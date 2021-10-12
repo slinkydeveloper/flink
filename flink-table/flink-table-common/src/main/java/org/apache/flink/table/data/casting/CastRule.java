@@ -32,6 +32,7 @@ import java.time.ZoneId;
 @Internal
 public interface CastRule<IN, OUT> {
 
+    /** @see CastRulePredicate for more details about a cast rule predicate definition */
     CastRulePredicate getPredicateDefinition();
 
     // TODO should we assume the casting rule is valid at this point?

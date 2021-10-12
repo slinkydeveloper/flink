@@ -99,15 +99,15 @@ public class CastRuleProvider {
 
     private CastRule<?, ?> internalResolve(LogicalType inputDataType, LogicalType targetDataType) {
         // Lookup by target type
-        Map<Object, CastRule<?, ?>> inputTypeToCastRule =
+        Map<Object, CastRule<?, ?>> inputTypeToCastRuleMap =
                 lookupTypeInMap(rules, targetDataType.getTypeRoot());
 
         // If nothing found, just return null
-        if (inputTypeToCastRule == null) {
+        if (inputTypeToCastRuleMap == null) {
             return null;
         }
 
-        CastRule<?, ?> rule = lookupTypeInMap(inputTypeToCastRule, inputDataType.getTypeRoot());
+        CastRule<?, ?> rule = lookupTypeInMap(inputTypeToCastRuleMap, inputDataType.getTypeRoot());
         if (rule == null) {
             // Try with the rules using custom predicates
             rule =
