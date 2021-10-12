@@ -19,12 +19,16 @@
 package org.apache.flink.table.data.casting;
 
 import org.apache.flink.annotation.Internal;
+import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
+
+import javax.annotation.Nullable;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 /**
  * In order to apply a {@link CastRule}, the runtime checks if a particular rule matches the tuple
@@ -37,13 +41,15 @@ import java.util.Set;
  *         <li>{@link #getInputTypeFamilies()} includes one of the {@link LogicalTypeFamily} of
  *             input type
  *       </ol>
- *   <li>{@link #getTargetTypeFamilies()} includes one of the {@link LogicalTypeFamily} of target
+ *   <li>Or {@link #getTargetTypeFamilies()} includes one of the {@link LogicalTypeFamily} of target
  *       type and either
  *       <ol>
  *         <li>{@link #getInputTypes()} includes the {@link LogicalTypeRoot} of input type or
  *         <li>{@link #getInputTypeFamilies()} includes one of the {@link LogicalTypeFamily} of
  *             input type
  *       </ol>
+ *   <li>Or, if {@link #getCustomPredicate()} is not null, the input type and target type matches
+ *       the predicate
  * </ol>
  */
 @Internal
@@ -55,15 +61,19 @@ public class CastRulePredicate {
     private final Set<LogicalTypeFamily> inputTypeFamilies;
     private final Set<LogicalTypeFamily> targetTypeFamilies;
 
+    private final BiPredicate<LogicalType, LogicalType> customPredicate;
+
     private CastRulePredicate(
             Set<LogicalTypeRoot> inputTypes,
             Set<LogicalTypeRoot> targetTypes,
             Set<LogicalTypeFamily> inputTypeFamilies,
-            Set<LogicalTypeFamily> targetTypeFamilies) {
+            Set<LogicalTypeFamily> targetTypeFamilies,
+            BiPredicate<LogicalType, LogicalType> customPredicate) {
         this.inputTypes = inputTypes;
         this.targetTypes = targetTypes;
         this.inputTypeFamilies = inputTypeFamilies;
         this.targetTypeFamilies = targetTypeFamilies;
+        this.customPredicate = customPredicate;
     }
 
     public Set<LogicalTypeRoot> getInputTypes() {
@@ -82,6 +92,10 @@ public class CastRulePredicate {
         return targetTypeFamilies;
     }
 
+    public @Nullable BiPredicate<LogicalType, LogicalType> getCustomPredicate() {
+        return customPredicate;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -93,6 +107,8 @@ public class CastRulePredicate {
 
         private final Set<LogicalTypeFamily> inputTypeFamilies = new HashSet<>();
         private final Set<LogicalTypeFamily> targetTypeFamilies = new HashSet<>();
+
+        private BiPredicate<LogicalType, LogicalType> customPredicate;
 
         public Builder input(LogicalTypeRoot inputType) {
             inputTypes.add(inputType);
@@ -114,12 +130,18 @@ public class CastRulePredicate {
             return this;
         }
 
+        public Builder predicate(BiPredicate<LogicalType, LogicalType> customPredicate) {
+            this.customPredicate = customPredicate;
+            return this;
+        }
+
         public CastRulePredicate build() {
             return new CastRulePredicate(
                     Collections.unmodifiableSet(inputTypes),
                     Collections.unmodifiableSet(targetTypes),
                     Collections.unmodifiableSet(inputTypeFamilies),
-                    Collections.unmodifiableSet(targetTypeFamilies));
+                    Collections.unmodifiableSet(targetTypeFamilies),
+                    customPredicate);
         }
     }
 }

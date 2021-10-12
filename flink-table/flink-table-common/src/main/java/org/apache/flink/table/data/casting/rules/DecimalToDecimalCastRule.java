@@ -21,24 +21,21 @@ package org.apache.flink.table.data.casting.rules;
 import org.apache.flink.table.api.TableException;
 import org.apache.flink.table.data.DecimalData;
 import org.apache.flink.table.data.casting.CastExecutor;
-import org.apache.flink.table.data.casting.CastRule;
 import org.apache.flink.table.data.casting.CastRulePredicate;
 import org.apache.flink.table.types.logical.DecimalType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
-public class DecimalToDecimalCastRule implements CastRule<DecimalData, DecimalData> {
+public class DecimalToDecimalCastRule extends AbstractCastRule<DecimalData, DecimalData> {
 
     public static final DecimalToDecimalCastRule INSTANCE = new DecimalToDecimalCastRule();
 
-    private DecimalToDecimalCastRule() {}
-
-    @Override
-    public CastRulePredicate getPredicateDefinition() {
-        return CastRulePredicate.builder()
-                .input(LogicalTypeRoot.DECIMAL)
-                .target(LogicalTypeRoot.DECIMAL)
-                .build();
+    private DecimalToDecimalCastRule() {
+        super(
+                CastRulePredicate.builder()
+                        .input(LogicalTypeRoot.DECIMAL)
+                        .target(LogicalTypeRoot.DECIMAL)
+                        .build());
     }
 
     @Override

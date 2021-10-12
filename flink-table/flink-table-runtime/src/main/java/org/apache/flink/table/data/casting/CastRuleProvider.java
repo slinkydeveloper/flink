@@ -21,6 +21,7 @@ package org.apache.flink.table.data.casting;
 import org.apache.flink.annotation.Internal;
 import org.apache.flink.table.data.casting.rules.AtomicToArrayCastRule;
 import org.apache.flink.table.data.casting.rules.DecimalToDecimalCastRule;
+import org.apache.flink.table.data.casting.rules.IdentityCastRule;
 import org.apache.flink.table.data.casting.rules.TimestampToStringCastRule;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
@@ -28,8 +29,10 @@ import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 import javax.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // TODO move to runtime, where it belongs
@@ -38,18 +41,12 @@ public class CastRuleProvider {
 
     /* ------- Entrypoint ------- */
 
-    /** @see #resolve(LogicalTypeRoot, LogicalTypeRoot) */
-    public static @Nullable CastRule<?, ?> resolve(
-            LogicalType inputDataType, LogicalType targetDataType) {
-        return resolve(inputDataType.getTypeRoot(), targetDataType.getTypeRoot());
-    }
-
     /**
      * Resolve a {@link CastRule} for the provided input data type and target data type. Returns
      * {@code null} if no rule can be resolved.
      */
     public static @Nullable CastRule<?, ?> resolve(
-            LogicalTypeRoot inputDataType, LogicalTypeRoot targetDataType) {
+            LogicalType inputDataType, LogicalType targetDataType) {
         return INSTANCE.internalResolve(inputDataType, targetDataType);
     }
 
@@ -61,11 +58,13 @@ public class CastRuleProvider {
         INSTANCE.addRule(DecimalToDecimalCastRule.INSTANCE)
                 .addRule(AtomicToArrayCastRule.INSTANCE)
                 .addRule(TimestampToStringCastRule.INSTANCE)
+                .addRule(IdentityCastRule.INSTANCE)
                 .freeze();
     }
 
     // Map<Target family or root, Map<Input family or root, rule>>
     private Map<Object, Map<Object, CastRule<?, ?>>> rules = new HashMap<>();
+    private List<CastRule<?, ?>> rulesWithCustomPredicate = new ArrayList<>();
 
     private CastRuleProvider addRule(CastRule<?, ?> rule) {
         CastRulePredicate predicate = rule.getPredicateDefinition();
@@ -90,24 +89,45 @@ public class CastRuleProvider {
                 map.put(inputTypeFamily, rule);
             }
         }
+
+        if (predicate.getCustomPredicate() != null) {
+            rulesWithCustomPredicate.add(rule);
+        }
+
+        return this;
     }
 
-    private CastRule<?, ?> internalResolve(
-            LogicalTypeRoot inputDataType, LogicalTypeRoot targetDataType) {
+    private CastRule<?, ?> internalResolve(LogicalType inputDataType, LogicalType targetDataType) {
         // Lookup by target type
-        Map<Object, CastRule<?, ?>> inputTypeToCastRule = lookupTypeInMap(rules, targetDataType);
+        Map<Object, CastRule<?, ?>> inputTypeToCastRule =
+                lookupTypeInMap(rules, targetDataType.getTypeRoot());
 
         // If nothing found, just return null
         if (inputTypeToCastRule == null) {
             return null;
         }
 
-        return lookupTypeInMap(inputTypeToCastRule, inputDataType);
+        CastRule<?, ?> rule = lookupTypeInMap(inputTypeToCastRule, inputDataType.getTypeRoot());
+        if (rule == null) {
+            // Try with the rules using custom predicates
+            rule =
+                    rulesWithCustomPredicate.stream()
+                            .filter(
+                                    r ->
+                                            r.getPredicateDefinition()
+                                                    .getCustomPredicate()
+                                                    .test(inputDataType, targetDataType))
+                            .findFirst()
+                            .orElse(null);
+        }
+
+        return rule;
     }
 
     private void freeze() {
         rules.replaceAll((k, m) -> Collections.unmodifiableMap(m));
         rules = Collections.unmodifiableMap(rules);
+        rulesWithCustomPredicate = Collections.unmodifiableList(rulesWithCustomPredicate);
     }
 
     /**

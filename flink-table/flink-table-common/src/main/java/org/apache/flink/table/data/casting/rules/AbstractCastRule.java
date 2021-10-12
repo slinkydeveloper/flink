@@ -16,27 +16,22 @@
  * limitations under the License.
  */
 
-package org.apache.flink.table.data.casting;
+package org.apache.flink.table.data.casting.rules;
 
-public class DateToStringCastingFactory {
-    //    @Override
-    //    public DataType getInputType() {
-    //        // Return timestamp data type
-    //        return null;
-    //    }
-    //
-    //    @Override
-    //    public DataType getOutputType() {
-    //        // Return string data type
-    //        return null;
-    //    }
-    //
-    //    @Override
-    //    public CastingExecutor<TimestampData, StringData> create(TimestampType outputLogicalType)
-    // {
-    //        return data ->
-    //                StringData.fromString(
-    //                        SqlDateTimeUtils.timestampToString(data,
-    // outputLogicalType.getPrecision()));
-    //    }
+import org.apache.flink.table.data.casting.CastRule;
+import org.apache.flink.table.data.casting.CastRulePredicate;
+
+/** Base class for all cast rules. */
+public abstract class AbstractCastRule<IN, OUT> implements CastRule<IN, OUT> {
+
+    private final CastRulePredicate predicate;
+
+    protected AbstractCastRule(CastRulePredicate predicate) {
+        this.predicate = predicate;
+    }
+
+    @Override
+    public CastRulePredicate getPredicateDefinition() {
+        return predicate;
+    }
 }

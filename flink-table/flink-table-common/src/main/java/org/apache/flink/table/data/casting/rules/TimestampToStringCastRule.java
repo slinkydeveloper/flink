@@ -31,21 +31,12 @@ public class TimestampToStringCastRule extends AbstractCharacterFamilyTargetRule
 
     public static final TimestampToStringCastRule INSTANCE = new TimestampToStringCastRule();
 
-    private TimestampToStringCastRule() {}
-
-    public CastRulePredicate getPredicate() {
-        return CastRulePredicate.builder()
-                .input(LogicalTypeFamily.TIMESTAMP)
-                .target(LogicalTypeFamily.CHARACTER_STRING)
-                .build();
-    }
-
-    @Override
-    public CastRulePredicate getPredicateDefinition() {
-        return CastRulePredicate.builder()
-                .input(LogicalTypeFamily.TIMESTAMP)
-                .target(LogicalTypeFamily.CHARACTER_STRING)
-                .build();
+    private TimestampToStringCastRule() {
+        super(
+                CastRulePredicate.builder()
+                        .input(LogicalTypeFamily.TIMESTAMP)
+                        .target(LogicalTypeFamily.CHARACTER_STRING)
+                        .build());
     }
 
     @Override

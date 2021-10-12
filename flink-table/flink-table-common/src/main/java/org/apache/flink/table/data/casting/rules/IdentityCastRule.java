@@ -18,34 +18,23 @@
 
 package org.apache.flink.table.data.casting.rules;
 
-import org.apache.flink.table.data.ArrayData;
-import org.apache.flink.table.data.GenericArrayData;
 import org.apache.flink.table.data.casting.CastExecutor;
 import org.apache.flink.table.data.casting.CastRulePredicate;
 import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.LogicalTypeFamily;
-import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
-import java.util.Collections;
+import java.util.Objects;
 
-public class AtomicToArrayCastRule extends AbstractCastRule<Object, ArrayData> {
+public class IdentityCastRule extends AbstractCastRule<Object, Object> {
 
-    public static final AtomicToArrayCastRule INSTANCE = new AtomicToArrayCastRule();
+    public static final IdentityCastRule INSTANCE = new IdentityCastRule();
 
-    private AtomicToArrayCastRule() {
-        super(
-                CastRulePredicate.builder()
-                        .input(LogicalTypeFamily.PREDEFINED)
-                        .target(LogicalTypeRoot.ARRAY)
-                        .build());
+    private IdentityCastRule() {
+        super(CastRulePredicate.builder().predicate(Objects::equals).build());
     }
 
     @Override
-    public CastExecutor<Object, ArrayData> create(
+    public CastExecutor<Object, Object> create(
             Context context, LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        // TODO I'm assuming this casting is valid!
-
-        // TODO this should understand primitive arrays as well, use inputLogicalType for that
-        return value -> new GenericArrayData(Collections.singleton(value).toArray());
+        return x -> x;
     }
 }

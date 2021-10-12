@@ -20,14 +20,19 @@ package org.apache.flink.table.data.casting.rules;
 
 import org.apache.flink.table.data.StringData;
 import org.apache.flink.table.data.casting.CastExecutor;
-import org.apache.flink.table.data.casting.CastRule;
+import org.apache.flink.table.data.casting.CastRulePredicate;
 import org.apache.flink.table.types.logical.CharType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.VarCharType;
 
 import java.util.function.Function;
 
-public abstract class AbstractCharacterFamilyTargetRule<IN> implements CastRule<IN, StringData> {
+public abstract class AbstractCharacterFamilyTargetRule<IN>
+        extends AbstractCastRule<IN, StringData> {
+
+    protected AbstractCharacterFamilyTargetRule(CastRulePredicate predicate) {
+        super(predicate);
+    }
 
     protected abstract Function<IN, String> create(Context context, LogicalType inputLogicalType);
 
