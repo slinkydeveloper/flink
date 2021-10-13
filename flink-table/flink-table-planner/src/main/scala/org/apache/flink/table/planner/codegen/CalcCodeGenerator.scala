@@ -67,7 +67,7 @@ object CalcCodeGenerator {
     new CodeGenOperatorFactory(genOperator)
   }
 
-  private[flink] def generateFunction[T <: Function](
+  def generateFunction[T <: Function](
       inputType: RowType,
       name: String,
       returnType: RowType,
