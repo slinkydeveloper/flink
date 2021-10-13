@@ -46,5 +46,15 @@ public interface CastRule<IN, OUT> {
     /** Casting context. */
     interface Context {
         ZoneId getSessionZoneId();
+
+        /** Create a casting context. */
+        static Context create(ZoneId zoneId) {
+            return new Context() {
+                @Override
+                public ZoneId getSessionZoneId() {
+                    return zoneId;
+                }
+            };
+        }
     }
 }

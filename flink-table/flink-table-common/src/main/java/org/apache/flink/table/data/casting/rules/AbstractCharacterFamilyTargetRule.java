@@ -26,8 +26,6 @@ import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.VarCharType;
 
-import java.util.function.Function;
-
 /** Base class for all rules targeting {@link LogicalTypeFamily#CHARACTER_STRING}. */
 public abstract class AbstractCharacterFamilyTargetRule<IN>
         extends AbstractCastRule<IN, StringData> {
@@ -36,20 +34,21 @@ public abstract class AbstractCharacterFamilyTargetRule<IN>
         super(predicate);
     }
 
-    protected abstract Function<IN, String> create(Context context, LogicalType inputLogicalType);
+    protected abstract CastExecutor<IN, String> create(
+            Context context, LogicalType inputLogicalType);
 
     @Override
     public CastExecutor<IN, StringData> create(
             Context context, LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        Function<IN, String> toString = create(context, inputLogicalType);
+        CastExecutor<IN, String> toString = create(context, inputLogicalType);
 
         int limit =
                 (targetLogicalType instanceof CharType)
                         ? ((CharType) targetLogicalType).getLength()
                         : ((VarCharType) targetLogicalType).getLength();
         if (limit == Integer.MAX_VALUE) {
-            return in -> StringData.fromString(toString.apply(in));
+            return in -> StringData.fromString(toString.cast(in));
         }
-        return in -> StringData.fromString(toString.apply(in).substring(limit));
+        return in -> StringData.fromString(toString.cast(in).substring(limit));
     }
 }

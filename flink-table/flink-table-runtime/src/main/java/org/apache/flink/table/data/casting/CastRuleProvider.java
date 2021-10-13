@@ -62,11 +62,7 @@ public class CastRuleProvider {
     private static final CastRuleProvider INSTANCE = new CastRuleProvider();
 
     static {
-        INSTANCE.addRule(DecimalToDecimalCastRule.INSTANCE)
-                .addRule(AtomicToArrayCastRule.INSTANCE)
-                .addRule(TimestampToStringCastRule.INSTANCE)
-                .addRule(IdentityCastRule.INSTANCE)
-                .freeze();
+        INSTANCE.addRule(TimestampToStringCastRule.INSTANCE).freeze();
     }
 
     // Map<Target family or root, Map<Input family or root, rule>>

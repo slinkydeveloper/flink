@@ -19,13 +19,13 @@
 package org.apache.flink.table.data.casting.rules;
 
 import org.apache.flink.table.data.TimestampData;
+import org.apache.flink.table.data.casting.CastExecutor;
 import org.apache.flink.table.data.casting.CastRulePredicate;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 import java.time.ZoneId;
-import java.util.function.Function;
 
 /**
  * Cast rule for {@link LogicalTypeFamily#TIMESTAMP} to {@link LogicalTypeFamily#CHARACTER_STRING}.
@@ -43,7 +43,7 @@ public class TimestampToStringCastRule extends AbstractCharacterFamilyTargetRule
     }
 
     @Override
-    protected Function<TimestampData, String> create(
+    protected CastExecutor<TimestampData, String> create(
             Context context, LogicalType inputLogicalType) {
         ZoneId zoneId =
                 inputLogicalType.getTypeRoot() == LogicalTypeRoot.TIMESTAMP_WITH_LOCAL_TIME_ZONE
