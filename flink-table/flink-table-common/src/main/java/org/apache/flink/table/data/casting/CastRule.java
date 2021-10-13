@@ -35,7 +35,6 @@ public interface CastRule<IN, OUT> {
     /** @see CastRulePredicate for more details about a cast rule predicate definition */
     CastRulePredicate getPredicateDefinition();
 
-    // TODO should we assume the casting rule is valid at this point?
     /**
      * Create a casting executor starting from the provided input type. The returned {@link
      * CastExecutor} assumes the input value is using the internal data type, and it's a valid value
