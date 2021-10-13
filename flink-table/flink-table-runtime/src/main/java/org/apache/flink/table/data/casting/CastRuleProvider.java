@@ -23,6 +23,7 @@ import org.apache.flink.table.data.casting.rules.AtomicToArrayCastRule;
 import org.apache.flink.table.data.casting.rules.DecimalToDecimalCastRule;
 import org.apache.flink.table.data.casting.rules.IdentityCastRule;
 import org.apache.flink.table.data.casting.rules.TimestampToStringCastRule;
+import org.apache.flink.table.types.DataType;
 import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
@@ -35,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// TODO move to runtime, where it belongs
+/** This class resolves {@link CastRule} starting from the input and the target type. */
 @Internal
 public class CastRuleProvider {
 
@@ -48,6 +49,12 @@ public class CastRuleProvider {
     public static @Nullable CastRule<?, ?> resolve(
             LogicalType inputDataType, LogicalType targetDataType) {
         return INSTANCE.internalResolve(inputDataType, targetDataType);
+    }
+
+    /** @see #resolve(LogicalType, LogicalType) */
+    public static @Nullable CastRule<?, ?> resolve(
+            DataType inputDataType, DataType targetDataType) {
+        return resolve(inputDataType.getLogicalType(), targetDataType.getLogicalType());
     }
 
     /* ------ Implementation ------ */

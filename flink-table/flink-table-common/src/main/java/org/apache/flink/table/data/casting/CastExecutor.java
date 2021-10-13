@@ -24,12 +24,14 @@ import org.apache.flink.table.api.TableException;
 /**
  * Interface to model a function that performs the casting of one value to another type.
  *
+ * <p>This interface is serializable in order to be embedded in the runtime codegen.
+ *
  * @param <IN> Input internal type
  * @param <OUT> Output internal type
  */
 @Internal
 @FunctionalInterface
-public interface CastExecutor<IN, OUT> {
+public interface CastExecutor<IN, OUT> extends java.io.Serializable {
     /** Cast the input value. */
     OUT cast(IN value) throws TableException;
 }

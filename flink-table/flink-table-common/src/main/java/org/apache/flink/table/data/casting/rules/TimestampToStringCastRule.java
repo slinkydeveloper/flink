@@ -27,6 +27,9 @@ import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import java.time.ZoneId;
 import java.util.function.Function;
 
+/**
+ * Cast rule for {@link LogicalTypeFamily#TIMESTAMP} to {@link LogicalTypeFamily#CHARACTER_STRING}.
+ */
 public class TimestampToStringCastRule extends AbstractCharacterFamilyTargetRule<TimestampData> {
 
     public static final TimestampToStringCastRule INSTANCE = new TimestampToStringCastRule();

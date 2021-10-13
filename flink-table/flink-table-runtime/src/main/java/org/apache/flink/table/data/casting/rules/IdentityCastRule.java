@@ -24,6 +24,7 @@ import org.apache.flink.table.types.logical.LogicalType;
 
 import java.util.Objects;
 
+/** Identity casting for non parametrized types. */
 public class IdentityCastRule extends AbstractCastRule<Object, Object> {
 
     public static final IdentityCastRule INSTANCE = new IdentityCastRule();

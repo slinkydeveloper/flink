@@ -23,10 +23,12 @@ import org.apache.flink.table.data.casting.CastExecutor;
 import org.apache.flink.table.data.casting.CastRulePredicate;
 import org.apache.flink.table.types.logical.CharType;
 import org.apache.flink.table.types.logical.LogicalType;
+import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.VarCharType;
 
 import java.util.function.Function;
 
+/** Base class for all rules targeting {@link LogicalTypeFamily#CHARACTER_STRING}. */
 public abstract class AbstractCharacterFamilyTargetRule<IN>
         extends AbstractCastRule<IN, StringData> {
 

@@ -18,34 +18,44 @@
 
 package org.apache.flink.table.data.casting.rules;
 
-import org.apache.flink.table.data.ArrayData;
-import org.apache.flink.table.data.GenericArrayData;
+import org.apache.flink.table.api.TableException;
+import org.apache.flink.table.data.DecimalData;
 import org.apache.flink.table.data.casting.CastExecutor;
 import org.apache.flink.table.data.casting.CastRulePredicate;
+import org.apache.flink.table.types.logical.DecimalType;
 import org.apache.flink.table.types.logical.LogicalType;
-import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
-import java.util.Collections;
+/** Identity casting for {@link LogicalTypeRoot#DECIMAL} with bounds check. */
+public class DecimalToDecimalCastRule extends AbstractCastRule<DecimalData, DecimalData> {
 
-public class AtomicToArrayCastRule extends AbstractCastRule<Object, ArrayData> {
+    public static final DecimalToDecimalCastRule INSTANCE = new DecimalToDecimalCastRule();
 
-    public static final AtomicToArrayCastRule INSTANCE = new AtomicToArrayCastRule();
-
-    private AtomicToArrayCastRule() {
+    private DecimalToDecimalCastRule() {
         super(
                 CastRulePredicate.builder()
-                        .input(LogicalTypeFamily.PREDEFINED)
-                        .target(LogicalTypeRoot.ARRAY)
+                        .input(LogicalTypeRoot.DECIMAL)
+                        .target(LogicalTypeRoot.DECIMAL)
                         .build());
     }
 
     @Override
-    public CastExecutor<Object, ArrayData> create(
+    public CastExecutor<DecimalData, DecimalData> create(
             Context context, LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        // TODO I'm assuming this casting is valid!
+        DecimalType inputDecimal = (DecimalType) inputLogicalType;
+        DecimalType targetDecimal = (DecimalType) targetLogicalType;
 
-        // TODO this should understand primitive arrays as well, use inputLogicalType for that
-        return value -> new GenericArrayData(Collections.singleton(value).toArray());
+        // TODO very lazy bounds check
+        if (inputDecimal.getPrecision() > targetDecimal.getPrecision()) {
+            return decimalData -> {
+                throw new TableException("Overflow");
+            };
+        }
+
+        return decimalData ->
+                DecimalData.fromBigDecimal(
+                        decimalData.toBigDecimal(),
+                        targetDecimal.getPrecision(),
+                        targetDecimal.getScale());
     }
 }
