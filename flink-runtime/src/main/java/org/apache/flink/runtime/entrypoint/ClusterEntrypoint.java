@@ -352,6 +352,9 @@ public abstract class ClusterEntrypoint implements AutoCloseableAsync, FatalErro
             executionGraphInfoStore =
                     createSerializableExecutionGraphStore(
                             configuration, commonRpcService.getScheduledExecutor());
+
+            ClusterEntrypointUtils.configureJobManagerWorkingDirectory(
+                    configuration, ResourceID.generate());
         }
     }
 
