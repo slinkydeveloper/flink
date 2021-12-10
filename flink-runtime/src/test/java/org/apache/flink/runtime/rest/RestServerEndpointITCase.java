@@ -103,18 +103,13 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** IT cases for {@link RestClient} and {@link RestServerEndpoint}. */
 @RunWith(Parameterized.class)
@@ -291,13 +286,13 @@ public class RestServerEndpointITCase extends TestLogger {
         // send second request and verify response
         final CompletableFuture<TestResponse> response2 =
                 sendRequestToTestHandler(new TestRequest(2));
-        assertEquals(2, response2.get().id);
+        assertThat(response2.get().id).isEqualTo(2);
 
         // wake up blocked handler
         sync.releaseBlocker();
 
         // verify response to first request
-        assertEquals(1, response1.get().id);
+        assertThat(response1.get().id).isEqualTo(1);
     }
 
     /**
@@ -329,11 +324,11 @@ public class RestServerEndpointITCase extends TestLogger {
         } catch (ExecutionException ee) {
             Throwable t = ExceptionUtils.stripExecutionException(ee);
 
-            assertTrue(t instanceof RestClientException);
+            assertThat(t).isInstanceOf(RestClientException.class);
 
             RestClientException rce = (RestClientException) t;
 
-            assertEquals(HttpResponseStatus.BAD_REQUEST, rce.getHttpResponseStatus());
+            assertThat(rce.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
         }
     }
 
@@ -352,8 +347,8 @@ public class RestServerEndpointITCase extends TestLogger {
             fail("Expected exception not thrown");
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripExecutionException(e);
-            assertThat(throwable, instanceOf(RestClientException.class));
-            assertThat(throwable.getMessage(), containsString("Try to raise"));
+            assertThat(throwable).isInstanceOf(RestClientException.class);
+            assertThat(throwable.getMessage()).contains("Try to raise");
         }
     }
 
@@ -371,8 +366,8 @@ public class RestServerEndpointITCase extends TestLogger {
             fail("Expected exception not thrown");
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripExecutionException(e);
-            assertThat(throwable, instanceOf(TooLongFrameException.class));
-            assertThat(throwable.getMessage(), containsString("Try to raise"));
+            assertThat(throwable).isInstanceOf(TooLongFrameException.class);
+            assertThat(throwable.getMessage()).contains("Try to raise");
         }
     }
 
@@ -404,9 +399,10 @@ public class RestServerEndpointITCase extends TestLogger {
             writer.append("--" + boundary + "--").append(crlf).flush();
         }
 
-        assertEquals(200, connection.getResponseCode());
+        assertThat(connection.getResponseCode()).isEqualTo(200);
         final byte[] lastUploadedFileContents = testUploadHandler.getLastUploadedFileContents();
-        assertEquals(uploadedContent, new String(lastUploadedFileContents, StandardCharsets.UTF_8));
+        assertThat(new String(lastUploadedFileContents, StandardCharsets.UTF_8))
+                .isEqualTo(uploadedContent);
     }
 
     /**
@@ -433,7 +429,7 @@ public class RestServerEndpointITCase extends TestLogger {
             writer.append("--" + boundary + "--").append(crlf).flush();
         }
 
-        assertEquals(400, connection.getResponseCode());
+        assertThat(connection.getResponseCode()).isEqualTo(400);
     }
 
     /** Tests that files can be served with the {@link StaticFileServerHandler}. */
@@ -447,7 +443,7 @@ public class RestServerEndpointITCase extends TestLogger {
         connection.setRequestMethod("GET");
         final String fileContents = IOUtils.toString(connection.getInputStream());
 
-        assertEquals("foobar", fileContents.trim());
+        assertThat(fileContents.trim()).isEqualTo("foobar");
     }
 
     @Test
@@ -490,10 +486,10 @@ public class RestServerEndpointITCase extends TestLogger {
 
         try {
             version1Response.get(5, TimeUnit.SECONDS);
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException ee) {
             RestClientException rce = (RestClientException) ee.getCause();
-            assertEquals(HttpResponseStatus.OK, rce.getHttpResponseStatus());
+            assertThat(rce.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.OK);
         }
 
         CompletableFuture<EmptyResponseBody> version2Response =
@@ -508,10 +504,10 @@ public class RestServerEndpointITCase extends TestLogger {
 
         try {
             version2Response.get(5, TimeUnit.SECONDS);
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException ee) {
             RestClientException rce = (RestClientException) ee.getCause();
-            assertEquals(HttpResponseStatus.ACCEPTED, rce.getHttpResponseStatus());
+            assertThat(rce.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.ACCEPTED);
         }
     }
 
@@ -532,7 +528,7 @@ public class RestServerEndpointITCase extends TestLogger {
                         .build();
 
         try (final Response response = client.newCall(request).execute()) {
-            assertEquals(HttpResponseStatus.ACCEPTED.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.ACCEPTED.code());
         }
     }
 
@@ -544,9 +540,9 @@ public class RestServerEndpointITCase extends TestLogger {
         String httpUrl = httpsUrl.replace("https://", "http://");
         Request request = new Request.Builder().url(httpUrl).build();
         try (final Response response = client.newCall(request).execute()) {
-            assertEquals(HttpResponseStatus.MOVED_PERMANENTLY.code(), response.code());
-            assertThat(response.headers().names(), hasItems("Location"));
-            assertEquals(httpsUrl, response.header("Location"));
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.MOVED_PERMANENTLY.code());
+            assertThat(response.headers().names()).satisfies(matching(hasItems("Location")));
+            assertThat(response.header("Location")).isEqualTo(httpsUrl);
         }
     }
 
@@ -576,7 +572,7 @@ public class RestServerEndpointITCase extends TestLogger {
 
         // Initiate closing RestServerEndpoint but the test handler should block.
         final CompletableFuture<Void> closeRestServerEndpointFuture = serverEndpoint.closeAsync();
-        assertThat(closeRestServerEndpointFuture.isDone(), is(false));
+        assertThat(closeRestServerEndpointFuture.isDone()).isEqualTo(false);
 
         // create an in-flight request
         final CompletableFuture<TestResponse> request =
@@ -586,7 +582,7 @@ public class RestServerEndpointITCase extends TestLogger {
         // Allow handler to close but there is still one in-flight request which should prevent
         // the RestServerEndpoint from closing.
         testHandler.closeFuture.complete(null);
-        assertThat(closeRestServerEndpointFuture.isDone(), is(false));
+        assertThat(closeRestServerEndpointFuture.isDone()).isEqualTo(false);
 
         // Finish the in-flight request.
         sync.releaseBlocker();
@@ -606,7 +602,7 @@ public class RestServerEndpointITCase extends TestLogger {
 
         final CompletableFuture<Void> closeRestServerEndpointFuture = serverEndpoint.closeAsync();
 
-        assertThat(closeRestServerEndpointFuture.isDone(), is(false));
+        assertThat(closeRestServerEndpointFuture.isDone()).isEqualTo(false);
 
         // wait until the TestHandler is closed
         testHandler.closeLatch.await();
@@ -643,58 +639,51 @@ public class RestServerEndpointITCase extends TestLogger {
             serverEndpoint1.start();
             serverEndpoint2.start();
 
-            assertNotEquals(
-                    serverEndpoint1.getServerAddress().getPort(),
-                    serverEndpoint2.getServerAddress().getPort());
+            assertThat(serverEndpoint2.getServerAddress().getPort())
+                    .isEqualTo(serverEndpoint1.getServerAddress().getPort());
 
-            assertThat(
-                    serverEndpoint1.getServerAddress().getPort(),
-                    is(greaterThanOrEqualTo(portRangeStart)));
-            assertThat(
-                    serverEndpoint1.getServerAddress().getPort(),
-                    is(lessThanOrEqualTo(portRangeEnd)));
+            assertThat(serverEndpoint1.getServerAddress().getPort())
+                    .isEqualTo(greaterThanOrEqualTo(portRangeStart));
+            assertThat(serverEndpoint1.getServerAddress().getPort())
+                    .isEqualTo(lessThanOrEqualTo(portRangeEnd));
 
-            assertThat(
-                    serverEndpoint2.getServerAddress().getPort(),
-                    is(greaterThanOrEqualTo(portRangeStart)));
-            assertThat(
-                    serverEndpoint2.getServerAddress().getPort(),
-                    is(lessThanOrEqualTo(portRangeEnd)));
+            assertThat(serverEndpoint2.getServerAddress().getPort())
+                    .isEqualTo(greaterThanOrEqualTo(portRangeStart));
+            assertThat(serverEndpoint2.getServerAddress().getPort())
+                    .isEqualTo(lessThanOrEqualTo(portRangeEnd));
         }
     }
 
     @Test
     public void testEndpointsMustBeUnique() throws Exception {
-        assertThrows(
-                "REST handler registration",
-                FlinkRuntimeException.class,
-                () -> {
-                    try (TestRestServerEndpoint restServerEndpoint =
-                            TestRestServerEndpoint.builder(config)
-                                    .withHandler(new TestHeaders(), testHandler)
-                                    .withHandler(new TestHeaders(), testUploadHandler)
-                                    .build()) {
-                        restServerEndpoint.start();
-                        return null;
-                    }
-                });
+        assertThatThrownBy(
+                        () -> {
+                            try (TestRestServerEndpoint restServerEndpoint =
+                                    TestRestServerEndpoint.builder(config)
+                                            .withHandler(new TestHeaders(), testHandler)
+                                            .withHandler(new TestHeaders(), testUploadHandler)
+                                            .build()) {
+                                restServerEndpoint.start();
+                            }
+                        })
+                .as("REST handler registration")
+                .isInstanceOf(FlinkRuntimeException.class);
     }
 
     @Test
     public void testDuplicateHandlerRegistrationIsForbidden() throws Exception {
-        assertThrows(
-                "Duplicate REST handler",
-                FlinkRuntimeException.class,
-                () -> {
-                    try (TestRestServerEndpoint restServerEndpoint =
-                            TestRestServerEndpoint.builder(config)
-                                    .withHandler(new TestHeaders(), testHandler)
-                                    .withHandler(TestUploadHeaders.INSTANCE, testHandler)
-                                    .build()) {
-                        restServerEndpoint.start();
-                        return null;
-                    }
-                });
+        assertThatThrownBy(
+                        () -> {
+                            try (TestRestServerEndpoint restServerEndpoint =
+                                    TestRestServerEndpoint.builder(config)
+                                            .withHandler(new TestHeaders(), testHandler)
+                                            .withHandler(TestUploadHeaders.INSTANCE, testHandler)
+                                            .build()) {
+                                restServerEndpoint.start();
+                            }
+                        })
+                .as("Duplicate REST handler")
+                .isInstanceOf(FlinkRuntimeException.class);
     }
 
     private static File getTestResource(final String fileName) {
@@ -745,8 +734,9 @@ public class RestServerEndpointITCase extends TestLogger {
         @Override
         protected CompletableFuture<TestResponse> handleRequest(
                 @Nonnull HandlerRequest<TestRequest> request, RestfulGateway gateway) {
-            assertEquals(request.getPathParameter(JobIDPathParameter.class), PATH_JOB_ID);
-            assertEquals(request.getQueryParameter(JobIDQueryParameter.class).get(0), QUERY_JOB_ID);
+            assertThat(PATH_JOB_ID).isEqualTo(request.getPathParameter(JobIDPathParameter.class));
+            assertThat(QUERY_JOB_ID)
+                    .isEqualTo(request.getQueryParameter(JobIDQueryParameter.class).get(0));
 
             final int id = request.getRequestBody().id;
             return handlerBody.apply(id);

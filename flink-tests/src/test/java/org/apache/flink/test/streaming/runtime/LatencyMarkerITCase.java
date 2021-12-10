@@ -29,13 +29,14 @@ import org.apache.flink.streaming.api.functions.co.BroadcastProcessFunction;
 import org.apache.flink.test.checkpointing.utils.MigrationTestUtils.AccumulatorCountingSink;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests latency marker. */
 public class LatencyMarkerITCase {
@@ -100,6 +101,6 @@ public class LatencyMarkerITCase {
         Integer count =
                 executionResult.getAccumulatorResult(
                         AccumulatorCountingSink.NUM_ELEMENTS_ACCUMULATOR);
-        Assert.assertEquals(inputCount * parallelism, count.intValue());
+        assertThat(count.intValue()).isEqualTo(inputCount * parallelism);
     }
 }

@@ -28,7 +28,6 @@ import org.apache.flink.runtime.state.StreamStateHandle;
 import org.apache.flink.runtime.state.filesystem.FsCheckpointStreamFactory.FsCheckpointStateOutputStream;
 import org.apache.flink.runtime.state.memory.ByteStreamStateHandle;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -47,12 +46,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
@@ -99,7 +94,7 @@ public class FsCheckpointStateOutputStreamTest {
                         relativePaths);
 
         StreamStateHandle handle = stream.closeAndGetHandle();
-        assertNull(handle);
+        assertThat(handle).isNull();
     }
 
     @Test
@@ -133,7 +128,7 @@ public class FsCheckpointStateOutputStreamTest {
                         relativePaths);
 
         for (int i = 0; i < 64; ++i) {
-            Assert.assertEquals(i, stream.getPos());
+            assertThat(stream.getPos()).isEqualTo(i);
             stream.write(0x42);
         }
 
@@ -152,7 +147,7 @@ public class FsCheckpointStateOutputStreamTest {
         byte[] data = "testme!".getBytes(ConfigConstants.DEFAULT_CHARSET);
 
         for (int i = 0; i < 7; ++i) {
-            Assert.assertEquals(i * (1 + data.length), stream.getPos());
+            assertThat(stream.getPos()).isEqualTo(i * (1 + data.length));
             stream.write(0x42);
             stream.write(data);
         }
@@ -250,13 +245,13 @@ public class FsCheckpointStateOutputStreamTest {
 
         StreamStateHandle handle = stream.closeAndGetHandle();
         if (expectFile) {
-            assertTrue(handle instanceof FileStateHandle);
+            assertThat(handle).isInstanceOf(FileStateHandle.class);
         } else {
-            assertTrue(handle instanceof ByteStreamStateHandle);
+            assertThat(handle).isInstanceOf(ByteStreamStateHandle.class);
         }
 
         // make sure the writing process did not alter the original byte array
-        assertArrayEquals(original, bytes);
+        assertThat(bytes).isEqualTo(original);
 
         try (InputStream inStream = handle.openInputStream()) {
             byte[] validation = new byte[bytes.length];
@@ -264,7 +259,7 @@ public class FsCheckpointStateOutputStreamTest {
             DataInputStream dataInputStream = new DataInputStream(inStream);
             dataInputStream.readFully(validation);
 
-            assertArrayEquals(bytes, validation);
+            assertThat(validation).isEqualTo(bytes);
         }
 
         handle.discardState();
@@ -280,21 +275,21 @@ public class FsCheckpointStateOutputStreamTest {
                         512,
                         relativePaths);
 
-        assertFalse(stream.isClosed());
+        assertThat(stream.isClosed()).isFalse();
 
         stream.close();
-        assertTrue(stream.isClosed());
+        assertThat(stream.isClosed()).isTrue();
 
         try {
             stream.write(1);
-            fail();
+            fail("unknown failure");
         } catch (IOException e) {
             // expected
         }
 
         try {
             stream.write(new byte[4], 1, 2);
-            fail();
+            fail("unknown failure");
         } catch (IOException e) {
             // expected
         }
@@ -346,27 +341,27 @@ public class FsCheckpointStateOutputStreamTest {
         stream5.close();
         try {
             stream5.closeAndGetHandle();
-            fail();
+            fail("unknown failure");
         } catch (IOException e) {
             // uh-huh
         }
 
         validateBytesInStream(handle1.openInputStream(), state1);
         handle1.discardState();
-        assertFalse(isDirectoryEmpty(directory));
+        assertThat(isDirectoryEmpty(directory)).isFalse();
         ensureLocalFileDeleted(handle1.getFilePath());
 
         validateBytesInStream(handle2.openInputStream(), state2);
         handle2.discardState();
-        assertFalse(isDirectoryEmpty(directory));
+        assertThat(isDirectoryEmpty(directory)).isFalse();
 
         // nothing was written to the stream, so it will return nothing
-        assertNull(handle3);
-        assertFalse(isDirectoryEmpty(directory));
+        assertThat(handle3).isNull();
+        assertThat(isDirectoryEmpty(directory)).isFalse();
 
         validateBytesInStream(handle4.openInputStream(), state4);
         handle4.discardState();
-        assertTrue(isDirectoryEmpty(directory));
+        assertThat(isDirectoryEmpty(directory)).isTrue();
     }
 
     // ------------------------------------------------------------------------
@@ -412,8 +407,8 @@ public class FsCheckpointStateOutputStreamTest {
         verify(fs, times(0)).delete(any(Path.class), anyBoolean());
 
         // the directory must still exist as a proper directory
-        assertTrue(directory.exists());
-        assertTrue(directory.isDirectory());
+        assertThat(directory.exists()).isTrue();
+        assertThat(directory.isDirectory()).isTrue();
     }
 
     // ------------------------------------------------------------------------
@@ -424,7 +419,7 @@ public class FsCheckpointStateOutputStreamTest {
         URI uri = path.toUri();
         if ("file".equals(uri.getScheme())) {
             File file = new File(uri.getPath());
-            assertFalse("file not properly deleted", file.exists());
+            assertThat(file.exists()).as("file not properly deleted").isFalse();
         } else {
             throw new IllegalArgumentException("not a local path");
         }
@@ -449,9 +444,9 @@ public class FsCheckpointStateOutputStreamTest {
                 pos += read;
             }
 
-            assertEquals("not enough data", holder.length, pos);
-            assertEquals("too much data", -1, is.read());
-            assertArrayEquals("wrong data", data, holder);
+            assertThat(pos).as("not enough data").isEqualTo(holder.length);
+            assertThat(is.read()).as("too much data").isEqualTo(-1);
+            assertThat(holder).as("wrong data").isEqualTo(data);
         } finally {
             is.close();
         }

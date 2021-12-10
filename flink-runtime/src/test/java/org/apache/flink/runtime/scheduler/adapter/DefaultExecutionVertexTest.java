@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.BLOCKING;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link DefaultExecutionVertex}. */
 public class DefaultExecutionVertexTest extends TestLogger {
@@ -88,7 +88,7 @@ public class DefaultExecutionVertexTest extends TestLogger {
     public void testGetExecutionState() {
         for (ExecutionState state : ExecutionState.values()) {
             stateSupplier.setExecutionState(state);
-            assertEquals(state, producerVertex.getState());
+            assertThat(producerVertex.getState()).isEqualTo(state);
         }
     }
 
@@ -102,7 +102,7 @@ public class DefaultExecutionVertexTest extends TestLogger {
                                 () ->
                                         new IllegalArgumentException(
                                                 "can not find result partition"));
-        assertEquals(partitionIds1, intermediateResultPartitionId);
+        assertThat(intermediateResultPartitionId).isEqualTo(partitionIds1);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class DefaultExecutionVertexTest extends TestLogger {
                                 () ->
                                         new IllegalArgumentException(
                                                 "can not find result partition"));
-        assertEquals(partitionIds1, intermediateResultPartitionId);
+        assertThat(intermediateResultPartitionId).isEqualTo(partitionIds1);
     }
 
     /** A simple implementation of {@link Supplier} for testing. */

@@ -49,9 +49,9 @@ import static org.apache.flink.streaming.connectors.kafka.table.KafkaTableTestUt
 import static org.apache.flink.streaming.connectors.kafka.table.KafkaTableTestUtils.readLines;
 import static org.apache.flink.table.api.config.ExecutionConfigOptions.TABLE_EXEC_SOURCE_IDLE_TIMEOUT;
 import static org.apache.flink.table.utils.TableTestMatchers.deepEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Basic IT cases for the Kafka table source and sink. */
 @RunWith(Parameterized.class)
@@ -159,7 +159,7 @@ public class KafkaTableITCase extends KafkaTableTestBase {
                         "+I(2019-12-12 00:00:05.000,2019-12-12,00:00:03,2019-12-12 00:00:04.004,3,50.00)",
                         "+I(2019-12-12 00:00:10.000,2019-12-12,00:00:05,2019-12-12 00:00:06.006,2,5.33)");
 
-        assertEquals(expected, TestingSinkFunction.rows);
+        assertThat(TestingSinkFunction.rows).isEqualTo(expected);
 
         // ------------- cleanup -------------------
 
@@ -250,7 +250,7 @@ public class KafkaTableITCase extends KafkaTableTestBase {
         }
         List<String> expected = Arrays.asList("+I(Dollar)", "+I(Dummy)", "+I(Euro)", "+I(Yen)");
         TestingSinkFunction.rows.sort(Comparator.naturalOrder());
-        assertEquals(expected, TestingSinkFunction.rows);
+        assertThat(TestingSinkFunction.rows).isEqualTo(expected);
 
         // ------------- cleanup -------------------
         topics.forEach(super::deleteTestTopic);
@@ -346,7 +346,7 @@ public class KafkaTableITCase extends KafkaTableTestBase {
                                 topic,
                                 true));
 
-        assertThat(result, deepEqualTo(expected, true));
+        assertThat(result).satisfies(matching(deepEqualTo(expected, true)));
 
         // ------------- cleanup -------------------
 
@@ -427,7 +427,7 @@ public class KafkaTableITCase extends KafkaTableTestBase {
                                 43,
                                 "payload 3"));
 
-        assertThat(result, deepEqualTo(expected, true));
+        assertThat(result).satisfies(matching(deepEqualTo(expected, true)));
 
         // ------------- cleanup -------------------
 
@@ -505,7 +505,7 @@ public class KafkaTableITCase extends KafkaTableTestBase {
                                 102L,
                                 "payload 3"));
 
-        assertThat(result, deepEqualTo(expected, true));
+        assertThat(result).satisfies(matching(deepEqualTo(expected, true)));
 
         // ------------- cleanup -------------------
 
@@ -620,7 +620,7 @@ public class KafkaTableITCase extends KafkaTableTestBase {
                         "+I[o_005, 2020-10-01T18:00, p_001, 2020-10-01T18:00, 11.9900, Leonard, scooter, 10, 119.9000]",
                         "+I[o_006, 2020-10-01T18:00, null, null, null, Leonard, null, 10, null]");
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
 
         // ------------- cleanup -------------------
 

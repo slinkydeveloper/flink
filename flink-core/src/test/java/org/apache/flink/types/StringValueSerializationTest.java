@@ -29,8 +29,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test for the serialization of StringValue. */
 public class StringValueSerializationTest {
@@ -134,14 +134,13 @@ public class StringValueSerializationTest {
             StringValue deser = new StringValue();
             deser.read(deserializer);
 
-            assertEquals(
-                    "DeserializedString differs from original string.",
-                    values[num],
-                    deser.getValue());
+            assertThat(deser.getValue())
+                    .as("DeserializedString differs from original string.")
+                    .isEqualTo(values[num]);
             num++;
         }
 
-        assertEquals("Wrong number of deserialized values", values.length, num);
+        assertThat(num).as("Wrong number of deserialized values").isEqualTo(values.length);
     }
 
     public static void testCopy(String[] values) throws IOException {
@@ -175,13 +174,12 @@ public class StringValueSerializationTest {
         while (validateInput.available() > 0) {
             sValue.read(validate);
 
-            assertEquals(
-                    "DeserializedString differs from original string.",
-                    values[num],
-                    sValue.getValue());
+            assertThat(sValue.getValue())
+                    .as("DeserializedString differs from original string.")
+                    .isEqualTo(values[num]);
             num++;
         }
 
-        assertEquals("Wrong number of deserialized values", values.length, num);
+        assertThat(num).as("Wrong number of deserialized values").isEqualTo(values.length);
     }
 }

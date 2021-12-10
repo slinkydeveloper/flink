@@ -49,13 +49,10 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.doAnswer;
@@ -104,14 +101,14 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
             JobGraph jobGraph = createJobGraph(new JobID(), "JobName");
 
             // Empty state
-            assertEquals(0, jobGraphs.getJobIds().size());
+            assertThat(jobGraphs.getJobIds().size()).isEqualTo(0);
 
             // Add initial
             jobGraphs.putJobGraph(jobGraph);
 
             // Verify initial job graph
             Collection<JobID> jobIds = jobGraphs.getJobIds();
-            assertEquals(1, jobIds.size());
+            assertThat(jobIds.size()).isEqualTo(1);
 
             JobID jobId = jobIds.iterator().next();
 
@@ -123,7 +120,7 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
 
             // Verify updated
             jobIds = jobGraphs.getJobIds();
-            assertEquals(1, jobIds.size());
+            assertThat(jobIds.size()).isEqualTo(1);
 
             jobId = jobIds.iterator().next();
 
@@ -133,7 +130,7 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
             jobGraphs.removeJobGraph(jobGraph.getJobID());
 
             // Empty state
-            assertEquals(0, jobGraphs.getJobIds().size());
+            assertThat(jobGraphs.getJobIds().size()).isEqualTo(0);
 
             // Nothing should have been notified
             verify(listener, atMost(1)).onAddedJobGraph(any(JobID.class));
@@ -185,11 +182,11 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
 
             Collection<JobID> actual = jobGraphs.getJobIds();
 
-            assertEquals(expected.size(), actual.size());
+            assertThat(actual.size()).isEqualTo(expected.size());
 
             for (JobID jobId : actual) {
                 JobGraph jobGraph = jobGraphs.recoverJobGraph(jobId);
-                assertTrue(expected.containsKey(jobGraph.getJobID()));
+                assertThat(expected.containsKey(jobGraph.getJobID())).isTrue();
 
                 verifyJobGraphs(expected.get(jobGraph.getJobID()), jobGraph);
 
@@ -197,7 +194,7 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
             }
 
             // Empty state
-            assertEquals(0, jobGraphs.getJobIds().size());
+            assertThat(jobGraphs.getJobIds().size()).isEqualTo(0);
 
             // Nothing should have been notified
             verify(listener, atMost(expected.size())).onAddedJobGraph(any(JobID.class));
@@ -257,7 +254,7 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
             verify(listener, times(1)).onAddedJobGraph(any(JobID.class));
             verify(listener, never()).onRemovedJobGraph(any(JobID.class));
 
-            assertEquals(otherJobGraph.getJobID(), actualOtherJobId[0]);
+            assertThat(actualOtherJobId[0]).isEqualTo(otherJobGraph.getJobID());
         } finally {
             if (jobGraphs != null) {
                 jobGraphs.stop();
@@ -310,7 +307,7 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
         final JobGraph recoveredJobGraph =
                 otherSubmittedJobGraphStore.recoverJobGraph(jobGraph.getJobID());
 
-        assertThat(recoveredJobGraph, is(notNullValue()));
+        assertThat(recoveredJobGraph).isEqualTo(notNullValue());
 
         try {
             otherSubmittedJobGraphStore.removeJobGraph(recoveredJobGraph.getJobID());
@@ -325,9 +322,8 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
         // now we should be able to delete the job graph
         otherSubmittedJobGraphStore.removeJobGraph(recoveredJobGraph.getJobID());
 
-        assertThat(
-                otherSubmittedJobGraphStore.recoverJobGraph(recoveredJobGraph.getJobID()),
-                is(nullValue()));
+        assertThat(otherSubmittedJobGraphStore.recoverJobGraph(recoveredJobGraph.getJobID()))
+                .isEqualTo(nullValue());
 
         otherSubmittedJobGraphStore.stop();
     }
@@ -350,7 +346,7 @@ public class ZooKeeperJobGraphsStoreITCase extends TestLogger {
     }
 
     private void verifyJobGraphs(JobGraph expected, JobGraph actual) {
-        assertEquals(expected.getName(), actual.getName());
-        assertEquals(expected.getJobID(), actual.getJobID());
+        assertThat(actual.getName()).isEqualTo(expected.getName());
+        assertThat(actual.getJobID()).isEqualTo(expected.getJobID());
     }
 }

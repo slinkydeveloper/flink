@@ -22,7 +22,6 @@ import org.apache.flink.configuration.BlobServerOptions;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,8 +29,10 @@ import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
 import java.net.ServerSocket;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 
@@ -62,7 +63,7 @@ public class BlobServerRangeTest extends TestLogger {
             socket = new ServerSocket(0);
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail("An exception was thrown while preparing the test " + e.getMessage());
+            fail("An exception was thrown while preparing the test " + e.getMessage());
         }
 
         Configuration conf = new Configuration();
@@ -89,7 +90,7 @@ public class BlobServerRangeTest extends TestLogger {
                 sockets[i] = new ServerSocket(0);
             } catch (IOException e) {
                 e.printStackTrace();
-                Assert.fail("An exception was thrown while preparing the test " + e.getMessage());
+                fail("An exception was thrown while preparing the test " + e.getMessage());
             }
         }
         Configuration conf = new Configuration();
@@ -103,8 +104,9 @@ public class BlobServerRangeTest extends TestLogger {
         try {
             BlobServer server = new BlobServer(conf, new VoidBlobStore());
             server.start();
-            assertThat(
-                    server.getPort(), allOf(greaterThanOrEqualTo(50000), lessThanOrEqualTo(50050)));
+            assertThat(server.getPort())
+                    .satisfies(
+                            matching(allOf(greaterThanOrEqualTo(50000), lessThanOrEqualTo(50050))));
             server.close();
         } finally {
             for (int i = 0; i < numAllocated; ++i) {

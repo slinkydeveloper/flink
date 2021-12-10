@@ -22,9 +22,7 @@ import org.apache.flink.runtime.state.memory.ByteStreamStateHandle;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A test for {@link KeyGroupsStateHandle} */
 public class KeyGroupsStateHandleTest {
@@ -38,9 +36,9 @@ public class KeyGroupsStateHandleTest {
 
         KeyGroupRange expectedRange = new KeyGroupRange(0, 3);
         KeyGroupsStateHandle newHandle = handle.getIntersection(expectedRange);
-        assertNotNull(newHandle);
-        assertEquals(streamHandle, newHandle.getDelegateStateHandle());
-        assertEquals(expectedRange, newHandle.getKeyGroupRange());
+        assertThat(newHandle).isNotNull();
+        assertThat(newHandle.getDelegateStateHandle()).isEqualTo(streamHandle);
+        assertThat(newHandle.getKeyGroupRange()).isEqualTo(expectedRange);
     }
 
     @Test
@@ -51,6 +49,6 @@ public class KeyGroupsStateHandleTest {
         KeyGroupsStateHandle handle = new KeyGroupsStateHandle(offsets, streamHandle);
         // return null if the keygroup intersection is empty.
         KeyGroupRange newRange = new KeyGroupRange(8, 11);
-        assertNull(handle.getIntersection(newRange));
+        assertThat(handle.getIntersection(newRange)).isNull();
     }
 }

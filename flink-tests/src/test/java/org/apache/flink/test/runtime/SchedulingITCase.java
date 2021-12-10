@@ -53,8 +53,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.flink.configuration.JobManagerOptions.EXECUTION_FAILOVER_STRATEGY;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT case for testing Flink's scheduling strategies. */
 public class SchedulingITCase extends TestLogger {
@@ -124,7 +123,7 @@ public class SchedulingITCase extends TestLogger {
 
             JobResult jobResult = resultFuture.get();
 
-            assertThat(jobResult.getSerializedThrowable().isPresent(), is(false));
+            assertThat(jobResult.getSerializedThrowable().isPresent()).isEqualTo(false);
         }
     }
 

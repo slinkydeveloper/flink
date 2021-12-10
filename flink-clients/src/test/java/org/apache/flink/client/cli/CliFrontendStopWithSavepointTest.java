@@ -34,11 +34,8 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the STOP command. */
 public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
@@ -64,9 +61,9 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
         TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
         clusterClient.setStopWithSavepointFunction(
                 (jobID, advanceToEndOfEventTime, savepointDirectory) -> {
-                    assertThat(jobID, is(jid));
-                    assertThat(advanceToEndOfEventTime, is(false));
-                    assertNull(savepointDirectory);
+                    assertThat(jobID).isEqualTo(jid);
+                    assertThat(advanceToEndOfEventTime).isEqualTo(false);
+                    assertThat(savepointDirectory).isNull();
                     stopWithSavepointLatch.trigger();
                     return CompletableFuture.completedFuture(savepointDirectory);
                 });
@@ -86,9 +83,9 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
         TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
         clusterClient.setStopWithSavepointFunction(
                 (jobID, advanceToEndOfEventTime, savepointDirectory) -> {
-                    assertThat(jobID, is(jid));
-                    assertThat(advanceToEndOfEventTime, is(false));
-                    assertNull(savepointDirectory);
+                    assertThat(jobID).isEqualTo(jid);
+                    assertThat(advanceToEndOfEventTime).isEqualTo(false);
+                    assertThat(savepointDirectory).isNull();
                     stopWithSavepointLatch.trigger();
                     return CompletableFuture.completedFuture(savepointDirectory);
                 });
@@ -107,9 +104,9 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
         TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
         clusterClient.setStopWithSavepointFunction(
                 (jobID, advanceToEndOfEventTime, savepointDirectory) -> {
-                    assertThat(jobID, is(jid));
-                    assertThat(advanceToEndOfEventTime, is(false));
-                    assertThat(savepointDirectory, is("test-target-dir"));
+                    assertThat(jobID).isEqualTo(jid);
+                    assertThat(advanceToEndOfEventTime).isEqualTo(false);
+                    assertThat(savepointDirectory).isEqualTo("test-target-dir");
                     stopWithSavepointLatch.trigger();
                     return CompletableFuture.completedFuture(savepointDirectory);
                 });
@@ -127,9 +124,9 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
         TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
         clusterClient.setStopWithSavepointFunction(
                 (jobID, advanceToEndOfEventTime, savepointDirectory) -> {
-                    assertThat(jobID, is(jid));
-                    assertThat(advanceToEndOfEventTime, is(true));
-                    assertNull(savepointDirectory);
+                    assertThat(jobID).isEqualTo(jid);
+                    assertThat(advanceToEndOfEventTime).isEqualTo(true);
+                    assertThat(savepointDirectory).isNull();
                     stopWithSavepointLatch.trigger();
                     return CompletableFuture.completedFuture(savepointDirectory);
                 });
@@ -148,9 +145,9 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
         TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
         clusterClient.setStopWithSavepointFunction(
                 (jobID, advanceToEndOfEventTime, savepointDirectory) -> {
-                    assertThat(jobID, is(jid));
-                    assertThat(advanceToEndOfEventTime, is(true));
-                    assertNull(savepointDirectory);
+                    assertThat(jobID).isEqualTo(jid);
+                    assertThat(advanceToEndOfEventTime).isEqualTo(true);
+                    assertThat(savepointDirectory).isNull();
                     stopWithSavepointLatch.trigger();
                     return CompletableFuture.completedFuture(savepointDirectory);
                 });
@@ -169,9 +166,9 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
         TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
         clusterClient.setStopWithSavepointFunction(
                 (jobID, advanceToEndOfEventTime, savepointDirectory) -> {
-                    assertThat(jobID, is(jid));
-                    assertThat(advanceToEndOfEventTime, is(true));
-                    assertThat(savepointDirectory, is("test-target-dir"));
+                    assertThat(jobID).isEqualTo(jid);
+                    assertThat(advanceToEndOfEventTime).isEqualTo(true);
+                    assertThat(savepointDirectory).isEqualTo("test-target-dir");
                     stopWithSavepointLatch.trigger();
                     return CompletableFuture.completedFuture(savepointDirectory);
                 });
@@ -227,7 +224,8 @@ public class CliFrontendStopWithSavepointTest extends CliFrontendTestBase {
             testFrontend.stop(parameters);
             fail("Should have failed.");
         } catch (FlinkException e) {
-            assertTrue(ExceptionUtils.findThrowableWithMessage(e, expectedMessage).isPresent());
+            assertThat(ExceptionUtils.findThrowableWithMessage(e, expectedMessage).isPresent())
+                    .isTrue();
         }
     }
 }

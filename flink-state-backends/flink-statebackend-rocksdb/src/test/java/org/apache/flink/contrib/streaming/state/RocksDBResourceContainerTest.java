@@ -44,11 +44,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
 
 /** Tests to guard {@link RocksDBResourceContainer}. */
 public class RocksDBResourceContainerTest {
@@ -66,9 +65,9 @@ public class RocksDBResourceContainerTest {
     public void testFreeDBOptionsAfterClose() throws Exception {
         RocksDBResourceContainer container = new RocksDBResourceContainer();
         DBOptions dbOptions = container.getDbOptions();
-        assertThat(dbOptions.isOwningHandle(), is(true));
+        assertThat(dbOptions.isOwningHandle()).isEqualTo(true);
         container.close();
-        assertThat(dbOptions.isOwningHandle(), is(false));
+        assertThat(dbOptions.isOwningHandle()).isEqualTo(false);
     }
 
     @Test
@@ -81,7 +80,7 @@ public class RocksDBResourceContainerTest {
         }
         container.close();
         for (DBOptions dbOption : dbOptions) {
-            assertThat(dbOption.isOwningHandle(), is(false));
+            assertThat(dbOption.isOwningHandle()).isEqualTo(false);
         }
     }
 
@@ -99,8 +98,9 @@ public class RocksDBResourceContainerTest {
                 new RocksDBResourceContainer(PredefinedOptions.DEFAULT, null, sharedResources);
         container.close();
         RocksDBSharedResources rocksDBSharedResources = sharedResources.getResourceHandle();
-        assertThat(rocksDBSharedResources.getCache().isOwningHandle(), is(false));
-        assertThat(rocksDBSharedResources.getWriteBufferManager().isOwningHandle(), is(false));
+        assertThat(rocksDBSharedResources.getCache().isOwningHandle()).isEqualTo(false);
+        assertThat(rocksDBSharedResources.getWriteBufferManager().isOwningHandle())
+                .isEqualTo(false);
     }
 
     /**
@@ -122,10 +122,9 @@ public class RocksDBResourceContainerTest {
             WriteBufferManager writeBufferManager = getWriteBufferManager(dbOptions);
             writeBufferManagers.add(writeBufferManager);
         }
-        assertThat(writeBufferManagers.size(), is(1));
-        assertThat(
-                writeBufferManagers.iterator().next(),
-                is(sharedResources.getResourceHandle().getWriteBufferManager()));
+        assertThat(writeBufferManagers.size()).isEqualTo(1);
+        assertThat(writeBufferManagers.iterator().next())
+                .isEqualTo(sharedResources.getResourceHandle().getWriteBufferManager());
         container.close();
     }
 
@@ -148,8 +147,9 @@ public class RocksDBResourceContainerTest {
             Cache cache = getBlockCache(columnOptions);
             caches.add(cache);
         }
-        assertThat(caches.size(), is(1));
-        assertThat(caches.iterator().next(), is(sharedResources.getResourceHandle().getCache()));
+        assertThat(caches.size()).isEqualTo(1);
+        assertThat(caches.iterator().next())
+                .isEqualTo(sharedResources.getResourceHandle().getCache());
         container.close();
     }
 
@@ -206,9 +206,9 @@ public class RocksDBResourceContainerTest {
     public void testFreeColumnOptionsAfterClose() throws Exception {
         RocksDBResourceContainer container = new RocksDBResourceContainer();
         ColumnFamilyOptions columnFamilyOptions = container.getColumnOptions();
-        assertThat(columnFamilyOptions.isOwningHandle(), is(true));
+        assertThat(columnFamilyOptions.isOwningHandle()).isEqualTo(true);
         container.close();
-        assertThat(columnFamilyOptions.isOwningHandle(), is(false));
+        assertThat(columnFamilyOptions.isOwningHandle()).isEqualTo(false);
     }
 
     @Test
@@ -221,7 +221,7 @@ public class RocksDBResourceContainerTest {
         }
         container.close();
         for (ColumnFamilyOptions columnFamilyOption : columnFamilyOptions) {
-            assertThat(columnFamilyOption.isOwningHandle(), is(false));
+            assertThat(columnFamilyOption.isOwningHandle()).isEqualTo(false);
         }
     }
 
@@ -237,7 +237,7 @@ public class RocksDBResourceContainerTest {
             }
             container.close();
             for (ColumnFamilyOptions columnFamilyOption : columnFamilyOptions) {
-                assertThat(columnFamilyOption.isOwningHandle(), is(false));
+                assertThat(columnFamilyOption.isOwningHandle()).isEqualTo(false);
             }
         }
     }
@@ -256,8 +256,8 @@ public class RocksDBResourceContainerTest {
                 new RocksDBResourceContainer(PredefinedOptions.DEFAULT, null, opaqueResource);
 
         container.close();
-        assertThat(cache.isOwningHandle(), is(false));
-        assertThat(wbm.isOwningHandle(), is(false));
+        assertThat(cache.isOwningHandle()).isEqualTo(false);
+        assertThat(wbm.isOwningHandle()).isEqualTo(false);
     }
 
     @Test
@@ -265,11 +265,11 @@ public class RocksDBResourceContainerTest {
         RocksDBResourceContainer container = new RocksDBResourceContainer();
         WriteOptions writeOptions = container.getWriteOptions();
         ReadOptions readOptions = container.getReadOptions();
-        assertThat(writeOptions.isOwningHandle(), is(true));
-        assertThat(readOptions.isOwningHandle(), is(true));
+        assertThat(writeOptions.isOwningHandle()).isEqualTo(true);
+        assertThat(readOptions.isOwningHandle()).isEqualTo(true);
         container.close();
-        assertThat(writeOptions.isOwningHandle(), is(false));
-        assertThat(readOptions.isOwningHandle(), is(false));
+        assertThat(writeOptions.isOwningHandle()).isEqualTo(false);
+        assertThat(readOptions.isOwningHandle()).isEqualTo(false);
     }
 
     @Test
@@ -314,11 +314,13 @@ public class RocksDBResourceContainerTest {
             ColumnFamilyOptions columnOptions = container.getColumnOptions();
             BlockBasedTableConfig actual =
                     (BlockBasedTableConfig) columnOptions.tableFormatConfig();
-            assertThat(actual.indexType(), is(IndexType.kTwoLevelIndexSearch));
-            assertThat(actual.partitionFilters(), is(true));
-            assertThat(actual.pinTopLevelIndexAndFilter(), is(true));
-            assertThat(actual.filterPolicy(), not(blockBasedFilter));
+            assertThat(actual.indexType()).isEqualTo(IndexType.kTwoLevelIndexSearch);
+            assertThat(actual.partitionFilters()).isEqualTo(true);
+            assertThat(actual.pinTopLevelIndexAndFilter()).isEqualTo(true);
+            assertThat(actual.filterPolicy()).satisfies(matching(not(blockBasedFilter)));
         }
-        assertFalse("Block based filter is left unclosed.", blockBasedFilter.isOwningHandle());
+        assertThat(blockBasedFilter.isOwningHandle())
+                .as("Block based filter is left unclosed.")
+                .isFalse();
     }
 }

@@ -39,7 +39,6 @@ import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.test.util.AbstractTestBase;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -47,6 +46,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for windowed join / coGroup operators. */
 @SuppressWarnings("serial")
@@ -161,7 +162,7 @@ public class CoGroupJoinITCase extends AbstractTestBase {
         Collections.sort(expectedResult);
         Collections.sort(testResults);
 
-        Assert.assertEquals(expectedResult, testResults);
+        assertThat(testResults).isEqualTo(expectedResult);
     }
 
     @Test
@@ -275,7 +276,7 @@ public class CoGroupJoinITCase extends AbstractTestBase {
         Collections.sort(expectedResult);
         Collections.sort(testResults);
 
-        Assert.assertEquals(expectedResult, testResults);
+        assertThat(testResults).isEqualTo(expectedResult);
     }
 
     @Test
@@ -370,7 +371,7 @@ public class CoGroupJoinITCase extends AbstractTestBase {
         Collections.sort(expectedResult);
         Collections.sort(testResults);
 
-        Assert.assertEquals(expectedResult, testResults);
+        assertThat(testResults).isEqualTo(expectedResult);
     }
 
     /**

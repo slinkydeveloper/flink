@@ -69,7 +69,6 @@ import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.flink.util.function.CheckedSupplier;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -94,13 +93,11 @@ import static org.apache.flink.api.common.typeinfo.BasicTypeInfo.STRING_TYPE_INF
 import static org.apache.flink.runtime.checkpoint.CheckpointType.SAVEPOINT_TERMINATE;
 import static org.apache.flink.streaming.runtime.tasks.StreamTaskFinalCheckpointsTest.triggerCheckpoint;
 import static org.apache.flink.util.Preconditions.checkState;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * These tests verify that the RichFunction methods are called (in correct order). And that
@@ -124,11 +121,13 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
         testHarness.invoke();
         testHarness.waitForTaskCompletion();
 
-        assertTrue("RichFunction methods where not called.", OpenCloseTestSource.closeCalled);
+        assertThat(OpenCloseTestSource.closeCalled)
+                .as("RichFunction methods where not called.")
+                .isTrue();
 
         List<String> resultElements =
                 TestHarnessUtil.getRawElementsFromOutput(testHarness.getOutput());
-        Assert.assertEquals(10, resultElements.size());
+        assertThat(resultElements.size()).isEqualTo(10);
     }
 
     @Test
@@ -214,7 +213,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
 
             List<Tuple2<Long, Integer>> resultElements =
                     TestHarnessUtil.getRawElementsFromOutput(testHarness.getOutput());
-            Assert.assertEquals(numElements, resultElements.size());
+            assertThat(resultElements.size()).isEqualTo(numElements);
         } finally {
             executor.shutdown();
         }
@@ -254,7 +253,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
                 new StreamRecord<>("[Operator1]: Finish"));
 
         final Object[] output = testHarness.getOutput().toArray();
-        assertArrayEquals("Output was not correct.", expected.toArray(), output);
+        assertThat(output).as("Output was not correct.").isEqualTo(expected.toArray());
     }
 
     @Test
@@ -354,9 +353,9 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
                     .createExecutor(0)
                     .execute(
                             () ->
-                                    assertFalse(
-                                            "This should never execute before task cancelation",
-                                            testHarness.getTask().isRunning()),
+                                    assertThat(testHarness.getTask().isRunning())
+                                            .as("This should never execute before task cancelation")
+                                            .isFalse(),
                             "Test");
         }
 
@@ -504,13 +503,13 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
         // SourceStreamTask should be still waiting for NonStoppingSource after cancellation
         harness.getTask().cancel();
         harness.waitForTaskCompletion(50, true); // allow task to exit prematurely
-        assertTrue(harness.taskThread.isAlive());
+        assertThat(harness.taskThread.isAlive()).isTrue();
 
         // SourceStreamTask should be still waiting for NonStoppingSource after interruptions
         for (int i = 0; i < 10; i++) {
             harness.getTask().maybeInterruptOnCancel(harness.getTaskThread(), null, null);
             harness.waitForTaskCompletion(50, true); // allow task to exit prematurely
-            assertTrue(harness.taskThread.isAlive());
+            assertThat(harness.taskThread.isAlive()).isTrue();
         }
 
         // It should only exit once NonStoppingSource allows for it
@@ -593,12 +592,12 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
                         (id, error) ->
                                 testHarness.getStreamTask().notifyCheckpointCompleteAsync(2));
                 testHarness.finishProcessing();
-                assertTrue(checkpointFuture.isDone());
+                assertThat(checkpointFuture.isDone()).isTrue();
 
                 // Each result partition should have emitted 1 barrier, 1 max watermark and 1
                 // EndOfUserRecordEvent.
                 for (ResultPartition resultPartition : partitionWriters) {
-                    assertEquals(3, resultPartition.getNumberOfQueuedBuffers());
+                    assertThat(resultPartition.getNumberOfQueuedBuffers()).isEqualTo(3);
                 }
             }
         } finally {
@@ -634,7 +633,12 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
             harness.processAll();
             harness.streamTask.getCompletionFuture().get();
 
-            assertThat(output, contains(Watermark.MAX_WATERMARK, new EndOfData(StopMode.DRAIN)));
+            assertThat(output)
+                    .satisfies(
+                            matching(
+                                    contains(
+                                            Watermark.MAX_WATERMARK,
+                                            new EndOfData(StopMode.DRAIN))));
 
             LifeCycleMonitorSource source =
                     (LifeCycleMonitorSource)
@@ -692,9 +696,9 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
             harness.streamTask.runMailboxLoop();
             harness.finishProcessing();
 
-            assertTrue(triggerResult.isDone());
-            assertTrue(triggerResult.get());
-            assertTrue(checkpointCompleted.isDone());
+            assertThat(triggerResult.isDone()).isTrue();
+            assertThat(triggerResult.get()).isTrue();
+            assertThat(checkpointCompleted.isDone()).isTrue();
         }
     }
 
@@ -775,7 +779,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
         public List<Serializable> snapshotState(long checkpointId, long timestamp)
                 throws Exception {
             if (!semaphore.tryAcquire()) {
-                Assert.fail("Concurrent invocation of snapshotState.");
+                fail("Concurrent invocation of snapshotState.");
             }
             int startCount = count;
             lastCheckpointId = checkpointId;
@@ -788,7 +792,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
             if (startCount != count) {
                 semaphore.release();
                 // This means that next() was invoked while the snapshot was ongoing
-                Assert.fail("Count is different at start end end of snapshot.");
+                fail("Count is different at start end end of snapshot.");
             }
             semaphore.release();
             return Collections.singletonList(sum);
@@ -879,7 +883,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
         public void open(Configuration parameters) throws Exception {
             super.open(parameters);
             if (closeCalled) {
-                Assert.fail("Close called before open.");
+                fail("Close called before open.");
             }
             openCalled = true;
         }
@@ -888,7 +892,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
         public void close() throws Exception {
             super.close();
             if (!openCalled) {
-                Assert.fail("Open was not called before close.");
+                fail("Open was not called before close.");
             }
             closeCalled = true;
         }
@@ -896,7 +900,7 @@ public class SourceStreamTaskTest extends SourceStreamTaskTestBase {
         @Override
         public void run(SourceContext<String> ctx) throws Exception {
             if (!openCalled) {
-                Assert.fail("Open was not called before run.");
+                fail("Open was not called before run.");
             }
             for (int i = 0; i < 10; i++) {
                 ctx.collect("Hello" + i);

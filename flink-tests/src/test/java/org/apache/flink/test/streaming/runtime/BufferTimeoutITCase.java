@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link StreamExecutionEnvironment#setBufferTimeout(long)}. */
 public class BufferTimeoutITCase extends AbstractTestBase {
@@ -80,14 +80,17 @@ public class BufferTimeoutITCase extends AbstractTestBase {
         CommonTestUtils.waitForAllTaskRunning(
                 miniClusterResource.getMiniCluster(), jobClient.getJobID(), false);
 
-        assertTrue(
-                RecordWriter.DEFAULT_OUTPUT_FLUSH_THREAD_NAME + " thread is unexpectedly running",
-                Thread.getAllStackTraces().keySet().stream()
-                        .noneMatch(
-                                thread ->
-                                        thread.getName()
-                                                .startsWith(
-                                                        RecordWriter
-                                                                .DEFAULT_OUTPUT_FLUSH_THREAD_NAME)));
+        assertThat(
+                        Thread.getAllStackTraces().keySet().stream()
+                                .noneMatch(
+                                        thread ->
+                                                thread.getName()
+                                                        .startsWith(
+                                                                RecordWriter
+                                                                        .DEFAULT_OUTPUT_FLUSH_THREAD_NAME)))
+                .as(
+                        RecordWriter.DEFAULT_OUTPUT_FLUSH_THREAD_NAME
+                                + " thread is unexpectedly running")
+                .isTrue();
     }
 }

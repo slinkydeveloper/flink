@@ -45,8 +45,9 @@ import java.util.List;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 import static org.apache.flink.runtime.entrypoint.component.FileJobGraphRetriever.JOB_GRAPH_FILE_PATH;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link FileJobGraphRetriever}. */
 public class FileJobGraphRetrieverTest {
@@ -100,7 +101,8 @@ public class FileJobGraphRetrieverTest {
                 FileJobGraphRetriever.createFrom(configuration, usrLibDir);
         final JobGraph jobGraphFromFile = fileJobGraphRetriever.retrieveJobGraph(configuration);
 
-        assertThat(jobGraphFromFile.getClasspaths(), containsInAnyOrder(expectedURLs.toArray()));
+        assertThat(jobGraphFromFile.getClasspaths())
+                .satisfies(matching(containsInAnyOrder(expectedURLs.toArray())));
     }
 
     @Test
@@ -110,6 +112,7 @@ public class FileJobGraphRetrieverTest {
         final List<URL> expectedUrls = Collections.singletonList(jarFileInJobGraph.toUri().toURL());
         final JobGraph jobGraph = fileJobGraphRetriever.retrieveJobGraph(configuration);
 
-        assertThat(jobGraph.getClasspaths(), containsInAnyOrder(expectedUrls.toArray()));
+        assertThat(jobGraph.getClasspaths())
+                .satisfies(matching(containsInAnyOrder(expectedUrls.toArray())));
     }
 }

@@ -83,7 +83,6 @@ import org.apache.flink.util.SerializedValue;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -97,7 +96,7 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -206,7 +205,7 @@ public class StreamTaskTerminationTest extends TestLogger {
         }
 
         // check that we have entered the finished state
-        assertEquals(ExecutionState.FINISHED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FINISHED);
     }
 
     /**
@@ -247,8 +246,8 @@ public class StreamTaskTerminationTest extends TestLogger {
 
             // wait until all async checkpoint threads are terminated, so that no more exceptions
             // can be reported
-            Assert.assertTrue(
-                    getAsyncOperationsThreadPool().awaitTermination(30L, TimeUnit.SECONDS));
+            assertThat(getAsyncOperationsThreadPool().awaitTermination(30L, TimeUnit.SECONDS))
+                    .isTrue();
         }
     }
 

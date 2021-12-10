@@ -26,11 +26,11 @@ import org.apache.flink.table.api.config.ExecutionConfigOptions;
 
 import org.junit.Test;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
 import static org.apache.flink.table.planner.utils.TableTestUtil.readFromResource;
 import static org.apache.flink.table.planner.utils.TableTestUtil.replaceStageId;
 import static org.apache.flink.table.planner.utils.TableTestUtil.replaceStreamNodeId;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Test for {@link FileSystemTableSink}. */
 public class FileSystemTableSinkTest {
@@ -50,10 +50,10 @@ public class FileSystemTableSinkTest {
                         "INSERT INTO %s SELECT DISTINCT * FROM %s",
                         testSinkTableName, testSourceTableName);
 
-        assertThrows(
-                "filesystem sink doesn't support setting parallelism (10) by 'sink.parallelism' when the input stream is not INSERT only.",
-                ValidationException.class,
-                () -> tEnv.explainSql(sql));
+        assertThatThrownBy(() -> tEnv.explainSql(sql))
+                .as(
+                        "filesystem sink doesn't support setting parallelism (10) by 'sink.parallelism' when the input stream is not INSERT only.")
+                .isInstanceOf(ValidationException.class);
     }
 
     @Test
@@ -76,9 +76,8 @@ public class FileSystemTableSinkTest {
         final String expectedNormal =
                 readFromResource(
                         "/explain/filesystem/testFileSystemTableSinkWithParallelismInStreamingSql0.out");
-        assertEquals(
-                replaceStreamNodeId(replaceStageId(expectedNormal)),
-                replaceStreamNodeId(replaceStageId(actualNormal)));
+        assertThat(replaceStreamNodeId(replaceStageId(actualNormal)))
+                .isEqualTo(replaceStreamNodeId(replaceStageId(expectedNormal)));
 
         // verify operator parallelisms when compaction is enabled
         final String testCompactSinkTableName = "test_compact_sink_table";
@@ -88,9 +87,8 @@ public class FileSystemTableSinkTest {
         final String expectedCompact =
                 readFromResource(
                         "/explain/filesystem/testFileSystemTableSinkWithParallelismInStreamingSql1.out");
-        assertEquals(
-                replaceStreamNodeId(replaceStageId(expectedCompact)),
-                replaceStreamNodeId(replaceStageId(actualCompact)));
+        assertThat(replaceStreamNodeId(replaceStageId(actualCompact)))
+                .isEqualTo(replaceStreamNodeId(replaceStageId(expectedCompact)));
     }
 
     @Test
@@ -112,9 +110,8 @@ public class FileSystemTableSinkTest {
                 readFromResource(
                         "/explain/filesystem/testFileSystemTableSinkWithParallelismInBatch.out");
 
-        assertEquals(
-                replaceStreamNodeId(replaceStageId(expected)),
-                replaceStreamNodeId(replaceStageId(actual)));
+        assertThat(replaceStreamNodeId(replaceStageId(actual)))
+                .isEqualTo(replaceStreamNodeId(replaceStageId(expected)));
     }
 
     private static String buildSourceTableSql(String testSourceTableName, boolean bounded) {

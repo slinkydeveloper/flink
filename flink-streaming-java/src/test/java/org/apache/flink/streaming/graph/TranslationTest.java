@@ -26,8 +26,8 @@ import org.apache.flink.streaming.api.graph.StreamConfig;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test translation of {@link CheckpointingMode}. */
 @SuppressWarnings("serial")
@@ -40,27 +40,24 @@ public class TranslationTest {
             StreamExecutionEnvironment deactivated = getSimpleJob();
 
             for (JobVertex vertex : deactivated.getStreamGraph().getJobGraph().getVertices()) {
-                assertEquals(
-                        CheckpointingMode.AT_LEAST_ONCE,
-                        new StreamConfig(vertex.getConfiguration()).getCheckpointMode());
+                assertThat(new StreamConfig(vertex.getConfiguration()).getCheckpointMode())
+                        .isEqualTo(CheckpointingMode.AT_LEAST_ONCE);
             }
 
             // with activated fault tolerance, the checkpoint mode should be by default exactly once
             StreamExecutionEnvironment activated = getSimpleJob();
             activated.enableCheckpointing(1000L);
             for (JobVertex vertex : activated.getStreamGraph().getJobGraph().getVertices()) {
-                assertEquals(
-                        CheckpointingMode.EXACTLY_ONCE,
-                        new StreamConfig(vertex.getConfiguration()).getCheckpointMode());
+                assertThat(new StreamConfig(vertex.getConfiguration()).getCheckpointMode())
+                        .isEqualTo(CheckpointingMode.EXACTLY_ONCE);
             }
 
             // explicitly setting the mode
             StreamExecutionEnvironment explicit = getSimpleJob();
             explicit.enableCheckpointing(1000L, CheckpointingMode.AT_LEAST_ONCE);
             for (JobVertex vertex : explicit.getStreamGraph().getJobGraph().getVertices()) {
-                assertEquals(
-                        CheckpointingMode.AT_LEAST_ONCE,
-                        new StreamConfig(vertex.getConfiguration()).getCheckpointMode());
+                assertThat(new StreamConfig(vertex.getConfiguration()).getCheckpointMode())
+                        .isEqualTo(CheckpointingMode.AT_LEAST_ONCE);
             }
         } catch (Exception e) {
             e.printStackTrace();

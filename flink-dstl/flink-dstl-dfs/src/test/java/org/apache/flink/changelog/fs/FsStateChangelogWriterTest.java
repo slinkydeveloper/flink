@@ -32,8 +32,7 @@ import java.util.concurrent.ExecutionException;
 
 import static org.apache.flink.shaded.guava30.com.google.common.collect.Iterables.getOnlyElement;
 import static org.apache.flink.util.ExceptionUtils.rethrowIOException;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link FsStateChangelogWriter} test. */
 public class FsStateChangelogWriterTest {
@@ -75,12 +74,12 @@ public class FsStateChangelogWriterTest {
                             writer.persist(append(writer, bytes));
                     assertSubmittedOnly(uploader, bytes);
                     uploader.completeUpload();
-                    assertArrayEquals(
-                            bytes,
-                            getOnlyElement(future.get().getHandlesAndOffsets())
-                                    .f0
-                                    .asBytesIfInMemory()
-                                    .get());
+                    assertThat(
+                                    getOnlyElement(future.get().getHandlesAndOffsets())
+                                            .f0
+                                            .asBytesIfInMemory()
+                                            .get())
+                            .isEqualTo(bytes);
                 });
     }
 
@@ -217,9 +216,8 @@ public class FsStateChangelogWriterTest {
     }
 
     private void assertSubmittedOnly(TestingStateChangeUploader uploader, byte[] bytes) {
-        assertArrayEquals(
-                bytes,
-                getOnlyElement(getOnlyElement(uploader.getUploaded()).getChanges()).getChange());
+        assertThat(getOnlyElement(getOnlyElement(uploader.getUploaded()).getChanges()).getChange())
+                .isEqualTo(bytes);
     }
 
     private SequenceNumber append(FsStateChangelogWriter writer, byte[] bytes) throws IOException {
@@ -238,6 +236,6 @@ public class FsStateChangelogWriterTest {
     }
 
     private static void assertNoUpload(TestingStateChangeUploader uploader, String message) {
-        assertTrue(message, uploader.getUploaded().isEmpty());
+        assertThat(uploader.getUploaded().isEmpty()).as(message).isTrue();
     }
 }

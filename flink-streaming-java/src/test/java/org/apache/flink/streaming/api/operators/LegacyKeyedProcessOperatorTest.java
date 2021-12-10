@@ -40,7 +40,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests {@link LegacyKeyedProcessOperator}. */
 @Deprecated
@@ -457,7 +457,7 @@ public class LegacyKeyedProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<Integer> out)
                 throws Exception {
-            assertEquals(this.timeDomain, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(this.timeDomain);
             out.collect(1777);
         }
     }
@@ -494,7 +494,7 @@ public class LegacyKeyedProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(this.timeDomain, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(this.timeDomain);
             out.collect("STATE:" + getRuntimeContext().getState(state).value());
         }
     }

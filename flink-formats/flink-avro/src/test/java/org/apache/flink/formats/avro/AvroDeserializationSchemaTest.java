@@ -30,8 +30,7 @@ import java.time.Instant;
 import java.util.Random;
 
 import static org.apache.flink.formats.avro.utils.AvroTestUtils.writeRecord;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link AvroDeserializationSchema}. */
 public class AvroDeserializationSchemaTest {
@@ -44,7 +43,7 @@ public class AvroDeserializationSchemaTest {
                 AvroDeserializationSchema.forSpecific(Address.class);
 
         Address deserializedAddress = deserializer.deserialize(null);
-        assertNull(deserializedAddress);
+        assertThat(deserializedAddress).isNull();
     }
 
     @Test
@@ -54,9 +53,9 @@ public class AvroDeserializationSchemaTest {
 
         byte[] encodedAddress = writeRecord(address, Address.getClassSchema());
         GenericRecord genericRecord = deserializationSchema.deserialize(encodedAddress);
-        assertEquals(address.getCity(), genericRecord.get("city").toString());
-        assertEquals(address.getNum(), genericRecord.get("num"));
-        assertEquals(address.getState(), genericRecord.get("state").toString());
+        assertThat(genericRecord.get("city").toString()).isEqualTo(address.getCity());
+        assertThat(genericRecord.get("num")).isEqualTo(address.getNum());
+        assertThat(genericRecord.get("state").toString()).isEqualTo(address.getState());
     }
 
     @Test
@@ -66,7 +65,7 @@ public class AvroDeserializationSchemaTest {
 
         byte[] encodedAddress = writeRecord(address);
         Address deserializedAddress = deserializer.deserialize(encodedAddress);
-        assertEquals(address, deserializedAddress);
+        assertThat(deserializedAddress).isEqualTo(address);
     }
 
     @Test
@@ -78,6 +77,6 @@ public class AvroDeserializationSchemaTest {
 
         byte[] encodedData = writeRecord(data);
         UnionLogicalType deserializedData = deserializer.deserialize(encodedData);
-        assertEquals(data, deserializedData);
+        assertThat(deserializedData).isEqualTo(data);
     }
 }

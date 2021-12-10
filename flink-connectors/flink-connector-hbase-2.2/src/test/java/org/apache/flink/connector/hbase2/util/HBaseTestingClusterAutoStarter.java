@@ -43,9 +43,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * By using this class as the super class of a set of tests you will have a HBase testing cluster
@@ -65,7 +63,7 @@ public class HBaseTestingClusterAutoStarter {
 
     protected static void createTable(
             TableName tableName, byte[][] columnFamilyName, byte[][] splitKeys) {
-        assertNotNull("HBaseAdmin is not initialized successfully.", admin);
+        assertThat(admin).as("HBaseAdmin is not initialized successfully.").isNotNull();
         HTableDescriptor desc = new HTableDescriptor(tableName);
         for (byte[] fam : columnFamilyName) {
             HColumnDescriptor colDef = new HColumnDescriptor(fam);
@@ -75,15 +73,15 @@ public class HBaseTestingClusterAutoStarter {
         try {
             admin.createTable(desc, splitKeys);
             createdTables.add(tableName);
-            assertTrue("Fail to create the table", admin.tableExists(tableName));
+            assertThat(admin.tableExists(tableName)).as("Fail to create the table").isTrue();
         } catch (IOException e) {
-            assertNull("Exception found while creating table", e);
+            assertThat(e).as("Exception found while creating table").isNull();
         }
     }
 
     protected static Table openTable(TableName tableName) throws IOException {
         Table table = TEST_UTIL.getConnection().getTable(tableName);
-        assertTrue("Fail to create the table", admin.tableExists(tableName));
+        assertThat(admin.tableExists(tableName)).as("Fail to create the table").isTrue();
         return table;
     }
 
@@ -96,7 +94,7 @@ public class HBaseTestingClusterAutoStarter {
                         admin.deleteTable(tableName);
                     }
                 } catch (IOException e) {
-                    assertNull("Exception found deleting the table", e);
+                    assertThat(e).as("Exception found deleting the table").isNull();
                 }
             }
         }
@@ -117,11 +115,11 @@ public class HBaseTestingClusterAutoStarter {
         try {
             admin = TEST_UTIL.getAdmin();
         } catch (MasterNotRunningException e) {
-            assertNull("Master is not running", e);
+            assertThat(e).as("Master is not running").isNull();
         } catch (ZooKeeperConnectionException e) {
-            assertNull("Cannot connect to ZooKeeper", e);
+            assertThat(e).as("Cannot connect to ZooKeeper").isNull();
         } catch (IOException e) {
-            assertNull("IOException", e);
+            assertThat(e).as("IOException").isNull();
         }
     }
 

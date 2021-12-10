@@ -29,8 +29,9 @@ import org.apache.flink.graph.spargel.ScatterFunction;
 import org.apache.flink.graph.utils.VertexToTuple2Map;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Dummy iteration to test that the supersteps are correctly incremented and can be retrieved from
@@ -63,7 +64,7 @@ public class CollectionModeSuperstepITCase extends TestLogger {
         @Override
         public void sendMessages(Vertex<Long, Long> vertex) {
             long superstep = getSuperstepNumber();
-            Assert.assertEquals(true, vertex.getValue() == superstep);
+            assertThat(vertex.getValue() == superstep).isEqualTo(true);
             // send message to keep vertices active
             sendMessageToAllNeighbors(vertex.getValue());
         }
@@ -73,7 +74,7 @@ public class CollectionModeSuperstepITCase extends TestLogger {
         @Override
         public void updateVertex(Vertex<Long, Long> vertex, MessageIterator<Long> inMessages) {
             long superstep = getSuperstepNumber();
-            Assert.assertEquals(true, vertex.getValue() == superstep);
+            assertThat(vertex.getValue() == superstep).isEqualTo(true);
             setNewVertexValue(vertex.getValue() + 1);
         }
     }

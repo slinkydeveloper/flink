@@ -25,8 +25,7 @@ import org.apache.flink.runtime.executiongraph.ArchivedExecutionGraph;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MockStateWithExecutionGraphContext implements StateWithExecutionGraph.Context, AutoCloseable {
 
@@ -79,6 +78,6 @@ class MockStateWithExecutionGraphContext implements StateWithExecutionGraph.Cont
     }
 
     protected final void assertNoStateTransition() {
-        assertThat(hadStateTransition, is(false));
+        assertThat(hadStateTransition).isEqualTo(false);
     }
 }

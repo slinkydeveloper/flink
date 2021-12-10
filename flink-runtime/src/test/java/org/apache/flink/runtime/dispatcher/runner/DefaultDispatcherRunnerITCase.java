@@ -69,11 +69,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /** Integration tests for the {@link DefaultDispatcherRunner}. */
 public class DefaultDispatcherRunnerITCase extends TestLogger {
@@ -150,7 +149,7 @@ public class DefaultDispatcherRunnerITCase extends TestLogger {
 
             final Collection<JobID> jobIds = secondDispatcherGateway.listJobs(TIMEOUT).get();
 
-            assertThat(jobIds, contains(jobGraph.getJobID()));
+            assertThat(jobIds).satisfies(matching(contains(jobGraph.getJobID())));
         }
     }
 
@@ -204,14 +203,13 @@ public class DefaultDispatcherRunnerITCase extends TestLogger {
             final UUID leaderSessionId = UUID.randomUUID();
             final CompletableFuture<UUID> leaderFuture =
                     dispatcherLeaderElectionService.isLeader(leaderSessionId);
-            assertThat(leaderFuture.isDone(), is(false));
+            assertThat(leaderFuture.isDone()).isEqualTo(false);
 
             LOG.info("Complete the termination of the first job manager runner.");
             testingJobManagerRunner.completeTerminationFuture();
 
-            assertThat(
-                    leaderFuture.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS),
-                    is(equalTo(leaderSessionId)));
+            assertThat(leaderFuture.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(equalTo(leaderSessionId));
 
             // Wait for job to recover...
             final DispatcherGateway leaderGateway =
@@ -222,9 +220,8 @@ public class DefaultDispatcherRunnerITCase extends TestLogger {
                                     DispatcherId.fromUuid(leaderSessionId),
                                     DispatcherGateway.class)
                             .get();
-            assertEquals(
-                    jobGraph.getJobID(),
-                    Iterables.getOnlyElement(leaderGateway.listJobs(TIMEOUT).get()));
+            assertThat(Iterables.getOnlyElement(leaderGateway.listJobs(TIMEOUT).get()))
+                    .isEqualTo(jobGraph.getJobID());
         }
     }
 

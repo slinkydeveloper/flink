@@ -29,11 +29,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that validate that the configuration for limited FS connections are properly picked up. */
 public class LimitedConnectionsConfigurationTest {
@@ -52,8 +48,8 @@ public class LimitedConnectionsConfigurationTest {
         FileSystem schemeFs = FileSystem.get(URI.create(fsScheme + ":///a/b/c"));
         FileSystem localFs = FileSystem.get(tempDir.newFile().toURI());
 
-        assertFalse(schemeFs instanceof LimitedConnectionsFileSystem);
-        assertFalse(localFs instanceof LimitedConnectionsFileSystem);
+        assertThat(schemeFs).isNotInstanceOf(LimitedConnectionsFileSystem.class);
+        assertThat(localFs).isNotInstanceOf(LimitedConnectionsFileSystem.class);
 
         // configure some limits, which should cause "fsScheme" to be limited
 
@@ -70,15 +66,15 @@ public class LimitedConnectionsConfigurationTest {
             schemeFs = FileSystem.get(URI.create(fsScheme + ":///a/b/c"));
             localFs = FileSystem.get(tempDir.newFile().toURI());
 
-            assertTrue(schemeFs instanceof LimitedConnectionsFileSystem);
-            assertFalse(localFs instanceof LimitedConnectionsFileSystem);
+            assertThat(schemeFs).isInstanceOf(LimitedConnectionsFileSystem.class);
+            assertThat(localFs).isNotInstanceOf(LimitedConnectionsFileSystem.class);
 
             LimitedConnectionsFileSystem limitedFs = (LimitedConnectionsFileSystem) schemeFs;
-            assertEquals(42, limitedFs.getMaxNumOpenStreamsTotal());
-            assertEquals(11, limitedFs.getMaxNumOpenInputStreams());
-            assertEquals(40, limitedFs.getMaxNumOpenOutputStreams());
-            assertEquals(12345, limitedFs.getStreamOpenTimeout());
-            assertEquals(98765, limitedFs.getStreamInactivityTimeout());
+            assertThat(limitedFs.getMaxNumOpenStreamsTotal()).isEqualTo(42);
+            assertThat(limitedFs.getMaxNumOpenInputStreams()).isEqualTo(11);
+            assertThat(limitedFs.getMaxNumOpenOutputStreams()).isEqualTo(40);
+            assertThat(limitedFs.getStreamOpenTimeout()).isEqualTo(12345);
+            assertThat(limitedFs.getStreamInactivityTimeout()).isEqualTo(98765);
         } finally {
             // clear all settings
             FileSystem.initialize(new Configuration());
@@ -94,7 +90,7 @@ public class LimitedConnectionsConfigurationTest {
         final String scheme = "testscheme";
 
         // empty config
-        assertNull(ConnectionLimitingSettings.fromConfig(new Configuration(), scheme));
+        assertThat(ConnectionLimitingSettings.fromConfig(new Configuration(), scheme)).isNull();
 
         // only total limit set
         {
@@ -103,10 +99,10 @@ public class LimitedConnectionsConfigurationTest {
 
             ConnectionLimitingSettings settings =
                     ConnectionLimitingSettings.fromConfig(conf, scheme);
-            assertNotNull(settings);
-            assertEquals(10, settings.limitTotal);
-            assertEquals(0, settings.limitInput);
-            assertEquals(0, settings.limitOutput);
+            assertThat(settings).isNotNull();
+            assertThat(settings.limitTotal).isEqualTo(10);
+            assertThat(settings.limitInput).isEqualTo(0);
+            assertThat(settings.limitOutput).isEqualTo(0);
         }
 
         // only input limit set
@@ -116,10 +112,10 @@ public class LimitedConnectionsConfigurationTest {
 
             ConnectionLimitingSettings settings =
                     ConnectionLimitingSettings.fromConfig(conf, scheme);
-            assertNotNull(settings);
-            assertEquals(0, settings.limitTotal);
-            assertEquals(10, settings.limitInput);
-            assertEquals(0, settings.limitOutput);
+            assertThat(settings).isNotNull();
+            assertThat(settings.limitTotal).isEqualTo(0);
+            assertThat(settings.limitInput).isEqualTo(10);
+            assertThat(settings.limitOutput).isEqualTo(0);
         }
 
         // only output limit set
@@ -129,10 +125,10 @@ public class LimitedConnectionsConfigurationTest {
 
             ConnectionLimitingSettings settings =
                     ConnectionLimitingSettings.fromConfig(conf, scheme);
-            assertNotNull(settings);
-            assertEquals(0, settings.limitTotal);
-            assertEquals(0, settings.limitInput);
-            assertEquals(10, settings.limitOutput);
+            assertThat(settings).isNotNull();
+            assertThat(settings.limitTotal).isEqualTo(0);
+            assertThat(settings.limitInput).isEqualTo(0);
+            assertThat(settings.limitOutput).isEqualTo(10);
         }
     }
 }

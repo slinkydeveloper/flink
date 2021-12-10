@@ -59,9 +59,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class contains integration tests for the adaptive scheduler which start a {@link
@@ -126,7 +124,7 @@ public class AdaptiveSchedulerClusterITCase extends TestLogger {
 
         final JobResult jobResult = resultFuture.join();
 
-        assertTrue(jobResult.isSuccess());
+        assertThat(jobResult.isSuccess()).isTrue();
     }
 
     @Test
@@ -155,7 +153,7 @@ public class AdaptiveSchedulerClusterITCase extends TestLogger {
                 jobGraph.getJobID(), JOB_VERTEX_ID, targetInstanceCount);
         OnceBlockingNoOpInvokable.unblock();
 
-        assertTrue(jobResultFuture.join().isSuccess());
+        assertThat(jobResultFuture.join().isSuccess()).isTrue();
     }
 
     @Test
@@ -205,7 +203,8 @@ public class AdaptiveSchedulerClusterITCase extends TestLogger {
                         .thenApply(
                                 eg -> eg.getCheckpointStatsSnapshot().getHistory().getCheckpoints())
                         .get();
-        assertThat(checkpointHistory.get(checkpointHistory.size() - 1).getCheckpointId(), is(1L));
+        assertThat(checkpointHistory.get(checkpointHistory.size() - 1).getCheckpointId())
+                .isEqualTo(1L);
     }
 
     /** An invokable that doesn't do anything interesting, but does support checkpointing. */

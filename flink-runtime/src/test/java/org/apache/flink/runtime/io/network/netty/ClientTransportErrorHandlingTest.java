@@ -52,11 +52,8 @@ import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.connect;
 import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.createConfig;
 import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.initServerAndClient;
 import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.shutdown;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.isA;
 import static org.mockito.Mockito.doAnswer;
@@ -340,22 +337,22 @@ public class ClientTransportErrorHandlingTest {
         // Verify the Exception
         doAnswer(
                         new Answer<Void>() {
+
                             @Override
                             public Void answer(InvocationOnMock invocation) throws Throwable {
                                 Throwable cause = (Throwable) invocation.getArguments()[0];
-
                                 try {
-                                    assertEquals(RemoteTransportException.class, cause.getClass());
-                                    assertNotEquals("Connection reset by peer", cause.getMessage());
-
-                                    assertEquals(IOException.class, cause.getCause().getClass());
-                                    assertEquals(
-                                            "Connection reset by peer",
-                                            cause.getCause().getMessage());
+                                    assertThat(cause.getClass())
+                                            .isEqualTo(RemoteTransportException.class);
+                                    assertThat(cause.getMessage())
+                                            .isEqualTo("Connection reset by peer");
+                                    assertThat(cause.getCause().getClass())
+                                            .isEqualTo(IOException.class);
+                                    assertThat(cause.getCause().getMessage())
+                                            .isEqualTo("Connection reset by peer");
                                 } catch (Throwable t) {
                                     error[0] = t;
                                 }
-
                                 return null;
                             }
                         })
@@ -364,7 +361,7 @@ public class ClientTransportErrorHandlingTest {
 
         ch.pipeline().fireExceptionCaught(new IOException("Connection reset by peer"));
 
-        assertNull(error[0]);
+        assertThat(error[0]).isNull();
     }
 
     /** Verifies that the channel is closed if there is an error *during* error notification. */
@@ -382,7 +379,7 @@ public class ClientTransportErrorHandlingTest {
 
         ch.pipeline().fireExceptionCaught(new Exception());
 
-        assertFalse(ch.isActive());
+        assertThat(ch.isActive()).isFalse();
     }
 
     // ---------------------------------------------------------------------------------------------

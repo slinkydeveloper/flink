@@ -42,7 +42,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test that checks how the combiner handles very large records that are too large to be written
@@ -151,8 +152,8 @@ public class CombinerOversizedRecordsTest
 
             testDriver(testTask, TestCombiner.class);
 
-            assertEquals(3, testTask.getOversizedRecordCount());
-            assertTrue(keyCnt + 3 == outList.size() || 2 * keyCnt + 3 == outList.size());
+            assertThat(testTask.getOversizedRecordCount()).isEqualTo(3);
+            assertThat(keyCnt + 3 == outList.size() || 2 * keyCnt + 3 == outList.size()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

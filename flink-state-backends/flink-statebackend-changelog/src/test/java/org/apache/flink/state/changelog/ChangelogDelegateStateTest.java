@@ -46,7 +46,7 @@ import java.util.function.Supplier;
 
 import static org.apache.flink.state.changelog.ChangelogStateBackendTestUtils.DummyCheckpointingStorageAccess;
 import static org.apache.flink.state.changelog.ChangelogStateBackendTestUtils.createKeyedBackend;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ChangelogStateBackend} delegating state accesses. */
 @RunWith(Parameterized.class)
@@ -121,15 +121,18 @@ public class ChangelogDelegateStateTest {
                     changelogBackend.getPartitionedState(
                             VoidNamespace.INSTANCE, VoidNamespaceSerializer.INSTANCE, descriptor);
 
-            assertSame(state.getClass(), stateClass);
-            assertSame(
-                    ((AbstractChangelogState<?, ?, ?, ?>) state).getDelegatedState().getClass(),
-                    delegatedBackend
-                            .getPartitionedState(
-                                    VoidNamespace.INSTANCE,
-                                    VoidNamespaceSerializer.INSTANCE,
-                                    descriptor)
-                            .getClass());
+            assertThat(stateClass).isSameAs(state.getClass());
+            assertThat(
+                            delegatedBackend
+                                    .getPartitionedState(
+                                            VoidNamespace.INSTANCE,
+                                            VoidNamespaceSerializer.INSTANCE,
+                                            descriptor)
+                                    .getClass())
+                    .isSameAs(
+                            ((AbstractChangelogState<?, ?, ?, ?>) state)
+                                    .getDelegatedState()
+                                    .getClass());
         } finally {
             if (delegatedBackend != null) {
                 delegatedBackend.dispose();

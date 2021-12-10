@@ -39,12 +39,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class AsyncCallsTest extends TestLogger {
 
@@ -124,10 +120,10 @@ public class AsyncCallsTest extends TestLogger {
                             Time.seconds(30L));
 
             String str = result.get(30, TimeUnit.SECONDS);
-            assertEquals("test", str);
+            assertThat(str).isEqualTo("test");
 
             // validate that no concurrent access happened
-            assertFalse("Rpc Endpoint had concurrent access", concurrentAccess.get());
+            assertThat(concurrentAccess.get()).as("Rpc Endpoint had concurrent access").isFalse();
         } finally {
             RpcUtils.terminateRpcEndpoint(rpcEndpoint, timeout);
         }
@@ -185,9 +181,11 @@ public class AsyncCallsTest extends TestLogger {
             final long stop = System.nanoTime();
 
             // validate that no concurrent access happened
-            assertFalse("Rpc Endpoint had concurrent access", concurrentAccess.get());
+            assertThat(concurrentAccess.get()).as("Rpc Endpoint had concurrent access").isFalse();
 
-            assertTrue("call was not properly delayed", ((stop - start) / 1_000_000) >= delay);
+            assertThat(((stop - start) / 1_000_000) >= delay)
+                    .as("call was not properly delayed")
+                    .isTrue();
         } finally {
             RpcUtils.terminateRpcEndpoint(rpcEndpoint, timeout);
         }
@@ -237,8 +235,8 @@ public class AsyncCallsTest extends TestLogger {
                 },
                 newFencingToken);
 
-        assertEquals(
-                newFencingToken, resultFuture.get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS));
+        assertThat(resultFuture.get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS))
+                .isEqualTo(newFencingToken);
     }
 
     /** Tests that async callables are not executed if the fencing token changes. */
@@ -254,7 +252,8 @@ public class AsyncCallsTest extends TestLogger {
 
             fail("The async call operation should fail due to the changed fencing token.");
         } catch (ExecutionException e) {
-            assertTrue(ExceptionUtils.stripExecutionException(e) instanceof FencingTokenException);
+            assertThat(ExceptionUtils.stripExecutionException(e))
+                    .isInstanceOf(FencingTokenException.class);
         }
     }
 
@@ -271,7 +270,7 @@ public class AsyncCallsTest extends TestLogger {
                         endpoint -> endpoint.callAsyncWithoutFencing(() -> true, timeout),
                         newFencingToken);
 
-        assertTrue(resultFuture.get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS));
+        assertThat(resultFuture.get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS)).isTrue();
     }
 
     @Test
@@ -286,7 +285,7 @@ public class AsyncCallsTest extends TestLogger {
                                         () -> value, endpoint.getUnfencedMainThreadExecutor()),
                         newFencingToken);
 
-        assertThat(resultFuture.get(), is(value));
+        assertThat(resultFuture.get()).isEqualTo(value);
     }
 
     private static <T> CompletableFuture<T> testRunAsync(
@@ -310,9 +309,9 @@ public class AsyncCallsTest extends TestLogger {
             CompletableFuture<Acknowledge> newFencingTokenFuture =
                     fencedTestGateway.setNewFencingToken(newFencingToken, timeout);
 
-            assertFalse(newFencingTokenFuture.isDone());
+            assertThat(newFencingTokenFuture.isDone()).isFalse();
 
-            assertEquals(initialFencingToken, fencedTestEndpoint.getFencingToken());
+            assertThat(fencedTestEndpoint.getFencingToken()).isEqualTo(initialFencingToken);
 
             CompletableFuture<T> result = runAsyncCall.apply(fencedTestEndpoint);
 

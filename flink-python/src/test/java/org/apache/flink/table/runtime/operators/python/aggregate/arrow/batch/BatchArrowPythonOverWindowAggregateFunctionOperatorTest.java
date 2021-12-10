@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link BatchArrowPythonOverWindowAggregateFunctionOperator}. These test that:
@@ -166,18 +166,18 @@ public class BatchArrowPythonOverWindowAggregateFunctionOperatorTest
                         testHarness.getOneInputOperator();
         FlinkFnApi.UserDefinedFunctions functionsProto = operator.getUserDefinedFunctionsProto();
         List<FlinkFnApi.OverWindow> windows = functionsProto.getWindowsList();
-        assertEquals(2, windows.size());
+        assertThat(windows.size()).isEqualTo(2);
 
         // first window is a range sliding window.
         FlinkFnApi.OverWindow firstWindow = windows.get(0);
-        assertEquals(firstWindow.getWindowType(), FlinkFnApi.OverWindow.WindowType.RANGE_SLIDING);
+        assertThat(FlinkFnApi.OverWindow.WindowType.RANGE_SLIDING)
+                .isEqualTo(firstWindow.getWindowType());
 
         // second window is a row unbounded preceding window.
         FlinkFnApi.OverWindow secondWindow = windows.get(1);
-        assertEquals(
-                secondWindow.getWindowType(),
-                FlinkFnApi.OverWindow.WindowType.ROW_UNBOUNDED_PRECEDING);
-        assertEquals(secondWindow.getUpperBoundary(), 2L);
+        assertThat(FlinkFnApi.OverWindow.WindowType.ROW_UNBOUNDED_PRECEDING)
+                .isEqualTo(secondWindow.getWindowType());
+        assertThat(2L).isEqualTo(secondWindow.getUpperBoundary());
     }
 
     @Override

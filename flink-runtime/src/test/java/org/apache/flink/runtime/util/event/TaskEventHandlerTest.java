@@ -25,8 +25,7 @@ import org.apache.flink.runtime.io.network.api.TaskEventHandler;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** This class contains unit tests for the {@link TaskEventHandler}. */
 public class TaskEventHandlerTest {
@@ -73,8 +72,8 @@ public class TaskEventHandlerTest {
         evm.publish(stringTaskEvent1);
         evm.publish(new IntegerTaskEvent(5));
 
-        assertNotNull(listener.getLastReceivedEvent());
+        assertThat(listener.getLastReceivedEvent()).isNotNull();
         StringTaskEvent receivedStringEvent = (StringTaskEvent) listener.getLastReceivedEvent();
-        assertEquals(stringTaskEvent1, receivedStringEvent);
+        assertThat(receivedStringEvent).isEqualTo(stringTaskEvent1);
     }
 }

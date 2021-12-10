@@ -52,14 +52,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link ZooKeeperHaServices}. */
 public class ZooKeeperHaServicesTest extends TestLogger {
@@ -106,11 +104,11 @@ public class ZooKeeperHaServicesTest extends TestLogger {
 
         runCleanupTest(configuration, blobStoreService, ZooKeeperHaServices::close);
 
-        assertThat(blobStoreService.isClosed(), is(true));
-        assertThat(blobStoreService.isClosedAndCleanedUpAllData(), is(false));
+        assertThat(blobStoreService.isClosed()).isEqualTo(true);
+        assertThat(blobStoreService.isClosedAndCleanedUpAllData()).isEqualTo(false);
 
         final List<String> children = client.getChildren().forPath(rootPath);
-        assertThat(children, is(not(empty())));
+        assertThat(children).isEqualTo(not(empty()));
     }
 
     /**
@@ -128,10 +126,10 @@ public class ZooKeeperHaServicesTest extends TestLogger {
         runCleanupTest(
                 configuration, blobStoreService, ZooKeeperHaServices::closeAndCleanupAllData);
 
-        assertThat(blobStoreService.isClosedAndCleanedUpAllData(), is(true));
+        assertThat(blobStoreService.isClosedAndCleanedUpAllData()).isEqualTo(true);
 
         final List<String> children = client.getChildren().forPath("/");
-        assertThat(children, is(equalTo(initialChildren)));
+        assertThat(children).isEqualTo(equalTo(initialChildren));
     }
 
     /** Tests that we can only delete the parent znodes as long as they are empty. */
@@ -149,10 +147,10 @@ public class ZooKeeperHaServicesTest extends TestLogger {
         runCleanupTest(
                 configuration, blobStoreService, ZooKeeperHaServices::closeAndCleanupAllData);
 
-        assertThat(blobStoreService.isClosedAndCleanedUpAllData(), is(true));
+        assertThat(blobStoreService.isClosedAndCleanedUpAllData()).isEqualTo(true);
 
-        assertThat(client.checkExists().forPath(flinkPath), is(nullValue()));
-        assertThat(client.checkExists().forPath(unclePath), is(notNullValue()));
+        assertThat(client.checkExists().forPath(flinkPath)).isEqualTo(nullValue());
+        assertThat(client.checkExists().forPath(unclePath)).isEqualTo(notNullValue());
     }
 
     /** Tests that the ZooKeeperHaServices cleans up paths for job manager. */
@@ -173,13 +171,10 @@ public class ZooKeeperHaServicesTest extends TestLogger {
                 jobID,
                 haServices -> {
                     final List<String> childrenBefore = client.getChildren().forPath(path);
-
                     haServices.cleanupJobData(jobID);
-
                     final List<String> childrenAfter = client.getChildren().forPath(path);
-
-                    assertThat(childrenBefore, hasItem(jobID.toString()));
-                    assertThat(childrenAfter, not(hasItem(jobID.toString())));
+                    assertThat(childrenBefore).contains(jobID.toString());
+                    assertThat(childrenAfter).doesNotContain(jobID.toString());
                 });
     }
 

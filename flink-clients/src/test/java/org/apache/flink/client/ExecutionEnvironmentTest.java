@@ -32,8 +32,8 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-import static junit.framework.TestCase.fail;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for {@link ExecutionEnvironment}.
@@ -94,6 +94,6 @@ public class ExecutionEnvironmentTest extends TestLogger implements Serializable
     private void testJobName(String prefixOfExpectedJobName, ExecutionEnvironment env) {
         env.fromElements(1, 2, 3).writeAsText("/dev/null");
         Plan plan = env.createProgramPlan();
-        assertTrue(plan.getJobName().startsWith(prefixOfExpectedJobName));
+        assertThat(plan.getJobName().startsWith(prefixOfExpectedJobName)).isTrue();
     }
 }

@@ -83,8 +83,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.flink.runtime.testutils.CommonTestUtils.waitForAllTaskRunning;
 import static org.apache.flink.test.util.TestUtils.submitJobAndWaitForResult;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test savepoint rescaling. */
 @RunWith(Parameterized.class)
@@ -213,9 +212,10 @@ public class RescalingITCase extends TestLogger {
 
             // wait til the sources have emitted numberElements for each key and completed a
             // checkpoint
-            assertTrue(
-                    SubtaskIndexFlatMapper.workCompletedLatch.await(
-                            deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            SubtaskIndexFlatMapper.workCompletedLatch.await(
+                                    deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isTrue();
 
             // verify the current state
 
@@ -233,7 +233,7 @@ public class RescalingITCase extends TestLogger {
                                 numberElements * key));
             }
 
-            assertEquals(expectedResult, actualResult);
+            assertThat(actualResult).isEqualTo(expectedResult);
 
             // clear the CollectionSink set for the restarted job
             CollectionSink.clearElementsSet();
@@ -280,7 +280,7 @@ public class RescalingITCase extends TestLogger {
                                 key * (numberElements + numberElements2)));
             }
 
-            assertEquals(expectedResult2, actualResult2);
+            assertThat(actualResult2).isEqualTo(expectedResult2);
 
         } finally {
             // clear the CollectionSink set for the restarted job
@@ -393,9 +393,10 @@ public class RescalingITCase extends TestLogger {
 
             // wait til the sources have emitted numberElements for each key and completed a
             // checkpoint
-            assertTrue(
-                    SubtaskIndexFlatMapper.workCompletedLatch.await(
-                            deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            SubtaskIndexFlatMapper.workCompletedLatch.await(
+                                    deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isTrue();
 
             // verify the current state
 
@@ -413,7 +414,7 @@ public class RescalingITCase extends TestLogger {
                                 numberElements * key));
             }
 
-            assertEquals(expectedResult, actualResult);
+            assertThat(actualResult).isEqualTo(expectedResult);
 
             // clear the CollectionSink set for the restarted job
             CollectionSink.clearElementsSet();
@@ -460,7 +461,7 @@ public class RescalingITCase extends TestLogger {
                                 key * (numberElements + numberElements2)));
             }
 
-            assertEquals(expectedResult2, actualResult2);
+            assertThat(actualResult2).isEqualTo(expectedResult2);
 
         } finally {
             // clear the CollectionSink set for the restarted job
@@ -604,7 +605,7 @@ public class RescalingITCase extends TestLogger {
                 }
             }
 
-            assertEquals(sumExp, sumAct);
+            assertThat(sumAct).isEqualTo(sumExp);
         } finally {
         }
     }

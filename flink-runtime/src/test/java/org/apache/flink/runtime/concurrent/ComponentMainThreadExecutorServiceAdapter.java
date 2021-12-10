@@ -31,6 +31,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Adapter class for a {@link ScheduledExecutorService} or {@link ScheduledExecutor} which shall be
  * used as a {@link ComponentMainThreadExecutor}. It enhances the given executor with an assert that
@@ -53,7 +55,8 @@ public class ComponentMainThreadExecutorServiceAdapter implements ComponentMainT
         this.scheduledExecutor = scheduledExecutor;
         this.mainThreadCheck =
                 () -> {
-                    assert MainThreadValidatorUtil.isRunningInExpectedThread(mainThread);
+                    assertThat(MainThreadValidatorUtil.isRunningInExpectedThread(mainThread))
+                            .isTrue();
                 };
     }
 
@@ -63,7 +66,8 @@ public class ComponentMainThreadExecutorServiceAdapter implements ComponentMainT
                 new DirectScheduledExecutorService() {
                     @Override
                     public void execute(Runnable command) {
-                        assert MainThreadValidatorUtil.isRunningInExpectedThread(main);
+                        assertThat(MainThreadValidatorUtil.isRunningInExpectedThread(main))
+                                .isTrue();
                         super.execute(command);
                     }
                 },

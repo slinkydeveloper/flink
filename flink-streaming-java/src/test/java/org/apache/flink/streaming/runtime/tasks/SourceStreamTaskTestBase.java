@@ -39,9 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 import static org.apache.flink.api.common.typeinfo.BasicTypeInfo.INT_TYPE_INFO;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Common base class for testing source tasks. */
 public class SourceStreamTaskTestBase {
@@ -73,26 +72,24 @@ public class SourceStreamTaskTestBase {
             OneShotLatch checkpointAcknowledgeLatch = new OneShotLatch();
             harness.getCheckpointResponder().setAcknowledgeLatch(checkpointAcknowledgeLatch);
 
-            assertFalse(triggerFuture.isDone());
+            assertThat(triggerFuture.isDone()).isFalse();
             Thread.sleep(sleepTime);
             while (!triggerFuture.isDone()) {
                 harness.streamTask.runMailboxStep();
             }
             Gauge<Long> checkpointStartDelayGauge =
                     (Gauge<Long>) metrics.get(MetricNames.CHECKPOINT_START_DELAY_TIME);
-            assertThat(
-                    checkpointStartDelayGauge.getValue(),
-                    greaterThanOrEqualTo(sleepTime * 1_000_000));
+            assertThat(checkpointStartDelayGauge.getValue())
+                    .isGreaterThanOrEqualTo(sleepTime * 1_000_000);
             Gauge<Double> busyTimeGauge = (Gauge<Double>) metrics.get(MetricNames.TASK_BUSY_TIME);
-            assertThat(busyTimeGauge.getValue(), busyTimeMatcher);
+            assertThat(busyTimeGauge.getValue()).satisfies(matching(busyTimeMatcher));
 
             checkpointAcknowledgeLatch.await();
             TestCheckpointResponder.AcknowledgeReport acknowledgeReport =
                     Iterables.getOnlyElement(
                             harness.getCheckpointResponder().getAcknowledgeReports());
-            assertThat(
-                    acknowledgeReport.getCheckpointMetrics().getCheckpointStartDelayNanos(),
-                    greaterThanOrEqualTo(sleepTime * 1_000_000));
+            assertThat(acknowledgeReport.getCheckpointMetrics().getCheckpointStartDelayNanos())
+                    .isGreaterThanOrEqualTo(sleepTime * 1_000_000);
         }
     }
 }

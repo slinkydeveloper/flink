@@ -27,8 +27,7 @@ import org.apache.flink.yarn.configuration.YarnConfigOptions;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link YarnWorkerResourceSpecFactory}. */
 public class YarnWorkerResourceSpecFactoryTest extends TestLogger {
@@ -40,9 +39,8 @@ public class YarnWorkerResourceSpecFactoryTest extends TestLogger {
         configuration.setInteger(YarnConfigOptions.VCORES, 2);
         configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS, 3);
 
-        assertThat(
-                YarnWorkerResourceSpecFactory.getDefaultCpus(configuration),
-                is(new CPUResource(1.0)));
+        assertThat(YarnWorkerResourceSpecFactory.getDefaultCpus(configuration))
+                .isEqualTo(new CPUResource(1.0));
     }
 
     @Test
@@ -51,9 +49,8 @@ public class YarnWorkerResourceSpecFactoryTest extends TestLogger {
         configuration.setInteger(YarnConfigOptions.VCORES, 2);
         configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS, 3);
 
-        assertThat(
-                YarnWorkerResourceSpecFactory.getDefaultCpus(configuration),
-                is(new CPUResource(2.0)));
+        assertThat(YarnWorkerResourceSpecFactory.getDefaultCpus(configuration))
+                .isEqualTo(new CPUResource(2.0));
     }
 
     @Test
@@ -61,9 +58,8 @@ public class YarnWorkerResourceSpecFactoryTest extends TestLogger {
         final Configuration configuration = new Configuration();
         configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS, 3);
 
-        assertThat(
-                YarnWorkerResourceSpecFactory.getDefaultCpus(configuration),
-                is(new CPUResource(3.0)));
+        assertThat(YarnWorkerResourceSpecFactory.getDefaultCpus(configuration))
+                .isEqualTo(new CPUResource(3.0));
     }
 
     @Test
@@ -71,9 +67,8 @@ public class YarnWorkerResourceSpecFactoryTest extends TestLogger {
         final Configuration configuration = new Configuration();
         configuration.setDouble(TaskManagerOptions.CPU_CORES, 0.5);
 
-        assertThat(
-                YarnWorkerResourceSpecFactory.getDefaultCpus(configuration),
-                is(new CPUResource(1.0)));
+        assertThat(YarnWorkerResourceSpecFactory.getDefaultCpus(configuration))
+                .isEqualTo(new CPUResource(1.0));
     }
 
     @Test(expected = IllegalConfigurationException.class)

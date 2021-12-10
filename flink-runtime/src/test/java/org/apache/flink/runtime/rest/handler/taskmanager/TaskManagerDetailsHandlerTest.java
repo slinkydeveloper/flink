@@ -54,8 +54,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the {@link TaskManagerDetailsHandler} implementation. */
 public class TaskManagerDetailsHandlerTest extends TestLogger {
@@ -124,7 +123,7 @@ public class TaskManagerDetailsHandlerTest extends TestLogger {
         String actualJson = objectMapper.writeValueAsString(actual);
         String expectedJson = objectMapper.writeValueAsString(expected);
 
-        assertThat(actualJson, is(expectedJson));
+        assertThat(actualJson).isEqualTo(expectedJson);
     }
 
     private static void initializeMetricStore(MetricStore metricStore) {

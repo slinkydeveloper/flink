@@ -34,9 +34,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link AbstractUserClassPathJobGraphRetriever}. */
 public class AbstractUserClassPathJobGraphRetrieverTest extends TestLogger {
@@ -61,21 +61,25 @@ public class AbstractUserClassPathJobGraphRetrieverTest extends TestLogger {
         final Path currentWorkingDirectory = FileUtils.getCurrentWorkingDirectory();
         final TestJobGraphRetriever testJobGraphRetriever = new TestJobGraphRetriever(testJobDir);
 
-        assertThat(
-                testJobGraphRetriever.getUserClassPaths(),
-                containsInAnyOrder(
-                        testFiles.stream()
-                                .map(
-                                        file ->
-                                                FileUtils.relativizePath(
-                                                        currentWorkingDirectory, file))
-                                .map(FunctionUtils.uncheckedFunction(FileUtils::toURL))
-                                .toArray()));
+        assertThat(testJobGraphRetriever.getUserClassPaths())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        testFiles.stream()
+                                                .map(
+                                                        file ->
+                                                                FileUtils.relativizePath(
+                                                                        currentWorkingDirectory,
+                                                                        file))
+                                                .map(
+                                                        FunctionUtils.uncheckedFunction(
+                                                                FileUtils::toURL))
+                                                .toArray())));
     }
 
     @Test
     public void testGetUserClassPathReturnEmptyListIfJobDirIsNull() throws IOException {
         final TestJobGraphRetriever testJobGraphRetriever = new TestJobGraphRetriever(null);
-        assertTrue(testJobGraphRetriever.getUserClassPaths().isEmpty());
+        assertThat(testJobGraphRetriever.getUserClassPaths().isEmpty()).isTrue();
     }
 }

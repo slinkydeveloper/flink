@@ -41,7 +41,7 @@ import java.util.ArrayDeque;
 import java.util.Objects;
 import java.util.stream.StreamSupport;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ContinuousProcessingTimeTrigger}. */
 public class ContinuousProcessingTimeTriggerTest {
@@ -100,7 +100,7 @@ public class ContinuousProcessingTimeTriggerTest {
         ContinuousProcessingTimeTrigger<TimeWindow> trigger =
                 ContinuousProcessingTimeTrigger.of(Time.milliseconds(5));
 
-        assertTrue(trigger.canMerge());
+        assertThat(trigger.canMerge()).isTrue();
 
         ListStateDescriptor<Integer> stateDesc =
                 new ListStateDescriptor<>(
@@ -177,7 +177,7 @@ public class ContinuousProcessingTimeTriggerTest {
         ContinuousProcessingTimeTrigger<TimeWindow> trigger =
                 ContinuousProcessingTimeTrigger.of(Time.milliseconds(5));
 
-        assertTrue(trigger.canMerge());
+        assertThat(trigger.canMerge()).isTrue();
 
         ListStateDescriptor<Integer> stateDesc =
                 new ListStateDescriptor<>(

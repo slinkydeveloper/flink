@@ -53,13 +53,10 @@ import java.util.Optional;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RunnableFuture;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link StreamOperatorStateHandlerTest}. */
 public class StreamOperatorStateHandlerTest {
@@ -149,13 +146,12 @@ public class StreamOperatorStateHandlerTest {
             stateHandler.setCurrentKey("44");
             stateHandler.initializeOperatorState(checkpointedStreamOperator);
 
+            assertThat(stateContext.operatorStateBackend().getRegisteredStateNames())
+                    .isEqualTo(not(empty()));
             assertThat(
-                    stateContext.operatorStateBackend().getRegisteredStateNames(),
-                    is(not(empty())));
-            assertThat(
-                    ((AbstractKeyedStateBackend<?>) stateContext.keyedStateBackend())
-                            .numKeyValueStatesByName(),
-                    equalTo(1));
+                            ((AbstractKeyedStateBackend<?>) stateContext.keyedStateBackend())
+                                    .numKeyValueStatesByName())
+                    .isEqualTo(1);
 
             try {
                 stateHandler.snapshotState(
@@ -179,25 +175,25 @@ public class StreamOperatorStateHandlerTest {
                 }
             }
 
-            assertTrue(keyedStateManagedFuture.isCancelled());
-            assertTrue(keyedStateRawFuture.isCancelled());
-            assertTrue(context.getKeyedStateStreamFuture().isCancelled());
-            assertTrue(operatorStateManagedFuture.isCancelled());
-            assertTrue(operatorStateRawFuture.isCancelled());
-            assertTrue(context.getOperatorStateStreamFuture().isCancelled());
-            assertTrue(inputChannelStateFuture.isCancelled());
-            assertTrue(resultSubpartitionStateFuture.isCancelled());
+            assertThat(keyedStateManagedFuture.isCancelled()).isTrue();
+            assertThat(keyedStateRawFuture.isCancelled()).isTrue();
+            assertThat(context.getKeyedStateStreamFuture().isCancelled()).isTrue();
+            assertThat(operatorStateManagedFuture.isCancelled()).isTrue();
+            assertThat(operatorStateRawFuture.isCancelled()).isTrue();
+            assertThat(context.getOperatorStateStreamFuture().isCancelled()).isTrue();
+            assertThat(inputChannelStateFuture.isCancelled()).isTrue();
+            assertThat(resultSubpartitionStateFuture.isCancelled()).isTrue();
 
             stateHandler.dispose();
 
+            assertThat(stateContext.operatorStateBackend().getRegisteredBroadcastStateNames())
+                    .isEqualTo(empty());
+            assertThat(stateContext.operatorStateBackend().getRegisteredStateNames())
+                    .isEqualTo(empty());
             assertThat(
-                    stateContext.operatorStateBackend().getRegisteredBroadcastStateNames(),
-                    is(empty()));
-            assertThat(stateContext.operatorStateBackend().getRegisteredStateNames(), is(empty()));
-            assertThat(
-                    ((AbstractKeyedStateBackend<?>) stateContext.keyedStateBackend())
-                            .numKeyValueStatesByName(),
-                    equalTo(0));
+                            ((AbstractKeyedStateBackend<?>) stateContext.keyedStateBackend())
+                                    .numKeyValueStatesByName())
+                    .isEqualTo(0);
         }
     }
 

@@ -32,6 +32,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /** A simple testing implementation of the {@link OperatorCoordinator}. */
 class TestingOperatorCoordinator implements OperatorCoordinator {
 
@@ -111,7 +113,7 @@ class TestingOperatorCoordinator implements OperatorCoordinator {
     @Override
     public void checkpointCoordinator(long checkpointId, CompletableFuture<byte[]> result) {
         boolean added = triggeredCheckpoints.offer(result);
-        assert added; // guard the test assumptions
+        assertThat(added).isTrue(); // guard the test assumptions
     }
 
     @Override

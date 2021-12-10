@@ -33,7 +33,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests for {@link BlobUtils} working on non-writable directories. */
@@ -51,15 +51,15 @@ public class BlobUtilsNonWritableTest extends TestLogger {
 
         // Prepare test directory
         blobUtilsTestDirectory = temporaryFolder.newFolder();
-        assertTrue(blobUtilsTestDirectory.setExecutable(true, false));
-        assertTrue(blobUtilsTestDirectory.setReadable(true, false));
-        assertTrue(blobUtilsTestDirectory.setWritable(false, false));
+        assertThat(blobUtilsTestDirectory.setExecutable(true, false)).isTrue();
+        assertThat(blobUtilsTestDirectory.setReadable(true, false)).isTrue();
+        assertThat(blobUtilsTestDirectory.setWritable(false, false)).isTrue();
     }
 
     @After
     public void after() {
         // Cleanup test directory, ensure it was empty
-        assertTrue(blobUtilsTestDirectory.delete());
+        assertThat(blobUtilsTestDirectory.delete()).isTrue();
     }
 
     @Test(expected = IOException.class)

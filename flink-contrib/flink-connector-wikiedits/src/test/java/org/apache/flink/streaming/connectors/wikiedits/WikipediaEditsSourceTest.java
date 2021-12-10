@@ -39,9 +39,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the WikipediaEditsSource. */
 public class WikipediaEditsSourceTest {
@@ -99,10 +98,12 @@ public class WikipediaEditsSourceTest {
                     fail("Failure in WikipediaEditsSource: " + error.getMessage());
                 }
 
-                assertNotNull(
-                        "Did not receive a WikipediaEditEvent within the desired timeout", event);
-                assertTrue(
-                        "Received unexpected event " + event, event instanceof WikipediaEditEvent);
+                assertThat(event)
+                        .as("Did not receive a WikipediaEditEvent within the desired timeout")
+                        .isNotNull();
+                assertThat(event)
+                        .as("Received unexpected event " + event)
+                        .isInstanceOf(WikipediaEditEvent.class);
             } finally {
                 wikipediaEditsSource.cancel();
 

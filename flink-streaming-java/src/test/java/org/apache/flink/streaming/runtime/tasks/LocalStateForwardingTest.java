@@ -52,7 +52,6 @@ import org.apache.flink.streaming.api.operators.OperatorSnapshotFutures;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -68,6 +67,7 @@ import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.flink.runtime.checkpoint.StateObjectCollection.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -207,10 +207,10 @@ public class LocalStateForwardingTest extends TestLogger {
                             CheckpointMetrics lCheckpointMetrics,
                             TaskStateSnapshot lSubtaskState) {
 
-                        Assert.assertEquals(jobID, lJobID);
-                        Assert.assertEquals(executionAttemptID, lExecutionAttemptID);
-                        Assert.assertEquals(checkpointMetaData.getCheckpointId(), lCheckpointId);
-                        Assert.assertEquals(checkpointMetrics, lCheckpointMetrics);
+                        assertThat(lJobID).isEqualTo(jobID);
+                        assertThat(lExecutionAttemptID).isEqualTo(executionAttemptID);
+                        assertThat(lCheckpointId).isEqualTo(checkpointMetaData.getCheckpointId());
+                        assertThat(lCheckpointMetrics).isEqualTo(checkpointMetrics);
                         jmReported.set(true);
                     }
                 };
@@ -236,7 +236,7 @@ public class LocalStateForwardingTest extends TestLogger {
                             @Nonnegative long checkpointId,
                             @Nullable TaskStateSnapshot localState) {
 
-                        Assert.assertEquals(tmSnapshot, localState);
+                        assertThat(localState).isEqualTo(tmSnapshot);
                         tmReported.set(true);
                     }
                 };
@@ -255,8 +255,8 @@ public class LocalStateForwardingTest extends TestLogger {
         taskStateManager.reportTaskStateSnapshots(
                 checkpointMetaData, checkpointMetrics, jmSnapshot, tmSnapshot);
 
-        Assert.assertTrue("Reporting for JM state was not called.", jmReported.get());
-        Assert.assertTrue("Reporting for TM state was not called.", tmReported.get());
+        assertThat(jmReported.get()).as("Reporting for JM state was not called.").isTrue();
+        assertThat(tmReported.get()).as("Reporting for TM state was not called.").isTrue();
     }
 
     private static <T extends StateObject> void performCheck(
@@ -271,9 +271,10 @@ public class LocalStateForwardingTest extends TestLogger {
             throw new RuntimeException(e);
         }
 
-        Assert.assertEquals(snapshotResult.getJobManagerOwnedSnapshot(), jmState.iterator().next());
+        assertThat(jmState.iterator().next())
+                .isEqualTo(snapshotResult.getJobManagerOwnedSnapshot());
 
-        Assert.assertEquals(snapshotResult.getTaskLocalSnapshot(), tmState.iterator().next());
+        assertThat(tmState.iterator().next()).isEqualTo(snapshotResult.getTaskLocalSnapshot());
     }
 
     private static <T extends StateObject> void performCollectionCheck(
@@ -288,8 +289,8 @@ public class LocalStateForwardingTest extends TestLogger {
             throw new RuntimeException(e);
         }
 
-        Assert.assertEquals(snapshotResult.getJobManagerOwnedSnapshot(), jmState);
-        Assert.assertEquals(snapshotResult.getTaskLocalSnapshot(), tmState);
+        assertThat(jmState).isEqualTo(snapshotResult.getJobManagerOwnedSnapshot());
+        assertThat(tmState).isEqualTo(snapshotResult.getTaskLocalSnapshot());
     }
 
     private static <T extends StateObject> RunnableFuture<SnapshotResult<T>> createSnapshotResult(

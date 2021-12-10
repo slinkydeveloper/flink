@@ -33,11 +33,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link ComponentClassLoader}. */
 public class ComponentClassLoaderTest extends TestLogger {
@@ -82,7 +78,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new URL[0], owner, new String[] {CLASS_TO_LOAD.getName()}, new String[0]);
 
         final Class<?> loadedClass = componentClassLoader.loadClass(CLASS_TO_LOAD.getName());
-        assertThat(loadedClass, sameInstance(CLASS_RETURNED_BY_OWNER));
+        assertThat(loadedClass).isSameAs(CLASS_RETURNED_BY_OWNER);
     }
 
     @Test
@@ -94,7 +90,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new URL[0], owner, new String[] {CLASS_TO_LOAD.getName()}, new String[0]);
 
         final Class<?> loadedClass = componentClassLoader.loadClass(CLASS_TO_LOAD.getName());
-        assertThat(loadedClass, sameInstance(CLASS_TO_LOAD));
+        assertThat(loadedClass).isSameAs(CLASS_TO_LOAD);
     }
 
     @Test
@@ -107,7 +103,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new URL[0], owner, new String[0], new String[] {CLASS_TO_LOAD.getName()});
 
         final Class<?> loadedClass = componentClassLoader.loadClass(CLASS_TO_LOAD.getName());
-        assertThat(loadedClass, sameInstance(CLASS_TO_LOAD));
+        assertThat(loadedClass).isSameAs(CLASS_TO_LOAD);
     }
 
     @Test
@@ -120,7 +116,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new URL[0], owner, new String[0], new String[] {NON_EXISTENT_CLASS_NAME});
 
         final Class<?> loadedClass = componentClassLoader.loadClass(NON_EXISTENT_CLASS_NAME);
-        assertThat(loadedClass, sameInstance(CLASS_RETURNED_BY_OWNER));
+        assertThat(loadedClass).isSameAs(CLASS_RETURNED_BY_OWNER);
     }
 
     // ----------------------------------------------------------------------------------------------
@@ -134,10 +130,9 @@ public class ComponentClassLoaderTest extends TestLogger {
         final ComponentClassLoader componentClassLoader =
                 new ComponentClassLoader(new URL[0], owner, new String[0], new String[0]);
 
-        assertThat(componentClassLoader.getResource(NON_EXISTENT_RESOURCE_NAME), nullValue());
-        assertThat(
-                componentClassLoader.getResources(NON_EXISTENT_RESOURCE_NAME).hasMoreElements(),
-                is(false));
+        assertThat(componentClassLoader.getResource(NON_EXISTENT_RESOURCE_NAME)).isNull();
+        assertThat(componentClassLoader.getResources(NON_EXISTENT_RESOURCE_NAME).hasMoreElements())
+                .isEqualTo(false);
     }
 
     @Test
@@ -150,7 +145,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new URL[] {}, owner, new String[] {resourceToLoad}, new String[0]);
 
         final URL loadedResource = componentClassLoader.getResource(resourceToLoad);
-        assertThat(loadedResource, sameInstance(RESOURCE_RETURNED_BY_OWNER));
+        assertThat(loadedResource).isSameAs(RESOURCE_RETURNED_BY_OWNER);
     }
 
     @Test
@@ -165,7 +160,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new String[0]);
 
         final URL loadedResource = componentClassLoader.getResource(resourceToLoad);
-        assertThat(loadedResource.toString(), containsString(resourceToLoad));
+        assertThat(loadedResource.toString()).contains(resourceToLoad);
     }
 
     @Test
@@ -181,7 +176,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new String[] {resourceToLoad});
 
         final URL loadedResource = componentClassLoader.getResource(resourceToLoad);
-        assertThat(loadedResource.toString(), containsString(resourceToLoad));
+        assertThat(loadedResource.toString()).contains(resourceToLoad);
     }
 
     @Test
@@ -197,7 +192,7 @@ public class ComponentClassLoaderTest extends TestLogger {
                         new String[] {NON_EXISTENT_RESOURCE_NAME});
 
         final URL loadedResource = componentClassLoader.getResource(NON_EXISTENT_RESOURCE_NAME);
-        assertThat(loadedResource, sameInstance(RESOURCE_RETURNED_BY_OWNER));
+        assertThat(loadedResource).isSameAs(RESOURCE_RETURNED_BY_OWNER);
     }
 
     private static class TestUrlClassLoader extends URLClassLoader {

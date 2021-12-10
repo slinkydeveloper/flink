@@ -31,7 +31,7 @@ import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BlockingBackChannel}. */
 public class BlockingBackChannelTest {
@@ -63,20 +63,20 @@ public class BlockingBackChannelTest {
         //			System.out.println("ACTION " + (++action) + ": " + log);
         //		}
 
-        assertEquals(12, actionLog.size());
+        assertThat(actionLog.size()).isEqualTo(12);
 
-        assertEquals("head sends data", actionLog.get(0));
-        assertEquals("tail receives data", actionLog.get(1));
-        assertEquals("tail writes in iteration 0", actionLog.get(2));
-        assertEquals("head reads in iteration 0", actionLog.get(3));
-        assertEquals("head sends data", actionLog.get(4));
-        assertEquals("tail receives data", actionLog.get(5));
-        assertEquals("tail writes in iteration 1", actionLog.get(6));
-        assertEquals("head reads in iteration 1", actionLog.get(7));
-        assertEquals("head sends data", actionLog.get(8));
-        assertEquals("tail receives data", actionLog.get(9));
-        assertEquals("tail writes in iteration 2", actionLog.get(10));
-        assertEquals("head reads in iteration 2", actionLog.get(11));
+        assertThat(actionLog.get(0)).isEqualTo("head sends data");
+        assertThat(actionLog.get(1)).isEqualTo("tail receives data");
+        assertThat(actionLog.get(2)).isEqualTo("tail writes in iteration 0");
+        assertThat(actionLog.get(3)).isEqualTo("head reads in iteration 0");
+        assertThat(actionLog.get(4)).isEqualTo("head sends data");
+        assertThat(actionLog.get(5)).isEqualTo("tail receives data");
+        assertThat(actionLog.get(6)).isEqualTo("tail writes in iteration 1");
+        assertThat(actionLog.get(7)).isEqualTo("head reads in iteration 1");
+        assertThat(actionLog.get(8)).isEqualTo("head sends data");
+        assertThat(actionLog.get(9)).isEqualTo("tail receives data");
+        assertThat(actionLog.get(10)).isEqualTo("tail writes in iteration 2");
+        assertThat(actionLog.get(11)).isEqualTo("head reads in iteration 2");
     }
 
     class IterationHead implements Runnable {

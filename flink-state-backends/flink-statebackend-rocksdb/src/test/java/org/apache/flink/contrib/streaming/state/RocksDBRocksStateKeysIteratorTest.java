@@ -26,7 +26,6 @@ import org.apache.flink.contrib.streaming.state.iterator.RocksStateKeysIterator;
 import org.apache.flink.core.memory.DataOutputSerializer;
 import org.apache.flink.runtime.state.CompositeKeySerializationUtils;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RocksIteratorWrapper. */
 public class RocksDBRocksStateKeysIteratorTest {
@@ -116,10 +117,10 @@ public class RocksDBRocksStateKeysIteratorTest {
                 }
 
                 fetchedKeys.sort(Comparator.comparingInt(a -> a));
-                Assert.assertEquals(1000, fetchedKeys.size());
+                assertThat(fetchedKeys.size()).isEqualTo(1000);
 
                 for (int i = 0; i < 1000; ++i) {
-                    Assert.assertEquals(i, fetchedKeys.get(i).intValue());
+                    assertThat(fetchedKeys.get(i).intValue()).isEqualTo(i);
                 }
             }
         }

@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CycleGraph}. */
 public class CycleGraphTest extends GraphGeneratorTestBase {
@@ -48,18 +48,18 @@ public class CycleGraphTest extends GraphGeneratorTestBase {
 
         Graph<LongValue, NullValue, NullValue> graph = new CycleGraph(env, vertexCount).generate();
 
-        assertEquals(vertexCount, graph.numberOfVertices());
-        assertEquals(2 * vertexCount, graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(vertexCount);
+        assertThat(graph.numberOfEdges()).isEqualTo(2 * vertexCount);
 
         long minInDegree = graph.inDegrees().min(1).collect().get(0).f1.getValue();
         long minOutDegree = graph.outDegrees().min(1).collect().get(0).f1.getValue();
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(2, minInDegree);
-        assertEquals(2, minOutDegree);
-        assertEquals(2, maxInDegree);
-        assertEquals(2, maxOutDegree);
+        assertThat(minInDegree).isEqualTo(2);
+        assertThat(minOutDegree).isEqualTo(2);
+        assertThat(maxInDegree).isEqualTo(2);
+        assertThat(maxOutDegree).isEqualTo(2);
     }
 
     @Test

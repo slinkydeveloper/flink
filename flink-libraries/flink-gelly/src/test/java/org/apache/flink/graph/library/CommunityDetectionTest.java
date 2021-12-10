@@ -33,7 +33,7 @@ import org.apache.flink.types.LongValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CommunityDetection}. */
 public class CommunityDetectionTest extends AsmTestBase {
@@ -104,7 +104,7 @@ public class CommunityDetectionTest extends AsmTestBase {
         Checksum checksum =
                 new ChecksumHashCode<Vertex<LongValue, Long>>().run(result.getVertices()).execute();
 
-        assertEquals(184, checksum.getCount());
-        assertEquals(0x00000000000cdc96L, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(184);
+        assertThat(checksum.getChecksum()).isEqualTo(0x00000000000cdc96L);
     }
 }

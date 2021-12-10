@@ -34,11 +34,13 @@ import org.apache.flink.types.StringValue;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.MutableObjectIterator;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class GroupReduceDriverTest {
@@ -79,11 +81,11 @@ public class GroupReduceDriverTest {
             driver.prepare();
             driver.run();
 
-            Assert.assertTrue(result.getList().isEmpty());
+            assertThat(result.getList().isEmpty()).isTrue();
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -133,7 +135,7 @@ public class GroupReduceDriverTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -186,7 +188,7 @@ public class GroupReduceDriverTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -237,15 +239,14 @@ public class GroupReduceDriverTest {
 
             try {
                 DriverTestData.compareTupleArrays(expected, res);
-                Assert.fail(
-                        "Accumulationg mutable objects is expected to result in incorrect values.");
+                fail("Accumulationg mutable objects is expected to result in incorrect values.");
             } catch (AssertionError e) {
                 // expected
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -299,7 +300,7 @@ public class GroupReduceDriverTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 

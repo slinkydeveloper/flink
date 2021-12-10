@@ -32,8 +32,7 @@ import org.mockito.Mock;
 import org.mockito.internal.verification.VerificationModeFactory;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,7 +55,7 @@ public class DeserializationSchemaWrapperTest {
         TypeInformation<String> typeInformation = TypeInformation.of(String.class);
         when(deserializationSchema.getProducedType()).thenReturn(typeInformation);
 
-        assertThat(deserializationSchemaWrapper.getProducedType(), is(typeInformation));
+        assertThat(deserializationSchemaWrapper.getProducedType()).isEqualTo(typeInformation);
         verify(deserializationSchema, times(1)).getProducedType();
     }
 
@@ -65,7 +64,7 @@ public class DeserializationSchemaWrapperTest {
         String input = "some-input";
         when(deserializationSchema.isEndOfStream(any())).thenReturn(true);
 
-        assertThat(deserializationSchemaWrapper.isEndOfStream(input), is(true));
+        assertThat(deserializationSchemaWrapper.isEndOfStream(input)).isEqualTo(true);
         verify(deserializationSchema, times(1)).isEndOfStream(input);
     }
 

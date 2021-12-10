@@ -46,9 +46,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test class for {@link RocksDBStateUploader}. */
 public class RocksDBStateUploaderTest extends TestLogger {
@@ -72,9 +71,9 @@ public class RocksDBStateUploaderTest extends TestLogger {
         try (RocksDBStateUploader rocksDBStateUploader = new RocksDBStateUploader(5)) {
             rocksDBStateUploader.uploadFilesToCheckpointFs(
                     filePaths, checkpointStreamFactory, new CloseableRegistry());
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
-            assertEquals(expectedException, e);
+            assertThat(e).isEqualTo(expectedException);
         }
     }
 
@@ -176,8 +175,8 @@ public class RocksDBStateUploaderTest extends TestLogger {
         byte[] excepted = Files.readAllBytes(stateFilePath);
         byte[] actual = new byte[excepted.length];
         IOUtils.readFully(inputStream, actual, 0, actual.length);
-        assertEquals(-1, inputStream.read());
-        assertArrayEquals(excepted, actual);
+        assertThat(inputStream.read()).isEqualTo(-1);
+        assertThat(actual).isEqualTo(excepted);
     }
 
     private static class SpecifiedException extends IOException {

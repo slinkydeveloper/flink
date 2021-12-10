@@ -30,7 +30,6 @@ import org.apache.flink.tests.util.flink.JobSubmission;
 import org.apache.flink.testutils.junit.FailsOnJava11;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -48,6 +47,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** End-to-end test for the kafka connectors. */
 @RunWith(Parameterized.class)
@@ -149,20 +150,19 @@ public class StreamingKafkaITCase extends TestLogger {
                 final List<String> bees = filterMessages(messages, "bee");
 
                 // check all keys
-                Assert.assertEquals(
-                        Arrays.asList("elephant,5,45218", "elephant,14,54867"), elephants);
-                Assert.assertEquals(
-                        Arrays.asList("squirrel,12,46213", "squirrel,34,52444"), squirrels);
-                Assert.assertEquals(Arrays.asList("bee,3,51348", "bee,13,53412"), bees);
+                assertThat(elephants)
+                        .isEqualTo(Arrays.asList("elephant,5,45218", "elephant,14,54867"));
+                assertThat(squirrels)
+                        .isEqualTo(Arrays.asList("squirrel,12,46213", "squirrel,34,52444"));
+                assertThat(bees).isEqualTo(Arrays.asList("bee,3,51348", "bee,13,53412"));
             }
 
             // now, we add a new partition to the topic
             LOG.info("Repartitioning Kafka topic [{}] ...", inputTopic);
             kafka.setNumPartitions(2, inputTopic);
-            Assert.assertEquals(
-                    "Failed adding a partition to input topic.",
-                    2,
-                    kafka.getNumPartitions(inputTopic));
+            assertThat(kafka.getNumPartitions(inputTopic))
+                    .as("Failed adding a partition to input topic.")
+                    .isEqualTo(2);
 
             // send some more messages to Kafka
             LOG.info("Sending more messages to Kafka topic [{}] ...", inputTopic);
@@ -176,10 +176,10 @@ public class StreamingKafkaITCase extends TestLogger {
 
             // verify that our assumption that the new partition actually has written messages is
             // correct
-            Assert.assertNotEquals(
-                    "The newly created partition does not have any new messages, and therefore partition discovery cannot be verified.",
-                    0L,
-                    kafka.getPartitionOffset(inputTopic, 1));
+            assertThat(kafka.getPartitionOffset(inputTopic, 1))
+                    .as(
+                            "The newly created partition does not have any new messages, and therefore partition discovery cannot be verified.")
+                    .isEqualTo(0L);
 
             LOG.info("Verifying messages from Kafka topic [{}] ...", outputTopic);
             {
@@ -190,22 +190,18 @@ public class StreamingKafkaITCase extends TestLogger {
                 final List<String> bees = filterMessages(messages, "bee");
                 final List<String> giraffes = filterMessages(messages, "giraffe");
 
-                Assert.assertEquals(
-                        String.format("Messages from Kafka %s: %s", kafkaVersion, messages),
-                        Arrays.asList("elephant,27,64213"),
-                        elephants);
-                Assert.assertEquals(
-                        String.format("Messages from Kafka %s: %s", kafkaVersion, messages),
-                        Arrays.asList("squirrel,52,66413"),
-                        squirrels);
-                Assert.assertEquals(
-                        String.format("Messages from Kafka %s: %s", kafkaVersion, messages),
-                        Arrays.asList("bee,18,65647"),
-                        bees);
-                Assert.assertEquals(
-                        String.format("Messages from Kafka %s: %s", kafkaVersion, messages),
-                        Arrays.asList("giraffe,9,65555"),
-                        giraffes);
+                assertThat(elephants)
+                        .as(String.format("Messages from Kafka %s: %s", kafkaVersion, messages))
+                        .isEqualTo(Arrays.asList("elephant,27,64213"));
+                assertThat(squirrels)
+                        .as(String.format("Messages from Kafka %s: %s", kafkaVersion, messages))
+                        .isEqualTo(Arrays.asList("squirrel,52,66413"));
+                assertThat(bees)
+                        .as(String.format("Messages from Kafka %s: %s", kafkaVersion, messages))
+                        .isEqualTo(Arrays.asList("bee,18,65647"));
+                assertThat(giraffes)
+                        .as(String.format("Messages from Kafka %s: %s", kafkaVersion, messages))
+                        .isEqualTo(Arrays.asList("giraffe,9,65555"));
             }
         }
     }

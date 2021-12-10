@@ -27,9 +27,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Marshalling tests for the {@link SavepointInfo}. */
 @RunWith(Parameterized.class)
@@ -66,17 +64,17 @@ public class SavepointInfoMarshallingTest extends RestResponseMarshallingTestBas
     @Override
     protected void assertOriginalEqualsToUnmarshalled(
             SavepointInfo expected, SavepointInfo actual) {
-        assertThat(actual.getLocation(), is(expected.getLocation()));
+        assertThat(actual.getLocation()).isEqualTo(expected.getLocation());
         if (expected.getFailureCause() != null) {
-            assertThat(actual.getFailureCause(), notNullValue());
+            assertThat(actual.getFailureCause()).isNotNull();
             assertThat(
-                    actual.getFailureCause()
-                            .deserializeError(ClassLoader.getSystemClassLoader())
-                            .getMessage(),
-                    is(
+                            actual.getFailureCause()
+                                    .deserializeError(ClassLoader.getSystemClassLoader())
+                                    .getMessage())
+                    .isEqualTo(
                             expected.getFailureCause()
                                     .deserializeError(ClassLoader.getSystemClassLoader())
-                                    .getMessage()));
+                                    .getMessage());
         }
     }
 }

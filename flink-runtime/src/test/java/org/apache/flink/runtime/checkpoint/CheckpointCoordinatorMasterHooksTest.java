@@ -49,12 +49,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import static org.apache.flink.runtime.checkpoint.CheckpointCoordinatorTestingUtils.StringSerializer;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.any;
@@ -89,9 +85,9 @@ public class CheckpointCoordinatorMasterHooksTest {
         MasterTriggerRestoreHook<?> hook3 = mock(MasterTriggerRestoreHook.class);
         when(hook3.getIdentifier()).thenReturn("anotherId");
 
-        assertTrue(cc.addMasterHook(hook1));
-        assertFalse(cc.addMasterHook(hook2));
-        assertTrue(cc.addMasterHook(hook3));
+        assertThat(cc.addMasterHook(hook1)).isTrue();
+        assertThat(cc.addMasterHook(hook2)).isFalse();
+        assertThat(cc.addMasterHook(hook3)).isTrue();
     }
 
     /** Test that validates correct exceptions when supplying hooks with invalid IDs. */
@@ -207,8 +203,8 @@ public class CheckpointCoordinatorMasterHooksTest {
         // trigger a checkpoint
         final CompletableFuture<CompletedCheckpoint> checkpointFuture = cc.triggerCheckpoint(false);
         manuallyTriggeredScheduledExecutor.triggerAll();
-        assertFalse(checkpointFuture.isCompletedExceptionally());
-        assertEquals(1, cc.getNumberOfPendingCheckpoints());
+        assertThat(checkpointFuture.isCompletedExceptionally()).isFalse();
+        assertThat(cc.getNumberOfPendingCheckpoints()).isEqualTo(1);
 
         verify(statefulHook1, times(1))
                 .triggerCheckpoint(anyLong(), anyLong(), any(Executor.class));
@@ -228,21 +224,21 @@ public class CheckpointCoordinatorMasterHooksTest {
         cc.receiveAcknowledgeMessage(
                 new AcknowledgeCheckpoint(graph.getJobID(), attemptID, checkpointId),
                 "Unknown location");
-        assertEquals(0, cc.getNumberOfPendingCheckpoints());
+        assertThat(cc.getNumberOfPendingCheckpoints()).isEqualTo(0);
 
-        assertEquals(1, cc.getNumberOfRetainedSuccessfulCheckpoints());
+        assertThat(cc.getNumberOfRetainedSuccessfulCheckpoints()).isEqualTo(1);
         final CompletedCheckpoint chk = cc.getCheckpointStore().getLatestCheckpoint();
 
         final Collection<MasterState> masterStates = chk.getMasterHookStates();
-        assertEquals(2, masterStates.size());
+        assertThat(masterStates.size()).isEqualTo(2);
 
         for (MasterState ms : masterStates) {
             if (ms.name().equals(id1)) {
-                assertArrayEquals(state1serialized, ms.bytes());
-                assertEquals(StringSerializer.VERSION, ms.version());
+                assertThat(ms.bytes()).isEqualTo(state1serialized);
+                assertThat(ms.version()).isEqualTo(StringSerializer.VERSION);
             } else if (ms.name().equals(id2)) {
-                assertArrayEquals(state2serialized, ms.bytes());
-                assertEquals(LongSerializer.VERSION, ms.version());
+                assertThat(ms.bytes()).isEqualTo(state2serialized);
+                assertThat(ms.version()).isEqualTo(LongSerializer.VERSION);
             } else {
                 fail("unrecognized state name: " + ms.name());
             }
@@ -415,10 +411,10 @@ public class CheckpointCoordinatorMasterHooksTest {
                             @Override
                             public CompletableFuture<Void> answer(InvocationOnMock invocation)
                                     throws Throwable {
-                                assertEquals(1, cc.getNumberOfPendingCheckpoints());
-
+                                assertThat(cc.getNumberOfPendingCheckpoints()).isEqualTo(1);
                                 long checkpointId = (Long) invocation.getArguments()[0];
-                                assertNotNull(cc.getPendingCheckpoints().get(checkpointId));
+                                assertThat(cc.getPendingCheckpoints().get(checkpointId))
+                                        .isNotNull();
                                 return null;
                             }
                         });
@@ -428,7 +424,7 @@ public class CheckpointCoordinatorMasterHooksTest {
         // trigger a checkpoint
         final CompletableFuture<CompletedCheckpoint> checkpointFuture = cc.triggerCheckpoint(false);
         manuallyTriggeredScheduledExecutor.triggerAll();
-        assertFalse(checkpointFuture.isCompletedExceptionally());
+        assertThat(checkpointFuture.isCompletedExceptionally()).isFalse();
     }
 
     // ------------------------------------------------------------------------
@@ -524,8 +520,8 @@ public class CheckpointCoordinatorMasterHooksTest {
 
         @Override
         public Long deserialize(int version, byte[] serialized) throws IOException {
-            assertEquals(VERSION, version);
-            assertEquals(8, serialized.length);
+            assertThat(version).isEqualTo(VERSION);
+            assertThat(serialized.length).isEqualTo(8);
 
             return ByteBuffer.wrap(serialized).order(ByteOrder.LITTLE_ENDIAN).getLong(0);
         }

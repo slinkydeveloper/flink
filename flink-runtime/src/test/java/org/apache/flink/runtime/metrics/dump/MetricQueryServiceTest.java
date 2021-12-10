@@ -42,8 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link MetricQueryService}. */
 public class MetricQueryServiceTest extends TestLogger {
@@ -93,10 +92,10 @@ public class MetricQueryServiceTest extends TestLogger {
         MetricDumpSerialization.MetricSerializationResult dump =
                 queryService.queryMetrics(TIMEOUT).get();
 
-        assertTrue(dump.serializedCounters.length > 0);
-        assertTrue(dump.serializedGauges.length > 0);
-        assertTrue(dump.serializedHistograms.length > 0);
-        assertTrue(dump.serializedMeters.length > 0);
+        assertThat(dump.serializedCounters.length > 0).isTrue();
+        assertThat(dump.serializedGauges.length > 0).isTrue();
+        assertThat(dump.serializedHistograms.length > 0).isTrue();
+        assertThat(dump.serializedMeters.length > 0).isTrue();
 
         queryService.removeMetric(c);
         queryService.removeMetric(g);
@@ -106,10 +105,10 @@ public class MetricQueryServiceTest extends TestLogger {
         MetricDumpSerialization.MetricSerializationResult emptyDump =
                 queryService.queryMetrics(TIMEOUT).get();
 
-        assertEquals(0, emptyDump.serializedCounters.length);
-        assertEquals(0, emptyDump.serializedGauges.length);
-        assertEquals(0, emptyDump.serializedHistograms.length);
-        assertEquals(0, emptyDump.serializedMeters.length);
+        assertThat(emptyDump.serializedCounters.length).isEqualTo(0);
+        assertThat(emptyDump.serializedGauges.length).isEqualTo(0);
+        assertThat(emptyDump.serializedHistograms.length).isEqualTo(0);
+        assertThat(emptyDump.serializedMeters.length).isEqualTo(0);
     }
 
     @Test
@@ -138,17 +137,17 @@ public class MetricQueryServiceTest extends TestLogger {
         MetricDumpSerialization.MetricSerializationResult dump =
                 queryService.queryMetrics(TIMEOUT).get();
 
-        assertTrue(dump.serializedCounters.length > 0);
-        assertEquals(1, dump.numCounters);
-        assertTrue(dump.serializedMeters.length > 0);
-        assertEquals(1, dump.numMeters);
+        assertThat(dump.serializedCounters.length > 0).isTrue();
+        assertThat(dump.numCounters).isEqualTo(1);
+        assertThat(dump.serializedMeters.length > 0).isTrue();
+        assertThat(dump.numMeters).isEqualTo(1);
 
         // gauges exceeded the size limit and will be excluded
-        assertEquals(0, dump.serializedGauges.length);
-        assertEquals(0, dump.numGauges);
+        assertThat(dump.serializedGauges.length).isEqualTo(0);
+        assertThat(dump.numGauges).isEqualTo(0);
 
-        assertTrue(dump.serializedHistograms.length > 0);
-        assertEquals(1, dump.numHistograms);
+        assertThat(dump.serializedHistograms.length > 0).isTrue();
+        assertThat(dump.numHistograms).isEqualTo(1);
 
         // unregister all but one gauge to ensure gauges are reported again if the remaining fit
         for (int x = 1; x < gauges.size(); x++) {
@@ -158,13 +157,13 @@ public class MetricQueryServiceTest extends TestLogger {
         MetricDumpSerialization.MetricSerializationResult recoveredDump =
                 queryService.queryMetrics(TIMEOUT).get();
 
-        assertTrue(recoveredDump.serializedCounters.length > 0);
-        assertEquals(1, recoveredDump.numCounters);
-        assertTrue(recoveredDump.serializedMeters.length > 0);
-        assertEquals(1, recoveredDump.numMeters);
-        assertTrue(recoveredDump.serializedGauges.length > 0);
-        assertEquals(1, recoveredDump.numGauges);
-        assertTrue(recoveredDump.serializedHistograms.length > 0);
-        assertEquals(1, recoveredDump.numHistograms);
+        assertThat(recoveredDump.serializedCounters.length > 0).isTrue();
+        assertThat(recoveredDump.numCounters).isEqualTo(1);
+        assertThat(recoveredDump.serializedMeters.length > 0).isTrue();
+        assertThat(recoveredDump.numMeters).isEqualTo(1);
+        assertThat(recoveredDump.serializedGauges.length > 0).isTrue();
+        assertThat(recoveredDump.numGauges).isEqualTo(1);
+        assertThat(recoveredDump.serializedHistograms.length > 0).isTrue();
+        assertThat(recoveredDump.numHistograms).isEqualTo(1);
     }
 }

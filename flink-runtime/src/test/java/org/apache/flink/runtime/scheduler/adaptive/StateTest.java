@@ -25,9 +25,8 @@ import org.junit.Test;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for the default methods on the {@link State} interface, based on the {@link Created} state,
@@ -38,7 +37,7 @@ public class StateTest extends TestLogger {
     public void testEmptyAs() throws Exception {
         try (CreatedTest.MockCreatedContext ctx = new CreatedTest.MockCreatedContext()) {
             State state = new Created(ctx, log);
-            assertThat(state.as(WaitingForResources.class), is(Optional.empty()));
+            assertThat(state.as(WaitingForResources.class)).isEqualTo(Optional.empty());
         }
     }
 
@@ -46,7 +45,7 @@ public class StateTest extends TestLogger {
     public void testCast() throws Exception {
         try (CreatedTest.MockCreatedContext ctx = new CreatedTest.MockCreatedContext()) {
             State state = new Created(ctx, log);
-            assertThat(state.as(Created.class), is(Optional.of(state)));
+            assertThat(state.as(Created.class)).isEqualTo(Optional.of(state));
         }
     }
 
@@ -65,7 +64,7 @@ public class StateTest extends TestLogger {
             State state = new Created(ctx, log);
             AtomicBoolean called = new AtomicBoolean(false);
             state.tryRun(Created.class, created -> called.set(true), "test");
-            assertThat(called.get(), is(true));
+            assertThat(called.get()).isEqualTo(true);
         }
     }
 
@@ -81,7 +80,7 @@ public class StateTest extends TestLogger {
                                 return "nope";
                             },
                             "test");
-            assertThat(result, is(Optional.empty()));
+            assertThat(result).isEqualTo(Optional.empty());
         }
     }
 
@@ -96,7 +95,7 @@ public class StateTest extends TestLogger {
                                 return "yes";
                             },
                             "test");
-            assertThat(result, is(Optional.of("yes")));
+            assertThat(result).isEqualTo(Optional.of("yes"));
         }
     }
 }

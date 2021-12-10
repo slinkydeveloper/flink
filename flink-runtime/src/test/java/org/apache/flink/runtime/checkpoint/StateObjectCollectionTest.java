@@ -22,7 +22,6 @@ import org.apache.flink.runtime.state.StateObject;
 import org.apache.flink.util.MethodForwardingTestUtil;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link StateObjectCollection}. */
@@ -38,7 +38,7 @@ public class StateObjectCollectionTest extends TestLogger {
     @Test
     public void testEmptyCollection() {
         StateObjectCollection<StateObject> empty = StateObjectCollection.empty();
-        Assert.assertEquals(0, empty.getStateSize());
+        assertThat(empty.getStateSize()).isEqualTo(0);
     }
 
     @Test
@@ -59,13 +59,13 @@ public class StateObjectCollectionTest extends TestLogger {
     public void testHasState() {
         StateObjectCollection<StateObject> stateObjects =
                 new StateObjectCollection<>(new ArrayList<>());
-        Assert.assertFalse(stateObjects.hasState());
+        assertThat(stateObjects.hasState()).isFalse();
 
         stateObjects = new StateObjectCollection<>(Collections.singletonList(null));
-        Assert.assertFalse(stateObjects.hasState());
+        assertThat(stateObjects.hasState()).isFalse();
 
         stateObjects =
                 new StateObjectCollection<>(Collections.singletonList(mock(StateObject.class)));
-        Assert.assertTrue(stateObjects.hasState());
+        assertThat(stateObjects.hasState()).isTrue();
     }
 }

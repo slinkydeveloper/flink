@@ -41,8 +41,7 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.flink.kubernetes.highavailability.KubernetesHighAvailabilityTestBase.LEADER_CONFIGMAP_NAME;
 import static org.apache.flink.kubernetes.highavailability.KubernetesHighAvailabilityTestBase.LEADER_INFORMATION;
 import static org.apache.flink.kubernetes.utils.Constants.LABEL_CONFIGMAP_TYPE_HIGH_AVAILABILITY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * IT Tests for the {@link KubernetesLeaderElectionDriver} and {@link
@@ -100,16 +99,15 @@ public class KubernetesLeaderElectionAndRetrievalITCase extends TestLogger {
 
             electionEventHandler.waitForLeader(TIMEOUT);
             // Check the new leader is confirmed
-            assertThat(
-                    electionEventHandler.getConfirmedLeaderInformation(), is(LEADER_INFORMATION));
+            assertThat(electionEventHandler.getConfirmedLeaderInformation())
+                    .isEqualTo(LEADER_INFORMATION);
 
             // Check the leader retrieval driver should be notified the leader address
             retrievalEventHandler.waitForNewLeader(TIMEOUT);
-            assertThat(
-                    retrievalEventHandler.getLeaderSessionID(),
-                    is(LEADER_INFORMATION.getLeaderSessionID()));
-            assertThat(
-                    retrievalEventHandler.getAddress(), is(LEADER_INFORMATION.getLeaderAddress()));
+            assertThat(retrievalEventHandler.getLeaderSessionID())
+                    .isEqualTo(LEADER_INFORMATION.getLeaderSessionID());
+            assertThat(retrievalEventHandler.getAddress())
+                    .isEqualTo(LEADER_INFORMATION.getLeaderAddress());
         } finally {
             electionEventHandler.close();
             if (leaderElectionDriver != null) {

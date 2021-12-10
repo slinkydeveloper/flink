@@ -42,7 +42,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class CombineTaskTest
         extends UnaryOperatorTestBase<
@@ -99,10 +100,10 @@ public class CombineTaskTest
                 expSum += i;
             }
 
-            assertTrue(this.outList.size() == keyCnt);
+            assertThat(this.outList.size() == keyCnt).isTrue();
 
             for (Tuple2<Integer, Integer> record : this.outList) {
-                assertTrue(record.f1 == expSum);
+                assertThat(record.f1 == expSum).isTrue();
             }
 
             this.outList.clear();
@@ -186,7 +187,9 @@ public class CombineTaskTest
                 taskRunner.join(5000);
             } while (taskRunner.isAlive() && System.currentTimeMillis() < deadline);
 
-            assertFalse("Task did not cancel properly within in 10 seconds.", taskRunner.isAlive());
+            assertThat(taskRunner.isAlive())
+                    .as("Task did not cancel properly within in 10 seconds.")
+                    .isFalse();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

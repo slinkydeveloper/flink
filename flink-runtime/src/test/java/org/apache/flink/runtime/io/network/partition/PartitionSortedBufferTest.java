@@ -36,9 +36,7 @@ import java.util.Queue;
 import java.util.Random;
 
 import static org.apache.flink.runtime.io.network.buffer.Buffer.DataType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PartitionSortedBuffer}. */
 public class PartitionSortedBufferTest {
@@ -105,7 +103,7 @@ public class PartitionSortedBufferTest {
             numBytesRead[subpartition] += bufferAndChannel.getBuffer().readableBytes();
         }
 
-        assertEquals(totalBytesWritten, sortBuffer.numBytes());
+        assertThat(sortBuffer.numBytes()).isEqualTo(totalBytesWritten);
         checkWriteReadResult(
                 numSubpartitions, numBytesWritten, numBytesRead, dataWritten, buffersRead);
     }
@@ -117,7 +115,8 @@ public class PartitionSortedBufferTest {
             Queue<DataAndType>[] dataWritten,
             Queue<Buffer>[] buffersRead) {
         for (int subpartitionIndex = 0; subpartitionIndex < numSubpartitions; ++subpartitionIndex) {
-            assertEquals(numBytesWritten[subpartitionIndex], numBytesRead[subpartitionIndex]);
+            assertThat(numBytesRead[subpartitionIndex])
+                    .isEqualTo(numBytesWritten[subpartitionIndex]);
 
             List<DataAndType> eventsWritten = new ArrayList<>();
             List<Buffer> eventsRead = new ArrayList<>();
@@ -142,12 +141,14 @@ public class PartitionSortedBufferTest {
 
             subpartitionDataWritten.flip();
             subpartitionDataRead.flip();
-            assertEquals(subpartitionDataWritten, subpartitionDataRead);
+            assertThat(subpartitionDataRead).isEqualTo(subpartitionDataWritten);
 
-            assertEquals(eventsWritten.size(), eventsRead.size());
+            assertThat(eventsRead.size()).isEqualTo(eventsWritten.size());
             for (int i = 0; i < eventsWritten.size(); ++i) {
-                assertEquals(eventsWritten.get(i).dataType, eventsRead.get(i).getDataType());
-                assertEquals(eventsWritten.get(i).data, eventsRead.get(i).getNioBufferReadable());
+                assertThat(eventsRead.get(i).getDataType())
+                        .isEqualTo(eventsWritten.get(i).dataType);
+                assertThat(eventsRead.get(i).getNioBufferReadable())
+                        .isEqualTo(eventsWritten.get(i).data);
             }
         }
     }
@@ -193,8 +194,8 @@ public class PartitionSortedBufferTest {
             SortBuffer sortBuffer, ByteBuffer expectedBuffer, int expectedChannel, int bufferSize) {
         MemorySegment segment = MemorySegmentFactory.allocateUnpooledSegment(bufferSize);
         BufferWithChannel bufferWithChannel = sortBuffer.copyIntoSegment(segment);
-        assertEquals(expectedChannel, bufferWithChannel.getChannelIndex());
-        assertEquals(expectedBuffer, bufferWithChannel.getBuffer().getNioBufferReadable());
+        assertThat(bufferWithChannel.getChannelIndex()).isEqualTo(expectedChannel);
+        assertThat(bufferWithChannel.getBuffer().getNioBufferReadable()).isEqualTo(expectedBuffer);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -266,10 +267,11 @@ public class PartitionSortedBufferTest {
             throws IOException {
         ByteBuffer largeRecord = ByteBuffer.allocate(recordSize);
 
-        assertEquals(isSuccessful, sortBuffer.append(largeRecord, 0, Buffer.DataType.DATA_BUFFER));
-        assertEquals(numBytes, sortBuffer.numBytes());
-        assertEquals(numRecords, sortBuffer.numRecords());
-        assertEquals(hasRemaining, sortBuffer.hasRemaining());
+        assertThat(sortBuffer.append(largeRecord, 0, Buffer.DataType.DATA_BUFFER))
+                .isEqualTo(isSuccessful);
+        assertThat(sortBuffer.numBytes()).isEqualTo(numBytes);
+        assertThat(sortBuffer.numRecords()).isEqualTo(numRecords);
+        assertThat(sortBuffer.hasRemaining()).isEqualTo(hasRemaining);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -279,7 +281,7 @@ public class PartitionSortedBufferTest {
         SortBuffer sortBuffer = createSortBuffer(1, bufferSize, 1);
         sortBuffer.append(ByteBuffer.allocate(1), 0, Buffer.DataType.DATA_BUFFER);
 
-        assertTrue(sortBuffer.hasRemaining());
+        assertThat(sortBuffer.hasRemaining()).isTrue();
         sortBuffer.copyIntoSegment(MemorySegmentFactory.allocateUnpooledSegment(bufferSize));
     }
 
@@ -290,10 +292,10 @@ public class PartitionSortedBufferTest {
         SortBuffer sortBuffer = createSortBuffer(1, bufferSize, 1);
         sortBuffer.append(ByteBuffer.allocate(1), 0, Buffer.DataType.DATA_BUFFER);
         sortBuffer.finish();
-        assertTrue(sortBuffer.hasRemaining());
+        assertThat(sortBuffer.hasRemaining()).isTrue();
 
         sortBuffer.release();
-        assertFalse(sortBuffer.hasRemaining());
+        assertThat(sortBuffer.hasRemaining()).isFalse();
 
         sortBuffer.copyIntoSegment(MemorySegmentFactory.allocateUnpooledSegment(bufferSize));
     }
@@ -305,7 +307,7 @@ public class PartitionSortedBufferTest {
         SortBuffer sortBuffer = createSortBuffer(1, bufferSize, 1);
         sortBuffer.finish();
 
-        assertFalse(sortBuffer.hasRemaining());
+        assertThat(sortBuffer.hasRemaining()).isFalse();
         sortBuffer.copyIntoSegment(MemorySegmentFactory.allocateUnpooledSegment(bufferSize));
     }
 
@@ -323,17 +325,17 @@ public class PartitionSortedBufferTest {
                         new Object(), bufferPool, 1, bufferSize, bufferPoolSize, null);
         sortBuffer.append(ByteBuffer.allocate(recordSize), 0, Buffer.DataType.DATA_BUFFER);
 
-        assertEquals(bufferPoolSize, bufferPool.bestEffortGetNumOfUsedBuffers());
-        assertTrue(sortBuffer.hasRemaining());
-        assertEquals(1, sortBuffer.numRecords());
-        assertEquals(recordSize, sortBuffer.numBytes());
+        assertThat(bufferPool.bestEffortGetNumOfUsedBuffers()).isEqualTo(bufferPoolSize);
+        assertThat(sortBuffer.hasRemaining()).isTrue();
+        assertThat(sortBuffer.numRecords()).isEqualTo(1);
+        assertThat(sortBuffer.numBytes()).isEqualTo(recordSize);
 
         // should release all data and resources
         sortBuffer.release();
-        assertEquals(0, bufferPool.bestEffortGetNumOfUsedBuffers());
-        assertFalse(sortBuffer.hasRemaining());
-        assertEquals(0, sortBuffer.numRecords());
-        assertEquals(0, sortBuffer.numBytes());
+        assertThat(bufferPool.bestEffortGetNumOfUsedBuffers()).isEqualTo(0);
+        assertThat(sortBuffer.hasRemaining()).isFalse();
+        assertThat(sortBuffer.numRecords()).isEqualTo(0);
+        assertThat(sortBuffer.numBytes()).isEqualTo(0);
     }
 
     private SortBuffer createSortBuffer(int bufferPoolSize, int bufferSize, int numSubpartitions)

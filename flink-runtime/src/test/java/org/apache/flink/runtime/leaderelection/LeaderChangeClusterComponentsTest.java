@@ -47,10 +47,8 @@ import java.time.Duration;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /** Tests which verify the cluster behaviour in case of leader changes. */
 public class LeaderChangeClusterComponentsTest extends TestLogger {
@@ -117,7 +115,7 @@ public class LeaderChangeClusterComponentsTest extends TestLogger {
         highAvailabilityServices.revokeDispatcherLeadership().get();
 
         JobResult jobResult = jobResultFuture.get();
-        assertEquals(jobResult.getApplicationStatus(), ApplicationStatus.UNKNOWN);
+        assertThat(ApplicationStatus.UNKNOWN).isEqualTo(jobResult.getApplicationStatus());
 
         highAvailabilityServices.grantDispatcherLeadership();
 
@@ -169,11 +167,12 @@ public class LeaderChangeClusterComponentsTest extends TestLogger {
 
         // wait for the ResourceManager to confirm the leadership
         assertThat(
-                LeaderRetrievalUtils.retrieveLeaderConnectionInfo(
-                                highAvailabilityServices.getResourceManagerLeaderRetriever(),
-                                TESTING_TIMEOUT)
-                        .getLeaderSessionId(),
-                is(notNullValue()));
+                        LeaderRetrievalUtils.retrieveLeaderConnectionInfo(
+                                        highAvailabilityServices
+                                                .getResourceManagerLeaderRetriever(),
+                                        TESTING_TIMEOUT)
+                                .getLeaderSessionId())
+                .isEqualTo(notNullValue());
 
         waitUntilTaskExecutorsHaveConnected(NUM_TMS, deadline);
     }

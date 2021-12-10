@@ -45,13 +45,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertTrue;
 import static org.apache.flink.runtime.io.network.netty.NettyMessage.BufferResponse;
 import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.verifyBufferResponseHeader;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createRemoteInputChannel;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createSingleInputGate;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the client side message decoder. */
 public class NettyMessageClientDecoderDelegateTest extends TestLogger {
@@ -318,7 +316,7 @@ public class NettyMessageClientDecoderDelegateTest extends TestLogger {
         List<NettyMessage> decodedMessages = new ArrayList<>();
         Object input;
         while ((input = channel.readInbound()) != null) {
-            assertTrue(input instanceof NettyMessage);
+            assertThat(input).isInstanceOf(NettyMessage.class);
             decodedMessages.add((NettyMessage) input);
         }
 
@@ -327,17 +325,18 @@ public class NettyMessageClientDecoderDelegateTest extends TestLogger {
 
     private void verifyDecodedMessages(
             List<BufferResponse> expectedMessages, List<NettyMessage> decodedMessages) {
-        assertEquals(expectedMessages.size(), decodedMessages.size());
+        assertThat(decodedMessages.size()).isEqualTo(expectedMessages.size());
         for (int i = 0; i < expectedMessages.size(); ++i) {
-            assertEquals(expectedMessages.get(i).getClass(), decodedMessages.get(i).getClass());
+            assertThat(decodedMessages.get(i).getClass())
+                    .isEqualTo(expectedMessages.get(i).getClass());
 
             BufferResponse expected = expectedMessages.get(i);
             BufferResponse actual = (BufferResponse) decodedMessages.get(i);
             verifyBufferResponseHeader(expected, actual);
             if (expected.bufferSize == 0 || !expected.receiverId.equals(inputChannelId)) {
-                assertNull(actual.getBuffer());
+                assertThat(actual.getBuffer()).isNull();
             } else {
-                assertEquals(expected.getBuffer(), actual.getBuffer());
+                assertThat(actual.getBuffer()).isEqualTo(expected.getBuffer());
             }
         }
     }

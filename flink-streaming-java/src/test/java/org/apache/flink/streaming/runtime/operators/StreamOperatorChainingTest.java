@@ -46,13 +46,13 @@ import org.apache.flink.streaming.util.MockStreamTaskBuilder;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 
 /** Tests for stream operator chaining behaviour. */
@@ -118,7 +118,7 @@ public class StreamOperatorChainingTest {
         // be build our own StreamTask and OperatorChain
         JobGraph jobGraph = env.getStreamGraph().getJobGraph();
 
-        Assert.assertTrue(jobGraph.getVerticesSortedTopologicallyFromSources().size() == 2);
+        assertThat(jobGraph.getVerticesSortedTopologicallyFromSources().size() == 2).isTrue();
 
         JobVertex chainedVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(1);
 
@@ -143,8 +143,10 @@ public class StreamOperatorChainingTest {
             headOperator.processElement(new StreamRecord<>(2));
             headOperator.processElement(new StreamRecord<>(3));
 
-            assertThat(sink1Results, contains("First: 1", "First: 2", "First: 3"));
-            assertThat(sink2Results, contains("Second: 1", "Second: 2", "Second: 3"));
+            assertThat(sink1Results)
+                    .satisfies(matching(contains("First: 1", "First: 2", "First: 3")));
+            assertThat(sink2Results)
+                    .satisfies(matching(contains("Second: 1", "Second: 2", "Second: 3")));
         }
     }
 
@@ -244,7 +246,7 @@ public class StreamOperatorChainingTest {
         // be build our own StreamTask and OperatorChain
         JobGraph jobGraph = env.getStreamGraph().getJobGraph();
 
-        Assert.assertTrue(jobGraph.getVerticesSortedTopologicallyFromSources().size() == 2);
+        assertThat(jobGraph.getVerticesSortedTopologicallyFromSources().size() == 2).isTrue();
 
         JobVertex chainedVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(1);
 
@@ -269,9 +271,9 @@ public class StreamOperatorChainingTest {
             headOperator.processElement(new StreamRecord<>(2));
             headOperator.processElement(new StreamRecord<>(3));
 
-            assertThat(sink1Results, contains("First 1: 1"));
-            assertThat(sink2Results, contains("First 2: 1"));
-            assertThat(sink3Results, contains("Second: 2", "Second: 3"));
+            assertThat(sink1Results).satisfies(matching(contains("First 1: 1")));
+            assertThat(sink2Results).satisfies(matching(contains("First 2: 1")));
+            assertThat(sink3Results).satisfies(matching(contains("Second: 2", "Second: 3")));
         }
     }
 

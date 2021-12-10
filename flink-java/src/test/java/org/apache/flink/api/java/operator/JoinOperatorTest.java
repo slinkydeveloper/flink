@@ -35,7 +35,6 @@ import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.api.java.typeutils.TupleTypeInfo;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -43,7 +42,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link DataSet#join(DataSet)}. */
 @SuppressWarnings("serial")
@@ -115,7 +115,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -194,7 +194,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where("myInt").equalTo("myInt");
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -209,7 +209,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where("myInt").equalTo("myInt");
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -264,7 +264,7 @@ public class JoinOperatorTest {
                             });
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -285,7 +285,7 @@ public class JoinOperatorTest {
                     .equalTo("myInt");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -300,7 +300,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where("f0").equalTo(4);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -315,7 +315,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where("f0.f0").equalTo(4);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -328,10 +328,10 @@ public class JoinOperatorTest {
                 env.fromCollection(emptyTupleData, tupleTypeInfo);
         try {
             TypeInformation<?> t = ds1.join(ds2).where("f0.myInt").equalTo(4).getType();
-            assertTrue("not a composite type", t instanceof CompositeType);
+            assertThat(t).as("not a composite type").isInstanceOf(CompositeType.class);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -344,7 +344,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where("intByString.f0").equalTo("myInt");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -357,7 +357,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where("nested.myInt").equalTo("intByString.f0");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -372,7 +372,7 @@ public class JoinOperatorTest {
                     .equalTo("intByString.f0", "myInt", "myString");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -397,7 +397,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where(0).equalTo("f0");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -421,7 +421,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where("myInt").equalTo(4);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -454,7 +454,7 @@ public class JoinOperatorTest {
             ds1.join(ds2).where("nested.myInt").equalTo("nested.myInt");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -518,7 +518,7 @@ public class JoinOperatorTest {
                                 }
                             });
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -544,7 +544,7 @@ public class JoinOperatorTest {
                     .equalTo(3);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -569,7 +569,7 @@ public class JoinOperatorTest {
                                 }
                             });
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -706,7 +706,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0).projectFirst(0);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -723,27 +723,27 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0).projectFirst(0);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
 
         // should not work: field index is out of bounds of input tuple
         try {
             ds1.join(ds2).where(0).equalTo(0).projectFirst(-1);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IndexOutOfBoundsException iob) {
             // we're good here
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
 
         // should not work: field index is out of bounds of input tuple
         try {
             ds1.join(ds2).where(0).equalTo(0).project(9);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IndexOutOfBoundsException iob) {
             // we're good here
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -760,7 +760,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0).projectFirst(0, 3);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -777,7 +777,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0).projectFirst(0).projectSecond(3);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -799,7 +799,7 @@ public class JoinOperatorTest {
                     .projectSecond(1, 4)
                     .projectFirst(1);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -821,7 +821,7 @@ public class JoinOperatorTest {
                     .projectFirst(1, 4)
                     .projectFirst(1);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -853,7 +853,7 @@ public class JoinOperatorTest {
         } catch (Exception e) {
             System.out.println("FAILED: " + e);
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -885,7 +885,7 @@ public class JoinOperatorTest {
         } catch (Exception e) {
             System.out.println("FAILED: " + e);
             e.printStackTrace();
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -902,7 +902,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0).projectSecond().projectFirst(1, 4);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -919,7 +919,7 @@ public class JoinOperatorTest {
         try {
             ds1.join(ds2).where(0).equalTo(0).projectSecond().projectFirst(1, 4);
         } catch (Exception e) {
-            Assert.fail();
+            fail("unknown failure");
         }
     }
 
@@ -1093,35 +1093,35 @@ public class JoinOperatorTest {
 
         SemanticProperties semProps = joinOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 0).isTrue();
 
-        assertTrue(semProps.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 2).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(1, 4).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(1, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(1, 6).contains(0));
+        assertThat(semProps.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 2).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 4).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 6).contains(0)).isTrue();
 
-        assertTrue(semProps.getReadFields(0).size() == 3);
-        assertTrue(semProps.getReadFields(0).contains(2));
-        assertTrue(semProps.getReadFields(0).contains(4));
-        assertTrue(semProps.getReadFields(0).contains(6));
+        assertThat(semProps.getReadFields(0).size() == 3).isTrue();
+        assertThat(semProps.getReadFields(0).contains(2)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(4)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(6)).isTrue();
 
-        assertTrue(semProps.getReadFields(1).size() == 2);
-        assertTrue(semProps.getReadFields(1).contains(3));
-        assertTrue(semProps.getReadFields(1).contains(5));
+        assertThat(semProps.getReadFields(1).size() == 2).isTrue();
+        assertThat(semProps.getReadFields(1).contains(3)).isTrue();
+        assertThat(semProps.getReadFields(1).contains(5)).isTrue();
     }
 
     @Test
@@ -1143,33 +1143,33 @@ public class JoinOperatorTest {
 
         SemanticProperties semProps = joinOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).contains(0));
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).contains(0)).isTrue();
 
-        assertTrue(semProps.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 2).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(1, 2).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(1, 3).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(1, 3).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(1, 3).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(1, 4).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 6).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 2).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 2).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 3).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 3).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 3).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 4).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 6).size() == 0).isTrue();
 
-        assertTrue(semProps.getReadFields(0).size() == 3);
-        assertTrue(semProps.getReadFields(0).contains(2));
-        assertTrue(semProps.getReadFields(0).contains(3));
-        assertTrue(semProps.getReadFields(0).contains(4));
+        assertThat(semProps.getReadFields(0).size() == 3).isTrue();
+        assertThat(semProps.getReadFields(0).contains(2)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(3)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(4)).isTrue();
 
-        assertTrue(semProps.getReadFields(1) == null);
+        assertThat(semProps.getReadFields(1) == null).isTrue();
     }
 
     @Test
@@ -1192,28 +1192,28 @@ public class JoinOperatorTest {
 
         SemanticProperties semProps = joinOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(0));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).contains(5));
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(0)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).contains(5)).isTrue();
 
-        assertTrue(semProps.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 2).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(1, 2).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(1, 2).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(1, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(1, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(1, 4).contains(6));
-        assertTrue(semProps.getForwardingTargetFields(1, 5).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(1, 5).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(1, 6).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 2).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 2).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 2).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 4).contains(6)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 5).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 5).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(1, 6).size() == 0).isTrue();
     }
 
     /*

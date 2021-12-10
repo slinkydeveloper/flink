@@ -38,9 +38,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link ResultPartitionDeploymentDescriptor}. */
 public class ResultPartitionDeploymentDescriptorTest extends TestLogger {
@@ -77,9 +75,9 @@ public class ResultPartitionDeploymentDescriptorTest extends TestLogger {
         ShuffleDescriptor shuffleDescriptor = new UnknownShuffleDescriptor(resultPartitionID);
         ShuffleDescriptor shuffleDescriptorCopy =
                 CommonTestUtils.createCopySerializable(shuffleDescriptor);
-        assertThat(shuffleDescriptorCopy, instanceOf(UnknownShuffleDescriptor.class));
-        assertThat(shuffleDescriptorCopy.getResultPartitionID(), is(resultPartitionID));
-        assertThat(shuffleDescriptorCopy.isUnknown(), is(true));
+        assertThat(shuffleDescriptorCopy).isInstanceOf(UnknownShuffleDescriptor.class);
+        assertThat(shuffleDescriptorCopy.getResultPartitionID()).isEqualTo(resultPartitionID);
+        assertThat(shuffleDescriptorCopy.isUnknown()).isEqualTo(true);
     }
 
     /** Tests simple de/serialization with {@link NettyShuffleDescriptor}. */
@@ -94,13 +92,13 @@ public class ResultPartitionDeploymentDescriptorTest extends TestLogger {
         ResultPartitionDeploymentDescriptor copy =
                 createCopyAndVerifyResultPartitionDeploymentDescriptor(shuffleDescriptor);
 
-        assertThat(copy.getShuffleDescriptor(), instanceOf(NettyShuffleDescriptor.class));
+        assertThat(copy.getShuffleDescriptor()).isInstanceOf(NettyShuffleDescriptor.class);
         NettyShuffleDescriptor shuffleDescriptorCopy =
                 (NettyShuffleDescriptor) copy.getShuffleDescriptor();
-        assertThat(shuffleDescriptorCopy.getResultPartitionID(), is(resultPartitionID));
-        assertThat(shuffleDescriptorCopy.isUnknown(), is(false));
-        assertThat(shuffleDescriptorCopy.isLocalTo(producerLocation), is(true));
-        assertThat(shuffleDescriptorCopy.getConnectionId(), is(connectionID));
+        assertThat(shuffleDescriptorCopy.getResultPartitionID()).isEqualTo(resultPartitionID);
+        assertThat(shuffleDescriptorCopy.isUnknown()).isEqualTo(false);
+        assertThat(shuffleDescriptorCopy.isLocalTo(producerLocation)).isEqualTo(true);
+        assertThat(shuffleDescriptorCopy.getConnectionId()).isEqualTo(connectionID);
     }
 
     private static ResultPartitionDeploymentDescriptor
@@ -116,11 +114,11 @@ public class ResultPartitionDeploymentDescriptorTest extends TestLogger {
 
     private static void verifyResultPartitionDeploymentDescriptorCopy(
             ResultPartitionDeploymentDescriptor copy) {
-        assertThat(copy.getResultId(), is(resultId));
-        assertThat(copy.getTotalNumberOfPartitions(), is(numberOfPartitions));
-        assertThat(copy.getPartitionId(), is(partitionId));
-        assertThat(copy.getPartitionType(), is(partitionType));
-        assertThat(copy.getNumberOfSubpartitions(), is(numberOfSubpartitions));
-        assertThat(copy.notifyPartitionDataAvailable(), is(true));
+        assertThat(copy.getResultId()).isEqualTo(resultId);
+        assertThat(copy.getTotalNumberOfPartitions()).isEqualTo(numberOfPartitions);
+        assertThat(copy.getPartitionId()).isEqualTo(partitionId);
+        assertThat(copy.getPartitionType()).isEqualTo(partitionType);
+        assertThat(copy.getNumberOfSubpartitions()).isEqualTo(numberOfSubpartitions);
+        assertThat(copy.notifyPartitionDataAvailable()).isEqualTo(true);
     }
 }

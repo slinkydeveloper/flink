@@ -57,9 +57,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests base for the scheduling of batch jobs. */
 public class DefaultSchedulerBatchSchedulingTest extends TestLogger {
@@ -152,7 +151,7 @@ public class DefaultSchedulerBatchSchedulingTest extends TestLogger {
                 }
             }
 
-            assertThat(terminationFuture.get(), is(JobStatus.FINISHED));
+            assertThat(terminationFuture.get()).isEqualTo(JobStatus.FINISHED);
         }
     }
 

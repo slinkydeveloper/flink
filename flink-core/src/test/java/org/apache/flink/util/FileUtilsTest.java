@@ -49,15 +49,11 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
@@ -89,19 +85,19 @@ public class FileUtilsTest extends TestLogger {
             {
                 String expectedMD5 = generateTestFile(testFilePath, 1024);
                 final byte[] data = FileUtils.readAllBytes((new File(testFilePath)).toPath());
-                assertEquals(expectedMD5, md5Hex(data));
+                assertThat(md5Hex(data)).isEqualTo(expectedMD5);
             }
 
             {
                 String expectedMD5 = generateTestFile(testFilePath, 4096);
                 final byte[] data = FileUtils.readAllBytes((new File(testFilePath)).toPath());
-                assertEquals(expectedMD5, md5Hex(data));
+                assertThat(md5Hex(data)).isEqualTo(expectedMD5);
             }
 
             {
                 String expectedMD5 = generateTestFile(testFilePath, 5120);
                 final byte[] data = FileUtils.readAllBytes((new File(testFilePath)).toPath());
-                assertEquals(expectedMD5, md5Hex(data));
+                assertThat(md5Hex(data)).isEqualTo(expectedMD5);
             }
         } finally {
             if (tmpFolder != null) {
@@ -115,21 +111,21 @@ public class FileUtilsTest extends TestLogger {
         final FileSystem localFs = FileSystem.getLocalFileSystem();
 
         final File dir = tmp.newFolder();
-        assertTrue(dir.exists());
+        assertThat(dir.exists()).isTrue();
 
         final Path dirPath = new Path(dir.toURI());
 
         // deleting an empty directory should work
-        assertTrue(FileUtils.deletePathIfEmpty(localFs, dirPath));
+        assertThat(FileUtils.deletePathIfEmpty(localFs, dirPath)).isTrue();
 
         // deleting a non existing directory should work
-        assertTrue(FileUtils.deletePathIfEmpty(localFs, dirPath));
+        assertThat(FileUtils.deletePathIfEmpty(localFs, dirPath)).isTrue();
 
         // create a non-empty dir
         final File nonEmptyDir = tmp.newFolder();
         final Path nonEmptyDirPath = new Path(nonEmptyDir.toURI());
         new FileOutputStream(new File(nonEmptyDir, "filename")).close();
-        assertFalse(FileUtils.deletePathIfEmpty(localFs, nonEmptyDirPath));
+        assertThat(FileUtils.deletePathIfEmpty(localFs, nonEmptyDirPath)).isFalse();
     }
 
     @Test
@@ -207,7 +203,7 @@ public class FileUtilsTest extends TestLogger {
         // creating a directory to which the test creates a symbolic link
         File linkedDirectory = tmp.newFolder();
         File fileInLinkedDirectory = new File(linkedDirectory, "child");
-        assertTrue(fileInLinkedDirectory.createNewFile());
+        assertThat(fileInLinkedDirectory.createNewFile()).isTrue();
 
         File symbolicLink = new File(tmp.getRoot(), "symLink");
         try {
@@ -221,7 +217,7 @@ public class FileUtilsTest extends TestLogger {
         }
 
         FileUtils.deleteDirectory(symbolicLink);
-        assertTrue(fileInLinkedDirectory.exists());
+        assertThat(fileInLinkedDirectory.exists()).isTrue();
     }
 
     @Test
@@ -242,7 +238,7 @@ public class FileUtilsTest extends TestLogger {
         t3.sync();
 
         // assert is empty
-        assertFalse(parent.exists());
+        assertThat(parent.exists()).isFalse();
     }
 
     @Test
@@ -264,7 +260,8 @@ public class FileUtilsTest extends TestLogger {
     public void testListFilesInPathWithoutAnyFileReturnEmptyList() throws IOException {
         final java.nio.file.Path testDir = tmp.newFolder("_test_0").toPath();
 
-        assertThat(FileUtils.listFilesInDirectory(testDir, FileUtils::isJarFile), is(empty()));
+        assertThat(FileUtils.listFilesInDirectory(testDir, FileUtils::isJarFile))
+                .isEqualTo(empty());
     }
 
     @Test
@@ -274,7 +271,7 @@ public class FileUtilsTest extends TestLogger {
 
         final Collection<java.nio.file.Path> filesInDirectory =
                 FileUtils.listFilesInDirectory(testDir, FileUtils::isJarFile);
-        assertThat(filesInDirectory, containsInAnyOrder(testFiles.toArray()));
+        assertThat(filesInDirectory).satisfies(matching(containsInAnyOrder(testFiles.toArray())));
     }
 
     @Test
@@ -283,18 +280,18 @@ public class FileUtilsTest extends TestLogger {
 
         final java.nio.file.Path rootPath = tmp.getRoot().toPath();
         final java.nio.file.Path relativePath = FileUtils.relativizePath(rootPath, absolutePath);
-        assertFalse(relativePath.isAbsolute());
-        assertThat(rootPath.resolve(relativePath), is(absolutePath));
+        assertThat(relativePath.isAbsolute()).isFalse();
+        assertThat(rootPath.resolve(relativePath)).isEqualTo(absolutePath);
     }
 
     @Test
     public void testRelativizeOfRelativePath() {
         final java.nio.file.Path path = Paths.get("foobar");
-        assertFalse(path.isAbsolute());
+        assertThat(path.isAbsolute()).isFalse();
 
         final java.nio.file.Path relativePath =
                 FileUtils.relativizePath(tmp.getRoot().toPath(), path);
-        assertThat(relativePath, is(path));
+        assertThat(relativePath).isEqualTo(path);
     }
 
     @Test
@@ -303,18 +300,18 @@ public class FileUtilsTest extends TestLogger {
         final URL absoluteURL = FileUtils.toURL(absolutePath);
 
         final java.nio.file.Path transformedURL = Paths.get(absoluteURL.getPath());
-        assertThat(transformedURL, is(absolutePath));
+        assertThat(transformedURL).isEqualTo(absolutePath);
     }
 
     @Test
     public void testRelativePathToURL() throws MalformedURLException {
         final java.nio.file.Path relativePath = Paths.get("foobar");
-        assertFalse(relativePath.isAbsolute());
+        assertThat(relativePath.isAbsolute()).isFalse();
 
         final URL relativeURL = FileUtils.toURL(relativePath);
         final java.nio.file.Path transformedPath = Paths.get(relativeURL.getPath());
 
-        assertThat(transformedPath, is(relativePath));
+        assertThat(transformedPath).isEqualTo(relativePath);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -335,7 +332,7 @@ public class FileUtilsTest extends TestLogger {
     public void testFollowSymbolicDirectoryLink() throws IOException {
         final File directory = tmp.newFolder("a");
         final File file = new File(directory, "a.jar");
-        assertTrue(file.createNewFile());
+        assertThat(file.createNewFile()).isTrue();
 
         final File otherDirectory = tmp.newFolder();
         java.nio.file.Path linkPath = Paths.get(otherDirectory.getPath(), "a.lnk");
@@ -344,7 +341,7 @@ public class FileUtilsTest extends TestLogger {
         Collection<java.nio.file.Path> paths =
                 FileUtils.listFilesInDirectory(linkPath, FileUtils::isJarFile);
 
-        assertThat(paths, containsInAnyOrder(linkPath.resolve(file.getName())));
+        assertThat(paths).satisfies(matching(containsInAnyOrder(linkPath.resolve(file.getName()))));
     }
 
     // ------------------------------------------------------------------------
@@ -353,8 +350,8 @@ public class FileUtilsTest extends TestLogger {
 
     private static void assertDirEquals(java.nio.file.Path expected, java.nio.file.Path actual)
             throws IOException {
-        assertEquals(Files.isDirectory(expected), Files.isDirectory(actual));
-        assertEquals(expected.getFileName(), actual.getFileName());
+        assertThat(Files.isDirectory(actual)).isEqualTo(Files.isDirectory(expected));
+        assertThat(actual.getFileName()).isEqualTo(expected.getFileName());
 
         if (Files.isDirectory(expected)) {
             List<java.nio.file.Path> expectedContents;
@@ -370,7 +367,7 @@ public class FileUtilsTest extends TestLogger {
                                 .collect(Collectors.toList());
             }
 
-            assertEquals(expectedContents.size(), actualContents.size());
+            assertThat(actualContents.size()).isEqualTo(expectedContents.size());
 
             for (int x = 0; x < expectedContents.size(); x++) {
                 assertDirEquals(expectedContents.get(x), actualContents.get(x));
@@ -378,7 +375,7 @@ public class FileUtilsTest extends TestLogger {
         } else {
             byte[] expectedBytes = Files.readAllBytes(expected);
             byte[] actualBytes = Files.readAllBytes(actual);
-            assertArrayEquals(expectedBytes, actualBytes);
+            assertThat(actualBytes).isEqualTo(expectedBytes);
         }
     }
 
@@ -396,7 +393,7 @@ public class FileUtilsTest extends TestLogger {
             // generate the directories
             for (int i = 0; i < numDirs; i++) {
                 File subdir = new File(dir, new AbstractID().toString());
-                assertTrue(subdir.mkdir());
+                assertThat(subdir.mkdir()).isTrue();
                 generateRandomDirs(subdir, numFiles, numDirs, depth - 1);
             }
         }

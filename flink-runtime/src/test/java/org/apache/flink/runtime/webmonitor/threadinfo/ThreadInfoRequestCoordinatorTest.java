@@ -47,13 +47,11 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link ThreadInfoRequestCoordinator}. */
 public class ThreadInfoRequestCoordinatorTest extends TestLogger {
@@ -91,7 +89,7 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
     public void shutdownCoordinator() throws Exception {
         if (coordinator != null) {
             // verify no more pending request
-            assertEquals(0, coordinator.getNumberOfPendingRequests());
+            assertThat(coordinator.getNumberOfPendingRequests()).isEqualTo(0);
             coordinator.shutDown();
         }
     }
@@ -114,13 +112,13 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
         JobVertexThreadInfoStats threadInfoStats = requestFuture.get();
 
         // verify the request result
-        assertEquals(0, threadInfoStats.getRequestId());
+        assertThat(threadInfoStats.getRequestId()).isEqualTo(0);
 
         Map<ExecutionAttemptID, List<ThreadInfoSample>> samplesBySubtask =
                 threadInfoStats.getSamplesBySubtask();
 
         for (List<ThreadInfoSample> result : samplesBySubtask.values()) {
-            assertThat(result.get(0).getStackTrace(), not(emptyArray()));
+            assertThat(result.get(0).getStackTrace()).satisfies(matching(not(emptyArray())));
         }
     }
 
@@ -143,7 +141,7 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
             requestFuture.get();
             fail("Exception expected.");
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof RuntimeException);
+            assertThat(e.getCause()).isInstanceOf(RuntimeException.class);
         }
     }
 
@@ -166,9 +164,10 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
             requestFuture.get();
             fail("Exception expected.");
         } catch (ExecutionException e) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(e, REQUEST_TIMEOUT_MESSAGE)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(e, REQUEST_TIMEOUT_MESSAGE)
+                                    .isPresent())
+                    .isTrue();
         } finally {
             coordinator.shutDown();
         }
@@ -203,7 +202,7 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
         requestFutures.add(requestFuture2);
 
         for (CompletableFuture<JobVertexThreadInfoStats> future : requestFutures) {
-            assertFalse(future.isDone());
+            assertThat(future.isDone()).isFalse();
         }
 
         // shut down
@@ -211,7 +210,7 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
 
         // verify all completed
         for (CompletableFuture<JobVertexThreadInfoStats> future : requestFutures) {
-            assertTrue(future.isCompletedExceptionally());
+            assertThat(future.isCompletedExceptionally()).isTrue();
         }
 
         // verify new trigger returns failed future
@@ -222,7 +221,7 @@ public class ThreadInfoRequestCoordinatorTest extends TestLogger {
                         DEFAULT_DELAY_BETWEEN_SAMPLES,
                         DEFAULT_MAX_STACK_TRACE_DEPTH);
 
-        assertTrue(future.isCompletedExceptionally());
+        assertThat(future.isCompletedExceptionally()).isTrue();
     }
 
     private static CompletableFuture<TaskExecutorThreadInfoGateway> createMockTaskManagerGateway(

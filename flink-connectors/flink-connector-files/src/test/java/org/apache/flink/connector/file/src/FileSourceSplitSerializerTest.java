@@ -26,9 +26,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link FileSourceSplitSerializer}. */
 public class FileSourceSplitSerializerTest {
@@ -121,7 +119,7 @@ public class FileSourceSplitSerializerTest {
         final byte[] ser1 = FileSourceSplitSerializer.INSTANCE.serialize(split);
         final byte[] ser2 = FileSourceSplitSerializer.INSTANCE.serialize(split);
 
-        assertSame(ser1, ser2);
+        assertThat(ser2).isSameAs(ser1);
     }
 
     // ------------------------------------------------------------------------
@@ -137,11 +135,11 @@ public class FileSourceSplitSerializerTest {
     }
 
     static void assertSplitsEqual(FileSourceSplit expected, FileSourceSplit actual) {
-        assertEquals(expected.splitId(), actual.splitId());
-        assertEquals(expected.path(), actual.path());
-        assertEquals(expected.offset(), actual.offset());
-        assertEquals(expected.length(), actual.length());
-        assertArrayEquals(expected.hostnames(), actual.hostnames());
-        assertEquals(expected.getReaderPosition(), actual.getReaderPosition());
+        assertThat(actual.splitId()).isEqualTo(expected.splitId());
+        assertThat(actual.path()).isEqualTo(expected.path());
+        assertThat(actual.offset()).isEqualTo(expected.offset());
+        assertThat(actual.length()).isEqualTo(expected.length());
+        assertThat(actual.hostnames()).isEqualTo(expected.hostnames());
+        assertThat(actual.getReaderPosition()).isEqualTo(expected.getReaderPosition());
     }
 }

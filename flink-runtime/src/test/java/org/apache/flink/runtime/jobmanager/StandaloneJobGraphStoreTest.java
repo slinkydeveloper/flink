@@ -24,8 +24,7 @@ import org.apache.flink.runtime.jobgraph.JobGraphTestUtils;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StandaloneJobGraphStoreTest {
 
@@ -36,14 +35,14 @@ public class StandaloneJobGraphStoreTest {
 
         JobGraph jobGraph = JobGraphTestUtils.emptyJobGraph();
 
-        assertEquals(0, jobGraphs.getJobIds().size());
+        assertThat(jobGraphs.getJobIds().size()).isEqualTo(0);
 
         jobGraphs.putJobGraph(jobGraph);
-        assertEquals(0, jobGraphs.getJobIds().size());
+        assertThat(jobGraphs.getJobIds().size()).isEqualTo(0);
 
         jobGraphs.removeJobGraph(jobGraph.getJobID());
-        assertEquals(0, jobGraphs.getJobIds().size());
+        assertThat(jobGraphs.getJobIds().size()).isEqualTo(0);
 
-        assertNull(jobGraphs.recoverJobGraph(new JobID()));
+        assertThat(jobGraphs.recoverJobGraph(new JobID())).isNull();
     }
 }

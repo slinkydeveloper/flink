@@ -60,7 +60,6 @@ import org.apache.flink.streaming.runtime.watermarkstatus.WatermarkStatus;
 import org.apache.flink.streaming.util.TestHarnessUtil;
 
 import org.hamcrest.collection.IsMapContaining;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -72,10 +71,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests for {@link TwoInputStreamTask}.
@@ -130,8 +129,9 @@ public class TwoInputStreamTaskTest {
 
         testHarness.waitForTaskCompletion();
 
-        Assert.assertTrue(
-                "RichFunction methods were not called.", TestOpenCloseMapFunction.closeCalled);
+        assertThat(TestOpenCloseMapFunction.closeCalled)
+                .as("RichFunction methods were not called.")
+                .isTrue();
 
         TestHarnessUtil.assertOutputEquals(
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
@@ -260,7 +260,7 @@ public class TwoInputStreamTaskTest {
 
         List<String> resultElements =
                 TestHarnessUtil.getRawElementsFromOutput(testHarness.getOutput());
-        Assert.assertEquals(2, resultElements.size());
+        assertThat(resultElements.size()).isEqualTo(2);
     }
 
     /** This test verifies that checkpoint barriers are correctly forwarded. */
@@ -350,7 +350,7 @@ public class TwoInputStreamTaskTest {
 
         List<String> resultElements =
                 TestHarnessUtil.getRawElementsFromOutput(testHarness.getOutput());
-        Assert.assertEquals(3, resultElements.size());
+        assertThat(resultElements.size()).isEqualTo(3);
     }
 
     /**
@@ -515,8 +515,9 @@ public class TwoInputStreamTaskTest {
         }
         testHarness.waitForInputProcessing();
 
-        assertEquals(numRecords1 + numRecords2, numRecordsInCounter.getCount());
-        assertEquals((numRecords1 + numRecords2) * 2 * 2 * 2, numRecordsOutCounter.getCount());
+        assertThat(numRecordsInCounter.getCount()).isEqualTo(numRecords1 + numRecords2);
+        assertThat(numRecordsOutCounter.getCount())
+                .isEqualTo((numRecords1 + numRecords2) * 2 * 2 * 2);
 
         testHarness.endInput();
         testHarness.waitForTaskCompletion();
@@ -542,9 +543,12 @@ public class TwoInputStreamTaskTest {
             testHarness.processElement(Watermark.MAX_WATERMARK, 0);
             testHarness.processElement(Watermark.MAX_WATERMARK, 1);
             testHarness.waitForTaskCompletion();
-            assertThat(
-                    testHarness.getOutput(),
-                    contains(Watermark.MAX_WATERMARK, new EndOfData(StopMode.DRAIN)));
+            assertThat(testHarness.getOutput())
+                    .satisfies(
+                            matching(
+                                    contains(
+                                            Watermark.MAX_WATERMARK,
+                                            new EndOfData(StopMode.DRAIN))));
         }
     }
 
@@ -647,57 +651,57 @@ public class TwoInputStreamTaskTest {
                 (Gauge<Long>)
                         chainedOperatorMetricGroup.get(MetricNames.IO_CURRENT_OUTPUT_WATERMARK);
 
-        Assert.assertEquals(
-                "A metric was registered multiple times.",
-                7,
-                new HashSet<>(
-                                Arrays.asList(
-                                        taskInputWatermarkGauge,
-                                        headInput1WatermarkGauge,
-                                        headInput2WatermarkGauge,
-                                        headInputWatermarkGauge,
-                                        headOutputWatermarkGauge,
-                                        chainedInputWatermarkGauge,
-                                        chainedOutputWatermarkGauge))
-                        .size());
+        assertThat(
+                        new HashSet<>(
+                                        Arrays.asList(
+                                                taskInputWatermarkGauge,
+                                                headInput1WatermarkGauge,
+                                                headInput2WatermarkGauge,
+                                                headInputWatermarkGauge,
+                                                headOutputWatermarkGauge,
+                                                chainedInputWatermarkGauge,
+                                                chainedOutputWatermarkGauge))
+                                .size())
+                .as("A metric was registered multiple times.")
+                .isEqualTo(7);
 
-        Assert.assertEquals(Long.MIN_VALUE, taskInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headInput1WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headInput2WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headOutputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, chainedInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, chainedOutputWatermarkGauge.getValue().longValue());
+        assertThat(taskInputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headInputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headInput1WatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headInput2WatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headOutputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(chainedInputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(chainedOutputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
 
         testHarness.processElement(new Watermark(1L), 0, 0);
         testHarness.waitForInputProcessing();
-        Assert.assertEquals(Long.MIN_VALUE, taskInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(1L, headInput1WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headInput2WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, headOutputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, chainedInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(Long.MIN_VALUE, chainedOutputWatermarkGauge.getValue().longValue());
+        assertThat(taskInputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headInputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headInput1WatermarkGauge.getValue().longValue()).isEqualTo(1L);
+        assertThat(headInput2WatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(headOutputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(chainedInputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
+        assertThat(chainedOutputWatermarkGauge.getValue().longValue()).isEqualTo(Long.MIN_VALUE);
 
         testHarness.processElement(new Watermark(2L), 1, 0);
         testHarness.waitForInputProcessing();
-        Assert.assertEquals(1L, taskInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(1L, headInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(1L, headInput1WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(2L, headInput2WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(1L, headOutputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(1L, chainedInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(2L, chainedOutputWatermarkGauge.getValue().longValue());
+        assertThat(taskInputWatermarkGauge.getValue().longValue()).isEqualTo(1L);
+        assertThat(headInputWatermarkGauge.getValue().longValue()).isEqualTo(1L);
+        assertThat(headInput1WatermarkGauge.getValue().longValue()).isEqualTo(1L);
+        assertThat(headInput2WatermarkGauge.getValue().longValue()).isEqualTo(2L);
+        assertThat(headOutputWatermarkGauge.getValue().longValue()).isEqualTo(1L);
+        assertThat(chainedInputWatermarkGauge.getValue().longValue()).isEqualTo(1L);
+        assertThat(chainedOutputWatermarkGauge.getValue().longValue()).isEqualTo(2L);
 
         testHarness.processElement(new Watermark(3L), 0, 0);
         testHarness.waitForInputProcessing();
-        Assert.assertEquals(2L, taskInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(2L, headInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(3L, headInput1WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(2L, headInput2WatermarkGauge.getValue().longValue());
-        Assert.assertEquals(2L, headOutputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(2L, chainedInputWatermarkGauge.getValue().longValue());
-        Assert.assertEquals(4L, chainedOutputWatermarkGauge.getValue().longValue());
+        assertThat(taskInputWatermarkGauge.getValue().longValue()).isEqualTo(2L);
+        assertThat(headInputWatermarkGauge.getValue().longValue()).isEqualTo(2L);
+        assertThat(headInput1WatermarkGauge.getValue().longValue()).isEqualTo(3L);
+        assertThat(headInput2WatermarkGauge.getValue().longValue()).isEqualTo(2L);
+        assertThat(headOutputWatermarkGauge.getValue().longValue()).isEqualTo(2L);
+        assertThat(chainedInputWatermarkGauge.getValue().longValue()).isEqualTo(2L);
+        assertThat(chainedOutputWatermarkGauge.getValue().longValue()).isEqualTo(4L);
 
         testHarness.endInput();
         testHarness.waitForTaskCompletion();
@@ -745,7 +749,7 @@ public class TwoInputStreamTaskTest {
                 new StreamRecord<>("[Operator1]: Finish"));
 
         final Object[] output = testHarness.getOutput().toArray();
-        assertArrayEquals("Output was not correct.", expected.toArray(), output);
+        assertThat(output).as("Output was not correct.").isEqualTo(expected.toArray());
     }
 
     /**
@@ -775,8 +779,11 @@ public class TwoInputStreamTaskTest {
         testHarness.invoke(environment);
         testHarness.waitForTaskRunning();
 
-        assertThat(metrics, IsMapContaining.hasKey(MetricNames.CHECKPOINT_ALIGNMENT_TIME));
-        assertThat(metrics, IsMapContaining.hasKey(MetricNames.CHECKPOINT_START_DELAY_TIME));
+        assertThat(metrics)
+                .satisfies(matching(IsMapContaining.hasKey(MetricNames.CHECKPOINT_ALIGNMENT_TIME)));
+        assertThat(metrics)
+                .satisfies(
+                        matching(IsMapContaining.hasKey(MetricNames.CHECKPOINT_START_DELAY_TIME)));
 
         testHarness.endInput();
         testHarness.waitForTaskCompletion();
@@ -800,7 +807,7 @@ public class TwoInputStreamTaskTest {
         public void open(Configuration parameters) throws Exception {
             super.open(parameters);
             if (closeCalled) {
-                Assert.fail("Close called before open.");
+                fail("Close called before open.");
             }
             openCalled = true;
         }
@@ -809,7 +816,7 @@ public class TwoInputStreamTaskTest {
         public void close() throws Exception {
             super.close();
             if (!openCalled) {
-                Assert.fail("Open was not called before close.");
+                fail("Open was not called before close.");
             }
             closeCalled = true;
         }
@@ -817,7 +824,7 @@ public class TwoInputStreamTaskTest {
         @Override
         public String map1(String value) {
             if (!openCalled) {
-                Assert.fail("Open was not called before run.");
+                fail("Open was not called before run.");
             }
             return value;
         }
@@ -825,7 +832,7 @@ public class TwoInputStreamTaskTest {
         @Override
         public String map2(Integer value) {
             if (!openCalled) {
-                Assert.fail("Open was not called before run.");
+                fail("Open was not called before run.");
             }
             return value.toString();
         }

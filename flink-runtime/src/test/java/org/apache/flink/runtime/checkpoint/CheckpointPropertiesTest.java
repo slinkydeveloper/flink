@@ -22,8 +22,7 @@ import org.apache.flink.util.InstantiationUtil;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the default checkpoint properties. */
 public class CheckpointPropertiesTest {
@@ -34,23 +33,23 @@ public class CheckpointPropertiesTest {
         CheckpointProperties props =
                 CheckpointProperties.forCheckpoint(CheckpointRetentionPolicy.RETAIN_ON_FAILURE);
 
-        assertFalse(props.forceCheckpoint());
-        assertTrue(props.discardOnSubsumed());
-        assertTrue(props.discardOnJobFinished());
-        assertTrue(props.discardOnJobCancelled());
-        assertFalse(props.discardOnJobFailed());
-        assertTrue(props.discardOnJobSuspended());
+        assertThat(props.forceCheckpoint()).isFalse();
+        assertThat(props.discardOnSubsumed()).isTrue();
+        assertThat(props.discardOnJobFinished()).isTrue();
+        assertThat(props.discardOnJobCancelled()).isTrue();
+        assertThat(props.discardOnJobFailed()).isFalse();
+        assertThat(props.discardOnJobSuspended()).isTrue();
 
         props =
                 CheckpointProperties.forCheckpoint(
                         CheckpointRetentionPolicy.RETAIN_ON_CANCELLATION);
 
-        assertFalse(props.forceCheckpoint());
-        assertTrue(props.discardOnSubsumed());
-        assertTrue(props.discardOnJobFinished());
-        assertFalse(props.discardOnJobCancelled());
-        assertFalse(props.discardOnJobFailed());
-        assertFalse(props.discardOnJobSuspended());
+        assertThat(props.forceCheckpoint()).isFalse();
+        assertThat(props.discardOnSubsumed()).isTrue();
+        assertThat(props.discardOnJobFinished()).isTrue();
+        assertThat(props.discardOnJobCancelled()).isFalse();
+        assertThat(props.discardOnJobFailed()).isFalse();
+        assertThat(props.discardOnJobSuspended()).isFalse();
     }
 
     /** Tests the default (manually triggered) savepoint properties. */
@@ -58,12 +57,12 @@ public class CheckpointPropertiesTest {
     public void testSavepointProperties() {
         CheckpointProperties props = CheckpointProperties.forSavepoint(true);
 
-        assertTrue(props.forceCheckpoint());
-        assertFalse(props.discardOnSubsumed());
-        assertFalse(props.discardOnJobFinished());
-        assertFalse(props.discardOnJobCancelled());
-        assertFalse(props.discardOnJobFailed());
-        assertFalse(props.discardOnJobSuspended());
+        assertThat(props.forceCheckpoint()).isTrue();
+        assertThat(props.discardOnSubsumed()).isFalse();
+        assertThat(props.discardOnJobFinished()).isFalse();
+        assertThat(props.discardOnJobCancelled()).isFalse();
+        assertThat(props.discardOnJobFailed()).isFalse();
+        assertThat(props.discardOnJobSuspended()).isFalse();
     }
 
     /** Tests the isSavepoint utility works as expected. */
@@ -72,24 +71,24 @@ public class CheckpointPropertiesTest {
         {
             CheckpointProperties props =
                     CheckpointProperties.forCheckpoint(CheckpointRetentionPolicy.RETAIN_ON_FAILURE);
-            assertFalse(props.isSavepoint());
+            assertThat(props.isSavepoint()).isFalse();
         }
 
         {
             CheckpointProperties props =
                     CheckpointProperties.forCheckpoint(
                             CheckpointRetentionPolicy.RETAIN_ON_CANCELLATION);
-            assertFalse(props.isSavepoint());
+            assertThat(props.isSavepoint()).isFalse();
         }
 
         {
             CheckpointProperties props = CheckpointProperties.forSavepoint(true);
-            assertTrue(props.isSavepoint());
+            assertThat(props.isSavepoint()).isTrue();
 
             CheckpointProperties deserializedCheckpointProperties =
                     InstantiationUtil.deserializeObject(
                             InstantiationUtil.serializeObject(props), getClass().getClassLoader());
-            assertTrue(deserializedCheckpointProperties.isSavepoint());
+            assertThat(deserializedCheckpointProperties.isSavepoint()).isTrue();
         }
     }
 }

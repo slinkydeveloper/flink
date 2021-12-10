@@ -27,7 +27,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link EchoGraph}. */
 public class EchoGraphTest extends GraphGeneratorTestBase {
@@ -93,14 +93,14 @@ public class EchoGraphTest extends GraphGeneratorTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 new EchoGraph(env, vertexCount, vertexDegree).generate();
 
-        assertEquals(vertexCount, graph.numberOfVertices());
-        assertEquals(vertexCount * vertexDegree, graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(vertexCount);
+        assertThat(graph.numberOfEdges()).isEqualTo(vertexCount * vertexDegree);
 
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(vertexDegree, maxInDegree);
-        assertEquals(vertexDegree, maxOutDegree);
+        assertThat(maxInDegree).isEqualTo(vertexDegree);
+        assertThat(maxOutDegree).isEqualTo(vertexDegree);
     }
 
     @Test

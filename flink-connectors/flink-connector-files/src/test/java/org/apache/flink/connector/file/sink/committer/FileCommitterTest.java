@@ -32,8 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FileCommitter}. */
 public class FileCommitterTest {
@@ -48,10 +47,10 @@ public class FileCommitterTest {
         List<FileSinkCommittable> toRetry =
                 fileCommitter.commit(Collections.singletonList(fileSinkCommittable));
 
-        assertEquals(1, stubBucketWriter.getRecoveredPendingFiles().size());
-        assertEquals(0, stubBucketWriter.getNumCleanUp());
-        assertTrue(stubBucketWriter.getRecoveredPendingFiles().get(0).isCommitted());
-        assertEquals(0, toRetry.size());
+        assertThat(stubBucketWriter.getRecoveredPendingFiles().size()).isEqualTo(1);
+        assertThat(stubBucketWriter.getNumCleanUp()).isEqualTo(0);
+        assertThat(stubBucketWriter.getRecoveredPendingFiles().get(0).isCommitted()).isTrue();
+        assertThat(toRetry.size()).isEqualTo(0);
     }
 
     @Test
@@ -64,9 +63,9 @@ public class FileCommitterTest {
         List<FileSinkCommittable> toRetry =
                 fileCommitter.commit(Collections.singletonList(fileSinkCommittable));
 
-        assertEquals(0, stubBucketWriter.getRecoveredPendingFiles().size());
-        assertEquals(1, stubBucketWriter.getNumCleanUp());
-        assertEquals(0, toRetry.size());
+        assertThat(stubBucketWriter.getRecoveredPendingFiles().size()).isEqualTo(0);
+        assertThat(stubBucketWriter.getNumCleanUp()).isEqualTo(1);
+        assertThat(toRetry.size()).isEqualTo(0);
     }
 
     @Test
@@ -85,12 +84,12 @@ public class FileCommitterTest {
                                 new FileSinkTestUtils.TestInProgressFileRecoverable()));
         List<FileSinkCommittable> toRetry = fileCommitter.commit(committables);
 
-        assertEquals(3, stubBucketWriter.getRecoveredPendingFiles().size());
-        assertEquals(2, stubBucketWriter.getNumCleanUp());
+        assertThat(stubBucketWriter.getRecoveredPendingFiles().size()).isEqualTo(3);
+        assertThat(stubBucketWriter.getNumCleanUp()).isEqualTo(2);
         stubBucketWriter
                 .getRecoveredPendingFiles()
-                .forEach(pendingFile -> assertTrue(pendingFile.isCommitted()));
-        assertEquals(0, toRetry.size());
+                .forEach(pendingFile -> assertThat(pendingFile.isCommitted()).isTrue());
+        assertThat(toRetry.size()).isEqualTo(0);
     }
 
     // ------------------------------- Mock Classes --------------------------------

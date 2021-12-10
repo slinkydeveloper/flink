@@ -24,9 +24,8 @@ import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link FlinkUserCodeClassLoader}. */
 public class FlinkUserCodeClassLoaderTest extends TestLogger {
@@ -39,8 +38,8 @@ public class FlinkUserCodeClassLoaderTest extends TestLogger {
             classLoaderWithErrorHandler.loadClass("dummy.class");
             fail("The expected exception is not thrown");
         } catch (Throwable t) {
-            assertThat(handledException.get(), is(expectedException));
-            assertThat(t, is(expectedException));
+            assertThat(handledException.get()).isEqualTo(expectedException);
+            assertThat(t).isEqualTo(expectedException);
         }
     }
 

@@ -29,7 +29,7 @@ import org.apache.flink.yarn.executors.YarnSessionClusterExecutor;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for the {@link YarnClusterClientFactory} discovery. */
 public class YarnClusterClientFactoryTest {
@@ -52,6 +52,6 @@ public class YarnClusterClientFactoryTest {
         final ClusterClientFactory<ApplicationId> factory =
                 serviceLoader.getClusterClientFactory(configuration);
 
-        assertTrue(factory instanceof YarnClusterClientFactory);
+        assertThat(factory).isInstanceOf(YarnClusterClientFactory.class);
     }
 }

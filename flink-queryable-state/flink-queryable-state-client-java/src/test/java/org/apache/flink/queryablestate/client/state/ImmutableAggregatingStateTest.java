@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the {@link ImmutableAggregatingStateTest}. */
 public class ImmutableAggregatingStateTest {
@@ -56,7 +56,7 @@ public class ImmutableAggregatingStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testUpdate() throws Exception {
         String value = aggrState.get();
-        assertEquals("42", value);
+        assertThat(value).isEqualTo("42");
 
         aggrState.add(54L);
     }
@@ -64,7 +64,7 @@ public class ImmutableAggregatingStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testClear() throws Exception {
         String value = aggrState.get();
-        assertEquals("42", value);
+        assertThat(value).isEqualTo("42");
 
         aggrState.clear();
     }

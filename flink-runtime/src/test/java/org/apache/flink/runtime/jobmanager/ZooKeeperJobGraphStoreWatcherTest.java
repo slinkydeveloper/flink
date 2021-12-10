@@ -43,8 +43,9 @@ import org.junit.rules.TemporaryFolder;
 
 import java.time.Duration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link ZooKeeperJobGraphStoreWatcher}. */
 public class ZooKeeperJobGraphStoreWatcherTest extends TestLogger {
@@ -90,14 +91,16 @@ public class ZooKeeperJobGraphStoreWatcherTest extends TestLogger {
                     () -> testingJobGraphListener.getAddedJobGraphs().size() > 0,
                     Deadline.fromNow(TIMEOUT));
 
-            assertThat(testingJobGraphListener.getAddedJobGraphs(), contains(jobID));
+            assertThat(testingJobGraphListener.getAddedJobGraphs())
+                    .satisfies(matching(contains(jobID)));
 
             stateHandleStore.releaseAndTryRemove("/" + jobID);
 
             CommonTestUtils.waitUntilCondition(
                     () -> testingJobGraphListener.getRemovedJobGraphs().size() > 0,
                     Deadline.fromNow(TIMEOUT));
-            assertThat(testingJobGraphListener.getRemovedJobGraphs(), contains(jobID));
+            assertThat(testingJobGraphListener.getRemovedJobGraphs())
+                    .satisfies(matching(contains(jobID)));
 
             jobGraphStoreWatcher.stop();
         }

@@ -41,7 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Connected Components test case that uses a parameterizable convergence criterion. */
 @RunWith(Parameterized.class)
@@ -138,7 +138,7 @@ public class AggregatorConvergenceITCase extends MultipleProgramsTestBase {
         List<Tuple2<Long, Long>> result = iteration.closeWith(updatedComponentId).collect();
         Collections.sort(result, new TestBaseUtils.TupleComparator<Tuple2<Long, Long>>());
 
-        assertEquals(expectedResult, result);
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
@@ -185,7 +185,7 @@ public class AggregatorConvergenceITCase extends MultipleProgramsTestBase {
                 iteration.closeWith(updatedComponentId, updatedComponentId).collect();
         Collections.sort(result, new TestBaseUtils.TupleComparator<Tuple2<Long, Long>>());
 
-        assertEquals(expectedResult, result);
+        assertThat(result).isEqualTo(expectedResult);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class AggregatorConvergenceITCase extends MultipleProgramsTestBase {
                         new Tuple2<>(9L, 7L));
 
         // check program result
-        assertEquals(expectedResult, result);
+        assertThat(result).isEqualTo(expectedResult);
 
         // check aggregators
         long[] aggrValues = MinimumIdFilterCounting.aggr_value;
@@ -248,10 +248,10 @@ public class AggregatorConvergenceITCase extends MultipleProgramsTestBase {
         // iteration 2
         // position one as superstep 2, retrieved at the start of iteration 3.
         // the result from iteration 5 is not available, because no iteration 6 happens
-        assertEquals(3, aggrValues[0]);
-        assertEquals(4, aggrValues[1]);
-        assertEquals(5, aggrValues[2]);
-        assertEquals(6, aggrValues[3]);
+        assertThat(aggrValues[0]).isEqualTo(3);
+        assertThat(aggrValues[1]).isEqualTo(4);
+        assertThat(aggrValues[2]).isEqualTo(5);
+        assertThat(aggrValues[3]).isEqualTo(6);
     }
 
     // ------------------------------------------------------------------------

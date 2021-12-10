@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Utils for kafka table tests. */
 public class KafkaTableTestUtils {
@@ -68,7 +68,7 @@ public class KafkaTableTestUtils {
 
     public static List<String> readLines(String resource) throws IOException {
         final URL url = KafkaChangelogTableITCase.class.getClassLoader().getResource(resource);
-        assert url != null;
+        assertThat(url != null).isTrue();
         Path path = new File(url.getFile()).toPath();
         return Files.readAllLines(path);
     }
@@ -90,7 +90,7 @@ public class KafkaTableTestUtils {
         // timeout, assert again
         List<String> actual = TestValuesTableFactory.getResults(sinkName);
         Collections.sort(actual);
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     public static void comparedWithKeyAndOrder(
@@ -103,12 +103,12 @@ public class KafkaTableTestUtils {
             actualData.computeIfAbsent(key, k -> new LinkedList<>()).add(row);
         }
         // compare key first
-        assertEquals("Actual result: " + actual, expectedData.size(), actualData.size());
+        assertThat(actualData.size()).as("Actual result: " + actual).isEqualTo(expectedData.size());
         // compare by value
         for (Row key : expectedData.keySet()) {
-            assertThat(
-                    actualData.get(key),
-                    TableTestMatchers.deepEqualTo(expectedData.get(key), false));
+            assertThat(actualData.get(key))
+                    .satisfies(
+                            matching(TableTestMatchers.deepEqualTo(expectedData.get(key), false)));
         }
     }
 }

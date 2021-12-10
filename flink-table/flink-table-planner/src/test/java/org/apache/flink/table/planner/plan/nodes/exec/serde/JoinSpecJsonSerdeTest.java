@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JoinSpec} serialization and deserialization. */
 public class JoinSpecJsonSerdeTest {
@@ -63,6 +63,6 @@ public class JoinSpecJsonSerdeTest {
         }
         String json = writer.toString();
         JoinSpec actual = mapper.readValue(json, JoinSpec.class);
-        assertEquals(joinSpec, actual);
+        assertThat(actual).isEqualTo(joinSpec);
     }
 }

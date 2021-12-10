@@ -31,9 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.apache.flink.connector.pulsar.common.schema.PulsarSchemaUtils.decodeClassInfo;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link ProtobufSchemaFactory}. */
 class ProtobufSchemaFactoryTest {
@@ -49,8 +47,8 @@ class ProtobufSchemaFactoryTest {
                 .hasFieldOrPropertyWithValue("schemaInfo", pulsarSchema.getSchemaInfo())
                 .isInstanceOf(ProtobufSchema.class);
 
-        assertEquals(decodeClassInfo(schema2.getSchemaInfo()), SubMessage.class);
-        assertNotSame(schema, schema2);
+        assertThat(SubMessage.class).isEqualTo(decodeClassInfo(schema2.getSchemaInfo()));
+        assertThat(schema2).isNotSameAs(schema);
     }
 
     @Test
@@ -61,7 +59,7 @@ class ProtobufSchemaFactoryTest {
 
         TypeInformation<TestMessage> typeInfo =
                 factory.createTypeInfo(pulsarSchema.getSchemaInfo());
-        assertDoesNotThrow(() -> InstantiationUtil.clone(typeInfo));
+        assertThatThrownBy(() -> InstantiationUtil.clone(typeInfo)).isNull();
         assertThat(typeInfo)
                 .isInstanceOf(PulsarSchemaTypeInformation.class)
                 .hasFieldOrPropertyWithValue("typeClass", TestMessage.class);

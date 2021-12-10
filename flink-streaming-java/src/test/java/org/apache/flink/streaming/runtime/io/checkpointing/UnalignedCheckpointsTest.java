@@ -45,7 +45,6 @@ import org.apache.flink.streaming.runtime.tasks.TestSubtaskCheckpointCoordinator
 import org.apache.flink.streaming.runtime.tasks.mailbox.MailboxDefaultAction;
 import org.apache.flink.util.clock.SystemClock;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,11 +62,9 @@ import java.util.stream.IntStream;
 
 import static org.apache.flink.runtime.state.CheckpointStorageLocationReference.getDefault;
 import static org.apache.flink.util.Preconditions.checkState;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the behaviors of the {@link CheckpointedInputGate}. */
 public class UnalignedCheckpointsTest {
@@ -92,8 +89,8 @@ public class UnalignedCheckpointsTest {
     @After
     public void ensureEmpty() throws Exception {
         if (inputGate != null) {
-            assertFalse(inputGate.pollNext().isPresent());
-            assertTrue(inputGate.isFinished());
+            assertThat(inputGate.pollNext().isPresent()).isFalse();
+            assertThat(inputGate.isFinished()).isTrue();
             inputGate.close();
         }
 
@@ -210,7 +207,7 @@ public class UnalignedCheckpointsTest {
 
         // checkpoint 1 triggered unaligned
         assertOutput(sequence1);
-        assertEquals(1L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(1L);
         assertInflightData(sequence1[7]);
 
         // checkpoint without in-flight data
@@ -227,7 +224,7 @@ public class UnalignedCheckpointsTest {
                         createBarrier(2, 2));
 
         assertOutput(sequence2);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
         assertInflightData();
 
         // checkpoint with data only from one channel
@@ -243,14 +240,14 @@ public class UnalignedCheckpointsTest {
                         createBarrier(3, 1));
 
         assertOutput(sequence3);
-        assertEquals(3L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(3L);
         assertInflightData();
 
         // empty checkpoint
         addSequence(inputGate, createBarrier(4, 1), createBarrier(4, 2), createBarrier(4, 0));
 
         assertOutput();
-        assertEquals(4L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(4L);
         assertInflightData();
 
         // checkpoint with in-flight data in mixed order
@@ -273,7 +270,7 @@ public class UnalignedCheckpointsTest {
                         createBarrier(5, 0));
 
         assertOutput(sequence5);
-        assertEquals(5L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(5L);
         assertInflightData(sequence5[4], sequence5[5], sequence5[6], sequence5[10]);
 
         // some trailing data
@@ -332,26 +329,21 @@ public class UnalignedCheckpointsTest {
 
         long alignmentDuration = System.nanoTime() - alignmentStartNanos;
 
-        assertEquals(checkpointId, inputGate.getCheckpointBarrierHandler().getLatestCheckpointId());
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                Matchers.greaterThanOrEqualTo(sleepTime));
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                Matchers.lessThanOrEqualTo(startDelay));
+        assertThat(inputGate.getCheckpointBarrierHandler().getLatestCheckpointId())
+                .isEqualTo(checkpointId);
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isGreaterThanOrEqualTo(sleepTime);
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isLessThanOrEqualTo(startDelay);
 
-        assertTrue(handler.getLastAlignmentDurationNanos().isDone());
-        assertThat(
-                handler.getLastAlignmentDurationNanos().get() / 1_000_000,
-                Matchers.greaterThanOrEqualTo(sleepTime));
-        assertThat(
-                handler.getLastAlignmentDurationNanos().get(),
-                Matchers.lessThanOrEqualTo(alignmentDuration));
+        assertThat(handler.getLastAlignmentDurationNanos().isDone()).isTrue();
+        assertThat(handler.getLastAlignmentDurationNanos().get() / 1_000_000)
+                .isGreaterThanOrEqualTo(sleepTime);
+        assertThat(handler.getLastAlignmentDurationNanos().get())
+                .isLessThanOrEqualTo(alignmentDuration);
 
-        assertTrue(handler.getLastBytesProcessedDuringAlignment().isDone());
-        assertThat(
-                handler.getLastBytesProcessedDuringAlignment().get(),
-                Matchers.equalTo(6L * bufferSize));
+        assertThat(handler.getLastBytesProcessedDuringAlignment().isDone()).isTrue();
+        assertThat(handler.getLastBytesProcessedDuringAlignment().get()).isEqualTo(6L * bufferSize);
     }
 
     @Test
@@ -384,7 +376,7 @@ public class UnalignedCheckpointsTest {
                         createEndOfPartition(0));
 
         assertOutput(sequence);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
         // TODO: treat EndOfPartitionEvent as a special CheckpointBarrier?
         assertInflightData();
     }
@@ -405,8 +397,8 @@ public class UnalignedCheckpointsTest {
                         createEndOfPartition(1));
 
         assertOutput(sequence);
-        assertEquals(1L, channelStateWriter.getLastStartedCheckpointId());
-        assertEquals(3L, handler.getLastCanceledCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(1L);
+        assertThat(handler.getLastCanceledCheckpointId()).isEqualTo(3L);
         assertInflightData();
     }
 
@@ -426,7 +418,7 @@ public class UnalignedCheckpointsTest {
                         createBarrier(1, 2),
                         createBarrier(1, 0));
         assertOutput(sequence1);
-        assertEquals(1L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(1L);
         assertInflightData();
 
         // checkpoint 2
@@ -448,7 +440,7 @@ public class UnalignedCheckpointsTest {
                         createBuffer(0),
                         createEndOfPartition(0));
         assertOutput(sequence2);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
         assertInflightData();
     }
 
@@ -471,7 +463,7 @@ public class UnalignedCheckpointsTest {
                         createBarrier(2, 3),
                         createBarrier(2, 0));
         assertOutput(sequence1);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
         assertInflightData();
 
         // checkpoint with in-flight data
@@ -485,14 +477,14 @@ public class UnalignedCheckpointsTest {
                         createBuffer(0),
                         createBarrier(3, 0));
         assertOutput(sequence2);
-        assertEquals(3L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(3L);
         assertInflightData(sequence2[4]);
 
         // empty checkpoint
         final BufferOrEvent[] sequence3 =
                 addSequence(inputGate, createBarrier(4, 0), createBarrier(4, 3));
         assertOutput(sequence3);
-        assertEquals(4L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(4L);
         assertInflightData();
 
         // some data, one channel closes
@@ -504,7 +496,7 @@ public class UnalignedCheckpointsTest {
                         createBuffer(3),
                         createEndOfPartition(0));
         assertOutput(sequence4);
-        assertEquals(-1L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(-1L);
         assertInflightData();
 
         // checkpoint on last remaining channel
@@ -516,7 +508,7 @@ public class UnalignedCheckpointsTest {
                         createBuffer(3),
                         createEndOfPartition(3));
         assertOutput(sequence5);
-        assertEquals(5L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(5L);
         assertInflightData();
     }
 
@@ -530,7 +522,7 @@ public class UnalignedCheckpointsTest {
                 addSequence(
                         inputGate, createBarrier(1, 0), createBarrier(1, 1), createBarrier(1, 2));
         assertOutput(sequence1);
-        assertEquals(1L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(1L);
         assertInflightData();
 
         final BufferOrEvent[] sequence2 =
@@ -556,7 +548,7 @@ public class UnalignedCheckpointsTest {
                         // final end of stream
                         createEndOfPartition(0));
         assertOutput(sequence2);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
         assertInflightData(sequence2[7]);
     }
 
@@ -584,8 +576,8 @@ public class UnalignedCheckpointsTest {
                         createCancellationBarrier(4, 0));
 
         assertOutput(sequence1);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
-        assertEquals(4L, handler.getLastCanceledCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
+        assertThat(handler.getLastCanceledCheckpointId()).isEqualTo(4L);
         assertInflightData();
 
         final BufferOrEvent[] sequence2 =
@@ -598,8 +590,8 @@ public class UnalignedCheckpointsTest {
                         createEndOfPartition(0));
 
         assertOutput(sequence2);
-        assertEquals(5L, channelStateWriter.getLastStartedCheckpointId());
-        assertEquals(6L, handler.getLastCanceledCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(5L);
+        assertThat(handler.getLastCanceledCheckpointId()).isEqualTo(6L);
         assertInflightData();
     }
 
@@ -623,7 +615,7 @@ public class UnalignedCheckpointsTest {
                         createBuffer(2));
 
         assertOutput(sequence1);
-        assertEquals(1L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(1L);
         assertInflightData();
 
         // canceled checkpoint on last barrier
@@ -637,8 +629,8 @@ public class UnalignedCheckpointsTest {
                         createCancellationBarrier(2, 1));
 
         assertOutput(sequence2);
-        assertEquals(2L, channelStateWriter.getLastStartedCheckpointId());
-        assertEquals(2L, handler.getLastCanceledCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(2L);
+        assertThat(handler.getLastCanceledCheckpointId()).isEqualTo(2L);
         assertInflightData();
 
         // one more successful checkpoint
@@ -652,7 +644,7 @@ public class UnalignedCheckpointsTest {
                         createBarrier(3, 0));
 
         assertOutput(sequence3);
-        assertEquals(3L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(3L);
         assertInflightData();
 
         // this checkpoint gets immediately canceled, don't start a checkpoint at all
@@ -667,8 +659,8 @@ public class UnalignedCheckpointsTest {
                         createBarrier(4, 0));
 
         assertOutput(sequence4);
-        assertEquals(-1, channelStateWriter.getLastStartedCheckpointId());
-        assertEquals(4L, handler.getLastCanceledCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(-1);
+        assertThat(handler.getLastCanceledCheckpointId()).isEqualTo(4L);
         assertInflightData();
 
         // a simple successful checkpoint
@@ -686,7 +678,7 @@ public class UnalignedCheckpointsTest {
                         createBuffer(1));
 
         assertOutput(sequence5);
-        assertEquals(5L, channelStateWriter.getLastStartedCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(5L);
         assertInflightData();
 
         // abort multiple cancellations and a barrier after the cancellations, don't start a
@@ -703,8 +695,8 @@ public class UnalignedCheckpointsTest {
                         createEndOfPartition(2));
 
         assertOutput(sequence6);
-        assertEquals(-1L, channelStateWriter.getLastStartedCheckpointId());
-        assertEquals(6L, handler.getLastCanceledCheckpointId());
+        assertThat(channelStateWriter.getLastStartedCheckpointId()).isEqualTo(-1L);
+        assertThat(handler.getLastCanceledCheckpointId()).isEqualTo(6L);
         assertInflightData();
     }
 
@@ -735,8 +727,8 @@ public class UnalignedCheckpointsTest {
         handler.processBarrier(
                 buildCheckpointBarrier(DEFAULT_CHECKPOINT_ID), new InputChannelInfo(0, 0), false);
 
-        assertTrue(handler.isCheckpointPending());
-        assertEquals(DEFAULT_CHECKPOINT_ID, handler.getLatestCheckpointId());
+        assertThat(handler.isCheckpointPending()).isTrue();
+        assertThat(handler.getLatestCheckpointId()).isEqualTo(DEFAULT_CHECKPOINT_ID);
 
         testProcessCancellationBarrier(handler, invokable);
     }
@@ -794,9 +786,9 @@ public class UnalignedCheckpointsTest {
             ValidatingCheckpointInvokable invokable,
             long currentCheckpointId) {
 
-        assertFalse(handler.isCheckpointPending());
-        assertEquals(currentCheckpointId, handler.getLatestCheckpointId());
-        assertEquals(currentCheckpointId, invokable.getAbortedCheckpointId());
+        assertThat(handler.isCheckpointPending()).isFalse();
+        assertThat(handler.getLatestCheckpointId()).isEqualTo(currentCheckpointId);
+        assertThat(invokable.getAbortedCheckpointId()).isEqualTo(currentCheckpointId);
     }
 
     @Test
@@ -821,17 +813,17 @@ public class UnalignedCheckpointsTest {
         handler.processBarrier(
                 buildCheckpointBarrier(DEFAULT_CHECKPOINT_ID), new InputChannelInfo(0, 0), false);
 
-        assertTrue(handler.isCheckpointPending());
-        assertEquals(DEFAULT_CHECKPOINT_ID, handler.getLatestCheckpointId());
-        assertEquals(numberOfChannels, handler.getNumOpenChannels());
+        assertThat(handler.isCheckpointPending()).isTrue();
+        assertThat(handler.getLatestCheckpointId()).isEqualTo(DEFAULT_CHECKPOINT_ID);
+        assertThat(handler.getNumOpenChannels()).isEqualTo(numberOfChannels);
 
         // should abort current checkpoint while processing eof
         handler.processEndOfPartition(new InputChannelInfo(0, 0));
 
-        assertFalse(handler.isCheckpointPending());
-        assertEquals(DEFAULT_CHECKPOINT_ID, handler.getLatestCheckpointId());
-        assertEquals(numberOfChannels - 1, handler.getNumOpenChannels());
-        assertEquals(DEFAULT_CHECKPOINT_ID, invokable.getAbortedCheckpointId());
+        assertThat(handler.isCheckpointPending()).isFalse();
+        assertThat(handler.getLatestCheckpointId()).isEqualTo(DEFAULT_CHECKPOINT_ID);
+        assertThat(handler.getNumOpenChannels()).isEqualTo(numberOfChannels - 1);
+        assertThat(invokable.getAbortedCheckpointId()).isEqualTo(DEFAULT_CHECKPOINT_ID);
     }
 
     @Test
@@ -851,8 +843,8 @@ public class UnalignedCheckpointsTest {
                         /* 6 */ createEndOfPartition(1));
 
         assertOutput(sequence);
-        assertThat(validator.triggeredCheckpoints, contains(1L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(1L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
         assertInflightData(sequence[1]);
     }
 
@@ -872,8 +864,8 @@ public class UnalignedCheckpointsTest {
                         /* 5 */ createBarrier(3, 2));
         assertOutput(sequence1);
         assertInflightData(sequence1[3]);
-        assertThat(validator.triggeredCheckpoints, contains(3L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(3L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
 
         BufferOrEvent[] sequence2 =
                 addSequence(
@@ -883,8 +875,8 @@ public class UnalignedCheckpointsTest {
                         /* 2 */ createEndOfPartition(2));
         assertOutput(sequence2);
         assertInflightData();
-        assertThat(validator.triggeredCheckpoints, contains(3L, 4L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(3L, 4L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
     }
 
     // ------------------------------------------------------------------------
@@ -1020,10 +1012,9 @@ public class UnalignedCheckpointsTest {
 
     private void assertInflightData(BufferOrEvent... expected) {
         Collection<BufferOrEvent> andResetInflightData = getAndResetInflightData();
-        assertEquals(
-                "Unexpected in-flight sequence: " + andResetInflightData,
-                getIds(Arrays.asList(expected)),
-                getIds(andResetInflightData));
+        assertThat(getIds(andResetInflightData))
+                .as("Unexpected in-flight sequence: " + andResetInflightData)
+                .isEqualTo(getIds(Arrays.asList(expected)));
     }
 
     private Collection<BufferOrEvent> getAndResetInflightData() {
@@ -1036,10 +1027,9 @@ public class UnalignedCheckpointsTest {
     }
 
     private void assertOutput(BufferOrEvent... expectedSequence) {
-        assertEquals(
-                "Unexpected output sequence",
-                getIds(Arrays.asList(expectedSequence)),
-                getIds(output));
+        assertThat(getIds(output))
+                .as("Unexpected output sequence")
+                .isEqualTo(getIds(Arrays.asList(expectedSequence)));
     }
 
     private List<Object> getIds(Collection<BufferOrEvent> buffers) {
@@ -1089,7 +1079,7 @@ public class UnalignedCheckpointsTest {
         public void abortCheckpointOnBarrier(long checkpointId, CheckpointException cause) {
             super.abortCheckpointOnBarrier(checkpointId, cause);
             checkState(inputGate != null);
-            assertFalse(inputGate.getAllBarriersReceivedFuture(checkpointId).isDone());
+            assertThat(inputGate.getAllBarriersReceivedFuture(checkpointId).isDone()).isFalse();
         }
 
         public void setInputGate(CheckpointedInputGate inputGate) {

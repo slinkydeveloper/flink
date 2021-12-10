@@ -40,8 +40,7 @@ import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.
 import static org.apache.flink.runtime.jobgraph.DistributionPattern.ALL_TO_ALL;
 import static org.apache.flink.runtime.jobgraph.topology.DefaultLogicalVertexTest.assertVertexInfoEquals;
 import static org.apache.flink.runtime.jobgraph.topology.DefaultLogicalVertexTest.assertVerticesEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link DefaultLogicalResult}. */
 public class DefaultLogicalResultTest extends TestLogger {
@@ -110,18 +109,18 @@ public class DefaultLogicalResultTest extends TestLogger {
         for (IntermediateDataSet result : results) {
             final DefaultLogicalResult logicalResult = logicalResultMap.remove(result.getId());
 
-            assertNotNull(logicalResult);
+            assertThat(logicalResult).isNotNull();
             assertResultInfoEquals(result, logicalResult);
         }
 
         // this ensures the two collections exactly matches
-        assertEquals(0, logicalResultMap.size());
+        assertThat(logicalResultMap.size()).isEqualTo(0);
     }
 
     static void assertResultInfoEquals(
             final IntermediateDataSet result, final DefaultLogicalResult logicalResult) {
 
-        assertEquals(result.getId(), logicalResult.getId());
-        assertEquals(result.getResultType(), logicalResult.getResultType());
+        assertThat(logicalResult.getId()).isEqualTo(result.getId());
+        assertThat(logicalResult.getResultType()).isEqualTo(result.getResultType());
     }
 }

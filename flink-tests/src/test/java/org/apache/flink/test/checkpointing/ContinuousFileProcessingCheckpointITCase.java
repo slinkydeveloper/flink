@@ -39,7 +39,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.AssumptionViolatedException;
 import org.junit.Before;
 
@@ -55,8 +54,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test checkpointing while sourcing a continuous file processor. */
 public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleranceTestBase {
@@ -136,10 +135,10 @@ public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleran
         fc.join();
 
         Map<Integer, Set<String>> collected = actualCollectedContent;
-        Assert.assertEquals(collected.size(), fc.getFileContent().size());
+        assertThat(fc.getFileContent().size()).isEqualTo(collected.size());
 
         for (Integer fileIdx : fc.getFileContent().keySet()) {
-            Assert.assertTrue(collected.keySet().contains(fileIdx));
+            assertThat(collected.keySet().contains(fileIdx)).isTrue();
 
             List<String> cntnt = new ArrayList<>(collected.get(fileIdx));
             Collections.sort(
@@ -155,7 +154,7 @@ public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleran
             for (String line : cntnt) {
                 cntntStr.append(line);
             }
-            Assert.assertEquals(fc.getFileContent().get(fileIdx), cntntStr.toString());
+            assertThat(cntntStr.toString()).isEqualTo(fc.getFileContent().get(fileIdx));
         }
 
         collected.clear();
@@ -193,7 +192,7 @@ public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleran
         @Override
         public void open(Configuration parameters) throws Exception {
             // this sink can only work with DOP 1
-            assertEquals(1, getRuntimeContext().getNumberOfParallelSubtasks());
+            assertThat(getRuntimeContext().getNumberOfParallelSubtasks()).isEqualTo(1);
 
             long failurePosMin = (long) (0.4 * LINES_PER_FILE);
             long failurePosMax = (long) (0.7 * LINES_PER_FILE);
@@ -315,7 +314,7 @@ public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleran
                     org.apache.hadoop.fs.Path file =
                             new org.apache.hadoop.fs.Path(localFsURI + "/file" + i);
                     localFs.rename(tmpFile.f0, file);
-                    Assert.assertTrue(localFs.exists(file));
+                    assertThat(localFs.exists(file)).isTrue();
 
                     filesCreated.add(file);
                     fileContents.put(i, tmpFile.f1);
@@ -326,7 +325,7 @@ public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleran
         }
 
         void clean() throws IOException {
-            assert (localFs != null);
+            assertThat((localFs != null)).isTrue();
             for (org.apache.hadoop.fs.Path path : filesCreated) {
                 localFs.delete(path, false);
             }
@@ -343,7 +342,7 @@ public class ContinuousFileProcessingCheckpointITCase extends StreamFaultToleran
             String base, String fileName, int fileIdx, String sampleLine)
             throws IOException, InterruptedException {
 
-        assert (localFs != null);
+        assertThat((localFs != null)).isTrue();
 
         org.apache.hadoop.fs.Path tmp =
                 new org.apache.hadoop.fs.Path(base + "/." + fileName + fileIdx);

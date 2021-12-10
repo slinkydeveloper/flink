@@ -42,10 +42,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.kubernetes.utils.Constants.TASK_MANAGER_POD_TEMPLATE_FILE_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
 
 /** General tests for the {@link PodTemplateMountDecorator}. */
 public class PodTemplateMountDecoratorTest extends KubernetesJobManagerTestBase {
@@ -80,12 +80,13 @@ public class PodTemplateMountDecoratorTest extends KubernetesJobManagerTestBase 
 
         final List<HasMetadata> additionalResources =
                 podTemplateMountDecorator.buildAccompanyingKubernetesResources();
-        assertThat(additionalResources.size(), is(1));
+        assertThat(additionalResources.size()).isEqualTo(1);
 
         final ConfigMap resultConfigMap = (ConfigMap) additionalResources.get(0);
 
         final Map<String, String> resultData = resultConfigMap.getData();
-        assertThat(resultData.get(TASK_MANAGER_POD_TEMPLATE_FILE_NAME), is(POD_TEMPLATE_DATA));
+        assertThat(resultData.get(TASK_MANAGER_POD_TEMPLATE_FILE_NAME))
+                .isEqualTo(POD_TEMPLATE_DATA);
     }
 
     @Test
@@ -98,7 +99,7 @@ public class PodTemplateMountDecoratorTest extends KubernetesJobManagerTestBase 
                     String.format(
                             "Pod template file %s does not exist.",
                             new File(flinkConfDir, POD_TEMPLATE_FILE_NAME));
-            assertThat(ex, FlinkMatchers.containsMessage(msg));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsMessage(msg)));
         }
     }
 
@@ -116,9 +117,8 @@ public class PodTemplateMountDecoratorTest extends KubernetesJobManagerTestBase 
                                 .withPath(TASK_MANAGER_POD_TEMPLATE_FILE_NAME)
                                 .build());
         final List<Volume> expectedVolumes = getExpectedVolumes(expectedKeyToPaths);
-        assertThat(
-                resultFlinkPod.getPodWithoutMainContainer().getSpec().getVolumes(),
-                containsInAnyOrder(expectedVolumes.toArray()));
+        assertThat(resultFlinkPod.getPodWithoutMainContainer().getSpec().getVolumes())
+                .satisfies(matching(containsInAnyOrder(expectedVolumes.toArray())));
 
         final List<VolumeMount> expectedVolumeMounts =
                 Collections.singletonList(
@@ -126,9 +126,8 @@ public class PodTemplateMountDecoratorTest extends KubernetesJobManagerTestBase 
                                 .withName(Constants.POD_TEMPLATE_VOLUME)
                                 .withMountPath(Constants.POD_TEMPLATE_DIR_IN_POD)
                                 .build());
-        assertThat(
-                resultFlinkPod.getMainContainer().getVolumeMounts(),
-                containsInAnyOrder(expectedVolumeMounts.toArray()));
+        assertThat(resultFlinkPod.getMainContainer().getVolumeMounts())
+                .satisfies(matching(containsInAnyOrder(expectedVolumeMounts.toArray())));
     }
 
     private List<Volume> getExpectedVolumes(List<KeyToPath> keyToPaths) {

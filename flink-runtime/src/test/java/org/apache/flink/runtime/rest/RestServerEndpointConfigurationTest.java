@@ -24,12 +24,11 @@ import org.apache.flink.configuration.WebOptions;
 import org.apache.flink.util.ConfigurationException;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RestServerEndpointConfiguration}. */
 public class RestServerEndpointConfigurationTest extends TestLogger {
@@ -52,12 +51,11 @@ public class RestServerEndpointConfigurationTest extends TestLogger {
 
         final RestServerEndpointConfiguration result =
                 RestServerEndpointConfiguration.fromConfiguration(originalConfig);
-        Assert.assertEquals(ADDRESS, result.getRestAddress());
-        Assert.assertEquals(BIND_ADDRESS, result.getRestBindAddress());
-        Assert.assertEquals(BIND_PORT, result.getRestBindPortRange());
-        Assert.assertEquals(CONTENT_LENGTH, result.getMaxContentLength());
-        Assert.assertThat(
-                result.getUploadDir().toAbsolutePath().toString(),
-                containsString(temporaryFolder.getRoot().getAbsolutePath()));
+        assertThat(result.getRestAddress()).isEqualTo(ADDRESS);
+        assertThat(result.getRestBindAddress()).isEqualTo(BIND_ADDRESS);
+        assertThat(result.getRestBindPortRange()).isEqualTo(BIND_PORT);
+        assertThat(result.getMaxContentLength()).isEqualTo(CONTENT_LENGTH);
+        assertThat(result.getUploadDir().toAbsolutePath().toString())
+                .contains(temporaryFolder.getRoot().getAbsolutePath());
     }
 }

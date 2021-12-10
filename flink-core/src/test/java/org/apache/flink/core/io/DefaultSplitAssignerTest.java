@@ -26,7 +26,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class DefaultSplitAssignerTest {
 
@@ -43,11 +44,11 @@ public class DefaultSplitAssignerTest {
             DefaultInputSplitAssigner ia = new DefaultInputSplitAssigner(splits);
             InputSplit is = null;
             while ((is = ia.getNextInputSplit("", 0)) != null) {
-                assertTrue(splits.remove(is));
+                assertThat(splits.remove(is)).isTrue();
             }
 
-            assertTrue(splits.isEmpty());
-            assertNull(ia.getNextInputSplit("", 0));
+            assertThat(splits.isEmpty()).isTrue();
+            assertThat(ia.getNextInputSplit("", 0)).isNull();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -111,11 +112,11 @@ public class DefaultSplitAssignerTest {
                 }
             }
 
-            assertEquals(NUM_SPLITS, splitsRetrieved.get());
-            assertEquals(SUM_OF_IDS, sumOfIds.get());
+            assertThat(splitsRetrieved.get()).isEqualTo(NUM_SPLITS);
+            assertThat(sumOfIds.get()).isEqualTo(SUM_OF_IDS);
 
             // nothing left
-            assertNull(ia.getNextInputSplit("", 0));
+            assertThat(ia.getNextInputSplit("", 0)).isNull();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

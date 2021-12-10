@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test verifies the data could be partitioned correctly if multiple consumers are connected to
@@ -70,7 +70,7 @@ public class DataStreamWithSharedPartitionNodeITCase {
 
     private void checkSinkResult(String nameAndIndex, List<Integer> expected) {
         List<Integer> actualResult = CollectSink.result.get(nameAndIndex);
-        assertEquals(expected, actualResult);
+        assertThat(actualResult).isEqualTo(expected);
     }
 
     private static class TestPartitioner implements Partitioner<Integer> {

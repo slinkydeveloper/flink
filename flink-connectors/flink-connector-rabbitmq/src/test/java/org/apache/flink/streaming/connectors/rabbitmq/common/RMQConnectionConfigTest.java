@@ -26,9 +26,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RMQConnectionConfig}. */
 public class RMQConnectionConfigTest {
@@ -70,7 +68,8 @@ public class RMQConnectionConfigTest {
                         .setVirtualHost("/")
                         .build();
         ConnectionFactory factory = connectionConfig.getConnectionFactory();
-        assertEquals(ConnectionFactory.DEFAULT_CONNECTION_TIMEOUT, factory.getConnectionTimeout());
+        assertThat(factory.getConnectionTimeout())
+                .isEqualTo(ConnectionFactory.DEFAULT_CONNECTION_TIMEOUT);
     }
 
     @Test
@@ -86,7 +85,7 @@ public class RMQConnectionConfigTest {
                         .setConnectionTimeout(5000)
                         .build();
         ConnectionFactory factory = connectionConfig.getConnectionFactory();
-        assertEquals(5000, factory.getConnectionTimeout());
+        assertThat(factory.getConnectionTimeout()).isEqualTo(5000);
     }
 
     @Test
@@ -101,8 +100,8 @@ public class RMQConnectionConfigTest {
                         .setPrefetchCount(500)
                         .build();
         Optional<Integer> prefetch = connectionConfig.getPrefetchCount();
-        assertTrue(prefetch.isPresent());
-        assertEquals(500, (int) prefetch.get());
+        assertThat(prefetch.isPresent()).isTrue();
+        assertThat((int) prefetch.get()).isEqualTo(500);
     }
 
     @Test
@@ -116,7 +115,7 @@ public class RMQConnectionConfigTest {
                         .setVirtualHost("/")
                         .build();
         Optional<Integer> prefetch = connectionConfig.getPrefetchCount();
-        assertFalse(prefetch.isPresent());
+        assertThat(prefetch.isPresent()).isFalse();
     }
 
     @Test
@@ -129,10 +128,10 @@ public class RMQConnectionConfigTest {
                         .setPassword("guest")
                         .setVirtualHost("/");
         RMQConnectionConfig connectionConfig = builder.setDeliveryTimeout(10000).build();
-        assertEquals(10000, connectionConfig.getDeliveryTimeout());
+        assertThat(connectionConfig.getDeliveryTimeout()).isEqualTo(10000);
 
         connectionConfig = builder.setDeliveryTimeout(10, TimeUnit.SECONDS).build();
-        assertEquals(10000, connectionConfig.getDeliveryTimeout());
+        assertThat(connectionConfig.getDeliveryTimeout()).isEqualTo(10000);
     }
 
     @Test
@@ -145,7 +144,7 @@ public class RMQConnectionConfigTest {
                         .setPassword("guest")
                         .setVirtualHost("/")
                         .build();
-        assertEquals(30000, connectionConfig.getDeliveryTimeout());
+        assertThat(connectionConfig.getDeliveryTimeout()).isEqualTo(30000);
     }
 
     @Test(expected = IllegalArgumentException.class)

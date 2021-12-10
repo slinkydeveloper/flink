@@ -35,9 +35,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.security.AMRMTokenIdentifier;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fifo.FifoScheduler;
-import org.hamcrest.Matchers;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -48,6 +46,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * An extension of the {@link YARNSessionFIFOITCase} that runs the tests in a secured YARN cluster.
@@ -100,9 +100,9 @@ public class YARNSessionFIFOSecuredITCase extends YARNSessionFIFOITCase {
             // This is needed to ensure that SecurityUtils are run within a ugi.doAs section
             // Since we already logged in here in @BeforeClass, even a no-op security context will
             // still work.
-            Assert.assertTrue(
-                    "HadoopSecurityContext must be installed",
-                    SecurityUtils.getInstalledContext() instanceof HadoopSecurityContext);
+            assertThat(SecurityUtils.getInstalledContext())
+                    .as("HadoopSecurityContext must be installed")
+                    .isInstanceOf(HadoopSecurityContext.class);
             SecurityUtils.getInstalledContext()
                     .runSecured(
                             new Callable<Object>() {
@@ -185,10 +185,9 @@ public class YARNSessionFIFOSecuredITCase extends YARNSessionFIFOITCase {
         final boolean taskManagerRunsWithKerberos =
                 verifyStringsInNamedLogFiles(mustHave, applicationId, "taskmanager.log");
 
-        Assert.assertThat(
-                "The JobManager and the TaskManager should both run with Kerberos.",
-                jobManagerRunsWithKerberos && taskManagerRunsWithKerberos,
-                Matchers.is(true));
+        assertThat(jobManagerRunsWithKerberos && taskManagerRunsWithKerberos)
+                .as("The JobManager and the TaskManager should both run with Kerberos.")
+                .isEqualTo(true);
 
         final List<String> amRMTokens =
                 Lists.newArrayList(AMRMTokenIdentifier.KIND_NAME.toString());
@@ -199,14 +198,12 @@ public class YARNSessionFIFOSecuredITCase extends YARNSessionFIFOITCase {
         final boolean taskmanagerWithAmRmToken =
                 verifyTokenKindInContainerCredentials(amRMTokens, taskmanagerContainerId);
 
-        Assert.assertThat(
-                "The JobManager should have AMRMToken.",
-                jobmanagerWithAmRmToken,
-                Matchers.is(true));
-        Assert.assertThat(
-                "The TaskManager should not have AMRMToken.",
-                taskmanagerWithAmRmToken,
-                Matchers.is(false));
+        assertThat(jobmanagerWithAmRmToken)
+                .as("The JobManager should have AMRMToken.")
+                .isEqualTo(true);
+        assertThat(taskmanagerWithAmRmToken)
+                .as("The TaskManager should not have AMRMToken.")
+                .isEqualTo(false);
     }
 
     /* For secure cluster testing, it is enough to run only one test and override below test methods

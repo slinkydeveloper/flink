@@ -30,9 +30,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import static org.apache.flink.runtime.checkpoint.channel.ChannelStateWriteRequestDispatcher.NO_OP;
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link ChannelStateWriteRequestExecutorImpl} test. */
 public class ChannelStateWriteRequestExecutorImplTest {
@@ -70,8 +69,8 @@ public class ChannelStateWriteRequestExecutorImplTest {
         closingDeque.setWorker(worker);
         TestWriteRequest request = new TestWriteRequest();
         requestFun.accept(worker, request);
-        assertTrue(closingDeque.isEmpty());
-        assertFalse(request.isCancelled());
+        assertThat(closingDeque.isEmpty()).isTrue();
+        assertThat(request.isCancelled()).isFalse();
     }
 
     private void testSubmitFailure(
@@ -88,8 +87,8 @@ public class ChannelStateWriteRequestExecutorImplTest {
             // expected: executor not started;
             return;
         } finally {
-            assertTrue(request.cancelled);
-            assertTrue(deque.isEmpty());
+            assertThat(request.cancelled).isTrue();
+            assertThat(deque.isEmpty()).isTrue();
         }
         throw new RuntimeException("expected exception not thrown");
     }
@@ -107,9 +106,9 @@ public class ChannelStateWriteRequestExecutorImplTest {
         worker.close();
         worker.run();
 
-        assertTrue(requestProcessor.isStopped());
-        assertTrue(deque.isEmpty());
-        assertTrue(request.isCancelled());
+        assertThat(requestProcessor.isStopped()).isTrue();
+        assertThat(deque.isEmpty()).isTrue();
+        assertThat(request.isCancelled()).isTrue();
     }
 
     @Test

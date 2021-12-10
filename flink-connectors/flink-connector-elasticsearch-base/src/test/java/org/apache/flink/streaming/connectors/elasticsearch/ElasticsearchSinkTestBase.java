@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Environment preparation and suite of tests for version-specific {@link ElasticsearchSinkBase}
@@ -110,7 +110,7 @@ public abstract class ElasticsearchSinkTestBase<C extends AutoCloseable, A>
             return;
         }
 
-        fail();
+        fail("unknown failure");
     }
 
     /**
@@ -128,7 +128,7 @@ public abstract class ElasticsearchSinkTestBase<C extends AutoCloseable, A>
             return;
         }
 
-        fail();
+        fail("unknown failure");
     }
 
     /** Tests whether the Elasticsearch sink fails when there is no cluster to connect to. */
@@ -154,7 +154,7 @@ public abstract class ElasticsearchSinkTestBase<C extends AutoCloseable, A>
             return;
         }
 
-        fail();
+        fail("unknown failure");
     }
 
     /** Utility method to create a user config map. */

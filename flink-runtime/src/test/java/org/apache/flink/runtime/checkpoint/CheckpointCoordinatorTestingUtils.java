@@ -64,8 +64,6 @@ import org.apache.flink.util.concurrent.Executors;
 import org.apache.flink.util.concurrent.ManuallyTriggeredScheduledExecutor;
 import org.apache.flink.util.concurrent.ScheduledExecutor;
 
-import org.junit.Assert;
-
 import javax.annotation.Nullable;
 
 import java.io.File;
@@ -85,8 +83,7 @@ import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.spy;
 
 /** Testing utils for checkpoint coordinator. */
@@ -239,7 +236,7 @@ public class CheckpointCoordinatorTestingUtils {
                             .getTaskVertices()[i]
                             .getCurrentExecutionAttempt()
                             .getTaskRestore();
-            Assert.assertEquals(1L, taskRestore.getRestoreCheckpointId());
+            assertThat(taskRestore.getRestoreCheckpointId()).isEqualTo(1L);
             TaskStateSnapshot stateSnapshot = taskRestore.getTaskStateSnapshot();
 
             OperatorSubtaskState operatorState =
@@ -249,14 +246,15 @@ public class CheckpointCoordinatorTestingUtils {
             ChainedStateHandle<OperatorStateHandle> expectedOpStateBackend =
                     generateChainedPartitionableStateHandle(jobVertexID, i, 2, 8, false);
 
-            assertTrue(
-                    CommonTestUtils.isStreamContentEqual(
-                            expectedOpStateBackend.get(0).openInputStream(),
-                            operatorState
-                                    .getManagedOperatorState()
-                                    .iterator()
-                                    .next()
-                                    .openInputStream()));
+            assertThat(
+                            CommonTestUtils.isStreamContentEqual(
+                                    expectedOpStateBackend.get(0).openInputStream(),
+                                    operatorState
+                                            .getManagedOperatorState()
+                                            .iterator()
+                                            .next()
+                                            .openInputStream()))
+                    .isTrue();
 
             KeyGroupsStateHandle expectPartitionedKeyGroupState =
                     generateKeyGroupState(jobVertexID, keyGroupPartitions.get(i), false);
@@ -277,12 +275,12 @@ public class CheckpointCoordinatorTestingUtils {
                 expectedHeadOpKeyGroupStateHandle.getKeyGroupRange().getNumberOfKeyGroups();
         int actualTotalKeyGroups = 0;
         for (KeyedStateHandle keyedStateHandle : actualPartitionedKeyGroupState) {
-            assertTrue(keyedStateHandle instanceof KeyGroupsStateHandle);
+            assertThat(keyedStateHandle).isInstanceOf(KeyGroupsStateHandle.class);
 
             actualTotalKeyGroups += keyedStateHandle.getKeyGroupRange().getNumberOfKeyGroups();
         }
 
-        assertEquals(expectedTotalKeyGroups, actualTotalKeyGroups);
+        assertThat(actualTotalKeyGroups).isEqualTo(expectedTotalKeyGroups);
 
         try (FSDataInputStream inputStream = expectedHeadOpKeyGroupStateHandle.openInputStream()) {
             for (int groupId : expectedHeadOpKeyGroupStateHandle.getKeyGroupRange()) {
@@ -293,7 +291,7 @@ public class CheckpointCoordinatorTestingUtils {
                                 inputStream, Thread.currentThread().getContextClassLoader());
                 for (KeyedStateHandle oneActualKeyedStateHandle : actualPartitionedKeyGroupState) {
 
-                    assertTrue(oneActualKeyedStateHandle instanceof KeyGroupsStateHandle);
+                    assertThat(oneActualKeyedStateHandle).isInstanceOf(KeyGroupsStateHandle.class);
 
                     KeyGroupsStateHandle oneActualKeyGroupStateHandle =
                             (KeyGroupsStateHandle) oneActualKeyedStateHandle;
@@ -307,7 +305,7 @@ public class CheckpointCoordinatorTestingUtils {
                                     InstantiationUtil.deserializeObject(
                                             actualInputStream,
                                             Thread.currentThread().getContextClassLoader());
-                            assertEquals(expectedKeyGroupState, actualGroupState);
+                            assertThat(actualGroupState).isEqualTo(expectedKeyGroupState);
                         }
                     }
                 }
@@ -334,7 +332,7 @@ public class CheckpointCoordinatorTestingUtils {
             if (collectionList != null) {
                 for (int i = 0; i < collectionList.size(); ++i) {
                     Collection<OperatorStateHandle> stateHandles = collectionList.get(i);
-                    Assert.assertNotNull(stateHandles);
+                    assertThat(stateHandles).isNotNull();
                     for (OperatorStateHandle operatorStateHandle : stateHandles) {
                         collectResult(i, operatorStateHandle, actualResult);
                     }
@@ -343,7 +341,7 @@ public class CheckpointCoordinatorTestingUtils {
         }
 
         Collections.sort(actualResult);
-        Assert.assertEquals(expectedResult, actualResult);
+        assertThat(actualResult).isEqualTo(expectedResult);
     }
 
     static void collectResult(
@@ -534,10 +532,9 @@ public class CheckpointCoordinatorTestingUtils {
 
         public TriggeredCheckpoint getOnlyTriggeredCheckpoint(ExecutionAttemptID attemptId) {
             List<TriggeredCheckpoint> triggeredCheckpoints = getTriggeredCheckpoints(attemptId);
-            assertEquals(
-                    "There should be exactly one checkpoint triggered for " + attemptId,
-                    1,
-                    triggeredCheckpoints.size());
+            assertThat(triggeredCheckpoints.size())
+                    .as("There should be exactly one checkpoint triggered for " + attemptId)
+                    .isEqualTo(1);
             return triggeredCheckpoints.get(0);
         }
 
@@ -549,10 +546,11 @@ public class CheckpointCoordinatorTestingUtils {
         public NotifiedCheckpoint getOnlyNotifiedCompletedCheckpoint(ExecutionAttemptID attemptId) {
             List<NotifiedCheckpoint> completedCheckpoints =
                     getNotifiedCompletedCheckpoints(attemptId);
-            assertEquals(
-                    "There should be exactly one checkpoint notified completed for " + attemptId,
-                    1,
-                    completedCheckpoints.size());
+            assertThat(completedCheckpoints.size())
+                    .as(
+                            "There should be exactly one checkpoint notified completed for "
+                                    + attemptId)
+                    .isEqualTo(1);
             return completedCheckpoints.get(0);
         }
 
@@ -563,10 +561,9 @@ public class CheckpointCoordinatorTestingUtils {
 
         public NotifiedCheckpoint getOnlyNotifiedAbortedCheckpoint(ExecutionAttemptID attemptId) {
             List<NotifiedCheckpoint> abortedCheckpoints = getNotifiedAbortedCheckpoints(attemptId);
-            assertEquals(
-                    "There should be exactly one checkpoint notified aborted for " + attemptId,
-                    1,
-                    abortedCheckpoints.size());
+            assertThat(abortedCheckpoints.size())
+                    .as("There should be exactly one checkpoint notified aborted for " + attemptId)
+                    .isEqualTo(1);
             return abortedCheckpoints.get(0);
         }
     }

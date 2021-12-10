@@ -31,10 +31,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link FsCheckpointStreamFactory}. */
 public class FsCheckpointStreamFactoryTest {
@@ -65,12 +62,12 @@ public class FsCheckpointStreamFactoryTest {
                 factory.createCheckpointStateOutputStream(CheckpointedStateScope.EXCLUSIVE);
         stream.write(new byte[fileSizeThreshold]);
         File[] files = new File(exclusiveStateDir.toUri()).listFiles();
-        assertEquals(1, files.length);
+        assertThat(files.length).isEqualTo(1);
         File file = files[0];
-        assertEquals(fileSizeThreshold, file.length());
+        assertThat(file.length()).isEqualTo(fileSizeThreshold);
         stream.write(new byte[fileSizeThreshold - 1]); // should buffer without flushing
         stream.write(127); // should buffer without flushing
-        assertEquals(fileSizeThreshold, file.length());
+        assertThat(file.length()).isEqualTo(fileSizeThreshold);
     }
 
     @Test
@@ -82,7 +79,7 @@ public class FsCheckpointStreamFactoryTest {
         stream.write(1657);
         final StreamStateHandle handle = stream.closeAndGetHandle();
 
-        assertThat(handle, instanceOf(RelativeFileStateHandle.class));
+        assertThat(handle).isInstanceOf(RelativeFileStateHandle.class);
         assertPathsEqual(
                 exclusiveStateDir, ((RelativeFileStateHandle) handle).getFilePath().getParent());
     }
@@ -96,8 +93,8 @@ public class FsCheckpointStreamFactoryTest {
         stream.write(0);
         final StreamStateHandle handle = stream.closeAndGetHandle();
 
-        assertThat(handle, instanceOf(FileStateHandle.class));
-        assertThat(handle, not(instanceOf(RelativeFileStateHandle.class)));
+        assertThat(handle).isInstanceOf(FileStateHandle.class);
+        assertThat(handle).isNotInstanceOf(RelativeFileStateHandle.class);
         assertPathsEqual(sharedStateDir, ((FileStateHandle) handle).getFilePath().getParent());
     }
 
@@ -111,8 +108,8 @@ public class FsCheckpointStreamFactoryTest {
         stream.write(0);
         final StreamStateHandle handle = stream.closeAndGetHandle();
 
-        assertThat(handle, instanceOf(FileStateHandle.class));
-        assertThat(handle, not(instanceOf(RelativeFileStateHandle.class)));
+        assertThat(handle).isInstanceOf(FileStateHandle.class);
+        assertThat(handle).isNotInstanceOf(RelativeFileStateHandle.class);
         assertPathsEqual(exclusiveStateDir, ((FileStateHandle) handle).getFilePath().getParent());
     }
 
@@ -134,7 +131,8 @@ public class FsCheckpointStreamFactoryTest {
 
         stream.write(new byte[bytesToFlush], 0, bytesToFlush);
         stream.flush();
-        assertEquals(expectEmpty ? 0 : 1, new File(exclusiveStateDir.toUri()).listFiles().length);
+        assertThat(new File(exclusiveStateDir.toUri()).listFiles().length)
+                .isEqualTo(expectEmpty ? 0 : 1);
     }
 
     // ------------------------------------------------------------------------
@@ -144,7 +142,7 @@ public class FsCheckpointStreamFactoryTest {
     private static void assertPathsEqual(Path expected, Path actual) {
         final Path reNormalizedExpected = new Path(expected.toString());
         final Path reNormalizedActual = new Path(actual.toString());
-        assertEquals(reNormalizedExpected, reNormalizedActual);
+        assertThat(reNormalizedActual).isEqualTo(reNormalizedExpected);
     }
 
     private FsCheckpointStreamFactory createFactory(FileSystem fs, int fileSizeThreshold) {

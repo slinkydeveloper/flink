@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that check if we do not degrade NFA computation in case of State accesses. */
 public class NFAStateAccessTest {
@@ -125,9 +125,9 @@ public class NFAStateAccessTest {
                 NFATestHarness.forPattern(pattern).withSharedBuffer(sharedBuffer).build();
         nfaTestHarness.consumeRecords(inputEvents);
 
-        assertEquals(58, sharedBuffer.getStateReads());
-        assertEquals(33, sharedBuffer.getStateWrites());
-        assertEquals(91, sharedBuffer.getStateAccesses());
+        assertThat(sharedBuffer.getStateReads()).isEqualTo(58);
+        assertThat(sharedBuffer.getStateWrites()).isEqualTo(33);
+        assertThat(sharedBuffer.getStateAccesses()).isEqualTo(91);
     }
 
     @Test
@@ -220,8 +220,8 @@ public class NFAStateAccessTest {
                 NFATestHarness.forPattern(pattern).withSharedBuffer(sharedBuffer).build();
         nfaTestHarness.consumeRecords(inputEvents);
 
-        assertEquals(90, sharedBuffer.getStateReads());
-        assertEquals(31, sharedBuffer.getStateWrites());
-        assertEquals(121, sharedBuffer.getStateAccesses());
+        assertThat(sharedBuffer.getStateReads()).isEqualTo(90);
+        assertThat(sharedBuffer.getStateWrites()).isEqualTo(31);
+        assertThat(sharedBuffer.getStateAccesses()).isEqualTo(121);
     }
 }

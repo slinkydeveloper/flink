@@ -33,8 +33,7 @@ import java.util.Collection;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for configuring {@link StreamExecutionEnvironment} via {@link
@@ -160,11 +159,11 @@ public class StreamExecutionEnvironmentConfigurationTest {
         public void assertEqual(
                 StreamExecutionEnvironment configFromFile,
                 StreamExecutionEnvironment configFromSetters) {
-            assertThat(getter.apply(configFromFile), equalTo(getter.apply(configFromSetters)));
+            assertThat(getter.apply(configFromFile)).isEqualTo(getter.apply(configFromSetters));
         }
 
         public void assertEqualNonDefault(StreamExecutionEnvironment configFromFile) {
-            assertThat(getter.apply(configFromFile), equalTo(nonDefaultValue));
+            assertThat(getter.apply(configFromFile)).isEqualTo(nonDefaultValue);
         }
 
         @Override

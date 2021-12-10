@@ -37,9 +37,8 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for the system behavior in multiple corner cases - when null records are passed through the
@@ -81,7 +80,7 @@ public class MiscellaneousIssuesITCase extends TestLogger {
                 env.execute();
                 fail("this should fail due to null values.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, NullPointerException.class).isPresent());
+                assertThat(findThrowable(e, NullPointerException.class).isPresent()).isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -135,7 +134,7 @@ public class MiscellaneousIssuesITCase extends TestLogger {
 
             JobExecutionResult result = env.execute();
 
-            assertEquals(1000000L, result.getAllAccumulatorResults().get(accName));
+            assertThat(result.getAllAccumulatorResults().get(accName)).isEqualTo(1000000L);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

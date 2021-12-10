@@ -31,12 +31,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests verifying that the FsStateBackend passes the entropy injection option to the FileSystem for
@@ -66,19 +61,19 @@ public class FsStateBackendEntropyTest {
         final FsCheckpointStorageLocation location =
                 (FsCheckpointStorageLocation) storage.initializeLocationForCheckpoint(96562);
 
-        assertThat(location.getCheckpointDirectory().toString(), startsWith(checkpointDirStr));
-        assertThat(location.getSharedStateDirectory().toString(), startsWith(checkpointDirStr));
-        assertThat(location.getTaskOwnedStateDirectory().toString(), startsWith(checkpointDirStr));
-        assertThat(location.getMetadataFilePath().toString(), not(containsString(ENTROPY_MARKER)));
+        assertThat(location.getCheckpointDirectory().toString()).startsWith(checkpointDirStr);
+        assertThat(location.getSharedStateDirectory().toString()).startsWith(checkpointDirStr);
+        assertThat(location.getTaskOwnedStateDirectory().toString()).startsWith(checkpointDirStr);
+        assertThat(location.getMetadataFilePath().toString()).doesNotContain(ENTROPY_MARKER);
 
         // check entropy in task-owned state
         try (CheckpointStateOutputStream stream = storage.createTaskOwnedStateStream()) {
             stream.write(new byte[fileSizeThreshold + 1], 0, fileSizeThreshold + 1);
             FileStateHandle handle = (FileStateHandle) stream.closeAndGetHandle();
 
-            assertNotNull(handle);
-            assertThat(handle.getFilePath().toString(), not(containsString(ENTROPY_MARKER)));
-            assertThat(handle.getFilePath().toString(), containsString(RESOLVED_MARKER));
+            assertThat(handle).isNotNull();
+            assertThat(handle.getFilePath().toString()).doesNotContain(ENTROPY_MARKER);
+            assertThat(handle.getFilePath().toString()).contains(RESOLVED_MARKER);
         }
 
         // check entropy in the exclusive/shared state
@@ -88,9 +83,9 @@ public class FsStateBackendEntropyTest {
 
             FileStateHandle handle = (FileStateHandle) stream.closeAndGetHandle();
 
-            assertNotNull(handle);
-            assertThat(handle.getFilePath().toString(), not(containsString(ENTROPY_MARKER)));
-            assertThat(handle.getFilePath().toString(), containsString(RESOLVED_MARKER));
+            assertThat(handle).isNotNull();
+            assertThat(handle.getFilePath().toString()).doesNotContain(ENTROPY_MARKER);
+            assertThat(handle.getFilePath().toString()).contains(RESOLVED_MARKER);
         }
 
         // check that there is no entropy in the metadata
@@ -100,20 +95,17 @@ public class FsStateBackendEntropyTest {
             FsCompletedCheckpointStorageLocation handle =
                     (FsCompletedCheckpointStorageLocation) stream.closeAndFinalizeCheckpoint();
 
-            assertNotNull(handle);
+            assertThat(handle).isNotNull();
 
             // metadata files have no entropy
-            assertThat(
-                    handle.getMetadataHandle().getFilePath().toString(),
-                    not(containsString(ENTROPY_MARKER)));
-            assertThat(
-                    handle.getMetadataHandle().getFilePath().toString(),
-                    not(containsString(RESOLVED_MARKER)));
+            assertThat(handle.getMetadataHandle().getFilePath().toString())
+                    .doesNotContain(ENTROPY_MARKER);
+            assertThat(handle.getMetadataHandle().getFilePath().toString())
+                    .doesNotContain(RESOLVED_MARKER);
 
             // external location is the same as metadata, without the file name
-            assertEquals(
-                    handle.getMetadataHandle().getFilePath().getParent().toString(),
-                    handle.getExternalPointer());
+            assertThat(handle.getExternalPointer())
+                    .isEqualTo(handle.getMetadataHandle().getFilePath().getParent().toString());
         }
     }
 

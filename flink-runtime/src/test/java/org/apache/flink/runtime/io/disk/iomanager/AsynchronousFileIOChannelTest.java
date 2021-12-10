@@ -42,9 +42,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 @RunWith(PowerMockRunner.class)
@@ -311,8 +310,8 @@ public class AsynchronousFileIOChannelTest {
 
                 writer.close();
 
-                assertEquals(NUM_BLOCKS, callbackCounter.get());
-                assertFalse(exceptionOccurred.get());
+                assertThat(callbackCounter.get()).isEqualTo(NUM_BLOCKS);
+                assertThat(exceptionOccurred.get()).isFalse();
             } finally {
                 writer.closeAndDelete();
             }

@@ -38,7 +38,6 @@ import org.apache.flink.runtime.io.disk.iomanager.IOManagerAsync;
 import org.apache.flink.types.ByteValue;
 import org.apache.flink.util.MutableObjectIterator;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -48,7 +47,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class HashTableTest {
 
@@ -260,7 +260,7 @@ public class HashTableTest {
                 }
 
                 // check that we retrieve all our elements
-                Assert.assertEquals(numElements, counter);
+                assertThat(counter).isEqualTo(numElements);
             }
 
             table.close();

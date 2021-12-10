@@ -41,9 +41,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link org.apache.flink.streaming.api.functions.sink.SocketClientSink}. */
 @SuppressWarnings("serial")
@@ -103,7 +102,7 @@ public class SocketClientSinkTest extends TestLogger {
             fail("Error in spawned thread: " + t.getMessage());
         }
 
-        assertEquals(TEST_MESSAGE, value);
+        assertThat(value).isEqualTo(TEST_MESSAGE);
     }
 
     @Test
@@ -147,7 +146,7 @@ public class SocketClientSinkTest extends TestLogger {
             fail("Error in spawned thread: " + t.getMessage());
         }
 
-        assertEquals(TEST_MESSAGE, value);
+        assertThat(value).isEqualTo(TEST_MESSAGE);
     }
 
     @Test
@@ -195,12 +194,14 @@ public class SocketClientSinkTest extends TestLogger {
                 }
             } catch (IOException e) {
                 // check whether throw a exception that reconnect failed.
-                assertTrue("Wrong exception", e.getMessage().contains(EXCEPTION_MESSGAE));
+                assertThat(e.getMessage().contains(EXCEPTION_MESSGAE))
+                        .as("Wrong exception")
+                        .isTrue();
             } catch (Exception e) {
                 fail("wrong exception: " + e.getClass().getName() + " - " + e.getMessage());
             }
 
-            assertEquals(0, simpleSink.getCurrentNumberOfRetries());
+            assertThat(simpleSink.getCurrentNumberOfRetries()).isEqualTo(0);
         } finally {
             IOUtils.closeQuietly(server);
         }
@@ -229,7 +230,7 @@ public class SocketClientSinkTest extends TestLogger {
                                             new InputStreamReader(socket.getInputStream()));
 
                             String value = reader.readLine();
-                            assertEquals("0", value);
+                            assertThat(value).isEqualTo("0");
 
                             socket.close();
                             return null;
@@ -255,10 +256,10 @@ public class SocketClientSinkTest extends TestLogger {
 
             // Shutdown the server socket
             serverSocket[0].close();
-            assertTrue(serverSocket[0].isClosed());
+            assertThat(serverSocket[0].isClosed()).isTrue();
 
             // No retries expected at this point
-            assertEquals(0, sink.getCurrentNumberOfRetries());
+            assertThat(sink.getCurrentNumberOfRetries()).isEqualTo(0);
 
             final CountDownLatch retryLatch = new CountDownLatch(1);
             final CountDownLatch again = new CountDownLatch(1);
@@ -305,7 +306,7 @@ public class SocketClientSinkTest extends TestLogger {
             // Wait for the reconnect
             String value = reader.readLine();
 
-            assertEquals("1", value);
+            assertThat(value).isEqualTo("1");
 
             // OK the sink re-connected. :)
         } finally {

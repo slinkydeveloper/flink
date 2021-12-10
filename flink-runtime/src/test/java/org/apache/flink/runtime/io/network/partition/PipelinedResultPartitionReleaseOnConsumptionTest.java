@@ -25,8 +25,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PipelinedResultPartitionReleaseOnConsumptionTest}. */
 public class PipelinedResultPartitionReleaseOnConsumptionTest extends TestLogger {
@@ -44,11 +43,11 @@ public class PipelinedResultPartitionReleaseOnConsumptionTest extends TestLogger
         manager.registerResultPartition(partition);
 
         partition.onConsumedSubpartition(0);
-        assertFalse(partition.isReleased());
+        assertThat(partition.isReleased()).isFalse();
 
         partition.onConsumedSubpartition(1);
         partition.close();
-        assertTrue(partition.isReleased());
+        assertThat(partition.isReleased()).isTrue();
     }
 
     @Test
@@ -63,10 +62,10 @@ public class PipelinedResultPartitionReleaseOnConsumptionTest extends TestLogger
         partition.setup();
         partition.emitRecord(ByteBuffer.allocate(16), 0);
         partition.onConsumedSubpartition(0);
-        assertFalse(partition.isReleased());
+        assertThat(partition.isReleased()).isFalse();
         partition.emitRecord(ByteBuffer.allocate(16), 0);
         partition.close();
-        assertTrue(partition.isReleased());
+        assertThat(partition.isReleased()).isTrue();
     }
 
     @Test
@@ -83,7 +82,7 @@ public class PipelinedResultPartitionReleaseOnConsumptionTest extends TestLogger
         partition.onConsumedSubpartition(0);
         partition.onConsumedSubpartition(0);
 
-        assertFalse(partition.isReleased());
+        assertThat(partition.isReleased()).isFalse();
     }
 
     @Test
@@ -102,6 +101,6 @@ public class PipelinedResultPartitionReleaseOnConsumptionTest extends TestLogger
         partition.onConsumedSubpartition(1);
         partition.close();
 
-        assertTrue(partition.isReleased());
+        assertThat(partition.isReleased()).isTrue();
     }
 }

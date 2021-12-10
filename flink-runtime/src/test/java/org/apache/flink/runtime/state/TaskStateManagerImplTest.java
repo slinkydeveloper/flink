@@ -38,7 +38,6 @@ import org.apache.flink.runtime.taskmanager.TestCheckpointResponder;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -46,6 +45,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TaskStateManagerImplTest extends TestLogger {
 
@@ -80,9 +81,9 @@ public class TaskStateManagerImplTest extends TestLogger {
         OperatorID operatorID_2 = new OperatorID(2L, 2L);
         OperatorID operatorID_3 = new OperatorID(3L, 3L);
 
-        Assert.assertFalse(taskStateManager.prioritizedOperatorState(operatorID_1).isRestored());
-        Assert.assertFalse(taskStateManager.prioritizedOperatorState(operatorID_2).isRestored());
-        Assert.assertFalse(taskStateManager.prioritizedOperatorState(operatorID_3).isRestored());
+        assertThat(taskStateManager.prioritizedOperatorState(operatorID_1).isRestored()).isFalse();
+        assertThat(taskStateManager.prioritizedOperatorState(operatorID_2).isRestored()).isFalse();
+        assertThat(taskStateManager.prioritizedOperatorState(operatorID_3).isRestored()).isFalse();
 
         KeyGroupRange keyGroupRange = new KeyGroupRange(0, 1);
         // Remote state of operator 1 has only managed keyed state.
@@ -120,15 +121,14 @@ public class TaskStateManagerImplTest extends TestLogger {
 
         // checks that the checkpoint responder and the local state store received state as
         // expected.
-        Assert.assertEquals(
-                checkpointMetaData.getCheckpointId(), acknowledgeReport.getCheckpointId());
-        Assert.assertEquals(checkpointMetrics, acknowledgeReport.getCheckpointMetrics());
-        Assert.assertEquals(executionAttemptID, acknowledgeReport.getExecutionAttemptID());
-        Assert.assertEquals(jobID, acknowledgeReport.getJobID());
-        Assert.assertEquals(jmTaskStateSnapshot, acknowledgeReport.getSubtaskState());
-        Assert.assertEquals(
-                tmTaskStateSnapshot,
-                testTaskLocalStateStore.retrieveLocalState(checkpointMetaData.getCheckpointId()));
+        assertThat(acknowledgeReport.getCheckpointId())
+                .isEqualTo(checkpointMetaData.getCheckpointId());
+        assertThat(acknowledgeReport.getCheckpointMetrics()).isEqualTo(checkpointMetrics);
+        assertThat(acknowledgeReport.getExecutionAttemptID()).isEqualTo(executionAttemptID);
+        assertThat(acknowledgeReport.getJobID()).isEqualTo(jobID);
+        assertThat(acknowledgeReport.getSubtaskState()).isEqualTo(jmTaskStateSnapshot);
+        assertThat(testTaskLocalStateStore.retrieveLocalState(checkpointMetaData.getCheckpointId()))
+                .isEqualTo(tmTaskStateSnapshot);
 
         // -------------------------------------- test prio retrieving
         // ---------------------------------------
@@ -156,38 +156,39 @@ public class TaskStateManagerImplTest extends TestLogger {
         PrioritizedOperatorSubtaskState prioritized_3 =
                 taskStateManager.prioritizedOperatorState(operatorID_3);
 
-        Assert.assertTrue(prioritized_1.isRestored());
-        Assert.assertTrue(prioritized_2.isRestored());
-        Assert.assertTrue(prioritized_3.isRestored());
-        Assert.assertTrue(taskStateManager.prioritizedOperatorState(new OperatorID()).isRestored());
+        assertThat(prioritized_1.isRestored()).isTrue();
+        assertThat(prioritized_2.isRestored()).isTrue();
+        assertThat(prioritized_3.isRestored()).isTrue();
+        assertThat(taskStateManager.prioritizedOperatorState(new OperatorID()).isRestored())
+                .isTrue();
 
         // checks for operator 1.
         Iterator<StateObjectCollection<KeyedStateHandle>> prioritizedManagedKeyedState_1 =
                 prioritized_1.getPrioritizedManagedKeyedState().iterator();
 
-        Assert.assertTrue(prioritizedManagedKeyedState_1.hasNext());
+        assertThat(prioritizedManagedKeyedState_1.hasNext()).isTrue();
         StateObjectCollection<KeyedStateHandle> current = prioritizedManagedKeyedState_1.next();
         KeyedStateHandle keyedStateHandleExp =
                 tmOperatorSubtaskState_1.getManagedKeyedState().iterator().next();
         KeyedStateHandle keyedStateHandleAct = current.iterator().next();
-        Assert.assertTrue(keyedStateHandleExp == keyedStateHandleAct);
-        Assert.assertTrue(prioritizedManagedKeyedState_1.hasNext());
+        assertThat(keyedStateHandleExp == keyedStateHandleAct).isTrue();
+        assertThat(prioritizedManagedKeyedState_1.hasNext()).isTrue();
         current = prioritizedManagedKeyedState_1.next();
         keyedStateHandleExp = jmOperatorSubtaskState_1.getManagedKeyedState().iterator().next();
         keyedStateHandleAct = current.iterator().next();
-        Assert.assertTrue(keyedStateHandleExp == keyedStateHandleAct);
-        Assert.assertFalse(prioritizedManagedKeyedState_1.hasNext());
+        assertThat(keyedStateHandleExp == keyedStateHandleAct).isTrue();
+        assertThat(prioritizedManagedKeyedState_1.hasNext()).isFalse();
 
         // checks for operator 2.
         Iterator<StateObjectCollection<KeyedStateHandle>> prioritizedRawKeyedState_2 =
                 prioritized_2.getPrioritizedRawKeyedState().iterator();
 
-        Assert.assertTrue(prioritizedRawKeyedState_2.hasNext());
+        assertThat(prioritizedRawKeyedState_2.hasNext()).isTrue();
         current = prioritizedRawKeyedState_2.next();
         keyedStateHandleExp = jmOperatorSubtaskState_2.getRawKeyedState().iterator().next();
         keyedStateHandleAct = current.iterator().next();
-        Assert.assertTrue(keyedStateHandleExp == keyedStateHandleAct);
-        Assert.assertFalse(prioritizedRawKeyedState_2.hasNext());
+        assertThat(keyedStateHandleExp == keyedStateHandleAct).isTrue();
+        assertThat(prioritizedRawKeyedState_2.hasNext()).isFalse();
     }
 
     /**
@@ -247,21 +248,20 @@ public class TaskStateManagerImplTest extends TestLogger {
                     taskStateManager.createLocalRecoveryConfig();
 
             for (int i = 0; i < 10; ++i) {
-                Assert.assertEquals(
-                        allocBaseDirs[i % allocBaseDirs.length],
-                        localRecoveryConfFromTaskLocalStateStore
-                                .getLocalStateDirectoryProvider()
-                                .allocationBaseDirectory(i));
-                Assert.assertEquals(
-                        allocBaseDirs[i % allocBaseDirs.length],
-                        localRecoveryConfFromTaskStateManager
-                                .getLocalStateDirectoryProvider()
-                                .allocationBaseDirectory(i));
+                assertThat(
+                                localRecoveryConfFromTaskLocalStateStore
+                                        .getLocalStateDirectoryProvider()
+                                        .allocationBaseDirectory(i))
+                        .isEqualTo(allocBaseDirs[i % allocBaseDirs.length]);
+                assertThat(
+                                localRecoveryConfFromTaskStateManager
+                                        .getLocalStateDirectoryProvider()
+                                        .allocationBaseDirectory(i))
+                        .isEqualTo(allocBaseDirs[i % allocBaseDirs.length]);
             }
 
-            Assert.assertEquals(
-                    localRecoveryConfFromTaskLocalStateStore.isLocalRecoveryEnabled(),
-                    localRecoveryConfFromTaskStateManager.isLocalRecoveryEnabled());
+            assertThat(localRecoveryConfFromTaskStateManager.isLocalRecoveryEnabled())
+                    .isEqualTo(localRecoveryConfFromTaskLocalStateStore.isLocalRecoveryEnabled());
         } finally {
             tmpFolder.delete();
         }
@@ -281,7 +281,7 @@ public class TaskStateManagerImplTest extends TestLogger {
                         null,
                         jobManagerTaskRestore,
                         new TestCheckpointResponder());
-        Assert.assertTrue(stateManager.isTaskDeployedAsFinished());
+        assertThat(stateManager.isTaskDeployedAsFinished()).isTrue();
     }
 
     public void testAcquringRestoreCheckpointId() {
@@ -293,7 +293,7 @@ public class TaskStateManagerImplTest extends TestLogger {
                         null,
                         null,
                         new TestCheckpointResponder());
-        Assert.assertFalse(emptyStateManager.getRestoreCheckpointId().isPresent());
+        assertThat(emptyStateManager.getRestoreCheckpointId().isPresent()).isFalse();
 
         TaskStateManagerImpl nonEmptyStateManager =
                 new TaskStateManagerImpl(
@@ -303,7 +303,7 @@ public class TaskStateManagerImplTest extends TestLogger {
                         null,
                         new JobManagerTaskRestore(2, new TaskStateSnapshot()),
                         new TestCheckpointResponder());
-        Assert.assertEquals(2L, (long) nonEmptyStateManager.getRestoreCheckpointId().get());
+        assertThat((long) nonEmptyStateManager.getRestoreCheckpointId().get()).isEqualTo(2L);
     }
 
     public static TaskStateManager taskStateManager(

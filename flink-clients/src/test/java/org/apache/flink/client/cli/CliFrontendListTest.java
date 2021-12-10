@@ -34,8 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -62,9 +61,9 @@ public class CliFrontendListTest extends CliFrontendTestBase {
                     new ListOptions(
                             CliFrontendParser.parse(
                                     CliFrontendParser.getListCommandOptions(), parameters, true));
-            assertTrue(options.showAll());
-            assertFalse(options.showRunning());
-            assertFalse(options.showScheduled());
+            assertThat(options.showAll()).isTrue();
+            assertThat(options.showRunning()).isFalse();
+            assertThat(options.showScheduled()).isFalse();
         }
 
         // test configure running job
@@ -74,9 +73,9 @@ public class CliFrontendListTest extends CliFrontendTestBase {
                     new ListOptions(
                             CliFrontendParser.parse(
                                     CliFrontendParser.getListCommandOptions(), parameters, true));
-            assertFalse(options.showAll());
-            assertTrue(options.showRunning());
-            assertFalse(options.showScheduled());
+            assertThat(options.showAll()).isFalse();
+            assertThat(options.showRunning()).isTrue();
+            assertThat(options.showScheduled()).isFalse();
         }
 
         // test configure scheduled job
@@ -86,9 +85,9 @@ public class CliFrontendListTest extends CliFrontendTestBase {
                     new ListOptions(
                             CliFrontendParser.parse(
                                     CliFrontendParser.getListCommandOptions(), parameters, true));
-            assertFalse(options.showAll());
-            assertFalse(options.showRunning());
-            assertTrue(options.showScheduled());
+            assertThat(options.showAll()).isFalse();
+            assertThat(options.showRunning()).isFalse();
+            assertThat(options.showScheduled()).isTrue();
         }
     }
 

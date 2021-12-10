@@ -34,7 +34,7 @@ import static org.apache.flink.connector.pulsar.source.enumerator.subscriber.Pul
 import static org.apache.flink.connector.pulsar.source.enumerator.subscriber.PulsarSubscriber.getTopicPatternSubscriber;
 import static org.apache.flink.connector.pulsar.source.enumerator.topic.TopicRange.createFullRange;
 import static org.apache.pulsar.client.api.RegexSubscriptionMode.AllTopics;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link PulsarSubscriber}. */
 class PulsarSubscriberTest extends PulsarTestSuiteBase {
@@ -62,7 +62,7 @@ class PulsarSubscriberTest extends PulsarTestSuiteBase {
             expectedPartitions.add(new TopicPartition(TOPIC2, i, createFullRange()));
         }
 
-        assertEquals(expectedPartitions, topicPartitions);
+        assertThat(topicPartitions).isEqualTo(expectedPartitions);
 
         operator().deleteTopic(TOPIC1, true);
         operator().deleteTopic(TOPIC2, true);
@@ -89,7 +89,7 @@ class PulsarSubscriberTest extends PulsarTestSuiteBase {
             expectedPartitions.add(new TopicPartition(TOPIC3, i, createFullRange()));
         }
 
-        assertEquals(expectedPartitions, topicPartitions);
+        assertThat(topicPartitions).isEqualTo(expectedPartitions);
 
         operator().deleteTopic(TOPIC1, true);
         operator().deleteTopic(TOPIC2, true);

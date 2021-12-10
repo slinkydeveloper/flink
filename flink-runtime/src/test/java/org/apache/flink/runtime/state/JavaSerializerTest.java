@@ -30,7 +30,7 @@ import org.junit.Test;
 import java.io.File;
 import java.io.Serializable;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.fail;
 
 /** A test that verifies that the {@link JavaSerializer} properly handles class loading. */
 public class JavaSerializerTest extends SerializerTestBase<Serializable> {

@@ -33,7 +33,6 @@ import org.apache.flink.runtime.state.VoidNamespaceSerializer;
 import org.apache.flink.runtime.state.internal.InternalKvState;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -45,10 +44,8 @@ import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link KvStateRegistry}. */
 public class KvStateRegistryTest extends TestLogger {
@@ -106,8 +103,8 @@ public class KvStateRegistryTest extends TestLogger {
         final KvStateEntry<?, ?, ?> kvState = kvStateRegistry.getKvState(stateID);
 
         // verify that all the threads are done correctly.
-        Assert.assertEquals(threads, infos.size());
-        Assert.assertEquals(threads, kvState.getCacheSize());
+        assertThat(infos.size()).isEqualTo(threads);
+        assertThat(kvState.getCacheSize()).isEqualTo(threads);
 
         latch2.countDown();
 
@@ -116,11 +113,11 @@ public class KvStateRegistryTest extends TestLogger {
             for (KvStateInfo<?, ?, ?> infoB : infos) {
                 if (infoA == infoB) {
                     if (instanceAlreadyFound) {
-                        Assert.fail("More than one thread sharing the same serializer instance.");
+                        fail("More than one thread sharing the same serializer instance.");
                     }
                     instanceAlreadyFound = true;
                 } else {
-                    Assert.assertEquals(infoA, infoB);
+                    assertThat(infoB).isEqualTo(infoA);
                 }
             }
         }
@@ -128,7 +125,7 @@ public class KvStateRegistryTest extends TestLogger {
         kvStateRegistry.unregisterKvState(
                 jobID, jobVertexId, keyGroupRange, registrationName, stateID);
 
-        Assert.assertEquals(0L, kvState.getCacheSize());
+        assertThat(kvState.getCacheSize()).isEqualTo(0L);
 
         Throwable t = exceptionHolder.get();
         if (t != null) {
@@ -174,8 +171,8 @@ public class KvStateRegistryTest extends TestLogger {
                         new DummyKvState(),
                         getClass().getClassLoader());
 
-        assertThat(registeredNotifications1.poll(), equalTo(jobId1));
-        assertThat(registeredNotifications2.isEmpty(), is(true));
+        assertThat(registeredNotifications1.poll()).isEqualTo(jobId1);
+        assertThat(registeredNotifications2.isEmpty()).isEqualTo(true);
 
         final JobVertexID jobVertexId2 = new JobVertexID();
         final KeyGroupRange keyGroupRange2 = new KeyGroupRange(0, 1);
@@ -189,20 +186,20 @@ public class KvStateRegistryTest extends TestLogger {
                         new DummyKvState(),
                         getClass().getClassLoader());
 
-        assertThat(registeredNotifications2.poll(), equalTo(jobId2));
-        assertThat(registeredNotifications1.isEmpty(), is(true));
+        assertThat(registeredNotifications2.poll()).isEqualTo(jobId2);
+        assertThat(registeredNotifications1.isEmpty()).isEqualTo(true);
 
         kvStateRegistry.unregisterKvState(
                 jobId1, jobVertexId, keyGroupRange, registrationName, kvStateID);
 
-        assertThat(deregisteredNotifications1.poll(), equalTo(jobId1));
-        assertThat(deregisteredNotifications2.isEmpty(), is(true));
+        assertThat(deregisteredNotifications1.poll()).isEqualTo(jobId1);
+        assertThat(deregisteredNotifications2.isEmpty()).isEqualTo(true);
 
         kvStateRegistry.unregisterKvState(
                 jobId2, jobVertexId2, keyGroupRange2, registrationName2, kvStateID2);
 
-        assertThat(deregisteredNotifications2.poll(), equalTo(jobId2));
-        assertThat(deregisteredNotifications1.isEmpty(), is(true));
+        assertThat(deregisteredNotifications2.poll()).isEqualTo(jobId2);
+        assertThat(deregisteredNotifications1.isEmpty()).isEqualTo(true);
     }
 
     /**
@@ -240,16 +237,16 @@ public class KvStateRegistryTest extends TestLogger {
                         new DummyKvState(),
                         getClass().getClassLoader());
 
-        assertThat(stateRegistrationNotifications.poll(), equalTo(jobId));
+        assertThat(stateRegistrationNotifications.poll()).isEqualTo(jobId);
         // another listener should not have received any notifications
-        assertThat(anotherQueue.isEmpty(), is(true));
+        assertThat(anotherQueue.isEmpty()).isEqualTo(true);
 
         kvStateRegistry.unregisterKvState(
                 jobId, jobVertexId, keyGroupRange, registrationName, kvStateID);
 
-        assertThat(stateDeregistrationNotifications.poll(), equalTo(jobId));
+        assertThat(stateDeregistrationNotifications.poll()).isEqualTo(jobId);
         // another listener should not have received any notifications
-        assertThat(anotherQueue.isEmpty(), is(true));
+        assertThat(anotherQueue.isEmpty()).isEqualTo(true);
     }
 
     /** Testing implementation of {@link KvStateRegistryListener}. */

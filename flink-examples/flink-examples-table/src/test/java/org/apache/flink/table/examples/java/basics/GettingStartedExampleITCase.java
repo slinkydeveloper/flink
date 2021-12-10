@@ -22,8 +22,7 @@ import org.apache.flink.table.examples.utils.ExampleOutputTestBase;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for Java {@link GettingStartedExample}. */
 public class GettingStartedExampleITCase extends ExampleOutputTestBase {
@@ -32,8 +31,7 @@ public class GettingStartedExampleITCase extends ExampleOutputTestBase {
     public void testExample() throws Exception {
         GettingStartedExample.main(new String[0]);
         final String consoleOutput = getOutputString();
-        assertThat(
-                consoleOutput, containsString("|                    6 |                 1979 |"));
-        assertThat(consoleOutput, containsString("SUCCESS!"));
+        assertThat(consoleOutput).contains("|                    6 |                 1979 |");
+        assertThat(consoleOutput).contains("SUCCESS!");
     }
 }

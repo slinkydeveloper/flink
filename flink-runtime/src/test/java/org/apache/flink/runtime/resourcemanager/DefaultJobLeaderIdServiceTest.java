@@ -42,13 +42,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
@@ -90,9 +85,9 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         // notify the leader id service about the new leader
         leaderRetrievalService.notifyListener(address, leaderId.toUUID());
 
-        assertEquals(leaderId, leaderIdFuture.get());
+        assertThat(leaderIdFuture.get()).isEqualTo(leaderId);
 
-        assertTrue(jobLeaderIdService.containsJob(jobId));
+        assertThat(jobLeaderIdService.containsJob(jobId)).isTrue();
     }
 
     /** Tests that removing a job completes the job leader id future exceptionally. */
@@ -122,7 +117,7 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         // remove the job before we could find a leader
         jobLeaderIdService.removeJob(jobId);
 
-        assertFalse(jobLeaderIdService.containsJob(jobId));
+        assertThat(jobLeaderIdService.containsJob(jobId)).isFalse();
 
         try {
             leaderIdFuture.get();
@@ -158,7 +153,7 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
 
         jobLeaderIdService.addJob(jobId);
 
-        assertTrue(jobLeaderIdService.containsJob(jobId));
+        assertThat(jobLeaderIdService.containsJob(jobId)).isTrue();
 
         ArgumentCaptor<Runnable> runnableArgumentCaptor = ArgumentCaptor.forClass(Runnable.class);
         verify(scheduledExecutor)
@@ -172,7 +167,8 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         verify(jobLeaderIdActions, times(1))
                 .notifyJobTimeout(eq(jobId), timeoutIdArgumentCaptor.capture());
 
-        assertTrue(jobLeaderIdService.isValidTimeout(jobId, timeoutIdArgumentCaptor.getValue()));
+        assertThat(jobLeaderIdService.isValidTimeout(jobId, timeoutIdArgumentCaptor.getValue()))
+                .isTrue();
     }
 
     /**
@@ -238,9 +234,9 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         // notify the leader id service about the new leader
         leaderRetrievalService.notifyListener(address, leaderId.toUUID());
 
-        assertEquals(leaderId, leaderIdFuture.get());
+        assertThat(leaderIdFuture.get()).isEqualTo(leaderId);
 
-        assertTrue(jobLeaderIdService.containsJob(jobId));
+        assertThat(jobLeaderIdService.containsJob(jobId)).isTrue();
 
         // check that the first timeout got cancelled
         verify(timeout1, times(1)).cancel(anyBoolean());
@@ -251,14 +247,14 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         // initial timeout runnable which should no longer have an effect
         Runnable runnable = lastRunnable.get();
 
-        assertNotNull(runnable);
+        assertThat(runnable).isNotNull();
 
         runnable.run();
 
         verify(jobLeaderIdActions, times(1)).notifyJobTimeout(eq(jobId), any(UUID.class));
 
         // the timeout should no longer be valid
-        assertFalse(jobLeaderIdService.isValidTimeout(jobId, lastTimeoutId.get()));
+        assertThat(jobLeaderIdService.isValidTimeout(jobId, lastTimeoutId.get())).isFalse();
 
         // lose leadership
         leaderRetrievalService.notifyListener("", null);
@@ -269,14 +265,14 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         // the second runnable should be the new timeout
         runnable = lastRunnable.get();
 
-        assertNotNull(runnable);
+        assertThat(runnable).isNotNull();
 
         runnable.run();
 
         verify(jobLeaderIdActions, times(2)).notifyJobTimeout(eq(jobId), any(UUID.class));
 
         // the new timeout should be valid
-        assertTrue(jobLeaderIdService.isValidTimeout(jobId, lastTimeoutId.get()));
+        assertThat(jobLeaderIdService.isValidTimeout(jobId, lastTimeoutId.get())).isTrue();
     }
 
     /**
@@ -312,12 +308,12 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
 
         final CompletableFuture<JobMasterId> leaderIdFuture = jobLeaderIdService.getLeaderId(jobId);
         // there is currently no leader, so this should not be completed
-        assertThat(leaderIdFuture.isDone(), is(false));
+        assertThat(leaderIdFuture.isDone()).isEqualTo(false);
 
         // elect a new leader
         final UUID newLeaderId = UUID.randomUUID();
         leaderRetrievalService.notifyListener("foo", newLeaderId);
-        assertThat(leaderIdFuture.get(), is(JobMasterId.fromUuidOrNull(newLeaderId)));
+        assertThat(leaderIdFuture.get()).isEqualTo(JobMasterId.fromUuidOrNull(newLeaderId));
     }
 
     /** Tests that whether the service has been started. */
@@ -335,15 +331,15 @@ public class DefaultJobLeaderIdServiceTest extends TestLogger {
         DefaultJobLeaderIdService jobLeaderIdService =
                 new DefaultJobLeaderIdService(highAvailabilityServices, scheduledExecutor, timeout);
 
-        assertFalse(jobLeaderIdService.isStarted());
+        assertThat(jobLeaderIdService.isStarted()).isFalse();
 
         jobLeaderIdService.start(jobLeaderIdActions);
 
-        assertTrue(jobLeaderIdService.isStarted());
+        assertThat(jobLeaderIdService.isStarted()).isTrue();
 
         jobLeaderIdService.stop();
 
-        assertFalse(jobLeaderIdService.isStarted());
+        assertThat(jobLeaderIdService.isStarted()).isFalse();
     }
 
     private static class NoOpJobLeaderIdActions implements JobLeaderIdActions {

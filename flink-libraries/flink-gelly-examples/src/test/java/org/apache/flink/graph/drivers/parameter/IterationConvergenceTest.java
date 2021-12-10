@@ -20,9 +20,11 @@ package org.apache.flink.graph.drivers.parameter;
 
 import org.apache.flink.api.java.utils.ParameterTool;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /** Tests for {@link IterationConvergence}. */
 public class IterationConvergenceTest extends ParameterTestBase {
@@ -39,15 +41,16 @@ public class IterationConvergenceTest extends ParameterTestBase {
     @Test
     public void testWithIterations() {
         parameter.configure(ParameterTool.fromArgs(new String[] {"--iterations", "42"}));
-        Assert.assertEquals(42, parameter.getValue().iterations);
-        Assert.assertEquals(Double.MAX_VALUE, parameter.getValue().convergenceThreshold, 0.000001);
+        assertThat(parameter.getValue().iterations).isEqualTo(42);
+        assertThat(parameter.getValue().convergenceThreshold)
+                .isCloseTo(Double.MAX_VALUE, within(0.000001));
     }
 
     @Test
     public void testWithConvergenceThreshold() {
         parameter.configure(ParameterTool.fromArgs(new String[] {"--convergence_threshold", "42"}));
-        Assert.assertEquals(Integer.MAX_VALUE, parameter.getValue().iterations);
-        Assert.assertEquals(42.0, parameter.getValue().convergenceThreshold, 0.000001);
+        assertThat(parameter.getValue().iterations).isEqualTo(Integer.MAX_VALUE);
+        assertThat(parameter.getValue().convergenceThreshold).isCloseTo(42.0, within(0.000001));
     }
 
     @Test
@@ -55,14 +58,15 @@ public class IterationConvergenceTest extends ParameterTestBase {
         parameter.configure(
                 ParameterTool.fromArgs(
                         new String[] {"--iterations", "42", "--convergence_threshold", "42"}));
-        Assert.assertEquals(42, parameter.getValue().iterations);
-        Assert.assertEquals(42.0, parameter.getValue().convergenceThreshold, 0.000001);
+        assertThat(parameter.getValue().iterations).isEqualTo(42);
+        assertThat(parameter.getValue().convergenceThreshold).isCloseTo(42.0, within(0.000001));
     }
 
     @Test
     public void testWithNeither() {
         parameter.configure(ParameterTool.fromArgs(new String[] {}));
-        Assert.assertEquals(10, parameter.getValue().iterations);
-        Assert.assertEquals(Double.MAX_VALUE, parameter.getValue().convergenceThreshold, 0.000001);
+        assertThat(parameter.getValue().iterations).isEqualTo(10);
+        assertThat(parameter.getValue().convergenceThreshold)
+                .isCloseTo(Double.MAX_VALUE, within(0.000001));
     }
 }

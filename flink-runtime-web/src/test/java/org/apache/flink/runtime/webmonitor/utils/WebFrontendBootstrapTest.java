@@ -37,8 +37,7 @@ import org.slf4j.LoggerFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the WebFrontendBootstrap. */
 public class WebFrontendBootstrapTest {
@@ -74,25 +73,23 @@ public class WebFrontendBootstrapTest {
                         0,
                         configuration);
 
-        assertEquals(webUI.inboundChannelHandlerFactories.size(), 2);
-        assertTrue(
-                webUI.inboundChannelHandlerFactories.get(0)
-                        instanceof Prio1InboundChannelHandlerFactory);
-        assertTrue(
-                webUI.inboundChannelHandlerFactories.get(1)
-                        instanceof Prio0InboundChannelHandlerFactory);
+        assertThat(2).isEqualTo(webUI.inboundChannelHandlerFactories.size());
+        assertThat(webUI.inboundChannelHandlerFactories.get(0))
+                .isInstanceOf(Prio1InboundChannelHandlerFactory.class);
+        assertThat(webUI.inboundChannelHandlerFactories.get(1))
+                .isInstanceOf(Prio0InboundChannelHandlerFactory.class);
 
         int port = webUI.getServerPort();
         try {
             Tuple2<Integer, String> index =
                     HistoryServerTest.getFromHTTP("http://localhost:" + port + "/index.html");
-            assertEquals(index.f0.intValue(), 200);
-            assertTrue(index.f1.contains("Apache Flink Web Dashboard"));
+            assertThat(200).isEqualTo(index.f0.intValue());
+            assertThat(index.f1.contains("Apache Flink Web Dashboard")).isTrue();
 
             Tuple2<Integer, String> index2 =
                     HistoryServerTest.getFromHTTP("http://localhost:" + port + "/nonExisting");
-            assertEquals(index2.f0.intValue(), 200);
-            assertEquals(index, index2);
+            assertThat(200).isEqualTo(index2.f0.intValue());
+            assertThat(index2).isEqualTo(index);
         } finally {
             webUI.shutdown();
         }

@@ -38,11 +38,11 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -96,9 +96,9 @@ public class AbstractStreamOperatorTestHarnessTest extends TestLogger {
             keyedStateBackend.setCurrentKey(1);
             result.setStateTtlProcessingTime(0L);
             state.update(expectedValue);
-            Assert.assertEquals(expectedValue, (int) state.value());
+            assertThat((int) state.value()).isEqualTo(expectedValue);
             result.setStateTtlProcessingTime(timeToLive.toMilliseconds() + 1);
-            Assert.assertNull(state.value());
+            assertThat(state.value()).isNull();
         }
     }
 

@@ -27,7 +27,7 @@ import org.junit.runners.JUnit4;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** unit test for ClientOptions. */
 @RunWith(JUnit4.class)
@@ -38,15 +38,16 @@ public class ClientOptionsTest {
         Configuration configuration = new Configuration();
         configuration.set(ClientOptions.CLIENT_TIMEOUT, Duration.ofSeconds(10));
 
-        assertEquals(configuration.get(ClientOptions.CLIENT_TIMEOUT), Duration.ofSeconds(10));
+        assertThat(Duration.ofSeconds(10))
+                .isEqualTo(configuration.get(ClientOptions.CLIENT_TIMEOUT));
 
         configuration = new Configuration();
         configuration.set(AkkaOptions.CLIENT_TIMEOUT, "20 s");
-        assertEquals(configuration.get(ClientOptions.CLIENT_TIMEOUT), Duration.ofSeconds(20));
+        assertThat(Duration.ofSeconds(20))
+                .isEqualTo(configuration.get(ClientOptions.CLIENT_TIMEOUT));
 
         configuration = new Configuration();
-        assertEquals(
-                configuration.get(ClientOptions.CLIENT_TIMEOUT),
-                ClientOptions.CLIENT_TIMEOUT.defaultValue());
+        assertThat(ClientOptions.CLIENT_TIMEOUT.defaultValue())
+                .isEqualTo(configuration.get(ClientOptions.CLIENT_TIMEOUT));
     }
 }

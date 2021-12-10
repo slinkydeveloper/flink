@@ -33,9 +33,7 @@ import org.junit.Test;
 import java.util.Collections;
 
 import static org.apache.flink.client.cli.CliFrontendTestUtils.getTestJarPath;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RUN command. */
 public class CliFrontendRunTest extends CliFrontendTestBase {
@@ -90,9 +88,9 @@ public class CliFrontendRunTest extends CliFrontendTestBase {
 
             SavepointRestoreSettings savepointSettings =
                     executionOptions.getSavepointRestoreSettings();
-            assertTrue(savepointSettings.restoreSavepoint());
-            assertEquals("expectedSavepointPath", savepointSettings.getRestorePath());
-            assertFalse(savepointSettings.allowNonRestoredState());
+            assertThat(savepointSettings.restoreSavepoint()).isTrue();
+            assertThat(savepointSettings.getRestorePath()).isEqualTo("expectedSavepointPath");
+            assertThat(savepointSettings.allowNonRestoredState()).isFalse();
         }
 
         // test configure savepoint path (with ignore flag)
@@ -108,9 +106,9 @@ public class CliFrontendRunTest extends CliFrontendTestBase {
 
             SavepointRestoreSettings savepointSettings =
                     executionOptions.getSavepointRestoreSettings();
-            assertTrue(savepointSettings.restoreSavepoint());
-            assertEquals("expectedSavepointPath", savepointSettings.getRestorePath());
-            assertTrue(savepointSettings.allowNonRestoredState());
+            assertThat(savepointSettings.restoreSavepoint()).isTrue();
+            assertThat(savepointSettings.getRestorePath()).isEqualTo("expectedSavepointPath");
+            assertThat(savepointSettings.allowNonRestoredState()).isTrue();
         }
 
         // test jar arguments
@@ -123,11 +121,11 @@ public class CliFrontendRunTest extends CliFrontendTestBase {
                     CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, parameters, true);
             ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-            assertEquals("-arg1", programOptions.getProgramArgs()[0]);
-            assertEquals("value1", programOptions.getProgramArgs()[1]);
-            assertEquals("justavalue", programOptions.getProgramArgs()[2]);
-            assertEquals("--arg2", programOptions.getProgramArgs()[3]);
-            assertEquals("value2", programOptions.getProgramArgs()[4]);
+            assertThat(programOptions.getProgramArgs()[0]).isEqualTo("-arg1");
+            assertThat(programOptions.getProgramArgs()[1]).isEqualTo("value1");
+            assertThat(programOptions.getProgramArgs()[2]).isEqualTo("justavalue");
+            assertThat(programOptions.getProgramArgs()[3]).isEqualTo("--arg2");
+            assertThat(programOptions.getProgramArgs()[4]).isEqualTo("value2");
         }
     }
 
@@ -145,10 +143,10 @@ public class CliFrontendRunTest extends CliFrontendTestBase {
                 ExecutionConfigAccessor.fromProgramOptions(programOptions, Collections.emptyList());
 
         SavepointRestoreSettings savepointSettings = executionOptions.getSavepointRestoreSettings();
-        assertTrue(savepointSettings.restoreSavepoint());
-        assertEquals(RestoreMode.CLAIM, savepointSettings.getRestoreMode());
-        assertEquals("expectedSavepointPath", savepointSettings.getRestorePath());
-        assertTrue(savepointSettings.allowNonRestoredState());
+        assertThat(savepointSettings.restoreSavepoint()).isTrue();
+        assertThat(savepointSettings.getRestoreMode()).isEqualTo(RestoreMode.CLAIM);
+        assertThat(savepointSettings.getRestorePath()).isEqualTo("expectedSavepointPath");
+        assertThat(savepointSettings.allowNonRestoredState()).isTrue();
     }
 
     @Test
@@ -165,10 +163,10 @@ public class CliFrontendRunTest extends CliFrontendTestBase {
                 ExecutionConfigAccessor.fromProgramOptions(programOptions, Collections.emptyList());
 
         SavepointRestoreSettings savepointSettings = executionOptions.getSavepointRestoreSettings();
-        assertTrue(savepointSettings.restoreSavepoint());
-        assertEquals(RestoreMode.LEGACY, savepointSettings.getRestoreMode());
-        assertEquals("expectedSavepointPath", savepointSettings.getRestorePath());
-        assertTrue(savepointSettings.allowNonRestoredState());
+        assertThat(savepointSettings.restoreSavepoint()).isTrue();
+        assertThat(savepointSettings.getRestoreMode()).isEqualTo(RestoreMode.LEGACY);
+        assertThat(savepointSettings.getRestorePath()).isEqualTo("expectedSavepointPath");
+        assertThat(savepointSettings.allowNonRestoredState()).isTrue();
     }
 
     @Test(expected = CliArgsException.class)
@@ -258,8 +256,8 @@ public class CliFrontendRunTest extends CliFrontendTestBase {
         protected void executeProgram(Configuration configuration, PackagedProgram program) {
             final ExecutionConfigAccessor executionConfigAccessor =
                     ExecutionConfigAccessor.fromConfiguration(configuration);
-            assertEquals(isDetached, executionConfigAccessor.getDetachedMode());
-            assertEquals(expectedParallelism, executionConfigAccessor.getParallelism());
+            assertThat(executionConfigAccessor.getDetachedMode()).isEqualTo(isDetached);
+            assertThat(executionConfigAccessor.getParallelism()).isEqualTo(expectedParallelism);
         }
     }
 }

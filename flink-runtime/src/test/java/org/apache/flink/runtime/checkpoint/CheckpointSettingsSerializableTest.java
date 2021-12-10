@@ -54,8 +54,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -109,12 +108,12 @@ public class CheckpointSettingsSerializableTest extends TestLogger {
                         .setUserClassLoader(classLoader)
                         .build();
 
-        assertEquals(1, eg.getCheckpointCoordinator().getNumberOfRegisteredMasterHooks());
-        assertTrue(
-                jobGraph.getCheckpointingSettings()
+        assertThat(eg.getCheckpointCoordinator().getNumberOfRegisteredMasterHooks()).isEqualTo(1);
+        assertThat(
+                        jobGraph.getCheckpointingSettings()
                                 .getDefaultStateBackend()
-                                .deserializeValue(classLoader)
-                        instanceof CustomStateBackend);
+                                .deserializeValue(classLoader))
+                .isInstanceOf(CustomStateBackend.class);
     }
 
     // ------------------------------------------------------------------------

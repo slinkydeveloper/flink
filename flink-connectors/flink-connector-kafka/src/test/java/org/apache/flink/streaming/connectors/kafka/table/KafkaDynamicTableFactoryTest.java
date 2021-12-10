@@ -95,12 +95,8 @@ import static org.apache.flink.streaming.connectors.kafka.table.KafkaConnectorOp
 import static org.apache.flink.streaming.connectors.kafka.table.KafkaConnectorOptionsUtil.DEBEZIUM_AVRO_CONFLUENT;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSink;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSource;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /** Abstract test base for {@link KafkaDynamicTableFactory}. */
 public class KafkaDynamicTableFactoryTest extends TestLogger {
@@ -215,7 +211,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         StartupMode.SPECIFIC_OFFSETS,
                         specificOffsets,
                         0);
-        assertEquals(actualKafkaSource, expectedKafkaSource);
+        assertThat(expectedKafkaSource).isEqualTo(actualKafkaSource);
 
         ScanTableSource.ScanRuntimeProvider provider =
                 actualKafkaSource.getScanRuntimeProvider(ScanRuntimeProviderContext.INSTANCE);
@@ -258,7 +254,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         specificOffsets,
                         0);
         final KafkaDynamicSource actualKafkaSource = (KafkaDynamicSource) actualSource;
-        assertEquals(actualKafkaSource, expectedKafkaSource);
+        assertThat(expectedKafkaSource).isEqualTo(actualKafkaSource);
 
         ScanTableSource.ScanRuntimeProvider provider =
                 actualKafkaSource.getScanRuntimeProvider(ScanRuntimeProviderContext.INSTANCE);
@@ -299,7 +295,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         Collections.emptyMap(),
                         0);
 
-        assertEquals(actualSource, expectedKafkaSource);
+        assertThat(expectedKafkaSource).isEqualTo(actualSource);
     }
 
     @Test
@@ -352,7 +348,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
         expectedKafkaSource.producedDataType = SCHEMA_WITH_METADATA.toSourceRowDataType();
         expectedKafkaSource.metadataKeys = Collections.singletonList("timestamp");
 
-        assertEquals(actualSource, expectedKafkaSource);
+        assertThat(expectedKafkaSource).isEqualTo(actualSource);
     }
 
     @Test
@@ -362,22 +358,23 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         getBasicSourceOptions(), options -> options.remove("properties.group.id"));
         final DynamicTableSource tableSource = createTableSource(SCHEMA, modifiedOptions);
 
-        assertThat(tableSource, instanceOf(KafkaDynamicSource.class));
+        assertThat(tableSource).isInstanceOf(KafkaDynamicSource.class);
         ScanTableSource.ScanRuntimeProvider providerWithoutGroupId =
                 ((KafkaDynamicSource) tableSource)
                         .getScanRuntimeProvider(ScanRuntimeProviderContext.INSTANCE);
-        assertThat(providerWithoutGroupId, instanceOf(DataStreamScanProvider.class));
+        assertThat(providerWithoutGroupId).isInstanceOf(DataStreamScanProvider.class);
         final KafkaSource<?> kafkaSource = assertKafkaSource(providerWithoutGroupId);
         final Configuration configuration =
                 KafkaSourceTestUtils.getKafkaSourceConfiguration(kafkaSource);
 
         // Test offset commit on checkpoint should be disabled when do not set consumer group.
-        assertFalse(configuration.get(KafkaSourceOptions.COMMIT_OFFSETS_ON_CHECKPOINT));
-        assertFalse(
-                configuration.get(
-                        ConfigOptions.key(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG)
-                                .booleanType()
-                                .noDefaultValue()));
+        assertThat(configuration.get(KafkaSourceOptions.COMMIT_OFFSETS_ON_CHECKPOINT)).isFalse();
+        assertThat(
+                        configuration.get(
+                                ConfigOptions.key(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG)
+                                        .booleanType()
+                                        .noDefaultValue()))
+                .isFalse();
     }
 
     @Test
@@ -408,16 +405,16 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         DeliveryGuarantee.EXACTLY_ONCE,
                         null,
                         "kafka-sink");
-        assertEquals(expectedSink, actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink);
 
         // Test kafka producer.
         final KafkaDynamicSink actualKafkaSink = (KafkaDynamicSink) actualSink;
         DynamicTableSink.SinkRuntimeProvider provider =
                 actualKafkaSink.getSinkRuntimeProvider(new SinkRuntimeProviderContext(false));
-        assertThat(provider, instanceOf(SinkProvider.class));
+        assertThat(provider).isInstanceOf(SinkProvider.class);
         final SinkProvider sinkProvider = (SinkProvider) provider;
         final Sink<RowData, ?, ?, ?> sinkFunction = sinkProvider.createSink();
-        assertThat(sinkFunction, instanceOf(KafkaSink.class));
+        assertThat(sinkFunction).isInstanceOf(KafkaSink.class);
     }
 
     @Test
@@ -448,7 +445,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                             DeliveryGuarantee.valueOf(semantic.toUpperCase().replace("-", "_")),
                             null,
                             "kafka-sink");
-            assertEquals(expectedSink, actualSink);
+            assertThat(actualSink).isEqualTo(expectedSink);
         }
     }
 
@@ -492,7 +489,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         null,
                         "kafka-sink");
 
-        assertEquals(expectedSink, actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink);
     }
 
     @Test
@@ -519,14 +516,14 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
                         DeliveryGuarantee.EXACTLY_ONCE,
                         100,
                         "kafka-sink");
-        assertEquals(expectedSink, actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink);
 
         final DynamicTableSink.SinkRuntimeProvider provider =
                 actualSink.getSinkRuntimeProvider(new SinkRuntimeProviderContext(false));
-        assertThat(provider, instanceOf(SinkProvider.class));
+        assertThat(provider).isInstanceOf(SinkProvider.class);
         final SinkProvider sinkProvider = (SinkProvider) provider;
-        assertTrue(sinkProvider.getParallelism().isPresent());
-        assertEquals(100, (long) sinkProvider.getParallelism().get());
+        assertThat(sinkProvider.getParallelism().isPresent()).isTrue();
+        assertThat((long) sinkProvider.getParallelism().get()).isEqualTo(100);
     }
 
     @Test
@@ -641,11 +638,11 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
             } else {
                 expectedValueEncoder = createDebeziumAvroSerSchema(rowType, expectedValueSubject);
             }
-            assertEquals(expectedValueEncoder, actualValueEncoder);
+            assertThat(actualValueEncoder).isEqualTo(expectedValueEncoder);
         }
 
         if (avroFormats.contains(keyFormat)) {
-            assert sink.keyEncodingFormat != null;
+            assertThat(sink.keyEncodingFormat != null).isTrue();
             SerializationSchema<RowData> actualKeyEncoder =
                     sink.keyEncodingFormat.createRuntimeEncoder(
                             new SinkRuntimeProviderContext(false), SCHEMA_DATA_TYPE);
@@ -655,7 +652,7 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
             } else {
                 expectedKeyEncoder = createDebeziumAvroSerSchema(rowType, expectedKeySubject);
             }
-            assertEquals(expectedKeyEncoder, actualKeyEncoder);
+            assertThat(actualKeyEncoder).isEqualTo(expectedKeyEncoder);
         }
     }
 
@@ -797,12 +794,12 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
         try {
             createTableSink(SCHEMA, modifiedOptions);
         } catch (Throwable t) {
-            assertEquals(
-                    String.format(
-                            errorMessageTemp,
-                            "'topic'",
-                            String.format("[%s]", String.join(", ", TOPIC_LIST))),
-                    t.getCause().getMessage());
+            assertThat(t.getCause().getMessage())
+                    .isEqualTo(
+                            String.format(
+                                    errorMessageTemp,
+                                    "'topic'",
+                                    String.format("[%s]", String.join(", ", TOPIC_LIST))));
         }
 
         modifiedOptions =
@@ -813,9 +810,8 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
         try {
             createTableSink(SCHEMA, modifiedOptions);
         } catch (Throwable t) {
-            assertEquals(
-                    String.format(errorMessageTemp, "'topic-pattern'", TOPIC_REGEX),
-                    t.getCause().getMessage());
+            assertThat(t.getCause().getMessage())
+                    .isEqualTo(String.format(errorMessageTemp, "'topic-pattern'", TOPIC_REGEX));
         }
     }
 
@@ -1031,18 +1027,18 @@ public class KafkaDynamicTableFactoryTest extends TestLogger {
     }
 
     private KafkaSource<?> assertKafkaSource(ScanTableSource.ScanRuntimeProvider provider) {
-        assertThat(provider, instanceOf(DataStreamScanProvider.class));
+        assertThat(provider).isInstanceOf(DataStreamScanProvider.class);
         final DataStreamScanProvider dataStreamScanProvider = (DataStreamScanProvider) provider;
         final Transformation<RowData> transformation =
                 dataStreamScanProvider
                         .produceDataStream(StreamExecutionEnvironment.createLocalEnvironment())
                         .getTransformation();
-        assertThat(transformation, instanceOf(SourceTransformation.class));
+        assertThat(transformation).isInstanceOf(SourceTransformation.class);
         SourceTransformation<RowData, KafkaPartitionSplit, KafkaSourceEnumState>
                 sourceTransformation =
                         (SourceTransformation<RowData, KafkaPartitionSplit, KafkaSourceEnumState>)
                                 transformation;
-        assertThat(sourceTransformation.getSource(), instanceOf(KafkaSource.class));
+        assertThat(sourceTransformation.getSource()).isInstanceOf(KafkaSource.class);
         return (KafkaSource<?>) sourceTransformation.getSource();
     }
 }

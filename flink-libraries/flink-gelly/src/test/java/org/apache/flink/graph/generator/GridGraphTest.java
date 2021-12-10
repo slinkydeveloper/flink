@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GridGraph}. */
 public class GridGraphTest extends GraphGeneratorTestBase {
@@ -55,18 +55,18 @@ public class GridGraphTest extends GraphGeneratorTestBase {
 
         // Each vertex is the source of one edge in the first dimension of size 2,
         // and the source of two edges in each dimension of size greater than 2.
-        assertEquals(2 * 3 * 5 * 7, graph.numberOfVertices());
-        assertEquals(7 * 2 * 3 * 5 * 7, graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(2 * 3 * 5 * 7);
+        assertThat(graph.numberOfEdges()).isEqualTo(7 * 2 * 3 * 5 * 7);
 
         long minInDegree = graph.inDegrees().min(1).collect().get(0).f1.getValue();
         long minOutDegree = graph.outDegrees().min(1).collect().get(0).f1.getValue();
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(7, minInDegree);
-        assertEquals(7, minOutDegree);
-        assertEquals(7, maxInDegree);
-        assertEquals(7, maxOutDegree);
+        assertThat(minInDegree).isEqualTo(7);
+        assertThat(minOutDegree).isEqualTo(7);
+        assertThat(maxInDegree).isEqualTo(7);
+        assertThat(maxOutDegree).isEqualTo(7);
     }
 
     @Test

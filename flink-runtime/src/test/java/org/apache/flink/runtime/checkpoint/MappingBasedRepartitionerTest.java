@@ -24,7 +24,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests {@link MappingBasedRepartitioner}. */
 public class MappingBasedRepartitionerTest {
@@ -37,21 +37,21 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
+        assertThat(repartition(oldStates, SubtaskStateMapper.FULL, 3, 2))
+                .isEqualTo(
                         Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1"),
-                        Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.FULL, 3, 2));
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1"),
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1")));
     }
 
     @Test
@@ -62,27 +62,27 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
+        assertThat(repartition(oldStates, SubtaskStateMapper.FULL, 3, 3))
+                .isEqualTo(
                         Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1"),
-                        Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1"),
-                        Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.FULL, 3, 3));
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1"),
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1"),
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1")));
     }
 
     @Test
@@ -93,33 +93,33 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
+        assertThat(repartition(oldStates, SubtaskStateMapper.FULL, 3, 4))
+                .isEqualTo(
                         Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1"),
-                        Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1"),
-                        Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1"),
-                        Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.FULL, 3, 4));
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1"),
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1"),
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1"),
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1")));
     }
 
     @Test
@@ -130,11 +130,11 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1", "sub1state0"),
-                        Arrays.asList("sub1state0", "sub2state0", "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.RANGE, 3, 2));
+        assertThat(repartition(oldStates, SubtaskStateMapper.RANGE, 3, 2))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList("sub0state0", "sub0state1", "sub1state0"),
+                                Arrays.asList("sub1state0", "sub2state0", "sub2state1")));
     }
 
     @Test
@@ -145,12 +145,12 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1"),
-                        Arrays.asList("sub1state0"),
-                        Arrays.asList("sub2state0", "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.RANGE, 3, 3));
+        assertThat(repartition(oldStates, SubtaskStateMapper.RANGE, 3, 3))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList("sub0state0", "sub0state1"),
+                                Arrays.asList("sub1state0"),
+                                Arrays.asList("sub2state0", "sub2state1")));
     }
 
     @Test
@@ -161,13 +161,13 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1"),
-                        Arrays.asList("sub0state0", "sub0state1", "sub1state0"),
-                        Arrays.asList("sub1state0", "sub2state0", "sub2state1"),
-                        Arrays.asList("sub2state0", "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.RANGE, 3, 4));
+        assertThat(repartition(oldStates, SubtaskStateMapper.RANGE, 3, 4))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList("sub0state0", "sub0state1"),
+                                Arrays.asList("sub0state0", "sub0state1", "sub1state0"),
+                                Arrays.asList("sub1state0", "sub2state0", "sub2state1"),
+                                Arrays.asList("sub2state0", "sub2state1")));
     }
 
     @Test
@@ -178,21 +178,22 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1", "sub2state0", "sub2state1"),
-                        Arrays.asList("sub1state0")),
-                repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 2));
-
-        assertEquals(
-                Arrays.asList(
+        assertThat(repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 2))
+                .isEqualTo(
                         Arrays.asList(
-                                "sub0state0",
-                                "sub0state1",
-                                "sub1state0",
-                                "sub2state0",
-                                "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 1));
+                                Arrays.asList(
+                                        "sub0state0", "sub0state1", "sub2state0", "sub2state1"),
+                                Arrays.asList("sub1state0")));
+
+        assertThat(repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 1))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList(
+                                        "sub0state0",
+                                        "sub0state1",
+                                        "sub1state0",
+                                        "sub2state0",
+                                        "sub2state1")));
     }
 
     @Test
@@ -203,12 +204,12 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1"),
-                        Arrays.asList("sub1state0"),
-                        Arrays.asList("sub2state0", "sub2state1")),
-                repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 3));
+        assertThat(repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 3))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList("sub0state0", "sub0state1"),
+                                Arrays.asList("sub1state0"),
+                                Arrays.asList("sub2state0", "sub2state1")));
     }
 
     @Test
@@ -219,22 +220,22 @@ public class MappingBasedRepartitionerTest {
                         Arrays.asList("sub1state0"),
                         Arrays.asList("sub2state0", "sub2state1"));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1"),
-                        Arrays.asList("sub1state0"),
-                        Arrays.asList("sub2state0", "sub2state1"),
-                        Arrays.asList()),
-                repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 4));
+        assertThat(repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 4))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList("sub0state0", "sub0state1"),
+                                Arrays.asList("sub1state0"),
+                                Arrays.asList("sub2state0", "sub2state1"),
+                                Arrays.asList()));
 
-        assertEquals(
-                Arrays.asList(
-                        Arrays.asList("sub0state0", "sub0state1"),
-                        Arrays.asList("sub1state0"),
-                        Arrays.asList("sub2state0", "sub2state1"),
-                        Arrays.asList(),
-                        Arrays.asList()),
-                repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 5));
+        assertThat(repartition(oldStates, SubtaskStateMapper.ROUND_ROBIN, 3, 5))
+                .isEqualTo(
+                        Arrays.asList(
+                                Arrays.asList("sub0state0", "sub0state1"),
+                                Arrays.asList("sub1state0"),
+                                Arrays.asList("sub2state0", "sub2state1"),
+                                Arrays.asList(),
+                                Arrays.asList()));
     }
 
     private List<List<String>> repartition(

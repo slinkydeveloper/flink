@@ -43,7 +43,8 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class PartitionOperatorTest extends CompilerTestBase {
@@ -74,9 +75,9 @@ public class PartitionOperatorTest extends CompilerTestBase {
             SingleInputPlanNode reducer = (SingleInputPlanNode) sink.getInput().getSource();
             SingleInputPlanNode partitioner = (SingleInputPlanNode) reducer.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, reducer.getInput().getShipStrategy());
-            assertEquals(
-                    ShipStrategyType.PARTITION_CUSTOM, partitioner.getInput().getShipStrategy());
+            assertThat(reducer.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitioner.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -106,22 +107,23 @@ public class PartitionOperatorTest extends CompilerTestBase {
             SingleInputPlanNode partitionIDRemover =
                     (SingleInputPlanNode) partitionNode.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, reducer.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, partitionNode.getInput().getShipStrategy());
-            assertEquals(
-                    ShipStrategyType.PARTITION_CUSTOM,
-                    partitionIDRemover.getInput().getShipStrategy());
+            assertThat(reducer.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitionNode.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitionIDRemover.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
 
             SourcePlanNode sourcePlanNode = op.getDataSources().iterator().next();
             List<Channel> sourceOutgoingChannels = sourcePlanNode.getOutgoingChannels();
-            assertEquals(2, sourceOutgoingChannels.size());
-            assertEquals(ShipStrategyType.FORWARD, sourceOutgoingChannels.get(0).getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, sourceOutgoingChannels.get(1).getShipStrategy());
-            assertEquals(
-                    DataExchangeMode.PIPELINED,
-                    sourceOutgoingChannels.get(0).getDataExchangeMode());
-            assertEquals(
-                    DataExchangeMode.BATCH, sourceOutgoingChannels.get(1).getDataExchangeMode());
+            assertThat(sourceOutgoingChannels.size()).isEqualTo(2);
+            assertThat(sourceOutgoingChannels.get(0).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sourceOutgoingChannels.get(1).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sourceOutgoingChannels.get(0).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.PIPELINED);
+            assertThat(sourceOutgoingChannels.get(1).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.BATCH);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -174,39 +176,38 @@ public class PartitionOperatorTest extends CompilerTestBase {
             SingleInputPlanNode partitionIDRemover =
                     (SingleInputPlanNode) partitionNode.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, reducer.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, partitionNode.getInput().getShipStrategy());
-            assertEquals(
-                    ShipStrategyType.PARTITION_CUSTOM,
-                    partitionIDRemover.getInput().getShipStrategy());
+            assertThat(reducer.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitionNode.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitionIDRemover.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
 
             SourcePlanNode sourcePlanNode = op.getDataSources().iterator().next();
             List<Channel> sourceOutgoingChannels = sourcePlanNode.getOutgoingChannels();
-            assertEquals(3, sourceOutgoingChannels.size());
-            assertEquals(ShipStrategyType.FORWARD, sourceOutgoingChannels.get(0).getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, sourceOutgoingChannels.get(1).getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, sourceOutgoingChannels.get(2).getShipStrategy());
-            assertEquals(
-                    DataExchangeMode.PIPELINED,
-                    sourceOutgoingChannels.get(0).getDataExchangeMode());
-            assertEquals(
-                    DataExchangeMode.PIPELINED,
-                    sourceOutgoingChannels.get(1).getDataExchangeMode());
-            assertEquals(
-                    DataExchangeMode.BATCH, sourceOutgoingChannels.get(2).getDataExchangeMode());
+            assertThat(sourceOutgoingChannels.size()).isEqualTo(3);
+            assertThat(sourceOutgoingChannels.get(0).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sourceOutgoingChannels.get(1).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sourceOutgoingChannels.get(2).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sourceOutgoingChannels.get(0).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.PIPELINED);
+            assertThat(sourceOutgoingChannels.get(1).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.PIPELINED);
+            assertThat(sourceOutgoingChannels.get(2).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.BATCH);
 
             List<Channel> partitionOutputChannels = partitionNode.getOutgoingChannels();
-            assertEquals(2, partitionOutputChannels.size());
-            assertEquals(
-                    ShipStrategyType.FORWARD, partitionOutputChannels.get(0).getShipStrategy());
-            assertEquals(
-                    ShipStrategyType.FORWARD, partitionOutputChannels.get(1).getShipStrategy());
-            assertEquals(
-                    DataExchangeMode.PIPELINED,
-                    partitionOutputChannels.get(0).getDataExchangeMode());
-            assertEquals(
-                    DataExchangeMode.PIPELINED,
-                    partitionOutputChannels.get(1).getDataExchangeMode());
+            assertThat(partitionOutputChannels.size()).isEqualTo(2);
+            assertThat(partitionOutputChannels.get(0).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitionOutputChannels.get(1).getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(partitionOutputChannels.get(0).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.PIPELINED);
+            assertThat(partitionOutputChannels.get(1).getDataExchangeMode())
+                    .isEqualTo(DataExchangeMode.PIPELINED);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

@@ -29,8 +29,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for {@link ElasticsearchSinkBuilderBase}. */
 @ExtendWith(TestLoggerExtension.class)
@@ -53,28 +52,33 @@ abstract class ElasticsearchSinkBuilderBaseTest<B extends ElasticsearchSinkBuild
         return DynamicTest.stream(
                 validBuilders,
                 ElasticsearchSinkBuilderBase::toString,
-                builder -> assertDoesNotThrow(builder::build));
+                builder -> assertThatThrownBy(builder::build).isNull());
     }
 
     @Test
     void testThrowIfExactlyOnceConfigured() {
-        assertThrows(
-                IllegalStateException.class,
-                () -> createMinimalBuilder().setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE));
+        assertThatThrownBy(
+                        () ->
+                                createMinimalBuilder()
+                                        .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void testThrowIfHostsNotSet() {
-        assertThrows(
-                NullPointerException.class,
-                () -> createEmptyBuilder().setEmitter((element, indexer, context) -> {}).build());
+        assertThatThrownBy(
+                        () ->
+                                createEmptyBuilder()
+                                        .setEmitter((element, indexer, context) -> {})
+                                        .build())
+                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void testThrowIfEmitterNotSet() {
-        assertThrows(
-                NullPointerException.class,
-                () -> createEmptyBuilder().setHosts(new HttpHost("localhost:3000")).build());
+        assertThatThrownBy(
+                        () -> createEmptyBuilder().setHosts(new HttpHost("localhost:3000")).build())
+                .isInstanceOf(NullPointerException.class);
     }
 
     abstract B createEmptyBuilder();

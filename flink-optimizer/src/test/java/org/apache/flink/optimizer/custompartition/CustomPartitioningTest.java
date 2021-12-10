@@ -35,7 +35,8 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"serial", "unchecked"})
 public class CustomPartitioningTest extends CompilerTestBase {
@@ -64,21 +65,20 @@ public class CustomPartitioningTest extends CompilerTestBase {
             SingleInputPlanNode partitioner = (SingleInputPlanNode) mapper.getInput().getSource();
             SingleInputPlanNode balancer = (SingleInputPlanNode) partitioner.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(parallelism, sink.getParallelism());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sink.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(ShipStrategyType.FORWARD, mapper.getInput().getShipStrategy());
-            assertEquals(parallelism, mapper.getParallelism());
+            assertThat(mapper.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(mapper.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(
-                    ShipStrategyType.PARTITION_CUSTOM, partitioner.getInput().getShipStrategy());
-            assertEquals(part, partitioner.getInput().getPartitioner());
-            assertEquals(parallelism, partitioner.getParallelism());
+            assertThat(partitioner.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(partitioner.getInput().getPartitioner()).isEqualTo(part);
+            assertThat(partitioner.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(
-                    ShipStrategyType.PARTITION_FORCED_REBALANCE,
-                    balancer.getInput().getShipStrategy());
-            assertEquals(parallelism, balancer.getParallelism());
+            assertThat(balancer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_FORCED_REBALANCE);
+            assertThat(balancer.getParallelism()).isEqualTo(parallelism);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -131,21 +131,20 @@ public class CustomPartitioningTest extends CompilerTestBase {
             SingleInputPlanNode partitioner = (SingleInputPlanNode) mapper.getInput().getSource();
             SingleInputPlanNode balancer = (SingleInputPlanNode) partitioner.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(parallelism, sink.getParallelism());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sink.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(ShipStrategyType.FORWARD, mapper.getInput().getShipStrategy());
-            assertEquals(parallelism, mapper.getParallelism());
+            assertThat(mapper.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(mapper.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(
-                    ShipStrategyType.PARTITION_CUSTOM, partitioner.getInput().getShipStrategy());
-            assertEquals(part, partitioner.getInput().getPartitioner());
-            assertEquals(parallelism, partitioner.getParallelism());
+            assertThat(partitioner.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(partitioner.getInput().getPartitioner()).isEqualTo(part);
+            assertThat(partitioner.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(
-                    ShipStrategyType.PARTITION_FORCED_REBALANCE,
-                    balancer.getInput().getShipStrategy());
-            assertEquals(parallelism, balancer.getParallelism());
+            assertThat(balancer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_FORCED_REBALANCE);
+            assertThat(balancer.getParallelism()).isEqualTo(parallelism);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -202,27 +201,27 @@ public class CustomPartitioningTest extends CompilerTestBase {
             SingleInputPlanNode balancer =
                     (SingleInputPlanNode) keyExtractor.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(parallelism, sink.getParallelism());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(sink.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(ShipStrategyType.FORWARD, mapper.getInput().getShipStrategy());
-            assertEquals(parallelism, mapper.getParallelism());
+            assertThat(mapper.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(mapper.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(ShipStrategyType.FORWARD, keyRemover.getInput().getShipStrategy());
-            assertEquals(parallelism, keyRemover.getParallelism());
+            assertThat(keyRemover.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(keyRemover.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(
-                    ShipStrategyType.PARTITION_CUSTOM, partitioner.getInput().getShipStrategy());
-            assertEquals(part, partitioner.getInput().getPartitioner());
-            assertEquals(parallelism, partitioner.getParallelism());
+            assertThat(partitioner.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(partitioner.getInput().getPartitioner()).isEqualTo(part);
+            assertThat(partitioner.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(ShipStrategyType.FORWARD, keyExtractor.getInput().getShipStrategy());
-            assertEquals(parallelism, keyExtractor.getParallelism());
+            assertThat(keyExtractor.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(keyExtractor.getParallelism()).isEqualTo(parallelism);
 
-            assertEquals(
-                    ShipStrategyType.PARTITION_FORCED_REBALANCE,
-                    balancer.getInput().getShipStrategy());
-            assertEquals(parallelism, balancer.getParallelism());
+            assertThat(balancer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_FORCED_REBALANCE);
+            assertThat(balancer.getParallelism()).isEqualTo(parallelism);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

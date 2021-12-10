@@ -55,8 +55,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests {@link ExecutionGraph} deployment when job and task information are offloaded into the BLOB
@@ -120,7 +119,7 @@ public class DefaultExecutionGraphDeploymentWithSmallBlobCacheSizeLimitTest
         for (ExecutionJobVertex ejv : eg.getVerticesTopologically()) {
             for (ExecutionVertex ev : ejv.getTaskVertices()) {
 
-                assertEquals(ExecutionState.CREATED, ev.getExecutionState());
+                assertThat(ev.getExecutionState()).isEqualTo(ExecutionState.CREATED);
 
                 LogicalSlot slot =
                         new TestingLogicalSlotBuilder()
@@ -130,13 +129,13 @@ public class DefaultExecutionGraphDeploymentWithSmallBlobCacheSizeLimitTest
                         .registerProducedPartitions(slot.getTaskManagerLocation(), true)
                         .get();
                 ev.deployToSlot(slot);
-                assertEquals(ExecutionState.DEPLOYING, ev.getExecutionState());
+                assertThat(ev.getExecutionState()).isEqualTo(ExecutionState.DEPLOYING);
 
                 TaskDeploymentDescriptor tdd = tdds.take();
-                assertNotNull(tdd);
+                assertThat(tdd).isNotNull();
 
                 List<InputGateDeploymentDescriptor> igdds = tdd.getInputGates();
-                assertEquals(ev.getAllConsumedPartitionGroups().size(), igdds.size());
+                assertThat(igdds.size()).isEqualTo(ev.getAllConsumedPartitionGroups().size());
 
                 if (igdds.size() > 0) {
                     checkShuffleDescriptors(igdds.get(0), ev.getConsumedPartitionGroup(0));
@@ -186,9 +185,8 @@ public class DefaultExecutionGraphDeploymentWithSmallBlobCacheSizeLimitTest
             InputGateDeploymentDescriptor igdd, ConsumedPartitionGroup consumedPartitionGroup) {
         int idx = 0;
         for (IntermediateResultPartitionID consumedPartitionId : consumedPartitionGroup) {
-            assertEquals(
-                    consumedPartitionId,
-                    igdd.getShuffleDescriptors()[idx++].getResultPartitionID().getPartitionId());
+            assertThat(igdd.getShuffleDescriptors()[idx++].getResultPartitionID().getPartitionId())
+                    .isEqualTo(consumedPartitionId);
         }
     }
 }

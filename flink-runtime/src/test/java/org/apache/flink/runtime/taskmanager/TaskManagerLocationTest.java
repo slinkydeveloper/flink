@@ -21,16 +21,12 @@ package org.apache.flink.runtime.taskmanager;
 import org.apache.flink.runtime.clusterframework.types.ResourceID;
 import org.apache.flink.util.InstantiationUtil;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.InetAddress;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -72,22 +68,22 @@ public class TaskManagerLocationTest {
             TaskManagerLocation three = new TaskManagerLocation(resourceID3, address3, 10871);
             TaskManagerLocation four = new TaskManagerLocation(resourceID1, address1, 19871);
 
-            assertTrue(one.equals(four));
-            assertTrue(!one.equals(two));
-            assertTrue(!one.equals(three));
-            assertTrue(!two.equals(three));
-            assertTrue(!three.equals(four));
+            assertThat(one.equals(four)).isTrue();
+            assertThat(!one.equals(two)).isTrue();
+            assertThat(!one.equals(three)).isTrue();
+            assertThat(!two.equals(three)).isTrue();
+            assertThat(!three.equals(four)).isTrue();
 
-            assertTrue(one.compareTo(four) == 0);
-            assertTrue(four.compareTo(one) == 0);
-            assertTrue(one.compareTo(two) != 0);
-            assertTrue(one.compareTo(three) != 0);
-            assertTrue(two.compareTo(three) != 0);
-            assertTrue(three.compareTo(four) != 0);
+            assertThat(one.compareTo(four) == 0).isTrue();
+            assertThat(four.compareTo(one) == 0).isTrue();
+            assertThat(one.compareTo(two) != 0).isTrue();
+            assertThat(one.compareTo(three) != 0).isTrue();
+            assertThat(two.compareTo(three) != 0).isTrue();
+            assertThat(three.compareTo(four) != 0).isTrue();
 
             {
                 int val = one.compareTo(two);
-                assertTrue(two.compareTo(one) == -val);
+                assertThat(two.compareTo(one) == -val).isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +101,7 @@ public class TaskManagerLocationTest {
                                 ResourceID.generate(), InetAddress.getByName("1.2.3.4"), 8888);
 
                 TaskManagerLocation serCopy = InstantiationUtil.clone(original);
-                assertEquals(original, serCopy);
+                assertThat(serCopy).isEqualTo(original);
             }
 
             // with resolved hostname
@@ -116,7 +112,7 @@ public class TaskManagerLocationTest {
                 original.getFQDNHostname();
 
                 TaskManagerLocation serCopy = InstantiationUtil.clone(original);
-                assertEquals(original, serCopy);
+                assertThat(serCopy).isEqualTo(original);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,12 +126,12 @@ public class TaskManagerLocationTest {
             TaskManagerLocation info1 =
                     new TaskManagerLocation(
                             ResourceID.generate(), InetAddress.getByName("127.0.0.1"), 19871);
-            assertNotNull(info1.getFQDNHostname());
+            assertThat(info1.getFQDNHostname()).isNotNull();
 
             TaskManagerLocation info2 =
                     new TaskManagerLocation(
                             ResourceID.generate(), InetAddress.getByName("1.2.3.4"), 8888);
-            assertNotNull(info2.getFQDNHostname());
+            assertThat(info2.getFQDNHostname()).isNotNull();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -152,7 +148,7 @@ public class TaskManagerLocationTest {
 
             final TaskManagerLocation info =
                     new TaskManagerLocation(ResourceID.generate(), address, 19871);
-            Assert.assertEquals("worker2", info.getHostname());
+            assertThat(info.getHostname()).isEqualTo("worker2");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -169,7 +165,7 @@ public class TaskManagerLocationTest {
 
             TaskManagerLocation info =
                     new TaskManagerLocation(ResourceID.generate(), address, 19871);
-            Assert.assertEquals("worker10", info.getHostname());
+            assertThat(info.getHostname()).isEqualTo("worker10");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -192,11 +188,11 @@ public class TaskManagerLocationTest {
             TaskManagerLocation info =
                     new TaskManagerLocation(ResourceID.generate(), address, 54152);
 
-            assertNotNull(info.getFQDNHostname());
-            assertTrue(info.getFQDNHostname().equals(addressString));
+            assertThat(info.getFQDNHostname()).isNotNull();
+            assertThat(info.getFQDNHostname().equals(addressString)).isTrue();
 
-            assertNotNull(info.getHostname());
-            assertTrue(info.getHostname().equals(addressString));
+            assertThat(info.getHostname()).isNotNull();
+            assertThat(info.getHostname().equals(addressString)).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -217,9 +213,9 @@ public class TaskManagerLocationTest {
                         19871,
                         new TaskManagerLocation.IpOnlyHostNameSupplier(address));
 
-        assertNotEquals("worker10", info.getHostname());
-        assertNotEquals("worker10", info.getFQDNHostname());
-        assertEquals("127.0.0.1", info.getHostname());
-        assertEquals("127.0.0.1", info.getFQDNHostname());
+        assertThat(info.getHostname()).isEqualTo("worker10");
+        assertThat(info.getFQDNHostname()).isEqualTo("worker10");
+        assertThat(info.getHostname()).isEqualTo("127.0.0.1");
+        assertThat(info.getFQDNHostname()).isEqualTo("127.0.0.1");
     }
 }

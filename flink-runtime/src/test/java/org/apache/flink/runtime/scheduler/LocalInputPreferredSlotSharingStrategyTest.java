@@ -47,11 +47,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
 
 /** Tests for {@link LocalInputPreferredSlotSharingStrategy}. */
 public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
@@ -97,13 +96,11 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, coLocationGroups);
 
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(2));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev11.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev11.getId(), ev21.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev12.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev12.getId(), ev22.getId()));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(2)));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev11.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev11.getId(), ev21.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev12.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev12.getId(), ev22.getId())));
     }
 
     @Test
@@ -130,16 +127,13 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, Collections.emptySet());
 
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(3));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev21.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev11.getId(), ev21.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev22.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev22.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev23.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev12.getId(), ev23.getId()));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(3)));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev21.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev11.getId(), ev21.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev22.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev22.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev23.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev12.getId(), ev23.getId())));
     }
 
     @Test
@@ -170,13 +164,11 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
         final SlotSharingStrategy strategy =
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, Collections.emptySet());
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(2));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev21.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev11.getId(), ev21.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev22.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev12.getId(), ev22.getId()));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(2)));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev21.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev11.getId(), ev21.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev22.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev12.getId(), ev22.getId())));
     }
 
     @Test
@@ -185,13 +177,11 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, Collections.emptySet());
 
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(2));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev11.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev11.getId(), ev21.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev12.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev12.getId(), ev22.getId()));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(2)));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev11.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev11.getId(), ev21.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev12.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev12.getId(), ev22.getId())));
     }
 
     @Test
@@ -209,19 +199,15 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, Collections.emptySet());
 
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(4));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev11.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev11.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev12.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev12.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev21.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev21.getId()));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev22.getId()).getExecutionVertexIds(),
-                containsInAnyOrder(ev22.getId()));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(4)));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev11.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev11.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev12.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev12.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev21.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev21.getId())));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev22.getId()).getExecutionVertexIds())
+                .satisfies(matching(containsInAnyOrder(ev22.getId())));
     }
 
     @Test
@@ -243,19 +229,15 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, Collections.emptySet());
 
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(4));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev11.getId()).getResourceProfile(),
-                equalTo(resourceProfile1));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev12.getId()).getResourceProfile(),
-                equalTo(resourceProfile1));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev21.getId()).getResourceProfile(),
-                equalTo(resourceProfile2));
-        assertThat(
-                strategy.getExecutionSlotSharingGroup(ev22.getId()).getResourceProfile(),
-                equalTo(resourceProfile2));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(4)));
+        assertThat(strategy.getExecutionSlotSharingGroup(ev11.getId()).getResourceProfile())
+                .isEqualTo(resourceProfile1);
+        assertThat(strategy.getExecutionSlotSharingGroup(ev12.getId()).getResourceProfile())
+                .isEqualTo(resourceProfile1);
+        assertThat(strategy.getExecutionSlotSharingGroup(ev21.getId()).getResourceProfile())
+                .isEqualTo(resourceProfile2);
+        assertThat(strategy.getExecutionSlotSharingGroup(ev22.getId()).getResourceProfile())
+                .isEqualTo(resourceProfile2);
     }
 
     /**
@@ -274,8 +256,8 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
         v2.connectNewDataSetAsInput(
                 v1, DistributionPattern.ALL_TO_ALL, ResultPartitionType.BLOCKING);
 
-        assertEquals(2, v1.getProducedDataSets().size());
-        assertEquals(2, v2.getInputs().size());
+        assertThat(v1.getProducedDataSets().size()).isEqualTo(2);
+        assertThat(v2.getInputs().size()).isEqualTo(2);
 
         final JobGraph jobGraph = JobGraphTestUtils.batchJobGraph(v1, v2);
         final ExecutionGraph executionGraph =
@@ -286,7 +268,7 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                 new LocalInputPreferredSlotSharingStrategy(
                         topology, slotSharingGroups, Collections.emptySet());
 
-        assertThat(strategy.getExecutionSlotSharingGroups(), hasSize(4));
+        assertThat(strategy.getExecutionSlotSharingGroups()).satisfies(matching(hasSize(4)));
 
         ExecutionVertex[] ev1 =
                 Objects.requireNonNull(executionGraph.getJobVertex(JOB_VERTEX_ID_1))
@@ -296,8 +278,9 @@ public class LocalInputPreferredSlotSharingStrategyTest extends TestLogger {
                         .getTaskVertices();
         for (int i = 0; i < parallelism; i++) {
             assertThat(
-                    strategy.getExecutionSlotSharingGroup(ev1[i].getID()).getExecutionVertexIds(),
-                    containsInAnyOrder(ev1[i].getID(), ev2[i].getID()));
+                            strategy.getExecutionSlotSharingGroup(ev1[i].getID())
+                                    .getExecutionVertexIds())
+                    .satisfies(matching(containsInAnyOrder(ev1[i].getID(), ev2[i].getID())));
         }
     }
 

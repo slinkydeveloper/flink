@@ -70,7 +70,7 @@ import java.util.concurrent.Future;
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkNotNull;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** IMPORTANT! Remember to close environment after usage! */
 public class MockEnvironment implements Environment, AutoCloseable {

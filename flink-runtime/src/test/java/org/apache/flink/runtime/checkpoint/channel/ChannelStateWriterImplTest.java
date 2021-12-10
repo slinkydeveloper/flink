@@ -37,8 +37,7 @@ import java.util.function.Consumer;
 import static org.apache.flink.runtime.state.ChannelPersistenceITCase.getStreamFactoryFactory;
 import static org.apache.flink.util.CloseableIterator.ofElements;
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link ChannelStateWriterImpl} lifecycle tests. */
 public class ChannelStateWriterImplTest {
@@ -62,7 +61,7 @@ public class ChannelStateWriterImplTest {
                                 ofElements(Buffer::recycleBuffer, eventBuf, dataBuf));
                     });
         } finally {
-            assertTrue(dataBuf.isRecycled());
+            assertThat(dataBuf.isRecycled()).isTrue();
         }
     }
 
@@ -72,11 +71,11 @@ public class ChannelStateWriterImplTest {
         try (ChannelStateWriterImpl writer = openWriter()) {
             callStart(writer);
             result = writer.getAndRemoveWriteResult(CHECKPOINT_ID);
-            assertFalse(result.resultSubpartitionStateHandles.isDone());
-            assertFalse(result.inputChannelStateHandles.isDone());
+            assertThat(result.resultSubpartitionStateHandles.isDone()).isFalse();
+            assertThat(result.inputChannelStateHandles.isDone()).isFalse();
         }
-        assertTrue(result.inputChannelStateHandles.isDone());
-        assertTrue(result.resultSubpartitionStateHandles.isDone());
+        assertThat(result.inputChannelStateHandles.isDone()).isTrue();
+        assertThat(result.resultSubpartitionStateHandles.isDone()).isTrue();
     }
 
     @Test
@@ -89,8 +88,8 @@ public class ChannelStateWriterImplTest {
                     callAddInputData(writer, buffer);
                     callAbort(writer);
                     worker.processAllRequests();
-                    assertTrue(result.isDone());
-                    assertTrue(buffer.isRecycled());
+                    assertThat(result.isDone()).isTrue();
+                    assertThat(buffer.isRecycled()).isTrue();
                 });
     }
 
@@ -133,7 +132,7 @@ public class ChannelStateWriterImplTest {
                         writer.open();
                         callAddInputData(writer, buffer);
                     } finally {
-                        assertTrue(buffer.isRecycled());
+                        assertThat(buffer.isRecycled()).isTrue();
                     }
                 });
     }
@@ -145,9 +144,9 @@ public class ChannelStateWriterImplTest {
                 writer -> {
                     callStart(writer);
                     callAddInputData(writer, buffer);
-                    assertFalse(buffer.isRecycled());
+                    assertThat(buffer.isRecycled()).isFalse();
                 });
-        assertTrue(buffer.isRecycled());
+        assertThat(buffer.isRecycled()).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)

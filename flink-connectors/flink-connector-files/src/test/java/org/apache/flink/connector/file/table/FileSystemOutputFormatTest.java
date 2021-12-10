@@ -43,8 +43,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link FileSystemOutputFormat}. */
 public class FileSystemOutputFormatTest {
@@ -91,15 +90,14 @@ public class FileSystemOutputFormatTest {
         try (OneInputStreamOperatorTestHarness<Row, Object> testHarness =
                 createSink(false, false, false, new LinkedHashMap<>(), ref)) {
             writeUnorderedRecords(testHarness);
-            assertEquals(1, getFileContentByPath(tmpFile).size());
+            assertThat(getFileContentByPath(tmpFile).size()).isEqualTo(1);
         }
 
         ref.get().finalizeGlobal(1);
         Map<File, String> content = getFileContentByPath(outputFile);
-        assertEquals(1, content.size());
-        assertEquals(
-                "a1,1,p1\n" + "a2,2,p1\n" + "a2,2,p2\n" + "a3,3,p1\n",
-                content.values().iterator().next());
+        assertThat(content.size()).isEqualTo(1);
+        assertThat(content.values().iterator().next())
+                .isEqualTo("a1,1,p1\n" + "a2,2,p1\n" + "a2,2,p2\n" + "a3,3,p1\n");
     }
 
     private void writeUnorderedRecords(OneInputStreamOperatorTestHarness<Row, Object> testHarness)
@@ -121,16 +119,15 @@ public class FileSystemOutputFormatTest {
         try (OneInputStreamOperatorTestHarness<Row, Object> testHarness =
                 createSink(true, false, false, new LinkedHashMap<>(), ref)) {
             writeUnorderedRecords(testHarness);
-            assertEquals(1, getFileContentByPath(tmpFile).size());
+            assertThat(getFileContentByPath(tmpFile).size()).isEqualTo(1);
         }
 
         ref.get().finalizeGlobal(1);
         Map<File, String> content = getFileContentByPath(outputFile);
-        assertEquals(1, content.size());
-        assertEquals(
-                "a1,1,p1\n" + "a2,2,p1\n" + "a2,2,p2\n" + "a3,3,p1\n",
-                content.values().iterator().next());
-        assertFalse(new File(tmpFile.toURI()).exists());
+        assertThat(content.size()).isEqualTo(1);
+        assertThat(content.values().iterator().next())
+                .isEqualTo("a1,1,p1\n" + "a2,2,p1\n" + "a2,2,p2\n" + "a3,3,p1\n");
+        assertThat(new File(tmpFile.toURI()).exists()).isFalse();
     }
 
     @Test
@@ -147,15 +144,16 @@ public class FileSystemOutputFormatTest {
             testHarness.processElement(new StreamRecord<>(Row.of("a2", 2), 1L));
             testHarness.processElement(new StreamRecord<>(Row.of("a2", 2), 1L));
             testHarness.processElement(new StreamRecord<>(Row.of("a3", 3), 1L));
-            assertEquals(1, getFileContentByPath(tmpFile).size());
+            assertThat(getFileContentByPath(tmpFile).size()).isEqualTo(1);
         }
 
         ref.get().finalizeGlobal(1);
         Map<File, String> content = getFileContentByPath(outputFile);
-        assertEquals(1, content.size());
-        assertEquals("c=p1", content.keySet().iterator().next().getParentFile().getName());
-        assertEquals("a1,1\n" + "a2,2\n" + "a2,2\n" + "a3,3\n", content.values().iterator().next());
-        assertFalse(new File(tmpFile.toURI()).exists());
+        assertThat(content.size()).isEqualTo(1);
+        assertThat(content.keySet().iterator().next().getParentFile().getName()).isEqualTo("c=p1");
+        assertThat(content.values().iterator().next())
+                .isEqualTo("a1,1\n" + "a2,2\n" + "a2,2\n" + "a3,3\n");
+        assertThat(new File(tmpFile.toURI()).exists()).isFalse();
     }
 
     @Test
@@ -164,7 +162,7 @@ public class FileSystemOutputFormatTest {
         try (OneInputStreamOperatorTestHarness<Row, Object> testHarness =
                 createSink(false, true, false, new LinkedHashMap<>(), ref)) {
             writeUnorderedRecords(testHarness);
-            assertEquals(2, getFileContentByPath(tmpFile).size());
+            assertThat(getFileContentByPath(tmpFile).size()).isEqualTo(2);
         }
 
         ref.get().finalizeGlobal(1);
@@ -172,10 +170,10 @@ public class FileSystemOutputFormatTest {
         Map<String, String> sortedContent = new TreeMap<>();
         content.forEach((file, s) -> sortedContent.put(file.getParentFile().getName(), s));
 
-        assertEquals(2, sortedContent.size());
-        assertEquals("a1,1\n" + "a2,2\n" + "a3,3\n", sortedContent.get("c=p1"));
-        assertEquals("a2,2\n", sortedContent.get("c=p2"));
-        assertFalse(new File(tmpFile.toURI()).exists());
+        assertThat(sortedContent.size()).isEqualTo(2);
+        assertThat(sortedContent.get("c=p1")).isEqualTo("a1,1\n" + "a2,2\n" + "a3,3\n");
+        assertThat(sortedContent.get("c=p2")).isEqualTo("a2,2\n");
+        assertThat(new File(tmpFile.toURI()).exists()).isFalse();
     }
 
     @Test
@@ -190,7 +188,7 @@ public class FileSystemOutputFormatTest {
             testHarness.processElement(new StreamRecord<>(Row.of("a2", 2, "p1"), 1L));
             testHarness.processElement(new StreamRecord<>(Row.of("a3", 3, "p1"), 1L));
             testHarness.processElement(new StreamRecord<>(Row.of("a2", 2, "p2"), 1L));
-            assertEquals(2, getFileContentByPath(tmpFile).size());
+            assertThat(getFileContentByPath(tmpFile).size()).isEqualTo(2);
         }
 
         ref.get().finalizeGlobal(1);
@@ -198,10 +196,10 @@ public class FileSystemOutputFormatTest {
         Map<String, String> sortedContent = new TreeMap<>();
         content.forEach((file, s) -> sortedContent.put(file.getParentFile().getName(), s));
 
-        assertEquals(2, sortedContent.size());
-        assertEquals("a1,1\n" + "a2,2\n" + "a3,3\n", sortedContent.get("c=p1"));
-        assertEquals("a2,2\n", sortedContent.get("c=p2"));
-        assertFalse(new File(tmpFile.toURI()).exists());
+        assertThat(sortedContent.size()).isEqualTo(2);
+        assertThat(sortedContent.get("c=p1")).isEqualTo("a1,1\n" + "a2,2\n" + "a3,3\n");
+        assertThat(sortedContent.get("c=p2")).isEqualTo("a2,2\n");
+        assertThat(new File(tmpFile.toURI()).exists()).isFalse();
     }
 
     private OneInputStreamOperatorTestHarness<Row, Object> createSink(

@@ -28,8 +28,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link DefaultVertexParallelismDecider}. */
 public class DefaultVertexParallelismDeciderTest {
@@ -68,7 +67,7 @@ public class DefaultVertexParallelismDeciderTest {
     @Test
     public void testSourceJobVertex() {
         int parallelism = decider.decideParallelismForVertex(Collections.emptyList());
-        assertThat(parallelism, is(DEFAULT_SOURCE_PARALLELISM));
+        assertThat(parallelism).isEqualTo(DEFAULT_SOURCE_PARALLELISM);
     }
 
     @Test
@@ -82,7 +81,7 @@ public class DefaultVertexParallelismDeciderTest {
         int parallelism =
                 decider.decideParallelismForVertex(Arrays.asList(resultInfo1, resultInfo2));
 
-        assertThat(parallelism, is(11));
+        assertThat(parallelism).isEqualTo(11);
     }
 
     @Test
@@ -96,7 +95,7 @@ public class DefaultVertexParallelismDeciderTest {
         int parallelism =
                 decider.decideParallelismForVertex(Arrays.asList(resultInfo1, resultInfo2));
 
-        assertThat(parallelism, is(MAX_PARALLELISM));
+        assertThat(parallelism).isEqualTo(MAX_PARALLELISM);
     }
 
     @Test
@@ -109,7 +108,7 @@ public class DefaultVertexParallelismDeciderTest {
         int parallelism =
                 decider.decideParallelismForVertex(Arrays.asList(resultInfo1, resultInfo2));
 
-        assertThat(parallelism, is(MIN_PARALLELISM));
+        assertThat(parallelism).isEqualTo(MIN_PARALLELISM);
     }
 
     @Test
@@ -122,7 +121,7 @@ public class DefaultVertexParallelismDeciderTest {
         int parallelism =
                 decider.decideParallelismForVertex(Arrays.asList(resultInfo1, resultInfo2));
 
-        assertThat(parallelism, is(16));
+        assertThat(parallelism).isEqualTo(16);
     }
 
     @Test
@@ -136,6 +135,6 @@ public class DefaultVertexParallelismDeciderTest {
         int parallelism =
                 decider.decideParallelismForVertex(Arrays.asList(resultInfo1, resultInfo2));
 
-        assertThat(parallelism, is(17));
+        assertThat(parallelism).isEqualTo(17);
     }
 }

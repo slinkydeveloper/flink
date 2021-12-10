@@ -25,7 +25,6 @@ import org.apache.flink.util.CollectionUtil;
 import org.apache.flink.util.TestLogger;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nonnegative;
@@ -46,8 +45,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 /** Abstract test base for implementations of {@link KeyGroupPartitioner}. */
 public abstract class KeyGroupPartitionerTestBase<T> extends TestLogger {
@@ -82,7 +82,7 @@ public abstract class KeyGroupPartitionerTestBase<T> extends TestLogger {
         final Set<T> allElementsIdentitySet = Collections.newSetFromMap(new IdentityHashMap<>());
         final T[] data = generateTestInput(random, testSize, allElementsIdentitySet);
 
-        Assert.assertEquals(testSize, allElementsIdentitySet.size());
+        assertThat(allElementsIdentitySet.size()).isEqualTo(testSize);
 
         // Test with 5 key-groups.
         final KeyGroupRange range = new KeyGroupRange(0, 4);
@@ -142,12 +142,15 @@ public abstract class KeyGroupPartitionerTestBase<T> extends TestLogger {
 
         for (int keyGroup = 0; keyGroup < numberOfKeyGroups; ++keyGroup) {
             Iterator<T> iterator = result.iterator(keyGroup);
-            assertThat(
-                    CollectionUtil.iteratorToList(iterator),
-                    containsInAnyOrder(
-                            partitionedData.getOrDefault(keyGroup, Collections.emptyList()).stream()
-                                    .map(Matchers::equalTo)
-                                    .collect(Collectors.toList())));
+            assertThat(CollectionUtil.iteratorToList(iterator))
+                    .satisfies(
+                            matching(
+                                    containsInAnyOrder(
+                                            partitionedData
+                                                    .getOrDefault(keyGroup, Collections.emptyList())
+                                                    .stream()
+                                                    .map(Matchers::equalTo)
+                                                    .collect(Collectors.toList()))));
         }
     }
 
@@ -171,7 +174,7 @@ public abstract class KeyGroupPartitionerTestBase<T> extends TestLogger {
             element = elementGenerator.apply(random);
         }
 
-        Assert.assertEquals(numElementsToGenerate, allElementsIdentitySet.size());
+        assertThat(allElementsIdentitySet.size()).isEqualTo(numElementsToGenerate);
         return partitioningIn;
     }
 
@@ -222,16 +225,16 @@ public abstract class KeyGroupPartitionerTestBase<T> extends TestLogger {
 
         @Override
         public void writeElement(@Nonnull T element, @Nonnull DataOutputView dov) {
-            Assert.assertTrue(allElementsSet.remove(element));
-            Assert.assertEquals(
-                    currentKeyGroup,
-                    KeyGroupRangeAssignment.assignToKeyGroup(
-                            keyExtractorFunction.extractKeyFromElement(element),
-                            numberOfKeyGroups));
+            assertThat(allElementsSet.remove(element)).isTrue();
+            assertThat(
+                            KeyGroupRangeAssignment.assignToKeyGroup(
+                                    keyExtractorFunction.extractKeyFromElement(element),
+                                    numberOfKeyGroups))
+                    .isEqualTo(currentKeyGroup);
         }
 
         void validateAllElementsSeen() {
-            Assert.assertTrue(allElementsSet.isEmpty());
+            assertThat(allElementsSet.isEmpty()).isTrue();
         }
 
         void setCurrentKeyGroup(int currentKeyGroup) {

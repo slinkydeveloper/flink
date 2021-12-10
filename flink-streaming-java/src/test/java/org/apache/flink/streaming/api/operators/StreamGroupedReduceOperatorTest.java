@@ -30,10 +30,12 @@ import org.apache.flink.streaming.util.KeyedOneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.TestHarnessUtil;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for {@link StreamGroupedReduceOperator}. These test that:
@@ -102,9 +104,10 @@ public class StreamGroupedReduceOperatorTest {
 
         testHarness.close();
 
-        Assert.assertTrue(
-                "RichFunction methods where not called.", TestOpenCloseReduceFunction.closeCalled);
-        Assert.assertTrue("Output contains no elements.", testHarness.getOutput().size() > 0);
+        assertThat(TestOpenCloseReduceFunction.closeCalled)
+                .as("RichFunction methods where not called.")
+                .isTrue();
+        assertThat(testHarness.getOutput().size() > 0).as("Output contains no elements.").isTrue();
     }
 
     // This must only be used in one test, otherwise the static fields will be changed
@@ -119,7 +122,7 @@ public class StreamGroupedReduceOperatorTest {
         public void open(Configuration parameters) throws Exception {
             super.open(parameters);
             if (closeCalled) {
-                Assert.fail("Close called before open.");
+                fail("Close called before open.");
             }
             openCalled = true;
         }
@@ -128,7 +131,7 @@ public class StreamGroupedReduceOperatorTest {
         public void close() throws Exception {
             super.close();
             if (!openCalled) {
-                Assert.fail("Open was not called before close.");
+                fail("Open was not called before close.");
             }
             closeCalled = true;
         }
@@ -136,7 +139,7 @@ public class StreamGroupedReduceOperatorTest {
         @Override
         public Integer reduce(Integer in1, Integer in2) throws Exception {
             if (!openCalled) {
-                Assert.fail("Open was not called before run.");
+                fail("Open was not called before run.");
             }
             return in1 + in2;
         }

@@ -24,7 +24,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit test for {@link DataStreamSource}. */
 public class DataStreamSourceTest {
@@ -40,8 +40,8 @@ public class DataStreamSourceTest {
                 env.fromSource(mockSource, WatermarkStrategy.noWatermarks(), "TestingSource");
         stream.setParallelism(expectParallelism);
 
-        assertEquals(expectIsParallel, stream.isParallel());
+        assertThat(stream.isParallel()).isEqualTo(expectIsParallel);
 
-        assertEquals(expectParallelism, stream.getParallelism());
+        assertThat(stream.getParallelism()).isEqualTo(expectParallelism);
     }
 }

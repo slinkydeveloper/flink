@@ -58,8 +58,7 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.apache.flink.runtime.checkpoint.CheckpointRetentionPolicy.NEVER_RETAIN_AFTER_TERMINATION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link SchedulerUtils} utilities. */
 public class SchedulerUtilsTest extends TestLogger {
@@ -81,9 +80,8 @@ public class SchedulerUtilsTest extends TestLogger {
                         log,
                         new JobID());
 
-        assertEquals(
-                maxNumberOfCheckpointsToRetain,
-                completedCheckpointStore.getMaxNumberOfRetainedCheckpoints());
+        assertThat(completedCheckpointStore.getMaxNumberOfRetainedCheckpoints())
+                .isEqualTo(maxNumberOfCheckpointsToRetain);
     }
 
     /**
@@ -114,7 +112,7 @@ public class SchedulerUtilsTest extends TestLogger {
                 buildIncrementalHandle(key, new PlaceholderStreamStateHandle(), backendId);
         newHandle.registerSharedStates(sharedStateRegistry);
 
-        assertSame(handle, newHandle.getSharedState().get(key));
+        assertThat(newHandle.getSharedState().get(key)).isSameAs(handle);
     }
 
     private CheckpointRecoveryFactory buildRecoveryFactory(CompletedCheckpoint checkpoint) {

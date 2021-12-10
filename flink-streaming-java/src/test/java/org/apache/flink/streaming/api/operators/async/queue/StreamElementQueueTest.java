@@ -25,7 +25,6 @@ import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,9 +36,7 @@ import java.util.Collections;
 import static org.apache.flink.streaming.api.operators.async.queue.QueueUtil.popCompleted;
 import static org.apache.flink.streaming.api.operators.async.queue.QueueUtil.putSuccessfully;
 import static org.apache.flink.streaming.api.operators.async.queue.QueueUtil.putUnsuccessfully;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the basic functionality of {@link StreamElementQueue}. The basic operations consist of
@@ -78,16 +75,16 @@ public class StreamElementQueueTest extends TestLogger {
         StreamRecord<Integer> streamRecord = new StreamRecord<>(42, 1L);
 
         // add two elements to reach capacity
-        assertTrue(queue.tryPut(watermark).isPresent());
-        assertTrue(queue.tryPut(streamRecord).isPresent());
+        assertThat(queue.tryPut(watermark).isPresent()).isTrue();
+        assertThat(queue.tryPut(streamRecord).isPresent()).isTrue();
 
-        assertEquals(2, queue.size());
+        assertThat(queue.size()).isEqualTo(2);
 
         // queue full, cannot add new element
-        assertFalse(queue.tryPut(new Watermark(2L)).isPresent());
+        assertThat(queue.tryPut(new Watermark(2L)).isPresent()).isFalse();
 
         // check if expected values are returned (for checkpointing)
-        assertEquals(Arrays.asList(watermark, streamRecord), queue.values());
+        assertThat(queue.values()).isEqualTo(Arrays.asList(watermark, streamRecord));
     }
 
     @Test
@@ -98,18 +95,18 @@ public class StreamElementQueueTest extends TestLogger {
         putSuccessfully(queue, new Watermark(0L));
         ResultFuture<Integer> recordResult = putSuccessfully(queue, new StreamRecord<>(42, 1L));
 
-        assertEquals(2, queue.size());
+        assertThat(queue.size()).isEqualTo(2);
 
         // remove completed elements (watermarks are always completed)
-        assertEquals(Arrays.asList(new Watermark(0L)), popCompleted(queue));
-        assertEquals(1, queue.size());
+        assertThat(popCompleted(queue)).isEqualTo(Arrays.asList(new Watermark(0L)));
+        assertThat(queue.size()).isEqualTo(1);
 
         // now complete the stream record
         recordResult.complete(Collections.singleton(43));
 
-        assertEquals(Arrays.asList(new StreamRecord<>(43, 1L)), popCompleted(queue));
-        assertEquals(0, queue.size());
-        assertTrue(queue.isEmpty());
+        assertThat(popCompleted(queue)).isEqualTo(Arrays.asList(new StreamRecord<>(43, 1L)));
+        assertThat(queue.size()).isEqualTo(0);
+        assertThat(queue.isEmpty()).isTrue();
     }
 
     /** Tests that a put operation fails if the queue is full. */
@@ -119,14 +116,15 @@ public class StreamElementQueueTest extends TestLogger {
 
         // fill up queue
         ResultFuture<Integer> resultFuture = putSuccessfully(queue, new StreamRecord<>(42, 0L));
-        assertEquals(1, queue.size());
+        assertThat(queue.size()).isEqualTo(1);
 
         // cannot add more
         putUnsuccessfully(queue, new StreamRecord<>(43, 1L));
 
         // popping the completed element frees the queue again
         resultFuture.complete(Collections.singleton(42 * 42));
-        assertEquals(Arrays.asList(new StreamRecord<Integer>(42 * 42, 0L)), popCompleted(queue));
+        assertThat(popCompleted(queue))
+                .isEqualTo(Arrays.asList(new StreamRecord<Integer>(42 * 42, 0L)));
 
         // now the put operation should complete
         putSuccessfully(queue, new StreamRecord<>(43, 1L));
@@ -140,13 +138,13 @@ public class StreamElementQueueTest extends TestLogger {
         putSuccessfully(queue, new Watermark(2L));
         putSuccessfully(queue, new Watermark(5L));
 
-        Assert.assertEquals(2, queue.size());
-        Assert.assertFalse(queue.isEmpty());
+        assertThat(queue.size()).isEqualTo(2);
+        assertThat(queue.isEmpty()).isFalse();
 
-        Assert.assertEquals(
-                Arrays.asList(new Watermark(2L), new Watermark(5L)), popCompleted(queue));
-        Assert.assertEquals(0, queue.size());
-        Assert.assertTrue(queue.isEmpty());
-        Assert.assertEquals(Collections.emptyList(), popCompleted(queue));
+        assertThat(popCompleted(queue))
+                .isEqualTo(Arrays.asList(new Watermark(2L), new Watermark(5L)));
+        assertThat(queue.size()).isEqualTo(0);
+        assertThat(queue.isEmpty()).isTrue();
+        assertThat(popCompleted(queue)).isEqualTo(Collections.emptyList());
     }
 }

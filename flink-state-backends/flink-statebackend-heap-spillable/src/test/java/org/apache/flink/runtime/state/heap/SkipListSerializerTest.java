@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SkipListKeySerializer}. */
 public class SkipListSerializerTest extends TestLogger {
@@ -66,22 +66,23 @@ public class SkipListSerializerTest extends TestLogger {
         byte[] data = new byte[10 + skipListKey.length];
         System.arraycopy(skipListKey, 0, data, offset, skipListKey.length);
         MemorySegment skipListKeySegment = MemorySegmentFactory.wrap(data);
-        assertEquals(
-                key,
-                skipListKeySerializer.deserializeKey(
-                        skipListKeySegment, offset, skipListKey.length));
-        assertEquals(
-                namespace,
-                skipListKeySerializer.deserializeNamespace(
-                        skipListKeySegment, offset, skipListKey.length));
+        assertThat(
+                        skipListKeySerializer.deserializeKey(
+                                skipListKeySegment, offset, skipListKey.length))
+                .isEqualTo(key);
+        assertThat(
+                        skipListKeySerializer.deserializeNamespace(
+                                skipListKeySegment, offset, skipListKey.length))
+                .isEqualTo(namespace);
 
         Tuple2<byte[], byte[]> serializedKeyAndNamespace =
                 skipListKeySerializer.getSerializedKeyAndNamespace(skipListKeySegment, offset);
-        assertEquals(key, deserialize(keySerializer, serializedKeyAndNamespace.f0));
-        assertEquals(namespace, deserialize(namespaceSerializer, serializedKeyAndNamespace.f1));
+        assertThat(deserialize(keySerializer, serializedKeyAndNamespace.f0)).isEqualTo(key);
+        assertThat(deserialize(namespaceSerializer, serializedKeyAndNamespace.f1))
+                .isEqualTo(namespace);
 
         byte[] serializedNamespace = skipListKeySerializer.serializeNamespace(namespace);
-        assertEquals(namespace, deserialize(namespaceSerializer, serializedNamespace));
+        assertThat(deserialize(namespaceSerializer, serializedNamespace)).isEqualTo(namespace);
     }
 
     @Test
@@ -102,11 +103,11 @@ public class SkipListSerializerTest extends TestLogger {
         int offset = 10;
         byte[] data = new byte[10 + value.length];
         System.arraycopy(value, 0, data, offset, value.length);
-        assertEquals(state, deserialize(stateSerializer, value));
-        assertEquals(
-                state,
-                skipListValueSerializer.deserializeState(
-                        MemorySegmentFactory.wrap(data), offset, value.length));
+        assertThat(deserialize(stateSerializer, value)).isEqualTo(state);
+        assertThat(
+                        skipListValueSerializer.deserializeState(
+                                MemorySegmentFactory.wrap(data), offset, value.length))
+                .isEqualTo(state);
     }
 
     private <T> T deserialize(TypeSerializer<T> serializer, byte[] data) throws IOException {

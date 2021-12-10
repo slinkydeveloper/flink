@@ -22,8 +22,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultVertexAttemptNumberStore}. */
 public class DefaultVertexAttemptNumberStoreTest extends TestLogger {
@@ -38,10 +37,10 @@ public class DefaultVertexAttemptNumberStoreTest extends TestLogger {
 
         vertexAttemptNumberStore.setAttemptCount(jobVertexId, subtaskIndex, attemptCount);
         assertThat(
-                vertexAttemptNumberStore
-                        .getAttemptCounts(jobVertexId)
-                        .getAttemptCount(subtaskIndex),
-                is(attemptCount));
+                        vertexAttemptNumberStore
+                                .getAttemptCounts(jobVertexId)
+                                .getAttemptCount(subtaskIndex))
+                .isEqualTo(attemptCount);
     }
 
     @Test(expected = IllegalArgumentException.class)

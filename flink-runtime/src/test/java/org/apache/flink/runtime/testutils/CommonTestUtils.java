@@ -52,7 +52,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** This class contains auxiliary methods for unit tests. */
 public class CommonTestUtils {

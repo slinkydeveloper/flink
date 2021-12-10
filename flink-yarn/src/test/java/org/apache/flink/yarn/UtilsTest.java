@@ -38,12 +38,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for {@link Utils}. */
 public class UtilsTest extends TestLogger {
@@ -58,15 +55,15 @@ public class UtilsTest extends TestLogger {
         final Path applicationFilesDir = temporaryFolder.newFolder(".flink").toPath();
         Files.createFile(applicationFilesDir.resolve("flink.jar"));
         try (Stream<Path> files = Files.list(temporaryFolder.getRoot().toPath())) {
-            assertThat(files.count(), equalTo(1L));
+            assertThat(files.count()).isEqualTo(1L);
         }
         try (Stream<Path> files = Files.list(applicationFilesDir)) {
-            assertThat(files.count(), equalTo(1L));
+            assertThat(files.count()).isEqualTo(1L);
         }
 
         Utils.deleteApplicationFiles(applicationFilesDir.toString());
         try (Stream<Path> files = Files.list(temporaryFolder.getRoot().toPath())) {
-            assertThat(files.count(), equalTo(0L));
+            assertThat(files.count()).isEqualTo(0L);
         }
     }
 
@@ -109,8 +106,8 @@ public class UtilsTest extends TestLogger {
 
         final List<org.apache.hadoop.fs.Path> sharedLibs =
                 Utils.getQualifiedRemoteSharedPaths(flinkConfig, yarnConfig);
-        assertThat(sharedLibs.size(), is(1));
-        assertThat(sharedLibs.get(0).toUri().toString(), is(qualifiedPath));
+        assertThat(sharedLibs.size()).isEqualTo(1);
+        assertThat(sharedLibs.get(0).toUri().toString()).isEqualTo(qualifiedPath);
     }
 
     @Test
@@ -128,7 +125,7 @@ public class UtilsTest extends TestLogger {
                             + YarnConfigOptions.PROVIDED_LIB_DIRS.key()
                             + "\" should only "
                             + "contain dirs accessible from all worker nodes";
-            assertThat(ex, FlinkMatchers.containsMessage(msg));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsMessage(msg)));
         }
     }
 
@@ -153,9 +150,9 @@ public class UtilsTest extends TestLogger {
 
         final YarnConfiguration yarnConfig = Utils.getYarnConfiguration(flinkConfig);
 
-        assertEquals(v1, yarnConfig.get(yarnPrefix + k1, null));
-        assertEquals(v2, yarnConfig.get(yarnPrefix + k2, null));
-        assertTrue(yarnConfig.get(yarnPrefix + k3) == null);
+        assertThat(yarnConfig.get(yarnPrefix + k1, null)).isEqualTo(v1);
+        assertThat(yarnConfig.get(yarnPrefix + k2, null)).isEqualTo(v2);
+        assertThat(yarnConfig.get(yarnPrefix + k3) == null).isTrue();
     }
 
     private static void verifyUnitResourceVariousSchedulers(
@@ -173,7 +170,7 @@ public class UtilsTest extends TestLogger {
     private static void verifyUnitResource(
             YarnConfiguration yarnConfig, int expectedMem, int expectedVcore) {
         final Resource unitResource = Utils.getUnitResource(yarnConfig);
-        assertThat(unitResource.getMemory(), is(expectedMem));
-        assertThat(unitResource.getVirtualCores(), is(expectedVcore));
+        assertThat(unitResource.getMemory()).isEqualTo(expectedMem);
+        assertThat(unitResource.getVirtualCores()).isEqualTo(expectedVcore);
     }
 }

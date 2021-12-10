@@ -32,7 +32,8 @@ import org.apache.flink.optimizer.util.CompilerTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class WorksetIterationCornerCasesTest extends CompilerTestBase {
@@ -60,7 +61,7 @@ public class WorksetIterationCornerCasesTest extends CompilerTestBase {
             WorksetIterationPlanNode wipn =
                     (WorksetIterationPlanNode)
                             op.getDataSinks().iterator().next().getInput().getSource();
-            assertTrue(wipn.getSolutionSetPlanNode().getOutgoingChannels().isEmpty());
+            assertThat(wipn.getSolutionSetPlanNode().getOutgoingChannels().isEmpty()).isTrue();
 
             JobGraphGenerator jgg = new JobGraphGenerator();
             jgg.compileJobGraph(op);

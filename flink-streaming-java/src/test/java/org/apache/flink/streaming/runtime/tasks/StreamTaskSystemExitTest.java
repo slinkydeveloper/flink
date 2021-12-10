@@ -74,8 +74,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -116,16 +115,16 @@ public class StreamTaskSystemExitTest extends TestLogger {
     public void testInitSystemExitStreamTask() throws Exception {
         Task task = createSystemExitTask(InitSystemExitStreamTask.class.getName(), null);
         task.run();
-        assertNotNull(task.getFailureCause());
-        assertEquals(task.getFailureCause().getClass(), UserSystemExitException.class);
+        assertThat(task.getFailureCause()).isNotNull();
+        assertThat(UserSystemExitException.class).isEqualTo(task.getFailureCause().getClass());
     }
 
     @Test
     public void testProcessInputSystemExitStreamTask() throws Exception {
         Task task = createSystemExitTask(ProcessInputSystemExitStreamTask.class.getName(), null);
         task.run();
-        assertNotNull(task.getFailureCause());
-        assertEquals(task.getFailureCause().getClass(), UserSystemExitException.class);
+        assertThat(task.getFailureCause()).isNotNull();
+        assertThat(UserSystemExitException.class).isEqualTo(task.getFailureCause().getClass());
     }
 
     @Test(expected = UserSystemExitException.class)
@@ -143,8 +142,8 @@ public class StreamTaskSystemExitTest extends TestLogger {
         Task task =
                 createSystemExitTask(SystemExitSourceStreamTask.class.getName(), testStreamSource);
         task.run();
-        assertNotNull(task.getFailureCause());
-        assertEquals(task.getFailureCause().getClass(), UserSystemExitException.class);
+        assertThat(task.getFailureCause()).isNotNull();
+        assertThat(UserSystemExitException.class).isEqualTo(task.getFailureCause().getClass());
     }
 
     private Task createSystemExitTask(final String invokableClassName, StreamOperator<?> operator)

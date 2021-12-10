@@ -24,8 +24,7 @@ import org.junit.runners.Parameterized;
 
 import java.time.Duration;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TimeUtils#formatWithHighestUnit(Duration)}. */
 @RunWith(Parameterized.class)
@@ -50,6 +49,6 @@ public class TimeUtilsPrettyPrintingTest extends TestLogger {
 
     @Test
     public void testFormatting() {
-        assertThat(TimeUtils.formatWithHighestUnit(duration), is(expectedString));
+        assertThat(TimeUtils.formatWithHighestUnit(duration)).isEqualTo(expectedString);
     }
 }

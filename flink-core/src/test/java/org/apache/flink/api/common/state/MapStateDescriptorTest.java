@@ -29,10 +29,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link MapStateDescriptor}. */
 public class MapStateDescriptorTest {
@@ -48,24 +45,24 @@ public class MapStateDescriptorTest {
         MapStateDescriptor<Integer, String> descr =
                 new MapStateDescriptor<>("testName", keySerializer, valueSerializer);
 
-        assertEquals("testName", descr.getName());
-        assertNotNull(descr.getSerializer());
-        assertTrue(descr.getSerializer() instanceof MapSerializer);
-        assertNotNull(descr.getKeySerializer());
-        assertEquals(keySerializer, descr.getKeySerializer());
-        assertNotNull(descr.getValueSerializer());
-        assertEquals(valueSerializer, descr.getValueSerializer());
+        assertThat(descr.getName()).isEqualTo("testName");
+        assertThat(descr.getSerializer()).isNotNull();
+        assertThat(descr.getSerializer()).isInstanceOf(MapSerializer.class);
+        assertThat(descr.getKeySerializer()).isNotNull();
+        assertThat(descr.getKeySerializer()).isEqualTo(keySerializer);
+        assertThat(descr.getValueSerializer()).isNotNull();
+        assertThat(descr.getValueSerializer()).isEqualTo(valueSerializer);
 
         MapStateDescriptor<Integer, String> copy = CommonTestUtils.createCopySerializable(descr);
 
-        assertEquals("testName", copy.getName());
-        assertNotNull(copy.getSerializer());
-        assertTrue(copy.getSerializer() instanceof MapSerializer);
+        assertThat(copy.getName()).isEqualTo("testName");
+        assertThat(copy.getSerializer()).isNotNull();
+        assertThat(copy.getSerializer()).isInstanceOf(MapSerializer.class);
 
-        assertNotNull(copy.getKeySerializer());
-        assertEquals(keySerializer, copy.getKeySerializer());
-        assertNotNull(copy.getValueSerializer());
-        assertEquals(valueSerializer, copy.getValueSerializer());
+        assertThat(copy.getKeySerializer()).isNotNull();
+        assertThat(copy.getKeySerializer()).isEqualTo(keySerializer);
+        assertThat(copy.getValueSerializer()).isNotNull();
+        assertThat(copy.getValueSerializer()).isEqualTo(valueSerializer);
     }
 
     @Test
@@ -82,22 +79,22 @@ public class MapStateDescriptorTest {
 
         // test that hashCode() works on state descriptors with initialized and uninitialized
         // serializers
-        assertEquals(original.hashCode(), same.hashCode());
-        assertEquals(original.hashCode(), sameBySerializer.hashCode());
+        assertThat(same.hashCode()).isEqualTo(original.hashCode());
+        assertThat(sameBySerializer.hashCode()).isEqualTo(original.hashCode());
 
-        assertEquals(original, same);
-        assertEquals(original, sameBySerializer);
+        assertThat(same).isEqualTo(original);
+        assertThat(sameBySerializer).isEqualTo(original);
 
         // equality with a clone
         MapStateDescriptor<String, String> clone = CommonTestUtils.createCopySerializable(original);
-        assertEquals(original, clone);
+        assertThat(clone).isEqualTo(original);
 
         // equality with an initialized
         clone.initializeSerializerUnlessSet(new ExecutionConfig());
-        assertEquals(original, clone);
+        assertThat(clone).isEqualTo(original);
 
         original.initializeSerializerUnlessSet(new ExecutionConfig());
-        assertEquals(original, same);
+        assertThat(same).isEqualTo(original);
     }
 
     /**
@@ -124,12 +121,12 @@ public class MapStateDescriptorTest {
         TypeSerializer<Long> valueSerializerB = descr.getValueSerializer();
 
         // check that we did not retrieve the same serializers
-        assertNotSame(keySerializerA, keySerializerB);
-        assertNotSame(valueSerializerA, valueSerializerB);
+        assertThat(keySerializerB).isNotSameAs(keySerializerA);
+        assertThat(valueSerializerB).isNotSameAs(valueSerializerA);
 
         TypeSerializer<Map<String, Long>> serializerA = descr.getSerializer();
         TypeSerializer<Map<String, Long>> serializerB = descr.getSerializer();
 
-        assertNotSame(serializerA, serializerB);
+        assertThat(serializerB).isNotSameAs(serializerA);
     }
 }

@@ -36,10 +36,8 @@ import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.common.schema.SchemaType;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link PulsarSchema}. */
 class PulsarSchemaTest {
@@ -54,42 +52,44 @@ class PulsarSchemaTest {
 
     @Test
     void pulsarSchemaCreation() {
-        assertAll(
-                "Primitive schemas creation",
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.BYTES)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.STRING)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.INT8)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.INT16)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.INT32)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.INT64)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.BOOL)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.FLOAT)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.DOUBLE)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.DATE)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.TIME)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.TIMESTAMP)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.INSTANT)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.LOCAL_DATE)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.LOCAL_TIME)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(Schema.LOCAL_DATE_TIME)));
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.BYTES)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.STRING)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.INT8)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.INT16)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.INT32)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.INT64)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.BOOL)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.FLOAT)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.DOUBLE)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.DATE)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.TIME)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.TIMESTAMP)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.INSTANT)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.LOCAL_DATE)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.LOCAL_TIME)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(Schema.LOCAL_DATE_TIME)).isNull();
 
-        assertAll(
-                "Struct & KeyValue schema creation",
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(JSON, FL.class)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(AVRO, Bar.class)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(PROTO, TestMessage.class)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(PROTO_N, SubMessage.class)),
-                () -> assertDoesNotThrow(() -> new PulsarSchema<>(KV, Foo.class, FA.class)));
+        assertThatThrownBy(() -> new PulsarSchema<>(JSON, FL.class)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(AVRO, Bar.class)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(PROTO, TestMessage.class)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(PROTO_N, SubMessage.class)).isNull();
+        assertThatThrownBy(() -> new PulsarSchema<>(KV, Foo.class, FA.class)).isNull();
     }
 
     @Test
     void invalidPulsarSchemaCreationWithoutClassType() {
-        assertThrows(IllegalArgumentException.class, () -> new PulsarSchema<>(AVRO));
-        assertThrows(IllegalArgumentException.class, () -> new PulsarSchema<>(JSON));
-        assertThrows(IllegalArgumentException.class, () -> new PulsarSchema<>(PROTO));
-        assertThrows(IllegalArgumentException.class, () -> new PulsarSchema<>(PROTO_N));
-        assertThrows(IllegalArgumentException.class, () -> new PulsarSchema<>(KV));
-        assertThrows(IllegalArgumentException.class, () -> new PulsarSchema(KV, KeyValue.class));
+        assertThatThrownBy(() -> new PulsarSchema<>(AVRO))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new PulsarSchema<>(JSON))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new PulsarSchema<>(PROTO))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new PulsarSchema<>(PROTO_N))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new PulsarSchema<>(KV))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new PulsarSchema(KV, KeyValue.class))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -119,7 +119,7 @@ class PulsarSchemaTest {
 
     private <T> void assertPulsarSchemaIsSerializable(PulsarSchema<T> schema) throws Exception {
         PulsarSchema<T> clonedSchema = InstantiationUtil.clone(schema);
-        assertEquals(clonedSchema.getSchemaInfo(), schema.getSchemaInfo());
-        assertEquals(clonedSchema.getRecordClass(), schema.getRecordClass());
+        assertThat(schema.getSchemaInfo()).isEqualTo(clonedSchema.getSchemaInfo());
+        assertThat(schema.getRecordClass()).isEqualTo(clonedSchema.getRecordClass());
     }
 }

@@ -24,11 +24,13 @@ import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.DataOutputViewStreamWrapper;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.EOFException;
 import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Suite of tests for {@link PostVersionedIOReadableWritable}. */
 public class PostVersionedIOReadableWritableTest {
@@ -39,7 +41,7 @@ public class PostVersionedIOReadableWritableTest {
         byte[] serialized = serializeWithPostVersionedReadableWritable(payload);
         byte[] restored = restoreWithPostVersionedReadableWritable(serialized, payload.length);
 
-        Assert.assertArrayEquals(payload, restored);
+        assertThat(restored).isEqualTo(payload);
     }
 
     @Test
@@ -49,7 +51,7 @@ public class PostVersionedIOReadableWritableTest {
         byte[] restored =
                 restoreWithPostVersionedReadableWritable(serialized, preVersionedPayload.length);
 
-        Assert.assertArrayEquals(preVersionedPayload, restored);
+        assertThat(restored).isEqualTo(preVersionedPayload);
     }
 
     @Test
@@ -59,7 +61,7 @@ public class PostVersionedIOReadableWritableTest {
         byte[] restored =
                 restoreWithPostVersionedReadableWritable(serialized, preVersionedPayload.length);
 
-        Assert.assertArrayEquals(preVersionedPayload, restored);
+        assertThat(restored).isEqualTo(preVersionedPayload);
     }
 
     @Test
@@ -69,7 +71,7 @@ public class PostVersionedIOReadableWritableTest {
         byte[] restored =
                 restoreWithPostVersionedReadableWritable(serialized, preVersionedPayload.length);
 
-        Assert.assertArrayEquals(preVersionedPayload, restored);
+        assertThat(restored).isEqualTo(preVersionedPayload);
     }
 
     @Test
@@ -79,7 +81,7 @@ public class PostVersionedIOReadableWritableTest {
         byte[] restored =
                 restoreWithPostVersionedReadableWritable(serialized, preVersionedPayload.length);
 
-        Assert.assertArrayEquals(preVersionedPayload, restored);
+        assertThat(restored).isEqualTo(preVersionedPayload);
     }
 
     private byte[] serializeWithNonVersionedReadableWritable(byte[] payload) throws IOException {
@@ -124,7 +126,7 @@ public class PostVersionedIOReadableWritableTest {
     private static void assertEmpty(DataInputView in) throws IOException {
         try {
             in.readByte();
-            Assert.fail();
+            fail("unknown failure");
         } catch (EOFException ignore) {
         }
     }

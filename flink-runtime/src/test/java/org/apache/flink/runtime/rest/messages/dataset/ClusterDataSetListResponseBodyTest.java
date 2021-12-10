@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 
 /** Tests for {@link ClusterDataSetListResponseBody}. */
 public class ClusterDataSetListResponseBodyTest
@@ -47,7 +47,7 @@ public class ClusterDataSetListResponseBodyTest
 
         List<ClusterDataSetEntry> convertedDataSets =
                 ClusterDataSetListResponseBody.from(originalDataSets).getDataSets();
-        assertThat(convertedDataSets, hasSize(2));
+        assertThat(convertedDataSets).satisfies(matching(hasSize(2)));
         for (ClusterDataSetEntry convertedDataSet : convertedDataSets) {
             IntermediateDataSetID id =
                     new IntermediateDataSetID(
@@ -56,11 +56,10 @@ public class ClusterDataSetListResponseBodyTest
 
             DataSetMetaInfo dataSetMetaInfo = originalDataSets.get(id);
 
-            assertThat(
-                    convertedDataSet.isComplete(),
-                    is(
+            assertThat(convertedDataSet.isComplete())
+                    .isEqualTo(
                             dataSetMetaInfo.getNumRegisteredPartitions().orElse(0)
-                                    == dataSetMetaInfo.getNumTotalPartitions()));
+                                    == dataSetMetaInfo.getNumTotalPartitions());
         }
     }
 
@@ -83,13 +82,13 @@ public class ClusterDataSetListResponseBodyTest
         final List<ClusterDataSetEntry> expectedDataSets = expected.getDataSets();
         final List<ClusterDataSetEntry> actualDataSets = actual.getDataSets();
 
-        assertThat(actualDataSets, hasSize(expectedDataSets.size()));
+        assertThat(actualDataSets).satisfies(matching(hasSize(expectedDataSets.size())));
         for (int i = 0; i < expectedDataSets.size(); i++) {
             ClusterDataSetEntry expectedDataSet = expectedDataSets.get(i);
             ClusterDataSetEntry actualDataSet = actualDataSets.get(i);
 
-            assertThat(actualDataSet.getDataSetId(), is(expectedDataSet.getDataSetId()));
-            assertThat(actualDataSet.isComplete(), is(expectedDataSet.isComplete()));
+            assertThat(actualDataSet.getDataSetId()).isEqualTo(expectedDataSet.getDataSetId());
+            assertThat(actualDataSet.isComplete()).isEqualTo(expectedDataSet.isComplete());
         }
     }
 }

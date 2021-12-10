@@ -33,9 +33,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link BackgroundTask}. */
 public class BackgroundTaskTest extends TestLogger {
@@ -48,7 +48,7 @@ public class BackgroundTaskTest extends TestLogger {
     public void testFinishedBackgroundTaskIsTerminated() {
         final BackgroundTask<Void> finishedBackgroundTask = BackgroundTask.finishedBackgroundTask();
 
-        assertTrue(finishedBackgroundTask.getTerminationFuture().isDone());
+        assertThat(finishedBackgroundTask.getTerminationFuture().isDone()).isTrue();
         finishedBackgroundTask.getTerminationFuture().join();
     }
 
@@ -56,7 +56,7 @@ public class BackgroundTaskTest extends TestLogger {
     public void testFinishedBackgroundTaskDoesNotContainAResult() {
         final BackgroundTask<Void> finishedBackgroundTask = BackgroundTask.finishedBackgroundTask();
 
-        assertTrue(finishedBackgroundTask.getResultFuture().isCompletedExceptionally());
+        assertThat(finishedBackgroundTask.getResultFuture().isCompletedExceptionally()).isTrue();
     }
 
     @Test
@@ -66,7 +66,7 @@ public class BackgroundTaskTest extends TestLogger {
                 BackgroundTask.finishedBackgroundTask()
                         .runAfter(() -> expectedValue, TEST_EXECUTOR_RESOURCE.getExecutor());
 
-        assertThat(backgroundTask.getResultFuture().join(), Matchers.is(expectedValue));
+        assertThat(backgroundTask.getResultFuture().join()).isEqualTo(expectedValue);
         // check that the termination future has completed normally
         backgroundTask.getTerminationFuture().join();
     }
@@ -86,7 +86,7 @@ public class BackgroundTaskTest extends TestLogger {
             backgroundTask.getResultFuture().get();
             fail("Expected an exceptionally completed result future.");
         } catch (ExecutionException ee) {
-            assertThat(ee, FlinkMatchers.containsCause(expectedException));
+            assertThat(ee).satisfies(matching(FlinkMatchers.containsCause(expectedException)));
         }
         // check that the termination future has completed normally
         backgroundTask.getTerminationFuture().join();
@@ -115,7 +115,7 @@ public class BackgroundTaskTest extends TestLogger {
 
         backgroundTask.getTerminationFuture().join();
 
-        assertThat(taskCompletions, Matchers.contains(1, 2));
+        assertThat(taskCompletions).satisfies(matching(Matchers.contains(1, 2)));
     }
 
     @Test
@@ -151,6 +151,6 @@ public class BackgroundTaskTest extends TestLogger {
 
         finalTask.getTerminationFuture().join();
 
-        assertThat(taskCompletions, Matchers.contains(1, 3));
+        assertThat(taskCompletions).satisfies(matching(Matchers.contains(1, 3)));
     }
 }

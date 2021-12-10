@@ -36,7 +36,6 @@ import org.apache.flink.streaming.runtime.tasks.mailbox.SteppingMailboxProcessor
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.util.Preconditions;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
@@ -50,6 +49,7 @@ import java.util.stream.Stream;
 
 import static org.apache.flink.streaming.util.AbstractStreamOperatorTestHarness.repackageState;
 import static org.apache.flink.streaming.util.AbstractStreamOperatorTestHarness.repartitionOperatorState;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test processing files during rescaling. */
 public class ContinuousFileProcessingRescalingTest {
@@ -76,7 +76,7 @@ public class ContinuousFileProcessingRescalingTest {
                     i.awaitEverythingProcessed();
                 }
 
-                Assert.assertEquals(collectOutput(beforeRescale), collectOutput(afterRescale));
+                assertThat(collectOutput(afterRescale)).isEqualTo(collectOutput(beforeRescale));
             }
         } finally {
             for (HarnessWithFormat harness : beforeRescale) {
@@ -110,8 +110,8 @@ public class ContinuousFileProcessingRescalingTest {
                     harness.awaitEverythingProcessed();
                 }
 
-                Assert.assertEquals(
-                        collectOutput(beforeRescale), collectOutput(afterRescale0, afterRescale1));
+                assertThat(collectOutput(afterRescale0, afterRescale1))
+                        .isEqualTo(collectOutput(beforeRescale));
             }
         }
     }

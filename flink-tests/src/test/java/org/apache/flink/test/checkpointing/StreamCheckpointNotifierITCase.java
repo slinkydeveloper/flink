@@ -49,11 +49,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration test for the {@link CheckpointListener} interface. The test ensures that {@link
@@ -87,7 +84,7 @@ public class StreamCheckpointNotifierITCase extends AbstractTestBase {
         try {
             final StreamExecutionEnvironment env =
                     StreamExecutionEnvironment.getExecutionEnvironment();
-            assertEquals("test setup broken", PARALLELISM, env.getParallelism());
+            assertThat(env.getParallelism()).as("test setup broken").isEqualTo(PARALLELISM);
 
             env.enableCheckpointing(500);
             env.setRestartStrategy(RestartStrategies.fixedDelayRestart(Integer.MAX_VALUE, 0L));
@@ -119,7 +116,7 @@ public class StreamCheckpointNotifierITCase extends AbstractTestBase {
             env.execute();
 
             final long failureCheckpointID = OnceFailingReducer.failureCheckpointID;
-            assertNotEquals(0L, failureCheckpointID);
+            assertThat(failureCheckpointID).isEqualTo(0L);
 
             List<List<Long>[]> allLists =
                     Arrays.asList(
@@ -132,20 +129,21 @@ public class StreamCheckpointNotifierITCase extends AbstractTestBase {
             for (List<Long>[] parallelNotifications : allLists) {
                 for (List<Long> notifications : parallelNotifications) {
 
-                    assertTrue(
-                            "No checkpoint notification was received.", notifications.size() > 0);
+                    assertThat(notifications.size() > 0)
+                            .as("No checkpoint notification was received.")
+                            .isTrue();
 
-                    assertFalse(
-                            "Failure checkpoint was marked as completed.",
-                            notifications.contains(failureCheckpointID));
+                    assertThat(notifications.contains(failureCheckpointID))
+                            .as("Failure checkpoint was marked as completed.")
+                            .isFalse();
 
-                    assertFalse(
-                            "No checkpoint received after failure.",
-                            notifications.get(notifications.size() - 1) == failureCheckpointID);
+                    assertThat(notifications.get(notifications.size() - 1) == failureCheckpointID)
+                            .as("No checkpoint received after failure.")
+                            .isFalse();
 
-                    assertTrue(
-                            "Checkpoint notification was received multiple times",
-                            notifications.size() == new HashSet<Long>(notifications).size());
+                    assertThat(notifications.size() == new HashSet<Long>(notifications).size())
+                            .as("Checkpoint notification was received multiple times")
+                            .isTrue();
                 }
             }
         } catch (Exception e) {

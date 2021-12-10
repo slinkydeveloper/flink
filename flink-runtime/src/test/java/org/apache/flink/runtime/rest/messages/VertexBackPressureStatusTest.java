@@ -23,7 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JobVertexBackPressureInfo.VertexBackPressureStatus}. */
 public class VertexBackPressureStatusTest extends TestLogger {
@@ -34,14 +34,16 @@ public class VertexBackPressureStatusTest extends TestLogger {
      */
     @Test
     public void testJsonValue() throws Exception {
-        assertEquals(
-                "\"ok\"",
-                RestMapperUtils.getStrictObjectMapper()
-                        .writeValueAsString(JobVertexBackPressureInfo.VertexBackPressureStatus.OK));
-        assertEquals(
-                "\"deprecated\"",
-                RestMapperUtils.getStrictObjectMapper()
-                        .writeValueAsString(
-                                JobVertexBackPressureInfo.VertexBackPressureStatus.DEPRECATED));
+        assertThat(
+                        RestMapperUtils.getStrictObjectMapper()
+                                .writeValueAsString(
+                                        JobVertexBackPressureInfo.VertexBackPressureStatus.OK))
+                .isEqualTo("\"ok\"");
+        assertThat(
+                        RestMapperUtils.getStrictObjectMapper()
+                                .writeValueAsString(
+                                        JobVertexBackPressureInfo.VertexBackPressureStatus
+                                                .DEPRECATED))
+                .isEqualTo("\"deprecated\"");
     }
 }

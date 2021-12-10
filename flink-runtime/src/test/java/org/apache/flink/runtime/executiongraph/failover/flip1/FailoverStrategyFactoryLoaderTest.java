@@ -25,8 +25,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FailoverStrategyFactoryLoader}. */
 public class FailoverStrategyFactoryLoaderTest extends TestLogger {
@@ -37,9 +36,8 @@ public class FailoverStrategyFactoryLoaderTest extends TestLogger {
         config.setString(
                 JobManagerOptions.EXECUTION_FAILOVER_STRATEGY,
                 FailoverStrategyFactoryLoader.FULL_RESTART_STRATEGY_NAME);
-        assertThat(
-                FailoverStrategyFactoryLoader.loadFailoverStrategyFactory(config),
-                instanceOf(RestartAllFailoverStrategy.Factory.class));
+        assertThat(FailoverStrategyFactoryLoader.loadFailoverStrategyFactory(config))
+                .isInstanceOf(RestartAllFailoverStrategy.Factory.class);
     }
 
     @Test
@@ -48,17 +46,15 @@ public class FailoverStrategyFactoryLoaderTest extends TestLogger {
         config.setString(
                 JobManagerOptions.EXECUTION_FAILOVER_STRATEGY,
                 FailoverStrategyFactoryLoader.PIPELINED_REGION_RESTART_STRATEGY_NAME);
-        assertThat(
-                FailoverStrategyFactoryLoader.loadFailoverStrategyFactory(config),
-                instanceOf(RestartPipelinedRegionFailoverStrategy.Factory.class));
+        assertThat(FailoverStrategyFactoryLoader.loadFailoverStrategyFactory(config))
+                .isInstanceOf(RestartPipelinedRegionFailoverStrategy.Factory.class);
     }
 
     @Test
     public void testDefaultFailoverStrategyIsRegion() {
         final Configuration config = new Configuration();
-        assertThat(
-                FailoverStrategyFactoryLoader.loadFailoverStrategyFactory(config),
-                instanceOf(RestartPipelinedRegionFailoverStrategy.Factory.class));
+        assertThat(FailoverStrategyFactoryLoader.loadFailoverStrategyFactory(config))
+                .isInstanceOf(RestartPipelinedRegionFailoverStrategy.Factory.class);
     }
 
     @Test(expected = IllegalConfigurationException.class)

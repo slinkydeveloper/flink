@@ -45,12 +45,12 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Tests for {@link DefaultJobGraphStore} with {@link TestingJobGraphStoreWatcher}, {@link
@@ -92,8 +92,8 @@ public class DefaultJobGraphStoreTest extends TestLogger {
 
         final JobGraph recoveredJobGraph =
                 jobGraphStore.recoverJobGraph(testingJobGraph.getJobID());
-        assertThat(recoveredJobGraph, is(notNullValue()));
-        assertThat(recoveredJobGraph.getJobID(), is(testingJobGraph.getJobID()));
+        assertThat(recoveredJobGraph).isEqualTo(notNullValue());
+        assertThat(recoveredJobGraph.getJobID()).isEqualTo(testingJobGraph.getJobID());
     }
 
     @Test
@@ -110,7 +110,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
 
         final JobGraph recoveredJobGraph =
                 jobGraphStore.recoverJobGraph(testingJobGraph.getJobID());
-        assertThat(recoveredJobGraph, is(nullValue()));
+        assertThat(recoveredJobGraph).isEqualTo(nullValue());
     }
 
     @Test
@@ -132,9 +132,9 @@ public class DefaultJobGraphStoreTest extends TestLogger {
             fail(
                     "recoverJobGraph should fail when there is exception in getting the state handle.");
         } catch (Exception ex) {
-            assertThat(ex, FlinkMatchers.containsCause(testException));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsCause(testException)));
             String actual = releaseFuture.get(timeout, TimeUnit.MILLISECONDS);
-            assertThat(actual, is(testingJobGraph.getJobID().toString()));
+            assertThat(actual).isEqualTo(testingJobGraph.getJobID().toString());
         }
     }
 
@@ -154,7 +154,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         jobGraphStore.putJobGraph(testingJobGraph);
 
         final JobGraph actual = addFuture.get(timeout, TimeUnit.MILLISECONDS);
-        assertThat(actual.getJobID(), is(testingJobGraph.getJobID()));
+        assertThat(actual.getJobID()).isEqualTo(testingJobGraph.getJobID());
     }
 
     @Test
@@ -184,9 +184,9 @@ public class DefaultJobGraphStoreTest extends TestLogger {
 
         final Tuple3<String, IntegerResourceVersion, JobGraph> actual =
                 replaceFuture.get(timeout, TimeUnit.MILLISECONDS);
-        assertThat(actual.f0, is(testingJobGraph.getJobID().toString()));
-        assertThat(actual.f1, is(IntegerResourceVersion.valueOf(resourceVersion)));
-        assertThat(actual.f2.getJobID(), is(testingJobGraph.getJobID()));
+        assertThat(actual.f0).isEqualTo(testingJobGraph.getJobID().toString());
+        assertThat(actual.f1).isEqualTo(IntegerResourceVersion.valueOf(resourceVersion));
+        assertThat(actual.f2.getJobID()).isEqualTo(testingJobGraph.getJobID());
     }
 
     @Test
@@ -202,7 +202,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         jobGraphStore.putJobGraph(testingJobGraph);
         jobGraphStore.removeJobGraph(testingJobGraph.getJobID());
         final JobID actual = removeFuture.get(timeout, TimeUnit.MILLISECONDS);
-        assertThat(actual, is(testingJobGraph.getJobID()));
+        assertThat(actual).isEqualTo(testingJobGraph.getJobID());
     }
 
     @Test
@@ -222,7 +222,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         } catch (TimeoutException ex) {
             // expected
         }
-        assertThat(removeFuture.isDone(), is(false));
+        assertThat(removeFuture.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -238,7 +238,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
 
         final JobGraphStore jobGraphStore = createAndStartJobGraphStore(stateHandleStore);
         final Collection<JobID> jobIds = jobGraphStore.getJobIds();
-        assertThat(jobIds, contains(existingJobIds.toArray()));
+        assertThat(jobIds).satisfies(matching(contains(existingJobIds.toArray())));
     }
 
     @Test
@@ -250,7 +250,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         jobGraphStore.putJobGraph(testingJobGraph);
 
         testingJobGraphStoreWatcher.addJobGraph(testingJobGraph.getJobID());
-        assertThat(testingJobGraphListener.getAddedJobGraphs().size(), is(0));
+        assertThat(testingJobGraphListener.getAddedJobGraphs().size()).isEqualTo(0);
     }
 
     @Test
@@ -269,8 +269,9 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         // Unknown job
         final JobID unknownJobId = JobID.generate();
         testingJobGraphStoreWatcher.addJobGraph(unknownJobId);
-        assertThat(testingJobGraphListener.getAddedJobGraphs().size(), is(1));
-        assertThat(testingJobGraphListener.getAddedJobGraphs(), contains(unknownJobId));
+        assertThat(testingJobGraphListener.getAddedJobGraphs().size()).isEqualTo(1);
+        assertThat(testingJobGraphListener.getAddedJobGraphs())
+                .satisfies(matching(contains(unknownJobId)));
     }
 
     @Test
@@ -285,10 +286,9 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         testingJobGraphStoreWatcher.removeJobGraph(JobID.generate());
         // Known job
         testingJobGraphStoreWatcher.removeJobGraph(testingJobGraph.getJobID());
-        assertThat(testingJobGraphListener.getRemovedJobGraphs().size(), is(1));
-        assertThat(
-                testingJobGraphListener.getRemovedJobGraphs(),
-                contains(testingJobGraph.getJobID()));
+        assertThat(testingJobGraphListener.getRemovedJobGraphs().size()).isEqualTo(1);
+        assertThat(testingJobGraphListener.getRemovedJobGraphs())
+                .satisfies(matching(contains(testingJobGraph.getJobID())));
     }
 
     @Test
@@ -299,7 +299,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         createAndStartJobGraphStore(stateHandleStore);
 
         testingJobGraphStoreWatcher.removeJobGraph(testingJobGraph.getJobID());
-        assertThat(testingJobGraphListener.getRemovedJobGraphs().size(), is(0));
+        assertThat(testingJobGraphListener.getRemovedJobGraphs().size()).isEqualTo(0);
     }
 
     @Test
@@ -311,7 +311,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         jobGraphStore.stop();
 
         testingJobGraphStoreWatcher.addJobGraph(testingJobGraph.getJobID());
-        assertThat(testingJobGraphListener.getAddedJobGraphs().size(), is(0));
+        assertThat(testingJobGraphListener.getAddedJobGraphs().size()).isEqualTo(0);
     }
 
     @Test
@@ -324,7 +324,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         jobGraphStore.stop();
 
         testingJobGraphStoreWatcher.removeJobGraph(testingJobGraph.getJobID());
-        assertThat(testingJobGraphListener.getRemovedJobGraphs().size(), is(0));
+        assertThat(testingJobGraphListener.getRemovedJobGraphs().size()).isEqualTo(0);
     }
 
     @Test
@@ -336,7 +336,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         final JobGraphStore jobGraphStore = createAndStartJobGraphStore(stateHandleStore);
         jobGraphStore.stop();
 
-        assertThat(completableFuture.isDone(), is(true));
+        assertThat(completableFuture.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -349,7 +349,7 @@ public class DefaultJobGraphStoreTest extends TestLogger {
         jobGraphStore.releaseJobGraph(testingJobGraph.getJobID());
 
         final String actual = releaseFuture.get();
-        assertThat(actual, is(testingJobGraph.getJobID().toString()));
+        assertThat(actual).isEqualTo(testingJobGraph.getJobID().toString());
     }
 
     private JobGraphStore createAndStartJobGraphStore(

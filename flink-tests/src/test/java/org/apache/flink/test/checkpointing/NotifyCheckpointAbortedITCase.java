@@ -89,7 +89,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.runtime.state.SnapshotExecutionType.ASYNCHRONOUS;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integrated tests to verify the logic to notify checkpoint aborted via RPC message. */
 @RunWith(Parameterized.class)
@@ -205,8 +205,8 @@ public class NotifyCheckpointAbortedITCase extends TestLogger {
     }
 
     private void verifyAllOperatorsNotifyAbortedTimes(int expectedTimes) {
-        assertEquals(expectedTimes, NormalMap.notifiedAbortedTimes.get());
-        assertEquals(expectedTimes, DeclineSink.notifiedAbortedTimes.get());
+        assertThat(NormalMap.notifiedAbortedTimes.get()).isEqualTo(expectedTimes);
+        assertThat(DeclineSink.notifiedAbortedTimes.get()).isEqualTo(expectedTimes);
     }
 
     /** Normal source function. */

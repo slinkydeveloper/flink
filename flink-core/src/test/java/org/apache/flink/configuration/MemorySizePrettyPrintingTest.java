@@ -25,8 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link MemorySize#toString()}. */
 @RunWith(Parameterized.class)
@@ -52,6 +51,6 @@ public class MemorySizePrettyPrintingTest extends TestLogger {
 
     @Test
     public void testFormatting() {
-        assertThat(memorySize.toString(), is(expectedString));
+        assertThat(memorySize.toString()).isEqualTo(expectedString);
     }
 }

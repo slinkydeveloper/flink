@@ -40,15 +40,13 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link StandaloneApplicationClusterConfigurationParserFactory}. */
 public class StandaloneApplicationClusterConfigurationParserFactoryTest extends TestLogger {
@@ -101,21 +99,20 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
 
         final StandaloneApplicationClusterConfiguration clusterConfiguration =
                 commandLineParser.parse(args);
-        assertThat(clusterConfiguration.getJobClassName(), is(equalTo(JOB_CLASS_NAME)));
-        assertThat(clusterConfiguration.getArgs(), arrayContaining(arg1, arg2));
+        assertThat(clusterConfiguration.getJobClassName()).isEqualTo(equalTo(JOB_CLASS_NAME));
+        assertThat(clusterConfiguration.getArgs()).satisfies(matching(arrayContaining(arg1, arg2)));
 
         final Configuration configuration =
                 StandaloneApplicationClusterEntryPoint.loadConfigurationFromClusterConfig(
                         clusterConfiguration);
 
         final String strJobId = configuration.get(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID);
-        assertThat(JobID.fromHexString(strJobId), is(equalTo(jobID)));
-        assertThat(
-                SavepointRestoreSettings.fromConfiguration(configuration),
-                is(equalTo(savepointRestoreSettings)));
+        assertThat(JobID.fromHexString(strJobId)).isEqualTo(equalTo(jobID));
+        assertThat(SavepointRestoreSettings.fromConfiguration(configuration))
+                .isEqualTo(equalTo(savepointRestoreSettings));
 
-        assertThat(configuration.get(RestOptions.PORT), is(equalTo(restPort)));
-        assertThat(configuration.get(DeploymentOptions.TARGET), is(equalTo(value)));
+        assertThat(configuration.get(RestOptions.PORT)).isEqualTo(equalTo(restPort));
+        assertThat(configuration.get(DeploymentOptions.TARGET)).isEqualTo(equalTo(value));
     }
 
     @Test
@@ -131,10 +128,9 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
                         clusterConfiguration);
 
         final String strJobId = configuration.get(PipelineOptionsInternal.PIPELINE_FIXED_JOB_ID);
-        assertThat(JobID.fromHexString(strJobId), is(equalTo(jobID)));
-        assertThat(
-                SavepointRestoreSettings.fromConfiguration(configuration),
-                is(equalTo(SavepointRestoreSettings.none())));
+        assertThat(JobID.fromHexString(strJobId)).isEqualTo(equalTo(jobID));
+        assertThat(SavepointRestoreSettings.fromConfiguration(configuration))
+                .isEqualTo(equalTo(SavepointRestoreSettings.none()));
     }
 
     @Test
@@ -159,20 +155,19 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         final StandaloneApplicationClusterConfiguration clusterConfiguration =
                 commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(confDirPath)));
-        assertThat(clusterConfiguration.getJobClassName(), is(equalTo(JOB_CLASS_NAME)));
-        assertThat(clusterConfiguration.getRestPort(), is(equalTo(restPort)));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(confDirPath));
+        assertThat(clusterConfiguration.getJobClassName()).isEqualTo(equalTo(JOB_CLASS_NAME));
+        assertThat(clusterConfiguration.getRestPort()).isEqualTo(equalTo(restPort));
         final Properties dynamicProperties = clusterConfiguration.getDynamicProperties();
 
-        assertThat(dynamicProperties, hasEntry(key, value));
+        assertThat(dynamicProperties).satisfies(matching(hasEntry(key, value)));
 
-        assertThat(clusterConfiguration.getArgs(), arrayContaining(arg1, arg2));
+        assertThat(clusterConfiguration.getArgs()).satisfies(matching(arrayContaining(arg1, arg2)));
 
-        assertThat(
-                clusterConfiguration.getSavepointRestoreSettings(),
-                is(equalTo(SavepointRestoreSettings.none())));
+        assertThat(clusterConfiguration.getSavepointRestoreSettings())
+                .isEqualTo(equalTo(SavepointRestoreSettings.none()));
 
-        assertThat(clusterConfiguration.getJobId(), is(nullValue()));
+        assertThat(clusterConfiguration.getJobId()).isEqualTo(nullValue());
     }
 
     @Test
@@ -182,16 +177,16 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         final StandaloneApplicationClusterConfiguration clusterConfiguration =
                 commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(confDirPath)));
-        assertThat(clusterConfiguration.getDynamicProperties(), is(equalTo(new Properties())));
-        assertThat(clusterConfiguration.getArgs(), is(new String[0]));
-        assertThat(clusterConfiguration.getRestPort(), is(equalTo(-1)));
-        assertThat(clusterConfiguration.getHostname(), is(nullValue()));
-        assertThat(
-                clusterConfiguration.getSavepointRestoreSettings(),
-                is(equalTo(SavepointRestoreSettings.none())));
-        assertThat(clusterConfiguration.getJobId(), is(nullValue()));
-        assertThat(clusterConfiguration.getJobClassName(), is(nullValue()));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(confDirPath));
+        assertThat(clusterConfiguration.getDynamicProperties())
+                .isEqualTo(equalTo(new Properties()));
+        assertThat(clusterConfiguration.getArgs()).isEqualTo(new String[0]);
+        assertThat(clusterConfiguration.getRestPort()).isEqualTo(equalTo(-1));
+        assertThat(clusterConfiguration.getHostname()).isEqualTo(nullValue());
+        assertThat(clusterConfiguration.getSavepointRestoreSettings())
+                .isEqualTo(equalTo(SavepointRestoreSettings.none()));
+        assertThat(clusterConfiguration.getJobId()).isEqualTo(nullValue());
+        assertThat(clusterConfiguration.getJobClassName()).isEqualTo(nullValue());
     }
 
     @Test(expected = FlinkParseException.class)
@@ -211,9 +206,9 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         final SavepointRestoreSettings savepointRestoreSettings =
                 standaloneApplicationClusterConfiguration.getSavepointRestoreSettings();
 
-        assertThat(savepointRestoreSettings.restoreSavepoint(), is(true));
-        assertThat(savepointRestoreSettings.getRestorePath(), is(equalTo(restorePath)));
-        assertThat(savepointRestoreSettings.allowNonRestoredState(), is(true));
+        assertThat(savepointRestoreSettings.restoreSavepoint()).isEqualTo(true);
+        assertThat(savepointRestoreSettings.getRestorePath()).isEqualTo(equalTo(restorePath));
+        assertThat(savepointRestoreSettings.allowNonRestoredState()).isEqualTo(true);
     }
 
     @Test
@@ -226,7 +221,7 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         final StandaloneApplicationClusterConfiguration standaloneApplicationClusterConfiguration =
                 commandLineParser.parse(args);
 
-        assertThat(standaloneApplicationClusterConfiguration.getJobId(), is(equalTo(jobId)));
+        assertThat(standaloneApplicationClusterConfiguration.getJobId()).isEqualTo(equalTo(jobId));
     }
 
     @Test
@@ -242,8 +237,8 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         } catch (FlinkParseException e) {
             Optional<IllegalArgumentException> cause =
                     ExceptionUtils.findThrowable(e, IllegalArgumentException.class);
-            assertTrue(cause.isPresent());
-            assertThat(cause.get().getMessage(), containsString(invalidJobId));
+            assertThat(cause.isPresent()).isTrue();
+            assertThat(cause.get().getMessage()).contains(invalidJobId);
         }
     }
 
@@ -264,15 +259,16 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         final StandaloneApplicationClusterConfiguration clusterConfiguration =
                 commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(confDirPath)));
-        assertThat(clusterConfiguration.getJobClassName(), is(equalTo(jobClassName)));
-        assertThat(clusterConfiguration.getJobId(), is(equalTo(jobId)));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(confDirPath));
+        assertThat(clusterConfiguration.getJobClassName()).isEqualTo(equalTo(jobClassName));
+        assertThat(clusterConfiguration.getJobId()).isEqualTo(equalTo(jobId));
 
         final SavepointRestoreSettings savepointRestoreSettings =
                 clusterConfiguration.getSavepointRestoreSettings();
-        assertThat(savepointRestoreSettings.restoreSavepoint(), is(true));
-        assertThat(savepointRestoreSettings.getRestorePath(), is(equalTo(savepointRestorePath)));
-        assertThat(savepointRestoreSettings.allowNonRestoredState(), is(true));
+        assertThat(savepointRestoreSettings.restoreSavepoint()).isEqualTo(true);
+        assertThat(savepointRestoreSettings.getRestorePath())
+                .isEqualTo(equalTo(savepointRestorePath));
+        assertThat(savepointRestoreSettings.allowNonRestoredState()).isEqualTo(true);
     }
 
     @Test
@@ -283,6 +279,6 @@ public class StandaloneApplicationClusterConfigurationParserFactoryTest extends 
         };
         final StandaloneApplicationClusterConfiguration applicationClusterConfiguration =
                 commandLineParser.parse(args);
-        assertThat(applicationClusterConfiguration.getHostname(), is(hostName));
+        assertThat(applicationClusterConfiguration.getHostname()).isEqualTo(hostName);
     }
 }

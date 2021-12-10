@@ -32,8 +32,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link TaskManagerJobMetricGroup}. */
 public class TaskManagerJobGroupTest extends TestLogger {
@@ -62,13 +61,11 @@ public class TaskManagerJobGroupTest extends TestLogger {
         JobMetricGroup jmGroup =
                 new TaskManagerJobMetricGroup(registry, tmGroup, new JobID(), "myJobName");
 
-        assertArrayEquals(
-                new String[] {"theHostName", "taskmanager", "test-tm-id", "myJobName"},
-                jmGroup.getScopeComponents());
+        assertThat(jmGroup.getScopeComponents())
+                .isEqualTo(new String[] {"theHostName", "taskmanager", "test-tm-id", "myJobName"});
 
-        assertEquals(
-                "theHostName.taskmanager.test-tm-id.myJobName.name",
-                jmGroup.getMetricIdentifier("name"));
+        assertThat(jmGroup.getMetricIdentifier("name"))
+                .isEqualTo("theHostName.taskmanager.test-tm-id.myJobName.name");
     }
 
     @Test
@@ -86,10 +83,10 @@ public class TaskManagerJobGroupTest extends TestLogger {
                         registry, "theHostName", new ResourceID("test-tm-id"));
         JobMetricGroup jmGroup = new TaskManagerJobMetricGroup(registry, tmGroup, jid, "myJobName");
 
-        assertArrayEquals(
-                new String[] {"some-constant", "myJobName"}, jmGroup.getScopeComponents());
+        assertThat(jmGroup.getScopeComponents())
+                .isEqualTo(new String[] {"some-constant", "myJobName"});
 
-        assertEquals("some-constant.myJobName.name", jmGroup.getMetricIdentifier("name"));
+        assertThat(jmGroup.getMetricIdentifier("name")).isEqualTo("some-constant.myJobName.name");
         registry.shutdown().get();
     }
 
@@ -108,13 +105,11 @@ public class TaskManagerJobGroupTest extends TestLogger {
                         registry, "theHostName", new ResourceID("test-tm-id"));
         JobMetricGroup jmGroup = new TaskManagerJobMetricGroup(registry, tmGroup, jid, "myJobName");
 
-        assertArrayEquals(
-                new String[] {"peter", "test-tm-id", "some-constant", jid.toString()},
-                jmGroup.getScopeComponents());
+        assertThat(jmGroup.getScopeComponents())
+                .isEqualTo(new String[] {"peter", "test-tm-id", "some-constant", jid.toString()});
 
-        assertEquals(
-                "peter.test-tm-id.some-constant." + jid + ".name",
-                jmGroup.getMetricIdentifier("name"));
+        assertThat(jmGroup.getMetricIdentifier("name"))
+                .isEqualTo("peter.test-tm-id.some-constant." + jid + ".name");
         registry.shutdown().get();
     }
 
@@ -128,7 +123,7 @@ public class TaskManagerJobGroupTest extends TestLogger {
 
         QueryScopeInfo.JobQueryScopeInfo info =
                 job.createQueryServiceMetricInfo(new DummyCharacterFilter());
-        assertEquals("", info.scope);
-        assertEquals(jid.toString(), info.jobID);
+        assertThat(info.scope).isEqualTo("");
+        assertThat(info.jobID).isEqualTo(jid.toString());
     }
 }

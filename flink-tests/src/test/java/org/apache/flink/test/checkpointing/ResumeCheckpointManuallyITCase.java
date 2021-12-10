@@ -63,7 +63,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * IT case for resuming from checkpoints manually via their external pointer, rather than automatic
@@ -276,17 +276,17 @@ public class ResumeCheckpointManuallyITCase extends TestLogger {
             // main test sequence:  start job -> eCP -> restore job -> eCP -> restore job
             String firstExternalCheckpoint =
                     runJobAndGetExternalizedCheckpoint(backend, checkpointDir, null, client);
-            assertNotNull(firstExternalCheckpoint);
+            assertThat(firstExternalCheckpoint).isNotNull();
 
             String secondExternalCheckpoint =
                     runJobAndGetExternalizedCheckpoint(
                             backend, checkpointDir, firstExternalCheckpoint, client);
-            assertNotNull(secondExternalCheckpoint);
+            assertThat(secondExternalCheckpoint).isNotNull();
 
             String thirdExternalCheckpoint =
                     runJobAndGetExternalizedCheckpoint(
                             backend, checkpointDir, secondExternalCheckpoint, client);
-            assertNotNull(thirdExternalCheckpoint);
+            assertThat(thirdExternalCheckpoint).isNotNull();
         } finally {
             cluster.after();
         }

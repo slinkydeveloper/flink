@@ -25,7 +25,6 @@ import org.apache.flink.runtime.io.network.buffer.NetworkBuffer;
 import org.apache.flink.runtime.io.network.util.TestNotificationListener;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -39,9 +38,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link AsynchronousBufferFileWriter}. */
@@ -69,16 +67,14 @@ public class AsynchronousBufferFileWriterTest {
     @Test
     public void testAddAndHandleRequest() throws Exception {
         addRequest();
-        assertEquals(
-                "Didn't increment number of outstanding requests.",
-                1,
-                writer.getNumberOfOutstandingRequests());
+        assertThat(writer.getNumberOfOutstandingRequests())
+                .as("Didn't increment number of outstanding requests.")
+                .isEqualTo(1);
 
         handleRequest();
-        assertEquals(
-                "Didn't decrement number of outstanding requests.",
-                0,
-                writer.getNumberOfOutstandingRequests());
+        assertThat(writer.getNumberOfOutstandingRequests())
+                .as("Didn't decrement number of outstanding requests.")
+                .isEqualTo(0);
     }
 
     @Test
@@ -98,12 +94,11 @@ public class AsynchronousBufferFileWriterTest {
         } finally {
             if (!buffer.isRecycled()) {
                 buffer.recycleBuffer();
-                Assert.fail("buffer not recycled");
+                fail("buffer not recycled");
             }
-            assertEquals(
-                    "Shouln't increment number of outstanding requests.",
-                    0,
-                    writer.getNumberOfOutstandingRequests());
+            assertThat(writer.getNumberOfOutstandingRequests())
+                    .as("Shouln't increment number of outstanding requests.")
+                    .isEqualTo(0);
         }
     }
 
@@ -112,20 +107,22 @@ public class AsynchronousBufferFileWriterTest {
         final TestNotificationListener listener = new TestNotificationListener();
 
         // Unsuccessful subscription, because no outstanding requests
-        assertFalse(
-                "Allowed to subscribe w/o any outstanding requests.",
-                writer.registerAllRequestsProcessedListener(listener));
+        assertThat(writer.registerAllRequestsProcessedListener(listener))
+                .as("Allowed to subscribe w/o any outstanding requests.")
+                .isFalse();
 
         // Successful subscription
         addRequest();
-        assertTrue(
-                "Didn't allow to subscribe.",
-                writer.registerAllRequestsProcessedListener(listener));
+        assertThat(writer.registerAllRequestsProcessedListener(listener))
+                .as("Didn't allow to subscribe.")
+                .isTrue();
 
         // Test notification
         handleRequest();
 
-        assertEquals("Listener was not notified.", 1, listener.getNumberOfNotifications());
+        assertThat(listener.getNumberOfNotifications())
+                .as("Listener was not notified.")
+                .isEqualTo(1);
     }
 
     @Test
@@ -163,7 +160,9 @@ public class AsynchronousBufferFileWriterTest {
 
         sync.await();
 
-        assertEquals("Listener was not notified.", 1, listener.getNumberOfNotifications());
+        assertThat(listener.getNumberOfNotifications())
+                .as("Listener was not notified.")
+                .isEqualTo(1);
     }
 
     @Test
@@ -203,19 +202,17 @@ public class AsynchronousBufferFileWriterTest {
 
                 try {
                     if (subscribeFuture.get()) {
-                        assertEquals(
-                                "Race: Successfully subscribed, but was never notified.",
-                                1,
-                                listener.getNumberOfNotifications());
+                        assertThat(listener.getNumberOfNotifications())
+                                .as("Race: Successfully subscribed, but was never notified.")
+                                .isEqualTo(1);
                     } else {
-                        assertEquals(
-                                "Race: Never subscribed successfully, but was notified.",
-                                0,
-                                listener.getNumberOfNotifications());
+                        assertThat(listener.getNumberOfNotifications())
+                                .as("Race: Never subscribed successfully, but was notified.")
+                                .isEqualTo(0);
                     }
                 } catch (Throwable t) {
                     System.out.println(i);
-                    Assert.fail(t.getMessage());
+                    fail(t.getMessage());
                 }
             }
         } finally {

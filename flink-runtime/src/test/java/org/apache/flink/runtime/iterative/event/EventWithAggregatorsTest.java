@@ -25,7 +25,6 @@ import org.apache.flink.types.LongValue;
 import org.apache.flink.types.StringValue;
 import org.apache.flink.types.Value;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -34,6 +33,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link IterationEventWithAggregators}. */
 public class EventWithAggregatorsTest {
@@ -45,8 +47,8 @@ public class EventWithAggregatorsTest {
         AllWorkersDoneEvent e = new AllWorkersDoneEvent();
         IterationEventWithAggregators deserialized = pipeThroughSerialization(e);
 
-        Assert.assertEquals(0, deserialized.getAggregatorNames().length);
-        Assert.assertEquals(0, deserialized.getAggregates(cl).length);
+        assertThat(deserialized.getAggregatorNames().length).isEqualTo(0);
+        assertThat(deserialized.getAggregates(cl).length).isEqualTo(0);
     }
 
     @Test
@@ -80,8 +82,8 @@ public class EventWithAggregatorsTest {
         String[] names = deserialized.getAggregatorNames();
         Value[] aggregates = deserialized.getAggregates(cl);
 
-        Assert.assertEquals(allNames.size(), names.length);
-        Assert.assertEquals(allVals.size(), aggregates.length);
+        assertThat(names.length).isEqualTo(allNames.size());
+        assertThat(aggregates.length).isEqualTo(allVals.size());
 
         // check that all the correct names and values are returned
         for (String s : names) {
@@ -91,8 +93,8 @@ public class EventWithAggregatorsTest {
             allVals.remove(v);
         }
 
-        Assert.assertTrue(allNames.isEmpty());
-        Assert.assertTrue(allVals.isEmpty());
+        assertThat(allNames.isEmpty()).isTrue();
+        assertThat(allVals.isEmpty()).isTrue();
     }
 
     private IterationEventWithAggregators pipeThroughSerialization(
@@ -114,7 +116,7 @@ public class EventWithAggregatorsTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail("Test threw an exception: " + e.getMessage());
+            fail("Test threw an exception: " + e.getMessage());
             return null;
         }
     }

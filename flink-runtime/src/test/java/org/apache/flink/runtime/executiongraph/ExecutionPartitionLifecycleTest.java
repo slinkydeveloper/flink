@@ -63,12 +63,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link Execution}. */
 public class ExecutionPartitionLifecycleTest extends TestLogger {
@@ -120,22 +117,23 @@ public class ExecutionPartitionLifecycleTest extends TestLogger {
                 testingShuffleMaster);
 
         stateTransition1.accept(execution);
-        assertFalse(releasePartitionsCallFuture.isDone());
+        assertThat(releasePartitionsCallFuture.isDone()).isFalse();
 
         stateTransition2.accept(execution);
-        assertTrue(releasePartitionsCallFuture.isDone());
+        assertThat(releasePartitionsCallFuture.isDone()).isTrue();
 
         final Tuple2<JobID, Collection<ResultPartitionID>> releasePartitionsCall =
                 releasePartitionsCallFuture.get();
-        assertEquals(jobId, releasePartitionsCall.f0);
-        assertThat(
-                releasePartitionsCall.f1,
-                contains(descriptor.getShuffleDescriptor().getResultPartitionID()));
+        assertThat(releasePartitionsCall.f0).isEqualTo(jobId);
+        assertThat(releasePartitionsCall.f1)
+                .satisfies(
+                        matching(
+                                contains(
+                                        descriptor.getShuffleDescriptor().getResultPartitionID())));
 
-        assertEquals(1, testingShuffleMaster.externallyReleasedPartitions.size());
-        assertEquals(
-                descriptor.getShuffleDescriptor(),
-                testingShuffleMaster.externallyReleasedPartitions.poll());
+        assertThat(testingShuffleMaster.externallyReleasedPartitions.size()).isEqualTo(1);
+        assertThat(testingShuffleMaster.externallyReleasedPartitions.poll())
+                .isEqualTo(descriptor.getShuffleDescriptor());
     }
 
     private enum PartitionReleaseResult {
@@ -220,35 +218,35 @@ public class ExecutionPartitionLifecycleTest extends TestLogger {
 
         Tuple2<ResourceID, ResultPartitionDeploymentDescriptor> startTrackingCall =
                 partitionStartTrackingFuture.get();
-        assertThat(startTrackingCall.f0, equalTo(taskExecutorResourceId));
-        assertThat(startTrackingCall.f1, equalTo(descriptor));
+        assertThat(startTrackingCall.f0).isEqualTo(taskExecutorResourceId);
+        assertThat(startTrackingCall.f1).isEqualTo(descriptor);
 
         stateTransition.accept(execution);
 
         switch (partitionReleaseResult) {
             case NONE:
-                assertFalse(partitionStopTrackingFuture.isDone());
-                assertFalse(partitionStopTrackingAndReleaseFuture.isDone());
+                assertThat(partitionStopTrackingFuture.isDone()).isFalse();
+                assertThat(partitionStopTrackingAndReleaseFuture.isDone()).isFalse();
                 break;
             case STOP_TRACKING:
-                assertTrue(partitionStopTrackingFuture.isDone());
-                assertFalse(partitionStopTrackingAndReleaseFuture.isDone());
+                assertThat(partitionStopTrackingFuture.isDone()).isTrue();
+                assertThat(partitionStopTrackingAndReleaseFuture.isDone()).isFalse();
                 final Collection<ResultPartitionID> stopTrackingCall =
                         partitionStopTrackingFuture.get();
-                assertEquals(
-                        Collections.singletonList(
-                                descriptor.getShuffleDescriptor().getResultPartitionID()),
-                        stopTrackingCall);
+                assertThat(stopTrackingCall)
+                        .isEqualTo(
+                                Collections.singletonList(
+                                        descriptor.getShuffleDescriptor().getResultPartitionID()));
                 break;
             case STOP_TRACKING_AND_RELEASE:
-                assertFalse(partitionStopTrackingFuture.isDone());
-                assertTrue(partitionStopTrackingAndReleaseFuture.isDone());
+                assertThat(partitionStopTrackingFuture.isDone()).isFalse();
+                assertThat(partitionStopTrackingAndReleaseFuture.isDone()).isTrue();
                 final Collection<ResultPartitionID> stopTrackingAndReleaseCall =
                         partitionStopTrackingAndReleaseFuture.get();
-                assertEquals(
-                        Collections.singletonList(
-                                descriptor.getShuffleDescriptor().getResultPartitionID()),
-                        stopTrackingAndReleaseCall);
+                assertThat(stopTrackingAndReleaseCall)
+                        .isEqualTo(
+                                Collections.singletonList(
+                                        descriptor.getShuffleDescriptor().getResultPartitionID()));
                 break;
         }
     }

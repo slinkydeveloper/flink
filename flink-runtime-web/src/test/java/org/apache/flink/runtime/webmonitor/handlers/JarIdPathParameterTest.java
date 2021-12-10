@@ -23,7 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JarIdPathParameter}. */
 public class JarIdPathParameterTest extends TestLogger {
@@ -39,13 +39,13 @@ public class JarIdPathParameterTest extends TestLogger {
     public void testConvertFromString() throws Exception {
         final String expectedJarId = "test.jar";
         final String jarId = jarIdPathParameter.convertFromString(expectedJarId);
-        assertEquals(expectedJarId, jarId);
+        assertThat(jarId).isEqualTo(expectedJarId);
     }
 
     @Test
     public void testConvertToString() throws Exception {
         final String expected = "test.jar";
         final String toString = jarIdPathParameter.convertToString(expected);
-        assertEquals(expected, toString);
+        assertThat(toString).isEqualTo(expected);
     }
 }

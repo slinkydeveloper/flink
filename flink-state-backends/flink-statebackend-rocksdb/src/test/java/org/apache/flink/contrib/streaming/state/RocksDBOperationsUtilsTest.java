@@ -34,9 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Collections;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests for the {@link RocksDBOperationUtils}. */
@@ -74,9 +72,8 @@ public class RocksDBOperationsUtilsTest {
             // do not provoke a test failure if this passes, because some setups may actually
             // support long paths, in which case: great!
         } catch (IOException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("longer than the directory path length limit for Windows"));
+            assertThat(e.getMessage())
+                    .contains("longer than the directory path length limit for Windows");
         }
     }
 
@@ -88,29 +85,33 @@ public class RocksDBOperationsUtilsTest {
                         testWriteBufferSize);
         long testWriteBufferCapacityBoundary = testDefaultArenaSize * 8 / 7;
         assertThat(
-                "The sanity check should pass with default arena block size",
-                RocksDBOperationUtils.sanityCheckArenaBlockSize(
-                        testWriteBufferSize, 0, testWriteBufferCapacityBoundary),
-                is(true));
+                        RocksDBOperationUtils.sanityCheckArenaBlockSize(
+                                testWriteBufferSize, 0, testWriteBufferCapacityBoundary))
+                .as("The sanity check should pass with default arena block size")
+                .isEqualTo(true);
         assertThat(
-                "The sanity check should pass with default arena block size given as argument",
-                RocksDBOperationUtils.sanityCheckArenaBlockSize(
-                        testWriteBufferSize, testDefaultArenaSize, testWriteBufferCapacityBoundary),
-                is(true));
+                        RocksDBOperationUtils.sanityCheckArenaBlockSize(
+                                testWriteBufferSize,
+                                testDefaultArenaSize,
+                                testWriteBufferCapacityBoundary))
+                .as("The sanity check should pass with default arena block size given as argument")
+                .isEqualTo(true);
         assertThat(
-                "The sanity check should pass when the configured arena block size is smaller than the boundary.",
-                RocksDBOperationUtils.sanityCheckArenaBlockSize(
-                        testWriteBufferSize,
-                        testDefaultArenaSize - 1,
-                        testWriteBufferCapacityBoundary),
-                is(true));
+                        RocksDBOperationUtils.sanityCheckArenaBlockSize(
+                                testWriteBufferSize,
+                                testDefaultArenaSize - 1,
+                                testWriteBufferCapacityBoundary))
+                .as(
+                        "The sanity check should pass when the configured arena block size is smaller than the boundary.")
+                .isEqualTo(true);
         assertThat(
-                "The sanity check should fail when the configured arena block size is higher than the boundary.",
-                RocksDBOperationUtils.sanityCheckArenaBlockSize(
-                        testWriteBufferSize,
-                        testDefaultArenaSize + 1,
-                        testWriteBufferCapacityBoundary),
-                is(false));
+                        RocksDBOperationUtils.sanityCheckArenaBlockSize(
+                                testWriteBufferSize,
+                                testDefaultArenaSize + 1,
+                                testWriteBufferCapacityBoundary))
+                .as(
+                        "The sanity check should fail when the configured arena block size is higher than the boundary.")
+                .isEqualTo(false);
     }
 
     private static String getLongString(int numChars) {

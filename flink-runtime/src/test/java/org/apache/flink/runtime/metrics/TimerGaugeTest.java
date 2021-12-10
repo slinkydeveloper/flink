@@ -33,9 +33,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TimerGauge}. */
 public class TimerGaugeTest {
@@ -47,14 +45,14 @@ public class TimerGaugeTest {
         TimerGauge gauge = new TimerGauge(clock);
 
         gauge.update();
-        assertThat(gauge.getValue(), is(0L));
+        assertThat(gauge.getValue()).isEqualTo(0L);
 
         gauge.markStart();
         clock.advanceTime(SLEEP, TimeUnit.MILLISECONDS);
         gauge.markEnd();
         gauge.update();
 
-        assertThat(gauge.getValue(), greaterThanOrEqualTo(SLEEP / View.UPDATE_INTERVAL_SECONDS));
+        assertThat(gauge.getValue()).isGreaterThanOrEqualTo(SLEEP / View.UPDATE_INTERVAL_SECONDS);
     }
 
     @Test
@@ -66,7 +64,7 @@ public class TimerGaugeTest {
         clock.advanceTime(SLEEP, TimeUnit.MILLISECONDS);
         gauge.update();
 
-        assertThat(gauge.getValue(), greaterThanOrEqualTo(SLEEP / View.UPDATE_INTERVAL_SECONDS));
+        assertThat(gauge.getValue()).isGreaterThanOrEqualTo(SLEEP / View.UPDATE_INTERVAL_SECONDS);
     }
 
     @Test
@@ -77,10 +75,10 @@ public class TimerGaugeTest {
         gauge.markStart();
         clock.advanceTime(SLEEP, TimeUnit.MILLISECONDS);
 
-        assertThat(gauge.getValue(), is(0L));
+        assertThat(gauge.getValue()).isEqualTo(0L);
 
         gauge.markEnd();
 
-        assertThat(gauge.getValue(), is(0L));
+        assertThat(gauge.getValue()).isEqualTo(0L);
     }
 }

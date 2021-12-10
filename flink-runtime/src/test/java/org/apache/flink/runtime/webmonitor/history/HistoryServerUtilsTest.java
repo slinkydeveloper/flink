@@ -31,8 +31,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link HistoryServerUtils}. */
 public class HistoryServerUtilsTest extends TestLogger {
@@ -44,7 +43,7 @@ public class HistoryServerUtilsTest extends TestLogger {
     public void testIsSSLEnabledDefault() {
         final Configuration configuration = new Configuration();
 
-        assertThat(HistoryServerUtils.isSSLEnabled(configuration), is(false));
+        assertThat(HistoryServerUtils.isSSLEnabled(configuration)).isEqualTo(false);
     }
 
     @Test
@@ -52,7 +51,7 @@ public class HistoryServerUtilsTest extends TestLogger {
         final Configuration configuration = new Configuration();
         configuration.setBoolean(HistoryServerOptions.HISTORY_SERVER_WEB_SSL_ENABLED, true);
 
-        assertThat(HistoryServerUtils.isSSLEnabled(configuration), is(false));
+        assertThat(HistoryServerUtils.isSSLEnabled(configuration)).isEqualTo(false);
     }
 
     @Test
@@ -60,7 +59,7 @@ public class HistoryServerUtilsTest extends TestLogger {
         final Configuration configuration = new Configuration();
         configuration.setBoolean(SecurityOptions.SSL_REST_ENABLED, true);
 
-        assertThat(HistoryServerUtils.isSSLEnabled(configuration), is(false));
+        assertThat(HistoryServerUtils.isSSLEnabled(configuration)).isEqualTo(false);
     }
 
     @Test
@@ -68,7 +67,7 @@ public class HistoryServerUtilsTest extends TestLogger {
         final Configuration configuration = new Configuration();
         enableSSL(configuration);
 
-        assertThat(HistoryServerUtils.isSSLEnabled(configuration), is(true));
+        assertThat(HistoryServerUtils.isSSLEnabled(configuration)).isEqualTo(true);
     }
 
     private void enableSSL(Configuration configuration) {
@@ -83,7 +82,7 @@ public class HistoryServerUtilsTest extends TestLogger {
         final Optional<URL> historyServerURL =
                 HistoryServerUtils.getHistoryServerURL(configuration);
 
-        assertThat(historyServerURL.get(), is(new URL("http", HOSTNAME, PORT, "")));
+        assertThat(historyServerURL.get()).isEqualTo(new URL("http", HOSTNAME, PORT, ""));
     }
 
     @Test
@@ -94,14 +93,15 @@ public class HistoryServerUtilsTest extends TestLogger {
         final Optional<URL> historyServerURL =
                 HistoryServerUtils.getHistoryServerURL(configuration);
 
-        assertThat(historyServerURL.get(), is(new URL("https", HOSTNAME, PORT, "")));
+        assertThat(historyServerURL.get()).isEqualTo(new URL("https", HOSTNAME, PORT, ""));
     }
 
     @Test
     public void testGetHistoryServerURLWithoutHS() {
         final Configuration configuration = new Configuration();
 
-        assertThat(HistoryServerUtils.getHistoryServerURL(configuration).isPresent(), is(false));
+        assertThat(HistoryServerUtils.getHistoryServerURL(configuration).isPresent())
+                .isEqualTo(false);
     }
 
     @Nonnull

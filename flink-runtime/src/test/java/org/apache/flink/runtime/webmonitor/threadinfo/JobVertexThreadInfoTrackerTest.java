@@ -64,11 +64,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link JobVertexThreadInfoTracker}. */
 public class JobVertexThreadInfoTrackerTest extends TestLogger {
@@ -139,7 +135,7 @@ public class JobVertexThreadInfoTrackerTest extends TestLogger {
         Optional<JobVertexThreadInfoStats> result =
                 tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX);
         // cached result is returned instead of unusedThreadInfoStats
-        assertEquals(threadInfoStatsDefaultSample, result.get());
+        assertThat(result.get()).isEqualTo(threadInfoStatsDefaultSample);
     }
 
     /** Tests that cached result is NOT reused after refresh interval. */
@@ -170,7 +166,7 @@ public class JobVertexThreadInfoTrackerTest extends TestLogger {
                         threadInfoStatsAfterRefresh);
 
         // no stats yet, but the request triggers async collection of stats
-        assertFalse(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent());
+        assertThat(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent()).isFalse();
         // block until the async call completes and the first result is available
         tracker.getResultAvailableFuture().get();
 
@@ -204,11 +200,11 @@ public class JobVertexThreadInfoTrackerTest extends TestLogger {
                         threadInfoStatsDefaultSample);
 
         // no stats yet, but the request triggers async collection of stats
-        assertFalse(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent());
+        assertThat(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent()).isFalse();
         // wait until one eviction was registered
         cacheExpired.await();
 
-        assertFalse(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent());
+        assertThat(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent()).isFalse();
     }
 
     /** Tests that cached results are NOT removed within the cleanup interval. */
@@ -236,9 +232,9 @@ public class JobVertexThreadInfoTrackerTest extends TestLogger {
         tracker.shutDown();
 
         // verify that the previous cached result is invalid and trigger another request
-        assertFalse(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent());
+        assertThat(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent()).isFalse();
         // verify no response after shutdown
-        assertFalse(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent());
+        assertThat(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent()).isFalse();
     }
 
     private Cache<JobVertexThreadInfoTracker.Key, JobVertexThreadInfoStats> createCache(
@@ -256,7 +252,7 @@ public class JobVertexThreadInfoTrackerTest extends TestLogger {
             JobVertexThreadInfoTracker<JobVertexThreadInfoStats> tracker)
             throws InterruptedException, ExecutionException {
         // no stats yet, but the request triggers async collection of stats
-        assertFalse(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent());
+        assertThat(tracker.getVertexStats(JOB_ID, EXECUTION_JOB_VERTEX).isPresent()).isFalse();
         // block until the async call completes and the first result is available
         tracker.getResultAvailableFuture().get();
         assertExpectedEqualsReceived(
@@ -266,16 +262,16 @@ public class JobVertexThreadInfoTrackerTest extends TestLogger {
     private static void assertExpectedEqualsReceived(
             JobVertexThreadInfoStats expected,
             Optional<JobVertexThreadInfoStats> receivedOptional) {
-        assertTrue(receivedOptional.isPresent());
+        assertThat(receivedOptional.isPresent()).isTrue();
         JobVertexThreadInfoStats received = receivedOptional.get();
 
-        assertEquals(expected.getRequestId(), received.getRequestId());
-        assertEquals(expected.getEndTime(), received.getEndTime());
+        assertThat(received.getRequestId()).isEqualTo(expected.getRequestId());
+        assertThat(received.getEndTime()).isEqualTo(expected.getEndTime());
 
-        assertEquals(TASK_VERTICES.length, received.getNumberOfSubtasks());
+        assertThat(received.getNumberOfSubtasks()).isEqualTo(TASK_VERTICES.length);
 
         for (List<ThreadInfoSample> samples : received.getSamplesBySubtask().values()) {
-            assertThat(samples.isEmpty(), is(false));
+            assertThat(samples.isEmpty()).isEqualTo(false);
         }
     }
 

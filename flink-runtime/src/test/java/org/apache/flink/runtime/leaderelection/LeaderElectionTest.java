@@ -41,8 +41,7 @@ import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for leader election. */
 @RunWith(Parameterized.class)
@@ -99,22 +98,22 @@ public class LeaderElectionTest extends TestLogger {
         final ManualLeaderContender manualLeaderContender = new ManualLeaderContender();
 
         try {
-            assertThat(leaderElectionService.hasLeadership(UUID.randomUUID()), is(false));
+            assertThat(leaderElectionService.hasLeadership(UUID.randomUUID())).isEqualTo(false);
 
             leaderElectionService.start(manualLeaderContender);
 
             final UUID leaderSessionId = manualLeaderContender.waitForLeaderSessionId();
 
-            assertThat(leaderElectionService.hasLeadership(leaderSessionId), is(true));
-            assertThat(leaderElectionService.hasLeadership(UUID.randomUUID()), is(false));
+            assertThat(leaderElectionService.hasLeadership(leaderSessionId)).isEqualTo(true);
+            assertThat(leaderElectionService.hasLeadership(UUID.randomUUID())).isEqualTo(false);
 
             leaderElectionService.confirmLeadership(leaderSessionId, "foobar");
 
-            assertThat(leaderElectionService.hasLeadership(leaderSessionId), is(true));
+            assertThat(leaderElectionService.hasLeadership(leaderSessionId)).isEqualTo(true);
 
             leaderElectionService.stop();
 
-            assertThat(leaderElectionService.hasLeadership(leaderSessionId), is(false));
+            assertThat(leaderElectionService.hasLeadership(leaderSessionId)).isEqualTo(false);
         } finally {
             manualLeaderContender.rethrowError();
         }

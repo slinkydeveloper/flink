@@ -31,7 +31,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link EdgeTargetDegree}. */
 public class EdgeTargetDegreeTest extends AsmTestBase {
@@ -76,14 +76,14 @@ public class EdgeTargetDegreeTest extends AsmTestBase {
                         new EdgeTargetDegree<LongValue, NullValue, NullValue>()
                                 .setReduceOnSourceId(false));
 
-        assertEquals(0, targetDegreeOnTargetId.collect().size());
+        assertThat(targetDegreeOnTargetId.collect().size()).isEqualTo(0);
 
         DataSet<Edge<LongValue, Tuple2<NullValue, LongValue>>> targetDegreeOnSourceId =
                 emptyGraphWithVertices.run(
                         new EdgeTargetDegree<LongValue, NullValue, NullValue>()
                                 .setReduceOnSourceId(true));
 
-        assertEquals(0, targetDegreeOnSourceId.collect().size());
+        assertThat(targetDegreeOnSourceId.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -93,14 +93,14 @@ public class EdgeTargetDegreeTest extends AsmTestBase {
                         new EdgeTargetDegree<LongValue, NullValue, NullValue>()
                                 .setReduceOnSourceId(false));
 
-        assertEquals(0, targetDegreeOnTargetId.collect().size());
+        assertThat(targetDegreeOnTargetId.collect().size()).isEqualTo(0);
 
         DataSet<Edge<LongValue, Tuple2<NullValue, LongValue>>> targetDegreeOnSourceId =
                 emptyGraphWithoutVertices.run(
                         new EdgeTargetDegree<LongValue, NullValue, NullValue>()
                                 .setReduceOnSourceId(true));
 
-        assertEquals(0, targetDegreeOnSourceId.collect().size());
+        assertThat(targetDegreeOnSourceId.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -116,8 +116,8 @@ public class EdgeTargetDegreeTest extends AsmTestBase {
                         .run(targetDegreeOnTargetId)
                         .execute();
 
-        assertEquals(20884, checksumOnTargetId.getCount());
-        assertEquals(0x000000019d8f0070L, checksumOnTargetId.getChecksum());
+        assertThat(checksumOnTargetId.getCount()).isEqualTo(20884);
+        assertThat(checksumOnTargetId.getChecksum()).isEqualTo(0x000000019d8f0070L);
 
         DataSet<Edge<LongValue, Tuple2<NullValue, LongValue>>> targetDegreeOnSourceId =
                 undirectedRMatGraph(10, 16)
@@ -130,6 +130,6 @@ public class EdgeTargetDegreeTest extends AsmTestBase {
                         .run(targetDegreeOnSourceId)
                         .execute();
 
-        assertEquals(checksumOnTargetId, checksumOnSourceId);
+        assertThat(checksumOnSourceId).isEqualTo(checksumOnTargetId);
     }
 }

@@ -26,7 +26,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link KeyGroupStreamPartitioner}. */
 public class KeyGroupStreamPartitionerTest extends TestLogger {
@@ -62,15 +62,12 @@ public class KeyGroupStreamPartitionerTest extends TestLogger {
         serializationDelegate1.setInstance(streamRecord1);
         serializationDelegate2.setInstance(streamRecord2);
 
-        assertEquals(
-                selectChannels(serializationDelegate1, 1),
-                selectChannels(serializationDelegate2, 1));
-        assertEquals(
-                selectChannels(serializationDelegate1, 2),
-                selectChannels(serializationDelegate2, 2));
-        assertEquals(
-                selectChannels(serializationDelegate1, 1024),
-                selectChannels(serializationDelegate2, 1024));
+        assertThat(selectChannels(serializationDelegate2, 1))
+                .isEqualTo(selectChannels(serializationDelegate1, 1));
+        assertThat(selectChannels(serializationDelegate2, 2))
+                .isEqualTo(selectChannels(serializationDelegate1, 2));
+        assertThat(selectChannels(serializationDelegate2, 1024))
+                .isEqualTo(selectChannels(serializationDelegate1, 1024));
     }
 
     private int selectChannels(

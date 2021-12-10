@@ -42,11 +42,8 @@ import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for JAR file manifest parsing. */
 public class JarManifestParserTest extends TestLogger {
@@ -59,7 +56,7 @@ public class JarManifestParserTest extends TestLogger {
 
         Optional<String> entry = JarManifestParser.findEntryClass(jarFile);
 
-        assertFalse(entry.isPresent());
+        assertThat(entry.isPresent()).isFalse();
     }
 
     @Test
@@ -72,8 +69,8 @@ public class JarManifestParserTest extends TestLogger {
 
         Optional<String> entry = JarManifestParser.findEntryClass(jarFile);
 
-        assertTrue(entry.isPresent());
-        assertThat(entry.get(), is(equalTo("AssemblerClass")));
+        assertThat(entry.isPresent()).isTrue();
+        assertThat(entry.get()).isEqualTo(equalTo("AssemblerClass"));
     }
 
     @Test
@@ -85,8 +82,8 @@ public class JarManifestParserTest extends TestLogger {
 
         Optional<String> entry = JarManifestParser.findEntryClass(jarFile);
 
-        assertTrue(entry.isPresent());
-        assertThat(entry.get(), is(equalTo("MainClass")));
+        assertThat(entry.isPresent()).isTrue();
+        assertThat(entry.get()).isEqualTo(equalTo("MainClass"));
     }
 
     @Test
@@ -101,8 +98,8 @@ public class JarManifestParserTest extends TestLogger {
 
         Optional<String> entry = JarManifestParser.findEntryClass(jarFile);
 
-        assertTrue(entry.isPresent());
-        assertThat(entry.get(), is(equalTo("AssemblerClass")));
+        assertThat(entry.isPresent()).isTrue();
+        assertThat(entry.get()).isEqualTo(equalTo("AssemblerClass"));
     }
 
     @Test
@@ -111,8 +108,8 @@ public class JarManifestParserTest extends TestLogger {
 
         Optional<String> entryClass = JarManifestParser.findEntryClass(jarFile);
 
-        assertTrue(entryClass.isPresent());
-        assertThat(entryClass.get(), is(equalTo(TestJob.class.getCanonicalName())));
+        assertThat(entryClass.isPresent()).isTrue();
+        assertThat(entryClass.get()).isEqualTo(equalTo(TestJob.class.getCanonicalName()));
     }
 
     @Test(expected = NoSuchElementException.class)
@@ -133,9 +130,8 @@ public class JarManifestParserTest extends TestLogger {
         JarManifestParser.JarFileWithEntryClass jarFileWithEntryClass =
                 JarManifestParser.findOnlyEntryClass(ImmutableList.of(jarFile));
 
-        assertThat(
-                jarFileWithEntryClass.getEntryClass(),
-                is(equalTo(TestJob.class.getCanonicalName())));
+        assertThat(jarFileWithEntryClass.getEntryClass())
+                .isEqualTo(equalTo(TestJob.class.getCanonicalName()));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -153,16 +149,16 @@ public class JarManifestParserTest extends TestLogger {
         JarManifestParser.JarFileWithEntryClass jarFileWithEntryClass =
                 JarManifestParser.findOnlyEntryClass(ImmutableList.of(jarWithNoManifest, jarFile));
 
-        assertThat(
-                jarFileWithEntryClass.getEntryClass(),
-                is(equalTo(TestJob.class.getCanonicalName())));
+        assertThat(jarFileWithEntryClass.getEntryClass())
+                .isEqualTo(equalTo(TestJob.class.getCanonicalName()));
     }
 
     @Test
     public void testFindFirstManifestAttributeWithNoAttribute() throws IOException {
         assertThat(
-                JarManifestParser.findFirstManifestAttribute(TestJob.getTestJobJar()).isPresent(),
-                is(false));
+                        JarManifestParser.findFirstManifestAttribute(TestJob.getTestJobJar())
+                                .isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -170,8 +166,8 @@ public class JarManifestParserTest extends TestLogger {
         Optional<String> optionalValue =
                 JarManifestParser.findFirstManifestAttribute(
                         TestJob.getTestJobJar(), PackagedProgram.MANIFEST_ATTRIBUTE_MAIN_CLASS);
-        assertThat(optionalValue.isPresent(), is(true));
-        assertThat(optionalValue.get(), is(TestJobInfo.TEST_JAR_JOB_CLASS));
+        assertThat(optionalValue.isPresent()).isEqualTo(true);
+        assertThat(optionalValue.get()).isEqualTo(TestJobInfo.TEST_JAR_JOB_CLASS);
     }
 
     private File createJarFileWithManifest(Map<String, String> manifest) throws IOException {

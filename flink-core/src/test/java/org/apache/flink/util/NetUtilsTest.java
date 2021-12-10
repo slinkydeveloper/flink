@@ -18,7 +18,6 @@
 
 package org.apache.flink.util;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -33,10 +32,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.core.IsCollectionContaining.hasItems;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link NetUtils}. */
 public class NetUtilsTest extends TestLogger {
@@ -44,13 +44,13 @@ public class NetUtilsTest extends TestLogger {
     @Test
     public void testCorrectHostnamePort() throws Exception {
         final URL url = new URL("http", "foo.com", 8080, "/index.html");
-        assertEquals(url, NetUtils.getCorrectHostnamePort("foo.com:8080/index.html"));
+        assertThat(NetUtils.getCorrectHostnamePort("foo.com:8080/index.html")).isEqualTo(url);
     }
 
     @Test
     public void testParseHostPortAddress() {
         final InetSocketAddress socketAddress = new InetSocketAddress("foo.com", 8080);
-        assertEquals(socketAddress, NetUtils.parseHostPortAddress("foo.com:8080"));
+        assertThat(NetUtils.parseHostPortAddress("foo.com:8080")).isEqualTo(socketAddress);
     }
 
     @Test
@@ -72,7 +72,7 @@ public class NetUtilsTest extends TestLogger {
                     }
                 };
 
-        assertEquals(expected, NetUtils.acceptWithoutTimeout(serverSocket));
+        assertThat(NetUtils.acceptWithoutTimeout(serverSocket)).isEqualTo(expected);
     }
 
     @Test
@@ -86,7 +86,7 @@ public class NetUtilsTest extends TestLogger {
                         return expected;
                     }
                 }) {
-            assertEquals(expected, NetUtils.acceptWithoutTimeout(serverSocket));
+            assertThat(NetUtils.acceptWithoutTimeout(serverSocket)).isEqualTo(expected);
         }
     }
 
@@ -102,7 +102,7 @@ public class NetUtilsTest extends TestLogger {
                     }
                 }) {
             serverSocket.setSoTimeout(0);
-            assertEquals(expected, NetUtils.acceptWithoutTimeout(serverSocket));
+            assertThat(NetUtils.acceptWithoutTimeout(serverSocket)).isEqualTo(expected);
         }
     }
 
@@ -120,7 +120,7 @@ public class NetUtilsTest extends TestLogger {
             final String addressString = "192.168.0.1";
 
             InetAddress address = InetAddress.getByName(addressString);
-            assertEquals(addressString, NetUtils.ipAddressToUrlString(address));
+            assertThat(NetUtils.ipAddressToUrlString(address)).isEqualTo(addressString);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -134,7 +134,7 @@ public class NetUtilsTest extends TestLogger {
             final String normalizedAddress = "[2001:1db8::ff00:42:8329]";
 
             InetAddress address = InetAddress.getByName(addressString);
-            assertEquals(normalizedAddress, NetUtils.ipAddressToUrlString(address));
+            assertThat(NetUtils.ipAddressToUrlString(address)).isEqualTo(normalizedAddress);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -150,12 +150,11 @@ public class NetUtilsTest extends TestLogger {
             InetAddress address = InetAddress.getByName(addressString);
             InetSocketAddress socketAddress = new InetSocketAddress(address, port);
 
-            assertEquals(addressString, NetUtils.ipAddressToUrlString(address));
-            assertEquals(
-                    addressString + ':' + port,
-                    NetUtils.ipAddressAndPortToUrlString(address, port));
-            assertEquals(
-                    addressString + ':' + port, NetUtils.socketAddressToUrlString(socketAddress));
+            assertThat(NetUtils.ipAddressToUrlString(address)).isEqualTo(addressString);
+            assertThat(NetUtils.ipAddressAndPortToUrlString(address, port))
+                    .isEqualTo(addressString + ':' + port);
+            assertThat(NetUtils.socketAddressToUrlString(socketAddress))
+                    .isEqualTo(addressString + ':' + port);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -172,13 +171,11 @@ public class NetUtilsTest extends TestLogger {
             InetAddress address = InetAddress.getByName(addressString);
             InetSocketAddress socketAddress = new InetSocketAddress(address, port);
 
-            assertEquals(bracketedAddressString, NetUtils.ipAddressToUrlString(address));
-            assertEquals(
-                    bracketedAddressString + ':' + port,
-                    NetUtils.ipAddressAndPortToUrlString(address, port));
-            assertEquals(
-                    bracketedAddressString + ':' + port,
-                    NetUtils.socketAddressToUrlString(socketAddress));
+            assertThat(NetUtils.ipAddressToUrlString(address)).isEqualTo(bracketedAddressString);
+            assertThat(NetUtils.ipAddressAndPortToUrlString(address, port))
+                    .isEqualTo(bracketedAddressString + ':' + port);
+            assertThat(NetUtils.socketAddressToUrlString(socketAddress))
+                    .isEqualTo(bracketedAddressString + ':' + port);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -193,32 +190,33 @@ public class NetUtilsTest extends TestLogger {
         Iterator<Integer> portsIter = NetUtils.getPortRangeFromString(rangeDefinition);
         Set<Integer> ports = new HashSet<>();
         while (portsIter.hasNext()) {
-            Assert.assertTrue("Duplicate element", ports.add(portsIter.next()));
+            assertThat(ports.add(portsIter.next())).as("Duplicate element").isTrue();
         }
 
-        Assert.assertEquals(51 + 101 + 1, ports.size());
+        assertThat(ports.size()).isEqualTo(51 + 101 + 1);
         // check first range
-        Assert.assertThat(ports, hasItems(50000, 50001, 50002, 50050));
+        assertThat(ports).satisfies(matching(hasItems(50000, 50001, 50002, 50050)));
         // check second range and last point
-        Assert.assertThat(ports, hasItems(50100, 50101, 50110, 50200, 51234));
+        assertThat(ports).satisfies(matching(hasItems(50100, 50101, 50110, 50200, 51234)));
         // check that only ranges are included
-        Assert.assertThat(ports, not(hasItems(50051, 50052, 1337, 50201, 49999, 50099)));
+        assertThat(ports)
+                .satisfies(matching(not(hasItems(50051, 50052, 1337, 50201, 49999, 50099))));
 
         // test single port "range":
         portsIter = NetUtils.getPortRangeFromString(" 51234");
-        Assert.assertTrue(portsIter.hasNext());
-        Assert.assertEquals(51234, (int) portsIter.next());
-        Assert.assertFalse(portsIter.hasNext());
+        assertThat(portsIter.hasNext()).isTrue();
+        assertThat((int) portsIter.next()).isEqualTo(51234);
+        assertThat(portsIter.hasNext()).isFalse();
 
         // test port list
         portsIter = NetUtils.getPortRangeFromString("5,1,2,3,4");
-        Assert.assertTrue(portsIter.hasNext());
-        Assert.assertEquals(5, (int) portsIter.next());
-        Assert.assertEquals(1, (int) portsIter.next());
-        Assert.assertEquals(2, (int) portsIter.next());
-        Assert.assertEquals(3, (int) portsIter.next());
-        Assert.assertEquals(4, (int) portsIter.next());
-        Assert.assertFalse(portsIter.hasNext());
+        assertThat(portsIter.hasNext()).isTrue();
+        assertThat((int) portsIter.next()).isEqualTo(5);
+        assertThat((int) portsIter.next()).isEqualTo(1);
+        assertThat((int) portsIter.next()).isEqualTo(2);
+        assertThat((int) portsIter.next()).isEqualTo(3);
+        assertThat((int) portsIter.next()).isEqualTo(4);
+        assertThat(portsIter.hasNext()).isFalse();
 
         Throwable error = null;
 
@@ -228,7 +226,7 @@ public class NetUtilsTest extends TestLogger {
         } catch (Throwable t) {
             error = t;
         }
-        Assert.assertTrue(error instanceof NumberFormatException);
+        assertThat(error).isInstanceOf(NumberFormatException.class);
         error = null;
 
         // incomplete range
@@ -237,7 +235,7 @@ public class NetUtilsTest extends TestLogger {
         } catch (Throwable t) {
             error = t;
         }
-        Assert.assertTrue(error instanceof NumberFormatException);
+        assertThat(error).isInstanceOf(NumberFormatException.class);
         error = null;
 
         // incomplete range
@@ -246,7 +244,7 @@ public class NetUtilsTest extends TestLogger {
         } catch (Throwable t) {
             error = t;
         }
-        Assert.assertTrue(error instanceof NumberFormatException);
+        assertThat(error).isInstanceOf(NumberFormatException.class);
         error = null;
 
         // empty range
@@ -255,7 +253,7 @@ public class NetUtilsTest extends TestLogger {
         } catch (Throwable t) {
             error = t;
         }
-        Assert.assertTrue(error instanceof NumberFormatException);
+        assertThat(error).isInstanceOf(NumberFormatException.class);
     }
 
     @Test
@@ -264,41 +262,36 @@ public class NetUtilsTest extends TestLogger {
             // IPv4
             String host = "1.2.3.4";
             int port = 42;
-            Assert.assertEquals(
-                    host + ":" + port,
-                    NetUtils.unresolvedHostAndPortToNormalizedString(host, port));
+            assertThat(NetUtils.unresolvedHostAndPortToNormalizedString(host, port))
+                    .isEqualTo(host + ":" + port);
         }
         {
             // IPv6
             String host = "2001:0db8:85a3:0000:0000:8a2e:0370:7334";
             int port = 42;
-            Assert.assertEquals(
-                    "[2001:db8:85a3::8a2e:370:7334]:" + port,
-                    NetUtils.unresolvedHostAndPortToNormalizedString(host, port));
+            assertThat(NetUtils.unresolvedHostAndPortToNormalizedString(host, port))
+                    .isEqualTo("[2001:db8:85a3::8a2e:370:7334]:" + port);
         }
         {
             // [IPv6]
             String host = "[2001:0db8:85a3:0000:0000:8a2e:0370:7334]";
             int port = 42;
-            Assert.assertEquals(
-                    "[2001:db8:85a3::8a2e:370:7334]:" + port,
-                    NetUtils.unresolvedHostAndPortToNormalizedString(host, port));
+            assertThat(NetUtils.unresolvedHostAndPortToNormalizedString(host, port))
+                    .isEqualTo("[2001:db8:85a3::8a2e:370:7334]:" + port);
         }
         {
             // Hostnames
             String host = "somerandomhostname";
             int port = 99;
-            Assert.assertEquals(
-                    host + ":" + port,
-                    NetUtils.unresolvedHostAndPortToNormalizedString(host, port));
+            assertThat(NetUtils.unresolvedHostAndPortToNormalizedString(host, port))
+                    .isEqualTo(host + ":" + port);
         }
         {
             // Whitespace
             String host = "  somerandomhostname  ";
             int port = 99;
-            Assert.assertEquals(
-                    host.trim() + ":" + port,
-                    NetUtils.unresolvedHostAndPortToNormalizedString(host, port));
+            assertThat(NetUtils.unresolvedHostAndPortToNormalizedString(host, port))
+                    .isEqualTo(host.trim() + ":" + port);
         }
         {
             // Illegal hostnames
@@ -306,14 +299,14 @@ public class NetUtilsTest extends TestLogger {
             int port = 42;
             try {
                 NetUtils.unresolvedHostAndPortToNormalizedString(host, port);
-                fail();
+                fail("unknown failure");
             } catch (Exception ignored) {
             }
             // Illegal hostnames
             host = "illegalhost:fasf";
             try {
                 NetUtils.unresolvedHostAndPortToNormalizedString(host, port);
-                fail();
+                fail("unknown failure");
             } catch (Exception ignored) {
             }
         }
@@ -323,7 +316,7 @@ public class NetUtilsTest extends TestLogger {
             int port = -1;
             try {
                 NetUtils.unresolvedHostAndPortToNormalizedString(host, port);
-                fail();
+                fail("unknown failure");
             } catch (Exception ignored) {
             }
         }
@@ -331,9 +324,8 @@ public class NetUtilsTest extends TestLogger {
             // lower case conversion of hostnames
             String host = "CamelCaseHostName";
             int port = 99;
-            Assert.assertEquals(
-                    host.toLowerCase() + ":" + port,
-                    NetUtils.unresolvedHostAndPortToNormalizedString(host, port));
+            assertThat(NetUtils.unresolvedHostAndPortToNormalizedString(host, port))
+                    .isEqualTo(host.toLowerCase() + ":" + port);
         }
     }
 }

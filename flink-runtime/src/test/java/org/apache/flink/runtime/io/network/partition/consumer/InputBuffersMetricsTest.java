@@ -40,7 +40,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /** Tests the metrics for input buffers usage. */
 public class InputBuffersMetricsTest extends TestLogger {
@@ -89,15 +90,13 @@ public class InputBuffersMetricsTest extends TestLogger {
         closeableRegistry.registerCloseable(network::close);
         closeableRegistry.registerCloseable(inputGate1::close);
 
-        assertEquals(
-                numberOfBuffersPerGate,
-                floatingBuffersUsageGauge.calculateTotalBuffers(inputGate1));
-        assertEquals(
-                numberOfRemoteChannels * numberOfBufferPerChannel,
-                exclusiveBuffersUsageGauge.calculateTotalBuffers(inputGate1));
-        assertEquals(
-                numberOfRemoteChannels * numberOfBufferPerChannel + numberOfBuffersPerGate,
-                inputBufferPoolUsageGauge.calculateTotalBuffers(inputGate1));
+        assertThat(floatingBuffersUsageGauge.calculateTotalBuffers(inputGate1))
+                .isEqualTo(numberOfBuffersPerGate);
+        assertThat(exclusiveBuffersUsageGauge.calculateTotalBuffers(inputGate1))
+                .isEqualTo(numberOfRemoteChannels * numberOfBufferPerChannel);
+        assertThat(inputBufferPoolUsageGauge.calculateTotalBuffers(inputGate1))
+                .isEqualTo(
+                        numberOfRemoteChannels * numberOfBufferPerChannel + numberOfBuffersPerGate);
     }
 
     @Test
@@ -142,8 +141,8 @@ public class InputBuffersMetricsTest extends TestLogger {
                 new CreditBasedInputBuffersUsageGauge(
                         floatingBuffersUsageGauge, exclusiveBuffersUsageGauge, inputGates);
 
-        assertEquals(0.0, exclusiveBuffersUsageGauge.getValue(), 0.0);
-        assertEquals(0.0, inputBuffersUsageGauge.getValue(), 0.0);
+        assertThat(exclusiveBuffersUsageGauge.getValue()).isEqualTo(0.0);
+        assertThat(inputBuffersUsageGauge.getValue()).isEqualTo(0.0);
 
         int totalBuffers =
                 extraNetworkBuffersPerGate * inputGates.length
@@ -205,8 +204,8 @@ public class InputBuffersMetricsTest extends TestLogger {
                 new CreditBasedInputBuffersUsageGauge(
                         floatingBuffersUsageGauge, exclusiveBuffersUsageGauge, inputGates);
 
-        assertEquals(0.0, floatingBuffersUsageGauge.getValue(), 0.0);
-        assertEquals(0.0, inputBuffersUsageGauge.getValue(), 0.0);
+        assertThat(floatingBuffersUsageGauge.getValue()).isEqualTo(0.0);
+        assertThat(inputBuffersUsageGauge.getValue()).isEqualTo(0.0);
 
         // drain gate1's exclusive buffers
         drainBuffer(buffersPerChannel, remoteInputChannel1);
@@ -222,17 +221,16 @@ public class InputBuffersMetricsTest extends TestLogger {
 
         remoteInputChannel1.onSenderBacklog(backlog);
 
-        assertEquals(
-                totalRequestedBuffers,
-                remoteInputChannel1.unsynchronizedGetFloatingBuffersAvailable());
+        assertThat(remoteInputChannel1.unsynchronizedGetFloatingBuffersAvailable())
+                .isEqualTo(totalRequestedBuffers);
 
         drainBuffer(totalRequestedBuffers, remoteInputChannel1);
 
-        assertEquals(0, remoteInputChannel1.unsynchronizedGetFloatingBuffersAvailable());
-        assertEquals(
-                (double) (buffersPerChannel + totalRequestedBuffers) / totalBuffers,
-                inputBuffersUsageGauge.getValue(),
-                0.0001);
+        assertThat(remoteInputChannel1.unsynchronizedGetFloatingBuffersAvailable()).isEqualTo(0);
+        assertThat((double) inputBuffersUsageGauge.getValue())
+                .isCloseTo(
+                        (double) (buffersPerChannel + totalRequestedBuffers) / totalBuffers,
+                        within(0.0001));
     }
 
     private void drainAndValidate(
@@ -247,16 +245,12 @@ public class InputBuffersMetricsTest extends TestLogger {
             throws IOException {
 
         drainBuffer(numBuffersToRequest, channel);
-        assertEquals(
-                totalRequestedBuffers, exclusiveBuffersUsageGauge.calculateUsedBuffers(inputGate));
-        assertEquals(
-                (double) totalRequestedBuffers / totalExclusiveBuffers,
-                exclusiveBuffersUsageGauge.getValue(),
-                0.0001);
-        assertEquals(
-                (double) totalRequestedBuffers / totalBuffers,
-                inputBuffersUsageGauge.getValue(),
-                0.0001);
+        assertThat(exclusiveBuffersUsageGauge.calculateUsedBuffers(inputGate))
+                .isEqualTo(totalRequestedBuffers);
+        assertThat((double) exclusiveBuffersUsageGauge.getValue())
+                .isCloseTo((double) totalRequestedBuffers / totalExclusiveBuffers, within(0.0001));
+        assertThat((double) inputBuffersUsageGauge.getValue())
+                .isCloseTo((double) totalRequestedBuffers / totalBuffers, within(0.0001));
     }
 
     private void drainBuffer(int boundary, RemoteInputChannel channel) throws IOException {

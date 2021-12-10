@@ -38,11 +38,12 @@ import org.apache.flink.optimizer.plan.SinkPlanNode;
 import org.apache.flink.optimizer.plan.SourcePlanNode;
 import org.apache.flink.optimizer.util.CompilerTestBase;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({"serial"})
 public class PropertyDataSourceTest extends CompilerTestBase {
@@ -80,11 +81,11 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -112,12 +113,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(0, 1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0, 1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -145,12 +147,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(0, 1, 2, 3, 4)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0, 1, 2, 3, 4)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -178,12 +181,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(1, 2, 3)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(1, 2, 3)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -211,11 +215,11 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(3)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(3)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -243,12 +247,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(2, 4)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(2, 4)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -276,13 +281,14 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(0, 1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING);
-        Assert.assertTrue(gprops.getCustomPartitioner() != null);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0, 1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING).isTrue();
+        assertThat(gprops.getCustomPartitioner() != null).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -310,12 +316,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -343,12 +349,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0, 1)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0, 1)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -376,11 +382,11 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -408,12 +414,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(0, 1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0, 1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -441,12 +448,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(4)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(4)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(4)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(4)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -476,12 +483,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0, 2)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0, 2)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -509,12 +516,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(1, 2, 3)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(1, 2, 3)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -542,12 +549,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(1, 2, 3)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(1, 2, 3)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -577,12 +585,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                (new FieldSet(lprops.getGroupedFields().toArray())).equals(new FieldSet(1)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat((new FieldSet(lprops.getGroupedFields().toArray())).equals(new FieldSet(1)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -612,12 +620,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                (new FieldSet(lprops.getGroupedFields().toArray())).equals(new FieldSet(1, 0)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat((new FieldSet(lprops.getGroupedFields().toArray())).equals(new FieldSet(1, 0)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -647,11 +655,11 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -681,12 +689,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(0, 1)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0, 1)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -717,12 +726,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0, 2)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(0, 2)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -752,12 +761,12 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(
-                new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(1, 2, 3)));
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat((new FieldSet(gprops.getPartitioningFields().toArray())).equals(new FieldSet(2)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(new FieldSet(lprops.getGroupedFields().toArray()).equals(new FieldSet(1, 2, 3)))
+                .isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -787,12 +796,13 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops = sourceNode.getGlobalProperties();
         LocalProperties lprops = sourceNode.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops.getPartitioningFields().toArray()))
-                        .equals(new FieldSet(1, 2, 3)));
-        Assert.assertTrue(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING);
-        Assert.assertTrue(lprops.getGroupedFields() == null);
-        Assert.assertTrue(lprops.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(1, 2, 3)))
+                .isTrue();
+        assertThat(gprops.getPartitioning() == PartitioningProperty.ANY_PARTITIONING).isTrue();
+        assertThat(lprops.getGroupedFields() == null).isTrue();
+        assertThat(lprops.getOrdering() == null).isTrue();
     }
 
     @Test
@@ -838,19 +848,23 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops2 = sourceNode2.getGlobalProperties();
         LocalProperties lprops2 = sourceNode2.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops1.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops1.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING);
-        Assert.assertTrue(lprops1.getGroupedFields() == null);
-        Assert.assertTrue(lprops1.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops1.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops1.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING).isTrue();
+        assertThat(lprops1.getGroupedFields() == null).isTrue();
+        assertThat(lprops1.getOrdering() == null).isTrue();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops2.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops2.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING);
-        Assert.assertTrue(lprops2.getGroupedFields() == null);
-        Assert.assertTrue(lprops2.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops2.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops2.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING).isTrue();
+        assertThat(lprops2.getGroupedFields() == null).isTrue();
+        assertThat(lprops2.getOrdering() == null).isTrue();
 
-        Assert.assertTrue(gprops1.getCustomPartitioner().equals(gprops2.getCustomPartitioner()));
+        assertThat(gprops1.getCustomPartitioner().equals(gprops2.getCustomPartitioner())).isTrue();
     }
 
     @Test
@@ -896,19 +910,23 @@ public class PropertyDataSourceTest extends CompilerTestBase {
         GlobalProperties gprops2 = sourceNode2.getGlobalProperties();
         LocalProperties lprops2 = sourceNode2.getLocalProperties();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops1.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops1.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING);
-        Assert.assertTrue(lprops1.getGroupedFields() == null);
-        Assert.assertTrue(lprops1.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops1.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops1.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING).isTrue();
+        assertThat(lprops1.getGroupedFields() == null).isTrue();
+        assertThat(lprops1.getOrdering() == null).isTrue();
 
-        Assert.assertTrue(
-                (new FieldSet(gprops2.getPartitioningFields().toArray())).equals(new FieldSet(0)));
-        Assert.assertTrue(gprops2.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING);
-        Assert.assertTrue(lprops2.getGroupedFields() == null);
-        Assert.assertTrue(lprops2.getOrdering() == null);
+        assertThat(
+                        (new FieldSet(gprops2.getPartitioningFields().toArray()))
+                                .equals(new FieldSet(0)))
+                .isTrue();
+        assertThat(gprops2.getPartitioning() == PartitioningProperty.CUSTOM_PARTITIONING).isTrue();
+        assertThat(lprops2.getGroupedFields() == null).isTrue();
+        assertThat(lprops2.getOrdering() == null).isTrue();
 
-        Assert.assertTrue(!gprops1.getCustomPartitioner().equals(gprops2.getCustomPartitioner()));
+        assertThat(!gprops1.getCustomPartitioner().equals(gprops2.getCustomPartitioner())).isTrue();
     }
 
     public static class SomePojo {

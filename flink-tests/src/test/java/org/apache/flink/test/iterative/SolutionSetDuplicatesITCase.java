@@ -35,8 +35,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test for duplicate elimination in the solution set. */
 @SuppressWarnings("serial")
@@ -80,10 +80,10 @@ public class SolutionSetDuplicatesITCase extends MultipleProgramsTestBase {
                                     })
                             .collect();
 
-            assertEquals(11, result.size());
+            assertThat(result.size()).isEqualTo(11);
 
             Collections.sort(result);
-            assertEquals(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10), result);
+            assertThat(result).isEqualTo(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

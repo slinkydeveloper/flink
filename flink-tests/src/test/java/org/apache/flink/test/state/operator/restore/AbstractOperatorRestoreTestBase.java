@@ -51,8 +51,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Abstract class to verify that it is possible to migrate a savepoint across upgraded Flink
@@ -129,7 +128,7 @@ public abstract class AbstractOperatorRestoreTestBase extends TestLogger {
         jobToMigrate.setSavepointRestoreSettings(
                 SavepointRestoreSettings.forPath(savepointResource.getFile()));
 
-        assertNotNull(jobToMigrate.getJobID());
+        assertThat(jobToMigrate.getJobID()).isNotNull();
 
         clusterClient.submitJob(jobToMigrate).get();
 
@@ -140,9 +139,8 @@ public abstract class AbstractOperatorRestoreTestBase extends TestLogger {
                         deadline,
                         (jobStatus) -> jobStatus == JobStatus.RUNNING,
                         TestingUtils.defaultScheduledExecutor());
-        assertEquals(
-                JobStatus.RUNNING,
-                jobRunningFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+        assertThat(jobRunningFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                .isEqualTo(JobStatus.RUNNING);
 
         // Trigger savepoint
         File targetDirectory = tmpFolder.newFolder();
@@ -168,7 +166,7 @@ public abstract class AbstractOperatorRestoreTestBase extends TestLogger {
             }
         }
 
-        assertNotNull("Could not take savepoint.", savepointPath);
+        assertThat(savepointPath).as("Could not take savepoint.").isNotNull();
 
         CompletableFuture<JobStatus> jobCanceledFuture =
                 FutureUtils.retrySuccessfulWithDelay(
@@ -177,9 +175,8 @@ public abstract class AbstractOperatorRestoreTestBase extends TestLogger {
                         deadline,
                         (jobStatus) -> jobStatus == JobStatus.CANCELED,
                         TestingUtils.defaultScheduledExecutor());
-        assertEquals(
-                JobStatus.CANCELED,
-                jobCanceledFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+        assertThat(jobCanceledFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                .isEqualTo(JobStatus.CANCELED);
 
         return savepointPath;
     }
@@ -190,7 +187,7 @@ public abstract class AbstractOperatorRestoreTestBase extends TestLogger {
         jobToRestore.setSavepointRestoreSettings(
                 SavepointRestoreSettings.forPath(savepointPath, allowNonRestoredState));
 
-        assertNotNull("Job doesn't have a JobID.", jobToRestore.getJobID());
+        assertThat(jobToRestore.getJobID()).as("Job doesn't have a JobID.").isNotNull();
 
         clusterClient.submitJob(jobToRestore).get();
 
@@ -201,9 +198,8 @@ public abstract class AbstractOperatorRestoreTestBase extends TestLogger {
                         deadline,
                         (jobStatus) -> jobStatus == JobStatus.FINISHED,
                         TestingUtils.defaultScheduledExecutor());
-        assertEquals(
-                JobStatus.FINISHED,
-                jobStatusFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+        assertThat(jobStatusFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                .isEqualTo(JobStatus.FINISHED);
     }
 
     private JobGraph createJobGraph(ExecutionMode mode) {

@@ -45,11 +45,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link TwoPhaseCommitSinkFunction}. */
 public class TwoPhaseCommitSinkFunctionTest {
@@ -113,7 +110,7 @@ public class TwoPhaseCommitSinkFunctionTest {
         harness.notifyOfCompletedCheckpoint(1);
 
         assertExactlyOnce(Arrays.asList("42", "43", "44"));
-        assertEquals(1, tmpDirectory.listFiles().size()); // one for currentTransaction
+        assertThat(tmpDirectory.listFiles().size()).isEqualTo(1); // one for currentTransaction
     }
 
     @Test
@@ -146,7 +143,7 @@ public class TwoPhaseCommitSinkFunctionTest {
         assertExactlyOnce(Arrays.asList("42", "43"));
 
         // transaction for checkpoint2
-        assertEquals(1, tmpDirectory.listFiles().size());
+        assertThat(tmpDirectory.listFiles().size()).isEqualTo(1);
     }
 
     @Test
@@ -162,7 +159,7 @@ public class TwoPhaseCommitSinkFunctionTest {
 
         harness.initializeState(operatorSubtaskState);
         harness.open();
-        assertEquals(0, sinkFunction.abortedTransactions.size());
+        assertThat(sinkFunction.abortedTransactions.size()).isEqualTo(0);
     }
 
     @Test
@@ -177,11 +174,12 @@ public class TwoPhaseCommitSinkFunctionTest {
         harness.notifyOfCompletedCheckpoint(1);
 
         assertExactlyOnce(Arrays.asList("42", "43"));
-        assertEquals(
-                2,
-                tmpDirectory
-                        .listFiles()
-                        .size()); // one for checkpointId 2 and second for the currentTransaction
+        assertThat(
+                        tmpDirectory
+                                .listFiles()
+                                . // one for checkpointId 2 and second for the currentTransaction
+                                size())
+                .isEqualTo(2); // one for checkpointId 2 and second for the currentTransaction
     }
 
     @Test
@@ -213,7 +211,7 @@ public class TwoPhaseCommitSinkFunctionTest {
         assertExactlyOnce(Arrays.asList("42", "43"));
         closeTestHarness();
 
-        assertEquals(0, tmpDirectory.listFiles().size());
+        assertThat(tmpDirectory.listFiles().size()).isEqualTo(0);
     }
 
     @Test
@@ -239,7 +237,7 @@ public class TwoPhaseCommitSinkFunctionTest {
             harness.initializeState(snapshot);
             fail("Expected exception not thrown");
         } catch (RuntimeException e) {
-            assertEquals("Expected exception", e.getMessage());
+            assertThat(e.getMessage()).isEqualTo("Expected exception");
         }
 
         clock.setEpochMilli(transactionTimeout + 1);
@@ -263,12 +261,10 @@ public class TwoPhaseCommitSinkFunctionTest {
         clock.setEpochMilli(elapsedTime);
         harness.notifyOfCompletedCheckpoint(1);
 
-        assertThat(
-                testLoggerResource.getMessages(),
-                hasItem(
-                        containsString(
-                                "has been open for 502 ms. "
-                                        + "This is close to or even exceeding the transaction timeout of 1000 ms.")));
+        assertThat(testLoggerResource.getMessages())
+                .contains(
+                        "has been open for 502 ms. "
+                                + "This is close to or even exceeding the transaction timeout of 1000 ms.");
     }
 
     @Test
@@ -296,12 +292,10 @@ public class TwoPhaseCommitSinkFunctionTest {
 
         closeTestHarness();
 
-        assertThat(
-                testLoggerResource.getMessages(),
-                hasItem(
-                        containsString(
-                                "has been open for 502 ms. "
-                                        + "This is close to or even exceeding the transaction timeout of 1000 ms.")));
+        assertThat(testLoggerResource.getMessages())
+                .contains(
+                        "has been open for 502 ms. "
+                                + "This is close to or even exceeding the transaction timeout of 1000 ms.");
     }
 
     private void assertExactlyOnce(List<String> expectedValues) throws IOException {
@@ -311,7 +305,7 @@ public class TwoPhaseCommitSinkFunctionTest {
         }
         Collections.sort(actualValues);
         Collections.sort(expectedValues);
-        assertEquals(expectedValues, actualValues);
+        assertThat(actualValues).isEqualTo(expectedValues);
     }
 
     private class ContentDumpSinkFunction

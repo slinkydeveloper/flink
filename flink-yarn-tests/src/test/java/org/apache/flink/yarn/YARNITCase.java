@@ -53,11 +53,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.CLASSPATH_INCLUDE_USER_JAR;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Test cases for the deployment of Yarn Flink clusters. */
 public class YARNITCase extends YarnTestBase {
@@ -164,11 +161,12 @@ public class YARNITCase extends YarnTestBase {
 
                 for (DistributedCache.DistributedCacheEntry entry :
                         jobGraph.getUserArtifacts().values()) {
-                    assertTrue(
-                            String.format(
-                                    "The user artifacts(%s) should be remote or uploaded to remote filesystem.",
-                                    entry.filePath),
-                            Utils.isRemotePath(entry.filePath));
+                    assertThat(Utils.isRemotePath(entry.filePath))
+                            .as(
+                                    String.format(
+                                            "The user artifacts(%s) should be remote or uploaded to remote filesystem.",
+                                            entry.filePath))
+                            .isTrue();
                 }
 
                 ApplicationId applicationId = clusterClient.getClusterId();
@@ -178,8 +176,8 @@ public class YARNITCase extends YarnTestBase {
 
                 final JobResult jobResult = jobResultCompletableFuture.get();
 
-                assertThat(jobResult, is(notNullValue()));
-                assertThat(jobResult.getSerializedThrowable().isPresent(), is(false));
+                assertThat(jobResult).isEqualTo(notNullValue());
+                assertThat(jobResult.getSerializedThrowable().isPresent()).isEqualTo(false);
 
                 checkStagingDirectory(configuration, applicationId);
 
@@ -202,13 +200,14 @@ public class YARNITCase extends YarnTestBase {
             final Path stagingDirectory =
                     new Path(fs.getHomeDirectory(), ".flink/" + appId.toString());
             if (isProvidedLibDirsConfigured) {
-                assertFalse(
-                        "The provided lib dirs is set, so the lib directory should not be uploaded to staging directory.",
-                        fs.exists(new Path(stagingDirectory, flinkLibFolder.getName())));
+                assertThat(fs.exists(new Path(stagingDirectory, flinkLibFolder.getName())))
+                        .as(
+                                "The provided lib dirs is set, so the lib directory should not be uploaded to staging directory.")
+                        .isFalse();
             } else {
-                assertTrue(
-                        "The lib directory should be uploaded to staging directory.",
-                        fs.exists(new Path(stagingDirectory, flinkLibFolder.getName())));
+                assertThat(fs.exists(new Path(stagingDirectory, flinkLibFolder.getName())))
+                        .as("The lib directory should be uploaded to staging directory.")
+                        .isTrue();
             }
         }
     }

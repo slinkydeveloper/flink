@@ -50,10 +50,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A unit test class for {@link SourceReaderBase}. */
 public class SourceReaderBaseTest extends SourceReaderTestBase<MockSourceSplit> {
@@ -99,7 +96,7 @@ public class SourceReaderBaseTest extends SourceReaderTestBase<MockSourceSplit> 
             // This is not a real infinite loop, it is supposed to throw exception after two polls.
             while (true) {
                 InputStatus inputStatus = reader.pollNext(output);
-                assertNotEquals(InputStatus.END_OF_INPUT, inputStatus);
+                assertThat(inputStatus).isEqualTo(InputStatus.END_OF_INPUT);
                 // Add a sleep to avoid tight loop.
                 Thread.sleep(1);
             }
@@ -114,7 +111,7 @@ public class SourceReaderBaseTest extends SourceReaderTestBase<MockSourceSplit> 
 
         reader.pollNext(new TestingReaderOutput<>());
 
-        assertFalse(records.isRecycled());
+        assertThat(records.isRecycled()).isFalse();
     }
 
     @Test
@@ -129,7 +126,7 @@ public class SourceReaderBaseTest extends SourceReaderTestBase<MockSourceSplit> 
         reader.pollNext(new TestingReaderOutput<>());
         reader.pollNext(new TestingReaderOutput<>());
 
-        assertTrue(records.isRecycled());
+        assertThat(records.isRecycled()).isTrue();
     }
 
     @Test
@@ -231,8 +228,8 @@ public class SourceReaderBaseTest extends SourceReaderTestBase<MockSourceSplit> 
 
         // Add the last record to the split when the splitFetcherManager shutting down SplitFetchers
         splitFetcherManager.getInShutdownSplitFetcherFuture().thenRun(() -> split.addRecord(1));
-        assertEquals(
-                InputStatus.MORE_AVAILABLE, sourceReader.pollNext(new TestingReaderOutput<>()));
+        assertThat(sourceReader.pollNext(new TestingReaderOutput<>()))
+                .isEqualTo(InputStatus.MORE_AVAILABLE);
     }
 
     // ---------------- helper methods -----------------

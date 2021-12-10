@@ -18,10 +18,11 @@
 
 package org.apache.flink.yarn;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.regex.Pattern;
+
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link YarnTestBase}. */
 public class YarnTestBaseTest {
@@ -41,6 +42,6 @@ public class YarnTestBaseTest {
                 return;
             }
         }
-        Assert.fail("The following string didn't match any whitelisted patterns '" + probe + "'");
+        fail("The following string didn't match any whitelisted patterns '" + probe + "'");
     }
 }

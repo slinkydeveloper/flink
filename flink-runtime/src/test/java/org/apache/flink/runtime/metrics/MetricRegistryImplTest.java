@@ -45,7 +45,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.apache.flink.shaded.guava30.com.google.common.collect.Iterators;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.Duration;
@@ -57,8 +56,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link MetricRegistryImpl}. */
 public class MetricRegistryImplTest extends TestLogger {
@@ -71,11 +69,11 @@ public class MetricRegistryImplTest extends TestLogger {
                 new MetricRegistryImpl(
                         MetricRegistryTestUtils.defaultMetricRegistryConfiguration());
 
-        Assert.assertFalse(metricRegistry.isShutdown());
+        assertThat(metricRegistry.isShutdown()).isFalse();
 
         metricRegistry.shutdown().get();
 
-        Assert.assertTrue(metricRegistry.isShutdown());
+        assertThat(metricRegistry.isShutdown()).isTrue();
     }
 
     /** Reporter that exposes whether open() was called. */
@@ -94,13 +92,13 @@ public class MetricRegistryImplTest extends TestLogger {
                 new MetricRegistryImpl(
                         MetricRegistryTestUtils.defaultMetricRegistryConfiguration());
 
-        Assert.assertNull(metricRegistry.getMetricQueryServiceGatewayRpcAddress());
+        assertThat(metricRegistry.getMetricQueryServiceGatewayRpcAddress()).isNull();
 
         metricRegistry.startQueryService(new TestingRpcService(), new ResourceID("mqs"));
 
         MetricQueryServiceGateway metricQueryServiceGateway =
                 metricRegistry.getMetricQueryServiceGateway();
-        Assert.assertNotNull(metricQueryServiceGateway);
+        assertThat(metricQueryServiceGateway).isNotNull();
 
         metricRegistry.register(
                 new SimpleCounter(),
@@ -120,8 +118,9 @@ public class MetricRegistryImplTest extends TestLogger {
                 Thread.sleep(50);
             }
         }
-        Assert.assertTrue(
-                "metrics query did not return expected result", metricsSuccessfullyQueried);
+        assertThat(metricsSuccessfullyQueried)
+                .as("metrics query did not return expected result")
+                .isTrue();
     }
 
     /** Reporter that exposes the {@link MetricConfig} it was given. */
@@ -168,9 +167,11 @@ public class MetricRegistryImplTest extends TestLogger {
              * reports ends before or after T=50.
              */
             long maxAllowedReports = (curT - start) / 50 + 2;
-            Assert.assertTrue("Too many reports were triggered.", maxAllowedReports >= reportCount);
+            assertThat(maxAllowedReports >= reportCount)
+                    .as("Too many reports were triggered.")
+                    .isTrue();
         }
-        Assert.assertTrue("No report was triggered.", TestReporter3.reportCount > 0);
+        assertThat(TestReporter3.reportCount > 0).as("No report was triggered.").isTrue();
 
         registry.shutdown().get();
     }
@@ -195,9 +196,8 @@ public class MetricRegistryImplTest extends TestLogger {
             Collection<ScheduledFuture<?>> scheduledTasks =
                     manuallyTriggeredScheduledExecutorService.getActiveScheduledTasks();
             ScheduledFuture<?> reportTask = Iterators.getOnlyElement(scheduledTasks.iterator());
-            Assert.assertEquals(
-                    MetricOptions.REPORTER_INTERVAL.defaultValue().getSeconds(),
-                    reportTask.getDelay(TimeUnit.SECONDS));
+            assertThat(reportTask.getDelay(TimeUnit.SECONDS))
+                    .isEqualTo(MetricOptions.REPORTER_INTERVAL.defaultValue().getSeconds());
         } finally {
             registry.shutdown().get();
         }
@@ -240,19 +240,19 @@ public class MetricRegistryImplTest extends TestLogger {
                         registry, "host", new ResourceID("id"));
         root.counter("rootCounter");
 
-        assertTrue(TestReporter6.addedMetric instanceof Counter);
-        assertEquals("rootCounter", TestReporter6.addedMetricName);
+        assertThat(TestReporter6.addedMetric).isInstanceOf(Counter.class);
+        assertThat(TestReporter6.addedMetricName).isEqualTo("rootCounter");
 
-        assertTrue(TestReporter7.addedMetric instanceof Counter);
-        assertEquals("rootCounter", TestReporter7.addedMetricName);
+        assertThat(TestReporter7.addedMetric).isInstanceOf(Counter.class);
+        assertThat(TestReporter7.addedMetricName).isEqualTo("rootCounter");
 
         root.close();
 
-        assertTrue(TestReporter6.removedMetric instanceof Counter);
-        assertEquals("rootCounter", TestReporter6.removedMetricName);
+        assertThat(TestReporter6.removedMetric).isInstanceOf(Counter.class);
+        assertThat(TestReporter6.removedMetricName).isEqualTo("rootCounter");
 
-        assertTrue(TestReporter7.removedMetric instanceof Counter);
-        assertEquals("rootCounter", TestReporter7.removedMetricName);
+        assertThat(TestReporter7.removedMetric).isInstanceOf(Counter.class);
+        assertThat(TestReporter7.removedMetricName).isEqualTo("rootCounter");
 
         registry.shutdown().get();
     }
@@ -317,10 +317,10 @@ public class MetricRegistryImplTest extends TestLogger {
 
         ScopeFormats scopeConfig = ScopeFormats.fromConfig(config);
 
-        assertEquals("A", scopeConfig.getTaskManagerFormat().format());
-        assertEquals("B", scopeConfig.getTaskManagerJobFormat().format());
-        assertEquals("C", scopeConfig.getTaskFormat().format());
-        assertEquals("D", scopeConfig.getOperatorFormat().format());
+        assertThat(scopeConfig.getTaskManagerFormat().format()).isEqualTo("A");
+        assertThat(scopeConfig.getTaskManagerJobFormat().format()).isEqualTo("B");
+        assertThat(scopeConfig.getTaskFormat().format()).isEqualTo("C");
+        assertThat(scopeConfig.getOperatorFormat().format()).isEqualTo("D");
     }
 
     @Test
@@ -337,7 +337,7 @@ public class MetricRegistryImplTest extends TestLogger {
         TaskManagerMetricGroup tmGroup =
                 TaskManagerMetricGroup.createTaskManagerMetricGroup(
                         registry, "host", new ResourceID("id"));
-        assertEquals("A_B_C_D_E_name", tmGroup.getMetricIdentifier("name"));
+        assertThat(tmGroup.getMetricIdentifier("name")).isEqualTo("A_B_C_D_E_name");
 
         registry.shutdown().get();
     }
@@ -361,12 +361,12 @@ public class MetricRegistryImplTest extends TestLogger {
                                 ReporterSetup.forReporter("test2", config2, new TestReporter()),
                                 ReporterSetup.forReporter("test3", config3, new TestReporter())));
 
-        assertEquals(GLOBAL_DEFAULT_DELIMITER, registry.getDelimiter());
-        assertEquals('_', registry.getDelimiter(0));
-        assertEquals('-', registry.getDelimiter(1));
-        assertEquals(GLOBAL_DEFAULT_DELIMITER, registry.getDelimiter(2));
-        assertEquals(GLOBAL_DEFAULT_DELIMITER, registry.getDelimiter(3));
-        assertEquals(GLOBAL_DEFAULT_DELIMITER, registry.getDelimiter(-1));
+        assertThat(registry.getDelimiter()).isEqualTo(GLOBAL_DEFAULT_DELIMITER);
+        assertThat(registry.getDelimiter(0)).isEqualTo('_');
+        assertThat(registry.getDelimiter(1)).isEqualTo('-');
+        assertThat(registry.getDelimiter(2)).isEqualTo(GLOBAL_DEFAULT_DELIMITER);
+        assertThat(registry.getDelimiter(3)).isEqualTo(GLOBAL_DEFAULT_DELIMITER);
+        assertThat(registry.getDelimiter(-1)).isEqualTo(GLOBAL_DEFAULT_DELIMITER);
 
         registry.shutdown().get();
     }
@@ -457,8 +457,9 @@ public class MetricRegistryImplTest extends TestLogger {
 
             for (MetricGroupAndName groupAndName :
                     Arrays.asList(reporter.findAdded(name), reporter.findRemoved(name))) {
-                assertEquals(expected, groupAndName.group.getMetricIdentifier(name));
-                assertEquals(expected, groupAndName.group.getMetricIdentifier(name, reporter));
+                assertThat(groupAndName.group.getMetricIdentifier(name)).isEqualTo(expected);
+                assertThat(groupAndName.group.getMetricIdentifier(name, reporter))
+                        .isEqualTo(expected);
             }
         }
     }
@@ -496,14 +497,14 @@ public class MetricRegistryImplTest extends TestLogger {
         registry.register(
                 metric, "counter", new MetricGroupTest.DummyAbstractMetricGroup(registry));
 
-        assertEquals(metric, TestReporter7.addedMetric);
-        assertEquals("counter", TestReporter7.addedMetricName);
+        assertThat(TestReporter7.addedMetric).isEqualTo(metric);
+        assertThat(TestReporter7.addedMetricName).isEqualTo("counter");
 
         registry.unregister(
                 metric, "counter", new MetricGroupTest.DummyAbstractMetricGroup(registry));
 
-        assertEquals(metric, TestReporter7.removedMetric);
-        assertEquals("counter", TestReporter7.removedMetricName);
+        assertThat(TestReporter7.removedMetric).isEqualTo(metric);
+        assertThat(TestReporter7.removedMetricName).isEqualTo("counter");
 
         registry.shutdown().get();
     }

@@ -25,8 +25,7 @@ import org.junit.Test;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * IT Cases of {@link FineGrainedSlotManager}, with the {@link DefaultResourceAllocationStrategy}.
@@ -68,7 +67,7 @@ public class FineGrainedSlotManagerDefaultResourceAllocationStrategyITCase
                                                                     new JobID(),
                                                                     1,
                                                                     OTHER_SLOT_RESOURCE_PROFILE)));
-                            assertThat(resourceRequests.get(), is(0));
+                            assertThat(resourceRequests.get()).isEqualTo(0);
                         });
             }
         };

@@ -55,7 +55,6 @@ import org.apache.flink.streaming.runtime.tasks.ProcessingTimeService;
 import org.apache.flink.streaming.runtime.tasks.TestProcessingTimeService;
 import org.apache.flink.util.CloseableIterable;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -70,6 +69,7 @@ import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNew
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNewResultSubpartitionStateHandle;
 import static org.apache.flink.runtime.checkpoint.StateObjectCollection.singleton;
 import static org.apache.flink.runtime.state.OperatorStateHandle.Mode.SPLIT_DISTRIBUTE;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -114,12 +114,14 @@ public class StreamTaskStateInitializerImplTest {
         CloseableIterable<StatePartitionStreamProvider> operatorStateInputs =
                 stateContext.rawOperatorStateInputs();
 
-        Assert.assertFalse("Expected the context to NOT be restored", stateContext.isRestored());
-        Assert.assertNotNull(operatorStateBackend);
-        Assert.assertNotNull(keyedStateBackend);
-        Assert.assertNotNull(timeServiceManager);
-        Assert.assertNotNull(keyedStateInputs);
-        Assert.assertNotNull(operatorStateInputs);
+        assertThat(stateContext.isRestored())
+                .as("Expected the context to NOT be restored")
+                .isFalse();
+        assertThat(operatorStateBackend).isNotNull();
+        assertThat(keyedStateBackend).isNotNull();
+        assertThat(timeServiceManager).isNotNull();
+        assertThat(keyedStateInputs).isNotNull();
+        assertThat(operatorStateInputs).isNotNull();
 
         checkCloseablesRegistered(
                 closeableRegistry,
@@ -128,8 +130,8 @@ public class StreamTaskStateInitializerImplTest {
                 keyedStateInputs,
                 operatorStateInputs);
 
-        Assert.assertFalse(keyedStateInputs.iterator().hasNext());
-        Assert.assertFalse(operatorStateInputs.iterator().hasNext());
+        assertThat(keyedStateInputs.iterator().hasNext()).isFalse();
+        assertThat(operatorStateInputs.iterator().hasNext()).isFalse();
     }
 
     @SuppressWarnings("unchecked")
@@ -236,28 +238,28 @@ public class StreamTaskStateInitializerImplTest {
         CloseableIterable<StatePartitionStreamProvider> operatorStateInputs =
                 stateContext.rawOperatorStateInputs();
 
-        Assert.assertTrue("Expected the context to be restored", stateContext.isRestored());
-        Assert.assertEquals(OptionalLong.of(42L), stateContext.getRestoredCheckpointId());
+        assertThat(stateContext.isRestored()).as("Expected the context to be restored").isTrue();
+        assertThat(stateContext.getRestoredCheckpointId()).isEqualTo(OptionalLong.of(42L));
 
-        Assert.assertNotNull(operatorStateBackend);
-        Assert.assertNotNull(keyedStateBackend);
+        assertThat(operatorStateBackend).isNotNull();
+        assertThat(keyedStateBackend).isNotNull();
         // this is deactivated on purpose so that it does not attempt to consume the raw keyed
         // state.
-        Assert.assertNull(timeServiceManager);
-        Assert.assertNotNull(keyedStateInputs);
-        Assert.assertNotNull(operatorStateInputs);
+        assertThat(timeServiceManager).isNull();
+        assertThat(keyedStateInputs).isNotNull();
+        assertThat(operatorStateInputs).isNotNull();
 
         int count = 0;
         for (KeyGroupStatePartitionStreamProvider keyedStateInput : keyedStateInputs) {
             ++count;
         }
-        Assert.assertEquals(1, count);
+        assertThat(count).isEqualTo(1);
 
         count = 0;
         for (StatePartitionStreamProvider operatorStateInput : operatorStateInputs) {
             ++count;
         }
-        Assert.assertEquals(3, count);
+        assertThat(count).isEqualTo(3);
 
         checkCloseablesRegistered(
                 closeableRegistry,
@@ -270,7 +272,7 @@ public class StreamTaskStateInitializerImplTest {
     private static void checkCloseablesRegistered(
             CloseableRegistry closeableRegistry, Closeable... closeables) {
         for (Closeable closeable : closeables) {
-            Assert.assertTrue(closeableRegistry.unregisterCloseable(closeable));
+            assertThat(closeableRegistry.unregisterCloseable(closeable)).isTrue();
         }
     }
 

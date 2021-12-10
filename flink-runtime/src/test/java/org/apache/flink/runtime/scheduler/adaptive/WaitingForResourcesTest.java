@@ -45,12 +45,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the WaitingForResources state. */
 public class WaitingForResourcesTest extends TestLogger {
@@ -139,7 +135,7 @@ public class WaitingForResourcesTest extends TestLogger {
             wfr.notifyNewResourcesAvailable();
             // we are not triggering the scheduled tasks, to simulate a long stabilization timeout
 
-            assertThat(ctx.hasStateTransition(), is(false));
+            assertThat(ctx.hasStateTransition()).isEqualTo(false);
         }
     }
 
@@ -173,7 +169,7 @@ public class WaitingForResourcesTest extends TestLogger {
 
             ctx.runScheduledTasks(afterStabilizationTimeout.toMillis());
 
-            assertThat(ctx.hasStateTransition(), is(true));
+            assertThat(ctx.hasStateTransition()).isEqualTo(true);
         }
     }
 
@@ -211,16 +207,16 @@ public class WaitingForResourcesTest extends TestLogger {
             wfr.notifyNewResourcesAvailable();
 
             // sanity check: no state transition has been triggered so far
-            assertThat(ctx.hasStateTransition(), is(false));
-            assertThat(ctx.getTestDuration(), greaterThan(stabilizationTimeout));
+            assertThat(ctx.hasStateTransition()).isEqualTo(false);
+            assertThat(ctx.getTestDuration()).isGreaterThan(stabilizationTimeout);
 
             ctx.setExpectCreatingExecutionGraph();
 
             ctx.advanceTimeByMillis(1);
-            assertThat(ctx.hasStateTransition(), is(false));
+            assertThat(ctx.hasStateTransition()).isEqualTo(false);
 
             ctx.advanceTimeByMillis(stabilizationTimeout.toMillis());
-            assertThat(ctx.hasStateTransition(), is(true));
+            assertThat(ctx.hasStateTransition()).isEqualTo(true);
         }
     }
 
@@ -237,7 +233,7 @@ public class WaitingForResourcesTest extends TestLogger {
                             STABILIZATION_TIMEOUT);
 
             ctx.runScheduledTasks();
-            assertThat(ctx.hasStateTransition(), is(false));
+            assertThat(ctx.hasStateTransition()).isEqualTo(false);
         }
     }
 
@@ -266,13 +262,14 @@ public class WaitingForResourcesTest extends TestLogger {
 
             ctx.setExpectFinished(
                     archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED));
-                        assertThat(archivedExecutionGraph.getFailureInfo(), notNullValue());
-                        assertTrue(
-                                archivedExecutionGraph
-                                        .getFailureInfo()
-                                        .getExceptionAsString()
-                                        .contains(testExceptionString));
+                        assertThat(archivedExecutionGraph.getState()).isEqualTo(JobStatus.FAILED);
+                        assertThat(archivedExecutionGraph.getFailureInfo()).isNotNull();
+                        assertThat(
+                                        archivedExecutionGraph
+                                                .getFailureInfo()
+                                                .getExceptionAsString()
+                                                .contains(testExceptionString))
+                                .isTrue();
                     });
 
             wfr.handleGlobalFailure(new RuntimeException(testExceptionString));
@@ -289,7 +286,7 @@ public class WaitingForResourcesTest extends TestLogger {
 
             ctx.setExpectFinished(
                     (archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.CANCELED));
+                        assertThat(archivedExecutionGraph.getState()).isEqualTo(JobStatus.CANCELED);
                     }));
             wfr.cancel();
         }
@@ -305,8 +302,9 @@ public class WaitingForResourcesTest extends TestLogger {
 
             ctx.setExpectFinished(
                     (archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED));
-                        assertThat(archivedExecutionGraph.getFailureInfo(), notNullValue());
+                        assertThat(archivedExecutionGraph.getState())
+                                .isEqualTo(JobStatus.SUSPENDED);
+                        assertThat(archivedExecutionGraph.getFailureInfo()).isNotNull();
                     }));
 
             wfr.suspend(new RuntimeException("suspend"));
@@ -349,7 +347,7 @@ public class WaitingForResourcesTest extends TestLogger {
 
         ctx.runScheduledTasks();
 
-        assertThat(thirdRun.get(), is(true));
+        assertThat(thirdRun.get()).isEqualTo(true);
     }
 
     @Test
@@ -399,7 +397,7 @@ public class WaitingForResourcesTest extends TestLogger {
 
         // choose time that includes inner execution as well
         ctx.runScheduledTasks(10);
-        assertThat(executed.get(), is(true));
+        assertThat(executed.get()).isEqualTo(true);
     }
 
     private static class MockContext implements WaitingForResources.Context, AutoCloseable {
@@ -571,6 +569,6 @@ public class WaitingForResourcesTest extends TestLogger {
     }
 
     static <T> Consumer<T> assertNonNull() {
-        return (item) -> assertThat(item, notNullValue());
+        return (item) -> assertThat(item).isNotNull();
     }
 }

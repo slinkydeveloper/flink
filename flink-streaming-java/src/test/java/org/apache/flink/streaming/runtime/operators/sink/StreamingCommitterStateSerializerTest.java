@@ -26,8 +26,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test {@link StreamingCommitterStateSerializer}. */
 public class StreamingCommitterStateSerializerTest {
@@ -45,9 +44,8 @@ public class StreamingCommitterStateSerializerTest {
                 streamingCommitterStateSerializer.deserialize(
                         streamingCommitterStateSerializer.getVersion(), serialize);
 
-        assertThat(
-                streamingCommitterState.getCommittables(),
-                equalTo(expectedStreamingCommitterState.getCommittables()));
+        assertThat(streamingCommitterState.getCommittables())
+                .isEqualTo(expectedStreamingCommitterState.getCommittables());
     }
 
     @Test
@@ -63,8 +61,7 @@ public class StreamingCommitterStateSerializerTest {
                 streamingCommitterStateSerializer.deserialize(
                         streamingCommitterStateSerializer.getVersion(), serialize);
 
-        assertThat(
-                streamingCommitterState.getCommittables(),
-                equalTo(expectedStreamingCommitterState.getCommittables()));
+        assertThat(streamingCommitterState.getCommittables())
+                .isEqualTo(expectedStreamingCommitterState.getCommittables());
     }
 }

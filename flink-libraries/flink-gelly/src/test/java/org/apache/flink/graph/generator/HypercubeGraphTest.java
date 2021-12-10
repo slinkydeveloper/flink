@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link HypercubeGraph}. */
 public class HypercubeGraphTest extends GraphGeneratorTestBase {
@@ -52,18 +52,18 @@ public class HypercubeGraphTest extends GraphGeneratorTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 new HypercubeGraph(env, dimensions).generate();
 
-        assertEquals(1L << dimensions, graph.numberOfVertices());
-        assertEquals(dimensions * (1L << dimensions), graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(1L << dimensions);
+        assertThat(graph.numberOfEdges()).isEqualTo(dimensions * (1L << dimensions));
 
         long minInDegree = graph.inDegrees().min(1).collect().get(0).f1.getValue();
         long minOutDegree = graph.outDegrees().min(1).collect().get(0).f1.getValue();
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(dimensions, minInDegree);
-        assertEquals(dimensions, minOutDegree);
-        assertEquals(dimensions, maxInDegree);
-        assertEquals(dimensions, maxOutDegree);
+        assertThat(minInDegree).isEqualTo(dimensions);
+        assertThat(minOutDegree).isEqualTo(dimensions);
+        assertThat(maxInDegree).isEqualTo(dimensions);
+        assertThat(maxOutDegree).isEqualTo(dimensions);
     }
 
     @Test

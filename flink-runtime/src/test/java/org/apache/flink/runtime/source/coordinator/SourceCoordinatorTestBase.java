@@ -42,7 +42,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** The test base for SourceCoordinator related tests. */
 public abstract class SourceCoordinatorTestBase {
@@ -97,7 +97,7 @@ public abstract class SourceCoordinatorTestBase {
         if (enumerator == null) {
             enumerator =
                     (TestingSplitEnumerator<MockSourceSplit>) sourceCoordinator.getEnumerator();
-            assertNotNull("source was not started", enumerator);
+            assertThat(enumerator).as("source was not started").isNotNull();
         }
         return enumerator;
     }

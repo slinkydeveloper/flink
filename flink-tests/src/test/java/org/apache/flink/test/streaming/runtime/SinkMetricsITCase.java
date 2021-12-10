@@ -47,8 +47,9 @@ import java.util.stream.LongStream;
 
 import static org.apache.flink.metrics.testutils.MetricMatchers.isCounter;
 import static org.apache.flink.metrics.testutils.MetricMatchers.isGauge;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 
 /** Tests whether all provided metrics of a {@link Sink} are of the expected values (FLIP-33). */
@@ -127,7 +128,7 @@ public class SinkMetricsITCase extends TestLogger {
     private void assertSinkMetrics(
             long processedRecordsPerSubtask, int parallelism, int numSplits) {
         List<OperatorMetricGroup> groups = reporter.findOperatorMetricGroups("MetricTestSink");
-        assertThat(groups, hasSize(parallelism));
+        assertThat(groups).satisfies(matching(hasSize(parallelism)));
 
         int subtaskWithMetrics = 0;
         for (OperatorMetricGroup group : groups) {
@@ -138,28 +139,28 @@ public class SinkMetricsITCase extends TestLogger {
             }
             subtaskWithMetrics++;
             // I/O metrics
-            assertThat(
-                    group.getIOMetricGroup().getNumRecordsOutCounter(),
-                    isCounter(equalTo(processedRecordsPerSubtask)));
-            assertThat(
-                    group.getIOMetricGroup().getNumBytesOutCounter(),
-                    isCounter(
-                            equalTo(
-                                    processedRecordsPerSubtask
-                                            * MetricWriter.RECORD_SIZE_IN_BYTES)));
+            assertThat(group.getIOMetricGroup().getNumRecordsOutCounter())
+                    .satisfies(matching(isCounter(equalTo(processedRecordsPerSubtask))));
+            assertThat(group.getIOMetricGroup().getNumBytesOutCounter())
+                    .satisfies(
+                            matching(
+                                    isCounter(
+                                            equalTo(
+                                                    processedRecordsPerSubtask
+                                                            * MetricWriter.RECORD_SIZE_IN_BYTES))));
             // MetricWriter is just incrementing errors every even record
-            assertThat(
-                    metrics.get(MetricNames.NUM_RECORDS_OUT_ERRORS),
-                    isCounter(equalTo((processedRecordsPerSubtask + 1) / 2)));
+            assertThat(metrics.get(MetricNames.NUM_RECORDS_OUT_ERRORS))
+                    .satisfies(matching(isCounter(equalTo((processedRecordsPerSubtask + 1) / 2))));
             // check if the latest send time is fetched
-            assertThat(
-                    metrics.get(MetricNames.CURRENT_SEND_TIME),
-                    isGauge(
-                            equalTo(
-                                    (processedRecordsPerSubtask - 1)
-                                            * MetricWriter.BASE_SEND_TIME)));
+            assertThat(metrics.get(MetricNames.CURRENT_SEND_TIME))
+                    .satisfies(
+                            matching(
+                                    isGauge(
+                                            equalTo(
+                                                    (processedRecordsPerSubtask - 1)
+                                                            * MetricWriter.BASE_SEND_TIME))));
         }
-        assertThat(subtaskWithMetrics, equalTo(numSplits));
+        assertThat(subtaskWithMetrics).isEqualTo(numSplits);
     }
 
     private static class MetricWriter extends TestSink.DefaultSinkWriter<Long> {

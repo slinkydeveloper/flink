@@ -24,8 +24,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@code FromJarEntryClassInformationProviderTest} tests {@link
@@ -40,10 +39,10 @@ public class FromJarEntryClassInformationProviderTest extends TestLogger {
         final FromJarEntryClassInformationProvider testInstance =
                 FromJarEntryClassInformationProvider.createFromCustomJar(jarFile, jobClassName);
 
-        assertThat(testInstance.getJarFile().isPresent(), is(true));
-        assertThat(testInstance.getJarFile().get(), is(jarFile));
-        assertThat(testInstance.getJobClassName().isPresent(), is(true));
-        assertThat(testInstance.getJobClassName().get(), is(jobClassName));
+        assertThat(testInstance.getJarFile().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getJarFile().get()).isEqualTo(jarFile);
+        assertThat(testInstance.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getJobClassName().get()).isEqualTo(jobClassName);
     }
 
     @Test(expected = NullPointerException.class)
@@ -57,9 +56,9 @@ public class FromJarEntryClassInformationProviderTest extends TestLogger {
         final File jarFile = new File("some/path/to/jar");
         final EntryClassInformationProvider testInstance =
                 FromJarEntryClassInformationProvider.createFromCustomJar(jarFile, null);
-        assertThat(testInstance.getJarFile().isPresent(), is(true));
-        assertThat(testInstance.getJarFile().get(), is(jarFile));
-        assertThat(testInstance.getJobClassName().isPresent(), is(false));
+        assertThat(testInstance.getJarFile().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getJarFile().get()).isEqualTo(jarFile);
+        assertThat(testInstance.getJobClassName().isPresent()).isEqualTo(false);
     }
 
     @Test(expected = NullPointerException.class)

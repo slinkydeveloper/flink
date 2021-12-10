@@ -23,9 +23,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link InFlightRequestTracker}. */
 public class InFlightRequestTrackerTest {
@@ -39,7 +37,7 @@ public class InFlightRequestTrackerTest {
 
     @Test
     public void testShouldFinishAwaitAsyncImmediatelyIfNoRequests() {
-        assertTrue(inFlightRequestTracker.awaitAsync().isDone());
+        assertThat(inFlightRequestTracker.awaitAsync().isDone()).isTrue();
     }
 
     @Test
@@ -47,41 +45,39 @@ public class InFlightRequestTrackerTest {
         inFlightRequestTracker.registerRequest();
 
         final CompletableFuture<Void> awaitFuture = inFlightRequestTracker.awaitAsync();
-        assertFalse(awaitFuture.isDone());
+        assertThat(awaitFuture.isDone()).isFalse();
 
         inFlightRequestTracker.deregisterRequest();
-        assertTrue(awaitFuture.isDone());
+        assertThat(awaitFuture.isDone()).isTrue();
     }
 
     @Test
     public void testAwaitAsyncIsIdempotent() {
         final CompletableFuture<Void> awaitFuture = inFlightRequestTracker.awaitAsync();
-        assertTrue(awaitFuture.isDone());
+        assertThat(awaitFuture.isDone()).isTrue();
 
-        assertSame(
-                "The reference to the future must not change",
-                awaitFuture,
-                inFlightRequestTracker.awaitAsync());
+        assertThat(inFlightRequestTracker.awaitAsync())
+                .as("The reference to the future must not change")
+                .isSameAs(awaitFuture);
     }
 
     @Test
     public void testShouldTolerateRegisterAfterAwaitAsync() {
         final CompletableFuture<Void> awaitFuture = inFlightRequestTracker.awaitAsync();
-        assertTrue(awaitFuture.isDone());
+        assertThat(awaitFuture.isDone()).isTrue();
 
         inFlightRequestTracker.registerRequest();
 
-        assertSame(
-                "The reference to the future must not change",
-                awaitFuture,
-                inFlightRequestTracker.awaitAsync());
+        assertThat(inFlightRequestTracker.awaitAsync())
+                .as("The reference to the future must not change")
+                .isSameAs(awaitFuture);
     }
 
     @Test
     public void testShouldNotRegisterNewRequestsAfterTermination() {
         final CompletableFuture<Void> terminationFuture = inFlightRequestTracker.awaitAsync();
 
-        assertTrue(terminationFuture.isDone());
-        assertFalse(inFlightRequestTracker.registerRequest());
+        assertThat(terminationFuture.isDone()).isTrue();
+        assertThat(inFlightRequestTracker.registerRequest()).isFalse();
     }
 }

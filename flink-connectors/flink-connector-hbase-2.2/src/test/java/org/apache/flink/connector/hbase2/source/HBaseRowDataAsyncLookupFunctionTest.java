@@ -44,8 +44,7 @@ import static org.apache.flink.table.api.DataTypes.FIELD;
 import static org.apache.flink.table.api.DataTypes.INT;
 import static org.apache.flink.table.api.DataTypes.ROW;
 import static org.apache.flink.table.api.DataTypes.STRING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test suite for {@link HBaseRowDataAsyncLookupFunction}. */
 @RunWith(Parameterized.class)
@@ -81,7 +80,7 @@ public class HBaseRowDataAsyncLookupFunctionTest extends HBaseTestBase {
                     });
         }
         // this verifies lookup calls are async
-        assertTrue(result.size() < rowkeys.length);
+        assertThat(result.size() < rowkeys.length).isTrue();
         latch.await();
         lookupFunction.close();
         List<String> sortResult =
@@ -95,7 +94,7 @@ public class HBaseRowDataAsyncLookupFunctionTest extends HBaseTestBase {
         expected.add("3: +I(3,+I(30),+I(Hello-3,300),+I(3.03,false,Welt-3))");
         expected.add("3: +I(3,+I(30),+I(Hello-3,300),+I(3.03,false,Welt-3))");
         expected.add("4: +I(4,+I(40),+I(null,400),+I(4.04,true,Welt-4))");
-        assertEquals(expected, sortResult);
+        assertThat(sortResult).isEqualTo(expected);
     }
 
     private HBaseRowDataAsyncLookupFunction buildRowDataAsyncLookupFunction() {

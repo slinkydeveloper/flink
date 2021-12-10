@@ -20,7 +20,6 @@ package org.apache.flink.contrib.streaming.state;
 
 import org.apache.flink.runtime.operators.testutils.ExpectedTestException;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,7 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link EmbeddedRocksDBStateBackend} on initialization. */
 @RunWith(PowerMockRunner.class)
@@ -69,7 +69,7 @@ public class RocksDBInitTest {
             // ignored
         }
         File[] files = tempFolder.listFiles();
-        Assert.assertNotNull(files);
-        Assert.assertEquals(0, files.length);
+        assertThat(files).isNotNull();
+        assertThat(files.length).isEqualTo(0);
     }
 }

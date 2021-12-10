@@ -28,14 +28,12 @@ import org.apache.flink.runtime.state.StateSnapshotContextSynchronousImpl;
 import org.apache.flink.runtime.state.memory.MemCheckpointStreamFactory;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.Closeable;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -58,20 +56,20 @@ public class StateSnapshotContextSynchronousImplTest extends TestLogger {
 
     @Test
     public void testMetaData() {
-        assertEquals(42, snapshotContext.getCheckpointId());
-        assertEquals(4711, snapshotContext.getCheckpointTimestamp());
+        assertThat(snapshotContext.getCheckpointId()).isEqualTo(42);
+        assertThat(snapshotContext.getCheckpointTimestamp()).isEqualTo(4711);
     }
 
     @Test
     public void testCreateRawKeyedStateOutput() throws Exception {
         KeyedStateCheckpointOutputStream stream = snapshotContext.getRawKeyedOperatorStateOutput();
-        Assert.assertNotNull(stream);
+        assertThat(stream).isNotNull();
     }
 
     @Test
     public void testCreateRawOperatorStateOutput() throws Exception {
         OperatorStateCheckpointOutputStream stream = snapshotContext.getRawOperatorStateOutput();
-        Assert.assertNotNull(stream);
+        assertThat(stream).isNotNull();
     }
 
     /**
@@ -111,9 +109,9 @@ public class StateSnapshotContextSynchronousImplTest extends TestLogger {
         verify(streamFactory, times(2))
                 .createCheckpointStateOutputStream(CheckpointedStateScope.EXCLUSIVE);
 
-        assertEquals(2, closableRegistry.size());
-        assertTrue(closableRegistry.contains(outputStream1));
-        assertTrue(closableRegistry.contains(outputStream2));
+        assertThat(closableRegistry.size()).isEqualTo(2);
+        assertThat(closableRegistry.contains(outputStream1)).isTrue();
+        assertThat(closableRegistry.contains(outputStream2)).isTrue();
 
         context.getKeyedStateStreamFuture().run();
         context.getOperatorStateStreamFuture().run();
@@ -121,7 +119,7 @@ public class StateSnapshotContextSynchronousImplTest extends TestLogger {
         verify(outputStream1).closeAndGetHandle();
         verify(outputStream2).closeAndGetHandle();
 
-        assertEquals(0, closableRegistry.size());
+        assertThat(closableRegistry.size()).isEqualTo(0);
     }
 
     @Test
@@ -157,16 +155,16 @@ public class StateSnapshotContextSynchronousImplTest extends TestLogger {
         verify(streamFactory, times(2))
                 .createCheckpointStateOutputStream(CheckpointedStateScope.EXCLUSIVE);
 
-        assertEquals(2, closableRegistry.size());
-        assertTrue(closableRegistry.contains(outputStream1));
-        assertTrue(closableRegistry.contains(outputStream2));
+        assertThat(closableRegistry.size()).isEqualTo(2);
+        assertThat(closableRegistry.contains(outputStream1)).isTrue();
+        assertThat(closableRegistry.contains(outputStream2)).isTrue();
 
         context.closeExceptionally();
 
         verify(outputStream1).close();
         verify(outputStream2).close();
 
-        assertEquals(0, closableRegistry.size());
+        assertThat(closableRegistry.size()).isEqualTo(0);
     }
 
     static final class InsightCloseableRegistry extends CloseableRegistry {

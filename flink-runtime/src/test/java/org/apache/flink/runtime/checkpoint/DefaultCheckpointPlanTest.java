@@ -40,9 +40,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.flink.runtime.checkpoint.CheckpointCoordinatorTestingUtils.createSubtaskStateWithUnionListState;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the behavior of the {@link DefaultCheckpointPlan}. */
 public class DefaultCheckpointPlanTest {
@@ -174,12 +172,12 @@ public class DefaultCheckpointPlanTest {
         Map<OperatorID, OperatorState> operatorStates = new HashMap<>();
         checkpointPlan.fulfillFinishedTaskStatus(operatorStates);
 
-        assertEquals(3, operatorStates.size());
-        assertTrue(operatorStates.get(fullyFinishedOperatorId).isFullyFinished());
-        assertTrue(operatorStates.get(finishedOnRestoreOperatorId).isFullyFinished());
+        assertThat(operatorStates.size()).isEqualTo(3);
+        assertThat(operatorStates.get(fullyFinishedOperatorId).isFullyFinished()).isTrue();
+        assertThat(operatorStates.get(finishedOnRestoreOperatorId).isFullyFinished()).isTrue();
         OperatorState operatorState = operatorStates.get(partiallyFinishedOperatorId);
-        assertFalse(operatorState.isFullyFinished());
-        assertTrue(operatorState.getState(0).isFinished());
+        assertThat(operatorState.isFullyFinished()).isFalse();
+        assertThat(operatorState.getState(0).isFinished()).isTrue();
     }
 
     @Test
@@ -210,8 +208,8 @@ public class DefaultCheckpointPlanTest {
         operatorStates.put(finishedOperatorID, operatorState);
 
         checkpointPlan.fulfillFinishedTaskStatus(operatorStates);
-        assertEquals(1, operatorStates.size());
-        assertTrue(operatorStates.get(finishedOperatorID).isFullyFinished());
+        assertThat(operatorStates.size()).isEqualTo(1);
+        assertThat(operatorStates.get(finishedOperatorID).isFullyFinished()).isTrue();
     }
 
     private CheckpointPlan createCheckpointPlan(ExecutionGraph executionGraph) throws Exception {

@@ -42,8 +42,8 @@ import java.util.stream.Collectors;
 
 import static org.apache.flink.connector.kafka.sink.KafkaUtil.createKafkaContainer;
 import static org.apache.flink.util.DockerImageVersions.KAFKA;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
 
 @Testcontainers
@@ -88,7 +88,7 @@ class FlinkKafkaInternalProducerITCase extends TestLogger {
                     reuse.abortTransaction();
                 }
                 assertNumTransactions(i);
-                assertThat(readRecords(TEST_TOPIC).count(), equalTo(i / 2));
+                assertThat(readRecords(TEST_TOPIC).count()).isEqualTo(i / 2);
             }
         }
     }
@@ -98,10 +98,10 @@ class FlinkKafkaInternalProducerITCase extends TestLogger {
                 new KafkaTransactionLog(getProperties())
                         .getTransactions(id -> id.startsWith(TRANSACTION_PREFIX));
         assertThat(
-                transactions.stream()
-                        .map(KafkaTransactionLog.TransactionRecord::getTransactionId)
-                        .collect(Collectors.toSet()),
-                hasSize(numTransactions));
+                        transactions.stream()
+                                .map(KafkaTransactionLog.TransactionRecord::getTransactionId)
+                                .collect(Collectors.toSet()))
+                .satisfies(matching(hasSize(numTransactions)));
     }
 
     private ConsumerRecords<String, String> readRecords(String topic) {

@@ -28,8 +28,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the marshalling of {@link AsynchronousOperationResult}. */
 @RunWith(Parameterized.class)
@@ -72,7 +71,7 @@ public class AsynchronousOperationResultTest
     protected void assertOriginalEqualsToUnmarshalled(
             AsynchronousOperationResult<TriggerId> expected,
             AsynchronousOperationResult<TriggerId> actual) {
-        assertThat(actual.queueStatus().getId(), is(expected.queueStatus().getId()));
-        assertThat(actual.resource(), is(expected.resource()));
+        assertThat(actual.queueStatus().getId()).isEqualTo(expected.queueStatus().getId());
+        assertThat(actual.resource()).isEqualTo(expected.resource());
     }
 }

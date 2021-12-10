@@ -28,8 +28,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the {@link EventSerializer} functionality for serializing {@link CheckpointBarrier
@@ -83,7 +82,7 @@ public class CheckpointSerializationTest {
         final CheckpointBarrier barrierAfterDeserialization =
                 serializeAndDeserializeCheckpointBarrier(barrierBeforeSerialization);
 
-        assertEquals(barrierBeforeSerialization, barrierAfterDeserialization);
+        assertThat(barrierAfterDeserialization).isEqualTo(barrierBeforeSerialization);
     }
 
     private CheckpointBarrier serializeAndDeserializeCheckpointBarrier(
@@ -92,7 +91,7 @@ public class CheckpointSerializationTest {
         final ByteBuffer serialized = EventSerializer.toSerializedEvent(barrierUnderTest);
         final CheckpointBarrier deserialized =
                 (CheckpointBarrier) EventSerializer.fromSerializedEvent(serialized, cl);
-        assertFalse(serialized.hasRemaining());
+        assertThat(serialized.hasRemaining()).isFalse();
         return deserialized;
     }
 }

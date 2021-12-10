@@ -27,7 +27,6 @@ import org.apache.flink.runtime.rpc.RpcService;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.FutureUtils;
 
-import org.hamcrest.core.Is;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -41,8 +40,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests that akka rpc invocation messages are properly serialized and errors reported. */
 public class MessageSerializationTest extends TestLogger {
@@ -90,7 +89,7 @@ public class MessageSerializationTest extends TestLogger {
 
         testGateway.foobar(expected);
 
-        assertThat(linkedBlockingQueue.take(), Is.<Object>is(expected));
+        assertThat(linkedBlockingQueue.take()).isEqualTo(expected);
     }
 
     /**
@@ -136,7 +135,7 @@ public class MessageSerializationTest extends TestLogger {
 
         remoteGateway.foobar(expected);
 
-        assertThat(linkedBlockingQueue.take(), Is.<Object>is(expected));
+        assertThat(linkedBlockingQueue.take()).isEqualTo(expected);
     }
 
     /**

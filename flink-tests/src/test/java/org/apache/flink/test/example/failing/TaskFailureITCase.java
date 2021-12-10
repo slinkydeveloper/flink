@@ -27,12 +27,11 @@ import org.apache.flink.runtime.client.JobExecutionException;
 import org.apache.flink.test.util.JavaProgramTestBase;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 
-import org.junit.Assert;
-
 import java.util.List;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowableWithMessage;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests that both jobs, the failing and the working one, are handled correctly. The first (failing)
@@ -50,16 +49,16 @@ public class TaskFailureITCase extends JavaProgramTestBase {
             executeTask(new FailingTestMapper(), 1);
         } catch (RuntimeException e) { // expected for collection execution
             if (!isCollectionExecution()) {
-                Assert.fail();
+                fail("unknown failure");
             }
             // for collection execution, no restarts. So, exception should be appended with 0.
-            assertTrue(findThrowableWithMessage(e, EXCEPTION_STRING + ":0").isPresent());
+            assertThat(findThrowableWithMessage(e, EXCEPTION_STRING + ":0").isPresent()).isTrue();
         } catch (JobExecutionException e) { // expected for cluster execution
             if (isCollectionExecution()) {
-                Assert.fail();
+                fail("unknown failure");
             }
             // for cluster execution, one restart. So, exception should be appended with 1.
-            assertTrue(findThrowableWithMessage(e, EXCEPTION_STRING + ":1").isPresent());
+            assertThat(findThrowableWithMessage(e, EXCEPTION_STRING + ":1").isPresent()).isTrue();
         }
         // test correct version
         executeTask(new TestMapper(), 0);

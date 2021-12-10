@@ -59,11 +59,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.RunnableFuture;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the unified savepoint format. They verify you can switch a state backend through a
@@ -274,36 +272,36 @@ public abstract class SavepointStateBackendSwitchTestBase {
 
         keyedBackend.setCurrentKey("abc");
         mapState.setCurrentNamespace(namespace1);
-        assertEquals(33L, (long) mapState.get(33L));
-        assertEquals(55L, (long) mapState.get(55L));
-        assertEquals(2, getStateSize(mapState));
+        assertThat((long) mapState.get(33L)).isEqualTo(33L);
+        assertThat((long) mapState.get(55L)).isEqualTo(55L);
+        assertThat(getStateSize(mapState)).isEqualTo(2);
 
         mapState.setCurrentNamespace(namespace2);
-        assertEquals(22L, (long) mapState.get(22L));
-        assertEquals(11L, (long) mapState.get(11L));
-        assertEquals(2, getStateSize(mapState));
+        assertThat((long) mapState.get(22L)).isEqualTo(22L);
+        assertThat((long) mapState.get(11L)).isEqualTo(11L);
+        assertThat(getStateSize(mapState)).isEqualTo(2);
         listState.setCurrentNamespace(namespace2);
-        assertThat(listState.get(), contains(4L, 5L, 6L));
+        assertThat(listState.get()).satisfies(matching(contains(4L, 5L, 6L)));
 
         mapState.setCurrentNamespace(namespace3);
-        assertEquals(44L, (long) mapState.get(44L));
-        assertEquals(1, getStateSize(mapState));
+        assertThat((long) mapState.get(44L)).isEqualTo(44L);
+        assertThat(getStateSize(mapState)).isEqualTo(1);
 
         keyedBackend.setCurrentKey("mno");
         mapState.setCurrentNamespace(namespace3);
-        assertEquals(11L, (long) mapState.get(11L));
-        assertEquals(22L, (long) mapState.get(22L));
-        assertEquals(33L, (long) mapState.get(33L));
-        assertEquals(44L, (long) mapState.get(44L));
-        assertEquals(55L, (long) mapState.get(55L));
-        assertEquals(5, getStateSize(mapState));
+        assertThat((long) mapState.get(11L)).isEqualTo(11L);
+        assertThat((long) mapState.get(22L)).isEqualTo(22L);
+        assertThat((long) mapState.get(33L)).isEqualTo(33L);
+        assertThat((long) mapState.get(44L)).isEqualTo(44L);
+        assertThat((long) mapState.get(55L)).isEqualTo(55L);
+        assertThat(getStateSize(mapState)).isEqualTo(5);
         valueState.setCurrentNamespace(namespace3);
-        assertEquals(1239L, (long) valueState.value());
+        assertThat((long) valueState.value()).isEqualTo(1239L);
         listState.setCurrentNamespace(namespace3);
-        assertThat(listState.get(), contains(1L, 2L, 3L));
+        assertThat(listState.get()).satisfies(matching(contains(1L, 2L, 3L)));
 
         mapState.setCurrentNamespace(namespace4);
-        assertThat(mapState.isEmpty(), is(true));
+        assertThat(mapState.isEmpty()).isEqualTo(true);
 
         KeyGroupedInternalPriorityQueue<TimerHeapInternalTimer<String, Integer>> priorityQueue =
                 keyedBackend.create(
@@ -311,15 +309,12 @@ public abstract class SavepointStateBackendSwitchTestBase {
                         new TimerSerializer<>(
                                 keyedBackend.getKeySerializer(), IntSerializer.INSTANCE));
 
-        assertThat(priorityQueue.size(), equalTo(3));
-        assertThat(
-                priorityQueue.poll(),
-                equalTo(new TimerHeapInternalTimer<>(1234L, "mno", namespace3)));
-        assertThat(
-                priorityQueue.poll(),
-                equalTo(new TimerHeapInternalTimer<>(2345L, "mno", namespace2)));
-        assertThat(
-                priorityQueue.poll(),
-                equalTo(new TimerHeapInternalTimer<>(3456L, "mno", namespace3)));
+        assertThat(priorityQueue.size()).isEqualTo(3);
+        assertThat(priorityQueue.poll())
+                .isEqualTo(new TimerHeapInternalTimer<>(1234L, "mno", namespace3));
+        assertThat(priorityQueue.poll())
+                .isEqualTo(new TimerHeapInternalTimer<>(2345L, "mno", namespace2));
+        assertThat(priorityQueue.poll())
+                .isEqualTo(new TimerHeapInternalTimer<>(3456L, "mno", namespace3));
     }
 }

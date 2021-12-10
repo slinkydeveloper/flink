@@ -19,7 +19,14 @@
 package org.apache.flink.optimizer;
 
 import org.apache.flink.api.common.Plan;
-import org.apache.flink.api.common.functions.*;
+import org.apache.flink.api.common.functions.CoGroupFunction;
+import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.JoinFunction;
+import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.api.common.functions.RichGroupReduceFunction;
+import org.apache.flink.api.common.functions.RichJoinFunction;
+import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.operators.base.JoinOperatorBase.JoinHint;
 import org.apache.flink.api.java.DataSet;
 import org.apache.flink.api.java.ExecutionEnvironment;
@@ -48,7 +55,8 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"serial", "unchecked"})
 public class IterationsCompilerTest extends CompilerTestBase {
@@ -116,22 +124,22 @@ public class IterationsCompilerTest extends CompilerTestBase {
             Plan p = env.createProgramPlan();
             OptimizedPlan op = compileNoStats(p);
 
-            assertEquals(1, op.getDataSinks().size());
-            assertTrue(
-                    op.getDataSinks().iterator().next().getInput().getSource()
-                            instanceof WorksetIterationPlanNode);
+            assertThat(op.getDataSinks().size()).isEqualTo(1);
+            assertThat(op.getDataSinks().iterator().next().getInput().getSource())
+                    .isInstanceOf(WorksetIterationPlanNode.class);
 
             WorksetIterationPlanNode wipn =
                     (WorksetIterationPlanNode)
                             op.getDataSinks().iterator().next().getInput().getSource();
 
-            assertEquals(ShipStrategyType.PARTITION_HASH, wipn.getInput1().getShipStrategy());
+            assertThat(wipn.getInput1().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_HASH);
 
-            assertEquals(TempMode.NONE, wipn.getInput1().getTempMode());
-            assertEquals(TempMode.NONE, wipn.getInput2().getTempMode());
+            assertThat(wipn.getInput1().getTempMode()).isEqualTo(TempMode.NONE);
+            assertThat(wipn.getInput2().getTempMode()).isEqualTo(TempMode.NONE);
 
-            assertEquals(DataExchangeMode.BATCH, wipn.getInput1().getDataExchangeMode());
-            assertEquals(DataExchangeMode.BATCH, wipn.getInput2().getDataExchangeMode());
+            assertThat(wipn.getInput1().getDataExchangeMode()).isEqualTo(DataExchangeMode.BATCH);
+            assertThat(wipn.getInput2().getDataExchangeMode()).isEqualTo(DataExchangeMode.BATCH);
 
             new JobGraphGenerator().compileJobGraph(op);
         } catch (Exception e) {
@@ -160,10 +168,9 @@ public class IterationsCompilerTest extends CompilerTestBase {
             Plan p = env.createProgramPlan();
             OptimizedPlan op = compileNoStats(p);
 
-            assertEquals(1, op.getDataSinks().size());
-            assertTrue(
-                    op.getDataSinks().iterator().next().getInput().getSource()
-                            instanceof WorksetIterationPlanNode);
+            assertThat(op.getDataSinks().size()).isEqualTo(1);
+            assertThat(op.getDataSinks().iterator().next().getInput().getSource())
+                    .isInstanceOf(WorksetIterationPlanNode.class);
 
             WorksetIterationPlanNode wipn =
                     (WorksetIterationPlanNode)
@@ -172,20 +179,20 @@ public class IterationsCompilerTest extends CompilerTestBase {
 
             // the hash partitioning has been pushed out of the delta iteration into the bulk
             // iteration
-            assertEquals(ShipStrategyType.FORWARD, wipn.getInput1().getShipStrategy());
+            assertThat(wipn.getInput1().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
 
             // the input of the root step function is the last operator of the step function
             // since the work has been pushed out of the bulk iteration, it has to guarantee the
             // hash partitioning
             for (Channel c : bipn.getRootOfStepFunction().getInputs()) {
-                assertEquals(ShipStrategyType.PARTITION_HASH, c.getShipStrategy());
+                assertThat(c.getShipStrategy()).isEqualTo(ShipStrategyType.PARTITION_HASH);
             }
 
-            assertEquals(DataExchangeMode.BATCH, wipn.getInput1().getDataExchangeMode());
-            assertEquals(DataExchangeMode.BATCH, wipn.getInput2().getDataExchangeMode());
+            assertThat(wipn.getInput1().getDataExchangeMode()).isEqualTo(DataExchangeMode.BATCH);
+            assertThat(wipn.getInput2().getDataExchangeMode()).isEqualTo(DataExchangeMode.BATCH);
 
-            assertEquals(TempMode.NONE, wipn.getInput1().getTempMode());
-            assertEquals(TempMode.NONE, wipn.getInput2().getTempMode());
+            assertThat(wipn.getInput1().getTempMode()).isEqualTo(TempMode.NONE);
+            assertThat(wipn.getInput2().getTempMode()).isEqualTo(TempMode.NONE);
 
             new JobGraphGenerator().compileJobGraph(op);
         } catch (Exception e) {
@@ -215,22 +222,21 @@ public class IterationsCompilerTest extends CompilerTestBase {
             Plan p = env.createProgramPlan();
             OptimizedPlan op = compileNoStats(p);
 
-            assertEquals(1, op.getDataSinks().size());
-            assertTrue(
-                    op.getDataSinks().iterator().next().getInput().getSource()
-                            instanceof WorksetIterationPlanNode);
+            assertThat(op.getDataSinks().size()).isEqualTo(1);
+            assertThat(op.getDataSinks().iterator().next().getInput().getSource())
+                    .isInstanceOf(WorksetIterationPlanNode.class);
 
             WorksetIterationPlanNode wipn =
                     (WorksetIterationPlanNode)
                             op.getDataSinks().iterator().next().getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, wipn.getInput1().getShipStrategy());
+            assertThat(wipn.getInput1().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
 
-            assertEquals(DataExchangeMode.BATCH, wipn.getInput1().getDataExchangeMode());
-            assertEquals(DataExchangeMode.BATCH, wipn.getInput2().getDataExchangeMode());
+            assertThat(wipn.getInput1().getDataExchangeMode()).isEqualTo(DataExchangeMode.BATCH);
+            assertThat(wipn.getInput2().getDataExchangeMode()).isEqualTo(DataExchangeMode.BATCH);
 
-            assertEquals(TempMode.NONE, wipn.getInput1().getTempMode());
-            assertEquals(TempMode.NONE, wipn.getInput2().getTempMode());
+            assertThat(wipn.getInput1().getTempMode()).isEqualTo(TempMode.NONE);
+            assertThat(wipn.getInput2().getTempMode()).isEqualTo(TempMode.NONE);
 
             new JobGraphGenerator().compileJobGraph(op);
         } catch (Exception e) {
@@ -260,10 +266,9 @@ public class IterationsCompilerTest extends CompilerTestBase {
             Plan p = env.createProgramPlan();
             OptimizedPlan op = compileNoStats(p);
 
-            assertEquals(1, op.getDataSinks().size());
-            assertTrue(
-                    op.getDataSinks().iterator().next().getInput().getSource()
-                            instanceof BulkIterationPlanNode);
+            assertThat(op.getDataSinks().size()).isEqualTo(1);
+            assertThat(op.getDataSinks().iterator().next().getInput().getSource())
+                    .isInstanceOf(BulkIterationPlanNode.class);
 
             BulkIterationPlanNode bipn =
                     (BulkIterationPlanNode)
@@ -271,15 +276,16 @@ public class IterationsCompilerTest extends CompilerTestBase {
 
             // check that work has been pushed out
             for (Channel c : bipn.getPartialSolutionPlanNode().getOutgoingChannels()) {
-                assertEquals(ShipStrategyType.FORWARD, c.getShipStrategy());
+                assertThat(c.getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
             }
 
             // the end of the step function has to produce the necessary properties
             for (Channel c : bipn.getRootOfStepFunction().getInputs()) {
-                assertEquals(ShipStrategyType.PARTITION_HASH, c.getShipStrategy());
+                assertThat(c.getShipStrategy()).isEqualTo(ShipStrategyType.PARTITION_HASH);
             }
 
-            assertEquals(ShipStrategyType.PARTITION_HASH, bipn.getInput().getShipStrategy());
+            assertThat(bipn.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_HASH);
 
             new JobGraphGenerator().compileJobGraph(op);
         } catch (Exception e) {
@@ -310,10 +316,9 @@ public class IterationsCompilerTest extends CompilerTestBase {
             Plan p = env.createProgramPlan();
             OptimizedPlan op = compileNoStats(p);
 
-            assertEquals(1, op.getDataSinks().size());
-            assertTrue(
-                    op.getDataSinks().iterator().next().getInput().getSource()
-                            instanceof BulkIterationPlanNode);
+            assertThat(op.getDataSinks().size()).isEqualTo(1);
+            assertThat(op.getDataSinks().iterator().next().getInput().getSource())
+                    .isInstanceOf(BulkIterationPlanNode.class);
 
             BulkIterationPlanNode bipn =
                     (BulkIterationPlanNode)
@@ -321,10 +326,10 @@ public class IterationsCompilerTest extends CompilerTestBase {
 
             // check that work has not been pushed out
             for (Channel c : bipn.getPartialSolutionPlanNode().getOutgoingChannels()) {
-                assertEquals(ShipStrategyType.PARTITION_HASH, c.getShipStrategy());
+                assertThat(c.getShipStrategy()).isEqualTo(ShipStrategyType.PARTITION_HASH);
             }
 
-            assertEquals(ShipStrategyType.FORWARD, bipn.getInput().getShipStrategy());
+            assertThat(bipn.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
 
             new JobGraphGenerator().compileJobGraph(op);
         } catch (Exception e) {

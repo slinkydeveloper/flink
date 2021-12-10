@@ -43,9 +43,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 
@@ -113,7 +113,7 @@ public class DeclarativeSlotPoolBridgeRequestCompletionTest extends TestLogger {
                             new SimpleAckingTaskManagerGateway(),
                             Collections.singleton(slotOffer));
 
-            assertThat(acceptedSlots, containsInAnyOrder(slotOffer));
+            assertThat(acceptedSlots).satisfies(matching(containsInAnyOrder(slotOffer)));
 
             final FlinkException testingReleaseException =
                     new FlinkException("Testing release exception");
@@ -121,7 +121,7 @@ public class DeclarativeSlotPoolBridgeRequestCompletionTest extends TestLogger {
             // check that the slot requests get completed in sequential order
             for (int i = 0; i < slotRequestIds.size(); i++) {
                 final CompletableFuture<PhysicalSlot> slotRequestFuture = slotRequests.get(i);
-                assertThat(slotRequestFuture.getNow(null), is(not(nullValue())));
+                assertThat(slotRequestFuture.getNow(null)).isEqualTo(not(nullValue()));
                 slotPool.releaseSlot(slotRequestIds.get(i), testingReleaseException);
             }
         }

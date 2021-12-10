@@ -22,15 +22,14 @@ import org.apache.flink.api.common.JobStatus;
 
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JobStatusStoreTest {
 
     @Test
     void initialState() {
         final JobStatusStore store = new JobStatusStore(0);
-        assertThat(store.getState(), is(JobStatus.INITIALIZING));
+        assertThat(store.getState()).isEqualTo(JobStatus.INITIALIZING);
     }
 
     @Test
@@ -40,10 +39,10 @@ class JobStatusStoreTest {
         for (JobStatus jobStatus : JobStatus.values()) {
             switch (jobStatus) {
                 case INITIALIZING:
-                    assertThat(store.getStatusTimestamp(JobStatus.INITIALIZING), is(967823L));
+                    assertThat(store.getStatusTimestamp(JobStatus.INITIALIZING)).isEqualTo(967823L);
                     break;
                 default:
-                    assertThat(store.getStatusTimestamp(jobStatus), is(0L));
+                    assertThat(store.getStatusTimestamp(jobStatus)).isEqualTo(0L);
             }
         }
     }
@@ -53,7 +52,7 @@ class JobStatusStoreTest {
         final JobStatusStore store = new JobStatusStore(0L);
         store.jobStatusChanges(new JobID(), JobStatus.RUNNING, 1L);
 
-        assertThat(store.getState(), is(JobStatus.RUNNING));
+        assertThat(store.getState()).isEqualTo(JobStatus.RUNNING);
     }
 
     @Test
@@ -61,6 +60,6 @@ class JobStatusStoreTest {
         final JobStatusStore store = new JobStatusStore(0L);
         store.jobStatusChanges(new JobID(), JobStatus.RUNNING, 1L);
 
-        assertThat(store.getStatusTimestamp(JobStatus.RUNNING), is(1L));
+        assertThat(store.getStatusTimestamp(JobStatus.RUNNING)).isEqualTo(1L);
     }
 }

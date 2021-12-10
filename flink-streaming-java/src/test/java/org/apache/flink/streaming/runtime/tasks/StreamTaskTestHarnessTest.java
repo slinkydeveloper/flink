@@ -26,8 +26,9 @@ import org.apache.flink.streaming.api.operators.OneInputStreamOperator;
 import org.apache.flink.streaming.api.operators.TwoInputStreamOperator;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link StreamTaskTestHarness}. */
 public class StreamTaskTestHarnessTest {
@@ -43,19 +44,19 @@ public class StreamTaskTestHarnessTest {
 
         try {
             harness.setupOutputForSingletonOperatorChain();
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
         try {
             harness.setupOperatorChain(new OperatorID(), new TestOperator());
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
         try {
             harness.setupOperatorChain(new OperatorID(), new TwoInputTestOperator());
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
@@ -71,19 +72,19 @@ public class StreamTaskTestHarnessTest {
 
         try {
             harness.setupOutputForSingletonOperatorChain();
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
         try {
             harness.setupOperatorChain(new OperatorID(), new TestOperator());
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
         try {
             harness.setupOperatorChain(new OperatorID(), new TwoInputTestOperator());
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
@@ -99,19 +100,19 @@ public class StreamTaskTestHarnessTest {
 
         try {
             harness.setupOutputForSingletonOperatorChain();
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
         try {
             harness.setupOperatorChain(new OperatorID(), new TestOperator());
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }
         try {
             harness.setupOperatorChain(new OperatorID(), new TwoInputTestOperator());
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // expected
         }

@@ -26,7 +26,6 @@ import org.apache.flink.streaming.api.operators.StreamSource;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.util.AbstractStreamOperatorTestHarness;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -35,6 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link StatefulSequenceSource}. */
 public class StatefulSequenceSourceTest {
@@ -166,7 +168,7 @@ public class StatefulSequenceSourceTest {
         runner3.start();
         runner3.join();
 
-        Assert.assertEquals(3, outputCollector.size()); // we have 3 tasks.
+        assertThat(outputCollector.size()).isEqualTo(3); // we have 3 tasks.
 
         // test for at-most-once
         Set<Long> dedupRes = new HashSet<>(Math.abs(maxElement - initElement) + 1);
@@ -175,21 +177,21 @@ public class StatefulSequenceSourceTest {
             List<Long> elements = outputCollector.get(key);
 
             // this tests the correctness of the latches in the test
-            Assert.assertTrue(elements.size() > 0);
+            assertThat(elements.size() > 0).isTrue();
 
             for (Long elem : elements) {
                 if (!dedupRes.add(elem)) {
-                    Assert.fail("Duplicate entry: " + elem);
+                    fail("Duplicate entry: " + elem);
                 }
 
                 if (!expectedOutput.contains(elem)) {
-                    Assert.fail("Unexpected element: " + elem);
+                    fail("Unexpected element: " + elem);
                 }
             }
         }
 
         // test for exactly-once
-        Assert.assertEquals(Math.abs(initElement - maxElement) + 1, dedupRes.size());
+        assertThat(dedupRes.size()).isEqualTo(Math.abs(initElement - maxElement) + 1);
 
         latchToWait1.trigger();
         latchToWait2.trigger();
@@ -230,7 +232,7 @@ public class StatefulSequenceSourceTest {
             this.localOutput = new ArrayList<>();
             List<T> prev = collector.put(name, localOutput);
             if (prev != null) {
-                Assert.fail();
+                fail("unknown failure");
             }
         }
 

@@ -26,9 +26,8 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link PythonConfig}. */
 public class PythonConfigTest {
@@ -36,23 +35,19 @@ public class PythonConfigTest {
     @Test
     public void testDefaultConfigure() {
         PythonConfig pythonConfig = new PythonConfig(new Configuration());
-        assertThat(
-                pythonConfig.getMaxBundleSize(),
-                is(equalTo(PythonOptions.MAX_BUNDLE_SIZE.defaultValue())));
-        assertThat(
-                pythonConfig.getMaxBundleTimeMills(),
-                is(equalTo(PythonOptions.MAX_BUNDLE_TIME_MILLS.defaultValue())));
-        assertThat(
-                pythonConfig.getMaxArrowBatchSize(),
-                is(equalTo(PythonOptions.MAX_ARROW_BATCH_SIZE.defaultValue())));
-        assertThat(pythonConfig.getPythonFilesInfo().isEmpty(), is(true));
-        assertThat(pythonConfig.getPythonRequirementsFileInfo().isPresent(), is(false));
-        assertThat(pythonConfig.getPythonRequirementsCacheDirInfo().isPresent(), is(false));
-        assertThat(pythonConfig.getPythonArchivesInfo().isEmpty(), is(true));
-        assertThat(pythonConfig.getPythonExec(), is("python"));
-        assertThat(
-                pythonConfig.isUsingManagedMemory(),
-                is(equalTo(PythonOptions.USE_MANAGED_MEMORY.defaultValue())));
+        assertThat(pythonConfig.getMaxBundleSize())
+                .isEqualTo(equalTo(PythonOptions.MAX_BUNDLE_SIZE.defaultValue()));
+        assertThat(pythonConfig.getMaxBundleTimeMills())
+                .isEqualTo(equalTo(PythonOptions.MAX_BUNDLE_TIME_MILLS.defaultValue()));
+        assertThat(pythonConfig.getMaxArrowBatchSize())
+                .isEqualTo(equalTo(PythonOptions.MAX_ARROW_BATCH_SIZE.defaultValue()));
+        assertThat(pythonConfig.getPythonFilesInfo().isEmpty()).isEqualTo(true);
+        assertThat(pythonConfig.getPythonRequirementsFileInfo().isPresent()).isEqualTo(false);
+        assertThat(pythonConfig.getPythonRequirementsCacheDirInfo().isPresent()).isEqualTo(false);
+        assertThat(pythonConfig.getPythonArchivesInfo().isEmpty()).isEqualTo(true);
+        assertThat(pythonConfig.getPythonExec()).isEqualTo("python");
+        assertThat(pythonConfig.isUsingManagedMemory())
+                .isEqualTo(equalTo(PythonOptions.USE_MANAGED_MEMORY.defaultValue()));
     }
 
     @Test
@@ -60,7 +55,7 @@ public class PythonConfigTest {
         Configuration config = new Configuration();
         config.set(PythonOptions.MAX_BUNDLE_SIZE, 10);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.getMaxBundleSize(), is(equalTo(10)));
+        assertThat(pythonConfig.getMaxBundleSize()).isEqualTo(equalTo(10));
     }
 
     @Test
@@ -68,7 +63,7 @@ public class PythonConfigTest {
         Configuration config = new Configuration();
         config.set(PythonOptions.MAX_BUNDLE_TIME_MILLS, 10L);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.getMaxBundleTimeMills(), is(equalTo(10L)));
+        assertThat(pythonConfig.getMaxBundleTimeMills()).isEqualTo(equalTo(10L));
     }
 
     @Test
@@ -76,7 +71,7 @@ public class PythonConfigTest {
         Configuration config = new Configuration();
         config.set(PythonOptions.MAX_ARROW_BATCH_SIZE, 10);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.getMaxArrowBatchSize(), is(equalTo(10)));
+        assertThat(pythonConfig.getMaxArrowBatchSize()).isEqualTo(equalTo(10));
     }
 
     @Test
@@ -86,7 +81,7 @@ public class PythonConfigTest {
         pythonFiles.put("python_file_{SHA256}", "file0.py");
         config.set(PythonDependencyUtils.PYTHON_FILES, pythonFiles);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.getPythonFilesInfo(), is(equalTo(pythonFiles)));
+        assertThat(pythonConfig.getPythonFilesInfo()).isEqualTo(equalTo(pythonFiles));
     }
 
     @Test
@@ -98,9 +93,8 @@ public class PythonConfigTest {
         pythonRequirementsFile.put(PythonDependencyUtils.FILE, "python_requirements_file_{SHA256}");
         config.set(PythonDependencyUtils.PYTHON_REQUIREMENTS_FILE, pythonRequirementsFile);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(
-                pythonConfig.getPythonRequirementsFileInfo().get(),
-                is(equalTo("python_requirements_file_{SHA256}")));
+        assertThat(pythonConfig.getPythonRequirementsFileInfo().get())
+                .isEqualTo(equalTo("python_requirements_file_{SHA256}"));
     }
 
     @Test
@@ -113,9 +107,8 @@ public class PythonConfigTest {
                 PythonDependencyUtils.CACHE, "python_requirements_cache_{SHA256}");
         config.set(PythonDependencyUtils.PYTHON_REQUIREMENTS_FILE, pythonRequirementsFile);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(
-                pythonConfig.getPythonRequirementsCacheDirInfo().get(),
-                is(equalTo("python_requirements_cache_{SHA256}")));
+        assertThat(pythonConfig.getPythonRequirementsCacheDirInfo().get())
+                .isEqualTo(equalTo("python_requirements_cache_{SHA256}"));
     }
 
     @Test
@@ -125,7 +118,7 @@ public class PythonConfigTest {
         pythonArchives.put("python_archive_{SHA256}", "file0.zip");
         config.set(PythonDependencyUtils.PYTHON_ARCHIVES, pythonArchives);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.getPythonArchivesInfo(), is(equalTo(pythonArchives)));
+        assertThat(pythonConfig.getPythonArchivesInfo()).isEqualTo(equalTo(pythonArchives));
     }
 
     @Test
@@ -133,7 +126,7 @@ public class PythonConfigTest {
         Configuration config = new Configuration();
         config.set(PythonOptions.PYTHON_EXECUTABLE, "/usr/local/bin/python3");
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.getPythonExec(), is(equalTo("/usr/local/bin/python3")));
+        assertThat(pythonConfig.getPythonExec()).isEqualTo(equalTo("/usr/local/bin/python3"));
     }
 
     @Test
@@ -141,6 +134,6 @@ public class PythonConfigTest {
         Configuration config = new Configuration();
         config.set(PythonOptions.USE_MANAGED_MEMORY, true);
         PythonConfig pythonConfig = new PythonConfig(config);
-        assertThat(pythonConfig.isUsingManagedMemory(), is(equalTo(true)));
+        assertThat(pythonConfig.isUsingManagedMemory()).isEqualTo(equalTo(true));
     }
 }

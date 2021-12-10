@@ -27,8 +27,7 @@ import org.junit.Test;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link PhysicalSlotProviderImpl} using {@link
@@ -49,7 +48,7 @@ public class PhysicalSlotProviderImplWithDefaultSlotSelectionStrategyTest extend
         CompletableFuture<PhysicalSlotRequest.Result> slotFuture =
                 physicalSlotProviderResource.allocateSlot(request);
         PhysicalSlotRequest.Result result = slotFuture.get();
-        assertThat(result.getSlotRequestId(), is(request.getSlotRequestId()));
+        assertThat(result.getSlotRequestId()).isEqualTo(request.getSlotRequestId());
     }
 
     @Test
@@ -58,7 +57,7 @@ public class PhysicalSlotProviderImplWithDefaultSlotSelectionStrategyTest extend
         final CompletableFuture<PhysicalSlotRequest.Result> slotFuture =
                 physicalSlotProviderResource.allocateSlot(
                         physicalSlotProviderResource.createSimpleRequest());
-        assertThat(slotFuture.isDone(), is(false));
+        assertThat(slotFuture.isDone()).isEqualTo(false);
         physicalSlotProviderResource.registerSlotOffersFromNewTaskExecutor(ResourceProfile.ANY);
         slotFuture.get();
     }
@@ -69,10 +68,10 @@ public class PhysicalSlotProviderImplWithDefaultSlotSelectionStrategyTest extend
         DeclarativeSlotPoolBridge slotPool =
                 new DeclarativeSlotPoolBridgeBuilder()
                         .buildAndStart(physicalSlotProviderResource.getMainThreadExecutor());
-        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled(), is(true));
+        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled()).isEqualTo(true);
 
         new PhysicalSlotProviderImpl(
                 LocationPreferenceSlotSelectionStrategy.createDefault(), slotPool);
-        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled(), is(false));
+        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled()).isEqualTo(false);
     }
 }

@@ -44,7 +44,6 @@ import org.apache.flink.util.clock.SystemClock;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -57,15 +56,11 @@ import java.util.Random;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.streaming.runtime.io.checkpointing.UnalignedCheckpointsTest.addSequence;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the behavior of aligned checkpoints. */
 public class AlignedCheckpointsTest {
@@ -159,8 +154,8 @@ public class AlignedCheckpointsTest {
 
     @After
     public void ensureEmpty() throws Exception {
-        assertFalse(inputGate.pollNext().isPresent());
-        assertTrue(inputGate.isFinished());
+        assertThat(inputGate.pollNext().isPresent()).isFalse();
+        assertThat(inputGate.isFinished()).isTrue();
 
         inputGate.close();
     }
@@ -182,10 +177,10 @@ public class AlignedCheckpointsTest {
         inputGate = createCheckpointedInputGate(1, sequence);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
     }
 
     /**
@@ -212,10 +207,10 @@ public class AlignedCheckpointsTest {
         inputGate = createCheckpointedInputGate(4, sequence);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
     }
 
     /**
@@ -249,7 +244,7 @@ public class AlignedCheckpointsTest {
         handler.setNextExpectedCheckpointId(1L);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -308,7 +303,7 @@ public class AlignedCheckpointsTest {
         check(sequence[0], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[1], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[2], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(1L, handler.getNextExpectedCheckpointId());
+        assertThat(handler.getNextExpectedCheckpointId()).isEqualTo(1L);
 
         long startTs = System.nanoTime();
 
@@ -317,9 +312,9 @@ public class AlignedCheckpointsTest {
         check(sequence[4], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(2L, handler.getNextExpectedCheckpointId());
+        assertThat(handler.getNextExpectedCheckpointId()).isEqualTo(2L);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // pre checkpoint 2
         check(sequence[7], inputGate.pollNext().get(), PAGE_SIZE);
@@ -327,16 +322,16 @@ public class AlignedCheckpointsTest {
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[10], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[11], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(2L, handler.getNextExpectedCheckpointId());
+        assertThat(handler.getNextExpectedCheckpointId()).isEqualTo(2L);
 
         // checkpoint 2 barriers come together
         startTs = System.nanoTime();
         check(sequence[12], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[13], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[14], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(3L, handler.getNextExpectedCheckpointId());
+        assertThat(handler.getNextExpectedCheckpointId()).isEqualTo(3L);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[15], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[16], inputGate.pollNext().get(), PAGE_SIZE);
@@ -347,15 +342,15 @@ public class AlignedCheckpointsTest {
         check(sequence[19], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[20], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[21], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(4L, handler.getNextExpectedCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(handler.getNextExpectedCheckpointId()).isEqualTo(4L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // checkpoint 4
         check(sequence[22], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[23], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[24], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(5L, handler.getNextExpectedCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(handler.getNextExpectedCheckpointId()).isEqualTo(5L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // remaining data
         check(sequence[25], inputGate.pollNext().get(), PAGE_SIZE);
@@ -412,49 +407,51 @@ public class AlignedCheckpointsTest {
 
         // checkpoint 1
         check(sequence[3], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(1L, inputGate.getLatestCheckpointId());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(1L);
         check(sequence[4], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[7], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[8], inputGate.pollNext().get(), PAGE_SIZE);
 
         // alignment of checkpoint 2
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(2L, inputGate.getLatestCheckpointId());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(2L);
         check(sequence[10], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[11], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[12], inputGate.pollNext().get(), PAGE_SIZE);
 
         // checkpoint 2 aborted, checkpoint 3 started
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(0, 1));
+        assertThat(mockInputGate.getBlockedChannels())
+                .satisfies(matching(containsInAnyOrder(0, 1)));
         check(sequence[13], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(3L, inputGate.getLatestCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(2));
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(3L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(containsInAnyOrder(2)));
         check(sequence[14], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[15], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[16], inputGate.pollNext().get(), PAGE_SIZE);
 
         // checkpoint 3 aborted, checkpoint 4 started
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(0, 2));
+        assertThat(mockInputGate.getBlockedChannels())
+                .satisfies(matching(containsInAnyOrder(0, 2)));
         check(sequence[17], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(4L, inputGate.getLatestCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(1));
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(4L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(containsInAnyOrder(1)));
         check(sequence[18], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[19], inputGate.pollNext().get(), PAGE_SIZE);
 
         // checkpoint 4 aborted (due to end of partition)
         check(sequence[20], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
         check(sequence[21], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[22], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[23], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[24], inputGate.pollNext().get(), PAGE_SIZE);
 
-        assertEquals(1, handler.getTriggeredCheckpointCounter());
-        assertEquals(3, handler.getAbortedCheckpointCounter());
+        assertThat(handler.getTriggeredCheckpointCounter()).isEqualTo(1);
+        assertThat(handler.getAbortedCheckpointCounter()).isEqualTo(3);
     }
 
     @Test
@@ -505,25 +502,20 @@ public class AlignedCheckpointsTest {
         long startDelay = System.currentTimeMillis() - checkpointBarrierCreation;
         long alignmentDuration = System.nanoTime() - alignmentStartNanos;
 
-        assertEquals(checkpointId, inputGate.getCheckpointBarrierHandler().getLatestCheckpointId());
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                Matchers.greaterThanOrEqualTo(sleepTime));
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                Matchers.lessThanOrEqualTo(startDelay));
+        assertThat(inputGate.getCheckpointBarrierHandler().getLatestCheckpointId())
+                .isEqualTo(checkpointId);
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isGreaterThanOrEqualTo(sleepTime);
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isLessThanOrEqualTo(startDelay);
 
-        assertTrue(handler.lastAlignmentDurationNanos.isDone());
-        assertThat(
-                handler.lastAlignmentDurationNanos.get() / 1_000_000,
-                Matchers.greaterThanOrEqualTo(sleepTime));
-        assertThat(
-                handler.lastAlignmentDurationNanos.get(),
-                Matchers.lessThanOrEqualTo(alignmentDuration));
+        assertThat(handler.lastAlignmentDurationNanos.isDone()).isTrue();
+        assertThat(handler.lastAlignmentDurationNanos.get() / 1_000_000)
+                .isGreaterThanOrEqualTo(sleepTime);
+        assertThat(handler.lastAlignmentDurationNanos.get()).isLessThanOrEqualTo(alignmentDuration);
 
-        assertTrue(handler.lastBytesProcessedDuringAlignment.isDone());
-        assertThat(
-                handler.lastBytesProcessedDuringAlignment.get(), Matchers.equalTo(3L * bufferSize));
+        assertThat(handler.lastBytesProcessedDuringAlignment.isDone()).isTrue();
+        assertThat(handler.lastBytesProcessedDuringAlignment.get()).isEqualTo(3L * bufferSize);
     }
 
     @Test
@@ -539,10 +531,10 @@ public class AlignedCheckpointsTest {
         inputGate = createCheckpointedInputGate(2, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
     }
 
     @Test
@@ -587,14 +579,14 @@ public class AlignedCheckpointsTest {
         // checkpoint 2 alignment
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(2L, inputGate.getLatestCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(2L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // checkpoint 3 alignment
         check(sequence[7], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[8], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(3L, inputGate.getLatestCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(3L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // after checkpoint 3
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
@@ -605,8 +597,8 @@ public class AlignedCheckpointsTest {
 
         // checkpoint 4 alignment
         check(sequence[14], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(4L, inputGate.getLatestCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(4L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[15], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[16], inputGate.pollNext().get(), PAGE_SIZE);
@@ -644,22 +636,22 @@ public class AlignedCheckpointsTest {
         check(sequence[0], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[1], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[2], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[3], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[4], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(1L, inputGate.getLatestCheckpointId());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(1L);
 
         // alignment of second checkpoint
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(2L, inputGate.getLatestCheckpointId());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(2L);
         check(sequence[7], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[8], inputGate.pollNext().get(), PAGE_SIZE);
 
         // first end-of-partition encountered: checkpoint will not be completed
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[10], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[11], inputGate.pollNext().get(), PAGE_SIZE);
@@ -686,44 +678,41 @@ public class AlignedCheckpointsTest {
         toNotify.setNextExpectedCheckpointId(1);
         check(sequence[0], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[1], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         toNotify.setNextExpectedCheckpointId(2);
         check(sequence[2], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[3], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         toNotify.setNextExpectedCheckpointId(5);
         check(sequence[4], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[5], inputGate.pollNext().get(), 0);
-        assertEquals(4L, inputGate.getLatestCheckpointId());
-        assertEquals(4, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(4L);
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(4);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(5L, inputGate.getLatestCheckpointId());
-        assertEquals(4, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(5L);
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(4);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[7], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[8], inputGate.pollNext().get(), 0);
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(6L, inputGate.getLatestCheckpointId());
-        assertEquals(6, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
+        assertThat(inputGate.getLatestCheckpointId()).isEqualTo(6L);
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(6);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
 
-        assertEquals(3, toNotify.getTriggeredCheckpointCounter());
-        assertEquals(2, toNotify.getAbortedCheckpointCounter());
+        assertThat(toNotify.getTriggeredCheckpointCounter()).isEqualTo(3);
+        assertThat(toNotify.getAbortedCheckpointCounter()).isEqualTo(2);
     }
 
     @Test
@@ -792,31 +781,32 @@ public class AlignedCheckpointsTest {
         startTs = System.nanoTime();
         toNotify.setNextExpectedCheckpointId(1);
         check(sequence[3], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(1));
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(containsInAnyOrder(1)));
         check(sequence[4], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(1, 2));
+        assertThat(mockInputGate.getBlockedChannels())
+                .satisfies(matching(containsInAnyOrder(1, 2)));
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         check(sequence[7], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[8], inputGate.pollNext().get(), PAGE_SIZE);
 
         // alignment of second checkpoint
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(0));
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(containsInAnyOrder(0)));
         check(sequence[10], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(0, 2));
+        assertThat(mockInputGate.getBlockedChannels())
+                .satisfies(matching(containsInAnyOrder(0, 2)));
         check(sequence[11], inputGate.pollNext().get(), PAGE_SIZE);
 
         // canceled checkpoint on last barrier
         check(sequence[12], inputGate.pollNext().get(), 0);
-        assertEquals(2, toNotify.getLastCanceledCheckpointId());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(2);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
         check(sequence[13], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[14], inputGate.pollNext().get(), PAGE_SIZE);
 
@@ -827,22 +817,21 @@ public class AlignedCheckpointsTest {
         check(sequence[16], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[17], inputGate.pollNext().get(), PAGE_SIZE);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
         check(sequence[18], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[19], inputGate.pollNext().get(), PAGE_SIZE);
 
         // this checkpoint gets immediately canceled
         check(sequence[20], inputGate.pollNext().get(), 0);
-        assertEquals(4, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(4);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
         check(sequence[21], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
         check(sequence[22], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[23], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // some buffers
         check(sequence[24], inputGate.pollNext().get(), PAGE_SIZE);
@@ -856,24 +845,23 @@ public class AlignedCheckpointsTest {
         check(sequence[28], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[29], inputGate.pollNext().get(), PAGE_SIZE);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
         check(sequence[30], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[31], inputGate.pollNext().get(), PAGE_SIZE);
 
         // this checkpoint gets immediately canceled
         check(sequence[32], inputGate.pollNext().get(), 0);
         check(sequence[33], inputGate.pollNext().get(), 0);
-        assertEquals(6, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
-        assertEquals(0L, inputGate.getAlignmentDurationNanos());
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(6);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
+        assertThat(inputGate.getAlignmentDurationNanos()).isEqualTo(0L);
         check(sequence[34], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
         check(sequence[35], inputGate.pollNext().get(), PAGE_SIZE);
 
-        assertEquals(3, toNotify.getTriggeredCheckpointCounter());
-        assertEquals(3, toNotify.getAbortedCheckpointCounter());
+        assertThat(toNotify.getTriggeredCheckpointCounter()).isEqualTo(3);
+        assertThat(toNotify.getAbortedCheckpointCounter()).isEqualTo(3);
     }
 
     /**
@@ -934,11 +922,10 @@ public class AlignedCheckpointsTest {
         // cancelled by cancellation barrier
         check(sequence[4], inputGate.pollNext().get(), 0);
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(1, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER,
-                toNotify.getCheckpointFailureReason());
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(1);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_ON_CANCELLATION_BARRIER);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // the next checkpoint alignment
         startTs = System.nanoTime();
@@ -948,7 +935,7 @@ public class AlignedCheckpointsTest {
 
         // ignored barrier and unblock channel directly
         check(sequence[9], inputGate.pollNext().get(), PAGE_SIZE);
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(1));
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(containsInAnyOrder(1)));
         check(sequence[10], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[11], inputGate.pollNext().get(), PAGE_SIZE);
 
@@ -957,15 +944,15 @@ public class AlignedCheckpointsTest {
         check(sequence[12], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[13], inputGate.pollNext().get(), PAGE_SIZE);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // trailing data
         check(sequence[14], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[15], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[16], inputGate.pollNext().get(), PAGE_SIZE);
 
-        assertEquals(1, toNotify.getTriggeredCheckpointCounter());
-        assertEquals(1, toNotify.getAbortedCheckpointCounter());
+        assertThat(toNotify.getTriggeredCheckpointCounter()).isEqualTo(1);
+        assertThat(toNotify.getAbortedCheckpointCounter()).isEqualTo(1);
     }
 
     /**
@@ -1020,13 +1007,13 @@ public class AlignedCheckpointsTest {
 
         // future barrier aborts checkpoint
         startTs = System.nanoTime();
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(0, 1));
+        assertThat(mockInputGate.getBlockedChannels())
+                .satisfies(matching(containsInAnyOrder(0, 1)));
         check(sequence[4], inputGate.pollNext().get(), PAGE_SIZE);
-        assertEquals(3, toNotify.getLastCanceledCheckpointId());
-        assertEquals(
-                CheckpointFailureReason.CHECKPOINT_DECLINED_SUBSUMED,
-                toNotify.getCheckpointFailureReason());
-        assertThat(mockInputGate.getBlockedChannels(), containsInAnyOrder(2));
+        assertThat(toNotify.getLastCanceledCheckpointId()).isEqualTo(3);
+        assertThat(toNotify.getCheckpointFailureReason())
+                .isEqualTo(CheckpointFailureReason.CHECKPOINT_DECLINED_SUBSUMED);
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(containsInAnyOrder(2)));
         check(sequence[5], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[6], inputGate.pollNext().get(), PAGE_SIZE);
 
@@ -1040,7 +1027,7 @@ public class AlignedCheckpointsTest {
         check(sequence[10], inputGate.pollNext().get(), PAGE_SIZE);
         check(sequence[11], inputGate.pollNext().get(), PAGE_SIZE);
         validateAlignmentTime(startTs, inputGate);
-        assertThat(mockInputGate.getBlockedChannels(), empty());
+        assertThat(mockInputGate.getBlockedChannels()).satisfies(matching(empty()));
 
         // remaining data
         check(sequence[12], inputGate.pollNext().get(), PAGE_SIZE);
@@ -1048,8 +1035,8 @@ public class AlignedCheckpointsTest {
         check(sequence[14], inputGate.pollNext().get(), PAGE_SIZE);
 
         // check overall notifications
-        assertEquals(1, toNotify.getTriggeredCheckpointCounter());
-        assertEquals(1, toNotify.getAbortedCheckpointCounter());
+        assertThat(toNotify.getTriggeredCheckpointCounter()).isEqualTo(1);
+        assertThat(toNotify.getAbortedCheckpointCounter()).isEqualTo(1);
     }
 
     @Test
@@ -1065,9 +1052,9 @@ public class AlignedCheckpointsTest {
             check(bufferOrEvent, inputGate.pollNext().get(), PAGE_SIZE);
         }
 
-        assertThat(validator.triggeredCheckpoints, contains(1L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
-        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending(), equalTo(false));
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(1L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
+        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending()).isEqualTo(false);
     }
 
     @Test
@@ -1087,13 +1074,13 @@ public class AlignedCheckpointsTest {
         }
 
         // Here the checkpoint should not be triggered.
-        assertEquals(0, validator.getTriggeredCheckpointCounter());
-        assertEquals(0, validator.getAbortedCheckpointCounter());
+        assertThat(validator.getTriggeredCheckpointCounter()).isEqualTo(0);
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
 
         // The last barrier aligned the pending checkpoint 2.
-        assertEquals(sequence[3], inputGate.pollNext().get());
-        assertThat(validator.triggeredCheckpoints, contains(2L));
-        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending(), equalTo(false));
+        assertThat(inputGate.pollNext().get()).isEqualTo(sequence[3]);
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(2L)));
+        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending()).isEqualTo(false);
     }
 
     @Test
@@ -1113,9 +1100,9 @@ public class AlignedCheckpointsTest {
             check(bufferOrEvent, inputGate.pollNext().get(), PAGE_SIZE);
         }
 
-        assertThat(validator.triggeredCheckpoints, contains(6L, 7L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
-        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending(), equalTo(false));
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(6L, 7L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
+        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending()).isEqualTo(false);
     }
 
     // ------------------------------------------------------------------------
@@ -1156,21 +1143,21 @@ public class AlignedCheckpointsTest {
     }
 
     private static void check(BufferOrEvent expected, BufferOrEvent present, int pageSize) {
-        assertNotNull(expected);
-        assertNotNull(present);
-        assertEquals(expected.isBuffer(), present.isBuffer());
+        assertThat(expected).isNotNull();
+        assertThat(present).isNotNull();
+        assertThat(present.isBuffer()).isEqualTo(expected.isBuffer());
 
         if (expected.isBuffer()) {
-            assertEquals(
-                    expected.getBuffer().getMaxCapacity(), present.getBuffer().getMaxCapacity());
-            assertEquals(expected.getBuffer().getSize(), present.getBuffer().getSize());
+            assertThat(present.getBuffer().getMaxCapacity())
+                    .isEqualTo(expected.getBuffer().getMaxCapacity());
+            assertThat(present.getBuffer().getSize()).isEqualTo(expected.getBuffer().getSize());
             MemorySegment expectedMem = expected.getBuffer().getMemorySegment();
             MemorySegment presentMem = present.getBuffer().getMemorySegment();
-            assertTrue(
-                    "memory contents differs",
-                    expectedMem.compare(presentMem, 0, 0, pageSize) == 0);
+            assertThat(expectedMem.compare(presentMem, 0, 0, pageSize) == 0)
+                    .as("memory contents differs")
+                    .isTrue();
         } else {
-            assertEquals(expected.getEvent(), present.getEvent());
+            assertThat(present.getEvent()).isEqualTo(expected.getEvent());
         }
     }
 
@@ -1178,16 +1165,13 @@ public class AlignedCheckpointsTest {
             long alignmentStartTimestamp, CheckpointedInputGate inputGate) {
         long elapsedAlignment = System.nanoTime() - alignmentStartTimestamp;
         long elapsedTotalTime = System.nanoTime() - testStartTimeNanos;
-        assertThat(
-                inputGate.getAlignmentDurationNanos(),
-                Matchers.lessThanOrEqualTo(elapsedAlignment));
+        assertThat(inputGate.getAlignmentDurationNanos()).isLessThanOrEqualTo(elapsedAlignment);
 
         // Barrier lag is calculated with System.currentTimeMillis(), so we need a tolerance of 1ms
         // when comparing to time elapsed via System.nanoTime()
         long tolerance = 1_000_000;
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos(),
-                Matchers.lessThanOrEqualTo(elapsedTotalTime + tolerance));
+        assertThat(inputGate.getCheckpointStartDelayNanos())
+                .isLessThanOrEqualTo(elapsedTotalTime + tolerance);
     }
 
     // ------------------------------------------------------------------------

@@ -34,10 +34,8 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class JsonGeneratorTest {
 
@@ -93,33 +91,34 @@ public class JsonGeneratorTest {
                             sink2);
 
             String plan = JsonPlanGenerator.generatePlan(jg);
-            assertNotNull(plan);
+            assertThat(plan).isNotNull();
 
             // validate the produced JSON
             ObjectMapper m = new ObjectMapper();
             JsonNode rootNode = m.readTree(plan);
 
             // core fields
-            assertEquals(new TextNode(jg.getJobID().toString()), rootNode.get("jid"));
-            assertEquals(new TextNode(jg.getName()), rootNode.get("name"));
-            assertEquals(new TextNode(jg.getJobType().name()), rootNode.get("type"));
+            assertThat(rootNode.get("jid")).isEqualTo(new TextNode(jg.getJobID().toString()));
+            assertThat(rootNode.get("name")).isEqualTo(new TextNode(jg.getName()));
+            assertThat(rootNode.get("type")).isEqualTo(new TextNode(jg.getJobType().name()));
 
-            assertTrue(rootNode.path("nodes").isArray());
+            assertThat(rootNode.path("nodes").isArray()).isTrue();
 
             for (Iterator<JsonNode> iter = rootNode.path("nodes").elements(); iter.hasNext(); ) {
                 JsonNode next = iter.next();
 
                 JsonNode idNode = next.get("id");
-                assertNotNull(idNode);
-                assertTrue(idNode.isTextual());
+                assertThat(idNode).isNotNull();
+                assertThat(idNode.isTextual()).isTrue();
                 checkVertexExists(idNode.asText(), jg);
 
                 String description = next.get("description").asText();
-                assertTrue(
-                        description.startsWith("source")
-                                || description.startsWith("sink")
-                                || description.startsWith("intermediate")
-                                || description.startsWith("join"));
+                assertThat(
+                                description.startsWith("source")
+                                        || description.startsWith("sink")
+                                        || description.startsWith("intermediate")
+                                        || description.startsWith("join"))
+                        .isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -85,10 +85,9 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests the resource cleanup by the {@link Dispatcher}. */
 public class DispatcherResourceCleanupTest extends TestLogger {
@@ -173,10 +172,10 @@ public class DispatcherResourceCleanupTest extends TestLogger {
         jobGraph.addUserJarBlobKey(permanentBlobKey);
         blobFile = blobServer.getStorageLocation(jobId, permanentBlobKey);
 
-        assertThat(blobFile.exists(), is(true));
+        assertThat(blobFile.exists()).isEqualTo(true);
 
         // verify that we stored the blob also in the BlobStore
-        assertThat(storedHABlobFuture.get(), equalTo(permanentBlobKey));
+        assertThat(storedHABlobFuture.get()).isEqualTo(permanentBlobKey);
     }
 
     private TestingJobManagerRunnerFactory startDispatcherAndSubmitJob() throws Exception {
@@ -253,12 +252,12 @@ public class DispatcherResourceCleanupTest extends TestLogger {
 
     private void assertThatHABlobsHaveBeenRemoved()
             throws InterruptedException, ExecutionException {
-        assertThat(cleanupJobFuture.get(), equalTo(jobId));
+        assertThat(cleanupJobFuture.get()).isEqualTo(jobId);
 
         // verify that we also cleared the BlobStore
-        assertThat(deleteAllHABlobsFuture.get(), equalTo(jobId));
+        assertThat(deleteAllHABlobsFuture.get()).isEqualTo(jobId);
 
-        assertThat(blobFile.exists(), is(false));
+        assertThat(blobFile.exists()).isEqualTo(false);
     }
 
     private void submitJob() throws InterruptedException, ExecutionException {
@@ -277,9 +276,9 @@ public class DispatcherResourceCleanupTest extends TestLogger {
                 jobManagerRunnerFactory.takeCreatedJobManagerRunner();
         suspendJob(testingJobManagerRunner);
 
-        assertThat(cleanupJobFuture.get(), equalTo(jobId));
+        assertThat(cleanupJobFuture.get()).isEqualTo(jobId);
 
-        assertThat(blobFile.exists(), is(false));
+        assertThat(blobFile.exists()).isEqualTo(false);
 
         // verify that we did not clear the BlobStore
         try {
@@ -289,7 +288,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
             // expected
         }
 
-        assertThat(deleteAllHABlobsFuture.isDone(), is(false));
+        assertThat(deleteAllHABlobsFuture.isDone()).isEqualTo(false);
     }
 
     /** Tests that the uploaded blobs are being cleaned up in case of a job submission failure. */
@@ -303,7 +302,8 @@ public class DispatcherResourceCleanupTest extends TestLogger {
             submissionFuture.get();
             fail("Job submission was expected to fail.");
         } catch (ExecutionException ee) {
-            assertThat(ee, FlinkMatchers.containsCause(JobSubmissionException.class));
+            assertThat(ee)
+                    .satisfies(matching(FlinkMatchers.containsCause(JobSubmissionException.class)));
         }
 
         assertThatHABlobsHaveBeenRemoved();
@@ -315,9 +315,9 @@ public class DispatcherResourceCleanupTest extends TestLogger {
 
         dispatcher.closeAsync().get();
 
-        assertThat(cleanupJobFuture.get(), equalTo(jobId));
+        assertThat(cleanupJobFuture.get()).isEqualTo(jobId);
 
-        assertThat(blobFile.exists(), is(false));
+        assertThat(blobFile.exists()).isEqualTo(false);
 
         // verify that we did not clear the BlobStore
         try {
@@ -327,7 +327,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
             // expected
         }
 
-        assertThat(deleteAllHABlobsFuture.isDone(), is(false));
+        assertThat(deleteAllHABlobsFuture.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -359,8 +359,8 @@ public class DispatcherResourceCleanupTest extends TestLogger {
         // check that no exceptions have been thrown
         dispatcherTerminationFuture.get();
 
-        assertThat(cleanupJobFuture.get(), is(jobId));
-        assertThat(deleteAllHABlobsFuture.get(), is(jobId));
+        assertThat(cleanupJobFuture.get()).isEqualTo(jobId);
+        assertThat(deleteAllHABlobsFuture.get()).isEqualTo(jobId);
     }
 
     /**
@@ -373,7 +373,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
                 startDispatcherAndSubmitJob();
 
         runningJobsRegistry.setJobRunning(jobId);
-        assertThat(runningJobsRegistry.contains(jobId), is(true));
+        assertThat(runningJobsRegistry.contains(jobId)).isEqualTo(true);
 
         final TestingJobManagerRunner testingJobManagerRunner =
                 jobManagerRunnerFactory.takeCreatedJobManagerRunner();
@@ -387,7 +387,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
         // wait for the clearing
         clearedJobLatch.await();
 
-        assertThat(runningJobsRegistry.contains(jobId), is(false));
+        assertThat(runningJobsRegistry.contains(jobId)).isEqualTo(false);
     }
 
     /**
@@ -423,7 +423,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
             testingJobManagerRunner.completeTerminationFuture();
         }
 
-        assertThat(submissionFuture.get(), equalTo(Acknowledge.get()));
+        assertThat(submissionFuture.get()).isEqualTo(Acknowledge.get());
     }
 
     /**
@@ -444,9 +444,10 @@ public class DispatcherResourceCleanupTest extends TestLogger {
                 fail("Expected a DuplicateJobSubmissionFailure.");
             } catch (ExecutionException ee) {
                 assertThat(
-                        ExceptionUtils.findThrowable(ee, DuplicateJobSubmissionException.class)
-                                .isPresent(),
-                        is(true));
+                                ExceptionUtils.findThrowable(
+                                                ee, DuplicateJobSubmissionException.class)
+                                        .isPresent())
+                        .isEqualTo(true);
             }
 
             assertThatHABlobsHaveNotBeenRemoved();
@@ -464,7 +465,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
                 jobManagerRunnerFactory.takeCreatedJobManagerRunner();
         finishJob(jobManagerRunner);
         JobID jobID = cleanupJobHADataFuture.get(2000, TimeUnit.MILLISECONDS);
-        assertThat(jobID, is(this.jobId));
+        assertThat(jobID).isEqualTo(this.jobId);
     }
 
     @Test
@@ -479,7 +480,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
         } catch (TimeoutException ignored) {
             // expected
         }
-        assertThat(cleanupJobHADataFuture.isDone(), is(false));
+        assertThat(cleanupJobHADataFuture.isDone()).isEqualTo(false);
     }
 
     private void finishJob(TestingJobManagerRunner takeCreatedJobManagerRunner) {
@@ -501,9 +502,9 @@ public class DispatcherResourceCleanupTest extends TestLogger {
     }
 
     private void assertThatHABlobsHaveNotBeenRemoved() {
-        assertThat(cleanupJobFuture.isDone(), is(false));
-        assertThat(deleteAllHABlobsFuture.isDone(), is(false));
-        assertThat(blobFile.exists(), is(true));
+        assertThat(cleanupJobFuture.isDone()).isEqualTo(false);
+        assertThat(deleteAllHABlobsFuture.isDone()).isEqualTo(false);
+        assertThat(blobFile.exists()).isEqualTo(true);
     }
 
     @Test
@@ -515,7 +516,7 @@ public class DispatcherResourceCleanupTest extends TestLogger {
 
         final TestingJobManagerRunner jobManagerRunner =
                 jobManagerRunnerFactory.takeCreatedJobManagerRunner();
-        assertThat(jobManagerRunner.getTerminationFuture().isDone(), is(true));
+        assertThat(jobManagerRunner.getTerminationFuture().isDone()).isEqualTo(true);
     }
 
     /** Tests that terminating the Dispatcher will wait for all JobMasters to be terminated. */
@@ -615,8 +616,8 @@ public class DispatcherResourceCleanupTest extends TestLogger {
                 jobManagerRunnerFactory.takeCreatedJobManagerRunner();
         testingJobManagerRunner.completeResultFuture(new ExecutionGraphInfo(executionGraph));
 
-        assertThat(cleanupJobFuture.get(), equalTo(jobId));
-        assertThat(deleteAllHABlobsFuture.isDone(), is(false));
+        assertThat(cleanupJobFuture.get()).isEqualTo(jobId);
+        assertThat(deleteAllHABlobsFuture.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -634,8 +635,8 @@ public class DispatcherResourceCleanupTest extends TestLogger {
                 jobManagerRunnerFactory.takeCreatedJobManagerRunner();
         testingJobManagerRunner.completeResultFuture(new ExecutionGraphInfo(executionGraph));
 
-        assertThat(cleanupJobFuture.get(), equalTo(jobId));
-        assertThat(deleteAllHABlobsFuture.get(), equalTo(jobId));
+        assertThat(cleanupJobFuture.get()).isEqualTo(jobId);
+        assertThat(deleteAllHABlobsFuture.get()).isEqualTo(jobId);
     }
 
     private static final class TestingBlobServer extends BlobServer {

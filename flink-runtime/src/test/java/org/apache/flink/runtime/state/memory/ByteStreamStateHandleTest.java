@@ -24,8 +24,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link ByteStreamStateHandle}. */
 public class ByteStreamStateHandleTest {
@@ -40,14 +40,14 @@ public class ByteStreamStateHandleTest {
             FSDataInputStream in = handle.openInputStream();
             in.seek(i);
 
-            assertEquals(i, (int) in.getPos());
+            assertThat((int) in.getPos()).isEqualTo(i);
 
             if (i < data.length) {
-                assertEquals((int) data[i], in.read());
-                assertEquals(i + 1, (int) in.getPos());
+                assertThat(in.read()).isEqualTo((int) data[i]);
+                assertThat((int) in.getPos()).isEqualTo(i + 1);
             } else {
-                assertEquals(-1, in.read());
-                assertEquals(i, (int) in.getPos());
+                assertThat(in.read()).isEqualTo(-1);
+                assertThat((int) in.getPos()).isEqualTo(i);
             }
         }
 
@@ -56,11 +56,11 @@ public class ByteStreamStateHandleTest {
         in.seek(data.length);
 
         // read multiple times, should not affect anything
-        assertEquals(-1, in.read());
-        assertEquals(-1, in.read());
-        assertEquals(-1, in.read());
+        assertThat(in.read()).isEqualTo(-1);
+        assertThat(in.read()).isEqualTo(-1);
+        assertThat(in.read()).isEqualTo(-1);
 
-        assertEquals(data.length, (int) in.getPos());
+        assertThat((int) in.getPos()).isEqualTo(data.length);
     }
 
     @Test
@@ -110,14 +110,14 @@ public class ByteStreamStateHandleTest {
                 final byte[] target = new byte[targetLen];
                 final int read = in.read(target, targetLen - num, num);
 
-                assertEquals(Math.min(num, data.length - start), read);
+                assertThat(read).isEqualTo(Math.min(num, data.length - start));
                 for (int i = 0; i < read; i++) {
-                    assertEquals(data[start + i], target[targetLen - num + i]);
+                    assertThat(target[targetLen - num + i]).isEqualTo(data[start + i]);
                 }
 
                 int newPos = start + read;
-                assertEquals(newPos, (int) in.getPos());
-                assertEquals(newPos < data.length ? data[newPos] : -1, in.read());
+                assertThat((int) in.getPos()).isEqualTo(newPos);
+                assertThat(in.read()).isEqualTo(newPos < data.length ? data[newPos] : -1);
             }
         }
     }

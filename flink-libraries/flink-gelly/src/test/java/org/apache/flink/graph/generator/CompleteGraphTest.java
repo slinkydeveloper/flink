@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CompleteGraph}. */
 public class CompleteGraphTest extends GraphGeneratorTestBase {
@@ -50,18 +50,18 @@ public class CompleteGraphTest extends GraphGeneratorTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 new CompleteGraph(env, vertexCount).generate();
 
-        assertEquals(vertexCount, graph.numberOfVertices());
-        assertEquals(vertexCount * (vertexCount - 1), graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(vertexCount);
+        assertThat(graph.numberOfEdges()).isEqualTo(vertexCount * (vertexCount - 1));
 
         long minInDegree = graph.inDegrees().min(1).collect().get(0).f1.getValue();
         long minOutDegree = graph.outDegrees().min(1).collect().get(0).f1.getValue();
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(vertexCount - 1, minInDegree);
-        assertEquals(vertexCount - 1, minOutDegree);
-        assertEquals(vertexCount - 1, maxInDegree);
-        assertEquals(vertexCount - 1, maxOutDegree);
+        assertThat(minInDegree).isEqualTo(vertexCount - 1);
+        assertThat(minOutDegree).isEqualTo(vertexCount - 1);
+        assertThat(maxInDegree).isEqualTo(vertexCount - 1);
+        assertThat(maxOutDegree).isEqualTo(vertexCount - 1);
     }
 
     @Test

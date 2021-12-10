@@ -48,8 +48,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.contrib.streaming.state.RocksDBTestUtils.createKeyedStateBackend;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests to cover cases that if user choose options previously prone to misuse, embedded RocksDB
@@ -97,11 +96,11 @@ public class RocksDBStateOptionTest {
             Iterator<Map.Entry<Integer, Long>> iterator = mapState.entries().iterator();
             while (iterator.hasNext()) {
                 Map.Entry<Integer, Long> entry = iterator.next();
-                assertEquals(entry.getValue(), expectedResult.remove(entry.getKey()));
+                assertThat(expectedResult.remove(entry.getKey())).isEqualTo(entry.getValue());
                 iterator.remove();
             }
-            assertTrue(expectedResult.isEmpty());
-            assertTrue(mapState.isEmpty());
+            assertThat(expectedResult.isEmpty()).isTrue();
+            assertThat(mapState.isEmpty()).isTrue();
         } finally {
             keyedStateBackend.dispose();
         }
@@ -141,13 +140,13 @@ public class RocksDBStateOptionTest {
                 priorityQueue.add(timer);
                 expectedPriorityQueue.add(timer);
             }
-            assertEquals(queueSize, priorityQueue.size());
+            assertThat(priorityQueue.size()).isEqualTo(queueSize);
             TimerHeapInternalTimer<Integer, VoidNamespace> timer;
             while ((timer = priorityQueue.poll()) != null) {
-                assertEquals(expectedPriorityQueue.poll(), timer);
+                assertThat(timer).isEqualTo(expectedPriorityQueue.poll());
             }
-            assertTrue(expectedPriorityQueue.isEmpty());
-            assertTrue(priorityQueue.isEmpty());
+            assertThat(expectedPriorityQueue.isEmpty()).isTrue();
+            assertThat(priorityQueue.isEmpty()).isTrue();
         } finally {
             keyedStateBackend.dispose();
         }

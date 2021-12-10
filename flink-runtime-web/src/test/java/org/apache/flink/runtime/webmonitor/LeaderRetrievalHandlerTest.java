@@ -35,13 +35,14 @@ import org.apache.flink.shaded.netty4.io.netty.channel.ChannelHandlerContext;
 import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponse;
 import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseStatus;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
 
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link LeaderRetrievalHandler}. */
 public class LeaderRetrievalHandlerTest extends TestLogger {
@@ -80,7 +81,7 @@ public class LeaderRetrievalHandlerTest extends TestLogger {
             HttpTestClient.SimpleHttpResponse response =
                     httpClient.getNextResponse(FutureUtils.toDuration(timeout));
 
-            Assert.assertEquals(HttpResponseStatus.SERVICE_UNAVAILABLE, response.getStatus());
+            assertThat(response.getStatus()).isEqualTo(HttpResponseStatus.SERVICE_UNAVAILABLE);
 
             // 2. with leader
             gatewayFuture.complete(gateway);
@@ -89,8 +90,8 @@ public class LeaderRetrievalHandlerTest extends TestLogger {
 
             response = httpClient.getNextResponse(FutureUtils.toDuration(timeout));
 
-            Assert.assertEquals(HttpResponseStatus.OK, response.getStatus());
-            Assert.assertEquals(RESPONSE_MESSAGE, response.getContent());
+            assertThat(response.getStatus()).isEqualTo(HttpResponseStatus.OK);
+            assertThat(response.getContent()).isEqualTo(RESPONSE_MESSAGE);
 
         } finally {
             bootstrap.shutdown();
@@ -110,7 +111,7 @@ public class LeaderRetrievalHandlerTest extends TestLogger {
                 RoutedRequest routedRequest,
                 RestfulGateway gateway)
                 throws Exception {
-            Assert.assertTrue(channelHandlerContext.channel().eventLoop().inEventLoop());
+            assertThat(channelHandlerContext.channel().eventLoop().inEventLoop()).isTrue();
             HttpResponse response =
                     HandlerRedirectUtils.getResponse(HttpResponseStatus.OK, RESPONSE_MESSAGE);
             KeepAliveWrite.flush(

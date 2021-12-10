@@ -43,9 +43,8 @@ import static org.apache.flink.connector.pulsar.source.reader.deserializer.Pulsa
 import static org.apache.flink.connector.pulsar.source.reader.deserializer.PulsarDeserializationSchema.pulsarSchema;
 import static org.apache.flink.util.Preconditions.checkState;
 import static org.apache.pulsar.client.api.Schema.PROTOBUF_NATIVE;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link PulsarDeserializationSchema}. */
 class PulsarDeserializationSchemaTest {
@@ -54,14 +53,14 @@ class PulsarDeserializationSchemaTest {
     void createFromFlinkDeserializationSchema() throws Exception {
         PulsarDeserializationSchema<String> schema = flinkSchema(new SimpleStringSchema());
         schema.open(new TestingDeserializationContext());
-        assertDoesNotThrow(() -> InstantiationUtil.clone(schema));
+        assertThatThrownBy(() -> InstantiationUtil.clone(schema)).isNull();
 
         Message<byte[]> message = getMessage("some-sample-message", String::getBytes);
         SingleMessageCollector<String> collector = new SingleMessageCollector<>();
         schema.deserialize(message, collector);
 
-        assertNotNull(collector.result);
-        assertEquals(collector.result, "some-sample-message");
+        assertThat(collector.result).isNotNull();
+        assertThat("some-sample-message").isEqualTo(collector.result);
     }
 
     @Test
@@ -69,7 +68,7 @@ class PulsarDeserializationSchemaTest {
         Schema<TestMessage> schema1 = PROTOBUF_NATIVE(TestMessage.class);
         PulsarDeserializationSchema<TestMessage> schema2 = pulsarSchema(schema1, TestMessage.class);
         schema2.open(new TestingDeserializationContext());
-        assertDoesNotThrow(() -> InstantiationUtil.clone(schema2));
+        assertThatThrownBy(() -> InstantiationUtil.clone(schema2)).isNull();
 
         TestMessage message1 =
                 TestMessage.newBuilder()
@@ -81,15 +80,15 @@ class PulsarDeserializationSchemaTest {
         SingleMessageCollector<TestMessage> collector = new SingleMessageCollector<>();
         schema2.deserialize(message2, collector);
 
-        assertNotNull(collector.result);
-        assertEquals(collector.result, message1);
+        assertThat(collector.result).isNotNull();
+        assertThat(message1).isEqualTo(collector.result);
     }
 
     @Test
     void createFromFlinkTypeInformation() throws Exception {
         PulsarDeserializationSchema<String> schema = flinkTypeInfo(Types.STRING, null);
         schema.open(new TestingDeserializationContext());
-        assertDoesNotThrow(() -> InstantiationUtil.clone(schema));
+        assertThatThrownBy(() -> InstantiationUtil.clone(schema)).isNull();
 
         Message<byte[]> message =
                 getMessage(
@@ -102,8 +101,8 @@ class PulsarDeserializationSchemaTest {
         SingleMessageCollector<String> collector = new SingleMessageCollector<>();
         schema.deserialize(message, collector);
 
-        assertNotNull(collector.result);
-        assertEquals(collector.result, "test-content");
+        assertThat(collector.result).isNotNull();
+        assertThat("test-content").isEqualTo(collector.result);
     }
 
     /** Create a test message by given bytes. The message don't contains any meta data. */

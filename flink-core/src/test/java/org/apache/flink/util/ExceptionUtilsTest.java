@@ -20,37 +20,31 @@ package org.apache.flink.util;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the utility methods in {@link ExceptionUtils}. */
 public class ExceptionUtilsTest extends TestLogger {
 
     @Test
     public void testStringifyNullException() {
-        assertNotNull(ExceptionUtils.STRINGIFIED_NULL_EXCEPTION);
-        assertEquals(
-                ExceptionUtils.STRINGIFIED_NULL_EXCEPTION, ExceptionUtils.stringifyException(null));
+        assertThat(ExceptionUtils.STRINGIFIED_NULL_EXCEPTION).isNotNull();
+        assertThat(ExceptionUtils.stringifyException(null))
+                .isEqualTo(ExceptionUtils.STRINGIFIED_NULL_EXCEPTION);
     }
 
     @Test
     public void testJvmFatalError() {
         // not all errors are fatal
-        assertFalse(ExceptionUtils.isJvmFatalError(new Error()));
+        assertThat(ExceptionUtils.isJvmFatalError(new Error())).isFalse();
 
         // linkage errors are not fatal
-        assertFalse(ExceptionUtils.isJvmFatalError(new LinkageError()));
+        assertThat(ExceptionUtils.isJvmFatalError(new LinkageError())).isFalse();
 
         // some errors are fatal
-        assertTrue(ExceptionUtils.isJvmFatalError(new InternalError()));
-        assertTrue(ExceptionUtils.isJvmFatalError(new UnknownError()));
+        assertThat(ExceptionUtils.isJvmFatalError(new InternalError())).isTrue();
+        assertThat(ExceptionUtils.isJvmFatalError(new UnknownError())).isTrue();
     }
 
     @Test
@@ -58,7 +52,7 @@ public class ExceptionUtilsTest extends TestLogger {
         // fatal error is rethrown
         try {
             ExceptionUtils.rethrowIfFatalError(new InternalError());
-            fail();
+            fail("unknown failure");
         } catch (InternalError ignored) {
         }
 
@@ -68,11 +62,12 @@ public class ExceptionUtilsTest extends TestLogger {
 
     @Test
     public void testFindThrowableByType() {
-        assertTrue(
-                ExceptionUtils.findThrowable(
-                                new RuntimeException(new IllegalStateException()),
-                                IllegalStateException.class)
-                        .isPresent());
+        assertThat(
+                        ExceptionUtils.findThrowable(
+                                        new RuntimeException(new IllegalStateException()),
+                                        IllegalStateException.class)
+                                .isPresent())
+                .isTrue();
     }
 
     @Test
@@ -83,7 +78,7 @@ public class ExceptionUtilsTest extends TestLogger {
                         new RuntimeException(new RuntimeException(expectedException)),
                         RuntimeException.class);
 
-        assertThat(strippedException, is(equalTo(expectedException)));
+        assertThat(strippedException).isEqualTo(equalTo(expectedException));
     }
 
     @Test
@@ -93,7 +88,7 @@ public class ExceptionUtilsTest extends TestLogger {
         final Throwable strippedException =
                 ExceptionUtils.stripException(expectedException, RuntimeException.class);
 
-        assertThat(strippedException, is(equalTo(expectedException)));
+        assertThat(strippedException).isEqualTo(equalTo(expectedException));
     }
 
     @Test
@@ -106,7 +101,7 @@ public class ExceptionUtilsTest extends TestLogger {
         Throwable rootThrowable = new OutOfMemoryError("old message");
         ExceptionUtils.updateDetailMessage(rootThrowable, t -> "new message");
 
-        assertThat(rootThrowable.getMessage(), is("new message"));
+        assertThat(rootThrowable.getMessage()).isEqualTo("new message");
     }
 
     @Test
@@ -124,12 +119,12 @@ public class ExceptionUtilsTest extends TestLogger {
                 rootThrowable,
                 t -> t.getClass().equals(OutOfMemoryError.class) ? "new message" : null);
 
-        assertThat(rootThrowable.getCause(), sameInstance(oom));
-        assertThat(rootThrowable.getCause().getMessage(), is("new message"));
-        assertThat(rootThrowable.getCause().getStackTrace(), is(oom.getStackTrace()));
-        assertThat(rootThrowable.getCause().getSuppressed(), is(oom.getSuppressed()));
+        assertThat(rootThrowable.getCause()).isSameAs(oom);
+        assertThat(rootThrowable.getCause().getMessage()).isEqualTo("new message");
+        assertThat(rootThrowable.getCause().getStackTrace()).isEqualTo(oom.getStackTrace());
+        assertThat(rootThrowable.getCause().getSuppressed()).isEqualTo(oom.getSuppressed());
 
-        assertThat(rootThrowable.getCause().getCause(), sameInstance(oomCause));
+        assertThat(rootThrowable.getCause().getCause()).isSameAs(oomCause);
     }
 
     @Test
@@ -139,8 +134,8 @@ public class ExceptionUtilsTest extends TestLogger {
                         "root message", new IllegalArgumentException("cause message"));
         ExceptionUtils.updateDetailMessage(originalThrowable, t -> null);
 
-        assertThat(originalThrowable.getMessage(), is("root message"));
-        assertThat(originalThrowable.getCause().getMessage(), is("cause message"));
+        assertThat(originalThrowable.getMessage()).isEqualTo("root message");
+        assertThat(originalThrowable.getCause().getMessage()).isEqualTo("cause message");
     }
 
     @Test
@@ -153,16 +148,16 @@ public class ExceptionUtilsTest extends TestLogger {
         Throwable root = new Exception("old message");
         ExceptionUtils.updateDetailMessage(root, null);
 
-        assertThat(root.getMessage(), is("old message"));
+        assertThat(root.getMessage()).isEqualTo("old message");
     }
 
     @Test
     public void testIsMetaspaceOutOfMemoryErrorCanHandleNullValue() {
-        assertFalse(ExceptionUtils.isMetaspaceOutOfMemoryError(null));
+        assertThat(ExceptionUtils.isMetaspaceOutOfMemoryError(null)).isFalse();
     }
 
     @Test
     public void testIsDirectOutOfMemoryErrorCanHandleNullValue() {
-        assertFalse(ExceptionUtils.isDirectOutOfMemoryError(null));
+        assertThat(ExceptionUtils.isDirectOutOfMemoryError(null)).isFalse();
     }
 }

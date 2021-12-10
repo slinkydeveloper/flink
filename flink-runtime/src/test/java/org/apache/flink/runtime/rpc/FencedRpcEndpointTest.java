@@ -38,12 +38,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FencedRpcEndpointTest extends TestLogger {
 
@@ -78,8 +74,8 @@ public class FencedRpcEndpointTest extends TestLogger {
         try {
             fencedTestingEndpoint.start();
 
-            assertNull(fencedGateway.getFencingToken());
-            assertNull(fencedTestingEndpoint.getFencingToken());
+            assertThat(fencedGateway.getFencingToken()).isNull();
+            assertThat(fencedTestingEndpoint.getFencingToken()).isNull();
 
             final UUID newFencingToken = UUID.randomUUID();
 
@@ -91,10 +87,11 @@ public class FencedRpcEndpointTest extends TestLogger {
                 // expected to fail
             }
 
-            assertFalse(
-                    "Setting fencing token from outside the main thread did not fail as expected.",
-                    failed);
-            assertNull(fencedTestingEndpoint.getFencingToken());
+            assertThat(failed)
+                    .as(
+                            "Setting fencing token from outside the main thread did not fail as expected.")
+                    .isFalse();
+            assertThat(fencedTestingEndpoint.getFencingToken()).isNull();
 
             CompletableFuture<Acknowledge> setFencingFuture =
                     fencedTestingEndpoint.setFencingTokenInMainThread(newFencingToken, timeout);
@@ -103,8 +100,8 @@ public class FencedRpcEndpointTest extends TestLogger {
             setFencingFuture.get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
 
             // self gateway should adapt its fencing token
-            assertEquals(newFencingToken, fencedGateway.getFencingToken());
-            assertEquals(newFencingToken, fencedTestingEndpoint.getFencingToken());
+            assertThat(fencedGateway.getFencingToken()).isEqualTo(newFencingToken);
+            assertThat(fencedTestingEndpoint.getFencingToken()).isEqualTo(newFencingToken);
         } finally {
             RpcUtils.terminateRpcEndpoint(fencedTestingEndpoint, timeout);
         }
@@ -137,11 +134,11 @@ public class FencedRpcEndpointTest extends TestLogger {
                                     FencedTestingGateway.class)
                             .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
 
-            assertEquals(
-                    value,
-                    properFencedGateway
-                            .foobar(timeout)
-                            .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            properFencedGateway
+                                    .foobar(timeout)
+                                    .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(value);
 
             try {
                 wronglyFencedGateway
@@ -149,8 +146,8 @@ public class FencedRpcEndpointTest extends TestLogger {
                         .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
                 fail("This should fail since we have the wrong fencing token.");
             } catch (ExecutionException e) {
-                assertTrue(
-                        ExceptionUtils.stripExecutionException(e) instanceof FencingTokenException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(FencingTokenException.class);
             }
 
             final UUID newFencingToken = UUID.randomUUID();
@@ -169,8 +166,8 @@ public class FencedRpcEndpointTest extends TestLogger {
 
                 fail("This should fail since we have the wrong fencing token by now.");
             } catch (ExecutionException e) {
-                assertTrue(
-                        ExceptionUtils.stripExecutionException(e) instanceof FencingTokenException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(FencingTokenException.class);
             }
 
         } finally {
@@ -204,19 +201,19 @@ public class FencedRpcEndpointTest extends TestLogger {
                                     FencedTestingGateway.class)
                             .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
 
-            assertEquals(initialFencingToken, selfGateway.getFencingToken());
-            assertEquals(initialFencingToken, remoteGateway.getFencingToken());
+            assertThat(selfGateway.getFencingToken()).isEqualTo(initialFencingToken);
+            assertThat(remoteGateway.getFencingToken()).isEqualTo(initialFencingToken);
 
-            assertEquals(
-                    value,
-                    selfGateway
-                            .foobar(timeout)
-                            .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS));
-            assertEquals(
-                    value,
-                    remoteGateway
-                            .foobar(timeout)
-                            .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            selfGateway
+                                    .foobar(timeout)
+                                    .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(value);
+            assertThat(
+                            remoteGateway
+                                    .foobar(timeout)
+                                    .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(value);
 
             CompletableFuture<Acknowledge> newFencingTokenFuture =
                     fencedTestingEndpoint.setFencingTokenInMainThread(newFencingToken, timeout);
@@ -224,21 +221,21 @@ public class FencedRpcEndpointTest extends TestLogger {
             // wait for the new fencing token to be set
             newFencingTokenFuture.get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
 
-            assertEquals(newFencingToken, selfGateway.getFencingToken());
-            assertNotEquals(newFencingToken, remoteGateway.getFencingToken());
+            assertThat(selfGateway.getFencingToken()).isEqualTo(newFencingToken);
+            assertThat(remoteGateway.getFencingToken()).isEqualTo(newFencingToken);
 
-            assertEquals(
-                    value,
-                    selfGateway
-                            .foobar(timeout)
-                            .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            selfGateway
+                                    .foobar(timeout)
+                                    .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(value);
 
             try {
                 remoteGateway.foobar(timeout).get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
                 fail("This should have failed because we don't have the right fencing token.");
             } catch (ExecutionException e) {
-                assertTrue(
-                        ExceptionUtils.stripExecutionException(e) instanceof FencingTokenException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(FencingTokenException.class);
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(fencedTestingEndpoint, timeout);
@@ -320,8 +317,8 @@ public class FencedRpcEndpointTest extends TestLogger {
                         .get(timeout.toMilliseconds(), TimeUnit.MILLISECONDS);
                 fail("This should have failed because we have an unfenced gateway.");
             } catch (ExecutionException e) {
-                assertTrue(
-                        ExceptionUtils.stripExecutionException(e) instanceof RpcRuntimeException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(RpcRuntimeException.class);
             }
 
             try {

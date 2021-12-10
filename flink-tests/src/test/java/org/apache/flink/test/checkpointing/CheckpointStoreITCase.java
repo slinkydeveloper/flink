@@ -46,7 +46,7 @@ import java.util.concurrent.Executor;
 
 import static org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test that failure on recovery leads to job restart if configured, so that transient recovery
@@ -87,7 +87,7 @@ public class CheckpointStoreITCase extends TestLogger {
         BlockingHighAvailabilityServiceFactory.fetchRemoteCheckpointsStart.await();
         for (int i = 0; i < 10; i++) {
             final JobStatus jobStatus = jobClient.getJobStatus().get();
-            assertEquals(JobStatus.INITIALIZING, jobStatus);
+            assertThat(jobStatus).isEqualTo(JobStatus.INITIALIZING);
         }
         BlockingHighAvailabilityServiceFactory.fetchRemoteCheckpointsFinished.countDown();
 

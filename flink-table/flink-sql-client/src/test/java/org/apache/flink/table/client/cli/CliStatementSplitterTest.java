@@ -23,9 +23,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test {@link CliStatementSplitter}. */
 public class CliStatementSplitterTest {
@@ -35,9 +33,9 @@ public class CliStatementSplitterTest {
         // TODO: fix ';
         List<String> lines = Arrays.asList(" --;", "", "select -- ok;", "\n");
         for (String line : lines) {
-            assertFalse(
-                    String.format("%s is not end of statement but get true", line),
-                    CliStatementSplitter.isStatementComplete(line));
+            assertThat(CliStatementSplitter.isStatementComplete(line))
+                    .as(String.format("%s is not end of statement but get true", line))
+                    .isFalse();
         }
     }
 
@@ -45,9 +43,9 @@ public class CliStatementSplitterTest {
     public void testIsEndOfStatement() {
         List<String> lines = Arrays.asList(" ; --;", "select a from b;-- ok;", ";\n");
         for (String line : lines) {
-            assertTrue(
-                    String.format("%s is end of statement but get false", line),
-                    CliStatementSplitter.isStatementComplete(line));
+            assertThat(CliStatementSplitter.isStatementComplete(line))
+                    .as(String.format("%s is end of statement but get false", line))
+                    .isTrue();
         }
     }
 
@@ -80,7 +78,7 @@ public class CliStatementSplitterTest {
                         "\n" + "SELECT func(id) from MyTable\n;");
 
         for (int i = 0; i < lines.size(); i++) {
-            assertEquals(expected.get(i), actual.get(i));
+            assertThat(actual.get(i)).isEqualTo(expected.get(i));
         }
     }
 }

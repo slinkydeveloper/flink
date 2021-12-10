@@ -65,13 +65,7 @@ import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.verifyContents;
 import static org.apache.flink.runtime.blob.BlobUtils.JOB_DIR_PREFIX;
 import static org.apache.flink.runtime.blob.BlobUtils.NO_JOB_DIR_PREFIX;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Mockito.mock;
 
@@ -141,19 +135,19 @@ public class BlobCacheGetTest extends TestLogger {
 
             // put content addressable (like libraries)
             BlobKey key = put(server, jobId1, data, blobType);
-            assertNotNull(key);
+            assertThat(key).isNotNull();
             verifyType(blobType, key);
 
             // delete file to make sure that GET requests fail
             File blobFile = server.getStorageLocation(jobId1, key);
-            assertTrue(blobFile.delete());
+            assertThat(blobFile.delete()).isTrue();
 
             // issue a GET request that fails
             verifyDeleted(cache, jobId1, key);
 
             // add the same data under a second jobId
             BlobKey key2 = put(server, jobId2, data, blobType);
-            assertNotNull(key2);
+            assertThat(key2).isNotNull();
             verifyKeyDifferentHashEquals(key, key2);
 
             // request for jobId2 should succeed
@@ -163,25 +157,25 @@ public class BlobCacheGetTest extends TestLogger {
 
             if (blobType == PERMANENT_BLOB) {
                 // still existing on server
-                assertTrue(server.getStorageLocation(jobId2, key2).exists());
+                assertThat(server.getStorageLocation(jobId2, key2).exists()).isTrue();
                 // delete jobId2 on cache
                 blobFile = cache.getPermanentBlobService().getStorageLocation(jobId2, key2);
-                assertTrue(blobFile.delete());
+                assertThat(blobFile.delete()).isTrue();
                 // try to retrieve again
                 get(cache, jobId2, key2);
 
                 // delete on cache and server, verify that it is not accessible anymore
                 blobFile = cache.getPermanentBlobService().getStorageLocation(jobId2, key2);
-                assertTrue(blobFile.delete());
+                assertThat(blobFile.delete()).isTrue();
                 blobFile = server.getStorageLocation(jobId2, key2);
-                assertTrue(blobFile.delete());
+                assertThat(blobFile.delete()).isTrue();
                 verifyDeleted(cache, jobId2, key2);
             } else {
                 // deleted eventually on the server by the GET request above
                 verifyDeletedEventually(server, jobId2, key2);
                 // delete jobId2 on cache
                 blobFile = cache.getTransientBlobService().getStorageLocation(jobId2, key2);
-                assertTrue(blobFile.delete());
+                assertThat(blobFile.delete()).isTrue();
                 // verify that it is not accessible anymore
                 verifyDeleted(cache, jobId2, key2);
             }
@@ -242,9 +236,9 @@ public class BlobCacheGetTest extends TestLogger {
                 tempFileDir =
                         cache.getTransientBlobService().createTemporaryFilename().getParentFile();
             }
-            assertTrue(tempFileDir.setExecutable(true, false));
-            assertTrue(tempFileDir.setReadable(true, false));
-            assertTrue(tempFileDir.setWritable(false, false));
+            assertThat(tempFileDir.setExecutable(true, false)).isTrue();
+            assertThat(tempFileDir.setReadable(true, false)).isTrue();
+            assertThat(tempFileDir.setWritable(false, false)).isTrue();
 
             // request the file from the server via the cache
             exception.expect(IOException.class);
@@ -260,27 +254,27 @@ public class BlobCacheGetTest extends TestLogger {
                     expectedDirs.add(JOB_DIR_PREFIX + jobId);
                     File storageDir = tempFileDir.getParentFile();
                     String[] actualDirs = storageDir.list();
-                    assertNotNull(actualDirs);
-                    assertEquals(expectedDirs, new HashSet<>(Arrays.asList(actualDirs)));
+                    assertThat(actualDirs).isNotNull();
+                    assertThat(new HashSet<>(Arrays.asList(actualDirs))).isEqualTo(expectedDirs);
 
                     // job directory should be empty
                     File jobDir = new File(tempFileDir.getParentFile(), JOB_DIR_PREFIX + jobId);
-                    assertArrayEquals(new String[] {}, jobDir.list());
+                    assertThat(jobDir.list()).isEqualTo(new String[] {});
                 } else {
                     // only the incoming and no_job directory should exist (no job directory!)
                     expectedDirs.add(NO_JOB_DIR_PREFIX);
                     File storageDir = tempFileDir.getParentFile();
                     String[] actualDirs = storageDir.list();
-                    assertNotNull(actualDirs);
-                    assertEquals(expectedDirs, new HashSet<>(Arrays.asList(actualDirs)));
+                    assertThat(actualDirs).isNotNull();
+                    assertThat(new HashSet<>(Arrays.asList(actualDirs))).isEqualTo(expectedDirs);
 
                     // no_job directory should be empty
                     File noJobDir = new File(tempFileDir.getParentFile(), NO_JOB_DIR_PREFIX);
-                    assertArrayEquals(new String[] {}, noJobDir.list());
+                    assertThat(noJobDir.list()).isEqualTo(new String[] {});
                 }
 
                 // file should still be there on the server (even if transient)
-                assertTrue(server.getStorageLocation(jobId, blobKey).exists());
+                assertThat(server.getStorageLocation(jobId, blobKey).exists()).isTrue();
             }
         } finally {
             // set writable again to make sure we can remove the directory
@@ -349,9 +343,9 @@ public class BlobCacheGetTest extends TestLogger {
                                 .getStorageLocation(jobId, new TransientBlobKey())
                                 .getParentFile();
             }
-            assertTrue(jobStoreDir.setExecutable(true, false));
-            assertTrue(jobStoreDir.setReadable(true, false));
-            assertTrue(jobStoreDir.setWritable(false, false));
+            assertThat(jobStoreDir.setExecutable(true, false)).isTrue();
+            assertThat(jobStoreDir.setReadable(true, false)).isTrue();
+            assertThat(jobStoreDir.setWritable(false, false)).isTrue();
 
             // request the file from the server via the cache
             exception.expect(AccessDeniedException.class);
@@ -361,17 +355,17 @@ public class BlobCacheGetTest extends TestLogger {
             } finally {
                 // there should be no remaining incoming files
                 File incomingFileDir = new File(jobStoreDir.getParent(), "incoming");
-                assertArrayEquals(new String[] {}, incomingFileDir.list());
+                assertThat(incomingFileDir.list()).isEqualTo(new String[] {});
 
                 // there should be no files in the job directory
-                assertArrayEquals(new String[] {}, jobStoreDir.list());
+                assertThat(jobStoreDir.list()).isEqualTo(new String[] {});
 
                 // if transient, the get will fail but since the download was successful, the file
                 // will not be on the server anymore
                 if (blobType == TRANSIENT_BLOB) {
                     verifyDeletedEventually(server, jobId, blobKey);
                 } else {
-                    assertTrue(server.getStorageLocation(jobId, blobKey).exists());
+                    assertThat(server.getStorageLocation(jobId, blobKey).exists()).isTrue();
                 }
             }
         } finally {
@@ -408,7 +402,7 @@ public class BlobCacheGetTest extends TestLogger {
             byte[] data = new byte[2000000];
             rnd.nextBytes(data);
             PermanentBlobKey blobKey = (PermanentBlobKey) put(server, jobId, data, PERMANENT_BLOB);
-            assertTrue(server.getStorageLocation(jobId, blobKey).delete());
+            assertThat(server.getStorageLocation(jobId, blobKey).delete()).isTrue();
 
             File tempFileDir = server.createTemporaryFilename().getParentFile();
 
@@ -425,12 +419,12 @@ public class BlobCacheGetTest extends TestLogger {
                 // only the incoming and job directory should exist (no job directory!)
                 File storageDir = tempFileDir.getParentFile();
                 String[] actualDirs = storageDir.list();
-                assertNotNull(actualDirs);
-                assertEquals(expectedDirs, new HashSet<>(Arrays.asList(actualDirs)));
+                assertThat(actualDirs).isNotNull();
+                assertThat(new HashSet<>(Arrays.asList(actualDirs))).isEqualTo(expectedDirs);
 
                 // job directory should be empty
                 File jobDir = new File(tempFileDir.getParentFile(), JOB_DIR_PREFIX + jobId);
-                assertArrayEquals(new String[] {}, jobDir.list());
+                assertThat(jobDir.list()).isEqualTo(new String[] {});
             }
         }
     }
@@ -478,21 +472,21 @@ public class BlobCacheGetTest extends TestLogger {
 
                 // put BLOB
                 TransientBlobKey key = (TransientBlobKey) put(server, jobId, data, TRANSIENT_BLOB);
-                assertNotNull(key);
+                assertThat(key).isNotNull();
 
                 blobFile = server.getStorageLocation(jobId, key);
                 directory = blobFile.getParentFile();
 
-                assertTrue(blobFile.setWritable(false, false));
-                assertTrue(directory.setWritable(false, false));
+                assertThat(blobFile.setWritable(false, false)).isTrue();
+                assertThat(directory.setWritable(false, false)).isTrue();
 
                 // access from cache once which also deletes the file on the server
                 verifyContents(cache, jobId, key, data);
                 // delete locally (should not be affected by the server)
-                assertTrue(delete(cache, jobId, key));
+                assertThat(delete(cache, jobId, key)).isTrue();
                 File blobFileAtCache =
                         cache.getTransientBlobService().getStorageLocation(jobId, key);
-                assertFalse(blobFileAtCache.exists());
+                assertThat(blobFileAtCache.exists()).isFalse();
 
                 // the file should still be there on the server
                 verifyContents(server, jobId, key, data);
@@ -630,7 +624,7 @@ public class BlobCacheGetTest extends TestLogger {
                 }
                 // multiple clients may have accessed the BLOB successfully before it was
                 // deleted, but always at least one:
-                assertThat(completedSuccessfully, greaterThanOrEqualTo(1));
+                assertThat(completedSuccessfully).isGreaterThanOrEqualTo(1);
             }
         } finally {
             executor.shutdownNow();

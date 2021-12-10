@@ -27,8 +27,8 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests related to {@link PerJobCheckpointRecoveryFactory}. */
 public class PerJobCheckpointRecoveryTest extends TestLogger {
@@ -43,41 +43,41 @@ public class PerJobCheckpointRecoveryTest extends TestLogger {
         final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
         final JobID firstJobId = new JobID();
-        assertSame(
-                store,
-                factory.createRecoveredCompletedCheckpointStore(
-                        firstJobId,
-                        1,
-                        classLoader,
-                        SharedStateRegistry.DEFAULT_FACTORY,
-                        Executors.directExecutor()));
-        assertThrows(
-                UnsupportedOperationException.class,
-                () ->
+        assertThat(
                         factory.createRecoveredCompletedCheckpointStore(
                                 firstJobId,
                                 1,
                                 classLoader,
                                 SharedStateRegistry.DEFAULT_FACTORY,
-                                Executors.directExecutor()));
+                                Executors.directExecutor()))
+                .isSameAs(store);
+        assertThatThrownBy(
+                        () ->
+                                factory.createRecoveredCompletedCheckpointStore(
+                                        firstJobId,
+                                        1,
+                                        classLoader,
+                                        SharedStateRegistry.DEFAULT_FACTORY,
+                                        Executors.directExecutor()))
+                .isInstanceOf(UnsupportedOperationException.class);
 
         final JobID secondJobId = new JobID();
-        assertSame(
-                store,
-                factory.createRecoveredCompletedCheckpointStore(
-                        secondJobId,
-                        1,
-                        classLoader,
-                        SharedStateRegistry.DEFAULT_FACTORY,
-                        Executors.directExecutor()));
-        assertThrows(
-                UnsupportedOperationException.class,
-                () ->
+        assertThat(
                         factory.createRecoveredCompletedCheckpointStore(
                                 secondJobId,
                                 1,
                                 classLoader,
                                 SharedStateRegistry.DEFAULT_FACTORY,
-                                Executors.directExecutor()));
+                                Executors.directExecutor()))
+                .isSameAs(store);
+        assertThatThrownBy(
+                        () ->
+                                factory.createRecoveredCompletedCheckpointStore(
+                                        secondJobId,
+                                        1,
+                                        classLoader,
+                                        SharedStateRegistry.DEFAULT_FACTORY,
+                                        Executors.directExecutor()))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 }

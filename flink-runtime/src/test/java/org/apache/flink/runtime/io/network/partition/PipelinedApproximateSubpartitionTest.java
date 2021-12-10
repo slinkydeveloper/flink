@@ -30,10 +30,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderAndConsumerTest.assertContent;
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderAndConsumerTest.toByteBuffer;
 import static org.apache.flink.runtime.io.network.partition.PartitionTestUtils.createPartition;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PipelinedApproximateSubpartition}. */
 public class PipelinedApproximateSubpartitionTest extends PipelinedSubpartitionTest {
@@ -58,12 +55,12 @@ public class PipelinedApproximateSubpartitionTest extends PipelinedSubpartitionT
                 createPipelinedApproximateSubpartition();
 
         // first request
-        assertNotNull(subpartition.createReadView(() -> {}));
-        assertFalse(subpartition.isPartialBufferCleanupRequired());
+        assertThat(subpartition.createReadView(() -> {})).isNotNull();
+        assertThat(subpartition.isPartialBufferCleanupRequired()).isFalse();
 
         // reconnecting request
-        assertNotNull(subpartition.createReadView(() -> {}));
-        assertTrue(subpartition.isPartialBufferCleanupRequired());
+        assertThat(subpartition.createReadView(() -> {})).isNotNull();
+        assertThat(subpartition.isPartialBufferCleanupRequired()).isTrue();
     }
 
     @Test
@@ -76,7 +73,7 @@ public class PipelinedApproximateSubpartitionTest extends PipelinedSubpartitionT
         assertContent(requireNonNull(subpartition.pollBuffer()).buffer(), null, 0, 1, 2, 3);
 
         subpartition.setIsPartialBufferCleanupRequired();
-        assertNull(subpartition.pollBuffer());
+        assertThat(subpartition.pollBuffer()).isNull();
 
         writer.emitRecord(toByteBuffer(8, 9), 0);
         assertContent(requireNonNull(subpartition.pollBuffer()).buffer(), null, 8, 9);
@@ -141,7 +138,7 @@ public class PipelinedApproximateSubpartitionTest extends PipelinedSubpartitionT
         assertContent(requireNonNull(subpartition.pollBuffer()).buffer(), null, 0, 1, 2, 3);
 
         subpartition.setIsPartialBufferCleanupRequired();
-        assertNull(subpartition.pollBuffer());
+        assertThat(subpartition.pollBuffer()).isNull();
     }
 
     @Test
@@ -161,7 +158,7 @@ public class PipelinedApproximateSubpartitionTest extends PipelinedSubpartitionT
         // release again
         subpartition.setIsPartialBufferCleanupRequired();
         // 102 is cleaned up
-        assertNull(subpartition.pollBuffer());
+        assertThat(subpartition.pollBuffer()).isNull();
 
         writer.emitRecord(toByteBuffer(200, 201, 202, 203), 0);
         assertContent(requireNonNull(subpartition.pollBuffer()).buffer(), null, 200, 201, 202);

@@ -41,11 +41,8 @@ import java.net.URLClassLoader;
 import java.util.Objects;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link InstantiationUtil}. */
 public class InstantiationUtilTest extends TestLogger {
@@ -81,7 +78,7 @@ public class InstantiationUtilTest extends TestLogger {
             byte[] serializeObject = InstantiationUtil.serializeObject(proxy);
             Object deserializedProxy =
                     InstantiationUtil.deserializeObject(serializeObject, userClassLoader);
-            assertNotNull(deserializedProxy);
+            assertThat(deserializedProxy).isNotNull();
         }
     }
 
@@ -100,29 +97,29 @@ public class InstantiationUtilTest extends TestLogger {
 
     @Test
     public void testInstantiationOfStringValue() {
-        StringValue stringValue = InstantiationUtil.instantiate(StringValue.class, null);
-        assertNotNull(stringValue);
+        CharSequence stringValue = InstantiationUtil.instantiate(StringValue.class, null);
+        assertThat(stringValue).isNotNull();
     }
 
     @Test
     public void testInstantiationOfStringValueAndCastToValue() {
-        StringValue stringValue = InstantiationUtil.instantiate(StringValue.class, Value.class);
-        assertNotNull(stringValue);
+        CharSequence stringValue = InstantiationUtil.instantiate(StringValue.class, Value.class);
+        assertThat(stringValue).isNotNull();
     }
 
     @Test
     public void testHasNullaryConstructor() {
-        assertTrue(InstantiationUtil.hasPublicNullaryConstructor(StringValue.class));
+        assertThat(InstantiationUtil.hasPublicNullaryConstructor(StringValue.class)).isTrue();
     }
 
     @Test
     public void testClassIsProper() {
-        assertTrue(InstantiationUtil.isProperClass(StringValue.class));
+        assertThat(InstantiationUtil.isProperClass(StringValue.class)).isTrue();
     }
 
     @Test
     public void testClassIsNotProper() {
-        assertFalse(InstantiationUtil.isProperClass(Value.class));
+        assertThat(InstantiationUtil.isProperClass(Value.class)).isFalse();
     }
 
     @Test(expected = RuntimeException.class)
@@ -140,8 +137,9 @@ public class InstantiationUtilTest extends TestLogger {
         DoubleValue deserialized =
                 InstantiationUtil.deserializeFromByteArray(serializer, serialized);
 
-        assertEquals(
-                "Serialized record is not equal after serialization.", toSerialize, deserialized);
+        assertThat(deserialized)
+                .as("Serialized record is not equal after serialization.")
+                .isEqualTo(toSerialize);
     }
 
     @Test
@@ -149,11 +147,12 @@ public class InstantiationUtilTest extends TestLogger {
             throws IOException, ClassNotFoundException {
         final String value = "teststring";
 
-        assertEquals(
-                value,
-                InstantiationUtil.decompressAndDeserializeObject(
-                        InstantiationUtil.serializeObjectAndCompress(value),
-                        getClass().getClassLoader()));
+        assertThat(
+                        (String)
+                                InstantiationUtil.decompressAndDeserializeObject(
+                                        InstantiationUtil.serializeObjectAndCompress(value),
+                                        getClass().getClassLoader()))
+                .isEqualTo(value);
     }
 
     @Test
@@ -204,8 +203,8 @@ public class InstantiationUtilTest extends TestLogger {
         WritableType original = new WritableType();
         WritableType copy = InstantiationUtil.createCopyWritable(original);
 
-        assertTrue(original != copy);
-        assertTrue(original.equals(copy));
+        assertThat(original != copy).isTrue();
+        assertThat(original.equals(copy)).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------

@@ -49,12 +49,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -93,10 +92,10 @@ public class DefaultExecutionGraphConstructionTest {
         eg2.attachJobGraph(ordered);
 
         assertThat(
-                Sets.intersection(
-                        eg1.getRegisteredExecutions().keySet(),
-                        eg2.getRegisteredExecutions().keySet()),
-                is(empty()));
+                        Sets.intersection(
+                                eg1.getRegisteredExecutions().keySet(),
+                                eg2.getRegisteredExecutions().keySet()))
+                .isEqualTo(empty());
     }
 
     /**
@@ -347,8 +346,8 @@ public class DefaultExecutionGraphConstructionTest {
                 fail("Job failed with exception: " + e.getMessage());
             }
 
-            assertEquals(assigner1, eg.getAllVertices().get(v3.getID()).getSplitAssigner());
-            assertEquals(assigner2, eg.getAllVertices().get(v5.getID()).getSplitAssigner());
+            assertThat(eg.getAllVertices().get(v3.getID()).getSplitAssigner()).isEqualTo(assigner1);
+            assertThat(eg.getAllVertices().get(v5.getID()).getSplitAssigner()).isEqualTo(assigner2);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -408,9 +407,8 @@ public class DefaultExecutionGraphConstructionTest {
         IntermediateResultPartition partition1 = result.getPartitions()[0];
         IntermediateResultPartition partition2 = result.getPartitions()[1];
 
-        assertEquals(
-                partition1.getConsumedPartitionGroups().get(0),
-                partition2.getConsumedPartitionGroups().get(0));
+        assertThat(partition2.getConsumedPartitionGroups().get(0))
+                .isEqualTo(partition1.getConsumedPartitionGroups().get(0));
 
         ConsumedPartitionGroup consumedPartitionGroup =
                 partition1.getConsumedPartitionGroups().get(0);
@@ -418,8 +416,10 @@ public class DefaultExecutionGraphConstructionTest {
         for (IntermediateResultPartitionID partitionId : consumedPartitionGroup) {
             partitionIds.add(partitionId);
         }
-        assertThat(
-                partitionIds,
-                containsInAnyOrder(partition1.getPartitionId(), partition2.getPartitionId()));
+        assertThat(partitionIds)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        partition1.getPartitionId(), partition2.getPartitionId())));
     }
 }

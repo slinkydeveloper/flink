@@ -30,11 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link ThresholdMeter}. */
 public class ThresholdMeterTest extends TestLogger {
@@ -57,13 +56,15 @@ public class ThresholdMeterTest extends TestLogger {
 
         thresholdMeter.markEvent();
         clock.advanceTime(SLEEP, TimeUnit.MILLISECONDS);
-        assertThat(thresholdMeter.getCount(), is(1L));
-        assertThat(thresholdMeter.getRate(), closeTo(toPerSecondRate(1), ERROR));
+        assertThat(thresholdMeter.getCount()).isEqualTo(1L);
+        assertThat(thresholdMeter.getRate())
+                .satisfies(matching(closeTo(toPerSecondRate(1), ERROR)));
 
         thresholdMeter.markEvent();
-        assertThat(thresholdMeter.getCount(), is(2L));
+        assertThat(thresholdMeter.getCount()).isEqualTo(2L);
         clock.advanceTime(SLEEP, TimeUnit.MILLISECONDS);
-        assertThat(thresholdMeter.getRate(), closeTo(toPerSecondRate(2), ERROR));
+        assertThat(thresholdMeter.getRate())
+                .satisfies(matching(closeTo(toPerSecondRate(2), ERROR)));
     }
 
     @Test
@@ -71,8 +72,9 @@ public class ThresholdMeterTest extends TestLogger {
         final ThresholdMeter thresholdMeter = createLargeThresholdMeter();
         thresholdMeter.markEvent(2);
         clock.advanceTime(SLEEP * 2, TimeUnit.MILLISECONDS);
-        assertThat(thresholdMeter.getCount(), is(2L));
-        assertThat(thresholdMeter.getRate(), closeTo(toPerSecondRate(2), ERROR));
+        assertThat(thresholdMeter.getCount()).isEqualTo(2L);
+        assertThat(thresholdMeter.getRate())
+                .satisfies(matching(closeTo(toPerSecondRate(2), ERROR)));
     }
 
     @Test
@@ -100,7 +102,7 @@ public class ThresholdMeterTest extends TestLogger {
         thresholdMeter.markEvent();
         try {
             thresholdMeter.checkAgainstThreshold();
-            fail();
+            fail("unknown failure");
         } catch (ThresholdExceedException e) {
             // expected
         }
@@ -117,10 +119,9 @@ public class ThresholdMeterTest extends TestLogger {
             thresholdMeter.markEvent();
         }
 
-        assertThat(thresholdMeter.getCount(), is((long) THRESHOLD_SMALL));
-        assertThat(
-                thresholdMeter.getRate(),
-                closeTo(toPerSecondRate((int) (THRESHOLD_SMALL - 1)), ERROR));
+        assertThat(thresholdMeter.getCount()).isEqualTo((long) THRESHOLD_SMALL);
+        assertThat(thresholdMeter.getRate())
+                .satisfies(matching(closeTo(toPerSecondRate((int) (THRESHOLD_SMALL - 1)), ERROR)));
         thresholdMeter.checkAgainstThreshold();
     }
 
@@ -148,7 +149,7 @@ public class ThresholdMeterTest extends TestLogger {
             thread.join();
         }
 
-        assertEquals(repeatNum * concurrency, thresholdMeter.getCount());
+        assertThat(thresholdMeter.getCount()).isEqualTo(repeatNum * concurrency);
     }
 
     private static Runnable repeat(Runnable task, int repeatNum) {

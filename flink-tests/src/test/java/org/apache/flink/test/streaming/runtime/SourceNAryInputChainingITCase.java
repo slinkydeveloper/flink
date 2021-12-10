@@ -50,8 +50,8 @@ import org.junit.rules.TemporaryFolder;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for chaining the source operators / inputs. */
 @SuppressWarnings("serial")
@@ -79,7 +79,7 @@ public class SourceNAryInputChainingITCase extends TestLogger {
         final DataStream<Long> stream = createProgramWithSourcesOnly();
         final JobGraph jobGraph = sinkAndCompileJobGraph(stream);
 
-        assertEquals(1, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(1);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class SourceNAryInputChainingITCase extends TestLogger {
         final DataStream<Long> stream = createProgramWithMixedInputs();
         final JobGraph jobGraph = sinkAndCompileJobGraph(stream);
 
-        assertEquals(3, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(3);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class SourceNAryInputChainingITCase extends TestLogger {
         final DataStream<Long> stream = createProgramWithUnionInput();
         final JobGraph jobGraph = sinkAndCompileJobGraph(stream);
 
-        assertEquals(4, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(4);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class SourceNAryInputChainingITCase extends TestLogger {
         final DataStream<Long> stream = createProgramWithMultipleUnionInputs();
         final JobGraph jobGraph = sinkAndCompileJobGraph(stream);
 
-        assertEquals(6, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(6);
     }
 
     @Test

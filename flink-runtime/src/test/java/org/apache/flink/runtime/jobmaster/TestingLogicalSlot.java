@@ -29,6 +29,8 @@ import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.fail;
+
 /** Simple logical slot for testing purposes. */
 public class TestingLogicalSlot implements LogicalSlot {
 
@@ -105,7 +107,7 @@ public class TestingLogicalSlot implements LogicalSlot {
             released = true;
 
             tryAssignPayload(TERMINATED_PAYLOAD);
-            payloadReference.get().fail(cause);
+            fail("unknown failure", cause);
 
             slotOwner.returnLogicalSlot(this);
 

@@ -94,11 +94,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the partition-lifecycle logic in the {@link TaskExecutor}. */
 public class TaskExecutorPartitionLifecycleTest extends TestLogger {
@@ -222,7 +220,7 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
                     taskExecutor.getSelfGateway(TaskExecutorGateway.class);
 
             trackerIsTrackingPartitions.set(true);
-            assertThat(firstReleasePartitionsCallFuture.isDone(), is(false));
+            assertThat(firstReleasePartitionsCallFuture.isDone()).isEqualTo(false);
 
             taskExecutorGateway.releaseOrPromotePartitions(
                     jobId, Collections.singleton(new ResultPartitionID()), Collections.emptySet());
@@ -233,7 +231,7 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
             firstReleasePartitionsCallFuture.get();
 
             // connection should be kept alive since the table still contains partitions
-            assertThat(disconnectFuture.isDone(), is(false));
+            assertThat(disconnectFuture.isDone()).isEqualTo(false);
 
             trackerIsTrackingPartitions.set(false);
 
@@ -256,8 +254,7 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
                                 releasePartitionsForJobFuture::complete),
                 (jobId, resultPartitionDeploymentDescriptor, taskExecutor, taskExecutorGateway) -> {
                     taskExecutorGateway.disconnectJobManager(jobId, new Exception("test"));
-
-                    assertThat(releasePartitionsForJobFuture.get(), equalTo(jobId));
+                    assertThat(releasePartitionsForJobFuture.get()).isEqualTo(jobId);
                 });
     }
 
@@ -274,13 +271,12 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
                             resultPartitionDeploymentDescriptor
                                     .getShuffleDescriptor()
                                     .getResultPartitionID();
-
                     taskExecutorGateway.releaseOrPromotePartitions(
                             jobId,
                             Collections.singleton(resultPartitionId),
                             Collections.emptySet());
-
-                    assertThat(releasePartitionsFuture.get(), hasItems(resultPartitionId));
+                    assertThat(releasePartitionsFuture.get())
+                            .satisfies(matching(hasItems(resultPartitionId)));
                 });
     }
 
@@ -297,13 +293,12 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
                             resultPartitionDeploymentDescriptor
                                     .getShuffleDescriptor()
                                     .getResultPartitionID();
-
                     taskExecutorGateway.releaseOrPromotePartitions(
                             jobId,
                             Collections.emptySet(),
                             Collections.singleton(resultPartitionId));
-
-                    assertThat(promotePartitionsFuture.get(), hasItems(resultPartitionId));
+                    assertThat(promotePartitionsFuture.get())
+                            .satisfies(matching(hasItems(resultPartitionId)));
                 });
     }
 
@@ -318,11 +313,10 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
                 (jobId, resultPartitionDeploymentDescriptor, taskExecutor, taskExecutorGateway) -> {
                     final IntermediateDataSetID dataSetId =
                             resultPartitionDeploymentDescriptor.getResultId();
-
                     taskExecutorGateway.releaseClusterPartitions(
                             Collections.singleton(dataSetId), timeout);
-
-                    assertThat(releasePartitionsFuture.get(), hasItems(dataSetId));
+                    assertThat(releasePartitionsFuture.get())
+                            .satisfies(matching(hasItems(dataSetId)));
                 });
     }
 
@@ -510,7 +504,7 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
                     StreamSupport.stream(initialSlotReportFuture.get().spliterator(), false)
                             .findAny();
 
-            assertTrue(slotStatusOptional.isPresent());
+            assertThat(slotStatusOptional.isPresent()).isTrue();
 
             final SlotStatus slotStatus = slotStatusOptional.get();
 
@@ -549,12 +543,11 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
             TestingInvokable.sync.awaitBlocker();
 
             // the task is still running => the partition is in in-progress and should be tracked
-            assertThat(
-                    startTrackingFuture.get(),
-                    equalTo(
+            assertThat(startTrackingFuture.get())
+                    .isEqualTo(
                             taskResultPartitionDescriptor
                                     .getShuffleDescriptor()
-                                    .getResultPartitionID()));
+                                    .getResultPartitionID());
 
             TestingInvokable.sync.releaseBlocker();
             taskFinishedFuture.get(timeout.getSize(), timeout.getUnit());
@@ -567,7 +560,7 @@ public class TaskExecutorPartitionLifecycleTest extends TestLogger {
 
         // the shutdown of the backing shuffle environment releases all partitions
         // the book-keeping is not aware of this
-        assertTrue(shuffleEnvironment.getPartitionsOccupyingLocalResources().isEmpty());
+        assertThat(shuffleEnvironment.getPartitionsOccupyingLocalResources().isEmpty()).isTrue();
     }
 
     /** Test invokable which completes the given future when executed. */

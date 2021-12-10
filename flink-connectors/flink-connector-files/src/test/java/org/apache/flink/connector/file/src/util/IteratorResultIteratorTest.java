@@ -22,8 +22,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link IteratorResultIterator}. */
 public class IteratorResultIteratorTest {
@@ -40,9 +39,9 @@ public class IteratorResultIteratorTest {
 
         for (int i = 0; i < elements.length; i++) {
             final RecordAndPosition<String> recAndPos = iter.next();
-            assertEquals(elements[i], recAndPos.getRecord());
-            assertEquals(initialPos, recAndPos.getOffset());
-            assertEquals(initialSkipCount + i + 1, recAndPos.getRecordSkipCount());
+            assertThat(recAndPos.getRecord()).isEqualTo(elements[i]);
+            assertThat(recAndPos.getOffset()).isEqualTo(initialPos);
+            assertThat(recAndPos.getRecordSkipCount()).isEqualTo(initialSkipCount + i + 1);
         }
     }
 
@@ -54,6 +53,6 @@ public class IteratorResultIteratorTest {
         iter.next();
         iter.next();
 
-        assertNull(iter.next());
+        assertThat(iter.next()).isNull();
     }
 }

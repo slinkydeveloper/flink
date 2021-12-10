@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CirculantGraph}. */
 public class CirculantGraphTest extends GraphGeneratorTestBase {
@@ -54,14 +54,14 @@ public class CirculantGraphTest extends GraphGeneratorTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 new CirculantGraph(env, 10).addRange(offset, length).generate();
 
-        assertEquals(vertexCount, graph.numberOfVertices());
-        assertEquals(vertexCount * length, graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(vertexCount);
+        assertThat(graph.numberOfEdges()).isEqualTo(vertexCount * length);
 
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(length, maxInDegree);
-        assertEquals(length, maxOutDegree);
+        assertThat(maxInDegree).isEqualTo(length);
+        assertThat(maxOutDegree).isEqualTo(length);
     }
 
     @Test

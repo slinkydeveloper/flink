@@ -23,7 +23,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Additional tests for {@link PipelinedApproximateSubpartitionView} which require an availability
@@ -47,10 +47,11 @@ public class PipelinedApproximateSubpartitionWithReadViewTest
     @Override
     public void testRelease() {
         readView.releaseAllResources();
-        assertTrue(
-                resultPartition
-                        .getPartitionManager()
-                        .getUnreleasedPartitions()
-                        .contains(resultPartition.getPartitionId()));
+        assertThat(
+                        resultPartition
+                                .getPartitionManager()
+                                .getUnreleasedPartitions()
+                                .contains(resultPartition.getPartitionId()))
+                .isTrue();
     }
 }

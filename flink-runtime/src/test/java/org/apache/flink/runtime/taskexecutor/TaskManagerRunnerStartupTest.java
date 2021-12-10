@@ -63,10 +63,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.collection.IsIn.isIn;
 import static org.hamcrest.core.Every.everyItem;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Tests that check how the {@link TaskManagerRunner} behaves when encountering startup problems.
@@ -230,9 +231,8 @@ public class TaskManagerRunnerStartupTest extends TestLogger {
                                                 : Stream.empty())
                         .collect(Collectors.toSet());
 
-        assertThat(
-                expectedTaskManagerMetricsWithoutTaskManagerId,
-                everyItem(isIn(registeredMetricsWithoutTaskManagerId)));
+        assertThat(expectedTaskManagerMetricsWithoutTaskManagerId)
+                .satisfies(matching(everyItem(isIn(registeredMetricsWithoutTaskManagerId))));
     }
 
     // -----------------------------------------------------------------------------------------------

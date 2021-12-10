@@ -22,10 +22,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link SingletonResultIterator}. */
 public class SingletonResultIteratorTest {
@@ -33,7 +30,7 @@ public class SingletonResultIteratorTest {
     @Test
     public void testEmptyConstruction() {
         final SingletonResultIterator<Object> iter = new SingletonResultIterator<>();
-        assertNull(iter.next());
+        assertThat(iter.next()).isNull();
     }
 
     @Test
@@ -46,10 +43,10 @@ public class SingletonResultIteratorTest {
         iter.set(element, pos, skipCount);
 
         final RecordAndPosition<Object> record = iter.next();
-        assertNotNull(record);
-        assertEquals(element, record.getRecord());
-        assertEquals(pos, record.getOffset());
-        assertEquals(skipCount, record.getRecordSkipCount());
+        assertThat(record).isNotNull();
+        assertThat(record.getRecord()).isEqualTo(element);
+        assertThat(record.getOffset()).isEqualTo(pos);
+        assertThat(record.getRecordSkipCount()).isEqualTo(skipCount);
     }
 
     @Test
@@ -58,7 +55,7 @@ public class SingletonResultIteratorTest {
         iter.set(new Object(), 1, 2);
         iter.next();
 
-        assertNull(iter.next());
+        assertThat(iter.next()).isNull();
     }
 
     @Test
@@ -75,6 +72,6 @@ public class SingletonResultIteratorTest {
 
         iter.releaseBatch();
 
-        assertTrue(recycled.get());
+        assertThat(recycled.get()).isTrue();
     }
 }

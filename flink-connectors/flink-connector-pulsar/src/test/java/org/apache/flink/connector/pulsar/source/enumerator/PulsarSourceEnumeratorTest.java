@@ -46,8 +46,7 @@ import static org.apache.flink.connector.pulsar.source.PulsarSourceOptions.PULSA
 import static org.apache.flink.connector.pulsar.source.PulsarSourceOptions.PULSAR_SUBSCRIPTION_TYPE;
 import static org.apache.flink.connector.pulsar.source.enumerator.cursor.StopCursor.latest;
 import static org.apache.flink.connector.pulsar.source.enumerator.subscriber.PulsarSubscriber.getTopicPatternSubscriber;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link PulsarSourceEnumerator}. */
 class PulsarSourceEnumeratorTest extends PulsarTestSuiteBase {
@@ -86,11 +85,10 @@ class PulsarSourceEnumeratorTest extends PulsarTestSuiteBase {
             // Start the enumerator and it should schedule a one time task to discover and assign
             // partitions.
             enumerator.start();
-            assertTrue(context.getPeriodicCallables().isEmpty());
-            assertEquals(
-                    1,
-                    context.getOneTimeCallables().size(),
-                    "A one time partition discovery callable should have been scheduled");
+            assertThat(context.getPeriodicCallables().isEmpty()).isTrue();
+            assertThat(context.getOneTimeCallables().size())
+                    .as("A one time partition discovery callable should have been scheduled")
+                    .isEqualTo(1);
         }
     }
 
@@ -104,11 +102,10 @@ class PulsarSourceEnumeratorTest extends PulsarTestSuiteBase {
             // Start the enumerator and it should schedule a one time task to discover and assign
             // partitions.
             enumerator.start();
-            assertTrue(context.getOneTimeCallables().isEmpty());
-            assertEquals(
-                    1,
-                    context.getPeriodicCallables().size(),
-                    "A periodic partition discovery callable should have been scheduled");
+            assertThat(context.getOneTimeCallables().isEmpty()).isTrue();
+            assertThat(context.getPeriodicCallables().size())
+                    .as("A periodic partition discovery callable should have been scheduled")
+                    .isEqualTo(1);
         }
     }
 

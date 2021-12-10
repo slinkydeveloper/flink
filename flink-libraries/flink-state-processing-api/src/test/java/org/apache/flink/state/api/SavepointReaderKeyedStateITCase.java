@@ -31,7 +31,6 @@ import org.apache.flink.streaming.api.functions.KeyedProcessFunction;
 import org.apache.flink.streaming.api.functions.sink.DiscardingSink;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -40,6 +39,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT case for reading state. */
 public abstract class SavepointReaderKeyedStateITCase<B extends StateBackend>
@@ -77,8 +78,9 @@ public abstract class SavepointReaderKeyedStateITCase<B extends StateBackend>
 
         Set<Pojo> expected = new HashSet<>(elements);
 
-        Assert.assertEquals(
-                "Unexpected results from keyed state", expected, new HashSet<>(results));
+        assertThat(new HashSet<>(results))
+                .as("Unexpected results from keyed state")
+                .isEqualTo(expected);
     }
 
     private static class KeyedStatefulOperator extends KeyedProcessFunction<Integer, Pojo, Void> {

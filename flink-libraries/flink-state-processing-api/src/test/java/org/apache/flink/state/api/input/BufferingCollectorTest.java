@@ -18,8 +18,9 @@
 
 package org.apache.flink.state.api.input;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test of the buffering collector. */
 public class BufferingCollectorTest {
@@ -30,15 +31,16 @@ public class BufferingCollectorTest {
 
         collector.collect(1);
 
-        Assert.assertTrue("Failed to add element to collector", collector.hasNext());
-        Assert.assertEquals(
-                "Incorrect element removed from collector", Integer.valueOf(1), collector.next());
-        Assert.assertFalse("Failed to drop element from collector", collector.hasNext());
+        assertThat(collector.hasNext()).as("Failed to add element to collector").isTrue();
+        assertThat(collector.next())
+                .as("Incorrect element removed from collector")
+                .isEqualTo(Integer.valueOf(1));
+        assertThat(collector.hasNext()).as("Failed to drop element from collector").isFalse();
     }
 
     @Test
     public void testEmptyCollectorReturnsNull() {
         BufferingCollector<Integer> collector = new BufferingCollector<>();
-        Assert.assertNull("Empty collector did not return null", collector.next());
+        assertThat(collector.next()).as("Empty collector did not return null").isNull();
     }
 }

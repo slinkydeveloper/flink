@@ -32,7 +32,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.node.ObjectNode;
 
-import org.junit.Assert;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -85,7 +85,7 @@ public final class RestAPIStabilityTest extends TestLogger {
         final URL resource =
                 RestAPIStabilityTest.class.getClassLoader().getResource(versionedSnapshotFileName);
         if (resource == null) {
-            Assert.fail(
+            Assertions.fail(
                     "Snapshot file does not exist. If you added a new version, re-run this test with"
                             + " -D"
                             + REGENERATE_SNAPSHOT_PROPERTY
@@ -158,7 +158,7 @@ public final class RestAPIStabilityTest extends TestLogger {
                             result ->
                                     result.f1.getBackwardCompatibility()
                                             == Compatibility.IDENTICAL)) {
-                Assert.fail(
+                Assertions.fail(
                         "The API was modified in a compatible way, but the snapshot was not updated. "
                                 + "To update the snapshot, re-run this test with -D"
                                 + REGENERATE_SNAPSHOT_PROPERTY
@@ -181,7 +181,7 @@ public final class RestAPIStabilityTest extends TestLogger {
                             result ->
                                     result.f1.getBackwardCompatibility()
                                             == Compatibility.IDENTICAL)) {
-                Assert.fail(
+                Assertions.fail(
                         "The API was modified in a compatible way, but the snapshot was not updated. "
                                 + "To update the snapshot, re-run this test with -D"
                                 + REGENERATE_SNAPSHOT_PROPERTY
@@ -221,7 +221,7 @@ public final class RestAPIStabilityTest extends TestLogger {
                                 sb.append("\t\t" + error.getMessage());
                             }
                         });
-        Assert.fail(sb.toString());
+        Assertions.fail(sb.toString());
     }
 
     private static CompatibilityCheckResult checkCompatibility(

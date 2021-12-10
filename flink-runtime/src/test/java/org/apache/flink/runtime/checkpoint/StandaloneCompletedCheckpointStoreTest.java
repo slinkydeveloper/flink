@@ -32,8 +32,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 
 import static org.apache.flink.runtime.checkpoint.CheckpointRetentionPolicy.NEVER_RETAIN_AFTER_TERMINATION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for basic {@link CompletedCheckpointStore} contract. */
 public class StandaloneCompletedCheckpointStoreTest extends CompletedCheckpointStoreTest {
@@ -53,12 +52,12 @@ public class StandaloneCompletedCheckpointStoreTest extends CompletedCheckpointS
         Collection<OperatorState> operatorStates = checkpoint.getOperatorStates().values();
 
         store.addCheckpointAndSubsumeOldestOne(checkpoint, new CheckpointsCleaner(), () -> {});
-        assertEquals(1, store.getNumberOfRetainedCheckpoints());
+        assertThat(store.getNumberOfRetainedCheckpoints()).isEqualTo(1);
         verifyCheckpointRegistered(operatorStates, sharedStateRegistry);
 
         store.shutdown(JobStatus.FINISHED, new CheckpointsCleaner());
-        assertEquals(0, store.getNumberOfRetainedCheckpoints());
-        assertTrue(checkpoint.isDiscarded());
+        assertThat(store.getNumberOfRetainedCheckpoints()).isEqualTo(0);
+        assertThat(checkpoint.isDiscarded()).isTrue();
         verifyCheckpointDiscarded(operatorStates);
     }
 
@@ -74,12 +73,12 @@ public class StandaloneCompletedCheckpointStoreTest extends CompletedCheckpointS
         Collection<OperatorState> taskStates = checkpoint.getOperatorStates().values();
 
         store.addCheckpointAndSubsumeOldestOne(checkpoint, new CheckpointsCleaner(), () -> {});
-        assertEquals(1, store.getNumberOfRetainedCheckpoints());
+        assertThat(store.getNumberOfRetainedCheckpoints()).isEqualTo(1);
         verifyCheckpointRegistered(taskStates, sharedStateRegistry);
 
         store.shutdown(JobStatus.SUSPENDED, new CheckpointsCleaner());
-        assertEquals(0, store.getNumberOfRetainedCheckpoints());
-        assertTrue(checkpoint.isDiscarded());
+        assertThat(store.getNumberOfRetainedCheckpoints()).isEqualTo(0);
+        assertThat(checkpoint.isDiscarded()).isTrue();
         verifyCheckpointDiscarded(taskStates);
     }
 

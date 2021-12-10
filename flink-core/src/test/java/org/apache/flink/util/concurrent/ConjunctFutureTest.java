@@ -37,13 +37,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link ConjunctFuture} and its sub classes. */
 @RunWith(Parameterized.class)
@@ -60,14 +56,14 @@ public class ConjunctFutureTest extends TestLogger {
     public void testConjunctFutureFailsOnEmptyAndNull() throws Exception {
         try {
             futureFactory.createFuture(null);
-            fail();
+            fail("unknown failure");
         } catch (NullPointerException ignored) {
         }
 
         try {
             futureFactory.createFuture(
                     Arrays.asList(new CompletableFuture<>(), null, new CompletableFuture<>()));
-            fail();
+            fail("unknown failure");
         } catch (NullPointerException ignored) {
         }
     }
@@ -93,33 +89,33 @@ public class ConjunctFutureTest extends TestLogger {
 
         CompletableFuture<?> resultMapped = result.thenAccept(value -> {});
 
-        assertEquals(4, result.getNumFuturesTotal());
-        assertEquals(1, result.getNumFuturesCompleted());
-        assertFalse(result.isDone());
-        assertFalse(resultMapped.isDone());
+        assertThat(result.getNumFuturesTotal()).isEqualTo(4);
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(1);
+        assertThat(result.isDone()).isFalse();
+        assertThat(resultMapped.isDone()).isFalse();
 
         // complete two more futures
         future4.complete(new Object());
-        assertEquals(2, result.getNumFuturesCompleted());
-        assertFalse(result.isDone());
-        assertFalse(resultMapped.isDone());
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(2);
+        assertThat(result.isDone()).isFalse();
+        assertThat(resultMapped.isDone()).isFalse();
 
         future1.complete(new Object());
-        assertEquals(3, result.getNumFuturesCompleted());
-        assertFalse(result.isDone());
-        assertFalse(resultMapped.isDone());
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(3);
+        assertThat(result.isDone()).isFalse();
+        assertThat(resultMapped.isDone()).isFalse();
 
         // complete one future again
         future1.complete(new Object());
-        assertEquals(3, result.getNumFuturesCompleted());
-        assertFalse(result.isDone());
-        assertFalse(resultMapped.isDone());
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(3);
+        assertThat(result.isDone()).isFalse();
+        assertThat(resultMapped.isDone()).isFalse();
 
         // complete the final future
         future3.complete(new Object());
-        assertEquals(4, result.getNumFuturesCompleted());
-        assertTrue(result.isDone());
-        assertTrue(resultMapped.isDone());
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(4);
+        assertThat(result.isDone()).isTrue();
+        assertThat(resultMapped.isDone()).isTrue();
     }
 
     @Test
@@ -140,29 +136,29 @@ public class ConjunctFutureTest extends TestLogger {
 
         CompletableFuture<?> resultMapped = result.thenAccept(value -> {});
 
-        assertEquals(4, result.getNumFuturesTotal());
-        assertEquals(0, result.getNumFuturesCompleted());
-        assertFalse(result.isDone());
-        assertFalse(resultMapped.isDone());
+        assertThat(result.getNumFuturesTotal()).isEqualTo(4);
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(0);
+        assertThat(result.isDone()).isFalse();
+        assertThat(resultMapped.isDone()).isFalse();
 
         future2.completeExceptionally(new IOException());
 
-        assertEquals(0, result.getNumFuturesCompleted());
-        assertTrue(result.isDone());
-        assertTrue(resultMapped.isDone());
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(0);
+        assertThat(result.isDone()).isTrue();
+        assertThat(resultMapped.isDone()).isTrue();
 
         try {
             result.get();
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof IOException);
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
         }
 
         try {
             resultMapped.get();
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof IOException);
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
         }
     }
 
@@ -181,7 +177,7 @@ public class ConjunctFutureTest extends TestLogger {
         // build the conjunct future
         ConjunctFuture<?> result =
                 futureFactory.createFuture(Arrays.asList(future1, future2, future3, future4));
-        assertEquals(4, result.getNumFuturesTotal());
+        assertThat(result.getNumFuturesTotal()).isEqualTo(4);
 
         java.util.concurrent.CompletableFuture<?> resultMapped = result.thenAccept(value -> {});
 
@@ -191,22 +187,22 @@ public class ConjunctFutureTest extends TestLogger {
 
         future2.completeExceptionally(new IOException());
 
-        assertEquals(3, result.getNumFuturesCompleted());
-        assertTrue(result.isDone());
-        assertTrue(resultMapped.isDone());
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(3);
+        assertThat(result.isDone()).isTrue();
+        assertThat(resultMapped.isDone()).isTrue();
 
         try {
             result.get();
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof IOException);
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
         }
 
         try {
             resultMapped.get();
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof IOException);
+            assertThat(e.getCause()).isInstanceOf(IOException.class);
         }
     }
 
@@ -232,19 +228,18 @@ public class ConjunctFutureTest extends TestLogger {
         Collections.shuffle(shuffledFutures);
 
         for (Tuple2<Integer, CompletableFuture<Integer>> shuffledFuture : shuffledFutures) {
-            assertThat(result.isDone(), is(false));
+            assertThat(result.isDone()).isEqualTo(false);
             shuffledFuture.f1.complete(shuffledFuture.f0);
         }
 
-        assertThat(result.isDone(), is(true));
+        assertThat(result.isDone()).isEqualTo(true);
 
-        assertThat(
-                result.get(),
-                is(
+        assertThat(result.get())
+                .isEqualTo(
                         equalTo(
                                 IntStream.range(0, numberFutures)
                                         .boxed()
-                                        .collect(Collectors.toList()))));
+                                        .collect(Collectors.toList())));
     }
 
     @Test
@@ -253,9 +248,9 @@ public class ConjunctFutureTest extends TestLogger {
                 futureFactory.createFuture(
                         Collections.<java.util.concurrent.CompletableFuture<Object>>emptyList());
 
-        assertEquals(0, result.getNumFuturesTotal());
-        assertEquals(0, result.getNumFuturesCompleted());
-        assertTrue(result.isDone());
+        assertThat(result.getNumFuturesTotal()).isEqualTo(0);
+        assertThat(result.getNumFuturesCompleted()).isEqualTo(0);
+        assertThat(result.isDone()).isTrue();
     }
 
     /** Factory to create {@link ConjunctFuture} for testing. */

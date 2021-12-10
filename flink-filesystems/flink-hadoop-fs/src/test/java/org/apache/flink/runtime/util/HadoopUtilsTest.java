@@ -32,8 +32,7 @@ import org.mockito.Mockito;
 import sun.security.krb5.KrbException;
 
 import static org.apache.flink.runtime.util.HadoopUtils.HDFS_DELEGATION_TOKEN_KIND;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
@@ -66,8 +65,8 @@ public class HadoopUtilsTest extends TestLogger {
         boolean result =
                 HadoopUtils.areKerberosCredentialsValid(userWithoutCredentialsOrTokens, true);
 
-        assertTrue(isKerberosEnabled);
-        assertFalse(result);
+        assertThat(isKerberosEnabled).isTrue();
+        assertThat(result).isFalse();
     }
 
     @Test
@@ -82,7 +81,7 @@ public class HadoopUtilsTest extends TestLogger {
         boolean result =
                 HadoopUtils.areKerberosCredentialsValid(userWithoutCredentialsButHavingToken, true);
 
-        assertTrue(result);
+        assertThat(result).isTrue();
     }
 
     @Test
@@ -96,7 +95,7 @@ public class HadoopUtilsTest extends TestLogger {
 
         boolean result = HadoopUtils.areKerberosCredentialsValid(userWithCredentials, true);
 
-        assertTrue(result);
+        assertThat(result).isTrue();
     }
 
     @Test
@@ -108,7 +107,7 @@ public class HadoopUtilsTest extends TestLogger {
 
         boolean result = HadoopUtils.isKerberosSecurityEnabled(userWithAuthMethodOtherThanKerberos);
 
-        assertFalse(result);
+        assertThat(result).isFalse();
     }
 
     @Test
@@ -119,7 +118,7 @@ public class HadoopUtilsTest extends TestLogger {
 
         boolean result = HadoopUtils.areKerberosCredentialsValid(user, false);
 
-        assertTrue(result);
+        assertThat(result).isTrue();
     }
 
     @Test
@@ -129,7 +128,7 @@ public class HadoopUtilsTest extends TestLogger {
 
         boolean result = HadoopUtils.hasHDFSDelegationToken(userWithToken);
 
-        assertTrue(result);
+        assertThat(result).isTrue();
     }
 
     @Test
@@ -139,7 +138,7 @@ public class HadoopUtilsTest extends TestLogger {
 
         boolean result = HadoopUtils.hasHDFSDelegationToken(userWithoutToken);
 
-        assertFalse(result);
+        assertThat(result).isFalse();
     }
 
     private static Configuration getHadoopConfigWithAuthMethod(

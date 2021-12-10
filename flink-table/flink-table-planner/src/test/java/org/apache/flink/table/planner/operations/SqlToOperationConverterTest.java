@@ -88,7 +88,6 @@ import org.apache.flink.table.utils.ExpressionResolverMocks;
 
 import org.apache.calcite.sql.SqlNode;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -111,14 +110,8 @@ import static org.apache.flink.table.planner.utils.OperationMatchers.isCreateTab
 import static org.apache.flink.table.planner.utils.OperationMatchers.partitionedBy;
 import static org.apache.flink.table.planner.utils.OperationMatchers.withOptions;
 import static org.apache.flink.table.planner.utils.OperationMatchers.withSchema;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Test cases for {@link SqlToOperationConverter}. */
 public class SqlToOperationConverterTest {
@@ -193,23 +186,23 @@ public class SqlToOperationConverterTest {
     public void testUseCatalog() {
         final String sql = "USE CATALOG cat1";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof UseCatalogOperation;
-        assertEquals("cat1", ((UseCatalogOperation) operation).getCatalogName());
+        assertThat(operation).isInstanceOf(UseCatalogOperation.class);
+        assertThat(((UseCatalogOperation) operation).getCatalogName()).isEqualTo("cat1");
     }
 
     @Test
     public void testUseDatabase() {
         final String sql1 = "USE db1";
         Operation operation1 = parse(sql1, SqlDialect.DEFAULT);
-        assert operation1 instanceof UseDatabaseOperation;
-        assertEquals("builtin", ((UseDatabaseOperation) operation1).getCatalogName());
-        assertEquals("db1", ((UseDatabaseOperation) operation1).getDatabaseName());
+        assertThat(operation1).isInstanceOf(UseDatabaseOperation.class);
+        assertThat(((UseDatabaseOperation) operation1).getCatalogName()).isEqualTo("builtin");
+        assertThat(((UseDatabaseOperation) operation1).getDatabaseName()).isEqualTo("db1");
 
         final String sql2 = "USE cat1.db1";
         Operation operation2 = parse(sql2, SqlDialect.DEFAULT);
-        assert operation2 instanceof UseDatabaseOperation;
-        assertEquals("cat1", ((UseDatabaseOperation) operation2).getCatalogName());
-        assertEquals("db1", ((UseDatabaseOperation) operation2).getDatabaseName());
+        assertThat(operation2).isInstanceOf(UseDatabaseOperation.class);
+        assertThat(((UseDatabaseOperation) operation2).getCatalogName()).isEqualTo("cat1");
+        assertThat(((UseDatabaseOperation) operation2).getDatabaseName()).isEqualTo("db1");
     }
 
     @Test(expected = ValidationException.class)
@@ -244,17 +237,17 @@ public class SqlToOperationConverterTest {
 
         for (int i = 0; i < createDatabaseSqls.length; i++) {
             Operation operation = parse(createDatabaseSqls[i], SqlDialect.DEFAULT);
-            assert operation instanceof CreateDatabaseOperation;
+            assertThat(operation).isInstanceOf(CreateDatabaseOperation.class);
             final CreateDatabaseOperation createDatabaseOperation =
                     (CreateDatabaseOperation) operation;
-            assertEquals(expectedCatalogs[i], createDatabaseOperation.getCatalogName());
-            assertEquals(expectedDatabase, createDatabaseOperation.getDatabaseName());
-            assertEquals(
-                    expectedComments[i], createDatabaseOperation.getCatalogDatabase().getComment());
-            assertEquals(expectedIgnoreIfExists[i], createDatabaseOperation.isIgnoreIfExists());
-            assertEquals(
-                    expectedProperties[i],
-                    createDatabaseOperation.getCatalogDatabase().getProperties());
+            assertThat(createDatabaseOperation.getCatalogName()).isEqualTo(expectedCatalogs[i]);
+            assertThat(createDatabaseOperation.getDatabaseName()).isEqualTo(expectedDatabase);
+            assertThat(createDatabaseOperation.getCatalogDatabase().getComment())
+                    .isEqualTo(expectedComments[i]);
+            assertThat(createDatabaseOperation.isIgnoreIfExists())
+                    .isEqualTo(expectedIgnoreIfExists[i]);
+            assertThat(createDatabaseOperation.getCatalogDatabase().getProperties())
+                    .isEqualTo(expectedProperties[i]);
         }
     }
 
@@ -274,12 +267,12 @@ public class SqlToOperationConverterTest {
 
         for (int i = 0; i < dropDatabaseSqls.length; i++) {
             Operation operation = parse(dropDatabaseSqls[i], SqlDialect.DEFAULT);
-            assert operation instanceof DropDatabaseOperation;
+            assertThat(operation).isInstanceOf(DropDatabaseOperation.class);
             final DropDatabaseOperation dropDatabaseOperation = (DropDatabaseOperation) operation;
-            assertEquals(expectedCatalogs[i], dropDatabaseOperation.getCatalogName());
-            assertEquals(expectedDatabase, dropDatabaseOperation.getDatabaseName());
-            assertEquals(expectedIfExists[i], dropDatabaseOperation.isIfExists());
-            assertEquals(expectedIsCascades[i], dropDatabaseOperation.isCascade());
+            assertThat(dropDatabaseOperation.getCatalogName()).isEqualTo(expectedCatalogs[i]);
+            assertThat(dropDatabaseOperation.getDatabaseName()).isEqualTo(expectedDatabase);
+            assertThat(dropDatabaseOperation.isIfExists()).isEqualTo(expectedIfExists[i]);
+            assertThat(dropDatabaseOperation.isCascade()).isEqualTo(expectedIsCascades[i]);
         }
     }
 
@@ -293,18 +286,16 @@ public class SqlToOperationConverterTest {
                         "db1", new CatalogDatabaseImpl(new HashMap<>(), "db1_comment"), true);
         final String sql = "alter database cat1.db1 set ('k1'='v1', 'K2'='V2')";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof AlterDatabaseOperation;
+        assertThat(operation).isInstanceOf(AlterDatabaseOperation.class);
         Map<String, String> properties = new HashMap<>();
         properties.put("k1", "v1");
         properties.put("K2", "V2");
-        assertEquals("db1", ((AlterDatabaseOperation) operation).getDatabaseName());
-        assertEquals("cat1", ((AlterDatabaseOperation) operation).getCatalogName());
-        assertEquals(
-                "db1_comment",
-                ((AlterDatabaseOperation) operation).getCatalogDatabase().getComment());
-        assertEquals(
-                properties,
-                ((AlterDatabaseOperation) operation).getCatalogDatabase().getProperties());
+        assertThat(((AlterDatabaseOperation) operation).getDatabaseName()).isEqualTo("db1");
+        assertThat(((AlterDatabaseOperation) operation).getCatalogName()).isEqualTo("cat1");
+        assertThat(((AlterDatabaseOperation) operation).getCatalogDatabase().getComment())
+                .isEqualTo("db1_comment");
+        assertThat(((AlterDatabaseOperation) operation).getCatalogDatabase().getProperties())
+                .isEqualTo(properties);
     }
 
     @Test
@@ -316,11 +307,11 @@ public class SqlToOperationConverterTest {
         expectedOptions.put("k2", "v2");
 
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof LoadModuleOperation;
+        assertThat(operation).isInstanceOf(LoadModuleOperation.class);
         final LoadModuleOperation loadModuleOperation = (LoadModuleOperation) operation;
 
-        assertEquals(expectedModuleName, loadModuleOperation.getModuleName());
-        assertEquals(expectedOptions, loadModuleOperation.getOptions());
+        assertThat(loadModuleOperation.getModuleName()).isEqualTo(expectedModuleName);
+        assertThat(loadModuleOperation.getOptions()).isEqualTo(expectedOptions);
     }
 
     @Test
@@ -329,10 +320,10 @@ public class SqlToOperationConverterTest {
         final String expectedModuleName = "dummy";
 
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof UnloadModuleOperation;
+        assertThat(operation).isInstanceOf(UnloadModuleOperation.class);
         final UnloadModuleOperation unloadModuleOperation = (UnloadModuleOperation) operation;
 
-        assertEquals(expectedModuleName, unloadModuleOperation.getModuleName());
+        assertThat(unloadModuleOperation.getModuleName()).isEqualTo(expectedModuleName);
     }
 
     @Test
@@ -341,11 +332,11 @@ public class SqlToOperationConverterTest {
         final List<String> expectedModuleNames = Collections.singletonList("dummy");
 
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof UseModulesOperation;
+        assertThat(operation).isInstanceOf(UseModulesOperation.class);
         final UseModulesOperation useModulesOperation = (UseModulesOperation) operation;
 
-        assertEquals(expectedModuleNames, useModulesOperation.getModuleNames());
-        assertEquals("USE MODULES: [dummy]", useModulesOperation.asSummaryString());
+        assertThat(useModulesOperation.getModuleNames()).isEqualTo(expectedModuleNames);
+        assertThat(useModulesOperation.asSummaryString()).isEqualTo("USE MODULES: [dummy]");
     }
 
     @Test
@@ -354,33 +345,33 @@ public class SqlToOperationConverterTest {
         final List<String> expectedModuleNames = Arrays.asList("x", "y", "z");
 
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof UseModulesOperation;
+        assertThat(operation).isInstanceOf(UseModulesOperation.class);
         final UseModulesOperation useModulesOperation = (UseModulesOperation) operation;
 
-        assertEquals(expectedModuleNames, useModulesOperation.getModuleNames());
-        assertEquals("USE MODULES: [x, y, z]", useModulesOperation.asSummaryString());
+        assertThat(useModulesOperation.getModuleNames()).isEqualTo(expectedModuleNames);
+        assertThat(useModulesOperation.asSummaryString()).isEqualTo("USE MODULES: [x, y, z]");
     }
 
     @Test
     public void testShowModules() {
         final String sql = "SHOW MODULES";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof ShowModulesOperation;
+        assertThat(operation).isInstanceOf(ShowModulesOperation.class);
         final ShowModulesOperation showModulesOperation = (ShowModulesOperation) operation;
 
-        assertFalse(showModulesOperation.requireFull());
-        assertEquals("SHOW MODULES", showModulesOperation.asSummaryString());
+        assertThat(showModulesOperation.requireFull()).isFalse();
+        assertThat(showModulesOperation.asSummaryString()).isEqualTo("SHOW MODULES");
     }
 
     @Test
     public void testShowFullModules() {
         final String sql = "SHOW FULL MODULES";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof ShowModulesOperation;
+        assertThat(operation).isInstanceOf(ShowModulesOperation.class);
         final ShowModulesOperation showModulesOperation = (ShowModulesOperation) operation;
 
-        assertTrue(showModulesOperation.requireFull());
-        assertEquals("SHOW FULL MODULES", showModulesOperation.asSummaryString());
+        assertThat(showModulesOperation.requireFull()).isTrue();
+        assertThat(showModulesOperation.asSummaryString()).isEqualTo("SHOW FULL MODULES");
     }
 
     @Test
@@ -409,20 +400,20 @@ public class SqlToOperationConverterTest {
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, parser);
-        assert operation instanceof CreateTableOperation;
+        assertThat(operation).isInstanceOf(CreateTableOperation.class);
         CreateTableOperation op = (CreateTableOperation) operation;
         CatalogTable catalogTable = op.getCatalogTable();
-        assertEquals(Arrays.asList("a", "d"), catalogTable.getPartitionKeys());
-        assertArrayEquals(
-                catalogTable.getSchema().getFieldNames(), new String[] {"a", "b", "c", "d"});
-        assertArrayEquals(
-                catalogTable.getSchema().getFieldDataTypes(),
-                new DataType[] {
-                    DataTypes.BIGINT(),
-                    DataTypes.VARCHAR(Integer.MAX_VALUE),
-                    DataTypes.INT(),
-                    DataTypes.VARCHAR(Integer.MAX_VALUE)
-                });
+        assertThat(catalogTable.getPartitionKeys()).isEqualTo(Arrays.asList("a", "d"));
+        assertThat(new String[] {"a", "b", "c", "d"})
+                .isEqualTo(catalogTable.getSchema().getFieldNames());
+        assertThat(
+                        new DataType[] {
+                            DataTypes.BIGINT(),
+                            DataTypes.VARCHAR(Integer.MAX_VALUE),
+                            DataTypes.INT(),
+                            DataTypes.VARCHAR(Integer.MAX_VALUE)
+                        })
+                .isEqualTo(catalogTable.getSchema().getFieldDataTypes());
     }
 
     @Test
@@ -441,25 +432,25 @@ public class SqlToOperationConverterTest {
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, parser);
-        assert operation instanceof CreateTableOperation;
+        assertThat(operation).isInstanceOf(CreateTableOperation.class);
         CreateTableOperation op = (CreateTableOperation) operation;
         CatalogTable catalogTable = op.getCatalogTable();
         TableSchema tableSchema = catalogTable.getSchema();
         assertThat(
-                tableSchema
-                        .getPrimaryKey()
-                        .map(UniqueConstraint::asSummaryString)
-                        .orElse("fakeVal"),
-                is("CONSTRAINT ct1 PRIMARY KEY (a, b)"));
-        assertArrayEquals(new String[] {"a", "b", "c", "d"}, tableSchema.getFieldNames());
-        assertArrayEquals(
-                new DataType[] {
-                    DataTypes.BIGINT().notNull(),
-                    DataTypes.STRING().notNull(),
-                    DataTypes.INT(),
-                    DataTypes.STRING()
-                },
-                tableSchema.getFieldDataTypes());
+                        tableSchema
+                                .getPrimaryKey()
+                                .map(UniqueConstraint::asSummaryString)
+                                .orElse("fakeVal"))
+                .isEqualTo("CONSTRAINT ct1 PRIMARY KEY (a, b)");
+        assertThat(tableSchema.getFieldNames()).isEqualTo(new String[] {"a", "b", "c", "d"});
+        assertThat(tableSchema.getFieldDataTypes())
+                .isEqualTo(
+                        new DataType[] {
+                            DataTypes.BIGINT().notNull(),
+                            DataTypes.STRING().notNull(),
+                            DataTypes.INT(),
+                            DataTypes.STRING()
+                        });
     }
 
     @Test
@@ -560,9 +551,9 @@ public class SqlToOperationConverterTest {
         final FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         SqlNode node = parser.parse(sql);
-        assert node instanceof SqlCreateTable;
+        assertThat(node).isInstanceOf(SqlCreateTable.class);
         Operation operation = SqlToOperationConverter.convert(planner, catalogManager, node).get();
-        assert operation instanceof CreateTableOperation;
+        assertThat(operation).isInstanceOf(CreateTableOperation.class);
         CreateTableOperation op = (CreateTableOperation) operation;
         CatalogTable catalogTable = op.getCatalogTable();
         Map<String, String> options =
@@ -574,7 +565,7 @@ public class SqlToOperationConverterTest {
                         + "a.b-c-d.*=adad, "
                         + "a.b-c-d.e-f.g=ada, "
                         + "a.b-c-d.e-f1231.g=ada}";
-        assertEquals(expected, sortedProperties.toString());
+        assertThat(sortedProperties.toString()).isEqualTo(expected);
     }
 
     @Test
@@ -605,9 +596,9 @@ public class SqlToOperationConverterTest {
         final FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         SqlNode node = parser.parse(sql);
-        assert node instanceof SqlRichExplain;
+        assertThat(node).isInstanceOf(SqlRichExplain.class);
         Operation operation = SqlToOperationConverter.convert(planner, catalogManager, node).get();
-        assert operation instanceof ExplainOperation;
+        assertThat(operation).isInstanceOf(ExplainOperation.class);
     }
 
     @Test
@@ -628,9 +619,9 @@ public class SqlToOperationConverterTest {
         final FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         SqlNode node = parser.parse(sql);
-        assert node instanceof SqlCreateTable;
+        assertThat(node).isInstanceOf(SqlCreateTable.class);
         Operation operation = SqlToOperationConverter.convert(planner, catalogManager, node).get();
-        assert operation instanceof CreateTableOperation;
+        assertThat(operation).isInstanceOf(CreateTableOperation.class);
         CreateTableOperation op = (CreateTableOperation) operation;
         CatalogTable catalogTable = op.getCatalogTable();
         Map<String, String> properties = catalogTable.toProperties();
@@ -647,7 +638,7 @@ public class SqlToOperationConverterTest {
                 "`builtin`.`default`.`myfunc`(`c`, 1) - INTERVAL '5' SECOND");
         expected.put("schema.watermark.0.strategy.data-type", "TIMESTAMP(3)");
         expected.put("connector.type", "kafka");
-        assertEquals(expected, properties);
+        assertThat(properties).isEqualTo(expected);
     }
 
     @Test
@@ -679,18 +670,22 @@ public class SqlToOperationConverterTest {
                         + "like sourceTable";
         Operation operation = parseAndConvert(sql);
 
-        assertThat(
-                operation,
-                isCreateTableOperation(
-                        withSchema(
-                                Schema.newBuilder()
-                                        .column("f0", DataTypes.INT().notNull())
-                                        .column("f1", DataTypes.TIMESTAMP(3))
-                                        .column("a", DataTypes.INT())
-                                        .watermark("f1", "`f1` - INTERVAL '5' SECOND")
-                                        .build()),
-                        withOptions(entry("connector.type", "kafka"), entry("format.type", "json")),
-                        partitionedBy("a", "f0")));
+        assertThat(operation)
+                .satisfies(
+                        matching(
+                                isCreateTableOperation(
+                                        withSchema(
+                                                Schema.newBuilder()
+                                                        .column("f0", DataTypes.INT().notNull())
+                                                        .column("f1", DataTypes.TIMESTAMP(3))
+                                                        .column("a", DataTypes.INT())
+                                                        .watermark(
+                                                                "f1", "`f1` - INTERVAL '5' SECOND")
+                                                        .build()),
+                                        withOptions(
+                                                entry("connector.type", "kafka"),
+                                                entry("format.type", "json")),
+                                        partitionedBy("a", "f0"))));
     }
 
     @Test
@@ -712,16 +707,18 @@ public class SqlToOperationConverterTest {
         final String sql = "create table mytable like `builtin`.`default`.sourceTable";
         Operation operation = parseAndConvert(sql);
 
-        assertThat(
-                operation,
-                isCreateTableOperation(
-                        withSchema(
-                                Schema.newBuilder()
-                                        .column("f0", DataTypes.INT().notNull())
-                                        .column("f1", DataTypes.TIMESTAMP(3))
-                                        .build()),
-                        withOptions(
-                                entry("connector.type", "kafka"), entry("format.type", "json"))));
+        assertThat(operation)
+                .satisfies(
+                        matching(
+                                isCreateTableOperation(
+                                        withSchema(
+                                                Schema.newBuilder()
+                                                        .column("f0", DataTypes.INT().notNull())
+                                                        .column("f1", DataTypes.TIMESTAMP(3))
+                                                        .build()),
+                                        withOptions(
+                                                entry("connector.type", "kafka"),
+                                                entry("format.type", "json")))));
     }
 
     @Test
@@ -760,18 +757,22 @@ public class SqlToOperationConverterTest {
                         + ")";
         Operation operation = parseAndConvert(sql);
 
-        assertThat(
-                operation,
-                isCreateTableOperation(
-                        withSchema(
-                                Schema.newBuilder()
-                                        .column("f0", DataTypes.INT().notNull())
-                                        .column("f1", DataTypes.TIMESTAMP(3))
-                                        .column("a", DataTypes.INT())
-                                        .watermark("f1", "`f1` - INTERVAL '5' SECOND")
-                                        .build()),
-                        withOptions(entry("connector.type", "kafka"), entry("format.type", "json")),
-                        partitionedBy("a", "f0")));
+        assertThat(operation)
+                .satisfies(
+                        matching(
+                                isCreateTableOperation(
+                                        withSchema(
+                                                Schema.newBuilder()
+                                                        .column("f0", DataTypes.INT().notNull())
+                                                        .column("f1", DataTypes.TIMESTAMP(3))
+                                                        .column("a", DataTypes.INT())
+                                                        .watermark(
+                                                                "f1", "`f1` - INTERVAL '5' SECOND")
+                                                        .build()),
+                                        withOptions(
+                                                entry("connector.type", "kafka"),
+                                                entry("format.type", "json")),
+                                        partitionedBy("a", "f0"))));
     }
 
     @Test
@@ -890,11 +891,11 @@ public class SqlToOperationConverterTest {
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, parser);
-        assert operation instanceof CatalogSinkModifyOperation;
+        assertThat(operation).isInstanceOf(CatalogSinkModifyOperation.class);
         CatalogSinkModifyOperation sinkModifyOperation = (CatalogSinkModifyOperation) operation;
         final Map<String, String> expectedStaticPartitions = new HashMap<>();
         expectedStaticPartitions.put("a", "1");
-        assertEquals(expectedStaticPartitions, sinkModifyOperation.getStaticPartitions());
+        assertThat(sinkModifyOperation.getStaticPartitions()).isEqualTo(expectedStaticPartitions);
     }
 
     @Test
@@ -905,12 +906,12 @@ public class SqlToOperationConverterTest {
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, parser);
-        assert operation instanceof CatalogSinkModifyOperation;
+        assertThat(operation).isInstanceOf(CatalogSinkModifyOperation.class);
         CatalogSinkModifyOperation sinkModifyOperation = (CatalogSinkModifyOperation) operation;
         Map<String, String> dynamicOptions = sinkModifyOperation.getDynamicOptions();
-        assertNotNull(dynamicOptions);
-        assertThat(dynamicOptions.size(), is(2));
-        assertThat(dynamicOptions.toString(), is("{k1=v1, k2=v2}"));
+        assertThat(dynamicOptions).isNotNull();
+        assertThat(dynamicOptions.size()).isEqualTo(2);
+        assertThat(dynamicOptions.toString()).isEqualTo("{k1=v1, k2=v2}");
     }
 
     @Test
@@ -1069,11 +1070,11 @@ public class SqlToOperationConverterTest {
         final FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         SqlNode node = parser.parse(sql);
-        assert node instanceof SqlCreateTable;
+        assertThat(node).isInstanceOf(SqlCreateTable.class);
         Operation operation = SqlToOperationConverter.convert(planner, catalogManager, node).get();
         TableSchema schema = ((CreateTableOperation) operation).getCatalogTable().getSchema();
         Object[] expectedDataTypes = testItems.stream().map(item -> item.expectedType).toArray();
-        assertArrayEquals(expectedDataTypes, schema.getFieldDataTypes());
+        assertThat(schema.getFieldDataTypes()).isEqualTo(expectedDataTypes);
     }
 
     @Test
@@ -1100,23 +1101,22 @@ public class SqlToOperationConverterTest {
                 ObjectIdentifier.of("builtin", "default", "my_udf3"), Func8$.MODULE$);
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, getParserBySqlDialect(SqlDialect.DEFAULT));
-        assert operation instanceof CreateTableOperation;
+        assertThat(operation).isInstanceOf(CreateTableOperation.class);
         CreateTableOperation op = (CreateTableOperation) operation;
         CatalogTable catalogTable = op.getCatalogTable();
-        assertArrayEquals(
-                new String[] {"a", "b", "c", "d", "e", "f", "g"},
-                catalogTable.getSchema().getFieldNames());
-        assertArrayEquals(
-                new DataType[] {
-                    DataTypes.INT(),
-                    DataTypes.STRING(),
-                    DataTypes.INT(),
-                    DataTypes.STRING(),
-                    DataTypes.INT().notNull(),
-                    DataTypes.INT(),
-                    DataTypes.STRING()
-                },
-                catalogTable.getSchema().getFieldDataTypes());
+        assertThat(catalogTable.getSchema().getFieldNames())
+                .isEqualTo(new String[] {"a", "b", "c", "d", "e", "f", "g"});
+        assertThat(catalogTable.getSchema().getFieldDataTypes())
+                .isEqualTo(
+                        new DataType[] {
+                            DataTypes.INT(),
+                            DataTypes.STRING(),
+                            DataTypes.INT(),
+                            DataTypes.STRING(),
+                            DataTypes.INT().notNull(),
+                            DataTypes.INT(),
+                            DataTypes.STRING()
+                        });
         String[] columnExpressions =
                 catalogTable.getSchema().getTableColumns().stream()
                         .filter(ComputedColumn.class::isInstance)
@@ -1131,7 +1131,7 @@ public class SqlToOperationConverterTest {
                     "`builtin`.`default`.`my_udf2`(`a`) + 1",
                     "`builtin`.`default`.`my_udf3`(`a`) || '##'"
                 };
-        assertArrayEquals(expected, columnExpressions);
+        assertThat(columnExpressions).isEqualTo(expected);
     }
 
     @Test
@@ -1151,7 +1151,7 @@ public class SqlToOperationConverterTest {
 
         final FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final Operation operation = parse(sql, planner, getParserBySqlDialect(SqlDialect.DEFAULT));
-        assert operation instanceof CreateTableOperation;
+        assertThat(operation).isInstanceOf(CreateTableOperation.class);
         final CreateTableOperation op = (CreateTableOperation) operation;
         final TableSchema actualSchema = op.getCatalogTable().getSchema();
 
@@ -1164,7 +1164,7 @@ public class SqlToOperationConverterTest {
                         .add(TableColumn.metadata("e", DataTypes.INT(), true))
                         .build();
 
-        assertEquals(expectedSchema, actualSchema);
+        assertThat(actualSchema).isEqualTo(expectedSchema);
     }
 
     @Test
@@ -1181,11 +1181,13 @@ public class SqlToOperationConverterTest {
         // test rename table converter
         for (int i = 0; i < renameTableSqls.length; i++) {
             Operation operation = parse(renameTableSqls[i], SqlDialect.DEFAULT);
-            assert operation instanceof AlterTableRenameOperation;
+            assertThat(operation).isInstanceOf(AlterTableRenameOperation.class);
             final AlterTableRenameOperation alterTableRenameOperation =
                     (AlterTableRenameOperation) operation;
-            assertEquals(expectedIdentifier, alterTableRenameOperation.getTableIdentifier());
-            assertEquals(expectedNewIdentifier, alterTableRenameOperation.getNewTableIdentifier());
+            assertThat(alterTableRenameOperation.getTableIdentifier())
+                    .isEqualTo(expectedIdentifier);
+            assertThat(alterTableRenameOperation.getNewTableIdentifier())
+                    .isEqualTo(expectedNewIdentifier);
         }
         // test alter table options
         Operation operation =
@@ -1216,14 +1218,13 @@ public class SqlToOperationConverterTest {
                 parse(
                         "alter table tb1 add constraint ct1 primary key(a, b) not enforced",
                         SqlDialect.DEFAULT);
-        assert operation instanceof AlterTableAddConstraintOperation;
+        assertThat(operation).isInstanceOf(AlterTableAddConstraintOperation.class);
         AlterTableAddConstraintOperation addConstraintOperation =
                 (AlterTableAddConstraintOperation) operation;
-        assertThat(
-                addConstraintOperation.asSummaryString(),
-                is(
+        assertThat(addConstraintOperation.asSummaryString())
+                .isEqualTo(
                         "ALTER TABLE ADD CONSTRAINT: (identifier: [`cat1`.`db1`.`tb1`], "
-                                + "constraintName: [ct1], columns: [a, b])"));
+                                + "constraintName: [ct1], columns: [a, b])");
         // Test alter table add pk on nullable column
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Could not create a PRIMARY KEY 'ct1'. Column 'c' is nullable.");
@@ -1266,12 +1267,11 @@ public class SqlToOperationConverterTest {
         prepareTable(true);
         // Test alter table add enforced
         Operation operation = parse("alter table tb1 drop constraint ct1", SqlDialect.DEFAULT);
-        assert operation instanceof AlterTableDropConstraintOperation;
+        assertThat(operation).isInstanceOf(AlterTableDropConstraintOperation.class);
         AlterTableDropConstraintOperation dropConstraint =
                 (AlterTableDropConstraintOperation) operation;
-        assertThat(
-                dropConstraint.asSummaryString(),
-                is("ALTER TABLE `cat1`.`db1`.`tb1` DROP CONSTRAINT ct1"));
+        assertThat(dropConstraint.asSummaryString())
+                .isEqualTo("ALTER TABLE `cat1`.`db1`.`tb1` DROP CONSTRAINT ct1");
         thrown.expect(ValidationException.class);
         thrown.expectMessage("CONSTRAINT [ct2] does not exist");
         parse("alter table tb1 drop constraint ct2", SqlDialect.DEFAULT);
@@ -1316,7 +1316,7 @@ public class SqlToOperationConverterTest {
                         + ")";
 
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assertThat(operation, instanceOf(CreateViewOperation.class));
+        assertThat(operation).isInstanceOf(CreateViewOperation.class);
     }
 
     @Test
@@ -1344,29 +1344,29 @@ public class SqlToOperationConverterTest {
                         + "from sourceA /*+ OPTIONS('changelog-mode'='I') */";
 
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assertThat(operation, instanceOf(CreateViewOperation.class));
+        assertThat(operation).isInstanceOf(CreateViewOperation.class);
     }
 
     @Test
     public void testBeginStatementSet() {
         final String sql = "BEGIN STATEMENT SET";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof BeginStatementSetOperation;
+        assertThat(operation).isInstanceOf(BeginStatementSetOperation.class);
         final BeginStatementSetOperation beginStatementSetOperation =
                 (BeginStatementSetOperation) operation;
 
-        assertEquals("BEGIN STATEMENT SET", beginStatementSetOperation.asSummaryString());
+        assertThat(beginStatementSetOperation.asSummaryString()).isEqualTo("BEGIN STATEMENT SET");
     }
 
     @Test
     public void testEnd() {
         final String sql = "END";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof EndStatementSetOperation;
+        assertThat(operation).isInstanceOf(EndStatementSetOperation.class);
         final EndStatementSetOperation endStatementSetOperation =
                 (EndStatementSetOperation) operation;
 
-        assertEquals("END", endStatementSetOperation.asSummaryString());
+        assertThat(endStatementSetOperation.asSummaryString()).isEqualTo("END");
     }
 
     @Test
@@ -1375,7 +1375,7 @@ public class SqlToOperationConverterTest {
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, parser);
-        assertTrue(operation instanceof ExplainOperation);
+        assertThat(operation).isInstanceOf(ExplainOperation.class);
     }
 
     @Test
@@ -1384,7 +1384,7 @@ public class SqlToOperationConverterTest {
         FlinkPlannerImpl planner = getPlannerBySqlDialect(SqlDialect.DEFAULT);
         final CalciteParser parser = getParserBySqlDialect(SqlDialect.DEFAULT);
         Operation operation = parse(sql, planner, parser);
-        assertTrue(operation instanceof ExplainOperation);
+        assertThat(operation).isInstanceOf(ExplainOperation.class);
     }
 
     @Test
@@ -1402,7 +1402,7 @@ public class SqlToOperationConverterTest {
                                     (AddJarOperation)
                                             parser.parse(String.format("ADD JAR '%s'", jarPath))
                                                     .get(0);
-                            Assert.assertEquals(jarPath, operation.getPath());
+                            assertThat(operation.getPath()).isEqualTo(jarPath);
                         });
     }
 
@@ -1421,7 +1421,7 @@ public class SqlToOperationConverterTest {
                                     (RemoveJarOperation)
                                             parser.parse(String.format("REMOVE JAR '%s'", jarPath))
                                                     .get(0);
-                            Assert.assertEquals(jarPath, operation.getPath());
+                            assertThat(operation.getPath()).isEqualTo(jarPath);
                         });
     }
 
@@ -1429,40 +1429,40 @@ public class SqlToOperationConverterTest {
     public void testShowJars() {
         final String sql = "SHOW JARS";
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof ShowJarsOperation;
+        assertThat(operation).isInstanceOf(ShowJarsOperation.class);
         final ShowJarsOperation showModulesOperation = (ShowJarsOperation) operation;
-        assertEquals("SHOW JARS", showModulesOperation.asSummaryString());
+        assertThat(showModulesOperation.asSummaryString()).isEqualTo("SHOW JARS");
     }
 
     @Test
     public void testSet() {
         Operation operation1 = parse("SET", SqlDialect.DEFAULT);
-        assertTrue(operation1 instanceof SetOperation);
-        assertFalse(((SetOperation) operation1).getKey().isPresent());
-        assertFalse(((SetOperation) operation1).getValue().isPresent());
+        assertThat(operation1).isInstanceOf(SetOperation.class);
+        assertThat(((SetOperation) operation1).getKey().isPresent()).isFalse();
+        assertThat(((SetOperation) operation1).getValue().isPresent()).isFalse();
 
         Operation operation2 = parse("SET 'test-key' = 'test-value'", SqlDialect.DEFAULT);
-        assertTrue(operation2 instanceof SetOperation);
-        assertEquals("test-key", ((SetOperation) operation2).getKey().get());
-        assertEquals("test-value", ((SetOperation) operation2).getValue().get());
+        assertThat(operation2).isInstanceOf(SetOperation.class);
+        assertThat(((SetOperation) operation2).getKey().get()).isEqualTo("test-key");
+        assertThat(((SetOperation) operation2).getValue().get()).isEqualTo("test-value");
     }
 
     @Test
     public void testReset() {
         Operation operation1 = parse("RESET", SqlDialect.DEFAULT);
-        assertTrue(operation1 instanceof ResetOperation);
-        assertFalse(((ResetOperation) operation1).getKey().isPresent());
+        assertThat(operation1).isInstanceOf(ResetOperation.class);
+        assertThat(((ResetOperation) operation1).getKey().isPresent()).isFalse();
 
         Operation operation2 = parse("RESET 'test-key'", SqlDialect.DEFAULT);
-        assertTrue(operation2 instanceof ResetOperation);
-        assertTrue(((ResetOperation) operation2).getKey().isPresent());
-        assertEquals("test-key", ((ResetOperation) operation2).getKey().get());
+        assertThat(operation2).isInstanceOf(ResetOperation.class);
+        assertThat(((ResetOperation) operation2).getKey().isPresent()).isTrue();
+        assertThat(((ResetOperation) operation2).getKey().get()).isEqualTo("test-key");
     }
 
     // ~ Tool Methods ----------------------------------------------------------
 
     private static TestItem createTestItem(Object... args) {
-        assert args.length == 2;
+        assertThat(args.length).isEqualTo(2);
         final String testExpr = (String) args[0];
         TestItem testItem = TestItem.fromTestExpr(testExpr);
         if (args[1] instanceof String) {
@@ -1476,25 +1476,25 @@ public class SqlToOperationConverterTest {
     private void assertShowFunctions(
             String sql, String expectedSummary, FunctionScope expectedScope) {
         Operation operation = parse(sql, SqlDialect.DEFAULT);
-        assert operation instanceof ShowFunctionsOperation;
+        assertThat(operation).isInstanceOf(ShowFunctionsOperation.class);
         final ShowFunctionsOperation showFunctionsOperation = (ShowFunctionsOperation) operation;
 
-        assertEquals(expectedScope, showFunctionsOperation.getFunctionScope());
-        assertEquals(expectedSummary, showFunctionsOperation.asSummaryString());
+        assertThat(showFunctionsOperation.getFunctionScope()).isEqualTo(expectedScope);
+        assertThat(showFunctionsOperation.asSummaryString()).isEqualTo(expectedSummary);
     }
 
     private void assertAlterTableOptions(
             Operation operation,
             ObjectIdentifier expectedIdentifier,
             Map<String, String> expectedOptions) {
-        assert operation instanceof AlterTableOptionsOperation;
+        assertThat(operation).isInstanceOf(AlterTableOptionsOperation.class);
         final AlterTableOptionsOperation alterTableOptionsOperation =
                 (AlterTableOptionsOperation) operation;
-        assertEquals(expectedIdentifier, alterTableOptionsOperation.getTableIdentifier());
-        assertEquals(
-                expectedOptions.size(),
-                alterTableOptionsOperation.getCatalogTable().getOptions().size());
-        assertEquals(expectedOptions, alterTableOptionsOperation.getCatalogTable().getOptions());
+        assertThat(alterTableOptionsOperation.getTableIdentifier()).isEqualTo(expectedIdentifier);
+        assertThat(alterTableOptionsOperation.getCatalogTable().getOptions().size())
+                .isEqualTo(expectedOptions.size());
+        assertThat(alterTableOptionsOperation.getCatalogTable().getOptions())
+                .isEqualTo(expectedOptions);
     }
 
     private Operation parse(String sql, FlinkPlannerImpl planner, CalciteParser parser) {

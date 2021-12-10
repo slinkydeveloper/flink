@@ -29,13 +29,12 @@ import org.apache.flink.runtime.operators.testutils.UniformIntTupleGenerator;
 
 import org.apache.flink.shaded.guava30.com.google.common.base.Throwables;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class RightOuterJoinTaskTest extends AbstractOuterJoinTaskTest {
 
@@ -156,9 +155,9 @@ public class RightOuterJoinTaskTest extends AbstractOuterJoinTaskTest {
 
         final int expCnt = calculateExpectedCount(keyCnt1, valCnt1, keyCnt2, valCnt2);
 
-        Assert.assertTrue(
-                "Result set size was " + this.outList.size() + ". Expected was " + expCnt,
-                this.outList.size() == expCnt);
+        assertThat(this.outList.size() == expCnt)
+                .as("Result set size was " + this.outList.size() + ". Expected was " + expCnt)
+                .isTrue();
 
         this.outList.clear();
     }
@@ -229,7 +228,9 @@ public class RightOuterJoinTaskTest extends AbstractOuterJoinTaskTest {
         cancel();
         taskRunner.join(60000);
 
-        assertFalse("Task thread did not finish within 60 seconds", taskRunner.isAlive());
+        assertThat(taskRunner.isAlive())
+                .as("Task thread did not finish within 60 seconds")
+                .isFalse();
 
         final Throwable taskError = error.get();
         if (taskError != null) {
@@ -275,7 +276,9 @@ public class RightOuterJoinTaskTest extends AbstractOuterJoinTaskTest {
         cancel();
         taskRunner.join(60000);
 
-        assertFalse("Task thread did not finish within 60 seconds", taskRunner.isAlive());
+        assertThat(taskRunner.isAlive())
+                .as("Task thread did not finish within 60 seconds")
+                .isFalse();
 
         final Throwable taskError = error.get();
         if (taskError != null) {

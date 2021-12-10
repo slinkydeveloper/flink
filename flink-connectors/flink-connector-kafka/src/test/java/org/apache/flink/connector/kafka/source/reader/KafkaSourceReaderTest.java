@@ -50,7 +50,6 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
 import org.apache.kafka.common.serialization.IntegerSerializer;
 import org.apache.kafka.common.serialization.StringSerializer;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -80,8 +79,8 @@ import static org.apache.flink.connector.kafka.source.metrics.KafkaSourceReaderM
 import static org.apache.flink.connector.kafka.source.metrics.KafkaSourceReaderMetrics.TOPIC_GROUP;
 import static org.apache.flink.connector.kafka.source.testutils.KafkaSourceTestEnv.NUM_PARTITIONS;
 import static org.apache.flink.core.testutils.CommonTestUtils.waitUtil;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Unit tests for {@link KafkaSourceReader}. */
 public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSplit> {
@@ -169,10 +168,11 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                             .listConsumerGroupOffsets(groupId)
                             .partitionsToOffsetAndMetadata()
                             .get();
-            assertEquals(1, committedOffsets.size());
+            assertThat(committedOffsets.size()).isEqualTo(1);
             committedOffsets.forEach(
                     (tp, offsetAndMetadata) ->
-                            assertEquals(NUM_RECORDS_PER_SPLIT, offsetAndMetadata.offset()));
+                            assertThat(offsetAndMetadata.offset())
+                                    .isEqualTo(NUM_RECORDS_PER_SPLIT));
         }
     }
 
@@ -192,7 +192,7 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                             .listConsumerGroupOffsets(groupId)
                             .partitionsToOffsetAndMetadata()
                             .get();
-            assertTrue(committedOffsets.isEmpty());
+            assertThat(committedOffsets.isEmpty()).isTrue();
         }
     }
 
@@ -214,7 +214,7 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
             } while (output.count() < totalNumRecords);
 
             // The completion of the last checkpoint should subsume all the previous checkpoitns.
-            assertEquals(checkpointId, reader.getOffsetsToCommit().size());
+            assertThat(reader.getOffsetsToCommit().size()).isEqualTo(checkpointId);
 
             long lastCheckpointId = checkpointId;
             waitUtil(
@@ -240,10 +240,11 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                             .listConsumerGroupOffsets(groupId)
                             .partitionsToOffsetAndMetadata()
                             .get();
-            assertEquals(numSplits, committedOffsets.size());
+            assertThat(committedOffsets.size()).isEqualTo(numSplits);
             committedOffsets.forEach(
                     (tp, offsetAndMetadata) ->
-                            assertEquals(NUM_RECORDS_PER_SPLIT, offsetAndMetadata.offset()));
+                            assertThat(offsetAndMetadata.offset())
+                                    .isEqualTo(NUM_RECORDS_PER_SPLIT));
         }
     }
 
@@ -256,8 +257,8 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                             new TopicPartition(TOPIC, 0), KafkaPartitionSplit.EARLIEST_OFFSET);
             reader.addSplits(Collections.singletonList(split));
             reader.snapshotState(checkpointId);
-            assertEquals(1, reader.getOffsetsToCommit().size());
-            assertTrue(reader.getOffsetsToCommit().get(checkpointId).isEmpty());
+            assertThat(reader.getOffsetsToCommit().size()).isEqualTo(1);
+            assertThat(reader.getOffsetsToCommit().get(checkpointId).isEmpty()).isTrue();
         }
     }
 
@@ -282,7 +283,7 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                 // Create a checkpoint for each message consumption, but not complete them.
                 reader.snapshotState(checkpointId);
                 // Offsets to commit should be always empty because offset commit is disabled
-                assertEquals(0, reader.getOffsetsToCommit().size());
+                assertThat(reader.getOffsetsToCommit().size()).isEqualTo(0);
             } while (output.count() < totalNumRecords);
         }
     }
@@ -316,17 +317,18 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                             "Failed to poll %d records until timeout", NUM_RECORDS_PER_SPLIT * 2));
 
             // Metric "records-consumed-total" of KafkaConsumer should be NUM_RECORDS_PER_SPLIT
-            assertEquals(
-                    NUM_RECORDS_PER_SPLIT * 2,
-                    getKafkaConsumerMetric("records-consumed-total", metricListener));
+            assertThat(getKafkaConsumerMetric("records-consumed-total", metricListener))
+                    .isEqualTo(NUM_RECORDS_PER_SPLIT * 2);
 
             // Current consuming offset should be NUM_RECORD_PER_SPLIT - 1
-            assertEquals(NUM_RECORDS_PER_SPLIT - 1, getCurrentOffsetMetric(tp0, metricListener));
-            assertEquals(NUM_RECORDS_PER_SPLIT - 1, getCurrentOffsetMetric(tp1, metricListener));
+            assertThat(getCurrentOffsetMetric(tp0, metricListener))
+                    .isEqualTo(NUM_RECORDS_PER_SPLIT - 1);
+            assertThat(getCurrentOffsetMetric(tp1, metricListener))
+                    .isEqualTo(NUM_RECORDS_PER_SPLIT - 1);
 
             // No offset is committed till now
-            assertEquals(INITIAL_OFFSET, getCommittedOffsetMetric(tp0, metricListener));
-            assertEquals(INITIAL_OFFSET, getCommittedOffsetMetric(tp1, metricListener));
+            assertThat(getCommittedOffsetMetric(tp0, metricListener)).isEqualTo(INITIAL_OFFSET);
+            assertThat(getCommittedOffsetMetric(tp1, metricListener)).isEqualTo(INITIAL_OFFSET);
 
             // Trigger offset commit
             final long checkpointId = 15213L;
@@ -349,20 +351,20 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
 
             // Metric "commit-total" of KafkaConsumer should be greater than 0
             // It's hard to know the exactly number of commit because of the retry
-            MatcherAssert.assertThat(
-                    getKafkaConsumerMetric("commit-total", metricListener),
-                    Matchers.greaterThan(0L));
+            assertThat(getKafkaConsumerMetric("commit-total", metricListener)).isGreaterThan(0L);
 
             // Committed offset should be NUM_RECORD_PER_SPLIT
-            assertEquals(NUM_RECORDS_PER_SPLIT, getCommittedOffsetMetric(tp0, metricListener));
-            assertEquals(NUM_RECORDS_PER_SPLIT, getCommittedOffsetMetric(tp1, metricListener));
+            assertThat(getCommittedOffsetMetric(tp0, metricListener))
+                    .isEqualTo(NUM_RECORDS_PER_SPLIT);
+            assertThat(getCommittedOffsetMetric(tp1, metricListener))
+                    .isEqualTo(NUM_RECORDS_PER_SPLIT);
 
             // Number of successful commits should be greater than 0
             final Optional<Counter> commitsSucceeded =
                     metricListener.getCounter(
                             KAFKA_SOURCE_READER_METRIC_GROUP, COMMITS_SUCCEEDED_METRIC_COUNTER);
-            assertTrue(commitsSucceeded.isPresent());
-            MatcherAssert.assertThat(commitsSucceeded.get().getCount(), Matchers.greaterThan(0L));
+            assertThat(commitsSucceeded.isPresent()).isTrue();
+            assertThat(commitsSucceeded.get().getCount()).isGreaterThan(0L);
         }
     }
 
@@ -393,11 +395,14 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                     new TestingReaderOutput<>(),
                     () -> reader.getNumAliveFetchers() == 0,
                     "The split fetcher did not exit before timeout.");
-            MatcherAssert.assertThat(
-                    finishedSplits,
-                    Matchers.containsInAnyOrder(
-                            KafkaPartitionSplit.toSplitId(normalSplit.getTopicPartition()),
-                            KafkaPartitionSplit.toSplitId(emptySplit.getTopicPartition())));
+            assertThat(finishedSplits)
+                    .satisfies(
+                            matching(
+                                    Matchers.containsInAnyOrder(
+                                            KafkaPartitionSplit.toSplitId(
+                                                    normalSplit.getTopicPartition()),
+                                            KafkaPartitionSplit.toSplitId(
+                                                    emptySplit.getTopicPartition()))));
         }
     }
 
@@ -511,7 +516,7 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
         final Optional<Gauge<Object>> kafkaConsumerGauge =
                 listener.getGauge(
                         KAFKA_SOURCE_READER_METRIC_GROUP, KAFKA_CONSUMER_METRIC_GROUP, name);
-        assertTrue(kafkaConsumerGauge.isPresent());
+        assertThat(kafkaConsumerGauge.isPresent()).isTrue();
         return ((Double) kafkaConsumerGauge.get().getValue()).longValue();
     }
 
@@ -524,7 +529,7 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                         PARTITION_GROUP,
                         String.valueOf(tp.partition()),
                         CURRENT_OFFSET_METRIC_GAUGE);
-        assertTrue(currentOffsetGauge.isPresent());
+        assertThat(currentOffsetGauge.isPresent()).isTrue();
         return (long) currentOffsetGauge.get().getValue();
     }
 
@@ -537,7 +542,7 @@ public class KafkaSourceReaderTest extends SourceReaderTestBase<KafkaPartitionSp
                         PARTITION_GROUP,
                         String.valueOf(tp.partition()),
                         COMMITTED_OFFSET_METRIC_GAUGE);
-        assertTrue(committedOffsetGauge.isPresent());
+        assertThat(committedOffsetGauge.isPresent()).isTrue();
         return (long) committedOffsetGauge.get().getValue();
     }
 

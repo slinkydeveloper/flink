@@ -48,7 +48,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for the adaptive scheduler. */
 public class AdaptiveSchedulerSimpleITCase extends TestLogger {
@@ -90,7 +90,7 @@ public class AdaptiveSchedulerSimpleITCase extends TestLogger {
         final JobExecutionResult jobExecutionResult =
                 jobResult.toJobExecutionResult(getClass().getClassLoader());
 
-        assertTrue(jobResult.isSuccess());
+        assertThat(jobResult.isSuccess()).isTrue();
     }
 
     private JobGraph createJobGraph() {

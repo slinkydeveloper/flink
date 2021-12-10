@@ -23,11 +23,13 @@ import org.apache.flink.api.java.typeutils.runtime.WritableSerializer;
 import org.apache.flink.hadoopcompatibility.mapred.wrapper.HadoopTupleUnwrappingIterator;
 
 import org.apache.hadoop.io.IntWritable;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link HadoopTupleUnwrappingIterator}. */
 public class HadoopTupleUnwrappingIteratorTest {
@@ -56,16 +58,16 @@ public class HadoopTupleUnwrappingIteratorTest {
         int[] expectedValues = new int[] {1, 2, 3, 4, 5, 6, 7, 8};
 
         valIt.set(tList.iterator());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         for (int expectedValue : expectedValues) {
-            Assert.assertTrue(valIt.hasNext());
-            Assert.assertTrue(valIt.hasNext());
-            Assert.assertTrue(valIt.next().get() == expectedValue);
-            Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+            assertThat(valIt.hasNext()).isTrue();
+            assertThat(valIt.hasNext()).isTrue();
+            assertThat(valIt.next().get() == expectedValue).isTrue();
+            assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         }
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
 
         // one value
 
@@ -76,16 +78,16 @@ public class HadoopTupleUnwrappingIteratorTest {
         expectedValues = new int[] {10};
 
         valIt.set(tList.iterator());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         for (int expectedValue : expectedValues) {
-            Assert.assertTrue(valIt.hasNext());
-            Assert.assertTrue(valIt.hasNext());
-            Assert.assertTrue(valIt.next().get() == expectedValue);
-            Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+            assertThat(valIt.hasNext()).isTrue();
+            assertThat(valIt.hasNext()).isTrue();
+            assertThat(valIt.next().get() == expectedValue).isTrue();
+            assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         }
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
 
         // more values
 
@@ -100,17 +102,17 @@ public class HadoopTupleUnwrappingIteratorTest {
         expectedValues = new int[] {10, 4, 7, 9, 21};
 
         valIt.set(tList.iterator());
-        Assert.assertTrue(valIt.hasNext());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.hasNext()).isTrue();
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         for (int expectedValue : expectedValues) {
-            Assert.assertTrue(valIt.hasNext());
-            Assert.assertTrue(valIt.hasNext());
-            Assert.assertTrue(valIt.next().get() == expectedValue);
-            Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+            assertThat(valIt.hasNext()).isTrue();
+            assertThat(valIt.hasNext()).isTrue();
+            assertThat(valIt.next().get() == expectedValue).isTrue();
+            assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         }
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
 
         // no has next calls
 
@@ -125,17 +127,17 @@ public class HadoopTupleUnwrappingIteratorTest {
         expectedValues = new int[] {5, 8, 42, -1, 0};
 
         valIt.set(tList.iterator());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
         for (int expectedValue : expectedValues) {
-            Assert.assertTrue(valIt.next().get() == expectedValue);
+            assertThat(valIt.next().get() == expectedValue).isTrue();
         }
         try {
             valIt.next();
-            Assert.fail();
+            fail("unknown failure");
         } catch (NoSuchElementException nsee) {
             // expected
         }
-        Assert.assertFalse(valIt.hasNext());
-        Assert.assertTrue(valIt.getCurrentKey().get() == expectedKey);
+        assertThat(valIt.hasNext()).isFalse();
+        assertThat(valIt.getCurrentKey().get() == expectedKey).isTrue();
     }
 }

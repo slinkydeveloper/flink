@@ -27,10 +27,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link TaskIOMetricGroup}. */
 public class TaskIOMetricGroupTest {
@@ -40,8 +37,8 @@ public class TaskIOMetricGroupTest {
         TaskIOMetricGroup taskIO = task.getIOMetricGroup();
 
         // test counter forwarding
-        assertNotNull(taskIO.getNumRecordsInCounter());
-        assertNotNull(taskIO.getNumRecordsOutCounter());
+        assertThat(taskIO.getNumRecordsInCounter()).isNotNull();
+        assertThat(taskIO.getNumRecordsOutCounter()).isNotNull();
 
         Counter c1 = new SimpleCounter();
         c1.inc(32L);
@@ -50,8 +47,8 @@ public class TaskIOMetricGroupTest {
 
         taskIO.reuseRecordsInputCounter(c1);
         taskIO.reuseRecordsOutputCounter(c2);
-        assertEquals(32L, taskIO.getNumRecordsInCounter().getCount());
-        assertEquals(64L, taskIO.getNumRecordsOutCounter().getCount());
+        assertThat(taskIO.getNumRecordsInCounter().getCount()).isEqualTo(32L);
+        assertThat(taskIO.getNumRecordsOutCounter().getCount()).isEqualTo(64L);
 
         // test IOMetrics instantiation
         taskIO.getNumBytesInCounter().inc(100L);
@@ -65,14 +62,14 @@ public class TaskIOMetricGroupTest {
         taskIO.getBackPressuredTimePerSecond().markEnd();
 
         IOMetrics io = taskIO.createSnapshot();
-        assertEquals(32L, io.getNumRecordsIn());
-        assertEquals(64L, io.getNumRecordsOut());
-        assertEquals(100L, io.getNumBytesIn());
-        assertEquals(250L, io.getNumBytesOut());
-        assertEquals(3L, taskIO.getNumBuffersOutCounter().getCount());
-        assertThat(taskIO.getIdleTimeMsPerSecond().getCount(), greaterThanOrEqualTo(sleepTime));
-        assertThat(
-                taskIO.getBackPressuredTimePerSecond().getCount(), greaterThanOrEqualTo(sleepTime));
+        assertThat(io.getNumRecordsIn()).isEqualTo(32L);
+        assertThat(io.getNumRecordsOut()).isEqualTo(64L);
+        assertThat(io.getNumBytesIn()).isEqualTo(100L);
+        assertThat(io.getNumBytesOut()).isEqualTo(250L);
+        assertThat(taskIO.getNumBuffersOutCounter().getCount()).isEqualTo(3L);
+        assertThat(taskIO.getIdleTimeMsPerSecond().getCount()).isGreaterThanOrEqualTo(sleepTime);
+        assertThat(taskIO.getBackPressuredTimePerSecond().getCount())
+                .isGreaterThanOrEqualTo(sleepTime);
     }
 
     @Test
@@ -94,8 +91,8 @@ public class TaskIOMetricGroupTest {
         Map<IntermediateResultPartitionID, Long> numBytesProducedOfPartitions =
                 taskIO.createSnapshot().getNumBytesProducedOfPartitions();
 
-        assertEquals(2, numBytesProducedOfPartitions.size());
-        assertEquals(32L, numBytesProducedOfPartitions.get(resultPartitionID1).longValue());
-        assertEquals(64L, numBytesProducedOfPartitions.get(resultPartitionID2).longValue());
+        assertThat(numBytesProducedOfPartitions.size()).isEqualTo(2);
+        assertThat(numBytesProducedOfPartitions.get(resultPartitionID1).longValue()).isEqualTo(32L);
+        assertThat(numBytesProducedOfPartitions.get(resultPartitionID2).longValue()).isEqualTo(64L);
     }
 }

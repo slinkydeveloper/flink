@@ -64,10 +64,8 @@ import scala.concurrent.duration.FiniteDuration;
 import static org.apache.flink.changelog.fs.FsStateChangelogOptions.BASE_PATH;
 import static org.apache.flink.changelog.fs.FsStateChangelogStorageFactory.IDENTIFIER;
 import static org.apache.flink.configuration.StateChangelogOptions.STATE_CHANGE_LOG_STORAGE;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test job classloader. */
 public class ClassLoaderITCase extends TestLogger {
@@ -329,7 +327,8 @@ public class ClassLoaderITCase extends TestLogger {
             program.invokeInteractiveModeForExecution();
             fail("exception should happen");
         } catch (ProgramInvocationException e) {
-            assertTrue(ExceptionUtils.findThrowable(e, SuccessException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, SuccessException.class).isPresent())
+                    .isTrue();
         }
     }
 
@@ -423,7 +422,7 @@ public class ClassLoaderITCase extends TestLogger {
             }
         }
 
-        assertNotNull("Failed to trigger savepoint", savepointPath);
+        assertThat(savepointPath).as("Failed to trigger savepoint").isNotNull();
 
         clusterClient.disposeSavepoint(savepointPath).get();
 
@@ -431,7 +430,7 @@ public class ClassLoaderITCase extends TestLogger {
 
         // make sure, the execution is finished to not influence other test methods
         invokeThread.join(deadline.timeLeft().toMillis());
-        assertFalse("Program invoke thread still running", invokeThread.isAlive());
+        assertThat(invokeThread.isAlive()).as("Program invoke thread still running").isFalse();
     }
 
     @Test
@@ -443,7 +442,7 @@ public class ClassLoaderITCase extends TestLogger {
         String testResourceName = "test-resource";
         File childResourceDir = FOLDER.newFolder(childResourceDirName);
         File childResource = new File(childResourceDir, testResourceName);
-        assertTrue(childResource.createNewFile());
+        assertThat(childResource.createNewFile()).isTrue();
 
         TestStreamEnvironment.setAsContext(
                 miniClusterResource.getMiniCluster(),
@@ -482,7 +481,7 @@ public class ClassLoaderITCase extends TestLogger {
         String testResourceName = "test-resource";
         File childResourceDir = FOLDER.newFolder(childResourceDirName);
         File childResource = new File(childResourceDir, testResourceName);
-        assertTrue(childResource.createNewFile());
+        assertThat(childResource.createNewFile()).isTrue();
 
         TestStreamEnvironment.setAsContext(
                 miniClusterResource.getMiniCluster(),

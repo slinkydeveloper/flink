@@ -38,8 +38,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Common test cases for implementations of {@link ResourceManagerDriver}. */
 public abstract class ResourceManagerDriverTestBase<WorkerType extends ResourceIDRetrievable>
@@ -197,7 +196,7 @@ public abstract class ResourceManagerDriverTestBase<WorkerType extends ResourceI
         }
 
         protected final void validateInMainThread() {
-            assertThat(Thread.currentThread().getName(), is(MAIN_THREAD_NAME));
+            assertThat(Thread.currentThread().getName()).isEqualTo(MAIN_THREAD_NAME);
         }
 
         protected abstract void prepareRunTest() throws Exception;

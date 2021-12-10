@@ -23,7 +23,6 @@ import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.function.FutureTaskWithException;
 import org.apache.flink.util.function.RunnableWithException;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -33,8 +32,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Unit tests for {@link MailboxProcessor}. */
 public class TaskMailboxProcessorTest {
@@ -49,7 +48,7 @@ public class TaskMailboxProcessorTest {
         mailboxProcessor.prepareClose();
         try {
             mailboxProcessor.getMailboxExecutor(DEFAULT_PRIORITY).execute(() -> {}, "dummy");
-            Assert.fail("Should not be able to accept runnables if not opened.");
+            fail("Should not be able to accept runnables if not opened.");
         } catch (RejectedExecutionException expected) {
         }
     }
@@ -89,14 +88,14 @@ public class TaskMailboxProcessorTest {
 
         try {
             mailboxProcessor.getMailboxExecutor(DEFAULT_PRIORITY).execute(() -> {}, "dummy");
-            Assert.fail("Should not be able to accept runnables if not opened.");
+            fail("Should not be able to accept runnables if not opened.");
         } catch (RejectedExecutionException expected) {
         }
 
-        Assert.assertFalse(testRunnableFuture.isDone());
+        assertThat(testRunnableFuture.isDone()).isFalse();
 
         mailboxProcessor.close();
-        assertTrue(testRunnableFuture.isCancelled());
+        assertThat(testRunnableFuture.isCancelled()).isTrue();
     }
 
     @Test
@@ -136,7 +135,7 @@ public class TaskMailboxProcessorTest {
 
         start(mailboxThread);
         mailboxThread.join();
-        Assert.assertEquals(expectedInvocations, counter.get());
+        assertThat(counter.get()).isEqualTo(expectedInvocations);
     }
 
     @Test
@@ -164,12 +163,12 @@ public class TaskMailboxProcessorTest {
 
         MailboxProcessor mailboxProcessor = start(mailboxThread);
         actionSuspendedLatch.await();
-        Assert.assertEquals(blockAfterInvocations, counter.get());
+        assertThat(counter.get()).isEqualTo(blockAfterInvocations);
 
         MailboxDefaultAction.Suspension suspension = suspendedActionRef.get();
         mailboxProcessor.getMailboxExecutor(DEFAULT_PRIORITY).execute(suspension::resume, "resume");
         mailboxThread.join();
-        Assert.assertEquals(totalInvocations, counter.get());
+        assertThat(counter.get()).isEqualTo(totalInvocations);
     }
 
     @Test
@@ -186,9 +185,10 @@ public class TaskMailboxProcessorTest {
 
                         // If this is violated, it means that the default action was invoked while
                         // we assumed suspension
-                        assertTrue(
-                                suspendedActionRef.compareAndSet(
-                                        null, controller.suspendDefaultAction()));
+                        assertThat(
+                                        suspendedActionRef.compareAndSet(
+                                                null, controller.suspendDefaultAction()))
+                                .isTrue();
 
                         ++count;
 
@@ -295,8 +295,8 @@ public class TaskMailboxProcessorTest {
         mailboxThread.signalStart();
         mailboxThread.join();
 
-        Assert.assertEquals(expectedInvocations, counter.get());
-        Assert.assertEquals(expectedInvocations, index.get());
+        assertThat(counter.get()).isEqualTo(expectedInvocations);
+        assertThat(index.get()).isEqualTo(expectedInvocations);
     }
 
     @Test
@@ -341,14 +341,14 @@ public class TaskMailboxProcessorTest {
         suspendThread.join();
 
         // then: Mailbox is not stopped because it was suspended before the stop command.
-        assertFalse(stop.get());
+        assertThat(stop.get()).isFalse();
 
         // when: Resume the suspendable loop.
         mailboxProcessor.runMailboxLoop();
 
         // then: Stop command successfully executed because it was in the queue.
-        assertFalse(mailboxProcessor.isMailboxLoopRunning());
-        assertTrue(stop.get());
+        assertThat(mailboxProcessor.isMailboxLoopRunning()).isFalse();
+        assertThat(stop.get()).isTrue();
     }
 
     @Test
@@ -362,14 +362,14 @@ public class TaskMailboxProcessorTest {
         mailboxProcessor.runMailboxLoop();
 
         // then: Mailbox is finished without execution any job.
-        assertFalse(mailboxProcessor.isMailboxLoopRunning());
-        assertFalse(start.get());
+        assertThat(mailboxProcessor.isMailboxLoopRunning()).isFalse();
+        assertThat(start.get()).isFalse();
 
         // when: Start the suspendable loop again.
         mailboxProcessor.runMailboxLoop();
 
         // then: Nothing happens because mailbox is already permanently finished.
-        assertFalse(start.get());
+        assertThat(start.get()).isFalse();
     }
 
     @Test
@@ -389,13 +389,13 @@ public class TaskMailboxProcessorTest {
         mailboxProcessor.runMailboxLoop();
 
         // then: Mailbox is not finished but job didn't execute because it was suspended.
-        assertFalse(start.get());
+        assertThat(start.get()).isFalse();
 
         // when: Start the suspendable loop again.
         mailboxProcessor.runMailboxLoop();
 
         // then: Job is done.
-        assertTrue(start.get());
+        assertThat(start.get()).isTrue();
     }
 
     static class MailboxThread extends Thread implements MailboxDefaultAction {

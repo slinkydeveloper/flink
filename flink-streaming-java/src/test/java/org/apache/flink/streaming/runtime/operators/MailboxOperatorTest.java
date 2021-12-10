@@ -35,9 +35,7 @@ import javax.annotation.Nonnull;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test to verify that timer triggers are run according to operator precedence (combined with
@@ -72,9 +70,9 @@ public class MailboxOperatorTest extends TestLogger {
                     testHarness.getOutput().stream()
                             .mapToInt(r -> ((StreamRecord<Integer>) r).getValue())
                             .toArray();
-            assertArrayEquals(output, IntStream.range(0, numRecords).toArray());
-            assertThat(mail1.getMailCount(), equalTo(numRecords + 1));
-            assertThat(mail2.getMailCount(), equalTo(numRecords + 1));
+            assertThat(IntStream.range(0, numRecords).toArray()).isEqualTo(output);
+            assertThat(mail1.getMailCount()).isEqualTo(numRecords + 1);
+            assertThat(mail2.getMailCount()).isEqualTo(numRecords + 1);
         }
     }
 

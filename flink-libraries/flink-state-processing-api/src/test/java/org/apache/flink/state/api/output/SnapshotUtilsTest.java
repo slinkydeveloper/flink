@@ -29,7 +29,6 @@ import org.apache.flink.streaming.api.operators.StreamOperator;
 import org.apache.flink.streaming.api.operators.StreamTaskStateInitializer;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -38,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that snapshot utils can properly snapshot an operator. */
 public class SnapshotUtilsTest {
@@ -57,7 +58,7 @@ public class SnapshotUtilsTest {
 
         SnapshotUtils.snapshot(operator, 0, 0L, true, false, new Configuration(), path);
 
-        Assert.assertEquals(EXPECTED_CALL_OPERATOR_SNAPSHOT, ACTUAL_ORDER_TRACKING);
+        assertThat(ACTUAL_ORDER_TRACKING).isEqualTo(EXPECTED_CALL_OPERATOR_SNAPSHOT);
     }
 
     private static class LifecycleOperator implements StreamOperator<Void> {

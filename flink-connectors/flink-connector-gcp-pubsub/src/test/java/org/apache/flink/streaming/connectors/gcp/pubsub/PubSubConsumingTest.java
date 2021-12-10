@@ -41,8 +41,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for consuming records with {@link PubSubSource}. */
@@ -70,10 +69,11 @@ public class PubSubConsumingTest {
             thread.start();
             awaitRecordCount(results, 2);
 
-            assertThat(new ArrayList<>(results), equalTo(Arrays.asList("A", "B")));
+            assertThat(new ArrayList<>(results)).isEqualTo(Arrays.asList("A", "B"));
             pubSubSource.snapshotState(0, 0);
             pubSubSource.notifyCheckpointComplete(0);
-            assertThat(testPubSubSubscriber.getAcknowledgedIds(), equalTo(Arrays.asList("1", "2")));
+            assertThat(testPubSubSubscriber.getAcknowledgedIds())
+                    .isEqualTo(Arrays.asList("1", "2"));
         } finally {
             pubSubSource.cancel();
             thread.join();
@@ -112,13 +112,12 @@ public class PubSubConsumingTest {
             awaitRecordCount(results, 2);
 
             // we do not emit the end of stream record
-            assertThat(new ArrayList<>(results), equalTo(Arrays.asList("A", "B")));
+            assertThat(new ArrayList<>(results)).isEqualTo(Arrays.asList("A", "B"));
             pubSubSource.snapshotState(0, 0);
             pubSubSource.notifyCheckpointComplete(0);
             // we acknowledge also the end of the stream record
-            assertThat(
-                    testPubSubSubscriber.getAcknowledgedIds(),
-                    equalTo(Arrays.asList("1", "2", "3")));
+            assertThat(testPubSubSubscriber.getAcknowledgedIds())
+                    .isEqualTo(Arrays.asList("1", "2", "3"));
         } finally {
             pubSubSource.cancel();
             thread.join();
@@ -163,11 +162,12 @@ public class PubSubConsumingTest {
             awaitRecordCount(results, 2);
 
             // we emit only the records prior to the end of the stream
-            assertThat(new ArrayList<>(results), equalTo(Arrays.asList("A", "B")));
+            assertThat(new ArrayList<>(results)).isEqualTo(Arrays.asList("A", "B"));
             pubSubSource.snapshotState(0, 0);
             pubSubSource.notifyCheckpointComplete(0);
             // we acknowledge also the end of the stream record
-            assertThat(testPubSubSubscriber.getAcknowledgedIds(), equalTo(Arrays.asList("1", "2")));
+            assertThat(testPubSubSubscriber.getAcknowledgedIds())
+                    .isEqualTo(Arrays.asList("1", "2"));
         } finally {
             pubSubSource.cancel();
             thread.join();

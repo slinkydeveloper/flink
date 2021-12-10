@@ -42,9 +42,8 @@ import java.util.concurrent.TimeUnit;
 import static org.apache.flink.configuration.GlobalConfiguration.FLINK_CONF_FILENAME;
 import static org.apache.flink.runtime.testutils.CommonTestUtils.getCurrentClasspath;
 import static org.apache.flink.runtime.testutils.CommonTestUtils.getJavaCommandPath;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * Tests for passing and loading dynamical properties of task manager. Usually(in Yarn, Kubernetes),
@@ -73,7 +72,7 @@ public class TaskManagerLoadingDynamicPropertiesITCase extends TestLogger {
         final Configuration clientConfiguration = new Configuration();
         final File root = folder.getRoot();
         final File homeDir = new File(root, "home");
-        assertTrue(homeDir.mkdir());
+        assertThat(homeDir.mkdir()).isTrue();
         BootstrapTools.writeConfiguration(
                 clientConfiguration, new File(homeDir, FLINK_CONF_FILENAME));
 
@@ -93,7 +92,7 @@ public class TaskManagerLoadingDynamicPropertiesITCase extends TestLogger {
             if (!process.waitFor(10, TimeUnit.SECONDS)) {
                 throw new Exception("TestingTaskManagerRunner did not shutdown in time.");
             }
-            assertEquals(processOutput.toString(), 0, process.exitValue());
+            assertThat(process.exitValue()).as(processOutput.toString()).isEqualTo(0);
         } finally {
             process.destroy();
         }
@@ -151,10 +150,11 @@ public class TaskManagerLoadingDynamicPropertiesITCase extends TestLogger {
 
         public static void main(String[] args) throws FlinkParseException {
             final Configuration flinkConfig = TaskManagerRunner.loadConfiguration(args);
-            assertThat(
-                    flinkConfig.toMap().values(),
-                    Matchers.containsInAnyOrder(
-                            VALUE_A, VALUE_B, VALUE_C, VALUE_D, VALUE_E, VALUE_F));
+            assertThat(flinkConfig.toMap().values())
+                    .satisfies(
+                            matching(
+                                    Matchers.containsInAnyOrder(
+                                            VALUE_A, VALUE_B, VALUE_C, VALUE_D, VALUE_E, VALUE_F)));
         }
     }
 }

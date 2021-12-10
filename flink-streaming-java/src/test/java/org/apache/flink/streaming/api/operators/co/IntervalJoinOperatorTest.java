@@ -38,7 +38,6 @@ import org.apache.flink.util.FlinkException;
 import org.apache.flink.shaded.guava30.com.google.common.collect.Iterables;
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -49,6 +48,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link IntervalJoinOperator}. Those tests cover correctness and cleaning of state */
 @RunWith(Parameterized.class)
@@ -400,7 +401,7 @@ public class IntervalJoinOperatorTest {
                                     Context ctx,
                                     Collector<Tuple2<TestElem, TestElem>> out)
                                     throws Exception {
-                                Assert.assertEquals(left.ts, ctx.getLeftTimestamp());
+                                assertThat(ctx.getLeftTimestamp()).isEqualTo(left.ts);
                             }
                         });
 
@@ -439,8 +440,8 @@ public class IntervalJoinOperatorTest {
                                     Context ctx,
                                     Collector<Tuple2<TestElem, TestElem>> out)
                                     throws Exception {
-                                Assert.assertEquals(
-                                        Math.max(left.ts, right.ts), ctx.getTimestamp());
+                                assertThat(ctx.getTimestamp())
+                                        .isEqualTo(Math.max(left.ts, right.ts));
                             }
                         });
 
@@ -477,7 +478,7 @@ public class IntervalJoinOperatorTest {
                                     Context ctx,
                                     Collector<Tuple2<TestElem, TestElem>> out)
                                     throws Exception {
-                                Assert.assertEquals(right.ts, ctx.getRightTimestamp());
+                                assertThat(ctx.getRightTimestamp()).isEqualTo(right.ts);
                             }
                         });
 
@@ -554,7 +555,7 @@ public class IntervalJoinOperatorTest {
 
     private void assertEmpty(MapState<Long, ?> state) throws Exception {
         boolean stateIsEmpty = Iterables.size(state.keys()) == 0;
-        Assert.assertTrue("state not empty", stateIsEmpty);
+        assertThat(stateIsEmpty).as("state not empty").isTrue();
     }
 
     private void assertContainsOnly(MapState<Long, ?> state, long... ts) throws Exception {
@@ -564,7 +565,7 @@ public class IntervalJoinOperatorTest {
                             + Arrays.toString(ts)
                             + "\n Actual:   "
                             + state.keys();
-            Assert.assertTrue(message, state.contains(t));
+            assertThat(state.contains(t)).as(message).isTrue();
         }
 
         String message =
@@ -572,7 +573,7 @@ public class IntervalJoinOperatorTest {
                         + Arrays.toString(ts)
                         + "\n Actual:   "
                         + state.keys();
-        Assert.assertEquals(message, ts.length, Iterables.size(state.keys()));
+        assertThat(Iterables.size(state.keys())).as(message).isEqualTo(ts.length);
     }
 
     private void assertOutput(
@@ -587,11 +588,12 @@ public class IntervalJoinOperatorTest {
 
         int expectedSize = Iterables.size(expectedOutput);
 
-        Assert.assertEquals(
-                "Expected and actual size of stream records different", expectedSize, actualSize);
+        assertThat(actualSize)
+                .as("Expected and actual size of stream records different")
+                .isEqualTo(expectedSize);
 
         for (StreamRecord<Tuple2<TestElem, TestElem>> record : expectedOutput) {
-            Assert.assertTrue(actualOutput.contains(record));
+            assertThat(actualOutput.contains(record)).isTrue();
         }
     }
 

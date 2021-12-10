@@ -28,8 +28,7 @@ import org.apache.flink.types.NullValue;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RMatGraph}. */
 public class RMatGraphTest extends GraphGeneratorTestBase {
@@ -45,8 +44,8 @@ public class RMatGraphTest extends GraphGeneratorTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 new RMatGraph<>(env, rnd, vertexCount, edgeCount).generate();
 
-        assertTrue(vertexCount >= graph.numberOfVertices());
-        assertEquals(edgeCount, graph.numberOfEdges());
+        assertThat(vertexCount >= graph.numberOfVertices()).isTrue();
+        assertThat(graph.numberOfEdges()).isEqualTo(edgeCount);
     }
 
     @Test

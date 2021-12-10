@@ -28,7 +28,6 @@ import com.amazonaws.services.schemaregistry.serializers.GlueSchemaRegistrySeria
 import com.amazonaws.services.schemaregistry.utils.AWSSchemaRegistryConstants;
 import lombok.NonNull;
 import org.apache.avro.Schema;
-import org.hamcrest.Matchers;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,9 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GlueSchemaRegistryAvroSchemaCoder}. */
 public class GlueSchemaRegistryAvroSchemaCoderTest extends TestLogger {
@@ -102,7 +99,7 @@ public class GlueSchemaRegistryAvroSchemaCoderTest extends TestLogger {
     /** Test whether constructor works. */
     @Test
     public void testConstructor_withConfigs_succeeds() {
-        assertThat(new GlueSchemaRegistryAvroSchemaCoder(testTopic, configs), notNullValue());
+        assertThat(new GlueSchemaRegistryAvroSchemaCoder(testTopic, configs)).isNotNull();
     }
 
     /**
@@ -117,7 +114,7 @@ public class GlueSchemaRegistryAvroSchemaCoderTest extends TestLogger {
         Schema resultSchema =
                 glueSchemaRegistryAvroSchemaCoder.readSchema(buildByteArrayInputStream());
 
-        assertThat(resultSchema, equalTo(userSchema));
+        assertThat(resultSchema).isEqualTo(userSchema);
     }
 
     /**
@@ -167,12 +164,12 @@ public class GlueSchemaRegistryAvroSchemaCoderTest extends TestLogger {
     }
 
     private void testForSerializedData(byte[] serializedData) {
-        assertThat(serializedData, Matchers.notNullValue());
+        assertThat(serializedData).isNotNull();
 
         ByteBuffer buffer = getByteBuffer(serializedData);
         byte headerVersionByte = getByte(buffer);
 
-        assertThat(headerVersionByte, equalTo(AWSSchemaRegistryConstants.HEADER_VERSION_BYTE));
+        assertThat(headerVersionByte).isEqualTo(AWSSchemaRegistryConstants.HEADER_VERSION_BYTE);
     }
 
     private ByteArrayInputStream buildByteArrayInputStream() {

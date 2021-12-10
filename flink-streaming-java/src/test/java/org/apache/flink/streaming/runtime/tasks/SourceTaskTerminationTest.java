@@ -40,8 +40,7 @@ import org.junit.Test;
 
 import java.util.Queue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A test verifying the termination process (synchronous checkpoint and task termination) at the
@@ -116,7 +115,7 @@ public class SourceTaskTerminationTest extends TestLogger {
 
             waitForSynchronousSavepointIdToBeSet(srcTask);
 
-            assertTrue(srcTask.getSynchronousSavepointId().isPresent());
+            assertThat(srcTask.getSynchronousSavepointId().isPresent()).isTrue();
 
             srcTaskTestHarness.processUntil(
                     srcTask.notifyCheckpointCompleteAsync(syncSavepointId)::isDone);
@@ -157,27 +156,32 @@ public class SourceTaskTerminationTest extends TestLogger {
 
     private void verifyNextElement(Queue<Object> output, long expectedElement) {
         Object next = output.remove();
-        assertTrue("next element is not an event", next instanceof StreamRecord);
-        assertEquals(
-                "wrong event", expectedElement, ((StreamRecord<Long>) next).getValue().longValue());
+        assertThat(next).as("next element is not an event").isInstanceOf(StreamRecord.class);
+        assertThat(((StreamRecord<Long>) next).getValue().longValue())
+                .as("wrong event")
+                .isEqualTo(expectedElement);
     }
 
     private void verifyWatermark(Queue<Object> output, Watermark expectedWatermark) {
         Object next = output.remove();
-        assertTrue("next element is not a watermark", next instanceof Watermark);
-        assertEquals("wrong watermark", expectedWatermark, next);
+        assertThat(next).as("next element is not a watermark").isInstanceOf(Watermark.class);
+        assertThat(next).as("wrong watermark").isEqualTo(expectedWatermark);
     }
 
     private void verifyEvent(Queue<Object> output, AbstractEvent expectedEvent) {
         Object next = output.remove();
-        assertTrue(expectedEvent.getClass().isInstance(next));
-        assertEquals(expectedEvent, next);
+        assertThat(expectedEvent.getClass().isInstance(next)).isTrue();
+        assertThat(next).isEqualTo(expectedEvent);
     }
 
     private void verifyCheckpointBarrier(Queue<Object> output, long checkpointId) {
         Object next = output.remove();
-        assertTrue("next element is not a checkpoint barrier", next instanceof CheckpointBarrier);
-        assertEquals("wrong checkpoint id", checkpointId, ((CheckpointBarrier) next).getId());
+        assertThat(next)
+                .as("next element is not a checkpoint barrier")
+                .isInstanceOf(CheckpointBarrier.class);
+        assertThat(((CheckpointBarrier) next).getId())
+                .as("wrong checkpoint id")
+                .isEqualTo(checkpointId);
     }
 
     private static class LockStepSourceWithOneWmPerElement implements SourceFunction<Long> {

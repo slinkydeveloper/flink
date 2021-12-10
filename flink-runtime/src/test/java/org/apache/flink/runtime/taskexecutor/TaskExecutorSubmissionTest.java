@@ -78,11 +78,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.runtime.util.NettyShuffleDescriptorBuilder.createRemoteWithIdAndLocation;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
@@ -148,7 +144,7 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             taskSlotTable.allocateSlot(0, jobId, tdd.getAllocationId(), Time.seconds(60));
             tmGateway.submitTask(tdd, env.getJobMasterId(), timeout).get();
         } catch (Exception e) {
-            assertThat(e.getCause(), instanceOf(IllegalArgumentException.class));
+            assertThat(e.getCause()).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -188,14 +184,18 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             tmGateway.submitTask(tdd2, env.getJobMasterId(), timeout).get();
             task2RunningFuture.get();
 
-            assertSame(taskSlotTable.getTask(eid1).getExecutionState(), ExecutionState.RUNNING);
-            assertSame(taskSlotTable.getTask(eid2).getExecutionState(), ExecutionState.RUNNING);
+            assertThat(ExecutionState.RUNNING)
+                    .isSameAs(taskSlotTable.getTask(eid1).getExecutionState());
+            assertThat(ExecutionState.RUNNING)
+                    .isSameAs(taskSlotTable.getTask(eid2).getExecutionState());
 
             tmGateway.cancelTask(eid1, timeout);
             task1CanceledFuture.get();
 
-            assertSame(taskSlotTable.getTask(eid1).getExecutionState(), ExecutionState.CANCELED);
-            assertSame(taskSlotTable.getTask(eid2).getExecutionState(), ExecutionState.RUNNING);
+            assertThat(ExecutionState.CANCELED)
+                    .isSameAs(taskSlotTable.getTask(eid1).getExecutionState());
+            assertThat(ExecutionState.RUNNING)
+                    .isSameAs(taskSlotTable.getTask(eid2).getExecutionState());
         }
     }
 
@@ -246,8 +246,10 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             task1FailedFuture.get();
             task2FailedFuture.get();
 
-            assertSame(taskSlotTable.getTask(eid1).getExecutionState(), ExecutionState.FAILED);
-            assertSame(taskSlotTable.getTask(eid2).getExecutionState(), ExecutionState.FAILED);
+            assertThat(ExecutionState.FAILED)
+                    .isSameAs(taskSlotTable.getTask(eid1).getExecutionState());
+            assertThat(ExecutionState.FAILED)
+                    .isSameAs(taskSlotTable.getTask(eid2).getExecutionState());
         }
     }
 
@@ -307,8 +309,10 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             task1FinishedFuture.get();
             task2FinishedFuture.get();
 
-            assertSame(taskSlotTable.getTask(eid1).getExecutionState(), ExecutionState.FINISHED);
-            assertSame(taskSlotTable.getTask(eid2).getExecutionState(), ExecutionState.FINISHED);
+            assertThat(ExecutionState.FINISHED)
+                    .isSameAs(taskSlotTable.getTask(eid1).getExecutionState());
+            assertThat(ExecutionState.FINISHED)
+                    .isSameAs(taskSlotTable.getTask(eid2).getExecutionState());
         }
     }
 
@@ -382,12 +386,14 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             task2RunningFuture.get();
 
             task1FailedFuture.get();
-            assertSame(taskSlotTable.getTask(eid1).getExecutionState(), ExecutionState.FAILED);
+            assertThat(ExecutionState.FAILED)
+                    .isSameAs(taskSlotTable.getTask(eid1).getExecutionState());
 
             tmGateway.cancelTask(eid2, timeout);
 
             task2CanceledFuture.get();
-            assertSame(taskSlotTable.getTask(eid2).getExecutionState(), ExecutionState.CANCELED);
+            assertThat(ExecutionState.CANCELED)
+                    .isSameAs(taskSlotTable.getTask(eid2).getExecutionState());
         }
     }
 
@@ -429,9 +435,8 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             taskRunningFuture.get();
 
             taskFailedFuture.get();
-            assertThat(
-                    taskSlotTable.getTask(eid).getFailureCause(),
-                    instanceOf(PartitionNotFoundException.class));
+            assertThat(taskSlotTable.getTask(eid).getFailureCause())
+                    .isInstanceOf(PartitionNotFoundException.class);
         }
     }
 
@@ -480,8 +485,8 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             updateFuture.get();
             taskFailedFuture.get();
             Task task = taskSlotTable.getTask(tdd.getExecutionAttemptId());
-            assertThat(task.getExecutionState(), is(ExecutionState.FAILED));
-            assertThat(task.getFailureCause(), instanceOf(IOException.class));
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+            assertThat(task.getFailureCause()).isInstanceOf(IOException.class);
         }
     }
 
@@ -523,10 +528,10 @@ public class TaskExecutorSubmissionTest extends TestLogger {
 
             taskFailedFuture.get();
 
-            assertSame(taskSlotTable.getTask(eid).getExecutionState(), ExecutionState.FAILED);
-            assertThat(
-                    taskSlotTable.getTask(eid).getFailureCause(),
-                    instanceOf(PartitionNotFoundException.class));
+            assertThat(ExecutionState.FAILED)
+                    .isSameAs(taskSlotTable.getTask(eid).getExecutionState());
+            assertThat(taskSlotTable.getTask(eid).getFailureCause())
+                    .isInstanceOf(PartitionNotFoundException.class);
         }
     }
 
@@ -591,12 +596,13 @@ public class TaskExecutorSubmissionTest extends TestLogger {
             CompletableFuture<Boolean> cancelFuture =
                     TestingAbstractInvokables.TestInvokableRecordCancel.gotCanceled();
 
-            assertTrue(cancelFuture.get());
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    taskSlotTable.getTask(eid).getFailureCause(),
-                                    exception.getMessage())
-                            .isPresent());
+            assertThat(cancelFuture.get()).isTrue();
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            taskSlotTable.getTask(eid).getFailureCause(),
+                                            exception.getMessage())
+                                    .isPresent())
+                    .isTrue();
         }
     }
 

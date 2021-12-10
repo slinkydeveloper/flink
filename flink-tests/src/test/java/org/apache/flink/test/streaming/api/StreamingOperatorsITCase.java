@@ -33,7 +33,6 @@ import org.apache.flink.test.util.AbstractTestBase;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.MathUtils;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -45,6 +44,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for streaming operators. */
 public class StreamingOperatorsITCase extends AbstractTestBase {
@@ -126,10 +127,10 @@ public class StreamingOperatorsITCase extends AbstractTestBase {
 
         env.execute();
 
-        Assert.assertEquals(expected, actualResult1);
+        assertThat(actualResult1).isEqualTo(expected);
 
         Collections.sort(actualResult2);
-        Assert.assertEquals(expected, actualResult2);
+        assertThat(actualResult2).isEqualTo(expected);
 
         MemorySinkFunction.clear();
     }

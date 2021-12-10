@@ -43,9 +43,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the Standalone Resource Manager. */
 public class StandaloneResourceManagerTest extends TestLogger {
@@ -69,8 +68,8 @@ public class StandaloneResourceManagerTest extends TestLogger {
         final TestingStandaloneResourceManager rm =
                 createResourceManager(Time.milliseconds(1L), slotManager);
 
-        assertThat(setFailUnfulfillableRequestInvokes.take(), is(false));
-        assertThat(setFailUnfulfillableRequestInvokes.take(), is(true));
+        assertThat(setFailUnfulfillableRequestInvokes.take()).isEqualTo(false);
+        assertThat(setFailUnfulfillableRequestInvokes.take()).isEqualTo(true);
 
         rm.close();
     }
@@ -87,10 +86,9 @@ public class StandaloneResourceManagerTest extends TestLogger {
         final TestingStandaloneResourceManager rm =
                 createResourceManager(Time.milliseconds(-1L), slotManager);
 
-        assertThat(setFailUnfulfillableRequestInvokes.take(), is(false));
-        assertThat(
-                setFailUnfulfillableRequestInvokes.poll(50L, TimeUnit.MILLISECONDS),
-                is(nullValue()));
+        assertThat(setFailUnfulfillableRequestInvokes.take()).isEqualTo(false);
+        assertThat(setFailUnfulfillableRequestInvokes.poll(50L, TimeUnit.MILLISECONDS))
+                .isEqualTo(nullValue());
 
         rm.close();
     }

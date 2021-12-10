@@ -45,11 +45,8 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link JarUploadHandler}. */
 public class JarUploadHandlerTest extends TestLogger {
@@ -87,11 +84,10 @@ public class JarUploadHandlerTest extends TestLogger {
             fail("Expected exception not thrown.");
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripCompletionException(e.getCause());
-            assertThat(throwable, instanceOf(RestHandlerException.class));
+            assertThat(throwable).isInstanceOf(RestHandlerException.class);
             final RestHandlerException restHandlerException = (RestHandlerException) throwable;
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(),
-                    equalTo(HttpResponseStatus.BAD_REQUEST));
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.BAD_REQUEST);
         }
     }
 
@@ -102,14 +98,13 @@ public class JarUploadHandlerTest extends TestLogger {
 
         final JarUploadResponseBody jarUploadResponseBody =
                 jarUploadHandler.handleRequest(request, mockDispatcherGateway).get();
-        assertThat(
-                jarUploadResponseBody.getStatus(),
-                equalTo(JarUploadResponseBody.UploadStatus.success));
+        assertThat(jarUploadResponseBody.getStatus())
+                .isEqualTo(JarUploadResponseBody.UploadStatus.success);
         final String returnedFileNameWithUUID = jarUploadResponseBody.getFilename();
-        assertThat(returnedFileNameWithUUID, containsString("_"));
+        assertThat(returnedFileNameWithUUID).contains("_");
         final String returnedFileName =
                 returnedFileNameWithUUID.substring(returnedFileNameWithUUID.lastIndexOf("_") + 1);
-        assertThat(returnedFileName, equalTo(uploadedFile.getFileName().toString()));
+        assertThat(returnedFileName).isEqualTo(uploadedFile.getFileName().toString());
     }
 
     @Test
@@ -122,14 +117,12 @@ public class JarUploadHandlerTest extends TestLogger {
             fail("Expected exception not thrown.");
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripCompletionException(e.getCause());
-            assertThat(throwable, instanceOf(RestHandlerException.class));
+            assertThat(throwable).isInstanceOf(RestHandlerException.class);
             final RestHandlerException restHandlerException = (RestHandlerException) throwable;
-            assertThat(
-                    restHandlerException.getMessage(),
-                    containsString("Could not move uploaded jar file"));
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(),
-                    equalTo(HttpResponseStatus.INTERNAL_SERVER_ERROR));
+            assertThat(restHandlerException.getMessage())
+                    .contains("Could not move uploaded jar file");
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

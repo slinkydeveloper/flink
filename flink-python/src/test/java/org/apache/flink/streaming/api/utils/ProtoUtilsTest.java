@@ -26,9 +26,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test class for testing utilities used to construct protobuf objects or construct objects from
@@ -95,28 +93,28 @@ public class ProtoUtilsTest {
         StateTtlConfig stateTTLConfig =
                 ProtoUtils.parseStateTtlConfigFromProto(stateTTLConfigProto);
 
-        assertEquals(stateTTLConfig.getUpdateType(), StateTtlConfig.UpdateType.OnCreateAndWrite);
-        assertEquals(
-                stateTTLConfig.getStateVisibility(),
-                StateTtlConfig.StateVisibility.NeverReturnExpired);
-        assertEquals(stateTTLConfig.getTtl(), Time.milliseconds(1000));
-        assertEquals(
-                stateTTLConfig.getTtlTimeCharacteristic(),
-                StateTtlConfig.TtlTimeCharacteristic.ProcessingTime);
+        assertThat(StateTtlConfig.UpdateType.OnCreateAndWrite)
+                .isEqualTo(stateTTLConfig.getUpdateType());
+        assertThat(StateTtlConfig.StateVisibility.NeverReturnExpired)
+                .isEqualTo(stateTTLConfig.getStateVisibility());
+        assertThat(Time.milliseconds(1000)).isEqualTo(stateTTLConfig.getTtl());
+        assertThat(StateTtlConfig.TtlTimeCharacteristic.ProcessingTime)
+                .isEqualTo(stateTTLConfig.getTtlTimeCharacteristic());
 
         StateTtlConfig.CleanupStrategies cleanupStrategies = stateTTLConfig.getCleanupStrategies();
-        assertTrue(cleanupStrategies.isCleanupInBackground());
-        assertTrue(cleanupStrategies.inFullSnapshot());
+        assertThat(cleanupStrategies.isCleanupInBackground()).isTrue();
+        assertThat(cleanupStrategies.inFullSnapshot()).isTrue();
 
         StateTtlConfig.IncrementalCleanupStrategy incrementalCleanupStrategy =
                 cleanupStrategies.getIncrementalCleanupStrategy();
-        assertNotNull(incrementalCleanupStrategy);
-        assertEquals(incrementalCleanupStrategy.getCleanupSize(), 10);
-        assertTrue(incrementalCleanupStrategy.runCleanupForEveryRecord());
+        assertThat(incrementalCleanupStrategy).isNotNull();
+        assertThat(10).isEqualTo(incrementalCleanupStrategy.getCleanupSize());
+        assertThat(incrementalCleanupStrategy.runCleanupForEveryRecord()).isTrue();
 
         StateTtlConfig.RocksdbCompactFilterCleanupStrategy rocksdbCompactFilterCleanupStrategy =
                 cleanupStrategies.getRocksdbCompactFilterCleanupStrategy();
-        assertNotNull(rocksdbCompactFilterCleanupStrategy);
-        assertEquals(rocksdbCompactFilterCleanupStrategy.getQueryTimeAfterNumEntries(), 1000);
+        assertThat(rocksdbCompactFilterCleanupStrategy).isNotNull();
+        assertThat(1000)
+                .isEqualTo(rocksdbCompactFilterCleanupStrategy.getQueryTimeAfterNumEntries());
     }
 }

@@ -60,9 +60,7 @@ import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfi
 import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RECORD_PUBLISHER_TYPE;
 import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RecordPublisherType.EFO;
 import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.RecordPublisherType.POLLING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -84,7 +82,7 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof EnvironmentVariableCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(EnvironmentVariableCredentialsProvider.class);
     }
 
     @Test
@@ -93,7 +91,7 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof SystemPropertyCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(SystemPropertyCredentialsProvider.class);
     }
 
     @Test
@@ -102,7 +100,7 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof WebIdentityTokenFileCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(WebIdentityTokenFileCredentialsProvider.class);
     }
 
     @Test
@@ -143,7 +141,7 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof DefaultCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(DefaultCredentialsProvider.class);
     }
 
     @Test
@@ -153,7 +151,7 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof StsAssumeRoleCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(StsAssumeRoleCredentialsProvider.class);
 
         verify(properties).getProperty(AWSConfigConstants.roleArn(AWS_CREDENTIALS_PROVIDER));
         verify(properties)
@@ -171,8 +169,8 @@ public class AwsV2UtilTest {
         AwsCredentials credentials =
                 AwsV2Util.getCredentialsProvider(properties).resolveCredentials();
 
-        assertEquals("ak", credentials.accessKeyId());
-        assertEquals("sk", credentials.secretAccessKey());
+        assertThat(credentials.accessKeyId()).isEqualTo("ak");
+        assertThat(credentials.secretAccessKey()).isEqualTo("sk");
     }
 
     @Test
@@ -185,11 +183,12 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof ProfileCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(ProfileCredentialsProvider.class);
 
         AwsCredentials credentials = credentialsProvider.resolveCredentials();
-        assertEquals("11111111111111111111", credentials.accessKeyId());
-        assertEquals("wJalrXUtnFEMI/K7MDENG/bPxRfiCY1111111111", credentials.secretAccessKey());
+        assertThat(credentials.accessKeyId()).isEqualTo("11111111111111111111");
+        assertThat(credentials.secretAccessKey())
+                .isEqualTo("wJalrXUtnFEMI/K7MDENG/bPxRfiCY1111111111");
     }
 
     @Test
@@ -202,18 +201,19 @@ public class AwsV2UtilTest {
 
         AwsCredentialsProvider credentialsProvider = AwsV2Util.getCredentialsProvider(properties);
 
-        assertTrue(credentialsProvider instanceof ProfileCredentialsProvider);
+        assertThat(credentialsProvider).isInstanceOf(ProfileCredentialsProvider.class);
 
         AwsCredentials credentials = credentialsProvider.resolveCredentials();
-        assertEquals("22222222222222222222", credentials.accessKeyId());
-        assertEquals("wJalrXUtnFEMI/K7MDENG/bPxRfiCY2222222222", credentials.secretAccessKey());
+        assertThat(credentials.accessKeyId()).isEqualTo("22222222222222222222");
+        assertThat(credentials.secretAccessKey())
+                .isEqualTo("wJalrXUtnFEMI/K7MDENG/bPxRfiCY2222222222");
     }
 
     @Test
     public void testGetRegion() {
         Region region = AwsV2Util.getRegion(properties(AWS_REGION, "eu-west-2"));
 
-        assertEquals(Region.EU_WEST_2, region);
+        assertThat(region).isEqualTo(Region.EU_WEST_2);
     }
 
     @Test
@@ -476,89 +476,90 @@ public class AwsV2UtilTest {
     @Test
     public void testIsUsingEfoRecordPublisher() {
         Properties prop = new Properties();
-        assertFalse(AwsV2Util.isUsingEfoRecordPublisher(prop));
+        assertThat(AwsV2Util.isUsingEfoRecordPublisher(prop)).isFalse();
 
         prop.setProperty(RECORD_PUBLISHER_TYPE, EFO.name());
-        assertTrue(AwsV2Util.isUsingEfoRecordPublisher(prop));
+        assertThat(AwsV2Util.isUsingEfoRecordPublisher(prop)).isTrue();
 
         prop.setProperty(RECORD_PUBLISHER_TYPE, POLLING.name());
-        assertFalse(AwsV2Util.isUsingEfoRecordPublisher(prop));
+        assertThat(AwsV2Util.isUsingEfoRecordPublisher(prop)).isFalse();
     }
 
     @Test
     public void testIsEagerEfoRegistrationType() {
         Properties prop = new Properties();
-        assertFalse(AwsV2Util.isEagerEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isEagerEfoRegistrationType(prop)).isFalse();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, EAGER.name());
-        assertTrue(AwsV2Util.isEagerEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isEagerEfoRegistrationType(prop)).isTrue();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, LAZY.name());
-        assertFalse(AwsV2Util.isEagerEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isEagerEfoRegistrationType(prop)).isFalse();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, NONE.name());
-        assertFalse(AwsV2Util.isEagerEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isEagerEfoRegistrationType(prop)).isFalse();
     }
 
     @Test
     public void testIsLazyEfoRegistrationType() {
         Properties prop = new Properties();
-        assertTrue(AwsV2Util.isLazyEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isLazyEfoRegistrationType(prop)).isTrue();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, EAGER.name());
-        assertFalse(AwsV2Util.isLazyEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isLazyEfoRegistrationType(prop)).isFalse();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, LAZY.name());
-        assertTrue(AwsV2Util.isLazyEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isLazyEfoRegistrationType(prop)).isTrue();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, NONE.name());
-        assertFalse(AwsV2Util.isLazyEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isLazyEfoRegistrationType(prop)).isFalse();
     }
 
     @Test
     public void testIsNoneEfoRegistrationType() {
         Properties prop = new Properties();
-        assertFalse(AwsV2Util.isNoneEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isNoneEfoRegistrationType(prop)).isFalse();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, EAGER.name());
-        assertFalse(AwsV2Util.isNoneEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isNoneEfoRegistrationType(prop)).isFalse();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, LAZY.name());
-        assertFalse(AwsV2Util.isNoneEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isNoneEfoRegistrationType(prop)).isFalse();
 
         prop.setProperty(ConsumerConfigConstants.EFO_REGISTRATION_TYPE, NONE.name());
-        assertTrue(AwsV2Util.isNoneEfoRegistrationType(prop));
+        assertThat(AwsV2Util.isNoneEfoRegistrationType(prop)).isTrue();
     }
 
     @Test
     public void testIsRecoverableExceptionForRecoverable() {
         Exception recoverable = LimitExceededException.builder().build();
-        assertTrue(AwsV2Util.isRecoverableException(new ExecutionException(recoverable)));
+        assertThat(AwsV2Util.isRecoverableException(new ExecutionException(recoverable))).isTrue();
     }
 
     @Test
     public void testIsRecoverableExceptionForNonRecoverable() {
         Exception nonRecoverable = new IllegalArgumentException("abc");
-        assertFalse(AwsV2Util.isRecoverableException(new ExecutionException(nonRecoverable)));
+        assertThat(AwsV2Util.isRecoverableException(new ExecutionException(nonRecoverable)))
+                .isFalse();
     }
 
     @Test
     public void testIsRecoverableExceptionForRuntimeExceptionWrappingRecoverable() {
         Exception recoverable = LimitExceededException.builder().build();
         Exception runtime = new RuntimeException("abc", recoverable);
-        assertTrue(AwsV2Util.isRecoverableException(runtime));
+        assertThat(AwsV2Util.isRecoverableException(runtime)).isTrue();
     }
 
     @Test
     public void testIsRecoverableExceptionForRuntimeExceptionWrappingNonRecoverable() {
         Exception nonRecoverable = new IllegalArgumentException("abc");
         Exception runtime = new RuntimeException("abc", nonRecoverable);
-        assertFalse(AwsV2Util.isRecoverableException(runtime));
+        assertThat(AwsV2Util.isRecoverableException(runtime)).isFalse();
     }
 
     @Test
     public void testIsRecoverableExceptionForNullCause() {
         Exception nonRecoverable = new IllegalArgumentException("abc");
-        assertFalse(AwsV2Util.isRecoverableException(nonRecoverable));
+        assertThat(AwsV2Util.isRecoverableException(nonRecoverable)).isFalse();
     }
 }

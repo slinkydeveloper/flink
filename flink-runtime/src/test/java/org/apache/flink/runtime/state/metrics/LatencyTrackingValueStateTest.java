@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LatencyTrackingValueState}. */
 public class LatencyTrackingValueStateTest extends LatencyTrackingStateTestBase<Integer> {
@@ -61,17 +61,17 @@ public class LatencyTrackingValueStateTest extends LatencyTrackingStateTestBase<
             LatencyTrackingValueState.ValueStateLatencyMetrics latencyTrackingStateMetric =
                     latencyTrackingState.getLatencyTrackingStateMetric();
 
-            assertEquals(0, latencyTrackingStateMetric.getUpdateCount());
-            assertEquals(0, latencyTrackingStateMetric.getGetCount());
+            assertThat(latencyTrackingStateMetric.getUpdateCount()).isEqualTo(0);
+            assertThat(latencyTrackingStateMetric.getGetCount()).isEqualTo(0);
 
             setCurrentKey(keyedBackend);
             for (int index = 1; index <= SAMPLE_INTERVAL; index++) {
                 int expectedResult = index == SAMPLE_INTERVAL ? 0 : index;
                 latencyTrackingState.update(ThreadLocalRandom.current().nextLong());
-                assertEquals(expectedResult, latencyTrackingStateMetric.getUpdateCount());
+                assertThat(latencyTrackingStateMetric.getUpdateCount()).isEqualTo(expectedResult);
 
                 latencyTrackingState.value();
-                assertEquals(expectedResult, latencyTrackingStateMetric.getGetCount());
+                assertThat(latencyTrackingStateMetric.getGetCount()).isEqualTo(expectedResult);
             }
         } finally {
             if (keyedBackend != null) {

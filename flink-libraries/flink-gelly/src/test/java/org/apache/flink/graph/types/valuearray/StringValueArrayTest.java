@@ -22,9 +22,8 @@ import org.apache.flink.types.StringValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for {@link StringValueArray}. */
 public class StringValueArrayTest {
@@ -39,39 +38,39 @@ public class StringValueArrayTest {
 
         // fill the array
         for (int i = 0; i < count; i++) {
-            assertFalse(sva.isFull());
-            assertEquals(i, sva.size());
+            assertThat(sva.isFull()).isFalse();
+            assertThat(sva.size()).isEqualTo(i);
 
-            assertTrue(sva.add(new StringValue(Character.toString((char) (i & 0x7F)))));
+            assertThat(sva.add(new StringValue(Character.toString((char) (i & 0x7F))))).isTrue();
 
-            assertEquals(i + 1, sva.size());
+            assertThat(sva.size()).isEqualTo(i + 1);
         }
 
         // array is now full
-        assertTrue(sva.isFull());
-        assertEquals(count, sva.size());
+        assertThat(sva.isFull()).isTrue();
+        assertThat(sva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (StringValue sv : sva) {
-            assertEquals((idx++) & 0x7F, sv.getValue().charAt(0));
+            assertThat(sv.getValue().charAt(0)).isEqualTo((idx++) & 0x7F);
         }
 
         // add element past end of array
-        assertFalse(sva.add(new StringValue(String.valueOf((char) count))));
-        assertFalse(sva.addAll(sva));
+        assertThat(sva.add(new StringValue(String.valueOf((char) count)))).isFalse();
+        assertThat(sva.addAll(sva)).isFalse();
 
         // test copy
-        assertEquals(sva, sva.copy());
+        assertThatObject(sva.copy()).isEqualTo(sva);
 
         // test copyTo
         StringValueArray svaTo = new StringValueArray();
         sva.copyTo(svaTo);
-        assertEquals(sva, svaTo);
+        assertThatObject(svaTo).isEqualTo(sva);
 
         // test clear
         sva.clear();
-        assertEquals(0, sva.size());
+        assertThat(sva.size()).isEqualTo(0);
     }
 
     @Test
@@ -83,39 +82,39 @@ public class StringValueArrayTest {
 
         // fill the array
         for (int i = 0; i < count; i++) {
-            assertFalse(sva.isFull());
-            assertEquals(i, sva.size());
+            assertThat(sva.isFull()).isFalse();
+            assertThat(sva.size()).isEqualTo(i);
 
-            assertTrue(sva.add(new StringValue(Character.toString((char) (i & 0xFF)))));
+            assertThat(sva.add(new StringValue(Character.toString((char) (i & 0xFF))))).isTrue();
 
-            assertEquals(i + 1, sva.size());
+            assertThat(sva.size()).isEqualTo(i + 1);
         }
 
         // array is now full
-        assertTrue(sva.isFull());
-        assertEquals(count, sva.size());
+        assertThat(sva.isFull()).isTrue();
+        assertThat(sva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (StringValue sv : sva) {
-            assertEquals((idx++) & 0xFF, sv.getValue().charAt(0));
+            assertThat(sv.getValue().charAt(0)).isEqualTo((idx++) & 0xFF);
         }
 
         // add element past end of array
-        assertFalse(sva.add(new StringValue(String.valueOf((char) count))));
-        assertFalse(sva.addAll(sva));
+        assertThat(sva.add(new StringValue(String.valueOf((char) count)))).isFalse();
+        assertThat(sva.addAll(sva)).isFalse();
 
         // test copy
-        assertEquals(sva, sva.copy());
+        assertThatObject(sva.copy()).isEqualTo(sva);
 
         // test copyTo
         StringValueArray svaTo = new StringValueArray();
         sva.copyTo(svaTo);
-        assertEquals(sva, svaTo);
+        assertThatObject(svaTo).isEqualTo(sva);
 
         // test clear
         sva.clear();
-        assertEquals(0, sva.size());
+        assertThat(sva.size()).isEqualTo(0);
     }
 
     @Test
@@ -126,46 +125,46 @@ public class StringValueArrayTest {
 
         // add several elements
         for (int i = 0; i < count; i++) {
-            assertFalse(sva.isFull());
-            assertEquals(i, sva.size());
+            assertThat(sva.isFull()).isFalse();
+            assertThat(sva.size()).isEqualTo(i);
 
-            assertTrue(sva.add(new StringValue(String.valueOf((char) i))));
+            assertThat(sva.add(new StringValue(String.valueOf((char) i)))).isTrue();
 
-            assertEquals(i + 1, sva.size());
+            assertThat(sva.size()).isEqualTo(i + 1);
         }
 
         // array never fills
-        assertFalse(sva.isFull());
-        assertEquals(count, sva.size());
+        assertThat(sva.isFull()).isFalse();
+        assertThat(sva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (StringValue sv : sva) {
-            assertEquals(idx++, sv.getValue().charAt(0));
+            assertThat(sv.getValue().charAt(0)).isEqualTo(idx++);
         }
 
         // add element past end of array
-        assertTrue(sva.add(new StringValue(String.valueOf((char) count))));
-        assertTrue(sva.addAll(sva));
+        assertThat(sva.add(new StringValue(String.valueOf((char) count)))).isTrue();
+        assertThat(sva.addAll(sva)).isTrue();
 
         // test copy
-        assertEquals(sva, sva.copy());
+        assertThatObject(sva.copy()).isEqualTo(sva);
 
         // test copyTo
         StringValueArray svaTo = new StringValueArray();
         sva.copyTo(svaTo);
-        assertEquals(sva, svaTo);
+        assertThatObject(svaTo).isEqualTo(sva);
 
         // test mark/reset
         int size = sva.size();
         sva.mark();
-        assertTrue(sva.add(new StringValue()));
-        assertEquals(size + 1, sva.size());
+        assertThat(sva.add(new StringValue())).isTrue();
+        assertThat(sva.size()).isEqualTo(size + 1);
         sva.reset();
-        assertEquals(size, sva.size());
+        assertThat(sva.size()).isEqualTo(size);
 
         // test clear
         sva.clear();
-        assertEquals(0, sva.size());
+        assertThat(sva.size()).isEqualTo(0);
     }
 }

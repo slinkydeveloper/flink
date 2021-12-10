@@ -44,10 +44,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Base class for adapters, as used by {@link StreamFormatAdapterTest} and {@link
@@ -164,7 +162,7 @@ public abstract class AdapterTestBase<FormatT> {
         }
 
         // assertions
-        assertTrue(in.closed);
+        assertThat(in.closed).isTrue();
 
         // cleanup
         testFs.unregister();
@@ -201,7 +199,7 @@ public abstract class AdapterTestBase<FormatT> {
         }
 
         // assertions
-        assertTrue(in.closed);
+        assertThat(in.closed).isTrue();
 
         // cleanup
         testFs.unregister();
@@ -212,7 +210,7 @@ public abstract class AdapterTestBase<FormatT> {
     // ------------------------------------------------------------------------
 
     protected static void verifyIntListResult(List<Integer> result) {
-        assertEquals("wrong result size", NUM_NUMBERS, result.size());
+        assertThat(result.size()).as("wrong result size").isEqualTo(NUM_NUMBERS);
         int nextExpected = 0;
         for (int next : result) {
             if (next != nextExpected++) {
@@ -243,7 +241,7 @@ public abstract class AdapterTestBase<FormatT> {
         while (num > 0) {
             if (currentReader == null) {
                 currentSplit = moreSplits.poll();
-                assertNotNull(currentSplit);
+                assertThat(currentSplit).isNotNull();
                 currentReader = format.createReader(config, currentSplit);
             }
 

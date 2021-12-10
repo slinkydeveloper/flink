@@ -27,8 +27,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** ResourceManager HA test, including grant leadership and revoke leadership. */
 public class ResourceManagerHATest extends TestLogger {
@@ -50,18 +49,17 @@ public class ResourceManagerHATest extends TestLogger {
             resourceManagerService.isLeader(leaderId);
 
             // after grant leadership, verify resource manager is started with the fencing token
-            assertEquals(
-                    leaderId,
-                    leaderElectionService.getConfirmationFuture().get().getLeaderSessionId());
-            assertTrue(resourceManagerService.getResourceManagerFencingToken().isPresent());
-            assertEquals(
-                    leaderId,
-                    resourceManagerService.getResourceManagerFencingToken().get().toUUID());
+            assertThat(leaderElectionService.getConfirmationFuture().get().getLeaderSessionId())
+                    .isEqualTo(leaderId);
+            assertThat(resourceManagerService.getResourceManagerFencingToken().isPresent())
+                    .isTrue();
+            assertThat(resourceManagerService.getResourceManagerFencingToken().get().toUUID())
+                    .isEqualTo(leaderId);
 
             // then revoke leadership, verify resource manager is closed
             final Optional<CompletableFuture<Void>> rmTerminationFutureOpt =
                     resourceManagerService.getResourceManagerTerminationFuture();
-            assertTrue(rmTerminationFutureOpt.isPresent());
+            assertThat(rmTerminationFutureOpt.isPresent()).isTrue();
 
             resourceManagerService.notLeader();
             rmTerminationFutureOpt.get().get();

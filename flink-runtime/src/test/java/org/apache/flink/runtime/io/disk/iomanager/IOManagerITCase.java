@@ -29,7 +29,6 @@ import org.apache.flink.runtime.operators.testutils.DummyInvokable;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +37,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Integration test case for the I/O manager. */
 public class IOManagerITCase extends TestLogger {
@@ -66,9 +68,9 @@ public class IOManagerITCase extends TestLogger {
     public void afterTest() throws Exception {
         ioManager.close();
 
-        Assert.assertTrue(
-                "Not all memory was returned to the memory manager in the test.",
-                memoryManager.verifyEmpty());
+        assertThat(memoryManager.verifyEmpty())
+                .as("Not all memory was returned to the memory manager in the test.")
+                .isTrue();
         memoryManager.shutdown();
         memoryManager = null;
     }
@@ -145,23 +147,20 @@ public class IOManagerITCase extends TestLogger {
                     try {
                         intValue = Integer.parseInt(val.value);
                     } catch (NumberFormatException nfex) {
-                        Assert.fail(
-                                "Invalid value read from reader. Valid decimal number expected.");
+                        fail("Invalid value read from reader. Valid decimal number expected.");
                     }
-                    Assert.assertEquals(
-                            "Written and read values do not match during sequential read.",
-                            nextVal,
-                            intValue);
+                    assertThat(intValue)
+                            .as("Written and read values do not match during sequential read.")
+                            .isEqualTo(nextVal);
                     nextVal++;
                 }
             } catch (EOFException eofex) {
                 // expected
             }
 
-            Assert.assertEquals(
-                    "NUmber of written numbers differs from number of read numbers.",
-                    writingCounters[i],
-                    nextVal);
+            assertThat(nextVal)
+                    .as("NUmber of written numbers differs from number of read numbers.")
+                    .isEqualTo(writingCounters[i]);
 
             this.memoryManager.release(in.close());
         }
@@ -189,15 +188,13 @@ public class IOManagerITCase extends TestLogger {
                         try {
                             intValue = Integer.parseInt(val.value);
                         } catch (NumberFormatException nfex) {
-                            Assert.fail(
-                                    "Invalid value read from reader. Valid decimal number expected.");
+                            fail("Invalid value read from reader. Valid decimal number expected.");
                             return;
                         }
 
-                        Assert.assertEquals(
-                                "Written and read values do not match.",
-                                readingCounters[channel]++,
-                                intValue);
+                        assertThat(intValue)
+                                .as("Written and read values do not match.")
+                                .isEqualTo(readingCounters[channel]++);
 
                         break;
                     } catch (EOFException eofex) {
@@ -222,7 +219,7 @@ public class IOManagerITCase extends TestLogger {
         // check that files are deleted
         for (int i = 0; i < NUM_CHANNELS; i++) {
             File f = new File(ids[i].getPath());
-            Assert.assertFalse("Channel file has not been deleted.", f.exists());
+            assertThat(f.exists()).as("Channel file has not been deleted.").isFalse();
         }
     }
 

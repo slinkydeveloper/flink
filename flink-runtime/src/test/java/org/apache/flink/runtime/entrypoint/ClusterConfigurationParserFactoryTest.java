@@ -25,11 +25,11 @@ import org.junit.Test;
 
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link ClusterConfigurationParserFactory}. */
 public class ClusterConfigurationParserFactoryTest extends TestLogger {
@@ -50,12 +50,12 @@ public class ClusterConfigurationParserFactoryTest extends TestLogger {
 
         final ClusterConfiguration clusterConfiguration = commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(configDir)));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(configDir));
         final Properties dynamicProperties = clusterConfiguration.getDynamicProperties();
 
-        assertThat(dynamicProperties, hasEntry(key, value));
+        assertThat(dynamicProperties).satisfies(matching(hasEntry(key, value)));
 
-        assertThat(clusterConfiguration.getArgs(), arrayContaining(arg1, arg2));
+        assertThat(clusterConfiguration.getArgs()).satisfies(matching(arrayContaining(arg1, arg2)));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class ClusterConfigurationParserFactoryTest extends TestLogger {
 
         final ClusterConfiguration clusterConfiguration = commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(configDir)));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(configDir));
     }
 
     @Test(expected = FlinkParseException.class)

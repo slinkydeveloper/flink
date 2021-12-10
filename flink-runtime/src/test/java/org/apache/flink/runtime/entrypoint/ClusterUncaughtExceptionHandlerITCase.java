@@ -36,8 +36,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Integration test to check exit behaviour for the {@link ClusterUncaughtExceptionHandler}. */
@@ -64,7 +63,7 @@ public class ClusterUncaughtExceptionHandlerITCase extends TestLogger {
                     FatalExitExceptionHandler
                             .EXIT_CODE; // for FAIL mode, exit is done using this handler.
             int unsignedIntegerExitCode = ((byte) signedIntegerExitCode) & 0xFF;
-            assertThat(testProcess.exitCode(), is(unsignedIntegerExitCode));
+            assertThat(testProcess.exitCode()).isEqualTo(unsignedIntegerExitCode);
             success = true;
         } finally {
             if (!success) {

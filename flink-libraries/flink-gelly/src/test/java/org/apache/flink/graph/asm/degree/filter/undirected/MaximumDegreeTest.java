@@ -29,7 +29,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link MaximumDegree}. */
 public class MaximumDegreeTest extends AsmTestBase {
@@ -60,8 +60,8 @@ public class MaximumDegreeTest extends AsmTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 emptyGraphWithVertices.run(new MaximumDegree<>(1));
 
-        assertEquals(emptyGraphVertexCount, graph.getVertices().collect().size());
-        assertEquals(0, graph.getEdges().collect().size());
+        assertThat(graph.getVertices().collect().size()).isEqualTo(emptyGraphVertexCount);
+        assertThat(graph.getEdges().collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -69,8 +69,8 @@ public class MaximumDegreeTest extends AsmTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 emptyGraphWithoutVertices.run(new MaximumDegree<>(1));
 
-        assertEquals(0, graph.getVertices().collect().size());
-        assertEquals(0, graph.getEdges().collect().size());
+        assertThat(graph.getVertices().collect().size()).isEqualTo(0);
+        assertThat(graph.getEdges().collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class MaximumDegreeTest extends AsmTestBase {
                         .run(new ChecksumHashCode<>())
                         .execute();
 
-        assertEquals(805, checksum.getCount());
-        assertEquals(0x0000000008028b43L, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(805);
+        assertThat(checksum.getChecksum()).isEqualTo(0x0000000008028b43L);
     }
 }

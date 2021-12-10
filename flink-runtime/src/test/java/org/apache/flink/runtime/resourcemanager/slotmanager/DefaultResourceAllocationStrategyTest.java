@@ -31,10 +31,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link DefaultResourceAllocationStrategy}. */
 public class DefaultResourceAllocationStrategyTest extends TestLogger {
@@ -66,21 +66,21 @@ public class DefaultResourceAllocationStrategyTest extends TestLogger {
                 STRATEGY.tryFulfillRequirements(
                         Collections.singletonMap(jobId, requirements),
                         taskManagerResourceInfoProvider);
-        assertThat(result.getUnfulfillableJobs(), is(empty()));
-        assertThat(result.getAllocationsOnPendingResources().keySet(), is(empty()));
-        assertThat(result.getPendingTaskManagersToAllocate(), is(empty()));
+        assertThat(result.getUnfulfillableJobs()).isEqualTo(empty());
+        assertThat(result.getAllocationsOnPendingResources().keySet()).isEqualTo(empty());
+        assertThat(result.getPendingTaskManagersToAllocate()).isEqualTo(empty());
         assertThat(
-                result.getAllocationsOnRegisteredResources()
-                        .get(jobId)
-                        .get(taskManager.getInstanceId())
-                        .getResourceCount(DEFAULT_SLOT_RESOURCE),
-                is(2));
+                        result.getAllocationsOnRegisteredResources()
+                                .get(jobId)
+                                .get(taskManager.getInstanceId())
+                                .getResourceCount(DEFAULT_SLOT_RESOURCE))
+                .isEqualTo(2);
         assertThat(
-                result.getAllocationsOnRegisteredResources()
-                        .get(jobId)
-                        .get(taskManager.getInstanceId())
-                        .getResourceCount(largeResource),
-                is(1));
+                        result.getAllocationsOnRegisteredResources()
+                                .get(jobId)
+                                .get(taskManager.getInstanceId())
+                                .getResourceCount(largeResource))
+                .isEqualTo(1);
     }
 
     @Test
@@ -102,9 +102,9 @@ public class DefaultResourceAllocationStrategyTest extends TestLogger {
                 STRATEGY.tryFulfillRequirements(
                         Collections.singletonMap(jobId, requirements),
                         taskManagerResourceInfoProvider);
-        assertThat(result.getUnfulfillableJobs(), is(empty()));
-        assertThat(result.getAllocationsOnRegisteredResources().keySet(), is(empty()));
-        assertThat(result.getPendingTaskManagersToAllocate().size(), is(1));
+        assertThat(result.getUnfulfillableJobs()).isEqualTo(empty());
+        assertThat(result.getAllocationsOnRegisteredResources().keySet()).isEqualTo(empty());
+        assertThat(result.getPendingTaskManagersToAllocate().size()).isEqualTo(1);
         final PendingTaskManagerId newAllocated =
                 result.getPendingTaskManagersToAllocate().get(0).getPendingTaskManagerId();
         ResourceCounter allFulfilledRequirements = ResourceCounter.empty();
@@ -127,8 +127,8 @@ public class DefaultResourceAllocationStrategyTest extends TestLogger {
                             resourceWithCount.getKey(), resourceWithCount.getValue());
         }
 
-        assertThat(allFulfilledRequirements.getResourceCount(DEFAULT_SLOT_RESOURCE), is(4));
-        assertThat(allFulfilledRequirements.getResourceCount(largeResource), is(2));
+        assertThat(allFulfilledRequirements.getResourceCount(DEFAULT_SLOT_RESOURCE)).isEqualTo(4);
+        assertThat(allFulfilledRequirements.getResourceCount(largeResource)).isEqualTo(2);
     }
 
     @Test
@@ -151,7 +151,7 @@ public class DefaultResourceAllocationStrategyTest extends TestLogger {
                 STRATEGY.tryFulfillRequirements(
                         Collections.singletonMap(jobId, requirements),
                         taskManagerResourceInfoProvider);
-        assertThat(result.getUnfulfillableJobs(), contains(jobId));
-        assertThat(result.getPendingTaskManagersToAllocate(), is(empty()));
+        assertThat(result.getUnfulfillableJobs()).satisfies(matching(contains(jobId)));
+        assertThat(result.getPendingTaskManagersToAllocate()).isEqualTo(empty());
     }
 }

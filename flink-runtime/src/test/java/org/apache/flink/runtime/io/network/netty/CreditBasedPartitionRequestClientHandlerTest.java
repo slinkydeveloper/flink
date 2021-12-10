@@ -64,16 +64,9 @@ import java.io.IOException;
 import static org.apache.flink.runtime.io.network.netty.PartitionRequestQueueTest.blockChannel;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createRemoteInputChannel;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createSingleInputGate;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -193,8 +186,8 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                             new NetworkBufferAllocator(handler));
             handler.channelRead(mock(ChannelHandlerContext.class), bufferResponse);
 
-            assertEquals(1, inputChannel.getNumberOfQueuedBuffers());
-            assertEquals(2, inputChannel.getSenderBacklog());
+            assertThat(inputChannel.getNumberOfQueuedBuffers()).isEqualTo(1);
+            assertThat(inputChannel.getSenderBacklog()).isEqualTo(2);
         } finally {
             releaseResource(inputGate, networkBufferPool);
         }
@@ -236,12 +229,12 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                             inputChannel.getInputChannelId(),
                             2,
                             new NetworkBufferAllocator(handler));
-            assertTrue(bufferResponse.isCompressed);
+            assertThat(bufferResponse.isCompressed).isTrue();
             handler.channelRead(null, bufferResponse);
 
             Buffer receivedBuffer = inputChannel.getNextReceivedBuffer();
-            assertNotNull(receivedBuffer);
-            assertTrue(receivedBuffer.isCompressed());
+            assertThat(receivedBuffer).isNotNull();
+            assertThat(receivedBuffer.isCompressed()).isTrue();
             receivedBuffer.recycleBuffer();
         } finally {
             releaseResource(inputGate, networkBufferPool);
@@ -268,26 +261,26 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                     new CreditBasedPartitionRequestClientHandler();
             handler.addInputChannel(inputChannel);
 
-            assertEquals(2, inputChannel.getNumberOfAvailableBuffers());
-            assertEquals(0, inputChannel.unsynchronizedGetFloatingBuffersAvailable());
+            assertThat(inputChannel.getNumberOfAvailableBuffers()).isEqualTo(2);
+            assertThat(inputChannel.unsynchronizedGetFloatingBuffersAvailable()).isEqualTo(0);
 
             int backlog = 5;
             NettyMessage.BacklogAnnouncement announcement =
                     new NettyMessage.BacklogAnnouncement(backlog, inputChannel.getInputChannelId());
             handler.channelRead(null, announcement);
-            assertEquals(7, inputChannel.getNumberOfAvailableBuffers());
-            assertEquals(7, inputChannel.getNumberOfRequiredBuffers());
-            assertEquals(backlog, inputChannel.getSenderBacklog());
-            assertEquals(5, inputChannel.unsynchronizedGetFloatingBuffersAvailable());
+            assertThat(inputChannel.getNumberOfAvailableBuffers()).isEqualTo(7);
+            assertThat(inputChannel.getNumberOfRequiredBuffers()).isEqualTo(7);
+            assertThat(inputChannel.getSenderBacklog()).isEqualTo(backlog);
+            assertThat(inputChannel.unsynchronizedGetFloatingBuffersAvailable()).isEqualTo(5);
 
             backlog = 12;
             announcement =
                     new NettyMessage.BacklogAnnouncement(backlog, inputChannel.getInputChannelId());
             handler.channelRead(null, announcement);
-            assertEquals(10, inputChannel.getNumberOfAvailableBuffers());
-            assertEquals(14, inputChannel.getNumberOfRequiredBuffers());
-            assertEquals(backlog, inputChannel.getSenderBacklog());
-            assertEquals(8, inputChannel.unsynchronizedGetFloatingBuffersAvailable());
+            assertThat(inputChannel.getNumberOfAvailableBuffers()).isEqualTo(10);
+            assertThat(inputChannel.getNumberOfRequiredBuffers()).isEqualTo(14);
+            assertThat(inputChannel.getSenderBacklog()).isEqualTo(backlog);
+            assertThat(inputChannel.unsynchronizedGetFloatingBuffersAvailable()).isEqualTo(8);
         } finally {
             releaseResource(inputGate, networkBufferPool);
         }
@@ -307,10 +300,9 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                 new CreditBasedPartitionRequestClientHandler();
         handler.addInputChannel(inputChannel);
 
-        assertEquals(
-                "There should be no buffers available in the channel.",
-                0,
-                inputChannel.getNumberOfAvailableBuffers());
+        assertThat(inputChannel.getNumberOfAvailableBuffers())
+                .as("There should be no buffers available in the channel.")
+                .isEqualTo(0);
 
         final BufferResponse bufferResponse =
                 createBufferResponse(
@@ -319,7 +311,7 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                         inputChannel.getInputChannelId(),
                         2,
                         new NetworkBufferAllocator(handler));
-        assertNull(bufferResponse.getBuffer());
+        assertThat(bufferResponse.getBuffer()).isNull();
 
         handler.channelRead(mock(ChannelHandlerContext.class), bufferResponse);
         verify(inputChannel, times(1)).onError(any(IllegalStateException.class));
@@ -409,20 +401,18 @@ public class CreditBasedPartitionRequestClientHandlerTest {
             inputChannels[1].requestSubpartition(0);
 
             // The two input channels should send partition requests
-            assertTrue(channel.isWritable());
+            assertThat(channel.isWritable()).isTrue();
             Object readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(
-                    inputChannels[0].getInputChannelId(),
-                    ((PartitionRequest) readFromOutbound).receiverId);
-            assertEquals(2, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannels[0].getInputChannelId());
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(2);
 
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(
-                    inputChannels[1].getInputChannelId(),
-                    ((PartitionRequest) readFromOutbound).receiverId);
-            assertEquals(2, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannels[1].getInputChannelId());
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(2);
 
             // The buffer response will take one available buffer from input channel, and it will
             // trigger
@@ -444,26 +434,24 @@ public class CreditBasedPartitionRequestClientHandlerTest {
             handler.channelRead(mock(ChannelHandlerContext.class), bufferResponse1);
             handler.channelRead(mock(ChannelHandlerContext.class), bufferResponse2);
 
-            assertEquals(2, inputChannels[0].getUnannouncedCredit());
-            assertEquals(2, inputChannels[1].getUnannouncedCredit());
+            assertThat(inputChannels[0].getUnannouncedCredit()).isEqualTo(2);
+            assertThat(inputChannels[1].getUnannouncedCredit()).isEqualTo(2);
 
             channel.runPendingTasks();
 
             // The two input channels should notify credits availability via the writable channel
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(AddCredit.class));
-            assertEquals(
-                    inputChannels[0].getInputChannelId(),
-                    ((AddCredit) readFromOutbound).receiverId);
-            assertEquals(2, ((AddCredit) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(AddCredit.class);
+            assertThat(((AddCredit) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannels[0].getInputChannelId());
+            assertThat(((AddCredit) readFromOutbound).credit).isEqualTo(2);
 
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(AddCredit.class));
-            assertEquals(
-                    inputChannels[1].getInputChannelId(),
-                    ((AddCredit) readFromOutbound).receiverId);
-            assertEquals(2, ((AddCredit) readFromOutbound).credit);
-            assertNull(channel.readOutbound());
+            assertThat(readFromOutbound).isInstanceOf(AddCredit.class);
+            assertThat(((AddCredit) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannels[1].getInputChannelId());
+            assertThat(((AddCredit) readFromOutbound).credit).isEqualTo(2);
+            assertThatObject(channel.readOutbound()).isNull();
 
             ByteBuf channelBlockingBuffer = blockChannel(channel);
 
@@ -478,29 +466,29 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                             allocator);
             handler.channelRead(mock(ChannelHandlerContext.class), bufferResponse3);
 
-            assertEquals(1, inputChannels[0].getUnannouncedCredit());
-            assertEquals(0, inputChannels[1].getUnannouncedCredit());
+            assertThat(inputChannels[0].getUnannouncedCredit()).isEqualTo(1);
+            assertThat(inputChannels[1].getUnannouncedCredit()).isEqualTo(0);
 
             channel.runPendingTasks();
 
             // The input channel will not notify credits via un-writable channel
-            assertFalse(channel.isWritable());
-            assertNull(channel.readOutbound());
+            assertThat(channel.isWritable()).isFalse();
+            assertThatObject(channel.readOutbound()).isNull();
 
             // Flush the buffer to make the channel writable again
             channel.flush();
-            assertSame(channelBlockingBuffer, channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isSameAs(channelBlockingBuffer);
 
             // The input channel should notify credits via channel's writability changed event
-            assertTrue(channel.isWritable());
+            assertThat(channel.isWritable()).isTrue();
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(AddCredit.class));
-            assertEquals(1, ((AddCredit) readFromOutbound).credit);
-            assertEquals(0, inputChannels[0].getUnannouncedCredit());
-            assertEquals(0, inputChannels[1].getUnannouncedCredit());
+            assertThat(readFromOutbound).isInstanceOf(AddCredit.class);
+            assertThat(((AddCredit) readFromOutbound).credit).isEqualTo(1);
+            assertThat(inputChannels[0].getUnannouncedCredit()).isEqualTo(0);
+            assertThat(inputChannels[1].getUnannouncedCredit()).isEqualTo(0);
 
             // no more messages
-            assertNull(channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isNull();
         } finally {
             releaseResource(inputGate, networkBufferPool);
             channel.close();
@@ -536,8 +524,8 @@ public class CreditBasedPartitionRequestClientHandlerTest {
 
             // This should send the partition request
             Object readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(2, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(2);
 
             // Trigger request floating buffers via buffer response to notify credits available
             final BufferResponse bufferResponse =
@@ -549,7 +537,7 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                             new NetworkBufferAllocator(handler));
             handler.channelRead(mock(ChannelHandlerContext.class), bufferResponse);
 
-            assertEquals(2, inputChannel.getUnannouncedCredit());
+            assertThat(inputChannel.getUnannouncedCredit()).isEqualTo(2);
 
             // Release the input channel
             inputGate.close();
@@ -557,11 +545,11 @@ public class CreditBasedPartitionRequestClientHandlerTest {
             // it should send a close request after releasing the input channel,
             // but will not notify credits for a released input channel.
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(CloseRequest.class));
+            assertThat(readFromOutbound).isInstanceOf(CloseRequest.class);
 
             channel.runPendingTasks();
 
-            assertNull(channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isNull();
         } finally {
             releaseResource(inputGate, networkBufferPool);
             channel.close();
@@ -625,7 +613,7 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                 // thrown via #getNext
                 inputGate.getNext();
             } catch (IOException ignored) {
-                assertEquals(expectedMessage, ignored.getMessage());
+                assertThat(ignored.getMessage()).isEqualTo(expectedMessage);
             }
         } finally {
             // Cleanup
@@ -672,7 +660,7 @@ public class CreditBasedPartitionRequestClientHandlerTest {
                             "The handler should wrap the exception %s as %s, but it does not.",
                             cause, expectedClass));
         } catch (IOException e) {
-            assertThat(e, instanceOf(expectedClass));
+            assertThat(e).isInstanceOf(expectedClass);
         }
     }
 
@@ -709,13 +697,13 @@ public class CreditBasedPartitionRequestClientHandlerTest {
             channel.runPendingTasks();
 
             NettyMessage.NewBufferSize readOutbound = channel.readOutbound();
-            assertThat(readOutbound, instanceOf(NettyMessage.NewBufferSize.class));
-            assertThat(readOutbound.receiverId, is(inputChannels[0].getInputChannelId()));
-            assertThat(readOutbound.bufferSize, is(333));
+            assertThat(readOutbound).isInstanceOf(NettyMessage.NewBufferSize.class);
+            assertThat(readOutbound.receiverId).isEqualTo(inputChannels[0].getInputChannelId());
+            assertThat(readOutbound.bufferSize).isEqualTo(333);
 
             readOutbound = channel.readOutbound();
-            assertThat(readOutbound.receiverId, is(inputChannels[1].getInputChannelId()));
-            assertThat(readOutbound.bufferSize, is(333));
+            assertThat(readOutbound.receiverId).isEqualTo(inputChannels[1].getInputChannelId());
+            assertThat(readOutbound.bufferSize).isEqualTo(333);
 
         } finally {
             releaseResource(inputGate, networkBufferPool);
@@ -766,19 +754,20 @@ public class CreditBasedPartitionRequestClientHandlerTest {
 
             handler.channelRead(null, bufferResponse);
 
-            assertEquals(0, inputChannel.getNumberOfQueuedBuffers());
+            assertThat(inputChannel.getNumberOfQueuedBuffers()).isEqualTo(0);
             if (!readBeforeReleasingOrRemoving) {
-                assertNull(bufferResponse.getBuffer());
+                assertThat(bufferResponse.getBuffer()).isNull();
             } else {
-                assertNotNull(bufferResponse.getBuffer());
-                assertTrue(bufferResponse.getBuffer().isRecycled());
+                assertThat(bufferResponse.getBuffer()).isNotNull();
+                assertThat(bufferResponse.getBuffer().isRecycled()).isTrue();
             }
 
             embeddedChannel.runScheduledPendingTasks();
             NettyMessage.CancelPartitionRequest cancelPartitionRequest =
                     embeddedChannel.readOutbound();
-            assertNotNull(cancelPartitionRequest);
-            assertEquals(inputChannel.getInputChannelId(), cancelPartitionRequest.receiverId);
+            assertThat(cancelPartitionRequest).isNotNull();
+            assertThat(cancelPartitionRequest.receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
         } finally {
             releaseResource(inputGate, networkBufferPool);
             embeddedChannel.close();

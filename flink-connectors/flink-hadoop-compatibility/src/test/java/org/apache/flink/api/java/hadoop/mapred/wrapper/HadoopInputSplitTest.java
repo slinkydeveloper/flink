@@ -26,7 +26,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.InputSplit;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.JobConfigurable;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,6 +35,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Consumer;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link HadoopInputSplit}. */
 public class HadoopInputSplitTest {
@@ -62,8 +63,8 @@ public class HadoopInputSplitTest {
         serializeSizeChecker.accept(bytes.length);
 
         split = InstantiationUtil.deserializeObject(bytes, split.getClass().getClassLoader());
-        Assert.assertEquals(5, split.getSplitNumber());
-        Assert.assertArrayEquals(new String[] {"host0"}, split.getHostnames());
+        assertThat(split.getSplitNumber()).isEqualTo(5);
+        assertThat(split.getHostnames()).isEqualTo(new String[] {"host0"});
         splitChecker.accept(split.getHadoopInputSplit());
     }
 
@@ -72,8 +73,8 @@ public class HadoopInputSplitTest {
         FileSplit fileSplit = new FileSplit(new Path("/test"), 0, 100, new String[] {"host0"});
         testInner(
                 fileSplit,
-                i -> Assert.assertTrue(i < 10000),
-                split -> Assert.assertEquals(fileSplit, split));
+                i -> assertThat(i < 10000).isTrue(),
+                split -> assertThat(split).isEqualTo(fileSplit));
     }
 
     @Test
@@ -85,8 +86,8 @@ public class HadoopInputSplitTest {
                 i -> {},
                 inputSplit -> {
                     ConfigurableFileSplit split = (ConfigurableFileSplit) inputSplit;
-                    Assert.assertNotNull(split.getConf());
-                    Assert.assertEquals(fileSplit, split);
+                    assertThat(split.getConf()).isNotNull();
+                    assertThat(split).isEqualTo(fileSplit);
                 });
     }
 
@@ -99,8 +100,8 @@ public class HadoopInputSplitTest {
                 i -> {},
                 inputSplit -> {
                     JobConfigurableFileSplit split = (JobConfigurableFileSplit) inputSplit;
-                    Assert.assertNotNull(split.getConf());
-                    Assert.assertEquals(fileSplit, split);
+                    assertThat(split.getConf()).isNotNull();
+                    assertThat(split).isEqualTo(fileSplit);
                 });
     }
 

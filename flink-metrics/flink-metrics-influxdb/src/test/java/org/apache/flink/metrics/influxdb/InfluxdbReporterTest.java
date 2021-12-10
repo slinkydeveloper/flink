@@ -43,10 +43,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 
 /** Integration test for {@link InfluxdbReporter}. */
 public class InfluxdbReporterTest extends TestLogger {
@@ -83,9 +82,12 @@ public class InfluxdbReporterTest extends TestLogger {
         reporter.notifyOfAddedMetric(counter, metricName, metricGroup);
 
         MeasurementInfo measurementInfo = reporter.counters.get(counter);
-        assertNotNull("test metric must be registered in the reporter", measurementInfo);
-        assertEquals("taskmanager_" + metricName, measurementInfo.getName());
-        assertThat(measurementInfo.getTags(), hasEntry("host", METRIC_HOSTNAME));
+        assertThat(measurementInfo)
+                .as("test metric must be registered in the reporter")
+                .isNotNull();
+        assertThat(measurementInfo.getName()).isEqualTo("taskmanager_" + metricName);
+        assertThat(measurementInfo.getTags())
+                .satisfies(matching(hasEntry("host", METRIC_HOSTNAME)));
     }
 
     @Test

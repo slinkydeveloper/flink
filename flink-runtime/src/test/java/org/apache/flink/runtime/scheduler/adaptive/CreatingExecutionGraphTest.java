@@ -39,9 +39,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link CreatingExecutionGraph} state. */
 public class CreatingExecutionGraphTest extends TestLogger {
@@ -54,7 +52,8 @@ public class CreatingExecutionGraphTest extends TestLogger {
 
             context.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.CANCELED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.CANCELED));
 
             creatingExecutionGraph.cancel();
         }
@@ -68,7 +67,8 @@ public class CreatingExecutionGraphTest extends TestLogger {
 
             context.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.SUSPENDED));
 
             creatingExecutionGraph.suspend(new FlinkException("Job has been suspended."));
         }
@@ -82,7 +82,8 @@ public class CreatingExecutionGraphTest extends TestLogger {
 
             context.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.FAILED));
 
             creatingExecutionGraph.handleGlobalFailure(new FlinkException("Test exception"));
         }
@@ -99,7 +100,8 @@ public class CreatingExecutionGraphTest extends TestLogger {
 
             context.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.FAILED));
 
             executionGraphWithVertexParallelismFuture.completeExceptionally(
                     new FlinkException("Test exception"));
@@ -141,7 +143,7 @@ public class CreatingExecutionGraphTest extends TestLogger {
                     e -> CreatingExecutionGraph.AssignmentResult.success(e.getExecutionGraph()));
             context.setExpectedExecuting(
                     actualExecutionGraph ->
-                            assertThat(actualExecutionGraph, sameInstance(executionGraph)));
+                            assertThat(actualExecutionGraph).isSameAs(executionGraph));
 
             executionGraphWithvertexParallelismFuture.complete(
                     CreatingExecutionGraph.ExecutionGraphWithVertexParallelism.create(

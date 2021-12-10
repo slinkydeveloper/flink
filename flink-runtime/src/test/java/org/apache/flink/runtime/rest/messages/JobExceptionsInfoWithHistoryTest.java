@@ -23,15 +23,13 @@ import org.apache.flink.runtime.rest.util.RestMapperUtils;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonProcessingException;
 import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that the {@link JobExceptionsInfoWithHistory} can be marshalled and unmarshalled. */
 public class JobExceptionsInfoWithHistoryTest
@@ -73,7 +71,7 @@ public class JobExceptionsInfoWithHistoryTest
                         new JobExceptionsInfoWithHistory.ExceptionInfo(
                                 "exception name", "stacktrace", 0L));
 
-        assertThat(json, not(CoreMatchers.containsString("taskName")));
-        assertThat(json, not(CoreMatchers.containsString("location")));
+        assertThat(json).doesNotContain("taskName");
+        assertThat(json).doesNotContain("location");
     }
 }

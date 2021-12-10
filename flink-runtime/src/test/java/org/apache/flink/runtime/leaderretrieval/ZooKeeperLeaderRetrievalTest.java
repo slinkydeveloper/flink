@@ -49,7 +49,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the ZooKeeper based leader election and retrieval. */
 public class ZooKeeperLeaderRetrievalTest extends TestLogger {
@@ -220,7 +220,7 @@ public class ZooKeeperLeaderRetrievalTest extends TestLogger {
                 LeaderRetrievalUtils.findConnectingAddress(
                         leaderRetrievalService, timeout, RPC_SYSTEM);
 
-        assertEquals(InetAddress.getLocalHost(), result);
+        assertThat(result).isEqualTo(InetAddress.getLocalHost());
     }
 
     static class FindConnectingAddress implements Runnable {

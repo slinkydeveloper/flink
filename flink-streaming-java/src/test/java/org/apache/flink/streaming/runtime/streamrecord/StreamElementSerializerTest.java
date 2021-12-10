@@ -30,9 +30,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,12 +49,12 @@ public class StreamElementSerializerTest {
 
         StreamElementSerializer<Long> streamRecSer = new StreamElementSerializer<Long>(serializer1);
 
-        assertEquals(serializer1, streamRecSer.getContainedTypeSerializer());
+        assertThat(streamRecSer.getContainedTypeSerializer()).isEqualTo(serializer1);
 
         StreamElementSerializer<Long> copy = streamRecSer.duplicate();
-        assertNotEquals(copy, streamRecSer);
-        assertNotEquals(
-                copy.getContainedTypeSerializer(), streamRecSer.getContainedTypeSerializer());
+        assertThat(streamRecSer).isEqualTo(copy);
+        assertThat(streamRecSer.getContainedTypeSerializer())
+                .isEqualTo(copy.getContainedTypeSerializer());
     }
 
     @Test
@@ -64,9 +62,9 @@ public class StreamElementSerializerTest {
         StreamElementSerializer<Long> streamRecSer =
                 new StreamElementSerializer<Long>(LongSerializer.INSTANCE);
 
-        assertFalse(streamRecSer.isImmutableType());
-        assertEquals(Long.class, streamRecSer.createInstance().getValue().getClass());
-        assertEquals(-1L, streamRecSer.getLength());
+        assertThat(streamRecSer.isImmutableType()).isFalse();
+        assertThat(streamRecSer.createInstance().getValue().getClass()).isEqualTo(Long.class);
+        assertThat(streamRecSer.getLength()).isEqualTo(-1L);
     }
 
     @Test
@@ -75,23 +73,27 @@ public class StreamElementSerializerTest {
                 new StreamElementSerializer<String>(StringSerializer.INSTANCE);
 
         StreamRecord<String> withoutTimestamp = new StreamRecord<>("test 1 2 分享基督耶穌的愛給們，開拓雙贏!");
-        assertEquals(withoutTimestamp, serializeAndDeserialize(withoutTimestamp, serializer));
+        assertThat(serializeAndDeserialize(withoutTimestamp, serializer))
+                .isEqualTo(withoutTimestamp);
 
         StreamRecord<String> withTimestamp = new StreamRecord<>("one more test 拓 們 分", 77L);
-        assertEquals(withTimestamp, serializeAndDeserialize(withTimestamp, serializer));
+        assertThat(serializeAndDeserialize(withTimestamp, serializer)).isEqualTo(withTimestamp);
 
         StreamRecord<String> negativeTimestamp = new StreamRecord<>("他", Long.MIN_VALUE);
-        assertEquals(negativeTimestamp, serializeAndDeserialize(negativeTimestamp, serializer));
+        assertThat(serializeAndDeserialize(negativeTimestamp, serializer))
+                .isEqualTo(negativeTimestamp);
 
         Watermark positiveWatermark = new Watermark(13);
-        assertEquals(positiveWatermark, serializeAndDeserialize(positiveWatermark, serializer));
+        assertThat(serializeAndDeserialize(positiveWatermark, serializer))
+                .isEqualTo(positiveWatermark);
 
         Watermark negativeWatermark = new Watermark(-4647654567676555876L);
-        assertEquals(negativeWatermark, serializeAndDeserialize(negativeWatermark, serializer));
+        assertThat(serializeAndDeserialize(negativeWatermark, serializer))
+                .isEqualTo(negativeWatermark);
 
         LatencyMarker latencyMarker =
                 new LatencyMarker(System.currentTimeMillis(), new OperatorID(-1, -1), 1);
-        assertEquals(latencyMarker, serializeAndDeserialize(latencyMarker, serializer));
+        assertThat(serializeAndDeserialize(latencyMarker, serializer)).isEqualTo(latencyMarker);
     }
 
     @SuppressWarnings("unchecked")

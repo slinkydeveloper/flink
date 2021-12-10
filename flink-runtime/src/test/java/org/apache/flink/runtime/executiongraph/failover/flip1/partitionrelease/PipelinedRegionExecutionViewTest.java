@@ -29,8 +29,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link PipelinedRegionExecutionView}. */
 public class PipelinedRegionExecutionViewTest extends TestLogger {
@@ -50,7 +49,7 @@ public class PipelinedRegionExecutionViewTest extends TestLogger {
         final PipelinedRegionExecutionView pipelinedRegionExecutionView =
                 new PipelinedRegionExecutionView(TEST_PIPELINED_REGION);
 
-        assertFalse(pipelinedRegionExecutionView.isFinished());
+        assertThat(pipelinedRegionExecutionView.isFinished()).isFalse();
     }
 
     @Test
@@ -60,7 +59,7 @@ public class PipelinedRegionExecutionViewTest extends TestLogger {
 
         pipelinedRegionExecutionView.vertexFinished(TEST_EXECUTION_VERTEX_ID);
 
-        assertTrue(pipelinedRegionExecutionView.isFinished());
+        assertThat(pipelinedRegionExecutionView.isFinished()).isTrue();
     }
 
     @Test
@@ -71,7 +70,7 @@ public class PipelinedRegionExecutionViewTest extends TestLogger {
         pipelinedRegionExecutionView.vertexFinished(TEST_EXECUTION_VERTEX_ID);
         pipelinedRegionExecutionView.vertexUnfinished(TEST_EXECUTION_VERTEX_ID);
 
-        assertFalse(pipelinedRegionExecutionView.isFinished());
+        assertThat(pipelinedRegionExecutionView.isFinished()).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)

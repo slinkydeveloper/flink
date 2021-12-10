@@ -43,8 +43,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Summarization}. */
 @RunWith(Parameterized.class)
@@ -192,17 +191,19 @@ public class SummarizationITCase extends MultipleProgramsTestBase {
     private <VV> void validateVertex(
             String expected, Vertex<Long, Summarization.VertexValue<VV>> actual) {
         String[] tokens = TOKEN_SEPARATOR.split(expected);
-        assertTrue(getListFromIdRange(tokens[0]).contains(actual.getId()));
-        assertEquals(getGroupValue(tokens[1]), actual.getValue().getVertexGroupValue().toString());
-        assertEquals(getGroupCount(tokens[1]), actual.getValue().getVertexGroupCount());
+        assertThat(getListFromIdRange(tokens[0]).contains(actual.getId())).isTrue();
+        assertThat(actual.getValue().getVertexGroupValue().toString())
+                .isEqualTo(getGroupValue(tokens[1]));
+        assertThat(actual.getValue().getVertexGroupCount()).isEqualTo(getGroupCount(tokens[1]));
     }
 
     private <EV> void validateEdge(String expected, Edge<Long, EdgeValue<EV>> actual) {
         String[] tokens = TOKEN_SEPARATOR.split(expected);
-        assertTrue(getListFromIdRange(tokens[0]).contains(actual.getSource()));
-        assertTrue(getListFromIdRange(tokens[1]).contains(actual.getTarget()));
-        assertEquals(getGroupValue(tokens[2]), actual.getValue().getEdgeGroupValue().toString());
-        assertEquals(getGroupCount(tokens[2]), actual.getValue().getEdgeGroupCount());
+        assertThat(getListFromIdRange(tokens[0]).contains(actual.getSource())).isTrue();
+        assertThat(getListFromIdRange(tokens[1]).contains(actual.getTarget())).isTrue();
+        assertThat(actual.getValue().getEdgeGroupValue().toString())
+                .isEqualTo(getGroupValue(tokens[2]));
+        assertThat(actual.getValue().getEdgeGroupCount()).isEqualTo(getGroupCount(tokens[2]));
     }
 
     private List<Long> getListFromIdRange(String idRange) {

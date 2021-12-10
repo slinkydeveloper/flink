@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link TableEnvironmentInternal}. */
 public class TableEnvironmentInternalTest extends JsonPlanTestBase {
@@ -67,13 +67,14 @@ public class TableEnvironmentInternalTest extends JsonPlanTestBase {
     public void testGetJsonPlan() throws IOException {
         String jsonPlan = tableEnv.getJsonPlan("insert into MySink select * from MyTable");
         String expected = TableTestUtil.readFromResource("/jsonplan/testGetJsonPlan.out");
-        assertEquals(
-                TableTestUtil.replaceExecNodeId(
-                        TableTestUtil.replaceFlinkVersion(
-                                TableTestUtil.getFormattedJson(expected))),
-                TableTestUtil.replaceExecNodeId(
-                        TableTestUtil.replaceFlinkVersion(
-                                TableTestUtil.getFormattedJson(jsonPlan))));
+        assertThat(
+                        TableTestUtil.replaceExecNodeId(
+                                TableTestUtil.replaceFlinkVersion(
+                                        TableTestUtil.getFormattedJson(jsonPlan))))
+                .isEqualTo(
+                        TableTestUtil.replaceExecNodeId(
+                                TableTestUtil.replaceFlinkVersion(
+                                        TableTestUtil.getFormattedJson(expected))));
     }
 
     @Test
@@ -93,7 +94,7 @@ public class TableEnvironmentInternalTest extends JsonPlanTestBase {
         String jsonPlan = TableTestUtil.readFromResource("/jsonplan/testGetJsonPlan.out");
         String actual = tableEnv.explainJsonPlan(jsonPlan, ExplainDetail.JSON_EXECUTION_PLAN);
         String expected = TableTestUtil.readFromResource("/explain/testExplainJsonPlan.out");
-        assertEquals(expected, TableTestUtil.replaceStreamNodeId(actual));
+        assertThat(TableTestUtil.replaceStreamNodeId(actual)).isEqualTo(expected);
     }
 
     @Test

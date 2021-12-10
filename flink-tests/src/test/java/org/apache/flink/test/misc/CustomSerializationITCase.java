@@ -40,8 +40,8 @@ import java.io.IOException;
 import java.util.Optional;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test for proper error messages in case user-defined serialization is broken and detected in the
@@ -87,8 +87,8 @@ public class CustomSerializationITCase extends TestLogger {
             env.execute();
         } catch (JobExecutionException e) {
             Optional<IOException> rootCause = findThrowable(e, IOException.class);
-            assertTrue(rootCause.isPresent());
-            assertTrue(rootCause.get().getMessage().contains("broken serialization"));
+            assertThat(rootCause.isPresent()).isTrue();
+            assertThat(rootCause.get().getMessage().contains("broken serialization")).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -115,8 +115,8 @@ public class CustomSerializationITCase extends TestLogger {
             env.execute();
         } catch (JobExecutionException e) {
             Optional<IOException> rootCause = findThrowable(e, IOException.class);
-            assertTrue(rootCause.isPresent());
-            assertTrue(rootCause.get().getMessage().contains("broken serialization"));
+            assertThat(rootCause.isPresent()).isTrue();
+            assertThat(rootCause.get().getMessage().contains("broken serialization")).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -143,8 +143,8 @@ public class CustomSerializationITCase extends TestLogger {
             env.execute();
         } catch (JobExecutionException e) {
             Optional<IOException> rootCause = findThrowable(e, IOException.class);
-            assertTrue(rootCause.isPresent());
-            assertTrue(rootCause.get().getMessage().contains("broken serialization"));
+            assertThat(rootCause.isPresent()).isTrue();
+            assertThat(rootCause.get().getMessage().contains("broken serialization")).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -171,8 +171,8 @@ public class CustomSerializationITCase extends TestLogger {
             env.execute();
         } catch (ProgramInvocationException e) {
             Throwable rootCause = e.getCause().getCause();
-            assertTrue(rootCause instanceof IOException);
-            assertTrue(rootCause.getMessage().contains("broken serialization"));
+            assertThat(rootCause).isInstanceOf(IOException.class);
+            assertThat(rootCause.getMessage().contains("broken serialization")).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

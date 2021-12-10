@@ -18,12 +18,13 @@
 
 package org.apache.flink.util;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for java collection utilities. */
 public class CollectionUtilTest {
@@ -33,12 +34,13 @@ public class CollectionUtilTest {
         List<Integer> list = Arrays.asList(1, 2, 3, 4);
         Collection<List<Integer>> partitioned = CollectionUtil.partition(list, 4);
 
-        Assert.assertEquals(
-                "List partitioned into the an incorrect number of partitions",
-                4,
-                partitioned.size());
+        assertThat(partitioned.size())
+                .as("List partitioned into the an incorrect number of partitions")
+                .isEqualTo(4);
         for (List<Integer> partition : partitioned) {
-            Assert.assertEquals("Unexpected number of elements in partition", 1, partition.size());
+            assertThat(partition.size())
+                    .as("Unexpected number of elements in partition")
+                    .isEqualTo(1);
         }
     }
 }

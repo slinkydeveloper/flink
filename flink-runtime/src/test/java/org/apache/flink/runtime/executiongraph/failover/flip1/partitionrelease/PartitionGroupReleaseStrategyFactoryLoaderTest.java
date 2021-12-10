@@ -24,9 +24,8 @@ import org.apache.flink.configuration.JobManagerOptions;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 
 /** Tests for {@link PartitionGroupReleaseStrategyFactoryLoader}. */
 public class PartitionGroupReleaseStrategyFactoryLoaderTest {
@@ -38,7 +37,8 @@ public class PartitionGroupReleaseStrategyFactoryLoaderTest {
                 PartitionGroupReleaseStrategyFactoryLoader.loadPartitionGroupReleaseStrategyFactory(
                         emptyConfiguration);
 
-        assertThat(factory, is(instanceOf(RegionPartitionGroupReleaseStrategy.Factory.class)));
+        assertThat(factory)
+                .isEqualTo(instanceOf(RegionPartitionGroupReleaseStrategy.Factory.class));
     }
 
     @Test
@@ -51,7 +51,7 @@ public class PartitionGroupReleaseStrategyFactoryLoaderTest {
                 PartitionGroupReleaseStrategyFactoryLoader.loadPartitionGroupReleaseStrategyFactory(
                         emptyConfiguration);
 
-        assertThat(
-                factory, is(instanceOf(NotReleasingPartitionGroupReleaseStrategy.Factory.class)));
+        assertThat(factory)
+                .isEqualTo(instanceOf(NotReleasingPartitionGroupReleaseStrategy.Factory.class));
     }
 }

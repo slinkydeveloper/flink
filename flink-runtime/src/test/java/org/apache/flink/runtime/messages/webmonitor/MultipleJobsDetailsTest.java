@@ -32,7 +32,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link MultipleJobsDetails} class. */
 public class MultipleJobsDetailsTest extends TestLogger {
@@ -80,6 +80,6 @@ public class MultipleJobsDetailsTest extends TestLogger {
         final MultipleJobsDetails unmarshalled =
                 objectMapper.treeToValue(marshalled, MultipleJobsDetails.class);
 
-        assertEquals(expected, unmarshalled);
+        assertThat(unmarshalled).isEqualTo(expected);
     }
 }

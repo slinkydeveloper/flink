@@ -21,10 +21,8 @@ package org.apache.flink.runtime.rest.messages;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link SubtaskIndexPathParameter}. */
 public class SubtaskIndexPathParameterTest {
@@ -38,9 +36,8 @@ public class SubtaskIndexPathParameterTest {
 
     @Test
     public void testConversionFromString() throws Exception {
-        assertThat(
-                subtaskIndexPathParameter.convertFromString("2147483647"),
-                equalTo(Integer.MAX_VALUE));
+        assertThat(subtaskIndexPathParameter.convertFromString("2147483647"))
+                .isEqualTo(Integer.MAX_VALUE);
     }
 
     @Test
@@ -49,21 +46,19 @@ public class SubtaskIndexPathParameterTest {
             subtaskIndexPathParameter.convertFromString("-2147483648");
             fail("Expected exception not thrown");
         } catch (final ConversionException e) {
-            assertThat(
-                    e.getMessage(),
-                    equalTo("subtaskindex must be positive, was: " + Integer.MIN_VALUE));
+            assertThat(e.getMessage())
+                    .isEqualTo("subtaskindex must be positive, was: " + Integer.MIN_VALUE);
         }
     }
 
     @Test
     public void testConvertToString() throws Exception {
-        assertThat(
-                subtaskIndexPathParameter.convertToString(Integer.MAX_VALUE),
-                equalTo("2147483647"));
+        assertThat(subtaskIndexPathParameter.convertToString(Integer.MAX_VALUE))
+                .isEqualTo("2147483647");
     }
 
     @Test
     public void testIsMandatoryParameter() {
-        assertTrue(subtaskIndexPathParameter.isMandatory());
+        assertThat(subtaskIndexPathParameter.isMandatory()).isTrue();
     }
 }

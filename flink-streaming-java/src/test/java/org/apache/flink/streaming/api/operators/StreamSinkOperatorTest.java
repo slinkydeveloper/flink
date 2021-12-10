@@ -32,9 +32,9 @@ import org.junit.rules.ExpectedException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link StreamSink}. */
 public class StreamSinkOperatorTest extends TestLogger {
@@ -70,23 +70,25 @@ public class StreamSinkOperatorTest extends TestLogger {
         testHarness.setProcessingTime(15);
         testHarness.processElement(new StreamRecord<>("Ciao"));
 
-        assertThat(bufferingSink.data.size(), is(3));
+        assertThat(bufferingSink.data.size()).isEqualTo(3);
 
-        assertThat(
-                bufferingSink.data,
-                contains(
-                        new Tuple4<>(17L, 12L, 12L, "Hello"),
-                        new Tuple4<>(42L, 15L, 13L, "Ciao"),
-                        new Tuple4<>(42L, 15L, null, "Ciao")));
+        assertThat(bufferingSink.data)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new Tuple4<>(17L, 12L, 12L, "Hello"),
+                                        new Tuple4<>(42L, 15L, 13L, "Ciao"),
+                                        new Tuple4<>(42L, 15L, null, "Ciao"))));
 
-        assertThat(bufferingSink.watermarks.size(), is(3));
+        assertThat(bufferingSink.watermarks.size()).isEqualTo(3);
 
-        assertThat(
-                bufferingSink.watermarks,
-                contains(
-                        new org.apache.flink.api.common.eventtime.Watermark(17L),
-                        new org.apache.flink.api.common.eventtime.Watermark(42L),
-                        new org.apache.flink.api.common.eventtime.Watermark(42L)));
+        assertThat(bufferingSink.watermarks)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new org.apache.flink.api.common.eventtime.Watermark(17L),
+                                        new org.apache.flink.api.common.eventtime.Watermark(42L),
+                                        new org.apache.flink.api.common.eventtime.Watermark(42L))));
 
         testHarness.close();
     }

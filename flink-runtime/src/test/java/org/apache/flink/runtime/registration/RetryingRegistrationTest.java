@@ -42,13 +42,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.anyString;
@@ -98,10 +94,10 @@ public class RetryingRegistrationTest extends TestLogger {
                                     TestRegistrationSuccess,
                                     TestRegistrationRejection>>
                     future = registration.getFuture();
-            assertNotNull(future);
+            assertThat(future).isNotNull();
 
             // multiple accesses return the same future
-            assertEquals(future, registration.getFuture());
+            assertThat(registration.getFuture()).isEqualTo(future);
 
             RetryingRegistration.RetryingRegistrationResult<
                             TestRegistrationGateway,
@@ -110,8 +106,8 @@ public class RetryingRegistrationTest extends TestLogger {
                     registrationResponse = future.get(10L, TimeUnit.SECONDS);
 
             // validate correct invocation and result
-            assertEquals(testId, registrationResponse.getSuccess().getCorrelationId());
-            assertEquals(leaderId, testGateway.getInvocations().take().leaderId());
+            assertThat(registrationResponse.getSuccess().getCorrelationId()).isEqualTo(testId);
+            assertThat(testGateway.getInvocations().take().leaderId()).isEqualTo(leaderId);
         } finally {
             testGateway.stop();
         }
@@ -131,14 +127,14 @@ public class RetryingRegistrationTest extends TestLogger {
         registration.startRegistration();
 
         CompletableFuture<?> future = registration.getFuture();
-        assertTrue(future.isDone());
+        assertThat(future.isDone()).isTrue();
 
         try {
             future.get();
 
             fail("We expected an ExecutionException.");
         } catch (ExecutionException e) {
-            assertEquals(testExceptionMessage, e.getCause().getMessage());
+            assertThat(e.getCause().getMessage()).isEqualTo(testExceptionMessage);
         }
     }
 
@@ -191,13 +187,14 @@ public class RetryingRegistrationTest extends TestLogger {
             // measure the duration of the registration --> should be longer than the error delay
             long duration = System.currentTimeMillis() - start;
 
-            assertTrue(
-                    "The registration should have failed the first time. Thus the duration should be longer than at least a single error delay.",
-                    duration > TestRetryingRegistration.DELAY_ON_ERROR);
+            assertThat(duration > TestRetryingRegistration.DELAY_ON_ERROR)
+                    .as(
+                            "The registration should have failed the first time. Thus the duration should be longer than at least a single error delay.")
+                    .isTrue();
 
             // validate correct invocation and result
-            assertEquals(testId, registrationResponse.getSuccess().getCorrelationId());
-            assertEquals(leaderId, testGateway.getInvocations().take().leaderId());
+            assertThat(registrationResponse.getSuccess().getCorrelationId()).isEqualTo(testId);
+            assertThat(testGateway.getInvocations().take().leaderId()).isEqualTo(leaderId);
         } finally {
             testGateway.stop();
         }
@@ -252,11 +249,13 @@ public class RetryingRegistrationTest extends TestLogger {
             long elapsedMillis = (finished - started) / 1000000;
 
             // validate correct invocation and result
-            assertEquals(testId, registrationResponse.getSuccess().getCorrelationId());
-            assertEquals(leaderId, testGateway.getInvocations().take().leaderId());
+            assertThat(registrationResponse.getSuccess().getCorrelationId()).isEqualTo(testId);
+            assertThat(testGateway.getInvocations().take().leaderId()).isEqualTo(leaderId);
 
             // validate that some retry-delay / back-off behavior happened
-            assertTrue("retries did not properly back off", elapsedMillis >= 3 * initialTimeout);
+            assertThat(elapsedMillis >= 3 * initialTimeout)
+                    .as("retries did not properly back off")
+                    .isTrue();
         } finally {
             testGateway.stop();
         }
@@ -301,15 +300,16 @@ public class RetryingRegistrationTest extends TestLogger {
             long elapsedMillis = (finished - started) / 1000000;
 
             // validate correct invocation and result
-            assertEquals(testId, registrationResponse.getSuccess().getCorrelationId());
-            assertEquals(leaderId, testGateway.getInvocations().take().leaderId());
+            assertThat(registrationResponse.getSuccess().getCorrelationId()).isEqualTo(testId);
+            assertThat(testGateway.getInvocations().take().leaderId()).isEqualTo(leaderId);
 
             // validate that some retry-delay / back-off behavior happened
-            assertTrue(
-                    "retries did not properly back off",
-                    elapsedMillis
-                            >= 2 * TestRetryingRegistration.INITIAL_TIMEOUT
-                                    + TestRetryingRegistration.DELAY_ON_FAILURE);
+            assertThat(
+                            elapsedMillis
+                                    >= 2 * TestRetryingRegistration.INITIAL_TIMEOUT
+                                            + TestRetryingRegistration.DELAY_ON_FAILURE)
+                    .as("retries did not properly back off")
+                    .isTrue();
         } finally {
             testGateway.stop();
         }
@@ -334,10 +334,9 @@ public class RetryingRegistrationTest extends TestLogger {
                         TestRegistrationGateway, TestRegistrationSuccess, TestRegistrationRejection>
                 response = testRetryingRegistration.getFuture().join();
 
-        assertTrue(response.isRejection());
-        assertThat(
-                response.getRejection().getRejectionReason(),
-                is(TestRegistrationRejection.RejectionReason.REJECTED));
+        assertThat(response.isRejection()).isTrue();
+        assertThat(response.getRejection().getRejectionReason())
+                .isEqualTo(TestRegistrationRejection.RejectionReason.REJECTED);
     }
 
     @Test
@@ -378,12 +377,12 @@ public class RetryingRegistrationTest extends TestLogger {
         long finished = System.nanoTime();
         long elapsedMillis = (finished - started) / 1000000;
 
-        assertEquals(testId, registrationResponse.getSuccess().getCorrelationId());
+        assertThat(registrationResponse.getSuccess().getCorrelationId()).isEqualTo(testId);
 
         // validate that some retry-delay / back-off behavior happened
-        assertTrue(
-                "retries did not properly back off",
-                elapsedMillis >= TestRetryingRegistration.DELAY_ON_ERROR);
+        assertThat(elapsedMillis >= TestRetryingRegistration.DELAY_ON_ERROR)
+                .as("retries did not properly back off")
+                .isTrue();
     }
 
     @Test
@@ -414,7 +413,7 @@ public class RetryingRegistrationTest extends TestLogger {
         result.completeExceptionally(new TimeoutException());
 
         // there should not be a second registration attempt
-        assertThat(registrationCallCounter.get(), is(lessThanOrEqualTo(1)));
+        assertThat(registrationCallCounter.get()).isEqualTo(lessThanOrEqualTo(1));
     }
 
     // ------------------------------------------------------------------------

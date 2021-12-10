@@ -62,10 +62,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.junit.Assume.assumeTrue;
 
 /** Integration tests for the adaptive scheduler. */
@@ -141,8 +140,8 @@ public class AdaptiveSchedulerITCase extends TestLogger {
         final File savepointDirectory = tempFolder.newFolder("savepoint");
         final String savepoint =
                 client.stopWithSavepoint(false, savepointDirectory.getAbsolutePath()).get();
-        assertThat(savepoint, containsString(savepointDirectory.getAbsolutePath()));
-        assertThat(client.getJobStatus().get(), is(JobStatus.FINISHED));
+        assertThat(savepoint).contains(savepointDirectory.getAbsolutePath());
+        assertThat(client.getJobStatus().get()).isEqualTo(JobStatus.FINISHED);
     }
 
     @Test
@@ -161,7 +160,7 @@ public class AdaptiveSchedulerITCase extends TestLogger {
                     .get();
             fail("Expect exception");
         } catch (ExecutionException e) {
-            assertThat(e, containsCause(FlinkException.class));
+            assertThat(e).satisfies(matching(containsCause(FlinkException.class)));
         }
         // expect job to run again (maybe restart)
         CommonTestUtils.waitUntilCondition(
@@ -185,7 +184,7 @@ public class AdaptiveSchedulerITCase extends TestLogger {
                     .get();
             fail("Expect exception");
         } catch (ExecutionException e) {
-            assertThat(e, containsCause(FlinkException.class));
+            assertThat(e).satisfies(matching(containsCause(FlinkException.class)));
         }
         // expect job to run again (maybe restart)
         CommonTestUtils.waitUntilCondition(
@@ -213,7 +212,7 @@ public class AdaptiveSchedulerITCase extends TestLogger {
             client.stopWithSavepoint(false, savepointDirectory.getAbsolutePath()).get();
             fail("Expect failure of operation");
         } catch (ExecutionException e) {
-            assertThat(e, containsCause(FlinkException.class));
+            assertThat(e).satisfies(matching(containsCause(FlinkException.class)));
         }
 
         DummySource.awaitRunning();
@@ -228,7 +227,7 @@ public class AdaptiveSchedulerITCase extends TestLogger {
         // trigger second savepoint
         final String savepoint =
                 client.stopWithSavepoint(false, savepointDirectory.getAbsolutePath()).get();
-        assertThat(savepoint, containsString(savepointDirectory.getAbsolutePath()));
+        assertThat(savepoint).contains(savepointDirectory.getAbsolutePath());
     }
 
     private boolean isDirectoryEmpty(File directory) {

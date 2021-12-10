@@ -20,8 +20,7 @@ package org.apache.flink.runtime.io.network.netty;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link NettyBufferPool} wrapper. */
 public class NettyBufferPoolTest {
@@ -31,26 +30,26 @@ public class NettyBufferPoolTest {
         NettyBufferPool nettyBufferPool = new NettyBufferPool(1);
 
         // Buffers should prefer to be direct
-        assertTrue(nettyBufferPool.buffer().isDirect());
-        assertTrue(nettyBufferPool.buffer(128).isDirect());
-        assertTrue(nettyBufferPool.buffer(128, 256).isDirect());
+        assertThat(nettyBufferPool.buffer().isDirect()).isTrue();
+        assertThat(nettyBufferPool.buffer(128).isDirect()).isTrue();
+        assertThat(nettyBufferPool.buffer(128, 256).isDirect()).isTrue();
 
         // IO buffers should prefer to be direct
-        assertTrue(nettyBufferPool.ioBuffer().isDirect());
-        assertTrue(nettyBufferPool.ioBuffer(128).isDirect());
-        assertTrue(nettyBufferPool.ioBuffer(128, 256).isDirect());
+        assertThat(nettyBufferPool.ioBuffer().isDirect()).isTrue();
+        assertThat(nettyBufferPool.ioBuffer(128).isDirect()).isTrue();
+        assertThat(nettyBufferPool.ioBuffer(128, 256).isDirect()).isTrue();
 
         // Currently we fakes the heap buffer allocation with direct buffers
-        assertTrue(nettyBufferPool.heapBuffer().isDirect());
-        assertTrue(nettyBufferPool.heapBuffer(128).isDirect());
-        assertTrue(nettyBufferPool.heapBuffer(128, 256).isDirect());
+        assertThat(nettyBufferPool.heapBuffer().isDirect()).isTrue();
+        assertThat(nettyBufferPool.heapBuffer(128).isDirect()).isTrue();
+        assertThat(nettyBufferPool.heapBuffer(128, 256).isDirect()).isTrue();
 
         // Composite buffers allocates the corresponding type of buffers when extending its capacity
-        assertTrue(nettyBufferPool.compositeHeapBuffer().capacity(1024).isDirect());
-        assertTrue(nettyBufferPool.compositeHeapBuffer(10).capacity(1024).isDirect());
+        assertThat(nettyBufferPool.compositeHeapBuffer().capacity(1024).isDirect()).isTrue();
+        assertThat(nettyBufferPool.compositeHeapBuffer(10).capacity(1024).isDirect()).isTrue();
 
         // Is direct buffer pooled!
-        assertTrue(nettyBufferPool.isDirectBufferPooled());
+        assertThat(nettyBufferPool.isDirectBufferPooled()).isTrue();
     }
 
     @Test
@@ -62,14 +61,14 @@ public class NettyBufferPoolTest {
             // Single large buffer allocates one chunk
             nettyBufferPool.directBuffer(chunkSize - 64);
             long allocated = nettyBufferPool.getNumberOfAllocatedBytes().get();
-            assertEquals(chunkSize, allocated);
+            assertThat(allocated).isEqualTo(chunkSize);
         }
 
         {
             // Allocate a little more (one more chunk required)
             nettyBufferPool.directBuffer(128);
             long allocated = nettyBufferPool.getNumberOfAllocatedBytes().get();
-            assertEquals(2 * chunkSize, allocated);
+            assertThat(allocated).isEqualTo(2 * chunkSize);
         }
     }
 }

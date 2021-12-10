@@ -45,7 +45,6 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -74,10 +73,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the HistoryServer. */
 @RunWith(Parameterized.class)
@@ -151,7 +150,7 @@ public class HistoryServerTest extends TestLogger {
             hs.start();
             String baseUrl = "http://localhost:" + hs.getWebPort();
 
-            Assert.assertEquals(0, getJobsOverview(baseUrl).getJobs().size());
+            assertThat(getJobsOverview(baseUrl).getJobs().size()).isEqualTo(0);
 
             for (int x = 0; x < numJobs; x++) {
                 runJob();
@@ -159,8 +158,9 @@ public class HistoryServerTest extends TestLogger {
             createLegacyArchive(jmDirectory.toPath());
             waitForArchivesCreation(numJobs + numLegacyJobs);
 
-            assertTrue(numExpectedArchivedJobs.await(10L, TimeUnit.SECONDS));
-            Assert.assertEquals(numJobs + numLegacyJobs, getJobsOverview(baseUrl).getJobs().size());
+            assertThat(numExpectedArchivedJobs.await(10L, TimeUnit.SECONDS)).isTrue();
+            assertThat(getJobsOverview(baseUrl).getJobs().size())
+                    .isEqualTo(numJobs + numLegacyJobs);
 
             // checks whether the dashboard configuration contains all expected fields
             getDashboardConfiguration(baseUrl);
@@ -221,10 +221,10 @@ public class HistoryServerTest extends TestLogger {
         try {
             hs.start();
             String baseUrl = "http://localhost:" + hs.getWebPort();
-            assertTrue(numArchivesCreatedInitially.await(10L, TimeUnit.SECONDS));
-            assertTrue(numArchivesDeletedInitially.await(10L, TimeUnit.SECONDS));
-            Assert.assertEquals(
-                    new HashSet<>(expectedJobIdsToKeep), getIdsFromJobOverview(baseUrl));
+            assertThat(numArchivesCreatedInitially.await(10L, TimeUnit.SECONDS)).isTrue();
+            assertThat(numArchivesDeletedInitially.await(10L, TimeUnit.SECONDS)).isTrue();
+            assertThat(getIdsFromJobOverview(baseUrl))
+                    .isEqualTo(new HashSet<>(expectedJobIdsToKeep));
 
             for (int j = numArchivesBeforeHsStarted;
                     j < numArchivesBeforeHsStarted + numArchivesAfterHsStarted;
@@ -233,10 +233,10 @@ public class HistoryServerTest extends TestLogger {
                 expectedJobIdsToKeep.add(
                         createLegacyArchive(jmDirectory.toPath(), j * oneMinuteSinceEpoch));
             }
-            assertTrue(numArchivesCreatedTotal.await(10L, TimeUnit.SECONDS));
-            assertTrue(numArchivesDeletedTotal.await(10L, TimeUnit.SECONDS));
-            Assert.assertEquals(
-                    new HashSet<>(expectedJobIdsToKeep), getIdsFromJobOverview(baseUrl));
+            assertThat(numArchivesCreatedTotal.await(10L, TimeUnit.SECONDS)).isTrue();
+            assertThat(numArchivesDeletedTotal.await(10L, TimeUnit.SECONDS)).isTrue();
+            assertThat(getIdsFromJobOverview(baseUrl))
+                    .isEqualTo(new HashSet<>(expectedJobIdsToKeep));
         } finally {
             hs.stop();
         }
@@ -312,10 +312,10 @@ public class HistoryServerTest extends TestLogger {
         try {
             hs.start();
             String baseUrl = "http://localhost:" + hs.getWebPort();
-            assertTrue(numExpectedArchivedJobs.await(10L, TimeUnit.SECONDS));
+            assertThat(numExpectedArchivedJobs.await(10L, TimeUnit.SECONDS)).isTrue();
 
             Collection<JobDetails> jobs = getJobsOverview(baseUrl).getJobs();
-            Assert.assertEquals(numJobs, jobs.size());
+            assertThat(jobs.size()).isEqualTo(numJobs);
 
             String jobIdToDelete =
                     jobs.stream()
@@ -332,18 +332,18 @@ public class HistoryServerTest extends TestLogger {
             hs.fetchArchives();
             Files.deleteIfExists(jmDirectory.toPath().resolve(jobIdToDelete));
 
-            assertTrue(firstArchiveExpiredLatch.await(10L, TimeUnit.SECONDS));
+            assertThat(firstArchiveExpiredLatch.await(10L, TimeUnit.SECONDS)).isTrue();
 
             // check that archive is still/no longer present in hs
             Collection<JobDetails> jobsAfterDeletion = getJobsOverview(baseUrl).getJobs();
-            Assert.assertEquals(numJobs - numExpiredJobs, jobsAfterDeletion.size());
-            Assert.assertEquals(
-                    1 - numExpiredJobs,
-                    jobsAfterDeletion.stream()
-                            .map(JobDetails::getJobId)
-                            .map(JobID::toString)
-                            .filter(jobId -> jobId.equals(jobIdToDelete))
-                            .count());
+            assertThat(jobsAfterDeletion.size()).isEqualTo(numJobs - numExpiredJobs);
+            assertThat(
+                            jobsAfterDeletion.stream()
+                                    .map(JobDetails::getJobId)
+                                    .map(JobID::toString)
+                                    .filter(jobId -> jobId.equals(jobIdToDelete))
+                                    .count())
+                    .isEqualTo(1 - numExpiredJobs);
 
             // delete remaining archives from jm and ensure files are cleaned up
             List<String> remainingJobIds =
@@ -356,7 +356,7 @@ public class HistoryServerTest extends TestLogger {
                 Files.deleteIfExists(jmDirectory.toPath().resolve(remainingJobId));
             }
 
-            assertTrue(allArchivesExpiredLatch.await(10L, TimeUnit.SECONDS));
+            assertThat(allArchivesExpiredLatch.await(10L, TimeUnit.SECONDS)).isTrue();
 
             assertJobFilesCleanedUp(cleanupExpiredJobs);
         } finally {
@@ -375,7 +375,8 @@ public class HistoryServerTest extends TestLogger {
                             .filter(path -> !path.equals(Paths.get("overviews")))
                             .collect(Collectors.toList());
 
-            assertThat(jobFiles, jobFilesShouldBeDeleted ? empty() : not(empty()));
+            assertThat(jobFiles)
+                    .satisfies(matching(jobFilesShouldBeDeleted ? empty() : not(empty())));
         }
     }
 

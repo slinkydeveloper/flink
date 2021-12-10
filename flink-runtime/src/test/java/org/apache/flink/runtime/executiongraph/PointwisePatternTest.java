@@ -33,9 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for building {@link DistributionPattern#POINTWISE} connections in {@link
@@ -50,14 +49,13 @@ public class PointwisePatternTest {
         ExecutionJobVertex target = setUpExecutionGraphAndGetDownstreamVertex(N, N);
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
-            assertEquals(1, consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size()).isEqualTo(1);
 
-            assertEquals(
-                    ev.getParallelSubtaskIndex(),
-                    consumedPartitionGroup.getFirst().getPartitionNumber());
+            assertThat(consumedPartitionGroup.getFirst().getPartitionNumber())
+                    .isEqualTo(ev.getParallelSubtaskIndex());
         }
     }
 
@@ -68,16 +66,15 @@ public class PointwisePatternTest {
         ExecutionJobVertex target = setUpExecutionGraphAndGetDownstreamVertex(2 * N, N);
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
-            assertEquals(2, consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size()).isEqualTo(2);
 
             int idx = 0;
             for (IntermediateResultPartitionID partitionId : consumedPartitionGroup) {
-                assertEquals(
-                        ev.getParallelSubtaskIndex() * 2L + idx++,
-                        partitionId.getPartitionNumber());
+                assertThat(partitionId.getPartitionNumber())
+                        .isEqualTo(ev.getParallelSubtaskIndex() * 2L + idx++);
             }
         }
     }
@@ -89,16 +86,15 @@ public class PointwisePatternTest {
         ExecutionJobVertex target = setUpExecutionGraphAndGetDownstreamVertex(3 * N, N);
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
-            assertEquals(3, consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size()).isEqualTo(3);
 
             int idx = 0;
             for (IntermediateResultPartitionID partitionId : consumedPartitionGroup) {
-                assertEquals(
-                        ev.getParallelSubtaskIndex() * 3L + idx++,
-                        partitionId.getPartitionNumber());
+                assertThat(partitionId.getPartitionNumber())
+                        .isEqualTo(ev.getParallelSubtaskIndex() * 3L + idx++);
             }
         }
     }
@@ -110,14 +106,13 @@ public class PointwisePatternTest {
         ExecutionJobVertex target = setUpExecutionGraphAndGetDownstreamVertex(N, 2 * N);
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
-            assertEquals(1, consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size()).isEqualTo(1);
 
-            assertEquals(
-                    ev.getParallelSubtaskIndex() / 2,
-                    consumedPartitionGroup.getFirst().getPartitionNumber());
+            assertThat(consumedPartitionGroup.getFirst().getPartitionNumber())
+                    .isEqualTo(ev.getParallelSubtaskIndex() / 2);
         }
     }
 
@@ -128,14 +123,13 @@ public class PointwisePatternTest {
         ExecutionJobVertex target = setUpExecutionGraphAndGetDownstreamVertex(N, 7 * N);
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
-            assertEquals(1, consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size()).isEqualTo(1);
 
-            assertEquals(
-                    ev.getParallelSubtaskIndex() / 7,
-                    consumedPartitionGroup.getFirst().getPartitionNumber());
+            assertThat(consumedPartitionGroup.getFirst().getPartitionNumber())
+                    .isEqualTo(ev.getParallelSubtaskIndex() / 7);
         }
     }
 
@@ -188,16 +182,16 @@ public class PointwisePatternTest {
         int[] timesUsed = new int[lowDop];
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
-            assertEquals(1, consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size()).isEqualTo(1);
 
             timesUsed[consumedPartitionGroup.getFirst().getPartitionNumber()]++;
         }
 
         for (int used : timesUsed) {
-            assertTrue(used >= factor && used <= factor + delta);
+            assertThat(used >= factor && used <= factor + delta).isTrue();
         }
     }
 
@@ -214,7 +208,7 @@ public class PointwisePatternTest {
         int[] timesUsed = new int[highDop];
 
         for (ExecutionVertex ev : target.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             List<IntermediateResultPartitionID> consumedPartitions = new ArrayList<>();
             for (ConsumedPartitionGroup partitionGroup : ev.getAllConsumedPartitionGroups()) {
@@ -223,16 +217,17 @@ public class PointwisePatternTest {
                 }
             }
 
-            assertTrue(
-                    consumedPartitions.size() >= factor
-                            && consumedPartitions.size() <= factor + delta);
+            assertThat(
+                            consumedPartitions.size() >= factor
+                                    && consumedPartitions.size() <= factor + delta)
+                    .isTrue();
 
             for (IntermediateResultPartitionID consumedPartition : consumedPartitions) {
                 timesUsed[consumedPartition.getPartitionNumber()]++;
             }
         }
         for (int used : timesUsed) {
-            assertEquals(1, used);
+            assertThat(used).isEqualTo(1);
         }
     }
 
@@ -280,15 +275,13 @@ public class PointwisePatternTest {
             ExecutionVertex ev = target.getTaskVertices()[vertexIndex];
             ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(0);
 
-            assertEquals(
-                    expectedConsumedPartitionNumber[vertexIndex].length,
-                    consumedPartitionGroup.size());
+            assertThat(consumedPartitionGroup.size())
+                    .isEqualTo(expectedConsumedPartitionNumber[vertexIndex].length);
 
             int partitionIndex = 0;
             for (IntermediateResultPartitionID partitionId : consumedPartitionGroup) {
-                assertEquals(
-                        expectedConsumedPartitionNumber[vertexIndex][partitionIndex++],
-                        partitionId.getPartitionNumber());
+                assertThat(partitionId.getPartitionNumber())
+                        .isEqualTo(expectedConsumedPartitionNumber[vertexIndex][partitionIndex++]);
             }
         }
     }

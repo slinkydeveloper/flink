@@ -62,8 +62,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.kubernetes.utils.Constants.LABEL_CONFIGMAP_TYPE_HIGH_AVAILABILITY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 
 /**
@@ -150,11 +149,11 @@ public class KubernetesHighAvailabilityRecoverFromSavepointITCase extends TestLo
         final String jobManagerConfigMapName = CLUSTER_ID + "-" + jobId + "-jobmanager-leader";
         final Optional<KubernetesConfigMap> optional =
                 flinkKubeClient.getConfigMap(jobManagerConfigMapName);
-        assertThat(optional.isPresent(), is(true));
+        assertThat(optional.isPresent()).isEqualTo(true);
         final String checkpointIdKey =
                 KubernetesCheckpointStoreUtil.INSTANCE.checkpointIDToName(2L);
-        assertThat(optional.get().getData().get(checkpointIdKey), is(notNullValue()));
-        assertThat(optional.get().getData().get(Constants.CHECKPOINT_COUNTER_KEY), is("3"));
+        assertThat(optional.get().getData().get(checkpointIdKey)).isEqualTo(notNullValue());
+        assertThat(optional.get().getData().get(Constants.CHECKPOINT_COUNTER_KEY)).isEqualTo("3");
     }
 
     private Configuration getConfiguration() {

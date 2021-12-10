@@ -47,9 +47,8 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link AvroOutputFormat}. */
 public class AvroOutputFormatTest {
@@ -82,7 +81,7 @@ public class AvroOutputFormatTest {
         }
 
         // then
-        assertTrue(error);
+        assertThat(error).isTrue();
     }
 
     @Test
@@ -117,7 +116,7 @@ public class AvroOutputFormatTest {
                 new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()))) {
             // then
             Object o = ois.readObject();
-            assertTrue(o instanceof AvroOutputFormat);
+            assertThat(o).isInstanceOf(AvroOutputFormat.class);
             @SuppressWarnings("unchecked")
             final AvroOutputFormat<User> restored = (AvroOutputFormat<User>) o;
             final AvroOutputFormat.Codec restoredCodec =
@@ -125,8 +124,9 @@ public class AvroOutputFormatTest {
             final Schema restoredSchema =
                     (Schema) Whitebox.getInternalState(restored, "userDefinedSchema");
 
-            assertTrue(codec != null ? restoredCodec == codec : restoredCodec == null);
-            assertTrue(schema != null ? restoredSchema.equals(schema) : restoredSchema == null);
+            assertThat(codec != null ? restoredCodec == codec : restoredCodec == null).isTrue();
+            assertThat(schema != null ? restoredSchema.equals(schema) : restoredSchema == null)
+                    .isTrue();
         }
     }
 
@@ -152,7 +152,7 @@ public class AvroOutputFormatTest {
         output(compressedOutputFormat);
 
         // then
-        assertTrue(fileSize(outputPath) > fileSize(compressedOutputPath));
+        assertThat(fileSize(outputPath) > fileSize(compressedOutputPath)).isTrue();
 
         // cleanup
         FileSystem fs = FileSystem.getLocalFileSystem();
@@ -216,9 +216,9 @@ public class AvroOutputFormatTest {
 
         while (dataFileReader.hasNext()) {
             GenericRecord record = dataFileReader.next();
-            assertEquals(record.get("user_name").toString(), "testUser");
-            assertEquals(record.get("favorite_number"), 1);
-            assertEquals(record.get("favorite_color").toString(), "blue");
+            assertThat("testUser").isEqualTo(record.get("user_name").toString());
+            assertThat(1).isEqualTo(record.get("favorite_number"));
+            assertThat("blue").isEqualTo(record.get("favorite_color").toString());
         }
 
         // cleanup

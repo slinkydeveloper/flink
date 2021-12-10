@@ -21,12 +21,10 @@ package org.apache.flink.util;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link WrappingProxyUtil}. */
 public class WrappingProxyUtilTest {
@@ -38,7 +36,7 @@ public class WrappingProxyUtilTest {
                     new SelfWrappingProxy(WrappingProxyUtil.SAFETY_NET_MAX_ITERATIONS));
             fail("Expected exception not thrown");
         } catch (final IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("Are there loops in the object graph?"));
+            assertThat(e.getMessage()).contains("Are there loops in the object graph?");
         }
     }
 
@@ -46,9 +44,8 @@ public class WrappingProxyUtilTest {
     public void testStripsAllProxies() {
         final SelfWrappingProxy wrappingProxy =
                 new SelfWrappingProxy(WrappingProxyUtil.SAFETY_NET_MAX_ITERATIONS - 1);
-        assertThat(
-                WrappingProxyUtil.stripProxy(wrappingProxy),
-                is(not(instanceOf(SelfWrappingProxy.class))));
+        assertThat(WrappingProxyUtil.stripProxy(wrappingProxy))
+                .isEqualTo(not(instanceOf(SelfWrappingProxy.class)));
     }
 
     private static class Wrapped {}

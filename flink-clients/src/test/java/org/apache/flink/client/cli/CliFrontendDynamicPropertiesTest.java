@@ -36,7 +36,7 @@ import java.util.Collections;
 
 import static org.apache.flink.client.cli.CliFrontendTestUtils.TEST_JAR_MAIN_CLASS;
 import static org.apache.flink.client.cli.CliFrontendTestUtils.getTestJarPath;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RUN command with Dynamic Properties. */
 public class CliFrontendDynamicPropertiesTest extends CliFrontendTestBase {
@@ -174,12 +174,11 @@ public class CliFrontendDynamicPropertiesTest extends CliFrontendTestBase {
 
         @Override
         protected void executeProgram(Configuration configuration, PackagedProgram program) {
-            assertEquals(TEST_JAR_MAIN_CLASS, program.getMainClassName());
-            assertEquals(
-                    expectedResolveOrder, configuration.get(CoreOptions.CLASSLOADER_RESOLVE_ORDER));
-            assertEquals(
-                    userCodeClassLoaderClassName,
-                    program.getUserCodeClassLoader().getClass().getName());
+            assertThat(program.getMainClassName()).isEqualTo(TEST_JAR_MAIN_CLASS);
+            assertThat(configuration.get(CoreOptions.CLASSLOADER_RESOLVE_ORDER))
+                    .isEqualTo(expectedResolveOrder);
+            assertThat(program.getUserCodeClassLoader().getClass().getName())
+                    .isEqualTo(userCodeClassLoaderClassName);
         }
     }
 }

@@ -36,14 +36,11 @@ import org.mockito.Matchers;
 import java.util.Collection;
 
 import static org.apache.flink.streaming.util.StreamRecordMatchers.timeWindow;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.eq;
@@ -70,14 +67,12 @@ public class DynamicEventTimeSessionWindowsTest extends TestLogger {
         DynamicEventTimeSessionWindows<String> assigner =
                 DynamicEventTimeSessionWindows.withDynamicGap(extractor);
 
-        assertThat(
-                assigner.assignWindows("gap5000", 0L, mockContext), contains(timeWindow(0, 5000)));
-        assertThat(
-                assigner.assignWindows("gap4000", 4999L, mockContext),
-                contains(timeWindow(4999, 8999)));
-        assertThat(
-                assigner.assignWindows("gap9000", 5000L, mockContext),
-                contains(timeWindow(5000, 14000)));
+        assertThat(assigner.assignWindows("gap5000", 0L, mockContext))
+                .satisfies(matching(contains(timeWindow(0, 5000))));
+        assertThat(assigner.assignWindows("gap4000", 4999L, mockContext))
+                .satisfies(matching(contains(timeWindow(4999, 8999))));
+        assertThat(assigner.assignWindows("gap9000", 5000L, mockContext))
+                .satisfies(matching(contains(timeWindow(5000, 14000))));
     }
 
     @Test
@@ -201,7 +196,7 @@ public class DynamicEventTimeSessionWindowsTest extends TestLogger {
 
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("0 < gap"));
+            assertThat(e.toString()).contains("0 < gap");
         }
 
         try {
@@ -214,7 +209,7 @@ public class DynamicEventTimeSessionWindowsTest extends TestLogger {
 
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("0 < gap"));
+            assertThat(e.toString()).contains("0 < gap");
         }
     }
 
@@ -226,11 +221,10 @@ public class DynamicEventTimeSessionWindowsTest extends TestLogger {
         DynamicEventTimeSessionWindows assigner =
                 DynamicEventTimeSessionWindows.withDynamicGap(extractor);
 
-        assertTrue(assigner.isEventTime());
-        assertEquals(
-                new TimeWindow.Serializer(), assigner.getWindowSerializer(new ExecutionConfig()));
-        assertThat(
-                assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)),
-                instanceOf(EventTimeTrigger.class));
+        assertThat(assigner.isEventTime()).isTrue();
+        assertThat(assigner.getWindowSerializer(new ExecutionConfig()))
+                .isEqualTo(new TimeWindow.Serializer());
+        assertThat(assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)))
+                .isInstanceOf(EventTimeTrigger.class);
     }
 }

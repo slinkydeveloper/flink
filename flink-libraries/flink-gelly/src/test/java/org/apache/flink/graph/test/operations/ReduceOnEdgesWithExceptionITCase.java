@@ -33,7 +33,7 @@ import org.apache.flink.util.Collector;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test expected exceptions for {@link Graph#groupReduceOnEdges}. */
 public class ReduceOnEdgesWithExceptionITCase extends AbstractTestBase {

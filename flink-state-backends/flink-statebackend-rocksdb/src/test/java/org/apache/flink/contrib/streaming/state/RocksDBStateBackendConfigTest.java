@@ -45,7 +45,6 @@ import org.apache.flink.runtime.state.ttl.TtlTimeProvider;
 import org.apache.flink.runtime.util.TestingTaskManagerRuntimeInfo;
 import org.apache.flink.util.IOUtils;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
@@ -63,18 +62,11 @@ import java.util.Collection;
 import java.util.Collections;
 
 import static org.apache.flink.contrib.streaming.state.RocksDBTestUtils.createKeyedStateBackend;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.anyOf;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,7 +86,7 @@ public class RocksDBStateBackendConfigTest {
                 CheckpointingOptions.INCREMENTAL_CHECKPOINTS.defaultValue();
 
         EmbeddedRocksDBStateBackend backend = new EmbeddedRocksDBStateBackend();
-        assertEquals(defaultIncremental, backend.isIncrementalCheckpointsEnabled());
+        assertThat(backend.isIncrementalCheckpointsEnabled()).isEqualTo(defaultIncremental);
     }
 
     // ------------------------------------------------------------------------
@@ -109,16 +101,16 @@ public class RocksDBStateBackendConfigTest {
         final String testDir1 = tempFolder.newFolder().getAbsolutePath();
         final String testDir2 = tempFolder.newFolder().getAbsolutePath();
 
-        assertNull(rocksDbBackend.getDbStoragePaths());
+        assertThat(rocksDbBackend.getDbStoragePaths()).isNull();
 
         rocksDbBackend.setDbStoragePath(testDir1);
-        assertArrayEquals(new String[] {testDir1}, rocksDbBackend.getDbStoragePaths());
+        assertThat(rocksDbBackend.getDbStoragePaths()).isEqualTo(new String[] {testDir1});
 
         rocksDbBackend.setDbStoragePath(null);
-        assertNull(rocksDbBackend.getDbStoragePaths());
+        assertThat(rocksDbBackend.getDbStoragePaths()).isNull();
 
         rocksDbBackend.setDbStoragePaths(testDir1, testDir2);
-        assertArrayEquals(new String[] {testDir1, testDir2}, rocksDbBackend.getDbStoragePaths());
+        assertThat(rocksDbBackend.getDbStoragePaths()).isEqualTo(new String[] {testDir1, testDir2});
 
         final MockEnvironment env = getMockEnvironment(tempFolder.newFolder());
         final RocksDBKeyedStateBackend<Integer> keyedBackend =
@@ -126,13 +118,12 @@ public class RocksDBStateBackendConfigTest {
 
         try {
             File instanceBasePath = keyedBackend.getInstanceBasePath();
-            assertThat(
-                    instanceBasePath.getAbsolutePath(),
-                    anyOf(startsWith(testDir1), startsWith(testDir2)));
+            assertThat(instanceBasePath.getAbsolutePath())
+                    .satisfies(matching(anyOf(startsWith(testDir1), startsWith(testDir2))));
 
             //noinspection NullArgumentToVariableArgMethod
             rocksDbBackend.setDbStoragePaths(null);
-            assertNull(rocksDbBackend.getDbStoragePaths());
+            assertThat(rocksDbBackend.getDbStoragePaths()).isNull();
         } finally {
             IOUtils.closeQuietly(keyedBackend);
             keyedBackend.dispose();
@@ -146,29 +137,26 @@ public class RocksDBStateBackendConfigTest {
         final MockEnvironment env = getMockEnvironment(tempFolder.newFolder());
 
         // Fix the option key string
-        Assert.assertEquals(
-                "state.backend.rocksdb.timer-service.factory",
-                RocksDBOptions.TIMER_SERVICE_FACTORY.key());
+        assertThat(RocksDBOptions.TIMER_SERVICE_FACTORY.key())
+                .isEqualTo("state.backend.rocksdb.timer-service.factory");
 
         // Fix the option value string and ensure all are covered
-        Assert.assertEquals(2, EmbeddedRocksDBStateBackend.PriorityQueueStateType.values().length);
-        Assert.assertEquals(
-                "ROCKSDB", EmbeddedRocksDBStateBackend.PriorityQueueStateType.ROCKSDB.toString());
-        Assert.assertEquals(
-                "HEAP", EmbeddedRocksDBStateBackend.PriorityQueueStateType.HEAP.toString());
+        assertThat(EmbeddedRocksDBStateBackend.PriorityQueueStateType.values().length).isEqualTo(2);
+        assertThat(EmbeddedRocksDBStateBackend.PriorityQueueStateType.ROCKSDB.toString())
+                .isEqualTo("ROCKSDB");
+        assertThat(EmbeddedRocksDBStateBackend.PriorityQueueStateType.HEAP.toString())
+                .isEqualTo("HEAP");
 
         // Fix the default
-        Assert.assertEquals(
-                EmbeddedRocksDBStateBackend.PriorityQueueStateType.ROCKSDB,
-                RocksDBOptions.TIMER_SERVICE_FACTORY.defaultValue());
+        assertThat(RocksDBOptions.TIMER_SERVICE_FACTORY.defaultValue())
+                .isEqualTo(EmbeddedRocksDBStateBackend.PriorityQueueStateType.ROCKSDB);
 
         EmbeddedRocksDBStateBackend rocksDbBackend = new EmbeddedRocksDBStateBackend();
 
         RocksDBKeyedStateBackend<Integer> keyedBackend =
                 createKeyedStateBackend(rocksDbBackend, env, IntSerializer.INSTANCE);
-        Assert.assertEquals(
-                RocksDBPriorityQueueSetFactory.class,
-                keyedBackend.getPriorityQueueFactory().getClass());
+        assertThat(keyedBackend.getPriorityQueueFactory().getClass())
+                .isEqualTo(RocksDBPriorityQueueSetFactory.class);
         keyedBackend.dispose();
 
         Configuration conf = new Configuration();
@@ -179,9 +167,8 @@ public class RocksDBStateBackendConfigTest {
         rocksDbBackend =
                 rocksDbBackend.configure(conf, Thread.currentThread().getContextClassLoader());
         keyedBackend = createKeyedStateBackend(rocksDbBackend, env, IntSerializer.INSTANCE);
-        Assert.assertEquals(
-                HeapPriorityQueueSetFactory.class,
-                keyedBackend.getPriorityQueueFactory().getClass());
+        assertThat(keyedBackend.getPriorityQueueFactory().getClass())
+                .isEqualTo(HeapPriorityQueueSetFactory.class);
         keyedBackend.dispose();
         env.close();
     }
@@ -209,9 +196,8 @@ public class RocksDBStateBackendConfigTest {
                 createKeyedStateBackend(configuredRocksDBStateBackend, env, IntSerializer.INSTANCE);
 
         // priorityQueueStateType of the job backend should be preserved
-        assertThat(
-                keyedBackend.getPriorityQueueFactory(),
-                instanceOf(HeapPriorityQueueSetFactory.class));
+        assertThat(keyedBackend.getPriorityQueueFactory())
+                .isInstanceOf(HeapPriorityQueueSetFactory.class);
 
         keyedBackend.close();
         keyedBackend.dispose();
@@ -223,7 +209,7 @@ public class RocksDBStateBackendConfigTest {
         final File folder = tempFolder.newFolder();
         final String dbStoragePath = new Path(folder.toURI().toString()).toString();
 
-        assertTrue(dbStoragePath.startsWith("file:"));
+        assertThat(dbStoragePath.startsWith("file:")).isTrue();
 
         testLocalDbPaths(dbStoragePath, folder);
     }
@@ -268,12 +254,12 @@ public class RocksDBStateBackendConfigTest {
 
         try {
             File instanceBasePath = keyedBackend.getInstanceBasePath();
-            assertThat(
-                    instanceBasePath.getAbsolutePath(), startsWith(expectedPath.getAbsolutePath()));
+            assertThat(instanceBasePath.getAbsolutePath())
+                    .startsWith(expectedPath.getAbsolutePath());
 
             //noinspection NullArgumentToVariableArgMethod
             rocksDbBackend.setDbStoragePaths(null);
-            assertNull(rocksDbBackend.getDbStoragePaths());
+            assertThat(rocksDbBackend.getDbStoragePaths()).isNull();
         } finally {
             IOUtils.closeQuietly(keyedBackend);
             keyedBackend.dispose();
@@ -320,7 +306,7 @@ public class RocksDBStateBackendConfigTest {
         File dir1 = tempFolder.newFolder();
         File dir2 = tempFolder.newFolder();
 
-        assertNull(rocksDbBackend.getDbStoragePaths());
+        assertThat(rocksDbBackend.getDbStoragePaths()).isNull();
 
         final MockEnvironment env = getMockEnvironment(dir1, dir2);
         RocksDBKeyedStateBackend<Integer> keyedBackend =
@@ -340,9 +326,12 @@ public class RocksDBStateBackendConfigTest {
 
         try {
             File instanceBasePath = keyedBackend.getInstanceBasePath();
-            assertThat(
-                    instanceBasePath.getAbsolutePath(),
-                    anyOf(startsWith(dir1.getAbsolutePath()), startsWith(dir2.getAbsolutePath())));
+            assertThat(instanceBasePath.getAbsolutePath())
+                    .satisfies(
+                            matching(
+                                    anyOf(
+                                            startsWith(dir1.getAbsolutePath()),
+                                            startsWith(dir2.getAbsolutePath()))));
         } finally {
             IOUtils.closeQuietly(keyedBackend);
             keyedBackend.dispose();
@@ -381,12 +370,14 @@ public class RocksDBStateBackendConfigTest {
                         Collections.emptyList(),
                         new CloseableRegistry());
             } catch (Exception e) {
-                assertTrue(e.getMessage().contains("No local storage directories available"));
-                assertTrue(e.getMessage().contains(targetDir.getAbsolutePath()));
+                assertThat(e.getMessage().contains("No local storage directories available"))
+                        .isTrue();
+                assertThat(e.getMessage().contains(targetDir.getAbsolutePath())).isTrue();
                 hasFailure = true;
             }
-            assertTrue(
-                    "We must see a failure because no storaged directory is feasible.", hasFailure);
+            assertThat(hasFailure)
+                    .as("We must see a failure because no storaged directory is feasible.")
+                    .isTrue();
         } finally {
             //noinspection ResultOfMethodCallIgnored
             targetDir.setWritable(true, false);
@@ -445,7 +436,7 @@ public class RocksDBStateBackendConfigTest {
         RocksDBStateBackend rocksDbBackend = new RocksDBStateBackend(checkpointPath);
 
         // verify that we would use PredefinedOptions.DEFAULT by default.
-        assertEquals(PredefinedOptions.DEFAULT, rocksDbBackend.getPredefinedOptions());
+        assertThat(rocksDbBackend.getPredefinedOptions()).isEqualTo(PredefinedOptions.DEFAULT);
 
         // verify that user could configure predefined options via flink-conf.yaml
         Configuration configuration = new Configuration();
@@ -453,13 +444,14 @@ public class RocksDBStateBackendConfigTest {
                 RocksDBOptions.PREDEFINED_OPTIONS, PredefinedOptions.FLASH_SSD_OPTIMIZED.name());
         rocksDbBackend = new RocksDBStateBackend(checkpointPath);
         rocksDbBackend = rocksDbBackend.configure(configuration, getClass().getClassLoader());
-        assertEquals(PredefinedOptions.FLASH_SSD_OPTIMIZED, rocksDbBackend.getPredefinedOptions());
+        assertThat(rocksDbBackend.getPredefinedOptions())
+                .isEqualTo(PredefinedOptions.FLASH_SSD_OPTIMIZED);
 
         // verify that predefined options could be set programmatically and override pre-configured
         // one.
         rocksDbBackend.setPredefinedOptions(PredefinedOptions.SPINNING_DISK_OPTIMIZED);
-        assertEquals(
-                PredefinedOptions.SPINNING_DISK_OPTIMIZED, rocksDbBackend.getPredefinedOptions());
+        assertThat(rocksDbBackend.getPredefinedOptions())
+                .isEqualTo(PredefinedOptions.SPINNING_DISK_OPTIMIZED);
     }
 
     @Test
@@ -519,27 +511,27 @@ public class RocksDBStateBackendConfigTest {
                             configuration, PredefinedOptions.DEFAULT, null, null)) {
 
                 DBOptions dbOptions = optionsContainer.getDbOptions();
-                assertEquals(-1, dbOptions.maxOpenFiles());
-                assertEquals(InfoLogLevel.DEBUG_LEVEL, dbOptions.infoLogLevel());
-                assertEquals("/tmp/rocksdb-logs/", dbOptions.dbLogDir());
-                assertEquals(10, dbOptions.keepLogFileNum());
-                assertEquals(2 * SizeUnit.MB, dbOptions.maxLogFileSize());
+                assertThat(dbOptions.maxOpenFiles()).isEqualTo(-1);
+                assertThat(dbOptions.infoLogLevel()).isEqualTo(InfoLogLevel.DEBUG_LEVEL);
+                assertThat(dbOptions.dbLogDir()).isEqualTo("/tmp/rocksdb-logs/");
+                assertThat(dbOptions.keepLogFileNum()).isEqualTo(10);
+                assertThat(dbOptions.maxLogFileSize()).isEqualTo(2 * SizeUnit.MB);
 
                 ColumnFamilyOptions columnOptions = optionsContainer.getColumnOptions();
-                assertEquals(CompactionStyle.LEVEL, columnOptions.compactionStyle());
-                assertTrue(columnOptions.levelCompactionDynamicLevelBytes());
-                assertEquals(8 * SizeUnit.MB, columnOptions.targetFileSizeBase());
-                assertEquals(128 * SizeUnit.MB, columnOptions.maxBytesForLevelBase());
-                assertEquals(4, columnOptions.maxWriteBufferNumber());
-                assertEquals(2, columnOptions.minWriteBufferNumberToMerge());
-                assertEquals(64 * SizeUnit.MB, columnOptions.writeBufferSize());
+                assertThat(columnOptions.compactionStyle()).isEqualTo(CompactionStyle.LEVEL);
+                assertThat(columnOptions.levelCompactionDynamicLevelBytes()).isTrue();
+                assertThat(columnOptions.targetFileSizeBase()).isEqualTo(8 * SizeUnit.MB);
+                assertThat(columnOptions.maxBytesForLevelBase()).isEqualTo(128 * SizeUnit.MB);
+                assertThat(columnOptions.maxWriteBufferNumber()).isEqualTo(4);
+                assertThat(columnOptions.minWriteBufferNumberToMerge()).isEqualTo(2);
+                assertThat(columnOptions.writeBufferSize()).isEqualTo(64 * SizeUnit.MB);
 
                 BlockBasedTableConfig tableConfig =
                         (BlockBasedTableConfig) columnOptions.tableFormatConfig();
-                assertEquals(4 * SizeUnit.KB, tableConfig.blockSize());
-                assertEquals(8 * SizeUnit.KB, tableConfig.metadataBlockSize());
-                assertEquals(512 * SizeUnit.MB, tableConfig.blockCacheSize());
-                assertTrue(tableConfig.filterPolicy() instanceof BloomFilter);
+                assertThat(tableConfig.blockSize()).isEqualTo(4 * SizeUnit.KB);
+                assertThat(tableConfig.metadataBlockSize()).isEqualTo(8 * SizeUnit.KB);
+                assertThat(tableConfig.blockCacheSize()).isEqualTo(512 * SizeUnit.MB);
+                assertThat(tableConfig.filterPolicy()).isInstanceOf(BloomFilter.class);
             }
         }
     }
@@ -556,12 +548,12 @@ public class RocksDBStateBackendConfigTest {
 
         rocksDbBackend = rocksDbBackend.configure(config, getClass().getClassLoader());
 
-        assertTrue(rocksDbBackend.getRocksDBOptions() instanceof TestOptionsFactory);
+        assertThat(rocksDbBackend.getRocksDBOptions()).isInstanceOf(TestOptionsFactory.class);
 
         try (RocksDBResourceContainer optionsContainer =
                 rocksDbBackend.createOptionsAndResourceContainer()) {
             DBOptions dbOptions = optionsContainer.getDbOptions();
-            assertEquals(4, dbOptions.maxBackgroundJobs());
+            assertThat(dbOptions.maxBackgroundJobs()).isEqualTo(4);
         }
 
         // verify that user-defined options factory could be set programmatically and override
@@ -585,7 +577,7 @@ public class RocksDBStateBackendConfigTest {
         try (RocksDBResourceContainer optionsContainer =
                 rocksDbBackend.createOptionsAndResourceContainer()) {
             ColumnFamilyOptions colCreated = optionsContainer.getColumnOptions();
-            assertEquals(CompactionStyle.FIFO, colCreated.compactionStyle());
+            assertThat(colCreated.compactionStyle()).isEqualTo(CompactionStyle.FIFO);
         }
     }
 
@@ -598,8 +590,8 @@ public class RocksDBStateBackendConfigTest {
                         configuration, PredefinedOptions.SPINNING_DISK_OPTIMIZED, null, null)) {
 
             final ColumnFamilyOptions columnFamilyOptions = optionsContainer.getColumnOptions();
-            assertNotNull(columnFamilyOptions);
-            assertEquals(CompactionStyle.UNIVERSAL, columnFamilyOptions.compactionStyle());
+            assertThat(columnFamilyOptions).isNotNull();
+            assertThat(columnFamilyOptions.compactionStyle()).isEqualTo(CompactionStyle.UNIVERSAL);
         }
 
         try (final RocksDBResourceContainer optionsContainer =
@@ -610,8 +602,8 @@ public class RocksDBStateBackendConfigTest {
                         null)) {
 
             final ColumnFamilyOptions columnFamilyOptions = optionsContainer.getColumnOptions();
-            assertNotNull(columnFamilyOptions);
-            assertEquals(CompactionStyle.LEVEL, columnFamilyOptions.compactionStyle());
+            assertThat(columnFamilyOptions).isNotNull();
+            assertThat(columnFamilyOptions.compactionStyle()).isEqualTo(CompactionStyle.LEVEL);
         }
     }
 
@@ -638,8 +630,8 @@ public class RocksDBStateBackendConfigTest {
                         PredefinedOptions.SPINNING_DISK_OPTIMIZED, optionsFactory)) {
 
             final ColumnFamilyOptions columnFamilyOptions = optionsContainer.getColumnOptions();
-            assertNotNull(columnFamilyOptions);
-            assertEquals(CompactionStyle.UNIVERSAL, columnFamilyOptions.compactionStyle());
+            assertThat(columnFamilyOptions).isNotNull();
+            assertThat(columnFamilyOptions.compactionStyle()).isEqualTo(CompactionStyle.UNIVERSAL);
         }
     }
 
@@ -658,7 +650,7 @@ public class RocksDBStateBackendConfigTest {
 
         // these must not be the default options
         final PredefinedOptions predOptions = PredefinedOptions.SPINNING_DISK_OPTIMIZED_HIGH_MEM;
-        assertNotEquals(predOptions, original.getPredefinedOptions());
+        assertThat(original.getPredefinedOptions()).isEqualTo(predOptions);
         original.setPredefinedOptions(predOptions);
 
         final RocksDBOptionsFactory optionsFactory = mock(RocksDBOptionsFactory.class);
@@ -675,17 +667,17 @@ public class RocksDBStateBackendConfigTest {
                 original.configure(
                         new Configuration(), Thread.currentThread().getContextClassLoader());
 
-        assertEquals(
-                original.isIncrementalCheckpointsEnabled(), copy.isIncrementalCheckpointsEnabled());
-        assertArrayEquals(original.getDbStoragePaths(), copy.getDbStoragePaths());
-        assertEquals(original.getRocksDBOptions(), copy.getRocksDBOptions());
-        assertEquals(original.getPredefinedOptions(), copy.getPredefinedOptions());
+        assertThat(copy.isIncrementalCheckpointsEnabled())
+                .isEqualTo(original.isIncrementalCheckpointsEnabled());
+        assertThat(copy.getDbStoragePaths()).isEqualTo(original.getDbStoragePaths());
+        assertThat(copy.getRocksDBOptions()).isEqualTo(original.getRocksDBOptions());
+        assertThat(copy.getPredefinedOptions()).isEqualTo(original.getPredefinedOptions());
 
         FsStateBackend copyCheckpointBackend = (FsStateBackend) copy.getCheckpointBackend();
-        assertEquals(
-                checkpointBackend.getCheckpointPath(), copyCheckpointBackend.getCheckpointPath());
-        assertEquals(
-                checkpointBackend.getSavepointPath(), copyCheckpointBackend.getSavepointPath());
+        assertThat(copyCheckpointBackend.getCheckpointPath())
+                .isEqualTo(checkpointBackend.getCheckpointPath());
+        assertThat(copyCheckpointBackend.getSavepointPath())
+                .isEqualTo(checkpointBackend.getSavepointPath());
     }
 
     // ------------------------------------------------------------------------
@@ -695,30 +687,22 @@ public class RocksDBStateBackendConfigTest {
     @Test
     public void testDefaultMemoryControlParameters() {
         RocksDBMemoryConfiguration memSettings = new RocksDBMemoryConfiguration();
-        assertTrue(memSettings.isUsingManagedMemory());
-        assertFalse(memSettings.isUsingFixedMemoryPerSlot());
-        assertEquals(
-                RocksDBOptions.HIGH_PRIORITY_POOL_RATIO.defaultValue(),
-                memSettings.getHighPriorityPoolRatio(),
-                0.0);
-        assertEquals(
-                RocksDBOptions.WRITE_BUFFER_RATIO.defaultValue(),
-                memSettings.getWriteBufferRatio(),
-                0.0);
+        assertThat(memSettings.isUsingManagedMemory()).isTrue();
+        assertThat(memSettings.isUsingFixedMemoryPerSlot()).isFalse();
+        assertThat(memSettings.getHighPriorityPoolRatio())
+                .isEqualTo(RocksDBOptions.HIGH_PRIORITY_POOL_RATIO.defaultValue());
+        assertThat(memSettings.getWriteBufferRatio())
+                .isEqualTo(RocksDBOptions.WRITE_BUFFER_RATIO.defaultValue());
 
         RocksDBMemoryConfiguration configured =
                 RocksDBMemoryConfiguration.fromOtherAndConfiguration(
                         memSettings, new Configuration());
-        assertTrue(configured.isUsingManagedMemory());
-        assertFalse(configured.isUsingFixedMemoryPerSlot());
-        assertEquals(
-                RocksDBOptions.HIGH_PRIORITY_POOL_RATIO.defaultValue(),
-                configured.getHighPriorityPoolRatio(),
-                0.0);
-        assertEquals(
-                RocksDBOptions.WRITE_BUFFER_RATIO.defaultValue(),
-                configured.getWriteBufferRatio(),
-                0.0);
+        assertThat(configured.isUsingManagedMemory()).isTrue();
+        assertThat(configured.isUsingFixedMemoryPerSlot()).isFalse();
+        assertThat(configured.getHighPriorityPoolRatio())
+                .isEqualTo(RocksDBOptions.HIGH_PRIORITY_POOL_RATIO.defaultValue());
+        assertThat(configured.getWriteBufferRatio())
+                .isEqualTo(RocksDBOptions.WRITE_BUFFER_RATIO.defaultValue());
     }
 
     @Test
@@ -730,7 +714,7 @@ public class RocksDBStateBackendConfigTest {
                 RocksDBMemoryConfiguration.fromOtherAndConfiguration(
                         new RocksDBMemoryConfiguration(), config);
 
-        assertTrue(memSettings.isUsingManagedMemory());
+        assertThat(memSettings.isUsingManagedMemory()).isTrue();
     }
 
     @Test
@@ -773,7 +757,7 @@ public class RocksDBStateBackendConfigTest {
     public void testCallsForwardedToNonPartitionedBackend() throws Exception {
         StateBackend storageBackend = new MemoryStateBackend();
         RocksDBStateBackend rocksDbBackend = new RocksDBStateBackend(storageBackend);
-        assertEquals(storageBackend, rocksDbBackend.getCheckpointBackend());
+        assertThat(rocksDbBackend.getCheckpointBackend()).isEqualTo(storageBackend);
     }
 
     // ------------------------------------------------------------------------

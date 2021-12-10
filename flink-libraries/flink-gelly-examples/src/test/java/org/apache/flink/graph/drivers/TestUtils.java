@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Utility methods for testing graph algorithm drivers. */
 public class TestUtils {
@@ -104,9 +104,9 @@ public class TestUtils {
             if (!matched) {
                 // Data sources may have parallelism of 1, so simply check that the node
                 // parallelism has not been increased by setting the default parallelism
-                assertTrue(
-                        "Wrong parallelism for " + node.toString(),
-                        node.getParallelism() <= parallelism);
+                assertThat(node.getParallelism() <= parallelism)
+                        .as("Wrong parallelism for " + node.toString())
+                        .isTrue();
             }
 
             for (Channel channel : node.getInputs()) {

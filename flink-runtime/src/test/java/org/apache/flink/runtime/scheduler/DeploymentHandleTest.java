@@ -29,12 +29,8 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Unit tests for {@link DeploymentHandle}. */
 public class DeploymentHandleTest {
@@ -70,32 +66,31 @@ public class DeploymentHandleTest {
     @Test
     public void getLogicalSlotThrowsExceptionIfSlotFutureNotCompleted() {
         try {
-            assertFalse(deploymentHandle.getLogicalSlot().isPresent());
-            fail();
+            assertThat(deploymentHandle.getLogicalSlot().isPresent()).isFalse();
+            fail("unknown failure");
         } catch (IllegalStateException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("method can only be called after slot future is done"));
+            assertThat(e.getMessage())
+                    .contains("method can only be called after slot future is done");
         }
     }
 
     @Test
     public void slotIsNotPresentIfFutureWasCancelled() {
         logicalSlotFuture.cancel(false);
-        assertFalse(deploymentHandle.getLogicalSlot().isPresent());
+        assertThat(deploymentHandle.getLogicalSlot().isPresent()).isFalse();
     }
 
     @Test
     public void slotIsNotPresentIfFutureWasCompletedExceptionally() {
         logicalSlotFuture.completeExceptionally(new RuntimeException("expected"));
-        assertFalse(deploymentHandle.getLogicalSlot().isPresent());
+        assertThat(deploymentHandle.getLogicalSlot().isPresent()).isFalse();
     }
 
     @Test
     public void getLogicalSlotReturnsSlotIfFutureCompletedNormally() {
         final LogicalSlot logicalSlot = new TestingLogicalSlotBuilder().createTestingLogicalSlot();
         logicalSlotFuture.complete(logicalSlot);
-        assertTrue(deploymentHandle.getLogicalSlot().isPresent());
-        assertSame(logicalSlot, deploymentHandle.getLogicalSlot().get());
+        assertThat(deploymentHandle.getLogicalSlot().isPresent()).isTrue();
+        assertThat(deploymentHandle.getLogicalSlot().get()).isSameAs(logicalSlot);
     }
 }

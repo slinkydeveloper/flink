@@ -29,10 +29,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link MemoryCheckpointOutputStream}. */
 public class MemoryCheckpointOutputStreamTest {
@@ -74,11 +72,11 @@ public class MemoryCheckpointOutputStreamTest {
         oos.flush();
 
         StreamStateHandle handle = outStream.closeAndGetHandle();
-        assertNotNull(handle);
+        assertThat(handle).isNotNull();
 
         try (ObjectInputStream ois = new ObjectInputStream(handle.openInputStream())) {
-            assertEquals(state, ois.readObject());
-            assertTrue(ois.available() <= 0);
+            assertThat(ois.readObject()).isEqualTo(state);
+            assertThat(ois.available() <= 0).isTrue();
         }
     }
 }

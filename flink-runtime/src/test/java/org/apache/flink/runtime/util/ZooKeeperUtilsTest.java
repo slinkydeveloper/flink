@@ -25,12 +25,9 @@ import org.apache.flink.util.TestLogger;
 import org.apache.flink.shaded.curator4.org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.flink.shaded.curator4.org.apache.curator.retry.ExponentialBackoffRetry;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ZooKeeperUtils}. */
 public class ZooKeeperUtilsTest extends TestLogger {
@@ -57,15 +54,15 @@ public class ZooKeeperUtilsTest extends TestLogger {
 
             setQuorum(conf, expected);
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
 
             setQuorum(conf, " localhost:2891 "); // with leading and trailing whitespace
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
 
             setQuorum(conf, "localhost :2891"); // whitespace after port
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
         }
 
         {
@@ -73,19 +70,19 @@ public class ZooKeeperUtilsTest extends TestLogger {
 
             setQuorum(conf, "localhost:2891,localhost:2891");
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
 
             setQuorum(conf, "localhost:2891, localhost:2891");
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
 
             setQuorum(conf, "localhost :2891, localhost:2891");
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
 
             setQuorum(conf, " localhost:2891, localhost:2891 ");
             actual = ZooKeeperUtils.getZooKeeperEnsemble(conf);
-            assertEquals(expected, actual);
+            assertThat(actual).isEqualTo(expected);
         }
     }
 
@@ -103,14 +100,14 @@ public class ZooKeeperUtilsTest extends TestLogger {
                                 })
                         .namespace("flink");
         ZooKeeperUtils.startCuratorFramework(curatorFrameworkBuilder, handler);
-        Assert.assertEquals(errorMsg, handler.getErrorFuture().get().getMessage());
+        assertThat(handler.getErrorFuture().get().getMessage()).isEqualTo(errorMsg);
     }
 
     private void runZookeeperPathGenerationTest(
             String root, String namespace, String expectedValue) {
         final String result = ZooKeeperUtils.generateZookeeperPath(root, namespace);
 
-        assertThat(result, is(expectedValue));
+        assertThat(result).isEqualTo(expectedValue);
     }
 
     private Configuration setQuorum(Configuration conf, String quorum) {

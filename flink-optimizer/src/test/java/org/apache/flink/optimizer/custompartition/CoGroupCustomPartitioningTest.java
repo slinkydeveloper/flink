@@ -39,7 +39,8 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"serial", "unchecked"})
 public class CoGroupCustomPartitioningTest extends CompilerTestBase {
@@ -70,10 +71,12 @@ public class CoGroupCustomPartitioningTest extends CompilerTestBase {
             SinkPlanNode sink = op.getDataSinks().iterator().next();
             DualInputPlanNode join = (DualInputPlanNode) sink.getInput().getSource();
 
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput1().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput2().getShipStrategy());
-            assertEquals(partitioner, join.getInput1().getPartitioner());
-            assertEquals(partitioner, join.getInput2().getPartitioner());
+            assertThat(join.getInput1().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput2().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput1().getPartitioner()).isEqualTo(partitioner);
+            assertThat(join.getInput2().getPartitioner()).isEqualTo(partitioner);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -126,10 +129,12 @@ public class CoGroupCustomPartitioningTest extends CompilerTestBase {
             SinkPlanNode sink = op.getDataSinks().iterator().next();
             DualInputPlanNode join = (DualInputPlanNode) sink.getInput().getSource();
 
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput1().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput2().getShipStrategy());
-            assertEquals(partitioner, join.getInput1().getPartitioner());
-            assertEquals(partitioner, join.getInput2().getPartitioner());
+            assertThat(join.getInput1().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput2().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput1().getPartitioner()).isEqualTo(partitioner);
+            assertThat(join.getInput2().getPartitioner()).isEqualTo(partitioner);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -182,10 +187,12 @@ public class CoGroupCustomPartitioningTest extends CompilerTestBase {
             SinkPlanNode sink = op.getDataSinks().iterator().next();
             DualInputPlanNode join = (DualInputPlanNode) sink.getInput().getSource();
 
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput1().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput2().getShipStrategy());
-            assertEquals(partitioner, join.getInput1().getPartitioner());
-            assertEquals(partitioner, join.getInput2().getPartitioner());
+            assertThat(join.getInput1().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput2().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput1().getPartitioner()).isEqualTo(partitioner);
+            assertThat(join.getInput2().getPartitioner()).isEqualTo(partitioner);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -263,10 +270,13 @@ public class CoGroupCustomPartitioningTest extends CompilerTestBase {
             SinkPlanNode sink = op.getDataSinks().iterator().next();
             DualInputPlanNode coGroup = (DualInputPlanNode) sink.getInput().getSource();
 
-            assertEquals(ShipStrategyType.PARTITION_HASH, coGroup.getInput1().getShipStrategy());
-            assertTrue(
-                    coGroup.getInput2().getShipStrategy() == ShipStrategyType.PARTITION_HASH
-                            || coGroup.getInput2().getShipStrategy() == ShipStrategyType.FORWARD);
+            assertThat(coGroup.getInput1().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_HASH);
+            assertThat(
+                            coGroup.getInput2().getShipStrategy() == ShipStrategyType.PARTITION_HASH
+                                    || coGroup.getInput2().getShipStrategy()
+                                            == ShipStrategyType.FORWARD)
+                    .isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

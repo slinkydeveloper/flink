@@ -24,7 +24,6 @@ import org.apache.flink.runtime.execution.ExecutionState;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.FutureUtils;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -35,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * {@code StopWithSavepointTerminationManagerTest} tests that {@link
@@ -80,12 +79,11 @@ public class StopWithSavepointTerminationManagerTest extends TestLogger {
                         ComponentMainThreadExecutorServiceAdapter.forMainThread());
         completion.accept(completedSavepointFuture, terminatedExecutionStateFuture);
 
-        assertThat(
-                stopWithSavepointTerminationHandler.getActualMethodCallOrder(),
-                CoreMatchers.is(
+        assertThat(stopWithSavepointTerminationHandler.getActualMethodCallOrder())
+                .isEqualTo(
                         Arrays.asList(
                                 MethodCall.SavepointCreationTermination,
-                                MethodCall.ExecutionTermination)));
+                                MethodCall.ExecutionTermination));
     }
 
     private enum MethodCall {

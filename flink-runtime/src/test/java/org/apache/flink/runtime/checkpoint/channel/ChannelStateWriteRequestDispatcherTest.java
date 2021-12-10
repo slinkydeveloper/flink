@@ -41,7 +41,7 @@ import static org.apache.flink.runtime.checkpoint.channel.ChannelStateWriteReque
 import static org.apache.flink.runtime.checkpoint.channel.ChannelStateWriteRequest.completeOutput;
 import static org.apache.flink.runtime.checkpoint.channel.ChannelStateWriteRequest.write;
 import static org.apache.flink.runtime.state.ChannelPersistenceITCase.getStreamFactoryFactory;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link ChannelStateWriteRequestDispatcherImpl} tests. */
 @RunWith(Parameterized.class)

@@ -33,10 +33,9 @@ import java.io.Serializable;
 
 import static org.apache.flink.streaming.util.StreamRecordMatchers.streamRecord;
 import static org.apache.flink.streaming.util.WatermarkMatchers.legacyWatermark;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link TimestampsAndWatermarksOperator}. */
 public class TimestampsAndWatermarksOperatorTest {
@@ -53,7 +52,7 @@ public class TimestampsAndWatermarksOperatorTest {
         testHarness.processWatermark(createLegacyWatermark(42L));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL);
 
-        assertThat(testHarness.getOutput(), empty());
+        assertThat(testHarness.getOutput()).satisfies(matching(empty()));
     }
 
     @Test
@@ -65,7 +64,7 @@ public class TimestampsAndWatermarksOperatorTest {
 
         testHarness.processWatermark(createLegacyWatermark(Long.MAX_VALUE));
 
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(Long.MAX_VALUE)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(Long.MAX_VALUE));
     }
 
     @Test
@@ -78,14 +77,14 @@ public class TimestampsAndWatermarksOperatorTest {
         testHarness.processElement(new StreamRecord<>(2L, 1));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL);
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(2L, 2L));
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(1L)));
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(2L, 2L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(1L));
 
         testHarness.processElement(new StreamRecord<>(4L, 1));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL * 2);
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(4L, 4L));
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(3L)));
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(4L, 4L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(3L));
     }
 
     @Test
@@ -98,14 +97,14 @@ public class TimestampsAndWatermarksOperatorTest {
         testHarness.processElement(new StreamRecord<>(2L, 1));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL);
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(2L, 2L));
-        assertNull(pollNextLegacyWatermark(testHarness));
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(2L, 2L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isNull();
 
         testHarness.processElement(new StreamRecord<>(4L, 1));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL * 2);
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(4L, 4L));
-        assertNull(pollNextLegacyWatermark(testHarness));
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(4L, 4L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isNull();
     }
 
     @Test
@@ -117,8 +116,8 @@ public class TimestampsAndWatermarksOperatorTest {
 
         testHarness.processElement(new StreamRecord<>(2L, 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(2L, 2L));
-        assertThat(testHarness.getOutput(), empty());
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(2L, 2L)));
+        assertThat(testHarness.getOutput()).satisfies(matching(empty()));
     }
 
     @Test
@@ -131,14 +130,14 @@ public class TimestampsAndWatermarksOperatorTest {
         testHarness.processElement(new StreamRecord<>(4L, 1));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL);
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(4L, 4L));
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(3L)));
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(4L, 4L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(3L));
 
         testHarness.processElement(new StreamRecord<>(2L, 1));
         testHarness.setProcessingTime(AUTO_WATERMARK_INTERVAL);
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(2L, 2L));
-        assertThat(testHarness.getOutput(), empty());
+        assertThat(pollNextStreamRecord(testHarness)).satisfies(matching(streamRecord(2L, 2L)));
+        assertThat(testHarness.getOutput()).satisfies(matching(empty()));
     }
 
     @Test
@@ -152,13 +151,15 @@ public class TimestampsAndWatermarksOperatorTest {
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>(true, 2L), 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(new Tuple2<>(true, 2L), 2L));
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(2L)));
+        assertThat(pollNextStreamRecord(testHarness))
+                .satisfies(matching(streamRecord(new Tuple2<>(true, 2L), 2L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(2L));
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>(true, 4L), 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(new Tuple2<>(true, 4L), 4L));
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(4L)));
+        assertThat(pollNextStreamRecord(testHarness))
+                .satisfies(matching(streamRecord(new Tuple2<>(true, 4L), 4L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(4L));
     }
 
     @Test
@@ -172,13 +173,15 @@ public class TimestampsAndWatermarksOperatorTest {
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>(true, 2L), 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(new Tuple2<>(true, 2L), 2L));
-        assertNull(pollNextLegacyWatermark(testHarness));
+        assertThat(pollNextStreamRecord(testHarness))
+                .satisfies(matching(streamRecord(new Tuple2<>(true, 2L), 2L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isNull();
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>(true, 4L), 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(new Tuple2<>(true, 4L), 4L));
-        assertNull(pollNextLegacyWatermark(testHarness));
+        assertThat(pollNextStreamRecord(testHarness))
+                .satisfies(matching(streamRecord(new Tuple2<>(true, 4L), 4L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isNull();
     }
 
     @Test
@@ -192,13 +195,15 @@ public class TimestampsAndWatermarksOperatorTest {
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>(true, 4L), 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(new Tuple2<>(true, 4L), 4L));
-        assertThat(pollNextLegacyWatermark(testHarness), is(legacyWatermark(4L)));
+        assertThat(pollNextStreamRecord(testHarness))
+                .satisfies(matching(streamRecord(new Tuple2<>(true, 4L), 4L)));
+        assertThat(pollNextLegacyWatermark(testHarness)).isEqualTo(legacyWatermark(4L));
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>(true, 2L), 1));
 
-        assertThat(pollNextStreamRecord(testHarness), streamRecord(new Tuple2<>(true, 2L), 2L));
-        assertThat(testHarness.getOutput(), empty());
+        assertThat(pollNextStreamRecord(testHarness))
+                .satisfies(matching(streamRecord(new Tuple2<>(true, 2L), 2L)));
+        assertThat(testHarness.getOutput()).satisfies(matching(empty()));
     }
 
     /** Negative timestamps also must be correctly forwarded. */
@@ -217,7 +222,7 @@ public class TimestampsAndWatermarksOperatorTest {
         }
 
         for (long value : values) {
-            assertThat(pollNextStreamRecord(testHarness).getTimestamp(), is(value));
+            assertThat(pollNextStreamRecord(testHarness).getTimestamp()).isEqualTo(value);
         }
     }
 

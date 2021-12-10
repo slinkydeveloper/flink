@@ -47,11 +47,10 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.table.api.DataTypes.STRING;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
 
 /** Test for {@link PushProjectIntoTableSourceScanRule}. */
 public class PushProjectIntoTableSourceScanRuleTest
@@ -281,7 +280,7 @@ public class PushProjectIntoTableSourceScanRuleTest
         util().tableEnv().createTable("T1", sourceDescriptor);
 
         util().verifyRelPlan("SELECT m1, metadata FROM T1");
-        assertThat(appliedKeys.get(), contains("m1", "m2"));
+        assertThat(appliedKeys.get()).satisfies(matching(contains("m1", "m2")));
     }
 
     @Test
@@ -295,7 +294,7 @@ public class PushProjectIntoTableSourceScanRuleTest
         util().tableEnv().createTable("T2", sourceDescriptor);
 
         util().verifyRelPlan("SELECT m1, metadata FROM T2");
-        assertThat(appliedKeys.get(), contains("m1", "m2", "m3"));
+        assertThat(appliedKeys.get()).satisfies(matching(contains("m1", "m2", "m3")));
     }
 
     @Test
@@ -309,7 +308,7 @@ public class PushProjectIntoTableSourceScanRuleTest
         util().tableEnv().createTable("T3", sourceDescriptor);
 
         util().verifyRelPlan("SELECT 1 FROM T3");
-        assertThat(appliedKeys.get(), hasSize(0));
+        assertThat(appliedKeys.get()).satisfies(matching(hasSize(0)));
     }
 
     @Test
@@ -323,7 +322,7 @@ public class PushProjectIntoTableSourceScanRuleTest
         util().tableEnv().createTable("T4", sourceDescriptor);
 
         util().verifyRelPlan("SELECT 1 FROM T4");
-        assertThat(appliedKeys.get(), contains("m1", "m2", "m3"));
+        assertThat(appliedKeys.get()).satisfies(matching(contains("m1", "m2", "m3")));
     }
 
     @Test
@@ -341,15 +340,13 @@ public class PushProjectIntoTableSourceScanRuleTest
 
         util().verifyRelPlan("SELECT metadata FROM T5");
 
-        assertThat(appliedProjectionDataType.get(), notNullValue());
-        assertThat(appliedMetadataDataType.get(), notNullValue());
+        assertThat(appliedProjectionDataType.get()).isNotNull();
+        assertThat(appliedMetadataDataType.get()).isNotNull();
 
-        assertThat(
-                DataType.getFieldNames(appliedProjectionDataType.get()),
-                equalTo(Collections.emptyList()));
-        assertThat(
-                DataType.getFieldNames(appliedMetadataDataType.get()),
-                equalTo(Collections.singletonList("m2")));
+        assertThat(DataType.getFieldNames(appliedProjectionDataType.get()))
+                .isEqualTo(Collections.emptyList());
+        assertThat(DataType.getFieldNames(appliedMetadataDataType.get()))
+                .isEqualTo(Collections.singletonList("m2"));
     }
 
     @Test
@@ -367,15 +364,13 @@ public class PushProjectIntoTableSourceScanRuleTest
 
         util().verifyRelPlan("SELECT metadata, f1 FROM T5");
 
-        assertThat(appliedProjectionDataType.get(), notNullValue());
-        assertThat(appliedMetadataDataType.get(), notNullValue());
+        assertThat(appliedProjectionDataType.get()).isNotNull();
+        assertThat(appliedMetadataDataType.get()).isNotNull();
 
-        assertThat(
-                DataType.getFieldNames(appliedProjectionDataType.get()),
-                equalTo(Collections.singletonList("f1")));
-        assertThat(
-                DataType.getFieldNames(appliedMetadataDataType.get()),
-                equalTo(Arrays.asList("f1", "m2")));
+        assertThat(DataType.getFieldNames(appliedProjectionDataType.get()))
+                .isEqualTo(Collections.singletonList("f1"));
+        assertThat(DataType.getFieldNames(appliedMetadataDataType.get()))
+                .isEqualTo(Arrays.asList("f1", "m2"));
     }
 
     // ---------------------------------------------------------------------------------------------

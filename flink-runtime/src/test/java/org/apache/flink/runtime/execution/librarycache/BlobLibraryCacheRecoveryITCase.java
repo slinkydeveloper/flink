@@ -42,8 +42,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration test for {@link BlobLibraryCacheManager}. */
 public class BlobLibraryCacheRecoveryITCase extends TestLogger {
@@ -112,14 +111,14 @@ public class BlobLibraryCacheRecoveryITCase extends TestLogger {
 
             // Verify key 1
             File f = cache.getFile(jobId, keys.get(0));
-            assertEquals(expected.length, f.length());
+            assertThat(f.length()).isEqualTo(expected.length);
 
             try (FileInputStream fis = new FileInputStream(f)) {
                 for (int i = 0; i < expected.length && fis.available() > 0; i++) {
-                    assertEquals(expected[i], (byte) fis.read());
+                    assertThat((byte) fis.read()).isEqualTo(expected[i]);
                 }
 
-                assertEquals(0, fis.available());
+                assertThat(fis.available()).isEqualTo(0);
             }
 
             // Shutdown cache and start with other server
@@ -129,26 +128,26 @@ public class BlobLibraryCacheRecoveryITCase extends TestLogger {
 
             // Verify key 1
             f = cache.getFile(jobId, keys.get(0));
-            assertEquals(expected.length, f.length());
+            assertThat(f.length()).isEqualTo(expected.length);
 
             try (FileInputStream fis = new FileInputStream(f)) {
                 for (int i = 0; i < expected.length && fis.available() > 0; i++) {
-                    assertEquals(expected[i], (byte) fis.read());
+                    assertThat((byte) fis.read()).isEqualTo(expected[i]);
                 }
 
-                assertEquals(0, fis.available());
+                assertThat(fis.available()).isEqualTo(0);
             }
 
             // Verify key 2
             f = cache.getFile(jobId, keys.get(1));
-            assertEquals(expected2.length, f.length());
+            assertThat(f.length()).isEqualTo(expected2.length);
 
             try (FileInputStream fis = new FileInputStream(f)) {
                 for (int i = 0; i < 256 && fis.available() > 0; i++) {
-                    assertEquals(expected2[i], (byte) fis.read());
+                    assertThat((byte) fis.read()).isEqualTo(expected2[i]);
                 }
 
-                assertEquals(0, fis.available());
+                assertThat(fis.available()).isEqualTo(0);
             }
 
             // Remove blobs again
@@ -159,11 +158,10 @@ public class BlobLibraryCacheRecoveryITCase extends TestLogger {
             String haBlobStorePath = config.getString(HighAvailabilityOptions.HA_STORAGE_PATH);
             File haBlobStoreDir = new File(haBlobStorePath, clusterId);
             File[] recoveryFiles = haBlobStoreDir.listFiles();
-            assertNotNull("HA storage directory does not exist", recoveryFiles);
-            assertEquals(
-                    "Unclean state backend: " + Arrays.toString(recoveryFiles),
-                    0,
-                    recoveryFiles.length);
+            assertThat(recoveryFiles).as("HA storage directory does not exist").isNotNull();
+            assertThat(recoveryFiles.length)
+                    .as("Unclean state backend: " + Arrays.toString(recoveryFiles))
+                    .isEqualTo(0);
         } finally {
             for (BlobLibraryCacheManager s : libServer) {
                 if (s != null) {

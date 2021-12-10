@@ -31,10 +31,8 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -81,12 +79,12 @@ public class KvStateLocationRegistryTest {
         // Verify all registrations
         for (int i = 0; i < vertices.length; i++) {
             KvStateLocation location = registry.getKvStateLocation(registrationNames[i]);
-            assertNotNull(location);
+            assertThat(location).isNotNull();
 
             int maxParallelism = vertices[i].getMaxParallelism();
             for (int keyGroupIndex = 0; keyGroupIndex < maxParallelism; keyGroupIndex++) {
-                assertEquals(ids[i][keyGroupIndex], location.getKvStateID(keyGroupIndex));
-                assertEquals(server, location.getKvStateServerAddress(keyGroupIndex));
+                assertThat(location.getKvStateID(keyGroupIndex)).isEqualTo(ids[i][keyGroupIndex]);
+                assertThat(location.getKvStateServerAddress(keyGroupIndex)).isEqualTo(server);
             }
         }
 
@@ -103,7 +101,7 @@ public class KvStateLocationRegistryTest {
         }
 
         for (int i = 0; i < registrationNames.length; i++) {
-            assertNull(registry.getKvStateLocation(registrationNames[i]));
+            assertThat(registry.getKvStateLocation(registrationNames[i])).isNull();
         }
     }
 

@@ -18,8 +18,9 @@
 
 package org.apache.flink.runtime.webmonitor.history;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link ArchivedJson}. */
 public class ArchivedJsonTest {
@@ -31,10 +32,10 @@ public class ArchivedJsonTest {
         ArchivedJson identicalPath = new ArchivedJson("path", "hello");
         ArchivedJson identicalJson = new ArchivedJson("hello", "json");
 
-        Assert.assertEquals(original, original);
-        Assert.assertEquals(original, twin);
-        Assert.assertNotEquals(original, identicalPath);
-        Assert.assertNotEquals(original, identicalJson);
+        assertThat(original).isEqualTo(original);
+        assertThat(twin).isEqualTo(original);
+        assertThat(identicalPath).isEqualTo(original);
+        assertThat(identicalJson).isEqualTo(original);
     }
 
     @Test
@@ -42,8 +43,8 @@ public class ArchivedJsonTest {
         ArchivedJson original = new ArchivedJson("path", "json");
         ArchivedJson twin = new ArchivedJson("path", "json");
 
-        Assert.assertEquals(original, original);
-        Assert.assertEquals(original, twin);
-        Assert.assertEquals(original.hashCode(), twin.hashCode());
+        assertThat(original).isEqualTo(original);
+        assertThat(twin).isEqualTo(original);
+        assertThat(twin.hashCode()).isEqualTo(original.hashCode());
     }
 }

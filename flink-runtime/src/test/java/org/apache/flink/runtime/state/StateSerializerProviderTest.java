@@ -29,8 +29,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test suit for {@link StateSerializerProvider}. */
 public class StateSerializerProviderTest {
@@ -44,7 +44,8 @@ public class StateSerializerProviderTest {
         StateSerializerProvider<TestType> testProvider =
                 StateSerializerProvider.fromNewRegisteredSerializer(
                         new TestType.V1TestTypeSerializer());
-        assertTrue(testProvider.currentSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.currentSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     @Test
@@ -53,7 +54,8 @@ public class StateSerializerProviderTest {
         StateSerializerProvider<TestType> testProvider =
                 StateSerializerProvider.fromPreviousSerializerSnapshot(
                         serializer.snapshotConfiguration());
-        assertTrue(testProvider.currentSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.currentSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     // --------------------------------------------------------------------------------
@@ -76,8 +78,8 @@ public class StateSerializerProviderTest {
         StateSerializerProvider<TestType> testProvider =
                 StateSerializerProvider.fromPreviousSerializerSnapshot(
                         serializer.snapshotConfiguration());
-        assertTrue(
-                testProvider.previousSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.previousSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     @Test
@@ -134,11 +136,12 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.registerNewSerializerForRestoredState(
                         new TestType.V1TestTypeSerializer());
-        assertTrue(schemaCompatibility.isCompatibleAsIs());
+        assertThat(schemaCompatibility.isCompatibleAsIs()).isTrue();
 
-        assertTrue(testProvider.currentSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
-        assertTrue(
-                testProvider.previousSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.currentSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
+        assertThat(testProvider.previousSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     @Test
@@ -152,11 +155,12 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.registerNewSerializerForRestoredState(
                         new TestType.V2TestTypeSerializer());
-        assertTrue(schemaCompatibility.isCompatibleAfterMigration());
+        assertThat(schemaCompatibility.isCompatibleAfterMigration()).isTrue();
 
-        assertTrue(testProvider.currentSchemaSerializer() instanceof TestType.V2TestTypeSerializer);
-        assertTrue(
-                testProvider.previousSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.currentSchemaSerializer())
+                .isInstanceOf(TestType.V2TestTypeSerializer.class);
+        assertThat(testProvider.previousSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     @Test
@@ -171,10 +175,11 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.registerNewSerializerForRestoredState(
                         new TestType.ReconfigurationRequiringTestTypeSerializer());
-        assertTrue(schemaCompatibility.isCompatibleWithReconfiguredSerializer());
-        assertTrue(
-                testProvider.currentSchemaSerializer().getClass()
-                        == TestType.V1TestTypeSerializer.class);
+        assertThat(schemaCompatibility.isCompatibleWithReconfiguredSerializer()).isTrue();
+        assertThat(
+                        testProvider.currentSchemaSerializer().getClass()
+                                == TestType.V1TestTypeSerializer.class)
+                .isTrue();
     }
 
     @Test
@@ -188,13 +193,13 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.registerNewSerializerForRestoredState(
                         new TestType.IncompatibleTestTypeSerializer());
-        assertTrue(schemaCompatibility.isIncompatible());
+        assertThat(schemaCompatibility.isIncompatible()).isTrue();
 
         try {
             // a serializer for the current schema will no longer be accessible
             testProvider.currentSchemaSerializer();
 
-            fail();
+            fail("unknown failure");
         } catch (Exception excepted) {
             // success
         }
@@ -240,11 +245,12 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.setPreviousSerializerSnapshotForRestoredState(
                         new TestType.V1TestTypeSerializer().snapshotConfiguration());
-        assertTrue(schemaCompatibility.isCompatibleAsIs());
+        assertThat(schemaCompatibility.isCompatibleAsIs()).isTrue();
 
-        assertTrue(testProvider.currentSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
-        assertTrue(
-                testProvider.previousSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.currentSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
+        assertThat(testProvider.previousSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     @Test
@@ -258,11 +264,12 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.setPreviousSerializerSnapshotForRestoredState(
                         new TestType.V1TestTypeSerializer().snapshotConfiguration());
-        assertTrue(schemaCompatibility.isCompatibleAfterMigration());
+        assertThat(schemaCompatibility.isCompatibleAfterMigration()).isTrue();
 
-        assertTrue(testProvider.currentSchemaSerializer() instanceof TestType.V2TestTypeSerializer);
-        assertTrue(
-                testProvider.previousSchemaSerializer() instanceof TestType.V1TestTypeSerializer);
+        assertThat(testProvider.currentSchemaSerializer())
+                .isInstanceOf(TestType.V2TestTypeSerializer.class);
+        assertThat(testProvider.previousSchemaSerializer())
+                .isInstanceOf(TestType.V1TestTypeSerializer.class);
     }
 
     @Test
@@ -277,10 +284,11 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.setPreviousSerializerSnapshotForRestoredState(
                         new TestType.V1TestTypeSerializer().snapshotConfiguration());
-        assertTrue(schemaCompatibility.isCompatibleWithReconfiguredSerializer());
-        assertTrue(
-                testProvider.currentSchemaSerializer().getClass()
-                        == TestType.V1TestTypeSerializer.class);
+        assertThat(schemaCompatibility.isCompatibleWithReconfiguredSerializer()).isTrue();
+        assertThat(
+                        testProvider.currentSchemaSerializer().getClass()
+                                == TestType.V1TestTypeSerializer.class)
+                .isTrue();
     }
 
     @Test
@@ -294,13 +302,13 @@ public class StateSerializerProviderTest {
         TypeSerializerSchemaCompatibility<TestType> schemaCompatibility =
                 testProvider.setPreviousSerializerSnapshotForRestoredState(
                         new TestType.V1TestTypeSerializer().snapshotConfiguration());
-        assertTrue(schemaCompatibility.isIncompatible());
+        assertThat(schemaCompatibility.isIncompatible()).isTrue();
 
         try {
             // a serializer for the current schema will no longer be accessible
             testProvider.currentSchemaSerializer();
 
-            fail();
+            fail("unknown failure");
         } catch (Exception excepted) {
             // success
         }

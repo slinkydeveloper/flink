@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FixedRetryStrategy}. */
 public class FixedRetryStrategyTest extends TestLogger {
@@ -32,12 +32,12 @@ public class FixedRetryStrategyTest extends TestLogger {
     @Test
     public void testGetters() throws Exception {
         RetryStrategy retryStrategy = new FixedRetryStrategy(10, Duration.ofMillis(5L));
-        assertEquals(10, retryStrategy.getNumRemainingRetries());
-        assertEquals(Duration.ofMillis(5L), retryStrategy.getRetryDelay());
+        assertThat(retryStrategy.getNumRemainingRetries()).isEqualTo(10);
+        assertThat(retryStrategy.getRetryDelay()).isEqualTo(Duration.ofMillis(5L));
 
         RetryStrategy nextRetryStrategy = retryStrategy.getNextRetryStrategy();
-        assertEquals(9, nextRetryStrategy.getNumRemainingRetries());
-        assertEquals(Duration.ofMillis(5L), nextRetryStrategy.getRetryDelay());
+        assertThat(nextRetryStrategy.getNumRemainingRetries()).isEqualTo(9);
+        assertThat(nextRetryStrategy.getRetryDelay()).isEqualTo(Duration.ofMillis(5L));
     }
 
     /** Tests that getting a next RetryStrategy below zero remaining retries fails. */

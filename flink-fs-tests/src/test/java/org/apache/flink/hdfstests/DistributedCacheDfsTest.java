@@ -46,9 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for distributing files with {@link org.apache.flink.api.common.cache.DistributedCache} via
@@ -158,7 +156,7 @@ public class DistributedCacheDfsTest extends TestLogger {
                 jobResult.getSerializedThrowable().isPresent()
                         ? jobResult.getSerializedThrowable().get().getFullStringifiedStackTrace()
                         : "Job failed.";
-        assertTrue(messageInCaseOfFailure, jobResult.isSuccess());
+        assertThat(jobResult.isSuccess()).as(messageInCaseOfFailure).isTrue();
     }
 
     private StreamExecutionEnvironment createJobWithRegisteredCachedFiles() {
@@ -183,19 +181,19 @@ public class DistributedCacheDfsTest extends TestLogger {
                             getRuntimeContext().getDistributedCache().getFile("test_data").toURI());
 
             Path path = new Path(actualFile.toUri());
-            assertFalse(path.getFileSystem().isDistributedFS());
+            assertThat(path.getFileSystem().isDistributedFS()).isFalse();
 
             DataInputStream in = new DataInputStream(actualFile.getFileSystem().open(actualFile));
             String contents = in.readUTF();
 
-            assertEquals(testFileContent, contents);
+            assertThat(contents).isEqualTo(testFileContent);
 
             final Path actualDir =
                     new Path(getRuntimeContext().getDistributedCache().getFile("test_dir").toURI());
             FileStatus fileStatus = actualDir.getFileSystem().getFileStatus(actualDir);
-            assertTrue(fileStatus.isDir());
+            assertThat(fileStatus.isDir()).isTrue();
             FileStatus[] fileStatuses = actualDir.getFileSystem().listStatus(actualDir);
-            assertEquals(2, fileStatuses.length);
+            assertThat(fileStatuses.length).isEqualTo(2);
 
             return contents;
         }

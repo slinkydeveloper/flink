@@ -24,9 +24,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JobVertexMetricsHeaders}. */
 public class JobVertexMetricsHeadersTest extends TestLogger {
@@ -36,20 +34,18 @@ public class JobVertexMetricsHeadersTest extends TestLogger {
 
     @Test
     public void testUrl() {
-        assertThat(
-                jobVertexMetricsHeaders.getTargetRestEndpointURL(),
-                equalTo(
+        assertThat(jobVertexMetricsHeaders.getTargetRestEndpointURL())
+                .isEqualTo(
                         "/jobs/:"
                                 + JobIDPathParameter.KEY
                                 + "/vertices/:"
                                 + JobVertexIdPathParameter.KEY
-                                + "/metrics"));
+                                + "/metrics");
     }
 
     @Test
     public void testMessageParameters() {
-        assertThat(
-                jobVertexMetricsHeaders.getUnresolvedMessageParameters(),
-                instanceOf(JobVertexMetricsMessageParameters.class));
+        assertThat(jobVertexMetricsHeaders.getUnresolvedMessageParameters())
+                .isInstanceOf(JobVertexMetricsMessageParameters.class);
     }
 }

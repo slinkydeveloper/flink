@@ -32,8 +32,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests that the set of Kryo registrations is the same across compatible Flink versions.
@@ -100,7 +100,7 @@ public class AvroKryoSerializerRegistrationsTest {
     private void writeDefaultKryoRegistrations(String filePath) throws IOException {
         final File file = new File(filePath);
         if (file.exists()) {
-            assertTrue(file.delete());
+            assertThat(file.delete()).isTrue();
         }
 
         final Kryo kryo = new KryoSerializer<>(Integer.class, new ExecutionConfig()).getKryo();

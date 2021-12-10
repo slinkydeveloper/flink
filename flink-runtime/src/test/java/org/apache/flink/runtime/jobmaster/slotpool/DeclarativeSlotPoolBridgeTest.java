@@ -50,9 +50,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link DeclarativeSlotPoolBridge}. */
 public class DeclarativeSlotPoolBridgeTest extends TestLogger {
@@ -112,10 +112,12 @@ public class DeclarativeSlotPoolBridgeTest extends TestLogger {
                             declarativeSlotPoolBridge.notifyNotEnoughResourcesAvailable(
                                     Collections.emptyList()));
 
-            assertThat(
-                    slotAllocationFuture,
-                    FlinkMatchers.futureWillCompleteExceptionally(
-                            NoResourceAvailableException.class, Duration.ofSeconds(10)));
+            assertThat(slotAllocationFuture)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            NoResourceAvailableException.class,
+                                            Duration.ofSeconds(10))));
         }
     }
 
@@ -129,7 +131,7 @@ public class DeclarativeSlotPoolBridgeTest extends TestLogger {
                 TestingDeclarativeSlotPool.builder()
                         .setReserveFreeSlotFunction(
                                 (allocationId, resourceProfile) -> {
-                                    assertThat(allocationId, is(expectedAllocationId));
+                                    assertThat(allocationId).isEqualTo(expectedAllocationId);
                                     return allocatedSlot;
                                 })
                         .setFreeReservedSlotFunction(
@@ -150,7 +152,7 @@ public class DeclarativeSlotPoolBridgeTest extends TestLogger {
                     slotRequestId, expectedAllocationId, allocatedSlot.getResourceProfile());
             declarativeSlotPoolBridge.releaseSlot(slotRequestId, null);
 
-            assertThat(releaseSlotFuture.join(), is(expectedAllocationId));
+            assertThat(releaseSlotFuture.join()).isEqualTo(expectedAllocationId);
         }
     }
 
@@ -216,7 +218,7 @@ public class DeclarativeSlotPoolBridgeTest extends TestLogger {
                     new SimpleAckingTaskManagerGateway(),
                     Collections.singleton(new SlotOffer(allocationId, 0, ResourceProfile.ANY)));
 
-            assertThat(slotFuture.join().getAllocationId(), is(allocationId));
+            assertThat(slotFuture.join().getAllocationId()).isEqualTo(allocationId);
         }
     }
 

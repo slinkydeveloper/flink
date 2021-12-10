@@ -35,10 +35,10 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
 
 /** Tests for {@link RegionPartitionGroupReleaseStrategy}. */
 public class RegionPartitionGroupReleaseStrategyTest extends TestLogger {
@@ -67,7 +67,7 @@ public class RegionPartitionGroupReleaseStrategyTest extends TestLogger {
 
         final List<IntermediateResultPartitionID> partitionsToRelease =
                 getReleasablePartitions(regionPartitionGroupReleaseStrategy, onlyConsumerVertexId);
-        assertThat(partitionsToRelease, contains(onlyResultPartitionId));
+        assertThat(partitionsToRelease).satisfies(matching(contains(onlyResultPartitionId)));
     }
 
     @Test
@@ -98,7 +98,7 @@ public class RegionPartitionGroupReleaseStrategyTest extends TestLogger {
         regionPartitionGroupReleaseStrategy.vertexFinished(onlyIntermediateVertexId);
         final List<IntermediateResultPartitionID> partitionsToRelease =
                 getReleasablePartitions(regionPartitionGroupReleaseStrategy, onlySinkVertexId);
-        assertThat(partitionsToRelease, contains(onlySourceResultPartitionId));
+        assertThat(partitionsToRelease).satisfies(matching(contains(onlySourceResultPartitionId)));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class RegionPartitionGroupReleaseStrategyTest extends TestLogger {
 
         final List<IntermediateResultPartitionID> partitionsToRelease =
                 getReleasablePartitions(regionPartitionGroupReleaseStrategy, consumerVertex1);
-        assertThat(partitionsToRelease, is(empty()));
+        assertThat(partitionsToRelease).isEqualTo(empty());
     }
 
     @Test
@@ -139,7 +139,7 @@ public class RegionPartitionGroupReleaseStrategyTest extends TestLogger {
 
         final List<IntermediateResultPartitionID> partitionsToRelease =
                 getReleasablePartitions(regionPartitionGroupReleaseStrategy, consumerVertex1);
-        assertThat(partitionsToRelease, is(empty()));
+        assertThat(partitionsToRelease).isEqualTo(empty());
     }
 
     private static List<IntermediateResultPartitionID> getReleasablePartitions(

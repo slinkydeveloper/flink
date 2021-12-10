@@ -43,7 +43,6 @@ import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.util.Collector;
 
 import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -54,6 +53,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import scala.math.BigInt;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration tests for {@link GroupReduceFunction}, {@link RichGroupReduceFunction}, and {@link
@@ -1084,8 +1085,8 @@ public class GroupReduceITCase extends MultipleProgramsTestBase {
         ExecutionConfig ec = env.getConfig();
 
         // check if automatic type registration with Kryo worked
-        Assert.assertTrue(ec.getRegisteredKryoTypes().contains(BigInt.class));
-        Assert.assertFalse(ec.getRegisteredKryoTypes().contains(java.sql.Date.class));
+        assertThat(ec.getRegisteredKryoTypes().contains(BigInt.class)).isTrue();
+        assertThat(ec.getRegisteredKryoTypes().contains(java.sql.Date.class)).isFalse();
 
         String expected = null;
 
@@ -1096,7 +1097,7 @@ public class GroupReduceITCase extends MultipleProgramsTestBase {
                         + "For key 92233720368547758070 we got:\n"
                         + "PojoWithCollection{pojos.size()=2, key=0, sqlDate=1976-05-03, bigInt=92233720368547758070, bigDecimalKeepItNull=null, scalaBigInt=31104000, mixed=null}]";
 
-        Assert.assertEquals(localExpected, result.toString());
+        assertThat(result.toString()).isEqualTo(localExpected);
     }
 
     @Test

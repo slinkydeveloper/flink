@@ -31,8 +31,7 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 
 import static org.apache.flink.util.FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test makes sure that reversed classloading works for the Avro/Kryo integration when Kryo is
@@ -84,7 +83,7 @@ public class AvroKryoClassloadingTest {
 
         final Class<?> userLoadedAvroClass =
                 Class.forName(avroClass.getName(), false, userAppClassLoader);
-        assertNotEquals(avroClass, userLoadedAvroClass);
+        assertThat(userLoadedAvroClass).isEqualTo(avroClass);
 
         // call the 'addAvroGenericDataArrayRegistration(...)' method
         final Method m =
@@ -94,6 +93,6 @@ public class AvroKryoClassloadingTest {
         final LinkedHashMap<String, ?> map = new LinkedHashMap<>();
         m.invoke(userLoadedAvroClass.newInstance(), map);
 
-        assertEquals(1, map.size());
+        assertThat(map.size()).isEqualTo(1);
     }
 }

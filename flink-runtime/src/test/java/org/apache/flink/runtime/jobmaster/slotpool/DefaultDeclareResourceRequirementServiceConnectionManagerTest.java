@@ -40,8 +40,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultDeclareResourceRequirementServiceConnectionManager}. */
 public class DefaultDeclareResourceRequirementServiceConnectionManagerTest extends TestLogger {
@@ -78,7 +77,7 @@ public class DefaultDeclareResourceRequirementServiceConnectionManagerTest exten
         declareResourceRequirementServiceConnectionManager.declareResourceRequirements(
                 resourceRequirements);
 
-        assertThat(declareResourceRequirementsFuture.join(), is(resourceRequirements));
+        assertThat(declareResourceRequirementsFuture.join()).isEqualTo(resourceRequirements);
     }
 
     @Test
@@ -100,10 +99,10 @@ public class DefaultDeclareResourceRequirementServiceConnectionManagerTest exten
 
         scheduledExecutor.triggerNonPeriodicScheduledTasksWithRecursion();
 
-        assertThat(
-                failingDeclareResourceRequirementsService.nextResourceRequirements(),
-                is(resourceRequirements));
-        assertThat(failingDeclareResourceRequirementsService.hasResourceRequirements(), is(false));
+        assertThat(failingDeclareResourceRequirementsService.nextResourceRequirements())
+                .isEqualTo(resourceRequirements);
+        assertThat(failingDeclareResourceRequirementsService.hasResourceRequirements())
+                .isEqualTo(false);
     }
 
     @Test
@@ -139,7 +138,7 @@ public class DefaultDeclareResourceRequirementServiceConnectionManagerTest exten
         testAction.accept(declareResourceRequirementServiceConnectionManager);
         scheduledExecutor.triggerNonPeriodicScheduledTasksWithRecursion();
 
-        assertThat(declareResourceRequirementsService.hasResourceRequirements(), is(false));
+        assertThat(declareResourceRequirementsService.hasResourceRequirements()).isEqualTo(false);
     }
 
     @Test
@@ -169,10 +168,10 @@ public class DefaultDeclareResourceRequirementServiceConnectionManagerTest exten
 
         scheduledExecutor.triggerNonPeriodicScheduledTasksWithRecursion();
 
-        assertThat(
-                failingDeclareResourceRequirementsService.nextResourceRequirements(),
-                is(resourceRequirements2));
-        assertThat(failingDeclareResourceRequirementsService.hasResourceRequirements(), is(false));
+        assertThat(failingDeclareResourceRequirementsService.nextResourceRequirements())
+                .isEqualTo(resourceRequirements2);
+        assertThat(failingDeclareResourceRequirementsService.hasResourceRequirements())
+                .isEqualTo(false);
     }
 
     @Nonnull

@@ -19,14 +19,13 @@ package org.apache.flink.testutils.junit;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link RetryRule}. */
 public class RetryRuleTest extends TestLogger {
@@ -48,11 +47,11 @@ public class RetryRuleTest extends TestLogger {
 
         try {
             RETRY_RULE.apply(statement, testDescription).evaluate();
-            Assert.fail("Should have failed.");
+            fail("Should have failed.");
         } catch (RuntimeException expected) {
         }
 
-        assertThat(statement.getNumEvaluations(), is(numEvaluationsToFail));
+        assertThat(statement.getNumEvaluations()).isEqualTo(numEvaluationsToFail);
     }
 
     @Ignore // we don't want to actually this run as a test
@@ -76,11 +75,11 @@ public class RetryRuleTest extends TestLogger {
 
         try {
             RETRY_RULE.apply(statement, testDescription).evaluate();
-            Assert.fail("Should have failed.");
+            fail("Should have failed.");
         } catch (RuntimeException expected) {
         }
 
-        assertThat(statement.getNumEvaluations(), is(numEvaluationsToFail));
+        assertThat(statement.getNumEvaluations()).isEqualTo(numEvaluationsToFail);
     }
 
     @Ignore // we don't want to actually this run as a test
@@ -103,7 +102,7 @@ public class RetryRuleTest extends TestLogger {
 
         RETRY_RULE.apply(statement, testDescription).evaluate();
 
-        assertThat(statement.getNumEvaluations(), is(numEvaluationsToFail + 1));
+        assertThat(statement.getNumEvaluations()).isEqualTo(numEvaluationsToFail + 1);
     }
 
     @Ignore // we don't want to actually this run as a test
@@ -127,7 +126,7 @@ public class RetryRuleTest extends TestLogger {
 
         RETRY_RULE.apply(statement, testDescription).evaluate();
 
-        assertThat(statement.getNumEvaluations(), is(numEvaluationsToFail + 1));
+        assertThat(statement.getNumEvaluations()).isEqualTo(numEvaluationsToFail + 1);
     }
 
     @Ignore // we don't want to actually this run as a test

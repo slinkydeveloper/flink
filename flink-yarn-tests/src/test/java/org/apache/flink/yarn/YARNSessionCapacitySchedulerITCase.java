@@ -53,7 +53,6 @@ import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,15 +81,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.apache.flink.util.Preconditions.checkState;
 import static org.apache.flink.yarn.util.TestUtils.getTestJarPath;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * This test starts a MiniYARNCluster with a CapacityScheduler. Is has, by default a queue called
@@ -304,9 +300,8 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
                                         "768m",
                                         "-tm",
                                         "1024m",
-                                        "-s",
-                                        "3", // set the slots 3 to check if the vCores are set
-                                        // properly!
+                                        "-s", // set the slots 3 to check if the vCores are set
+                                        "3", // properly!
                                         "-nm",
                                         "customName",
                                         "-Dfancy-configuration-value=veryFancy",
@@ -314,44 +309,43 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
                                     },
                                     "JobManager Web Interface:",
                                     RunTypes.YARN_SESSION);
-
                     try {
                         final String logs = outContent.toString();
                         final HostAndPort hostAndPort = parseJobManagerHostname(logs);
                         final String host = hostAndPort.getHost();
                         final int port = hostAndPort.getPort();
                         LOG.info("Extracted hostname:port: {}:{}", host, port);
-
                         submitJob("WindowJoin.jar");
-
                         //
                         // Assert that custom YARN application name "customName" is set
                         //
                         final ApplicationReport applicationReport = getOnlyApplicationReport();
-                        assertEquals("customName", applicationReport.getName());
-
+                        assertThat(applicationReport.getName()).isEqualTo("customName");
                         //
                         // Assert the number of TaskManager slots are set
                         //
                         waitForTaskManagerRegistration(host, port, Duration.ofMillis(30_000));
                         assertNumberOfSlotsPerTask(host, port, 3);
-
                         final Map<String, String> flinkConfig = getFlinkConfig(host, port);
-
                         //
                         // Assert dynamic properties
                         //
-                        assertThat(flinkConfig, hasEntry("fancy-configuration-value", "veryFancy"));
-
+                        assertThat(flinkConfig)
+                                .satisfies(
+                                        matching(
+                                                hasEntry(
+                                                        "fancy-configuration-value", "veryFancy")));
                         //
                         // FLINK-2213: assert that vcores are set
                         //
-                        assertThat(flinkConfig, hasEntry(YarnConfigOptions.VCORES.key(), "2"));
-
+                        assertThat(flinkConfig)
+                                .satisfies(matching(hasEntry(YarnConfigOptions.VCORES.key(), "2")));
                         //
                         // FLINK-1902: check if jobmanager hostname is shown in web interface
                         //
-                        assertThat(flinkConfig, hasEntry(JobManagerOptions.ADDRESS.key(), host));
+                        assertThat(flinkConfig)
+                                .satisfies(
+                                        matching(hasEntry(JobManagerOptions.ADDRESS.key(), host)));
                     } finally {
                         yarnSessionClusterRunner.sendStop();
                         yarnSessionClusterRunner.join();
@@ -472,16 +466,15 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
                                 RunTypes.YARN_SESSION,
                                 1);
                     } catch (Exception e) {
-                        assertTrue(
-                                ExceptionUtils.findThrowableWithMessage(
-                                                e, "to unknown queue: doesntExist")
-                                        .isPresent());
+                        assertThat(
+                                        ExceptionUtils.findThrowableWithMessage(
+                                                        e, "to unknown queue: doesntExist")
+                                                .isPresent())
+                                .isTrue();
                     }
-                    assertThat(
-                            yarTestLoggerResource.getMessages(),
-                            hasItem(
-                                    containsString(
-                                            "The specified queue 'doesntExist' does not exist. Available queues")));
+                    assertThat(yarTestLoggerResource.getMessages())
+                            .contains(
+                                    "The specified queue 'doesntExist' does not exist. Available queues");
                     LOG.info("Finished testNonexistingQueueWARNmessage()");
                 });
     }
@@ -609,8 +602,9 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
                         RunTypes.CLI_FRONTEND);
 
         // it should usually be 2, but on slow machines, the number varies
-        Assert.assertTrue(
-                "There should be at most 2 containers running", getRunningContainers() <= 2);
+        assertThat(getRunningContainers() <= 2)
+                .as("There should be at most 2 containers running")
+                .isTrue();
         // give the runner some time to detach
         for (int attempt = 0; runner.isAlive() && attempt < 5; attempt++) {
             try {
@@ -618,7 +612,7 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
             } catch (InterruptedException e) {
             }
         }
-        Assert.assertFalse("The runner should detach.", runner.isAlive());
+        assertThat(runner.isAlive()).as("The runner should detach.").isFalse();
         LOG.info("CLI Frontend has returned, so the job is running");
 
         // find out the application id and wait until it has finished.
@@ -665,7 +659,7 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
             // check the output files.
             File[] listOfOutputFiles = tmpOutFolder.listFiles();
 
-            Assert.assertNotNull("Taskmanager output not found", listOfOutputFiles);
+            assertThat(listOfOutputFiles).as("Taskmanager output not found").isNotNull();
             LOG.info("The job has finished. TaskManager output files found in {}", tmpOutFolder);
 
             // read all output files in output folder to one output string
@@ -687,25 +681,27 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
                                             && dir.getAbsolutePath().contains(id.toString());
                                 }
                             });
-            Assert.assertNotNull("Unable to locate JobManager log", jobmanagerLog);
+            assertThat(jobmanagerLog).as("Unable to locate JobManager log").isNotNull();
             content = FileUtils.readFileToString(jobmanagerLog);
             String expected = "Starting TaskManagers";
-            Assert.assertTrue(
-                    "Expected string '"
-                            + expected
-                            + "' not found in JobManager log: '"
-                            + jobmanagerLog
-                            + "'",
-                    content.contains(expected));
+            assertThat(content.contains(expected))
+                    .as(
+                            "Expected string '"
+                                    + expected
+                                    + "' not found in JobManager log: '"
+                                    + jobmanagerLog
+                                    + "'")
+                    .isTrue();
             expected = " (2/2) (attempt #0) with attempt id ";
-            Assert.assertTrue(
-                    "Expected string '"
-                            + expected
-                            + "' not found in JobManager log."
-                            + "This string checks that the job has been started with a parallelism of 2. Log contents: '"
-                            + jobmanagerLog
-                            + "'",
-                    content.contains(expected));
+            assertThat(content.contains(expected))
+                    .as(
+                            "Expected string '"
+                                    + expected
+                                    + "' not found in JobManager log."
+                                    + "This string checks that the job has been started with a parallelism of 2. Log contents: '"
+                                    + jobmanagerLog
+                                    + "'")
+                    .isTrue();
 
             // make sure the detached app is really finished.
             LOG.info("Checking again that app has finished");
@@ -782,7 +778,7 @@ public class YARNSessionCapacitySchedulerITCase extends YarnTestBase {
         @SuppressWarnings("unchecked")
         Set<String> applicationTags = (Set<String>) applicationTagsMethod.invoke(report);
 
-        assertEquals(Collections.singleton("test-tag"), applicationTags);
+        assertThat(applicationTags).isEqualTo(Collections.singleton("test-tag"));
     }
 
     @After

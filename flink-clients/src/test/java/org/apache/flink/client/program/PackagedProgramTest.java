@@ -21,7 +21,6 @@ package org.apache.flink.client.program;
 import org.apache.flink.client.cli.CliFrontendTestUtils;
 import org.apache.flink.configuration.ConfigConstants;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,6 +34,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.apache.flink.client.cli.CliFrontendTestUtils.TEST_JAR_MAIN_CLASS;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PackagedProgram}. */
 public class PackagedProgramTest {
@@ -54,9 +54,9 @@ public class PackagedProgramTest {
         }
 
         final List<File> files = PackagedProgram.extractContainedLibraries(fakeJar.toURI().toURL());
-        Assert.assertEquals(1, files.size());
-        Assert.assertArrayEquals(
-                nestedJarContent, Files.readAllBytes(files.iterator().next().toPath()));
+        assertThat(files.size()).isEqualTo(1);
+        assertThat(Files.readAllBytes(files.iterator().next().toPath()))
+                .isEqualTo(nestedJarContent);
     }
 
     @Test

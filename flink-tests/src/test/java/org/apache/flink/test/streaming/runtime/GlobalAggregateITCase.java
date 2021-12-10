@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for GlobalAggregate functionality. */
 public class GlobalAggregateITCase extends AbstractTestBase {
@@ -100,9 +100,9 @@ public class GlobalAggregateITCase extends AbstractTestBase {
                 }
 
                 if (expectFailures) {
-                    assertEquals(i + 1, exceptionCount);
+                    assertThat(exceptionCount).isEqualTo(i + 1);
                 } else {
-                    assertEquals(expectedAccumulator, actualAccumlator);
+                    assertThat(actualAccumlator).isEqualTo(expectedAccumulator);
                 }
             }
         }

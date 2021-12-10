@@ -29,7 +29,7 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PrintSinkFunction}. */
 public class PrintSinkFunctionTest {
@@ -69,8 +69,8 @@ public class PrintSinkFunctionTest {
 
         printSink.invoke("hello world!", SinkContextUtil.forTimestamp(0));
 
-        assertEquals("Print to System.out", printSink.toString());
-        assertEquals("hello world!" + line, arrayOutputStream.toString());
+        assertThat(printSink.toString()).isEqualTo("Print to System.out");
+        assertThat(arrayOutputStream.toString()).isEqualTo("hello world!" + line);
         printSink.close();
     }
 
@@ -82,8 +82,8 @@ public class PrintSinkFunctionTest {
 
         printSink.invoke("hello world!", SinkContextUtil.forTimestamp(0));
 
-        assertEquals("Print to System.err", printSink.toString());
-        assertEquals("hello world!" + line, arrayErrorStream.toString());
+        assertThat(printSink.toString()).isEqualTo("Print to System.err");
+        assertThat(arrayErrorStream.toString()).isEqualTo("hello world!" + line);
         printSink.close();
     }
 
@@ -95,8 +95,8 @@ public class PrintSinkFunctionTest {
 
         printSink.invoke("hello world!", SinkContextUtil.forTimestamp(0));
 
-        assertEquals("Print to System.out", printSink.toString());
-        assertEquals("2> hello world!" + line, arrayOutputStream.toString());
+        assertThat(printSink.toString()).isEqualTo("Print to System.out");
+        assertThat(arrayOutputStream.toString()).isEqualTo("2> hello world!" + line);
         printSink.close();
     }
 
@@ -108,8 +108,8 @@ public class PrintSinkFunctionTest {
 
         printSink.invoke("hello world!", SinkContextUtil.forTimestamp(0));
 
-        assertEquals("Print to System.out", printSink.toString());
-        assertEquals("mySink:2> hello world!" + line, arrayOutputStream.toString());
+        assertThat(printSink.toString()).isEqualTo("Print to System.out");
+        assertThat(arrayOutputStream.toString()).isEqualTo("mySink:2> hello world!" + line);
         printSink.close();
     }
 
@@ -121,8 +121,8 @@ public class PrintSinkFunctionTest {
 
         printSink.invoke("hello world!", SinkContextUtil.forTimestamp(0));
 
-        assertEquals("Print to System.out", printSink.toString());
-        assertEquals("mySink> hello world!" + line, arrayOutputStream.toString());
+        assertThat(printSink.toString()).isEqualTo("Print to System.out");
+        assertThat(arrayOutputStream.toString()).isEqualTo("mySink> hello world!" + line);
         printSink.close();
     }
 }

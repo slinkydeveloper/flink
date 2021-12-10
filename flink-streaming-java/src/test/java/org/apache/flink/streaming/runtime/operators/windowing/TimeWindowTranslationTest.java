@@ -37,10 +37,11 @@ import org.apache.flink.streaming.api.windowing.triggers.EventTimeTrigger;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * These tests verify that the api calls on {@link WindowedStream} that use the "time" shortcut
@@ -74,7 +75,7 @@ public class TimeWindowTranslationTest {
                         window1.getTransformation();
         OneInputStreamOperator<Tuple2<String, Integer>, Tuple2<String, Integer>> operator1 =
                 transform1.getOperator();
-        Assert.assertTrue(operator1 instanceof WindowOperator);
+        assertThat(operator1).isInstanceOf(WindowOperator.class);
 
         DataStream<Tuple2<String, Integer>> window2 =
                 source.keyBy(0)
@@ -101,7 +102,7 @@ public class TimeWindowTranslationTest {
                         window2.getTransformation();
         OneInputStreamOperator<Tuple2<String, Integer>, Tuple2<String, Integer>> operator2 =
                 transform2.getOperator();
-        Assert.assertTrue(operator2 instanceof WindowOperator);
+        assertThat(operator2).isInstanceOf(WindowOperator.class);
     }
 
     @Test
@@ -125,11 +126,11 @@ public class TimeWindowTranslationTest {
                         window1.getTransformation();
         OneInputStreamOperator<Tuple2<String, Integer>, Tuple2<String, Integer>> operator1 =
                 transform1.getOperator();
-        Assert.assertTrue(operator1 instanceof WindowOperator);
+        assertThat(operator1).isInstanceOf(WindowOperator.class);
         WindowOperator winOperator1 = (WindowOperator) operator1;
-        Assert.assertTrue(winOperator1.getTrigger() instanceof EventTimeTrigger);
-        Assert.assertTrue(winOperator1.getWindowAssigner() instanceof SlidingEventTimeWindows);
-        Assert.assertTrue(winOperator1.getStateDescriptor() instanceof ReducingStateDescriptor);
+        assertThat(winOperator1.getTrigger()).isInstanceOf(EventTimeTrigger.class);
+        assertThat(winOperator1.getWindowAssigner()).isInstanceOf(SlidingEventTimeWindows.class);
+        assertThat(winOperator1.getStateDescriptor()).isInstanceOf(ReducingStateDescriptor.class);
     }
 
     @Test
@@ -166,11 +167,11 @@ public class TimeWindowTranslationTest {
                         window1.getTransformation();
         OneInputStreamOperator<Tuple2<String, Integer>, Tuple2<String, Integer>> operator1 =
                 transform1.getOperator();
-        Assert.assertTrue(operator1 instanceof WindowOperator);
+        assertThat(operator1).isInstanceOf(WindowOperator.class);
         WindowOperator winOperator1 = (WindowOperator) operator1;
-        Assert.assertTrue(winOperator1.getTrigger() instanceof EventTimeTrigger);
-        Assert.assertTrue(winOperator1.getWindowAssigner() instanceof TumblingEventTimeWindows);
-        Assert.assertTrue(winOperator1.getStateDescriptor() instanceof ListStateDescriptor);
+        assertThat(winOperator1.getTrigger()).isInstanceOf(EventTimeTrigger.class);
+        assertThat(winOperator1.getWindowAssigner()).isInstanceOf(TumblingEventTimeWindows.class);
+        assertThat(winOperator1.getStateDescriptor()).isInstanceOf(ListStateDescriptor.class);
     }
 
     // ------------------------------------------------------------------------

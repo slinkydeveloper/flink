@@ -22,8 +22,7 @@ import org.apache.flink.table.examples.utils.ExampleOutputTestBase;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for Scala {@link StreamSQLExample}. */
 public class StreamSQLExampleITCase extends ExampleOutputTestBase {
@@ -32,8 +31,8 @@ public class StreamSQLExampleITCase extends ExampleOutputTestBase {
     public void testExample() {
         StreamSQLExample.main(new String[0]);
         final String consoleOutput = getOutputString();
-        assertThat(consoleOutput, containsString("Order(4,beer,1)"));
-        assertThat(consoleOutput, containsString("Order(1,beer,3)"));
-        assertThat(consoleOutput, containsString("Order(1,diaper,4)"));
+        assertThat(consoleOutput).contains("Order(4,beer,1)");
+        assertThat(consoleOutput).contains("Order(1,beer,3)");
+        assertThat(consoleOutput).contains("Order(1,diaper,4)");
     }
 }

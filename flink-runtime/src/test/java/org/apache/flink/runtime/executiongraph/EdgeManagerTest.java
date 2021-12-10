@@ -33,7 +33,7 @@ import org.junit.Test;
 
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link EdgeManager}. */
 public class EdgeManagerTest {
@@ -72,7 +72,8 @@ public class EdgeManagerTest {
         ConsumedPartitionGroup groupRetrievedByIntermediateResultPartition =
                 consumedPartition.getConsumedPartitionGroups().get(0);
 
-        assertEquals(groupRetrievedByDownstreamVertex, groupRetrievedByIntermediateResultPartition);
+        assertThat(groupRetrievedByIntermediateResultPartition)
+                .isEqualTo(groupRetrievedByDownstreamVertex);
 
         ConsumedPartitionGroup groupRetrievedByScheduledResultPartition =
                 scheduler
@@ -82,6 +83,7 @@ public class EdgeManagerTest {
                         .getConsumedPartitionGroups()
                         .get(0);
 
-        assertEquals(groupRetrievedByDownstreamVertex, groupRetrievedByScheduledResultPartition);
+        assertThat(groupRetrievedByScheduledResultPartition)
+                .isEqualTo(groupRetrievedByDownstreamVertex);
     }
 }

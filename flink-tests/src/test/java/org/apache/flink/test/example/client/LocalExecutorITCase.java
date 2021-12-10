@@ -33,16 +33,15 @@ import org.apache.flink.test.testdata.WordCountData;
 import org.apache.flink.test.testfunctions.Tokenizer;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileWriter;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Integration tests for {@link LocalExecutor}. */
 public class LocalExecutorITCase extends TestLogger {
@@ -87,10 +86,10 @@ public class LocalExecutorITCase extends TestLogger {
             jobClient.getJobExecutionResult().get();
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
 
-        assertThat(miniCluster.isRunning(), is(false));
+        assertThat(miniCluster.isRunning()).isEqualTo(false);
     }
 
     @Test(timeout = 60_000)
@@ -105,12 +104,11 @@ public class LocalExecutorITCase extends TestLogger {
                 executor.execute(runtimeExceptionPlan, config, ClassLoader.getSystemClassLoader())
                         .get();
 
-        assertThrows(
-                "Job execution failed.",
-                Exception.class,
-                () -> jobClient.getJobExecutionResult().get());
+        assertThatThrownBy(() -> jobClient.getJobExecutionResult().get())
+                .as("Job execution failed.")
+                .isInstanceOf(Exception.class);
 
-        assertThat(miniCluster.isRunning(), is(false));
+        assertThat(miniCluster.isRunning()).isEqualTo(false);
     }
 
     private Plan getWordCountPlan(File inFile, File outFile, int parallelism) {

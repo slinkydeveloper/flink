@@ -46,7 +46,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Various tests around the proper passing of state descriptors to the operators and their
@@ -252,13 +252,13 @@ public class StateDescriptorPassingTest {
         // this would be the first statement to fail if state descriptors were not properly
         // initialized
         TypeSerializer<?> serializer = descr.getSerializer();
-        assertTrue(serializer instanceof KryoSerializer);
+        assertThat(serializer).isInstanceOf(KryoSerializer.class);
 
         Kryo kryo = ((KryoSerializer<?>) serializer).getKryo();
 
-        assertTrue(
-                "serializer registration was not properly passed on",
-                kryo.getSerializer(File.class) instanceof JavaSerializer);
+        assertThat(kryo.getSerializer(File.class))
+                .as("serializer registration was not properly passed on")
+                .isInstanceOf(JavaSerializer.class);
     }
 
     private void validateListStateDescriptorConfigured(SingleOutputStreamOperator<?> result) {
@@ -267,22 +267,22 @@ public class StateDescriptorPassingTest {
         WindowOperator<?, ?, ?, ?, ?> op = (WindowOperator<?, ?, ?, ?, ?>) transform.getOperator();
         StateDescriptor<?, ?> descr = op.getStateDescriptor();
 
-        assertTrue(descr instanceof ListStateDescriptor);
+        assertThat(descr).isInstanceOf(ListStateDescriptor.class);
 
         ListStateDescriptor<?> listDescr = (ListStateDescriptor<?>) descr;
 
         // this would be the first statement to fail if state descriptors were not properly
         // initialized
         TypeSerializer<?> serializer = listDescr.getSerializer();
-        assertTrue(serializer instanceof ListSerializer);
+        assertThat(serializer).isInstanceOf(ListSerializer.class);
 
         TypeSerializer<?> elementSerializer = listDescr.getElementSerializer();
-        assertTrue(elementSerializer instanceof KryoSerializer);
+        assertThat(elementSerializer).isInstanceOf(KryoSerializer.class);
 
         Kryo kryo = ((KryoSerializer<?>) elementSerializer).getKryo();
 
-        assertTrue(
-                "serializer registration was not properly passed on",
-                kryo.getSerializer(File.class) instanceof JavaSerializer);
+        assertThat(kryo.getSerializer(File.class))
+                .as("serializer registration was not properly passed on")
+                .isInstanceOf(JavaSerializer.class);
     }
 }

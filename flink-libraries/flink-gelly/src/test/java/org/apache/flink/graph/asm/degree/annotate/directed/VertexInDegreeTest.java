@@ -30,7 +30,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link VertexInDegree}. */
 public class VertexInDegreeTest extends AsmTestBase {
@@ -66,7 +66,7 @@ public class VertexInDegreeTest extends AsmTestBase {
                         new VertexInDegree<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(false));
 
-        assertEquals(0, inDegreeWithoutZeroDegreeVertices.collect().size());
+        assertThat(inDegreeWithoutZeroDegreeVertices.collect().size()).isEqualTo(0);
 
         DataSet<Vertex<LongValue, LongValue>> inDegreeWithZeroDegreeVertices =
                 emptyGraphWithVertices.run(
@@ -85,14 +85,14 @@ public class VertexInDegreeTest extends AsmTestBase {
                         new VertexInDegree<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(false));
 
-        assertEquals(0, inDegreeWithoutZeroDegreeVertices.collect().size());
+        assertThat(inDegreeWithoutZeroDegreeVertices.collect().size()).isEqualTo(0);
 
         DataSet<Vertex<LongValue, LongValue>> inDegreeWithZeroDegreeVertices =
                 emptyGraphWithoutVertices.run(
                         new VertexInDegree<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(true));
 
-        assertEquals(0, inDegreeWithZeroDegreeVertices.collect().size());
+        assertThat(inDegreeWithZeroDegreeVertices.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -106,7 +106,7 @@ public class VertexInDegreeTest extends AsmTestBase {
         Checksum checksum =
                 new ChecksumHashCode<Vertex<LongValue, LongValue>>().run(inDegree).execute();
 
-        assertEquals(902, checksum.getCount());
-        assertEquals(0x0000000000e1d885L, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(902);
+        assertThat(checksum.getChecksum()).isEqualTo(0x0000000000e1d885L);
     }
 }

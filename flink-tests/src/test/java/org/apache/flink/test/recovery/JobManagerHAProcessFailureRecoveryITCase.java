@@ -74,9 +74,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Verify behaviour in case of JobManager process failure during job execution.
@@ -165,17 +164,18 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
         final long numElements = 100000L;
         final DataSet<Long> result =
                 env.generateSequence(1, numElements)
-                        // make sure every mapper is involved (no one is skipped because of lazy
+                        . // make sure every mapper is involved (no one is skipped because of lazy
                         // split assignment)
-                        .rebalance()
-                        // the majority of the behavior is in the MapFunction
-                        .map(
+                        rebalance()
+                        . // the majority of the behavior is in the MapFunction
+                        map(
                                 new RichMapFunction<Long, Long>() {
 
                                     private final File proceedFile =
                                             new File(coordinateDir, PROCEED_MARKER_FILE);
 
                                     private boolean markerCreated = false;
+
                                     private boolean checkForProceedFile = true;
 
                                     @Override
@@ -189,7 +189,6 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
                                                             READY_MARKER_FILE_PREFIX + taskIndex));
                                             markerCreated = true;
                                         }
-
                                         // check if the proceed file exists
                                         if (checkForProceedFile) {
                                             if (proceedFile.exists()) {
@@ -204,23 +203,23 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
                                 })
                         .reduce(
                                 new ReduceFunction<Long>() {
+
                                     @Override
                                     public Long reduce(Long value1, Long value2) {
                                         return value1 + value2;
                                     }
                                 })
-                        // The check is done in the mapper, because the client can currently not
+                        . // The check is done in the mapper, because the client can currently not
                         // handle
                         // job manager losses/reconnects.
-                        .flatMap(
+                        flatMap(
                                 new RichFlatMapFunction<Long, Long>() {
+
                                     @Override
                                     public void flatMap(Long value, Collector<Long> out)
                                             throws Exception {
-                                        assertEquals(
-                                                numElements * (numElements + 1L) / 2L,
-                                                (long) value);
-
+                                        assertThat((long) value)
+                                                .isEqualTo(numElements * (numElements + 1L) / 2L);
                                         int taskIndex = getRuntimeContext().getIndexOfThisSubtask();
                                         AbstractTaskManagerProcessFailureRecoveryTest.touchFile(
                                                 new File(
@@ -244,7 +243,7 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
         final int numberOfTaskManagers = 2;
         final int numberOfSlotsPerTaskManager = 2;
 
-        assertEquals(PARALLELISM, numberOfTaskManagers * numberOfSlotsPerTaskManager);
+        assertThat(numberOfTaskManagers * numberOfSlotsPerTaskManager).isEqualTo(PARALLELISM);
 
         // Job managers
         final DispatcherProcess[] dispatcherProcesses = new DispatcherProcess[numberOfJobManagers];
@@ -374,7 +373,7 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
                     deadline.timeLeft().toMillis());
 
             // check that the program really finished
-            assertFalse("The program did not finish in time", programTrigger.isAlive());
+            assertThat(programTrigger.isAlive()).as("The program did not finish in time").isFalse();
 
             // check whether the program encountered an error
             if (errorRef[0] != null) {

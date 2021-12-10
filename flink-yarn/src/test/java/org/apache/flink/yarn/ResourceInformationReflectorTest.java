@@ -27,13 +27,8 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests for {@link ResourceInformationReflector}. */
@@ -51,12 +46,11 @@ public class ResourceInformationReflectorTest extends TestLogger {
         resourceInformationReflector.setResourceInformationUnSafe(
                 resourceWithMethod, RESOURCE_NAME, RESOURCE_VALUE);
 
-        assertNotNull(resourceWithMethod.getResourceWithName(RESOURCE_NAME));
-        assertThat(
-                resourceWithMethod.getResourceWithName(RESOURCE_NAME).getName(), is(RESOURCE_NAME));
-        assertThat(
-                resourceWithMethod.getResourceWithName(RESOURCE_NAME).getValue(),
-                is(RESOURCE_VALUE));
+        assertThat(resourceWithMethod.getResourceWithName(RESOURCE_NAME)).isNotNull();
+        assertThat(resourceWithMethod.getResourceWithName(RESOURCE_NAME).getName())
+                .isEqualTo(RESOURCE_NAME);
+        assertThat(resourceWithMethod.getResourceWithName(RESOURCE_NAME).getValue())
+                .isEqualTo(RESOURCE_VALUE);
     }
 
     @Test
@@ -70,9 +64,9 @@ public class ResourceInformationReflectorTest extends TestLogger {
 
         final Map<String, Long> externalResources =
                 resourceInformationReflector.getExternalResourcesUnSafe(resourceWithMethod);
-        assertThat(externalResources.size(), is(1));
-        assertTrue(externalResources.containsKey(RESOURCE_NAME));
-        assertThat(externalResources.get(RESOURCE_NAME), is(RESOURCE_VALUE));
+        assertThat(externalResources.size()).isEqualTo(1);
+        assertThat(externalResources.containsKey(RESOURCE_NAME)).isTrue();
+        assertThat(externalResources.get(RESOURCE_NAME)).isEqualTo(RESOURCE_VALUE);
     }
 
     @Test
@@ -85,7 +79,7 @@ public class ResourceInformationReflectorTest extends TestLogger {
         resourceInformationReflector.setResourceInformationUnSafe(
                 resourceWithMethod, RESOURCE_NAME, RESOURCE_VALUE);
 
-        assertNull(resourceWithMethod.getResourceWithName(RESOURCE_NAME));
+        assertThat(resourceWithMethod.getResourceWithName(RESOURCE_NAME)).isNull();
     }
 
     @Test
@@ -100,7 +94,7 @@ public class ResourceInformationReflectorTest extends TestLogger {
 
         final Map<String, Long> externalResources =
                 resourceInformationReflector.getExternalResourcesUnSafe(resourceWithMethod);
-        assertThat(externalResources.entrySet(), is(empty()));
+        assertThat(externalResources.entrySet()).isEqualTo(empty());
     }
 
     @Test
@@ -112,7 +106,7 @@ public class ResourceInformationReflectorTest extends TestLogger {
         // make sure that Resource has at least two associated resources (cpu and memory)
         final Map<String, Long> resourcesResult =
                 ResourceInformationReflector.INSTANCE.getAllResourceInfos(resource);
-        assertThat(resourcesResult.size(), greaterThanOrEqualTo(2));
+        assertThat(resourcesResult.size()).isGreaterThanOrEqualTo(2);
     }
 
     @Test
@@ -127,7 +121,7 @@ public class ResourceInformationReflectorTest extends TestLogger {
 
         final Map<String, Long> externalResourcesResult =
                 ResourceInformationReflector.INSTANCE.getExternalResources(resource);
-        assertTrue(externalResourcesResult.isEmpty());
+        assertThat(externalResourcesResult.isEmpty()).isTrue();
     }
 
     /**

@@ -47,8 +47,7 @@ import org.mockito.MockitoAnnotations;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
@@ -82,13 +81,14 @@ public class FlinkMetricContainerTest {
     public void testGetNameSpaceArray() {
         String json = "[\"key\", \"value\", \"MetricGroupType.key\", \"MetricGroupType.value\"]";
         MetricKey key = MetricKey.create("step", MetricName.named(json, "name"));
-        assertThat(FlinkMetricContainer.getNameSpaceArray(key), is(DEFAULT_SCOPE_COMPONENTS));
+        assertThat(FlinkMetricContainer.getNameSpaceArray(key)).isEqualTo(DEFAULT_SCOPE_COMPONENTS);
     }
 
     @Test
     public void testGetFlinkMetricIdentifierString() {
         MetricKey key = MetricKey.create("step", MetricName.named(DEFAULT_NAMESPACE, "name"));
-        assertThat(FlinkMetricContainer.getFlinkMetricIdentifierString(key), is("key.value.name"));
+        assertThat(FlinkMetricContainer.getFlinkMetricIdentifierString(key))
+                .isEqualTo("key.value.name");
     }
 
     @Test
@@ -101,9 +101,8 @@ public class FlinkMetricContainerTest {
                         registry, new MetricGroupTest.DummyAbstractMetricGroup(registry), "root");
         MetricGroup metricGroup = FlinkMetricContainer.registerMetricGroup(key, root);
 
-        assertThat(
-                metricGroup.getScopeComponents(),
-                is(Arrays.asList("root", "key", "value").toArray()));
+        assertThat(metricGroup.getScopeComponents())
+                .isEqualTo(Arrays.asList("root", "key", "value").toArray());
     }
 
     @Test
@@ -120,9 +119,9 @@ public class FlinkMetricContainerTest {
                         .setInt64SumValue(111)
                         .build();
 
-        assertThat(userCounter.getCount(), is(0L));
+        assertThat(userCounter.getCount()).isEqualTo(0L);
         container.updateMetrics("step", ImmutableList.of(userMonitoringInfo));
-        assertThat(userCounter.getCount(), is(111L));
+        assertThat(userCounter.getCount()).isEqualTo(111L);
     }
 
     @Test
@@ -140,12 +139,12 @@ public class FlinkMetricContainerTest {
                         .setLabel(MonitoringInfoConstants.Labels.PTRANSFORM, "anyPTransform")
                         .setInt64SumValue(111)
                         .build();
-        assertThat(userMeter.getCount(), is(0L));
-        assertThat(userMeter.getRate(), is(0.0));
+        assertThat(userMeter.getCount()).isEqualTo(0L);
+        assertThat(userMeter.getRate()).isEqualTo(0.0);
         container.updateMetrics("step", ImmutableList.of(userMonitoringInfo));
         userMeter.update();
-        assertThat(userMeter.getCount(), is(111L));
-        assertThat(userMeter.getRate(), is(1.85)); // 111 div 60 = 1.85
+        assertThat(userMeter.getCount()).isEqualTo(111L);
+        assertThat(userMeter.getRate()).isEqualTo(1.85); // 111 div 60 = 1.85
     }
 
     @Test

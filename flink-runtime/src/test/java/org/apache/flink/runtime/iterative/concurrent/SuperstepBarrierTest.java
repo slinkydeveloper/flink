@@ -26,8 +26,7 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SuperstepBarrier}. */
 public class SuperstepBarrierTest {
@@ -63,9 +62,9 @@ public class SuperstepBarrierTest {
         syncThread.join();
 
         if (event instanceof TerminationEvent) {
-            assertTrue(terminationSignaled.isTerminationSignaled());
+            assertThat(terminationSignaled.isTerminationSignaled()).isTrue();
         } else {
-            assertFalse(terminationSignaled.isTerminationSignaled());
+            assertThat(terminationSignaled.isTerminationSignaled()).isFalse();
         }
     }
 

@@ -24,9 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.flink.runtime.metrics.NoOpMetricRegistry.INSTANCE;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link TaskManagerMetricGroup} test. */
 public class TaskManagerMetricGroupTest {
@@ -48,31 +46,31 @@ public class TaskManagerMetricGroupTest {
 
     @Test
     public void testGetSameJob() {
-        assertSame(metricGroup.addJob(JOB_ID, JOB_NAME), metricGroup.addJob(JOB_ID, JOB_NAME));
-        assertNotSame(
-                metricGroup.addJob(JOB_ID, JOB_NAME),
-                metricGroup.addJob(new JobID(), "another job"));
+        assertThat(metricGroup.addJob(JOB_ID, JOB_NAME))
+                .isSameAs(metricGroup.addJob(JOB_ID, JOB_NAME));
+        assertThat(metricGroup.addJob(new JobID(), "another job"))
+                .isNotSameAs(metricGroup.addJob(JOB_ID, JOB_NAME));
     }
 
     @Test
     public void testReCreateAfterRemoval() {
         TaskManagerJobMetricGroup oldGroup = metricGroup.addJob(JOB_ID, JOB_NAME);
         metricGroup.removeJobMetricsGroup(JOB_ID);
-        assertNotSame(oldGroup, metricGroup.addJob(JOB_ID, JOB_NAME));
+        assertThat(metricGroup.addJob(JOB_ID, JOB_NAME)).isNotSameAs(oldGroup);
     }
 
     @Test
     public void testCloseOnRemove() {
         TaskManagerJobMetricGroup tmJobMetricGroup = metricGroup.addJob(JOB_ID, JOB_NAME);
         metricGroup.removeJobMetricsGroup(JOB_ID);
-        assertTrue(tmJobMetricGroup.isClosed());
+        assertThat(tmJobMetricGroup.isClosed()).isTrue();
     }
 
     @Test
     public void testCloseWithoutRemoval() {
         TaskManagerJobMetricGroup jobGroup = metricGroup.addJob(JOB_ID, JOB_NAME);
         metricGroup.close();
-        assertTrue(jobGroup.isClosed());
+        assertThat(jobGroup.isClosed()).isTrue();
     }
 
     @Test

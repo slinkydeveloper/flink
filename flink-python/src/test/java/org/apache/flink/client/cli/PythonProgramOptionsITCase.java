@@ -35,8 +35,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 import static org.apache.flink.python.PythonOptions.PYTHON_EXECUTABLE;
 import static org.apache.flink.python.PythonOptions.PYTHON_REQUIREMENTS;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** ITCases for {@link PythonProgramOptions}. */
 public class PythonProgramOptionsITCase {
@@ -79,15 +78,16 @@ public class PythonProgramOptionsITCase {
         Configuration configuration = new Configuration();
         ProgramOptionsUtils.configurePythonExecution(configuration, packagedProgram);
 
-        assertEquals(
-                "/absolute/a.py,relative/b.py,relative/c.py",
-                configuration.get(PythonOptions.PYTHON_FILES));
-        assertEquals("d.txt#e_dir", configuration.get(PYTHON_REQUIREMENTS));
-        assertEquals(
-                "g.zip,h.zip#data,h.zip#data2", configuration.get(PythonOptions.PYTHON_ARCHIVES));
-        assertEquals("/usr/bin/python", configuration.get(PYTHON_EXECUTABLE));
-        assertArrayEquals(
-                new String[] {"--python", "xxx.py", "--pyModule", "xxx", "userarg1", "userarg2"},
-                packagedProgram.getArguments());
+        assertThat(configuration.get(PythonOptions.PYTHON_FILES))
+                .isEqualTo("/absolute/a.py,relative/b.py,relative/c.py");
+        assertThat(configuration.get(PYTHON_REQUIREMENTS)).isEqualTo("d.txt#e_dir");
+        assertThat(configuration.get(PythonOptions.PYTHON_ARCHIVES))
+                .isEqualTo("g.zip,h.zip#data,h.zip#data2");
+        assertThat(configuration.get(PYTHON_EXECUTABLE)).isEqualTo("/usr/bin/python");
+        assertThat(packagedProgram.getArguments())
+                .isEqualTo(
+                        new String[] {
+                            "--python", "xxx.py", "--pyModule", "xxx", "userarg1", "userarg2"
+                        });
     }
 }

@@ -21,7 +21,6 @@ import org.apache.flink.tests.util.activation.OperatingSystemRestriction;
 import org.apache.flink.util.OperatingSystem;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +30,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TestUtils}. */
 public class TestUtilsTest extends TestLogger {
@@ -63,7 +64,7 @@ public class TestUtilsTest extends TestLogger {
         TestUtils.copyDirectory(symbolicLink, target);
 
         for (Path file : files) {
-            Assert.assertTrue(Files.exists(target.resolve(file)));
+            assertThat(Files.exists(target.resolve(file))).isTrue();
         }
     }
 }

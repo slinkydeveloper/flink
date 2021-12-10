@@ -38,15 +38,11 @@ import org.mockito.Matchers;
 import java.util.Collection;
 
 import static org.apache.flink.streaming.util.StreamRecordMatchers.timeWindow;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -68,19 +64,16 @@ public class ProcessingTimeSessionWindowsTest extends TestLogger {
                 ProcessingTimeSessionWindows.withGap(Time.milliseconds(5000));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(0L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(0, 5000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(0, 5000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(4999L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(4999, 9999)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(4999, 9999))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5000L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(5000, 10000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(5000, 10000))));
     }
 
     @Test
@@ -193,19 +186,16 @@ public class ProcessingTimeSessionWindowsTest extends TestLogger {
                 ProcessingTimeSessionWindows.withGap(Time.seconds(5));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(0L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(0, 5000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(0, 5000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(4999L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(4999, 9999)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(4999, 9999))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5000L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(5000, 10000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(5000, 10000))));
     }
 
     @Test
@@ -214,14 +204,14 @@ public class ProcessingTimeSessionWindowsTest extends TestLogger {
             ProcessingTimeSessionWindows.withGap(Time.seconds(-1));
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("0 < size"));
+            assertThat(e.toString()).contains("0 < size");
         }
 
         try {
             ProcessingTimeSessionWindows.withGap(Time.seconds(0));
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("0 < size"));
+            assertThat(e.toString()).contains("0 < size");
         }
     }
 
@@ -230,12 +220,11 @@ public class ProcessingTimeSessionWindowsTest extends TestLogger {
         ProcessingTimeSessionWindows assigner =
                 ProcessingTimeSessionWindows.withGap(Time.seconds(5));
 
-        assertFalse(assigner.isEventTime());
-        assertEquals(
-                new TimeWindow.Serializer(), assigner.getWindowSerializer(new ExecutionConfig()));
-        assertThat(
-                assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)),
-                instanceOf(ProcessingTimeTrigger.class));
+        assertThat(assigner.isEventTime()).isFalse();
+        assertThat(assigner.getWindowSerializer(new ExecutionConfig()))
+                .isEqualTo(new TimeWindow.Serializer());
+        assertThat(assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)))
+                .isInstanceOf(ProcessingTimeTrigger.class);
     }
 
     @Test
@@ -244,7 +233,7 @@ public class ProcessingTimeSessionWindowsTest extends TestLogger {
         DynamicProcessingTimeSessionWindows<String> assigner =
                 ProcessingTimeSessionWindows.withDynamicGap(extractor);
 
-        assertNotNull(assigner);
-        assertFalse(assigner.isEventTime());
+        assertThat(assigner).isNotNull();
+        assertThat(assigner.isEventTime()).isFalse();
     }
 }

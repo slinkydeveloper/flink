@@ -33,8 +33,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link SortingDataInput}.
@@ -75,16 +74,15 @@ public class SortingDataInputTest {
             inputStatus = sortingDataInput.emitNext(collectingDataOutput);
         } while (inputStatus != DataInputStatus.END_OF_INPUT);
 
-        assertThat(
-                collectingDataOutput.events,
-                equalTo(
+        assertThat(collectingDataOutput.events)
+                .isEqualTo(
                         Arrays.asList(
                                 new StreamRecord<>(1, 1),
                                 new StreamRecord<>(1, 2),
                                 new StreamRecord<>(1, 3),
                                 new StreamRecord<>(2, 1),
                                 new StreamRecord<>(2, 2),
-                                new StreamRecord<>(2, 3))));
+                                new StreamRecord<>(2, 3)));
     }
 
     @Test
@@ -125,9 +123,8 @@ public class SortingDataInputTest {
             inputStatus = sortingDataInput.emitNext(collectingDataOutput);
         } while (inputStatus != DataInputStatus.END_OF_INPUT);
 
-        assertThat(
-                collectingDataOutput.events,
-                equalTo(
+        assertThat(collectingDataOutput.events)
+                .isEqualTo(
                         Arrays.asList(
                                 new StreamRecord<>(1, 1),
                                 new StreamRecord<>(1, 2),
@@ -135,7 +132,7 @@ public class SortingDataInputTest {
                                 new StreamRecord<>(2, 1),
                                 new StreamRecord<>(2, 2),
                                 new StreamRecord<>(2, 3),
-                                new Watermark(6))));
+                                new Watermark(6)));
     }
 
     @Test
@@ -170,15 +167,14 @@ public class SortingDataInputTest {
             inputStatus = sortingDataInput.emitNext(collectingDataOutput);
         } while (inputStatus != DataInputStatus.END_OF_INPUT);
 
-        assertThat(
-                collectingDataOutput.events,
-                equalTo(
+        assertThat(collectingDataOutput.events)
+                .isEqualTo(
                         Arrays.asList(
                                 new StreamRecord<>(1, 1),
                                 new StreamRecord<>(1, 2),
                                 new StreamRecord<>(1, 3),
                                 new StreamRecord<>(2, 1),
                                 new StreamRecord<>(2, 2),
-                                new StreamRecord<>(2, 3))));
+                                new StreamRecord<>(2, 3)));
     }
 }

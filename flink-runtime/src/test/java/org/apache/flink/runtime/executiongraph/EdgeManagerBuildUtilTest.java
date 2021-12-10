@@ -34,7 +34,7 @@ import java.util.List;
 
 import static org.apache.flink.runtime.jobgraph.DistributionPattern.ALL_TO_ALL;
 import static org.apache.flink.runtime.jobgraph.DistributionPattern.POINTWISE;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link EdgeManagerBuildUtil} to verify the max number of connecting edges between
@@ -74,11 +74,11 @@ public class EdgeManagerBuildUtilTest {
                         upstream, downstream, pattern);
         int actualMaxForUpstream = -1;
         for (ExecutionVertex ev : upstreamEJV.getTaskVertices()) {
-            assertEquals(1, ev.getProducedPartitions().size());
+            assertThat(ev.getProducedPartitions().size()).isEqualTo(1);
 
             IntermediateResultPartition partition =
                     ev.getProducedPartitions().values().iterator().next();
-            assertEquals(1, partition.getConsumerVertexGroups().size());
+            assertThat(partition.getConsumerVertexGroups().size()).isEqualTo(1);
 
             ConsumerVertexGroup consumerVertexGroup = partition.getConsumerVertexGroups().get(0);
             int actual = consumerVertexGroup.size();
@@ -86,21 +86,21 @@ public class EdgeManagerBuildUtilTest {
                 actualMaxForUpstream = actual;
             }
         }
-        assertEquals(actualMaxForUpstream, calculatedMaxForUpstream);
+        assertThat(calculatedMaxForUpstream).isEqualTo(actualMaxForUpstream);
 
         int calculatedMaxForDownstream =
                 EdgeManagerBuildUtil.computeMaxEdgesToTargetExecutionVertex(
                         downstream, upstream, pattern);
         int actualMaxForDownstream = -1;
         for (ExecutionVertex ev : downstreamEJV.getTaskVertices()) {
-            assertEquals(1, ev.getNumberOfInputs());
+            assertThat(ev.getNumberOfInputs()).isEqualTo(1);
 
             int actual = ev.getConsumedPartitionGroup(0).size();
             if (actual > actualMaxForDownstream) {
                 actualMaxForDownstream = actual;
             }
         }
-        assertEquals(actualMaxForDownstream, calculatedMaxForDownstream);
+        assertThat(calculatedMaxForDownstream).isEqualTo(actualMaxForDownstream);
     }
 
     private Pair<ExecutionJobVertex, ExecutionJobVertex> setupExecutionGraph(

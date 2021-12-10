@@ -52,9 +52,7 @@ import java.util.concurrent.locks.LockSupport;
 
 import static java.util.Collections.singletonList;
 import static org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test of ignoring in-flight data during recovery. */
 public class IgnoreInFlightDataITCase extends TestLogger {
@@ -153,12 +151,12 @@ public class IgnoreInFlightDataITCase extends TestLogger {
 
         // then: Actual result should be less than the ideal result because some of data was
         // ignored.
-        assertThat(result.get().longValue(), lessThan(resultWithoutIgnoringData));
+        assertThat(result.get().longValue()).isLessThan(resultWithoutIgnoringData);
 
         // and: Actual result should be equal to sum of result before fail + source value after
         // recovery.
         long expectedResult = resultBeforeFail.get().longValue() + sourceValueAfterRestore;
-        assertEquals(expectedResult, result.get().longValue());
+        assertThat(result.get().longValue()).isEqualTo(expectedResult);
 
         return true;
     }
@@ -229,7 +227,8 @@ public class IgnoreInFlightDataITCase extends TestLogger {
                     Integer lastValue = stateIt.next();
 
                     // Checking that ListState is recovered correctly.
-                    assertEquals(lastCheckpointValue.get().intValue(), lastValue.intValue());
+                    assertThat(lastValue.intValue())
+                            .isEqualTo(lastCheckpointValue.get().intValue());
 
                     // if it is started after recovery, just send one more value and finish.
                     ctx.collect(lastValue + 1);

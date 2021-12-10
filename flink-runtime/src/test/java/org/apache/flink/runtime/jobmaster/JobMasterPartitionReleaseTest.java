@@ -67,9 +67,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 
 /** Tests for the partition release logic of the {@link JobMaster}. */
 public class JobMasterPartitionReleaseTest extends TestLogger {
@@ -127,9 +127,8 @@ public class JobMasterPartitionReleaseTest extends TestLogger {
                     testSetup.getTaskExecutorResourceID(), new Exception("test"));
             disconnectTaskExecutorFuture.get();
 
-            assertThat(
-                    testSetup.getStopTrackingPartitionsTargetResourceId().get(),
-                    equalTo(testSetup.getTaskExecutorResourceID()));
+            assertThat(testSetup.getStopTrackingPartitionsTargetResourceId().get())
+                    .isEqualTo(testSetup.getTaskExecutorResourceID());
         }
     }
 
@@ -188,9 +187,8 @@ public class JobMasterPartitionReleaseTest extends TestLogger {
             jobMasterGateway.updateTaskExecutionState(
                     new TaskExecutionState(
                             taskDeploymentDescriptor.getExecutionAttemptId(), finalExecutionState));
-            assertThat(
-                    callSelector.apply(testSetup).get(),
-                    containsInAnyOrder(partitionID0, partitionID1));
+            assertThat(callSelector.apply(testSetup).get())
+                    .satisfies(matching(containsInAnyOrder(partitionID0, partitionID1)));
         }
     }
 

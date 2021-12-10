@@ -39,7 +39,6 @@ import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.security.AMRMTokenIdentifier;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -56,8 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for various utilities. */
 public class UtilsTest extends TestLogger {
@@ -68,15 +66,15 @@ public class UtilsTest extends TestLogger {
     @Test
     public void testUberjarLocator() {
         File dir = TestUtils.findFile("..", new TestUtils.RootDirFilenameFilter());
-        Assert.assertNotNull(dir);
-        Assert.assertTrue(dir.getName().endsWith(".jar"));
+        assertThat(dir).isNotNull();
+        assertThat(dir.getName().endsWith(".jar")).isTrue();
         dir = dir.getParentFile().getParentFile(); // from uberjar to lib to root
-        Assert.assertTrue(dir.exists());
-        Assert.assertTrue(dir.isDirectory());
+        assertThat(dir.exists()).isTrue();
+        assertThat(dir.isDirectory()).isTrue();
         List<String> files = Arrays.asList(dir.list());
-        Assert.assertTrue(files.contains("lib"));
-        Assert.assertTrue(files.contains("bin"));
-        Assert.assertTrue(files.contains("conf"));
+        assertThat(files.contains("lib")).isTrue();
+        assertThat(files.contains("bin")).isTrue();
+        assertThat(files.contains("conf")).isTrue();
     }
 
     @Test
@@ -84,7 +82,7 @@ public class UtilsTest extends TestLogger {
         File root = temporaryFolder.getRoot();
         File home = new File(root, "home");
         boolean created = home.mkdir();
-        assertTrue(created);
+        assertThat(created).isTrue();
 
         Configuration flinkConf = new Configuration();
         YarnConfiguration yarnConf = new YarnConfiguration();
@@ -177,7 +175,7 @@ public class UtilsTest extends TestLogger {
                 hasHdfsDelegationToken = true;
             }
         }
-        assertTrue(hasHdfsDelegationToken);
-        assertFalse(hasAmRmToken);
+        assertThat(hasHdfsDelegationToken).isTrue();
+        assertThat(hasAmRmToken).isFalse();
     }
 }

@@ -47,7 +47,8 @@ import java.util.Comparator;
 
 import static org.apache.flink.runtime.state.filesystem.AbstractFsCheckpointStorageAccess.CHECKPOINT_DIR_PREFIX;
 import static org.apache.flink.runtime.state.filesystem.AbstractFsCheckpointStorageAccess.METADATA_FILE_NAME;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests if the coordinator handles up and downscaling. */
 public class CoordinatedSourceRescaleITCase extends TestLogger {
@@ -78,7 +79,7 @@ public class CoordinatedSourceRescaleITCase extends TestLogger {
             env.execute("create checkpoint");
             throw new AssertionError("No checkpoint");
         } catch (Exception e) {
-            assertThat(e, FlinkMatchers.containsMessage(CREATED_CHECKPOINT));
+            assertThat(e).satisfies(matching(FlinkMatchers.containsMessage(CREATED_CHECKPOINT)));
             return Files.find(checkpointDir.toPath(), 2, this::isCompletedCheckpoint)
                     .max(Comparator.comparing(Path::toString))
                     .map(Path::toFile)
@@ -99,7 +100,7 @@ public class CoordinatedSourceRescaleITCase extends TestLogger {
             env.execute("resume checkpoint");
             throw new AssertionError("No success error");
         } catch (Exception e) {
-            assertThat(e, FlinkMatchers.containsMessage(RESTORED_CHECKPOINT));
+            assertThat(e).satisfies(matching(FlinkMatchers.containsMessage(RESTORED_CHECKPOINT)));
         }
     }
 

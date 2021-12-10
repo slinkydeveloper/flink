@@ -23,7 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link SavepointInfo}. */
 public class SavepointInfoTest extends TestLogger {

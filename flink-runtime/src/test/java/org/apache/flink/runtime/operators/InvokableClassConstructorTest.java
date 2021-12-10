@@ -27,7 +27,7 @@ import org.apache.flink.runtime.iterative.task.IterationTailTask;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests that validate that stateless/stateful task implementations have the corresponding

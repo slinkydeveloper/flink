@@ -46,8 +46,6 @@ import org.apache.flink.runtime.jobgraph.JobType;
 import org.apache.flink.runtime.jobgraph.JobVertex;
 import org.apache.flink.util.AbstractID;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -59,12 +57,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JobGraphGeneratorTest {
 
@@ -141,14 +134,15 @@ public class JobGraphGeneratorTest {
         JobVertex sinkVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(3);
         JobVertex iterationSyncVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(4);
 
-        assertTrue(
-                sourceMapFilterVertex
-                        .getMinResources()
-                        .equals(resource1.merge(resource2).merge(resource3)));
-        assertTrue(iterationHeadVertex.getPreferredResources().equals(resource4));
-        assertTrue(feedbackVertex.getMinResources().equals(resource5.merge(resource6)));
-        assertTrue(sinkVertex.getPreferredResources().equals(resource7));
-        assertTrue(iterationSyncVertex.getMinResources().equals(resource4));
+        assertThat(
+                        sourceMapFilterVertex
+                                .getMinResources()
+                                .equals(resource1.merge(resource2).merge(resource3)))
+                .isTrue();
+        assertThat(iterationHeadVertex.getPreferredResources().equals(resource4)).isTrue();
+        assertThat(feedbackVertex.getMinResources().equals(resource5.merge(resource6))).isTrue();
+        assertThat(sinkVertex.getPreferredResources().equals(resource7)).isTrue();
+        assertThat(iterationSyncVertex.getMinResources().equals(resource4)).isTrue();
     }
 
     /**
@@ -225,15 +219,16 @@ public class JobGraphGeneratorTest {
         JobVertex sinkVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(5);
         JobVertex iterationSyncVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(6);
 
-        assertTrue(sourceMapVertex.getMinResources().equals(resource1.merge(resource2)));
-        assertTrue(iterationHeadVertex.getPreferredResources().equals(resource3));
-        assertTrue(deltaVertex.getMinResources().equals(resource4));
+        assertThat(sourceMapVertex.getMinResources().equals(resource1.merge(resource2))).isTrue();
+        assertThat(iterationHeadVertex.getPreferredResources().equals(resource3)).isTrue();
+        assertThat(deltaVertex.getMinResources().equals(resource4)).isTrue();
         // the iteration tail task will be scheduled in the same instance with iteration head, and
         // currently not set resources.
-        assertTrue(iterationTailVertex.getPreferredResources().equals(ResourceSpec.DEFAULT));
-        assertTrue(feedbackVertex.getMinResources().equals(resource5));
-        assertTrue(sinkVertex.getPreferredResources().equals(resource6));
-        assertTrue(iterationSyncVertex.getMinResources().equals(resource3));
+        assertThat(iterationTailVertex.getPreferredResources().equals(ResourceSpec.DEFAULT))
+                .isTrue();
+        assertThat(feedbackVertex.getMinResources().equals(resource5)).isTrue();
+        assertThat(sinkVertex.getPreferredResources().equals(resource6)).isTrue();
+        assertThat(iterationSyncVertex.getMinResources().equals(resource3)).isTrue();
     }
 
     @Test
@@ -292,7 +287,7 @@ public class JobGraphGeneratorTest {
         env.fromElements("test").output(new DiscardingOutputFormat<>());
 
         JobGraph graph = compileJob(env);
-        assertThat(graph.getJobType(), is(JobType.BATCH));
+        assertThat(graph.getJobType()).isEqualTo(JobType.BATCH);
     }
 
     @Test
@@ -316,36 +311,37 @@ public class JobGraphGeneratorTest {
 
         JobGraph jobGraph = compileJob(env);
 
-        Assert.assertEquals(3, jobGraph.getVerticesSortedTopologicallyFromSources().size());
+        assertThat(jobGraph.getVerticesSortedTopologicallyFromSources().size()).isEqualTo(3);
 
         JobVertex mapVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(1);
-        Assert.assertThat(mapVertex, Matchers.instanceOf(JobVertex.class));
+        assertThat(mapVertex).isInstanceOf(JobVertex.class);
 
         // there are 2 output result with one of them is ResultPartitionType.BLOCKING_PERSISTENT
-        Assert.assertEquals(2, mapVertex.getProducedDataSets().size());
+        assertThat(mapVertex.getProducedDataSets().size()).isEqualTo(2);
 
-        Assert.assertTrue(
-                mapVertex.getProducedDataSets().stream()
-                        .anyMatch(
-                                dataSet ->
-                                        dataSet.getId()
-                                                        .equals(
-                                                                new IntermediateDataSetID(
-                                                                        intermediateDataSetID))
-                                                && dataSet.getResultType()
-                                                        == ResultPartitionType
-                                                                .BLOCKING_PERSISTENT));
+        assertThat(
+                        mapVertex.getProducedDataSets().stream()
+                                .anyMatch(
+                                        dataSet ->
+                                                dataSet.getId()
+                                                                .equals(
+                                                                        new IntermediateDataSetID(
+                                                                                intermediateDataSetID))
+                                                        && dataSet.getResultType()
+                                                                == ResultPartitionType
+                                                                        .BLOCKING_PERSISTENT))
+                .isTrue();
     }
 
     private static void assertState(
             DistributedCache.DistributedCacheEntry entry, boolean isExecutable, boolean isZipped)
             throws IOException {
-        assertNotNull(entry);
-        assertEquals(isExecutable, entry.isExecutable);
-        assertEquals(isZipped, entry.isZipped);
+        assertThat(entry).isNotNull();
+        assertThat(entry.isExecutable).isEqualTo(isExecutable);
+        assertThat(entry.isZipped).isEqualTo(isZipped);
         org.apache.flink.core.fs.Path filePath = new org.apache.flink.core.fs.Path(entry.filePath);
-        assertTrue(filePath.getFileSystem().exists(filePath));
-        assertFalse(filePath.getFileSystem().getFileStatus(filePath).isDir());
+        assertThat(filePath.getFileSystem().exists(filePath)).isTrue();
+        assertThat(filePath.getFileSystem().getFileStatus(filePath).isDir()).isFalse();
     }
 
     private static JobGraph compileJob(ExecutionEnvironment env) {

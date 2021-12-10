@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A simple test that runs a streaming topology with checkpointing enabled.
@@ -106,13 +106,13 @@ public class StreamCheckpointingITCase extends StreamFaultToleranceTestBase {
             reduceInputCount += l;
         }
 
-        assertEquals(NUM_STRINGS, filterSum);
-        assertEquals(NUM_STRINGS, mapSum);
-        assertEquals(NUM_STRINGS, countSum);
-        assertEquals(NUM_STRINGS, reduceInputCount);
+        assertThat(filterSum).isEqualTo(NUM_STRINGS);
+        assertThat(mapSum).isEqualTo(NUM_STRINGS);
+        assertThat(countSum).isEqualTo(NUM_STRINGS);
+        assertThat(reduceInputCount).isEqualTo(NUM_STRINGS);
         // verify that we counted exactly right
         for (Long count : OnceFailingPrefixCounter.prefixCounts.values()) {
-            assertEquals(new Long(NUM_STRINGS / 40), count);
+            assertThat(count).isEqualTo(new Long(NUM_STRINGS / 40));
         }
     }
 

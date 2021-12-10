@@ -24,12 +24,13 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.runtime.operators.testutils.TestData;
 import org.apache.flink.util.MutableObjectIterator;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MergeIteratorTest {
 
@@ -104,15 +105,15 @@ public class MergeIteratorTest {
 
         int pos = 1;
 
-        Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
-        Assert.assertEquals(expected[0], rec1.f0.intValue());
+        assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
+        assertThat(rec1.f0.intValue()).isEqualTo(expected[0]);
 
         while ((rec2 = iterator.next(rec2)) != null) {
             k1 = rec1.f0;
             k2 = rec2.f0;
 
-            Assert.assertTrue(comparator.compare(k1, k2) <= 0);
-            Assert.assertEquals(expected[pos++], k2);
+            assertThat(comparator.compare(k1, k2) <= 0).isTrue();
+            assertThat(k2).isEqualTo(expected[pos++]);
 
             Tuple2<Integer, String> tmp = rec1;
             rec1 = rec2;
@@ -157,18 +158,18 @@ public class MergeIteratorTest {
         Tuple2<Integer, String> rec1 = new Tuple2<>();
         Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-        Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+        assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
         while ((rec2 = iterator.next(rec2)) != null) {
             elementsFound++;
 
-            Assert.assertTrue(comparator.compare(rec1.f0, rec2.f0) <= 0);
+            assertThat(comparator.compare(rec1.f0, rec2.f0) <= 0).isTrue();
 
             Tuple2<Integer, String> tmp = rec1;
             rec1 = rec2;
             rec2 = tmp;
         }
 
-        Assert.assertEquals("Too few elements returned from stream.", 50, elementsFound);
+        assertThat(elementsFound).as("Too few elements returned from stream.").isEqualTo(50);
     }
 
     @Test
@@ -209,7 +210,7 @@ public class MergeIteratorTest {
         Tuple2<Integer, String> rec1 = new Tuple2<>();
         Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-        Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+        assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
         while ((rec2 = iterator.next(rec2)) != null) {
             if (comparator.compare(rec1.f0, rec2.f0) > 0) {
                 violationFound = true;
@@ -221,6 +222,6 @@ public class MergeIteratorTest {
             rec2 = tmp;
         }
 
-        Assert.assertTrue("Merge must have returned a wrong result", violationFound);
+        assertThat(violationFound).as("Merge must have returned a wrong result").isTrue();
     }
 }

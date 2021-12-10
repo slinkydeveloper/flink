@@ -33,7 +33,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -41,7 +40,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.flink.cep.utils.NFATestUtilities.comparePatterns;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT tests covering {@link AfterMatchSkipStrategy}. */
 public class AfterMatchSkipITCase extends TestLogger {
@@ -1145,6 +1144,6 @@ public class AfterMatchSkipITCase extends TestLogger {
 
         nfaTestHarness.feedRecords(inputEvents);
 
-        assertThat(sharedBuffer.isEmpty(), Matchers.is(true));
+        assertThat(sharedBuffer.isEmpty()).isEqualTo(true);
     }
 }

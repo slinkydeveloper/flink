@@ -51,9 +51,7 @@ import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.verifyErro
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createRemoteInputChannel;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createSingleInputGate;
 import static org.apache.flink.util.Preconditions.checkArgument;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the serialization and deserialization of the various {@link NettyMessage} sub-classes
@@ -152,8 +150,8 @@ public class NettyMessageClientSideSerializationTest extends TestLogger {
     public void testBacklogAnnouncement() {
         BacklogAnnouncement expected = new BacklogAnnouncement(1024, inputChannelId);
         BacklogAnnouncement actual = encodeAndDecode(expected, channel);
-        assertEquals(expected.backlog, actual.backlog);
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.backlog).isEqualTo(expected.backlog);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 
     private void testErrorResponse(ErrorResponse expect) {
@@ -189,22 +187,22 @@ public class NettyMessageClientSideSerializationTest extends TestLogger {
                         random.nextInt(Integer.MAX_VALUE));
         BufferResponse actual = encodeAndDecode(expected, channel);
 
-        assertTrue(buffer.isRecycled());
-        assertTrue(testBuffer.isRecycled());
-        assertNotNull(
-                "The request input channel should always have available buffers in this test.",
-                actual.getBuffer());
+        assertThat(buffer.isRecycled()).isTrue();
+        assertThat(testBuffer.isRecycled()).isTrue();
+        assertThat(actual.getBuffer())
+                .as("The request input channel should always have available buffers in this test.")
+                .isNotNull();
 
         Buffer decodedBuffer = actual.getBuffer();
         if (testCompressedBuffer) {
-            assertTrue(actual.isCompressed);
+            assertThat(actual.isCompressed).isTrue();
             decodedBuffer = decompress(decodedBuffer);
         }
 
         verifyBufferResponseHeader(expected, actual);
-        assertEquals(BUFFER_SIZE, decodedBuffer.readableBytes());
+        assertThat(decodedBuffer.readableBytes()).isEqualTo(BUFFER_SIZE);
         for (int i = 0; i < BUFFER_SIZE; i += 8) {
-            assertEquals(i, decodedBuffer.asByteBuf().readLong());
+            assertThat(decodedBuffer.asByteBuf().readLong()).isEqualTo(i);
         }
 
         // Release the received message.
@@ -213,7 +211,7 @@ public class NettyMessageClientSideSerializationTest extends TestLogger {
             decodedBuffer.recycleBuffer();
         }
 
-        assertTrue(actual.getBuffer().isRecycled());
+        assertThat(actual.getBuffer().isRecycled()).isTrue();
     }
 
     private Buffer decompress(Buffer buffer) {

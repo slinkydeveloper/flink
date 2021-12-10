@@ -41,7 +41,8 @@ import java.io.Serializable;
 import static org.apache.flink.api.common.typeutils.TypeSerializerMatchers.isCompatibleAsIs;
 import static org.apache.flink.api.common.typeutils.TypeSerializerMatchers.isCompatibleWithReconfiguredSerializer;
 import static org.apache.flink.api.common.typeutils.TypeSerializerMatchers.isIncompatible;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for {@link KryoSerializerSnapshot}. */
 public class KryoSerializerSnapshotTest {
@@ -57,7 +58,8 @@ public class KryoSerializerSnapshotTest {
 
     @Test
     public void sanityTest() {
-        assertThat(resolveKryoCompatibility(oldConfig, newConfig), isCompatibleAsIs());
+        assertThat(resolveKryoCompatibility(oldConfig, newConfig))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -67,9 +69,8 @@ public class KryoSerializerSnapshotTest {
         newConfig.registerKryoType(Animal.class);
         newConfig.registerTypeWithKryoSerializer(Dog.class, DogKryoSerializer.class);
 
-        assertThat(
-                resolveKryoCompatibility(oldConfig, newConfig),
-                isCompatibleWithReconfiguredSerializer());
+        assertThat(resolveKryoCompatibility(oldConfig, newConfig))
+                .satisfies(matching(isCompatibleWithReconfiguredSerializer()));
     }
 
     @Test
@@ -82,7 +83,8 @@ public class KryoSerializerSnapshotTest {
 
         // it is compatible as is, since Kryo does not expose compatibility API with KryoSerializers
         // so we can not know if DogKryoSerializer is compatible with DogV2KryoSerializer
-        assertThat(resolveKryoCompatibility(oldConfig, newConfig), isCompatibleAsIs());
+        assertThat(resolveKryoCompatibility(oldConfig, newConfig))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -93,9 +95,8 @@ public class KryoSerializerSnapshotTest {
         newConfig.registerKryoType(Dog.class);
         newConfig.registerKryoType(Parrot.class);
 
-        assertThat(
-                resolveKryoCompatibility(oldConfig, newConfig),
-                isCompatibleWithReconfiguredSerializer());
+        assertThat(resolveKryoCompatibility(oldConfig, newConfig))
+                .satisfies(matching(isCompatibleWithReconfiguredSerializer()));
     }
 
     @Test
@@ -105,8 +106,8 @@ public class KryoSerializerSnapshotTest {
         TypeSerializer<Animal> currentSerializer =
                 new KryoSerializer<>(Animal.class, new ExecutionConfig());
 
-        assertThat(
-                restoredSnapshot.resolveSchemaCompatibility(currentSerializer), isIncompatible());
+        assertThat(restoredSnapshot.resolveSchemaCompatibility(currentSerializer))
+                .satisfies(matching(isIncompatible()));
     }
 
     // -------------------------------------------------------------------------------------------------------

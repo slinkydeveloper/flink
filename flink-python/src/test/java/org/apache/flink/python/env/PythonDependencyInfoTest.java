@@ -35,8 +35,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PythonDependencyInfo}. */
 public class PythonDependencyInfoTest {
@@ -82,7 +81,7 @@ public class PythonDependencyInfoTest {
         Map<String, String> expected = new HashMap<>();
         expected.put("/distributed_cache/file0", "test_file1.py");
         expected.put("/distributed_cache/file1", "test_file2.py");
-        assertEquals(expected, dependencyInfo.getPythonFiles());
+        assertThat(dependencyInfo.getPythonFiles()).isEqualTo(expected);
     }
 
     @Test
@@ -97,15 +96,18 @@ public class PythonDependencyInfoTest {
         PythonDependencyInfo dependencyInfo =
                 PythonDependencyInfo.create(new PythonConfig(config), distributedCache);
 
-        assertEquals("/distributed_cache/file2", dependencyInfo.getRequirementsFilePath().get());
-        assertFalse(dependencyInfo.getRequirementsCacheDir().isPresent());
+        assertThat(dependencyInfo.getRequirementsFilePath().get())
+                .isEqualTo("/distributed_cache/file2");
+        assertThat(dependencyInfo.getRequirementsCacheDir().isPresent()).isFalse();
 
         config.get(PythonDependencyUtils.PYTHON_REQUIREMENTS_FILE)
                 .put(PythonDependencyUtils.CACHE, "python_requirements_cache_{SHA256}");
         dependencyInfo = PythonDependencyInfo.create(new PythonConfig(config), distributedCache);
 
-        assertEquals("/distributed_cache/file2", dependencyInfo.getRequirementsFilePath().get());
-        assertEquals("/distributed_cache/file3", dependencyInfo.getRequirementsCacheDir().get());
+        assertThat(dependencyInfo.getRequirementsFilePath().get())
+                .isEqualTo("/distributed_cache/file2");
+        assertThat(dependencyInfo.getRequirementsCacheDir().get())
+                .isEqualTo("/distributed_cache/file3");
     }
 
     @Test
@@ -124,7 +126,7 @@ public class PythonDependencyInfoTest {
         Map<String, String> expected = new HashMap<>();
         expected.put("/distributed_cache/file4", "py27.zip");
         expected.put("/distributed_cache/file5", "py37");
-        assertEquals(expected, dependencyInfo.getArchives());
+        assertThat(dependencyInfo.getArchives()).isEqualTo(expected);
     }
 
     @Test
@@ -134,6 +136,6 @@ public class PythonDependencyInfoTest {
         PythonDependencyInfo dependencyInfo =
                 PythonDependencyInfo.create(new PythonConfig(config), distributedCache);
 
-        assertEquals("/usr/bin/python3", dependencyInfo.getPythonExec());
+        assertThat(dependencyInfo.getPythonExec()).isEqualTo("/usr/bin/python3");
     }
 }

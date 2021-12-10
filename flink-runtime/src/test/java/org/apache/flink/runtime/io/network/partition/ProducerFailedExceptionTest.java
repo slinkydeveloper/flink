@@ -23,15 +23,15 @@ import org.apache.flink.util.SerializedThrowable;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ProducerFailedException}. */
 public class ProducerFailedExceptionTest {
 
     @Test
     public void testInstanceOfCancelTaskException() throws Exception {
-        assertTrue(CancelTaskException.class.isAssignableFrom(ProducerFailedException.class));
+        assertThat(CancelTaskException.class.isAssignableFrom(ProducerFailedException.class))
+                .isTrue();
     }
 
     @Test
@@ -40,7 +40,7 @@ public class ProducerFailedExceptionTest {
         // of a user level Exception, which can not be deserialized by the
         // remote receiver's system class loader.
         ProducerFailedException e = new ProducerFailedException(new Exception());
-        assertNotNull(e.getCause());
-        assertTrue(e.getCause() instanceof SerializedThrowable);
+        assertThat(e.getCause()).isNotNull();
+        assertThat(e.getCause()).isInstanceOf(SerializedThrowable.class);
     }
 }

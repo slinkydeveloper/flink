@@ -27,9 +27,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.module.Si
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SerializedThrowableSerializer} and {@link SerializedThrowableDeserializer}. */
 public class SerializedThrowableSerializerTest extends TestLogger {
@@ -60,13 +58,12 @@ public class SerializedThrowableSerializerTest extends TestLogger {
         final SerializedThrowable deserializedSerializedThrowable =
                 objectMapper.readValue(json, SerializedThrowable.class);
 
-        assertThat(deserializedSerializedThrowable.getMessage(), equalTo(lastExceptionMessage));
-        assertThat(
-                deserializedSerializedThrowable.getFullStringifiedStackTrace(),
-                equalTo(serializedThrowable.getFullStringifiedStackTrace()));
+        assertThat(deserializedSerializedThrowable.getMessage()).isEqualTo(lastExceptionMessage);
+        assertThat(deserializedSerializedThrowable.getFullStringifiedStackTrace())
+                .isEqualTo(serializedThrowable.getFullStringifiedStackTrace());
 
-        assertThat(deserializedSerializedThrowable.getCause().getMessage(), equalTo(causeMessage));
-        assertThat(
-                deserializedSerializedThrowable.getCause(), instanceOf(SerializedThrowable.class));
+        assertThat(deserializedSerializedThrowable.getCause().getMessage()).isEqualTo(causeMessage);
+        assertThat(deserializedSerializedThrowable.getCause())
+                .isInstanceOf(SerializedThrowable.class);
     }
 }

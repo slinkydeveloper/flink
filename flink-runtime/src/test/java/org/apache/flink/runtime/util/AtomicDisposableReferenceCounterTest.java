@@ -28,8 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AtomicDisposableReferenceCounterTest {
 
@@ -37,26 +36,26 @@ public class AtomicDisposableReferenceCounterTest {
     public void testSerialIncrementAndDecrement() {
         AtomicDisposableReferenceCounter counter = new AtomicDisposableReferenceCounter();
 
-        assertTrue(counter.increment());
+        assertThat(counter.increment()).isTrue();
 
-        assertTrue(counter.decrement());
+        assertThat(counter.decrement()).isTrue();
 
-        assertFalse(counter.increment());
+        assertThat(counter.increment()).isFalse();
 
-        assertFalse(counter.decrement());
+        assertThat(counter.decrement()).isFalse();
     }
 
     @Test
     public void testSerialIncrementAndDecrementWithCustomDisposeCount() {
         AtomicDisposableReferenceCounter counter = new AtomicDisposableReferenceCounter(-2);
 
-        assertTrue(counter.increment());
+        assertThat(counter.increment()).isTrue();
 
-        assertFalse(counter.decrement());
+        assertThat(counter.decrement()).isFalse();
 
-        assertFalse(counter.decrement());
+        assertThat(counter.decrement()).isFalse();
 
-        assertTrue(counter.decrement());
+        assertThat(counter.decrement()).isTrue();
     }
 
     @Test
@@ -90,7 +89,7 @@ public class AtomicDisposableReferenceCounterTest {
                         executor.submit(incrementFirst ? decrementer : incrementer);
 
                 // Only one of the two should win the race and return true
-                assertTrue(success1.get() ^ success2.get());
+                assertThat(success1.get() ^ success2.get()).isTrue();
             }
         } finally {
             executor.shutdownNow();

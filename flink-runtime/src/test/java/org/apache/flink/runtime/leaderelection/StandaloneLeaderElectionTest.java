@@ -24,8 +24,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StandaloneLeaderElectionTest extends TestLogger {
     private static final String TEST_URL = "akka://users/jobmanager";
@@ -48,16 +47,15 @@ public class StandaloneLeaderElectionTest extends TestLogger {
 
             contender.waitForLeader(1000l);
 
-            assertTrue(contender.isLeader());
-            assertEquals(
-                    HighAvailabilityServices.DEFAULT_LEADER_ID, contender.getLeaderSessionID());
+            assertThat(contender.isLeader()).isTrue();
+            assertThat(contender.getLeaderSessionID())
+                    .isEqualTo(HighAvailabilityServices.DEFAULT_LEADER_ID);
 
             testingListener.waitForNewLeader(1000l);
 
-            assertEquals(TEST_URL, testingListener.getAddress());
-            assertEquals(
-                    HighAvailabilityServices.DEFAULT_LEADER_ID,
-                    testingListener.getLeaderSessionID());
+            assertThat(testingListener.getAddress()).isEqualTo(TEST_URL);
+            assertThat(testingListener.getLeaderSessionID())
+                    .isEqualTo(HighAvailabilityServices.DEFAULT_LEADER_ID);
         } finally {
             leaderElectionService.stop();
             leaderRetrievalService.stop();

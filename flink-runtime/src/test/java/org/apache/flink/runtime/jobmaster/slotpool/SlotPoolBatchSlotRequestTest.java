@@ -50,9 +50,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for batch slot requests. */
 public class SlotPoolBatchSlotRequestTest extends TestLogger {
@@ -93,7 +93,8 @@ public class SlotPoolBatchSlotRequestTest extends TestLogger {
                 slotFuture.get();
                 fail("Expected that slot future times out.");
             } catch (ExecutionException ee) {
-                assertThat(ee, FlinkMatchers.containsCause(TimeoutException.class));
+                assertThat(ee)
+                        .satisfies(matching(FlinkMatchers.containsCause(TimeoutException.class)));
             }
         }
     }
@@ -129,7 +130,7 @@ public class SlotPoolBatchSlotRequestTest extends TestLogger {
                     slotPool, mainThreadExecutor, clock, batchSlotTimeout);
 
             for (CompletableFuture<PhysicalSlot> slotFuture : slotFutures) {
-                assertThat(slotFuture.isDone(), is(false));
+                assertThat(slotFuture.isDone()).isEqualTo(false);
             }
         }
     }
@@ -155,9 +156,11 @@ public class SlotPoolBatchSlotRequestTest extends TestLogger {
             SlotPoolUtils.notifyNotEnoughResourcesAvailable(
                     slotPool, mainThreadExecutor, Collections.emptyList());
 
-            assertThat(
-                    slotFuture,
-                    FlinkMatchers.futureWillCompleteExceptionally(Duration.ofSeconds(10L)));
+            assertThat(slotFuture)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            Duration.ofSeconds(10L))));
         }
     }
 
@@ -182,7 +185,8 @@ public class SlotPoolBatchSlotRequestTest extends TestLogger {
                     SlotPoolUtils.requestNewAllocatedBatchSlot(
                             slotPool, mainThreadExecutor, resourceProfile);
 
-            assertThat(slotFuture, FlinkMatchers.willNotComplete(Duration.ofMillis(50L)));
+            assertThat(slotFuture)
+                    .satisfies(matching(FlinkMatchers.willNotComplete(Duration.ofMillis(50L))));
         }
     }
 
@@ -220,9 +224,10 @@ public class SlotPoolBatchSlotRequestTest extends TestLogger {
                     slotPool, mainThreadExecutor, clock, batchSlotTimeout);
 
             assertThat(
-                    CompletableFuture.anyOf(slotFutures.toArray(COMPLETABLE_FUTURES_EMPTY_ARRAY))
-                            .isDone(),
-                    is(false));
+                            CompletableFuture.anyOf(
+                                            slotFutures.toArray(COMPLETABLE_FUTURES_EMPTY_ARRAY))
+                                    .isDone())
+                    .isEqualTo(false);
 
             SlotPoolUtils.releaseTaskManager(slotPool, mainThreadExecutor, taskManagerResourceId);
 
@@ -230,13 +235,15 @@ public class SlotPoolBatchSlotRequestTest extends TestLogger {
                     slotPool, mainThreadExecutor, clock, batchSlotTimeout);
 
             for (CompletableFuture<PhysicalSlot> slotFuture : slotFutures) {
-                assertThat(slotFuture.isCompletedExceptionally(), is(true));
+                assertThat(slotFuture.isCompletedExceptionally()).isEqualTo(true);
 
                 try {
                     slotFuture.get();
                     fail("Expected that the slot future times out.");
                 } catch (ExecutionException ee) {
-                    assertThat(ee, FlinkMatchers.containsCause(TimeoutException.class));
+                    assertThat(ee)
+                            .satisfies(
+                                    matching(FlinkMatchers.containsCause(TimeoutException.class)));
                 }
             }
         }

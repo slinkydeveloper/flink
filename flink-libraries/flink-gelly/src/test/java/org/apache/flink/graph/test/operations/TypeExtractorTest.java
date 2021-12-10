@@ -32,9 +32,10 @@ import org.apache.flink.graph.Vertex;
 import org.apache.flink.graph.test.TestGraphUtils;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test output types from {@link Graph} methods. */
 public class TypeExtractorTest {
@@ -58,13 +59,15 @@ public class TypeExtractorTest {
         // test type extraction in mapVertices
         DataSet<Vertex<Long, Tuple2<Long, Integer>>> outVertices =
                 inputGraph.mapVertices(new VertexMapper<>()).getVertices();
-        Assert.assertTrue(
-                new TupleTypeInfo(
-                                Vertex.class,
-                                BasicTypeInfo.LONG_TYPE_INFO,
-                                new TupleTypeInfo<Tuple2<Long, Integer>>(
-                                        BasicTypeInfo.LONG_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO))
-                        .equals(outVertices.getType()));
+        assertThat(
+                        new TupleTypeInfo(
+                                        Vertex.class,
+                                        BasicTypeInfo.LONG_TYPE_INFO,
+                                        new TupleTypeInfo<Tuple2<Long, Integer>>(
+                                                BasicTypeInfo.LONG_TYPE_INFO,
+                                                BasicTypeInfo.INT_TYPE_INFO))
+                                .equals(outVertices.getType()))
+                .isTrue();
     }
 
     @Test
@@ -73,37 +76,42 @@ public class TypeExtractorTest {
         // test type extraction in mapEdges
         DataSet<Edge<Long, Tuple2<Long, Integer>>> outEdges =
                 inputGraph.mapEdges(new EdgeMapper<>()).getEdges();
-        Assert.assertTrue(
-                new TupleTypeInfo(
-                                Edge.class,
-                                BasicTypeInfo.LONG_TYPE_INFO,
-                                BasicTypeInfo.LONG_TYPE_INFO,
-                                new TupleTypeInfo<Tuple2<Long, Integer>>(
-                                        BasicTypeInfo.LONG_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO))
-                        .equals(outEdges.getType()));
+        assertThat(
+                        new TupleTypeInfo(
+                                        Edge.class,
+                                        BasicTypeInfo.LONG_TYPE_INFO,
+                                        BasicTypeInfo.LONG_TYPE_INFO,
+                                        new TupleTypeInfo<Tuple2<Long, Integer>>(
+                                                BasicTypeInfo.LONG_TYPE_INFO,
+                                                BasicTypeInfo.INT_TYPE_INFO))
+                                .equals(outEdges.getType()))
+                .isTrue();
     }
 
     @Test
     public void testFromDataSet() throws Exception {
         DataSet<Vertex<Long, Tuple2<Long, Integer>>> outVertices =
                 Graph.fromDataSet(edges, new VertexInitializer<>(), env).getVertices();
-        Assert.assertTrue(
-                new TupleTypeInfo(
-                                Vertex.class,
-                                BasicTypeInfo.LONG_TYPE_INFO,
-                                new TupleTypeInfo<Tuple2<Long, Integer>>(
-                                        BasicTypeInfo.LONG_TYPE_INFO, BasicTypeInfo.INT_TYPE_INFO))
-                        .equals(outVertices.getType()));
+        assertThat(
+                        new TupleTypeInfo(
+                                        Vertex.class,
+                                        BasicTypeInfo.LONG_TYPE_INFO,
+                                        new TupleTypeInfo<Tuple2<Long, Integer>>(
+                                                BasicTypeInfo.LONG_TYPE_INFO,
+                                                BasicTypeInfo.INT_TYPE_INFO))
+                                .equals(outVertices.getType()))
+                .isTrue();
     }
 
     @Test
     public void testGroupReduceOnEdges() throws Exception {
         DataSet<Tuple2<Long, Long>> output =
                 inputGraph.groupReduceOnEdges(new EdgesGroupFunction<>(), EdgeDirection.OUT);
-        Assert.assertTrue(
-                (new TupleTypeInfo<Tuple2<Long, Long>>(
-                                BasicTypeInfo.LONG_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO))
-                        .equals(output.getType()));
+        assertThat(
+                        (new TupleTypeInfo<Tuple2<Long, Long>>(
+                                        BasicTypeInfo.LONG_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO))
+                                .equals(output.getType()))
+                .isTrue();
     }
 
     private static final class VertexMapper<K>

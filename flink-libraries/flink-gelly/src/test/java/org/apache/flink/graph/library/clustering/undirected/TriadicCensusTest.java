@@ -27,7 +27,7 @@ import org.apache.flink.types.NullValue;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TriadicCensus}. */
 public class TriadicCensusTest extends AsmTestBase {
@@ -41,7 +41,7 @@ public class TriadicCensusTest extends AsmTestBase {
                         .run(undirectedSimpleGraph)
                         .execute();
 
-        assertEquals(expectedResult, triadCensus);
+        assertThat(triadCensus).isEqualTo(expectedResult);
     }
 
     @Test
@@ -57,7 +57,7 @@ public class TriadicCensusTest extends AsmTestBase {
         Result triadCensus =
                 new TriadicCensus<LongValue, NullValue, NullValue>().run(completeGraph).execute();
 
-        assertEquals(expectedResult, triadCensus);
+        assertThat(triadCensus).isEqualTo(expectedResult);
     }
 
     @Test
@@ -69,7 +69,7 @@ public class TriadicCensusTest extends AsmTestBase {
                         .run(emptyGraphWithVertices)
                         .execute();
 
-        assertEquals(expectedResult, triadCensus);
+        assertThat(triadCensus).isEqualTo(expectedResult);
     }
 
     @Test
@@ -81,7 +81,7 @@ public class TriadicCensusTest extends AsmTestBase {
                         .run(emptyGraphWithoutVertices)
                         .execute();
 
-        assertEquals(expectedResult, triadCensus);
+        assertThat(triadCensus).isEqualTo(expectedResult);
     }
 
     /*
@@ -103,6 +103,6 @@ public class TriadicCensusTest extends AsmTestBase {
                         .run(undirectedRMatGraph(10, 16))
                         .execute();
 
-        assertEquals(expectedResult, triadCensus);
+        assertThat(triadCensus).isEqualTo(expectedResult);
     }
 }

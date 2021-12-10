@@ -74,10 +74,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -100,10 +97,10 @@ public class SynchronousCheckpointITCase {
         try (TaskCleaner ignored = new TaskCleaner(task)) {
             task.startTaskThread();
 
-            assertThat(eventQueue.take(), is(Event.TASK_IS_RUNNING));
-            assertTrue(eventQueue.isEmpty());
+            assertThat(eventQueue.take()).isEqualTo(Event.TASK_IS_RUNNING);
+            assertThat(eventQueue.isEmpty()).isTrue();
 
-            assertEquals(ExecutionState.RUNNING, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.RUNNING);
 
             task.triggerCheckpointBarrier(
                     42,
@@ -112,17 +109,17 @@ public class SynchronousCheckpointITCase {
                             CheckpointType.SAVEPOINT_SUSPEND,
                             CheckpointStorageLocationReference.getDefault()));
 
-            assertThat(eventQueue.take(), is(Event.PRE_TRIGGER_CHECKPOINT));
-            assertThat(eventQueue.take(), is(Event.POST_TRIGGER_CHECKPOINT));
-            assertTrue(eventQueue.isEmpty());
+            assertThat(eventQueue.take()).isEqualTo(Event.PRE_TRIGGER_CHECKPOINT);
+            assertThat(eventQueue.take()).isEqualTo(Event.POST_TRIGGER_CHECKPOINT);
+            assertThat(eventQueue.isEmpty()).isTrue();
 
             task.notifyCheckpointComplete(42);
 
-            assertThat(eventQueue.take(), is(Event.PRE_NOTIFY_CHECKPOINT_COMPLETE));
-            assertThat(eventQueue.take(), is(Event.POST_NOTIFY_CHECKPOINT_COMPLETE));
-            assertTrue(eventQueue.isEmpty());
+            assertThat(eventQueue.take()).isEqualTo(Event.PRE_NOTIFY_CHECKPOINT_COMPLETE);
+            assertThat(eventQueue.take()).isEqualTo(Event.POST_NOTIFY_CHECKPOINT_COMPLETE);
+            assertThat(eventQueue.isEmpty()).isTrue();
 
-            assertEquals(ExecutionState.RUNNING, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.RUNNING);
         }
     }
 

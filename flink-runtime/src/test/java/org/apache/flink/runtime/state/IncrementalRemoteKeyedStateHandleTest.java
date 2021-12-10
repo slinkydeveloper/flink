@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;

@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests runtime context access from inside an RichOutputFormat class */
 public class RichOutputFormatTest {
@@ -50,7 +50,7 @@ public class RichOutputFormatTest {
                         new HashMap<String, Accumulator<?, ?>>(),
                         UnregisteredMetricsGroup.createOperatorMetricGroup()));
 
-        assertEquals(inputFormat.getRuntimeContext().getIndexOfThisSubtask(), 1);
-        assertEquals(inputFormat.getRuntimeContext().getNumberOfParallelSubtasks(), 3);
+        assertThat(1).isEqualTo(inputFormat.getRuntimeContext().getIndexOfThisSubtask());
+        assertThat(3).isEqualTo(inputFormat.getRuntimeContext().getNumberOfParallelSubtasks());
     }
 }

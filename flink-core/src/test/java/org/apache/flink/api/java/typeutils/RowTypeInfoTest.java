@@ -27,10 +27,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link RowTypeInfo}. */
 public class RowTypeInfoTest extends TypeInformationTestBase<RowTypeInfo> {
@@ -71,19 +68,20 @@ public class RowTypeInfoTest extends TypeInformationTestBase<RowTypeInfo> {
     public void testCustomFieldNames() {
         String[] fieldNames = new String[] {"int", "row", "string"};
         RowTypeInfo typeInfo1 = new RowTypeInfo(typeList, new String[] {"int", "row", "string"});
-        assertArrayEquals(new String[] {"int", "row", "string"}, typeInfo1.getFieldNames());
+        assertThat(typeInfo1.getFieldNames()).isEqualTo(new String[] {"int", "row", "string"});
 
-        assertEquals(BasicTypeInfo.STRING_TYPE_INFO, typeInfo1.getTypeAt("string"));
-        assertEquals(BasicTypeInfo.STRING_TYPE_INFO, typeInfo1.getTypeAt(2));
-        assertEquals(BasicTypeInfo.SHORT_TYPE_INFO, typeInfo1.getTypeAt("row.0"));
-        assertEquals(BasicTypeInfo.BIG_DEC_TYPE_INFO, typeInfo1.getTypeAt("row.f1"));
+        assertThat(typeInfo1.getTypeAt("string")).isEqualTo(BasicTypeInfo.STRING_TYPE_INFO);
+        assertThat(typeInfo1.getTypeAt(2)).isEqualTo(BasicTypeInfo.STRING_TYPE_INFO);
+        assertThat(typeInfo1.getTypeAt("row.0")).isEqualTo(BasicTypeInfo.SHORT_TYPE_INFO);
+        assertThat(typeInfo1.getTypeAt("row.f1")).isEqualTo(BasicTypeInfo.BIG_DEC_TYPE_INFO);
 
         // change the names in fieldNames
         fieldNames[1] = "composite";
         RowTypeInfo typeInfo2 = new RowTypeInfo(typeList, fieldNames);
         // make sure the field names are deep copied
-        assertArrayEquals(new String[] {"int", "row", "string"}, typeInfo1.getFieldNames());
-        assertArrayEquals(new String[] {"int", "composite", "string"}, typeInfo2.getFieldNames());
+        assertThat(typeInfo1.getFieldNames()).isEqualTo(new String[] {"int", "row", "string"});
+        assertThat(typeInfo2.getFieldNames())
+                .isEqualTo(new String[] {"int", "composite", "string"});
     }
 
     @Test
@@ -91,39 +89,36 @@ public class RowTypeInfoTest extends TypeInformationTestBase<RowTypeInfo> {
         RowTypeInfo typeInfo1 = new RowTypeInfo(typeList, new String[] {"int", "row", "string"});
         List<FlatFieldDescriptor> result = new ArrayList<>();
         typeInfo1.getFlatFields("row.*", 0, result);
-        assertEquals(2, result.size());
-        assertEquals(
-                new FlatFieldDescriptor(1, BasicTypeInfo.SHORT_TYPE_INFO).toString(),
-                result.get(0).toString());
-        assertEquals(
-                new FlatFieldDescriptor(2, BasicTypeInfo.BIG_DEC_TYPE_INFO).toString(),
-                result.get(1).toString());
+        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.get(0).toString())
+                .isEqualTo(new FlatFieldDescriptor(1, BasicTypeInfo.SHORT_TYPE_INFO).toString());
+        assertThat(result.get(1).toString())
+                .isEqualTo(new FlatFieldDescriptor(2, BasicTypeInfo.BIG_DEC_TYPE_INFO).toString());
 
         result.clear();
         typeInfo1.getFlatFields("string", 0, result);
-        assertEquals(1, result.size());
-        assertEquals(
-                new FlatFieldDescriptor(3, BasicTypeInfo.STRING_TYPE_INFO).toString(),
-                result.get(0).toString());
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).toString())
+                .isEqualTo(new FlatFieldDescriptor(3, BasicTypeInfo.STRING_TYPE_INFO).toString());
     }
 
     @Test
     public void testGetTypeAt() {
         RowTypeInfo typeInfo = new RowTypeInfo(typeList);
 
-        assertArrayEquals(new String[] {"f0", "f1", "f2"}, typeInfo.getFieldNames());
+        assertThat(typeInfo.getFieldNames()).isEqualTo(new String[] {"f0", "f1", "f2"});
 
-        assertEquals(BasicTypeInfo.STRING_TYPE_INFO, typeInfo.getTypeAt("f2"));
-        assertEquals(BasicTypeInfo.SHORT_TYPE_INFO, typeInfo.getTypeAt("f1.f0"));
-        assertEquals(BasicTypeInfo.BIG_DEC_TYPE_INFO, typeInfo.getTypeAt("f1.1"));
+        assertThat(typeInfo.getTypeAt("f2")).isEqualTo(BasicTypeInfo.STRING_TYPE_INFO);
+        assertThat(typeInfo.getTypeAt("f1.f0")).isEqualTo(BasicTypeInfo.SHORT_TYPE_INFO);
+        assertThat(typeInfo.getTypeAt("f1.1")).isEqualTo(BasicTypeInfo.BIG_DEC_TYPE_INFO);
     }
 
     @Test
     public void testNestedRowTypeInfo() {
         RowTypeInfo typeInfo = new RowTypeInfo(typeList);
 
-        assertEquals("Row(f0: Short, f1: BigDecimal)", typeInfo.getTypeAt("f1").toString());
-        assertEquals("Short", typeInfo.getTypeAt("f1.f0").toString());
+        assertThat(typeInfo.getTypeAt("f1").toString()).isEqualTo("Row(f0: Short, f1: BigDecimal)");
+        assertThat(typeInfo.getTypeAt("f1.f0").toString()).isEqualTo("Short");
     }
 
     @Test
@@ -140,7 +135,7 @@ public class RowTypeInfoTest extends TypeInformationTestBase<RowTypeInfo> {
                             BasicTypeInfo.INT_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO
                         },
                         new String[] {"field1", "field2"});
-        assertTrue(row1.schemaEquals(row2));
+        assertThat(row1.schemaEquals(row2)).isTrue();
 
         final RowTypeInfo other1 =
                 new RowTypeInfo(
@@ -154,7 +149,7 @@ public class RowTypeInfoTest extends TypeInformationTestBase<RowTypeInfo> {
                             BasicTypeInfo.LONG_TYPE_INFO, BasicTypeInfo.STRING_TYPE_INFO
                         },
                         new String[] {"field1", "field2"});
-        assertFalse(row1.schemaEquals(other1));
-        assertFalse(row1.schemaEquals(other2));
+        assertThat(row1.schemaEquals(other1)).isFalse();
+        assertThat(row1.schemaEquals(other2)).isFalse();
     }
 }

@@ -32,8 +32,8 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeFalse;
 
 /** Tests for the {@link BlobServer}. */
@@ -62,9 +62,9 @@ public class BlobServerTest extends TestLogger {
     private File createNonWritableDirectory() throws IOException {
         assumeFalse(OperatingSystem.isWindows()); // setWritable doesn't work on Windows.
         final File blobStorageDirectory = temporaryFolder.newFolder();
-        assertTrue(blobStorageDirectory.setExecutable(true, false));
-        assertTrue(blobStorageDirectory.setReadable(true, false));
-        assertTrue(blobStorageDirectory.setWritable(false, false));
+        assertThat(blobStorageDirectory.setExecutable(true, false)).isTrue();
+        assertThat(blobStorageDirectory.setReadable(true, false)).isTrue();
+        assertThat(blobStorageDirectory.setWritable(false, false)).isTrue();
         return blobStorageDirectory;
     }
 }

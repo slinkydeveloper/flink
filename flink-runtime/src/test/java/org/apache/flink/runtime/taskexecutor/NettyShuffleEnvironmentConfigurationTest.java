@@ -32,10 +32,7 @@ import org.junit.Test;
 
 import java.net.InetAddress;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit test for {@link NettyShuffleEnvironmentConfiguration}. */
 public class NettyShuffleEnvironmentConfigurationTest extends TestLogger {
@@ -50,7 +47,7 @@ public class NettyShuffleEnvironmentConfigurationTest extends TestLogger {
                 NettyShuffleEnvironmentConfiguration.fromConfiguration(
                                 config, MEM_SIZE_PARAM, false, InetAddress.getLoopbackAddress())
                         .numNetworkBuffers();
-        assertThat(numNetworkBuffers, is(128));
+        assertThat(numNetworkBuffers).isEqualTo(128);
     }
 
     /**
@@ -75,10 +72,10 @@ public class NettyShuffleEnvironmentConfigurationTest extends TestLogger {
                 NettyShuffleEnvironmentConfiguration.fromConfiguration(
                         config, MEM_SIZE_PARAM, true, InetAddress.getLoopbackAddress());
 
-        assertEquals(networkConfig.partitionRequestInitialBackoff(), 100);
-        assertEquals(networkConfig.partitionRequestMaxBackoff(), 200);
-        assertEquals(networkConfig.networkBuffersPerChannel(), 10);
-        assertEquals(networkConfig.floatingNetworkBuffersPerGate(), 100);
+        assertThat(100).isEqualTo(networkConfig.partitionRequestInitialBackoff());
+        assertThat(200).isEqualTo(networkConfig.partitionRequestMaxBackoff());
+        assertThat(10).isEqualTo(networkConfig.networkBuffersPerChannel());
+        assertThat(100).isEqualTo(networkConfig.floatingNetworkBuffersPerGate());
     }
 
     /** Verifies the correlation of sort-merge blocking shuffle config options. */
@@ -91,11 +88,11 @@ public class NettyShuffleEnvironmentConfigurationTest extends TestLogger {
 
         String configKey =
                 getConfigKey(NettyShuffleEnvironmentOptions.BLOCKING_SHUFFLE_COMPRESSION_ENABLED);
-        assertTrue(description.contains(configKey));
+        assertThat(description.contains(configKey)).isTrue();
         configKey = getConfigKey(NettyShuffleEnvironmentOptions.NETWORK_SORT_SHUFFLE_MIN_BUFFERS);
-        assertTrue(description.contains(configKey));
+        assertThat(description.contains(configKey)).isTrue();
         configKey = getConfigKey(TaskManagerOptions.NETWORK_BATCH_SHUFFLE_READ_MEMORY);
-        assertTrue(description.contains(configKey));
+        assertThat(description.contains(configKey)).isTrue();
     }
 
     private static String getConfigKey(ConfigOption<?> configOption) {

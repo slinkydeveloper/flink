@@ -37,7 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests via reflection that certain methods are not called in Flink.
@@ -127,7 +127,7 @@ public class CheckForbiddenMethodsUsage {
         for (ForbiddenCall forbiddenCall : forbiddenCalls) {
             final Set<Member> methodUsages = forbiddenCall.getUsages(reflections);
             methodUsages.removeAll(forbiddenCall.getExclusions());
-            assertEquals("Unexpected calls: " + methodUsages, 0, methodUsages.size());
+            assertThat(methodUsages.size()).as("Unexpected calls: " + methodUsages).isEqualTo(0);
         }
     }
 }

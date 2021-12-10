@@ -45,7 +45,6 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.util.Preconditions;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -60,6 +59,8 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test for {@link DataStreamUtils#reinterpretAsKeyedStream(DataStream, KeySelector,
@@ -325,7 +326,7 @@ public class ReinterpretDataStreamAsKeyedStreamITCase {
 
         @Override
         public void close() throws Exception {
-            Assert.assertEquals(expectedSum, runningSum);
+            assertThat(runningSum).isEqualTo(expectedSum);
             super.close();
         }
 

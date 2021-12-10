@@ -33,13 +33,14 @@ import org.apache.flink.util.Collector;
 
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for interval joins. */
 public class IntervalJoinITCase {
@@ -393,7 +394,7 @@ public class IntervalJoinITCase {
         List<String> listExpected = Lists.newArrayList(expected);
         Collections.sort(listExpected);
         Collections.sort(testResults);
-        Assert.assertEquals(listExpected, testResults);
+        assertThat(testResults).isEqualTo(listExpected);
     }
 
     private static class AscendingTuple2TimestampExtractor

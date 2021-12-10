@@ -35,10 +35,8 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.file.StandardOpenOption;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link BufferReaderWriterUtil}. */
 public class BufferReaderWriterUtilTest {
@@ -59,7 +57,7 @@ public class BufferReaderWriterUtilTest {
         memory.flip();
         Buffer result = BufferReaderWriterUtil.sliceNextBuffer(memory);
 
-        assertEquals(pos, memory.position());
+        assertThat(memory.position()).isEqualTo(pos);
         validateTestBuffer(result);
     }
 
@@ -70,9 +68,9 @@ public class BufferReaderWriterUtilTest {
 
         final boolean written = BufferReaderWriterUtil.writeBuffer(buffer, memory);
 
-        assertFalse(written);
-        assertEquals(0, memory.position());
-        assertEquals(memory.capacity(), memory.limit());
+        assertThat(written).isFalse();
+        assertThat(memory.position()).isEqualTo(0);
+        assertThat(memory.limit()).isEqualTo(memory.capacity());
     }
 
     @Test
@@ -82,7 +80,7 @@ public class BufferReaderWriterUtilTest {
 
         final Buffer result = BufferReaderWriterUtil.sliceNextBuffer(memory);
 
-        assertNull(result);
+        assertThat(result).isNull();
     }
 
     @Test
@@ -96,7 +94,7 @@ public class BufferReaderWriterUtilTest {
 
         try {
             BufferReaderWriterUtil.sliceNextBuffer(tooSmall);
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
             // expected
         }
@@ -145,7 +143,7 @@ public class BufferReaderWriterUtilTest {
                     BufferReaderWriterUtil.allocatedHeaderBuffer(),
                     readBuffer,
                     FreeingBufferRecycler.INSTANCE);
-            fail();
+            fail("unknown failure");
         } catch (IOException e) {
             // expected
         }
@@ -169,7 +167,7 @@ public class BufferReaderWriterUtilTest {
                     BufferReaderWriterUtil.allocatedHeaderBuffer(),
                     readBuffer,
                     FreeingBufferRecycler.INSTANCE);
-            fail();
+            fail("unknown failure");
         } catch (IOException e) {
             // expected
         }
@@ -186,7 +184,7 @@ public class BufferReaderWriterUtilTest {
             }
             int bytesExpected = bufferSize * numBuffers;
             BufferReaderWriterUtil.writeBuffers(fileChannel, bytesExpected, data);
-            assertEquals(bytesExpected, fileChannel.size());
+            assertThat(fileChannel.size()).isEqualTo(bytesExpected);
         }
     }
 

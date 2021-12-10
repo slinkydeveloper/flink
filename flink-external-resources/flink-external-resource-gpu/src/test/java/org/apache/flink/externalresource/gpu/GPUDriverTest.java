@@ -31,9 +31,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Set;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GPUDriver}. */
 public class GPUDriverTest extends TestLogger {
@@ -52,7 +50,7 @@ public class GPUDriverTest extends TestLogger {
         final GPUDriver gpuDriver = new GPUDriver(config);
         final Set<GPUInfo> gpuResource = gpuDriver.retrieveResourceInfo(gpuAmount);
 
-        assertThat(gpuResource.size(), is(gpuAmount));
+        assertThat(gpuResource.size()).isEqualTo(gpuAmount);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -85,7 +83,7 @@ public class GPUDriverTest extends TestLogger {
     public void testGPUDriverWithInexecutableScript() throws Exception {
         final Configuration config = new Configuration();
         final File inexecutableFile = TEMP_FOLDER.newFile();
-        assertTrue(inexecutableFile.setExecutable(false));
+        assertThat(inexecutableFile.setExecutable(false)).isTrue();
 
         config.setString(GPUDriver.DISCOVERY_SCRIPT_PATH, inexecutableFile.getAbsolutePath());
 

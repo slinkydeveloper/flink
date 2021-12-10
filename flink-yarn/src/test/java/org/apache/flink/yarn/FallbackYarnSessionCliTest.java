@@ -29,7 +29,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link FallbackYarnSessionCliTest}. */
 public class FallbackYarnSessionCliTest {
@@ -48,7 +48,7 @@ public class FallbackYarnSessionCliTest {
     @Test
     public void testFalseWhenNotActive() throws ParseException {
         final boolean isActive = checkIfYarnFallbackCLIisActiveWithCLIArgs("run");
-        assertFalse(isActive);
+        assertThat(isActive).isFalse();
     }
 
     private boolean checkIfYarnFallbackCLIisActiveWithCLIArgs(final String... args)

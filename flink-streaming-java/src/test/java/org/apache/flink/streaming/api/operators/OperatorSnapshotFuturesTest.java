@@ -37,7 +37,7 @@ import org.junit.Test;
 import java.util.concurrent.Future;
 import java.util.concurrent.RunnableFuture;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.spy;
@@ -63,7 +63,7 @@ public class OperatorSnapshotFuturesTest extends TestLogger {
                         ExceptionallyDoneFuture.of(new RuntimeException()),
                         ExceptionallyDoneFuture.of(new RuntimeException()),
                         ExceptionallyDoneFuture.of(new RuntimeException()));
-        assertEquals(s1.getStateSize() + s2.getStateSize(), futures.cancel());
+        assertThat(futures.cancel()).isEqualTo(s1.getStateSize() + s2.getStateSize());
     }
 
     /**

@@ -32,8 +32,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link StringifiedAccumulatorResult}. */
 public class StringifiedAccumulatorResultTest {
@@ -47,16 +46,16 @@ public class StringifiedAccumulatorResultTest {
                 new StringifiedAccumulatorResult(name, type, value);
 
         // Confirm no funny business in the constructor to getter pathway
-        assertEquals(name, original.getName());
-        assertEquals(type, original.getType());
-        assertEquals(value, original.getValue());
+        assertThat(original.getName()).isEqualTo(name);
+        assertThat(original.getType()).isEqualTo(type);
+        assertThat(original.getValue()).isEqualTo(value);
 
         final StringifiedAccumulatorResult copy = CommonTestUtils.createCopySerializable(original);
 
         // Copy should have equivalent core fields
-        assertEquals(name, copy.getName());
-        assertEquals(type, copy.getType());
-        assertEquals(value, copy.getValue());
+        assertThat(copy.getName()).isEqualTo(name);
+        assertThat(copy.getType()).isEqualTo(type);
+        assertThat(copy.getValue()).isEqualTo(value);
     }
 
     @Test
@@ -71,12 +70,12 @@ public class StringifiedAccumulatorResultTest {
         final StringifiedAccumulatorResult[] results =
                 StringifiedAccumulatorResult.stringifyAccumulatorResults(accumulatorMap);
 
-        assertEquals(1, results.length);
+        assertThat(results.length).isEqualTo(1);
 
         final StringifiedAccumulatorResult firstResult = results[0];
-        assertEquals(name, firstResult.getName());
-        assertEquals("IntCounter", firstResult.getType());
-        assertEquals(Integer.toString(targetValue), firstResult.getValue());
+        assertThat(firstResult.getName()).isEqualTo(name);
+        assertThat(firstResult.getType()).isEqualTo("IntCounter");
+        assertThat(firstResult.getValue()).isEqualTo(Integer.toString(targetValue));
     }
 
     @Test
@@ -89,13 +88,13 @@ public class StringifiedAccumulatorResultTest {
         final StringifiedAccumulatorResult[] results =
                 StringifiedAccumulatorResult.stringifyAccumulatorResults(accumulatorMap);
 
-        assertEquals(1, results.length);
+        assertThat(results.length).isEqualTo(1);
 
         // Note the use of a String with a content of "null" rather than a null value
         final StringifiedAccumulatorResult firstResult = results[0];
-        assertEquals(name, firstResult.getName());
-        assertEquals("NullBearingAccumulator", firstResult.getType());
-        assertEquals("null", firstResult.getValue());
+        assertThat(firstResult.getName()).isEqualTo(name);
+        assertThat(firstResult.getType()).isEqualTo("NullBearingAccumulator");
+        assertThat(firstResult.getValue()).isEqualTo("null");
     }
 
     @Test
@@ -107,13 +106,13 @@ public class StringifiedAccumulatorResultTest {
         final StringifiedAccumulatorResult[] results =
                 StringifiedAccumulatorResult.stringifyAccumulatorResults(accumulatorMap);
 
-        assertEquals(1, results.length);
+        assertThat(results.length).isEqualTo(1);
 
         // Note the use of String values with content of "null" rather than null values
         final StringifiedAccumulatorResult firstResult = results[0];
-        assertEquals(name, firstResult.getName());
-        assertEquals("null", firstResult.getType());
-        assertEquals("null", firstResult.getValue());
+        assertThat(firstResult.getName()).isEqualTo(name);
+        assertThat(firstResult.getType()).isEqualTo("null");
+        assertThat(firstResult.getValue()).isEqualTo("null");
     }
 
     @Test
@@ -125,16 +124,17 @@ public class StringifiedAccumulatorResultTest {
         final StringifiedAccumulatorResult[] results =
                 StringifiedAccumulatorResult.stringifyAccumulatorResults(accumulatorMap);
 
-        assertEquals(1, results.length);
+        assertThat(results.length).isEqualTo(1);
 
         // Note the use of String values with content of "null" rather than null values
         final StringifiedAccumulatorResult firstResult = results[0];
-        assertEquals(name, firstResult.getName());
-        assertEquals("null", firstResult.getType());
-        assertTrue(
-                firstResult
-                        .getValue()
-                        .startsWith("org.apache.flink.util.FlinkRuntimeException: Test"));
+        assertThat(firstResult.getName()).isEqualTo(name);
+        assertThat(firstResult.getType()).isEqualTo("null");
+        assertThat(
+                        firstResult
+                                .getValue()
+                                .startsWith("org.apache.flink.util.FlinkRuntimeException: Test"))
+                .isTrue();
     }
 
     private static class NullBearingAccumulator implements SimpleAccumulator<Serializable> {

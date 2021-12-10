@@ -18,7 +18,6 @@
 
 package org.apache.flink.fs.s3.common.utils;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -33,6 +32,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /** Tests for the {@link RefCountedFileWithStream}. */
 public class RefCountedFileWithStreamTest {
 
@@ -45,7 +46,7 @@ public class RefCountedFileWithStreamTest {
         final RefCountedFileWithStream fileUnderTest = getClosedRefCountedFileWithContent(content);
         long fileLength = fileUnderTest.getLength();
 
-        Assert.assertEquals(content.length, fileLength);
+        assertThat(fileLength).isEqualTo(content.length);
     }
 
     @Test
@@ -73,7 +74,7 @@ public class RefCountedFileWithStreamTest {
 
     private void verifyTheFileIsStillThere() throws IOException {
         try (Stream<Path> files = Files.list(temporaryFolder.getRoot().toPath())) {
-            Assert.assertEquals(1L, files.count());
+            assertThat(files.count()).isEqualTo(1L);
         }
     }
 

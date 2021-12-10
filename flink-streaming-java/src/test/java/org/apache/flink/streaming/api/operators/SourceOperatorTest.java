@@ -63,13 +63,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit test for {@link SourceOperator}. */
 @SuppressWarnings("serial")
@@ -104,7 +98,7 @@ public class SourceOperatorTest {
     @After
     public void cleanUp() throws Exception {
         operator.close();
-        assertTrue(mockSourceReader.isClosed());
+        assertThat(mockSourceReader.isClosed()).isTrue();
     }
 
     @Test
@@ -112,10 +106,11 @@ public class SourceOperatorTest {
         StateInitializationContext stateContext = getStateContext();
         operator.initializeState(stateContext);
 
-        assertNotNull(
-                stateContext
-                        .getOperatorStateStore()
-                        .getListState(SourceOperator.SPLITS_STATE_DESC));
+        assertThat(
+                        stateContext
+                                .getOperatorStateStore()
+                                .getListState(SourceOperator.SPLITS_STATE_DESC))
+                .isNotNull();
     }
 
     @Test
@@ -125,15 +120,16 @@ public class SourceOperatorTest {
         // Open the operator.
         operator.open();
         // The source reader should have been assigned a split.
-        assertEquals(Collections.singletonList(MOCK_SPLIT), mockSourceReader.getAssignedSplits());
+        assertThat(mockSourceReader.getAssignedSplits())
+                .isEqualTo(Collections.singletonList(MOCK_SPLIT));
         // The source reader should have started.
-        assertTrue(mockSourceReader.isStarted());
+        assertThat(mockSourceReader.isStarted()).isTrue();
 
         // A ReaderRegistrationRequest should have been sent.
-        assertEquals(1, mockGateway.getEventsSent().size());
+        assertThat(mockGateway.getEventsSent().size()).isEqualTo(1);
         OperatorEvent operatorEvent = mockGateway.getEventsSent().get(0);
-        assertTrue(operatorEvent instanceof ReaderRegistrationEvent);
-        assertEquals(SUBTASK_INDEX, ((ReaderRegistrationEvent) operatorEvent).subtaskId());
+        assertThat(operatorEvent).isInstanceOf(ReaderRegistrationEvent.class);
+        assertThat(((ReaderRegistrationEvent) operatorEvent).subtaskId()).isEqualTo(SUBTASK_INDEX);
     }
 
     @Test
@@ -143,18 +139,19 @@ public class SourceOperatorTest {
         // Open the operator.
         operator.open();
         // The source reader should have been assigned a split.
-        assertEquals(Collections.singletonList(MOCK_SPLIT), mockSourceReader.getAssignedSplits());
+        assertThat(mockSourceReader.getAssignedSplits())
+                .isEqualTo(Collections.singletonList(MOCK_SPLIT));
 
         CollectingDataOutput<Integer> dataOutput = new CollectingDataOutput<>();
-        assertEquals(DataInputStatus.NOTHING_AVAILABLE, operator.emitNext(dataOutput));
-        assertFalse(operator.isAvailable());
+        assertThat(operator.emitNext(dataOutput)).isEqualTo(DataInputStatus.NOTHING_AVAILABLE);
+        assertThat(operator.isAvailable()).isFalse();
 
         CompletableFuture<Void> sourceStopped = operator.stop(StopMode.DRAIN);
-        assertTrue(operator.isAvailable());
-        assertFalse(sourceStopped.isDone());
-        assertEquals(DataInputStatus.END_OF_DATA, operator.emitNext(dataOutput));
+        assertThat(operator.isAvailable()).isTrue();
+        assertThat(sourceStopped.isDone()).isFalse();
+        assertThat(operator.emitNext(dataOutput)).isEqualTo(DataInputStatus.END_OF_DATA);
         operator.finish();
-        assertTrue(sourceStopped.isDone());
+        assertThat(sourceStopped.isDone()).isTrue();
     }
 
     @Test
@@ -166,7 +163,8 @@ public class SourceOperatorTest {
                 new AddSplitEvent<>(
                         Collections.singletonList(newSplit), new MockSourceSplitSerializer()));
         // The source reader should have been assigned two splits.
-        assertEquals(Arrays.asList(MOCK_SPLIT, newSplit), mockSourceReader.getAssignedSplits());
+        assertThat(mockSourceReader.getAssignedSplits())
+                .isEqualTo(Arrays.asList(MOCK_SPLIT, newSplit));
     }
 
     @Test
@@ -176,7 +174,8 @@ public class SourceOperatorTest {
         SourceEvent event = new SourceEvent() {};
         operator.handleOperatorEvent(new SourceEventWrapper(event));
         // The source reader should have been assigned two splits.
-        assertEquals(Collections.singletonList(event), mockSourceReader.getReceivedSourceEvents());
+        assertThat(mockSourceReader.getReceivedSourceEvents())
+                .isEqualTo(Collections.singletonList(event));
     }
 
     @Test
@@ -193,7 +192,7 @@ public class SourceOperatorTest {
         // Verify the splits in state.
         List<MockSourceSplit> splitsInState =
                 CollectionUtil.iterableToList(operator.getReaderState().get());
-        assertEquals(Arrays.asList(MOCK_SPLIT, newSplit), splitsInState);
+        assertThat(splitsInState).isEqualTo(Arrays.asList(MOCK_SPLIT, newSplit));
     }
 
     @Test
@@ -203,7 +202,7 @@ public class SourceOperatorTest {
         operator.open();
         operator.snapshotState(new StateSnapshotContextSynchronousImpl(100L, 100L));
         operator.notifyCheckpointComplete(100L);
-        assertEquals(100L, (long) mockSourceReader.getCompletedCheckpoints().get(0));
+        assertThat((long) mockSourceReader.getCompletedCheckpoints().get(0)).isEqualTo(100L);
     }
 
     @Test
@@ -213,15 +212,15 @@ public class SourceOperatorTest {
         operator.open();
         operator.snapshotState(new StateSnapshotContextSynchronousImpl(100L, 100L));
         operator.notifyCheckpointAborted(100L);
-        assertEquals(100L, (long) mockSourceReader.getAbortedCheckpoints().get(0));
+        assertThat((long) mockSourceReader.getAbortedCheckpoints().get(0)).isEqualTo(100L);
     }
 
     @Test
     public void testSameAvailabilityFuture() {
         final CompletableFuture<?> initialFuture = operator.getAvailableFuture();
         final CompletableFuture<?> secondFuture = operator.getAvailableFuture();
-        assertThat(initialFuture, not(sameInstance(AvailabilityProvider.AVAILABLE)));
-        assertThat(secondFuture, sameInstance(initialFuture));
+        assertThat(initialFuture).isNotSameAs(AvailabilityProvider.AVAILABLE);
+        assertThat(secondFuture).isSameAs(initialFuture);
     }
 
     // ---------------- helper methods -------------------------

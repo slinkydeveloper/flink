@@ -30,8 +30,7 @@ import javax.annotation.Nullable;
 import java.util.function.Consumer;
 
 import static org.apache.flink.runtime.scheduler.adaptive.WaitingForResourcesTest.assertNonNull;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link Created} state. */
 public class CreatedTest extends TestLogger {
@@ -65,7 +64,8 @@ public class CreatedTest extends TestLogger {
 
             ctx.setExpectFinished(
                     archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED));
+                        assertThat(archivedExecutionGraph.getState())
+                                .isEqualTo(JobStatus.SUSPENDED);
                     });
 
             created.suspend(new RuntimeException("Suspend"));
@@ -79,7 +79,7 @@ public class CreatedTest extends TestLogger {
 
             ctx.setExpectFinished(
                     archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED));
+                        assertThat(archivedExecutionGraph.getState()).isEqualTo(JobStatus.FAILED);
                     });
 
             created.handleGlobalFailure(new RuntimeException("Global"));
@@ -91,7 +91,7 @@ public class CreatedTest extends TestLogger {
         try (MockCreatedContext ctx = new MockCreatedContext()) {
             Created created = new Created(ctx, log);
             ArchivedExecutionGraph job = created.getJob();
-            assertThat(job.getState(), is(JobStatus.INITIALIZING));
+            assertThat(job.getState()).isEqualTo(JobStatus.INITIALIZING);
         }
     }
 

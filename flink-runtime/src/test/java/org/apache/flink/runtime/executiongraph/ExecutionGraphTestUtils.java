@@ -51,8 +51,7 @@ import java.util.function.Predicate;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A collection of utility methods for testing the ExecutionGraph and its related classes. */
 public class ExecutionGraphTestUtils {
@@ -266,8 +265,7 @@ public class ExecutionGraphTestUtils {
         for (ExecutionVertex ev : eg.getAllExecutionVertices()) {
             final Execution exec = ev.getCurrentExecutionAttempt();
             final ExecutionState executionState = exec.getState();
-            assert executionState == ExecutionState.DEPLOYING
-                    : "Expected executionState to be DEPLOYING, was: " + executionState;
+            assertThat(executionState).isEqualTo(ExecutionState.DEPLOYING);
         }
 
         // switch executions to RUNNING
@@ -466,56 +464,54 @@ public class ExecutionGraphTestUtils {
             @Nullable List<JobVertex> outputJobVertices) {
 
         ExecutionJobVertex ejv = executionGraph.getAllVertices().get(originJobVertex.getID());
-        assertNotNull(ejv);
+        assertThat(ejv).isNotNull();
 
         // verify basic properties
-        assertEquals(originJobVertex.getParallelism(), ejv.getParallelism());
-        assertEquals(executionGraph.getJobID(), ejv.getJobId());
-        assertEquals(originJobVertex.getID(), ejv.getJobVertexId());
-        assertEquals(originJobVertex, ejv.getJobVertex());
+        assertThat(ejv.getParallelism()).isEqualTo(originJobVertex.getParallelism());
+        assertThat(ejv.getJobId()).isEqualTo(executionGraph.getJobID());
+        assertThat(ejv.getJobVertexId()).isEqualTo(originJobVertex.getID());
+        assertThat(ejv.getJobVertex()).isEqualTo(originJobVertex);
 
         // verify produced data sets
         if (outputJobVertices == null) {
-            assertEquals(0, ejv.getProducedDataSets().length);
+            assertThat(ejv.getProducedDataSets().length).isEqualTo(0);
         } else {
-            assertEquals(outputJobVertices.size(), ejv.getProducedDataSets().length);
+            assertThat(ejv.getProducedDataSets().length).isEqualTo(outputJobVertices.size());
             for (int i = 0; i < outputJobVertices.size(); i++) {
-                assertEquals(
-                        originJobVertex.getProducedDataSets().get(i).getId(),
-                        ejv.getProducedDataSets()[i].getId());
-                assertEquals(
-                        originJobVertex.getParallelism(),
-                        ejv.getProducedDataSets()[0].getPartitions().length);
+                assertThat(ejv.getProducedDataSets()[i].getId())
+                        .isEqualTo(originJobVertex.getProducedDataSets().get(i).getId());
+                assertThat(ejv.getProducedDataSets()[0].getPartitions().length)
+                        .isEqualTo(originJobVertex.getParallelism());
             }
         }
 
         // verify task vertices for their basic properties and their inputs
-        assertEquals(originJobVertex.getParallelism(), ejv.getTaskVertices().length);
+        assertThat(ejv.getTaskVertices().length).isEqualTo(originJobVertex.getParallelism());
 
         int subtaskIndex = 0;
         for (ExecutionVertex ev : ejv.getTaskVertices()) {
-            assertEquals(executionGraph.getJobID(), ev.getJobId());
-            assertEquals(originJobVertex.getID(), ev.getJobvertexId());
+            assertThat(ev.getJobId()).isEqualTo(executionGraph.getJobID());
+            assertThat(ev.getJobvertexId()).isEqualTo(originJobVertex.getID());
 
-            assertEquals(originJobVertex.getParallelism(), ev.getTotalNumberOfParallelSubtasks());
-            assertEquals(subtaskIndex, ev.getParallelSubtaskIndex());
+            assertThat(ev.getTotalNumberOfParallelSubtasks())
+                    .isEqualTo(originJobVertex.getParallelism());
+            assertThat(ev.getParallelSubtaskIndex()).isEqualTo(subtaskIndex);
 
             if (inputJobVertices == null) {
-                assertEquals(0, ev.getNumberOfInputs());
+                assertThat(ev.getNumberOfInputs()).isEqualTo(0);
             } else {
-                assertEquals(inputJobVertices.size(), ev.getNumberOfInputs());
+                assertThat(ev.getNumberOfInputs()).isEqualTo(inputJobVertices.size());
 
                 for (int i = 0; i < inputJobVertices.size(); i++) {
                     ConsumedPartitionGroup consumedPartitionGroup = ev.getConsumedPartitionGroup(i);
-                    assertEquals(
-                            inputJobVertices.get(i).getParallelism(),
-                            consumedPartitionGroup.size());
+                    assertThat(consumedPartitionGroup.size())
+                            .isEqualTo(inputJobVertices.get(i).getParallelism());
 
                     int expectedPartitionNum = 0;
                     for (IntermediateResultPartitionID consumedPartitionId :
                             consumedPartitionGroup) {
-                        assertEquals(
-                                expectedPartitionNum, consumedPartitionId.getPartitionNumber());
+                        assertThat(consumedPartitionId.getPartitionNumber())
+                                .isEqualTo(expectedPartitionNum);
 
                         expectedPartitionNum++;
                     }

@@ -46,9 +46,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link SingleLogicalSlot} class. */
 public class SingleLogicalSlotTest extends TestLogger {
@@ -59,10 +57,10 @@ public class SingleLogicalSlotTest extends TestLogger {
         final DummyPayload dummyPayload1 = new DummyPayload();
         final DummyPayload dummyPayload2 = new DummyPayload();
 
-        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload1), is(true));
-        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload2), is(false));
+        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload1)).isEqualTo(true);
+        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload2)).isEqualTo(false);
 
-        assertThat(singleLogicalSlot.getPayload(), sameInstance(dummyPayload1));
+        assertThat(singleLogicalSlot.getPayload()).isSameAs(dummyPayload1);
     }
 
     private SingleLogicalSlot createSingleLogicalSlot() {
@@ -88,19 +86,19 @@ public class SingleLogicalSlotTest extends TestLogger {
         final SingleLogicalSlot singleLogicalSlot = createSingleLogicalSlot();
         final DummyPayload dummyPayload = new DummyPayload();
 
-        assertThat(singleLogicalSlot.isAlive(), is(true));
+        assertThat(singleLogicalSlot.isAlive()).isEqualTo(true);
 
-        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload), is(true));
-        assertThat(singleLogicalSlot.isAlive(), is(true));
+        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload)).isEqualTo(true);
+        assertThat(singleLogicalSlot.isAlive()).isEqualTo(true);
 
         final CompletableFuture<?> releaseFuture =
                 singleLogicalSlot.releaseSlot(new FlinkException("Test exception"));
 
-        assertThat(singleLogicalSlot.isAlive(), is(false));
+        assertThat(singleLogicalSlot.isAlive()).isEqualTo(false);
 
         releaseFuture.get();
 
-        assertThat(singleLogicalSlot.isAlive(), is(false));
+        assertThat(singleLogicalSlot.isAlive()).isEqualTo(false);
     }
 
     @Test
@@ -110,7 +108,7 @@ public class SingleLogicalSlotTest extends TestLogger {
 
         singleLogicalSlot.releaseSlot(new FlinkException("Test exception"));
 
-        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload), is(false));
+        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload)).isEqualTo(false);
     }
 
     /**
@@ -129,14 +127,14 @@ public class SingleLogicalSlotTest extends TestLogger {
         final ManualTestingPayload dummyPayload =
                 new ManualTestingPayload(failFuture, terminalStateFuture);
 
-        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload), is(true));
+        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload)).isEqualTo(true);
 
         singleLogicalSlot.release(new FlinkException("Test exception"));
 
-        assertThat(failFuture.isDone(), is(true));
+        assertThat(failFuture.isDone()).isEqualTo(true);
         // we don't require the logical slot to return to the owner because
         // the release call should only come from the owner
-        assertThat(returnSlotFuture.isDone(), is(false));
+        assertThat(returnSlotFuture.isDone()).isEqualTo(false);
     }
 
     /** Tests that the slot release is only signaled after the owner has taken it back. */
@@ -153,22 +151,22 @@ public class SingleLogicalSlotTest extends TestLogger {
 
         final SingleLogicalSlot singleLogicalSlot = createSingleLogicalSlot(waitingSlotOwner);
 
-        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload), is(true));
+        assertThat(singleLogicalSlot.tryAssignPayload(dummyPayload)).isEqualTo(true);
 
         final CompletableFuture<?> releaseFuture =
                 singleLogicalSlot.releaseSlot(new FlinkException("Test exception"));
 
-        assertThat(releaseFuture.isDone(), is(false));
-        assertThat(returnedSlotFuture.isDone(), is(false));
-        assertThat(failFuture.isDone(), is(true));
+        assertThat(releaseFuture.isDone()).isEqualTo(false);
+        assertThat(returnedSlotFuture.isDone()).isEqualTo(false);
+        assertThat(failFuture.isDone()).isEqualTo(true);
 
         terminalStateFuture.complete(null);
 
-        assertThat(returnedSlotFuture.isDone(), is(true));
+        assertThat(returnedSlotFuture.isDone()).isEqualTo(true);
 
         returnSlotResponseFuture.complete(true);
 
-        assertThat(releaseFuture.isDone(), is(true));
+        assertThat(releaseFuture.isDone()).isEqualTo(true);
     }
 
     /**
@@ -212,8 +210,8 @@ public class SingleLogicalSlotTest extends TestLogger {
 
             releaseOperationsFuture.get();
 
-            assertThat(countingSlotOwner.getReleaseCount(), is(1));
-            assertThat(countingFailPayload.getFailCount(), is(1));
+            assertThat(countingSlotOwner.getReleaseCount()).isEqualTo(1);
+            assertThat(countingFailPayload.getFailCount()).isEqualTo(1);
         } finally {
             executorService.shutdownNow();
         }

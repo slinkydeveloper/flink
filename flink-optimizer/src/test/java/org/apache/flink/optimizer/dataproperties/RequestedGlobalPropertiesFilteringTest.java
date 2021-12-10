@@ -34,7 +34,7 @@ import org.apache.flink.types.LongValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RequestedGlobalPropertiesFilteringTest {
 
@@ -79,7 +79,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -94,7 +94,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -109,16 +109,16 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.HASH_PARTITIONED, filtered.getPartitioning());
-        assertNotNull(filtered.getPartitionedFields());
-        assertEquals(3, filtered.getPartitionedFields().size());
-        assertTrue(filtered.getPartitionedFields().contains(0));
-        assertTrue(filtered.getPartitionedFields().contains(3));
-        assertTrue(filtered.getPartitionedFields().contains(4));
-        assertNull(filtered.getDataDistribution());
-        assertNull(filtered.getCustomPartitioner());
-        assertNull(filtered.getOrdering());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.HASH_PARTITIONED);
+        assertThat(filtered.getPartitionedFields()).isNotNull();
+        assertThat(filtered.getPartitionedFields().size()).isEqualTo(3);
+        assertThat(filtered.getPartitionedFields().contains(0)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(3)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(4)).isTrue();
+        assertThat(filtered.getDataDistribution()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
+        assertThat(filtered.getOrdering()).isNull();
     }
 
     @Test
@@ -133,16 +133,16 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.HASH_PARTITIONED, filtered.getPartitioning());
-        assertNotNull(filtered.getPartitionedFields());
-        assertEquals(3, filtered.getPartitionedFields().size());
-        assertTrue(filtered.getPartitionedFields().contains(1));
-        assertTrue(filtered.getPartitionedFields().contains(2));
-        assertTrue(filtered.getPartitionedFields().contains(7));
-        assertNull(filtered.getDataDistribution());
-        assertNull(filtered.getCustomPartitioner());
-        assertNull(filtered.getOrdering());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.HASH_PARTITIONED);
+        assertThat(filtered.getPartitionedFields()).isNotNull();
+        assertThat(filtered.getPartitionedFields().size()).isEqualTo(3);
+        assertThat(filtered.getPartitionedFields().contains(1)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(2)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(7)).isTrue();
+        assertThat(filtered.getDataDistribution()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
+        assertThat(filtered.getOrdering()).isNull();
     }
 
     @Test
@@ -157,7 +157,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -172,16 +172,16 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.ANY_PARTITIONING, filtered.getPartitioning());
-        assertNotNull(filtered.getPartitionedFields());
-        assertEquals(3, filtered.getPartitionedFields().size());
-        assertTrue(filtered.getPartitionedFields().contains(0));
-        assertTrue(filtered.getPartitionedFields().contains(3));
-        assertTrue(filtered.getPartitionedFields().contains(4));
-        assertNull(filtered.getDataDistribution());
-        assertNull(filtered.getCustomPartitioner());
-        assertNull(filtered.getOrdering());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.ANY_PARTITIONING);
+        assertThat(filtered.getPartitionedFields()).isNotNull();
+        assertThat(filtered.getPartitionedFields().size()).isEqualTo(3);
+        assertThat(filtered.getPartitionedFields().contains(0)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(3)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(4)).isTrue();
+        assertThat(filtered.getDataDistribution()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
+        assertThat(filtered.getOrdering()).isNull();
     }
 
     @Test
@@ -196,16 +196,16 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.ANY_PARTITIONING, filtered.getPartitioning());
-        assertNotNull(filtered.getPartitionedFields());
-        assertEquals(3, filtered.getPartitionedFields().size());
-        assertTrue(filtered.getPartitionedFields().contains(1));
-        assertTrue(filtered.getPartitionedFields().contains(2));
-        assertTrue(filtered.getPartitionedFields().contains(7));
-        assertNull(filtered.getDataDistribution());
-        assertNull(filtered.getCustomPartitioner());
-        assertNull(filtered.getOrdering());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.ANY_PARTITIONING);
+        assertThat(filtered.getPartitionedFields()).isNotNull();
+        assertThat(filtered.getPartitionedFields().size()).isEqualTo(3);
+        assertThat(filtered.getPartitionedFields().contains(1)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(2)).isTrue();
+        assertThat(filtered.getPartitionedFields().contains(7)).isTrue();
+        assertThat(filtered.getDataDistribution()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
+        assertThat(filtered.getOrdering()).isNull();
     }
 
     @Test
@@ -220,7 +220,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -240,22 +240,22 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.RANGE_PARTITIONED, filtered.getPartitioning());
-        assertNotNull(filtered.getOrdering());
-        assertEquals(3, filtered.getOrdering().getNumberOfFields());
-        assertEquals(3, filtered.getOrdering().getFieldNumber(0).intValue());
-        assertEquals(1, filtered.getOrdering().getFieldNumber(1).intValue());
-        assertEquals(6, filtered.getOrdering().getFieldNumber(2).intValue());
-        assertEquals(LongValue.class, filtered.getOrdering().getType(0));
-        assertEquals(IntValue.class, filtered.getOrdering().getType(1));
-        assertEquals(ByteValue.class, filtered.getOrdering().getType(2));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(0));
-        assertEquals(Order.ASCENDING, filtered.getOrdering().getOrder(1));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(2));
-        assertNull(filtered.getPartitionedFields());
-        assertNull(filtered.getDataDistribution());
-        assertNull(filtered.getCustomPartitioner());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.RANGE_PARTITIONED);
+        assertThat(filtered.getOrdering()).isNotNull();
+        assertThat(filtered.getOrdering().getNumberOfFields()).isEqualTo(3);
+        assertThat(filtered.getOrdering().getFieldNumber(0).intValue()).isEqualTo(3);
+        assertThat(filtered.getOrdering().getFieldNumber(1).intValue()).isEqualTo(1);
+        assertThat(filtered.getOrdering().getFieldNumber(2).intValue()).isEqualTo(6);
+        assertThat(filtered.getOrdering().getType(0)).isEqualTo(LongValue.class);
+        assertThat(filtered.getOrdering().getType(1)).isEqualTo(IntValue.class);
+        assertThat(filtered.getOrdering().getType(2)).isEqualTo(ByteValue.class);
+        assertThat(filtered.getOrdering().getOrder(0)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getOrdering().getOrder(1)).isEqualTo(Order.ASCENDING);
+        assertThat(filtered.getOrdering().getOrder(2)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getPartitionedFields()).isNull();
+        assertThat(filtered.getDataDistribution()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
     }
 
     @Test
@@ -275,22 +275,22 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.RANGE_PARTITIONED, filtered.getPartitioning());
-        assertNotNull(filtered.getOrdering());
-        assertEquals(3, filtered.getOrdering().getNumberOfFields());
-        assertEquals(7, filtered.getOrdering().getFieldNumber(0).intValue());
-        assertEquals(1, filtered.getOrdering().getFieldNumber(1).intValue());
-        assertEquals(2, filtered.getOrdering().getFieldNumber(2).intValue());
-        assertEquals(LongValue.class, filtered.getOrdering().getType(0));
-        assertEquals(IntValue.class, filtered.getOrdering().getType(1));
-        assertEquals(ByteValue.class, filtered.getOrdering().getType(2));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(0));
-        assertEquals(Order.ASCENDING, filtered.getOrdering().getOrder(1));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(2));
-        assertNull(filtered.getPartitionedFields());
-        assertNull(filtered.getDataDistribution());
-        assertNull(filtered.getCustomPartitioner());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.RANGE_PARTITIONED);
+        assertThat(filtered.getOrdering()).isNotNull();
+        assertThat(filtered.getOrdering().getNumberOfFields()).isEqualTo(3);
+        assertThat(filtered.getOrdering().getFieldNumber(0).intValue()).isEqualTo(7);
+        assertThat(filtered.getOrdering().getFieldNumber(1).intValue()).isEqualTo(1);
+        assertThat(filtered.getOrdering().getFieldNumber(2).intValue()).isEqualTo(2);
+        assertThat(filtered.getOrdering().getType(0)).isEqualTo(LongValue.class);
+        assertThat(filtered.getOrdering().getType(1)).isEqualTo(IntValue.class);
+        assertThat(filtered.getOrdering().getType(2)).isEqualTo(ByteValue.class);
+        assertThat(filtered.getOrdering().getOrder(0)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getOrdering().getOrder(1)).isEqualTo(Order.ASCENDING);
+        assertThat(filtered.getOrdering().getOrder(2)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getPartitionedFields()).isNull();
+        assertThat(filtered.getDataDistribution()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
     }
 
     @Test
@@ -311,23 +311,23 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNotNull(filtered);
-        assertEquals(PartitioningProperty.RANGE_PARTITIONED, filtered.getPartitioning());
-        assertNotNull(filtered.getOrdering());
-        assertEquals(3, filtered.getOrdering().getNumberOfFields());
-        assertEquals(7, filtered.getOrdering().getFieldNumber(0).intValue());
-        assertEquals(1, filtered.getOrdering().getFieldNumber(1).intValue());
-        assertEquals(2, filtered.getOrdering().getFieldNumber(2).intValue());
-        assertEquals(LongValue.class, filtered.getOrdering().getType(0));
-        assertEquals(IntValue.class, filtered.getOrdering().getType(1));
-        assertEquals(ByteValue.class, filtered.getOrdering().getType(2));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(0));
-        assertEquals(Order.ASCENDING, filtered.getOrdering().getOrder(1));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(2));
-        assertNotNull(filtered.getDataDistribution());
-        assertEquals(dd, filtered.getDataDistribution());
-        assertNull(filtered.getPartitionedFields());
-        assertNull(filtered.getCustomPartitioner());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getPartitioning()).isEqualTo(PartitioningProperty.RANGE_PARTITIONED);
+        assertThat(filtered.getOrdering()).isNotNull();
+        assertThat(filtered.getOrdering().getNumberOfFields()).isEqualTo(3);
+        assertThat(filtered.getOrdering().getFieldNumber(0).intValue()).isEqualTo(7);
+        assertThat(filtered.getOrdering().getFieldNumber(1).intValue()).isEqualTo(1);
+        assertThat(filtered.getOrdering().getFieldNumber(2).intValue()).isEqualTo(2);
+        assertThat(filtered.getOrdering().getType(0)).isEqualTo(LongValue.class);
+        assertThat(filtered.getOrdering().getType(1)).isEqualTo(IntValue.class);
+        assertThat(filtered.getOrdering().getType(2)).isEqualTo(ByteValue.class);
+        assertThat(filtered.getOrdering().getOrder(0)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getOrdering().getOrder(1)).isEqualTo(Order.ASCENDING);
+        assertThat(filtered.getOrdering().getOrder(2)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getDataDistribution()).isNotNull();
+        assertThat(filtered.getDataDistribution()).isEqualTo(dd);
+        assertThat(filtered.getPartitionedFields()).isNull();
+        assertThat(filtered.getCustomPartitioner()).isNull();
     }
 
     @Test
@@ -347,7 +347,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -362,7 +362,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -377,7 +377,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -392,7 +392,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -407,7 +407,7 @@ public class RequestedGlobalPropertiesFilteringTest {
 
         RequestedGlobalProperties filtered = rgProps.filterBySemanticProperties(sProp, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -433,27 +433,27 @@ public class RequestedGlobalPropertiesFilteringTest {
         RequestedGlobalProperties filtered1 = gprops1.filterBySemanticProperties(dprops, 0);
         RequestedGlobalProperties filtered2 = gprops2.filterBySemanticProperties(dprops, 1);
 
-        assertNotNull(filtered1);
-        assertEquals(PartitioningProperty.HASH_PARTITIONED, filtered1.getPartitioning());
-        assertNotNull(filtered1.getPartitionedFields());
-        assertEquals(3, filtered1.getPartitionedFields().size());
-        assertTrue(filtered1.getPartitionedFields().contains(0));
-        assertTrue(filtered1.getPartitionedFields().contains(2));
-        assertTrue(filtered1.getPartitionedFields().contains(4));
-        assertNull(filtered1.getOrdering());
-        assertNull(filtered1.getCustomPartitioner());
-        assertNull(filtered1.getDataDistribution());
+        assertThat(filtered1).isNotNull();
+        assertThat(filtered1.getPartitioning()).isEqualTo(PartitioningProperty.HASH_PARTITIONED);
+        assertThat(filtered1.getPartitionedFields()).isNotNull();
+        assertThat(filtered1.getPartitionedFields().size()).isEqualTo(3);
+        assertThat(filtered1.getPartitionedFields().contains(0)).isTrue();
+        assertThat(filtered1.getPartitionedFields().contains(2)).isTrue();
+        assertThat(filtered1.getPartitionedFields().contains(4)).isTrue();
+        assertThat(filtered1.getOrdering()).isNull();
+        assertThat(filtered1.getCustomPartitioner()).isNull();
+        assertThat(filtered1.getDataDistribution()).isNull();
 
-        assertNotNull(filtered2);
-        assertEquals(PartitioningProperty.HASH_PARTITIONED, filtered2.getPartitioning());
-        assertNotNull(filtered2.getPartitionedFields());
-        assertEquals(3, filtered2.getPartitionedFields().size());
-        assertTrue(filtered2.getPartitionedFields().contains(1));
-        assertTrue(filtered2.getPartitionedFields().contains(3));
-        assertTrue(filtered2.getPartitionedFields().contains(4));
-        assertNull(filtered2.getOrdering());
-        assertNull(filtered2.getCustomPartitioner());
-        assertNull(filtered2.getDataDistribution());
+        assertThat(filtered2).isNotNull();
+        assertThat(filtered2.getPartitioning()).isEqualTo(PartitioningProperty.HASH_PARTITIONED);
+        assertThat(filtered2.getPartitionedFields()).isNotNull();
+        assertThat(filtered2.getPartitionedFields().size()).isEqualTo(3);
+        assertThat(filtered2.getPartitionedFields().contains(1)).isTrue();
+        assertThat(filtered2.getPartitionedFields().contains(3)).isTrue();
+        assertThat(filtered2.getPartitionedFields().contains(4)).isTrue();
+        assertThat(filtered2.getOrdering()).isNull();
+        assertThat(filtered2.getCustomPartitioner()).isNull();
+        assertThat(filtered2.getDataDistribution()).isNull();
     }
 
     @Test(expected = IndexOutOfBoundsException.class)

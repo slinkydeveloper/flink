@@ -67,8 +67,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.apache.flink.util.NetUtils.hostAndPortToUrlString;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** An implementation of the KafkaServerProvider. */
 public class KafkaTestEnvironmentImpl extends KafkaTestEnvironment {
@@ -105,15 +105,15 @@ public class KafkaTestEnvironmentImpl extends KafkaTestEnvironment {
 
         File tempDir = new File(System.getProperty("java.io.tmpdir"));
         tmpZkDir = new File(tempDir, "kafkaITcase-zk-dir-" + (UUID.randomUUID()));
-        assertTrue("cannot create zookeeper temp dir", tmpZkDir.mkdirs());
+        assertThat(tmpZkDir.mkdirs()).as("cannot create zookeeper temp dir").isTrue();
 
         tmpKafkaParent = new File(tempDir, "kafkaITcase-kafka-dir-" + (UUID.randomUUID()));
-        assertTrue("cannot create kafka temp dir", tmpKafkaParent.mkdirs());
+        assertThat(tmpKafkaParent.mkdirs()).as("cannot create kafka temp dir").isTrue();
 
         tmpKafkaDirs = new ArrayList<>(config.getKafkaServersNumber());
         for (int i = 0; i < config.getKafkaServersNumber(); i++) {
             File tmpDir = new File(tmpKafkaParent, "server-" + i);
-            assertTrue("cannot create kafka temp dir", tmpDir.mkdir());
+            assertThat(tmpDir.mkdir()).as("cannot create kafka temp dir").isTrue();
             tmpKafkaDirs.add(tmpDir);
         }
 

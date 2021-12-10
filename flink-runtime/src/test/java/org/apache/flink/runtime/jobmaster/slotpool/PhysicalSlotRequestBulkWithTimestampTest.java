@@ -25,8 +25,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PhysicalSlotRequestBulkWithTimestamp}. */
 public class PhysicalSlotRequestBulkWithTimestampTest extends TestLogger {
@@ -41,7 +40,7 @@ public class PhysicalSlotRequestBulkWithTimestampTest extends TestLogger {
         clock.advanceTime(456, TimeUnit.MILLISECONDS);
         bulk.markUnfulfillable(clock.relativeTimeMillis());
 
-        assertThat(bulk.getUnfulfillableSince(), is(clock.relativeTimeMillis()));
+        assertThat(bulk.getUnfulfillableSince()).isEqualTo(clock.relativeTimeMillis());
     }
 
     @Test
@@ -55,7 +54,7 @@ public class PhysicalSlotRequestBulkWithTimestampTest extends TestLogger {
         clock.advanceTime(456, TimeUnit.MILLISECONDS);
         bulk.markUnfulfillable(clock.relativeTimeMillis());
 
-        assertThat(bulk.getUnfulfillableSince(), is(unfulfillableSince));
+        assertThat(bulk.getUnfulfillableSince()).isEqualTo(unfulfillableSince);
     }
 
     private static PhysicalSlotRequestBulkWithTimestamp

@@ -18,7 +18,6 @@
 
 package org.apache.flink.client.python;
 
-import org.junit.Assert;
 import org.junit.Test;
 import py4j.GatewayServer;
 
@@ -28,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /** Tests for the {@link PythonDriver}. */
 public class PythonDriverTest {
     @Test
@@ -35,7 +36,7 @@ public class PythonDriverTest {
         GatewayServer gatewayServer = PythonEnvUtils.startGatewayServer();
         try {
             Socket socket = new Socket("localhost", gatewayServer.getListeningPort());
-            assert socket.isConnected();
+            assertThat(socket.isConnected()).isTrue();
         } catch (IOException e) {
             throw new RuntimeException("Connect Gateway Server failed");
         } finally {
@@ -52,11 +53,11 @@ public class PythonDriverTest {
         PythonDriverOptions pythonDriverOptions = new PythonDriverOptions("xxx", null, args);
         List<String> commands = PythonDriver.constructPythonCommands(pythonDriverOptions);
         // verify the generated commands
-        Assert.assertEquals(4, commands.size());
-        Assert.assertEquals(commands.get(0), "-m");
-        Assert.assertEquals(commands.get(1), "xxx");
-        Assert.assertEquals(commands.get(2), "--input");
-        Assert.assertEquals(commands.get(3), "in.txt");
+        assertThat(commands.size()).isEqualTo(4);
+        assertThat("-m").isEqualTo(commands.get(0));
+        assertThat("xxx").isEqualTo(commands.get(1));
+        assertThat("--input").isEqualTo(commands.get(2));
+        assertThat("in.txt").isEqualTo(commands.get(3));
     }
 
     @Test
@@ -67,9 +68,9 @@ public class PythonDriverTest {
 
         PythonDriverOptions pythonDriverOptions = new PythonDriverOptions(null, "xxx", args);
         List<String> commands = PythonDriver.constructPythonCommands(pythonDriverOptions);
-        Assert.assertEquals(3, commands.size());
-        Assert.assertEquals(commands.get(0), "xxx");
-        Assert.assertEquals(commands.get(1), "--input");
-        Assert.assertEquals(commands.get(2), "in.txt");
+        assertThat(commands.size()).isEqualTo(3);
+        assertThat("xxx").isEqualTo(commands.get(0));
+        assertThat("--input").isEqualTo(commands.get(1));
+        assertThat("in.txt").isEqualTo(commands.get(2));
     }
 }

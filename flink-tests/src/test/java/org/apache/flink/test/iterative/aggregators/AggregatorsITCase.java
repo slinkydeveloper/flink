@@ -35,7 +35,6 @@ import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.types.LongValue;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -52,7 +51,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test the functionality of aggregators in bulk and delta iterative cases. */
 @RunWith(Parameterized.class)
@@ -92,6 +91,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
                         env.generateSequence(1, 2)
                                 .filter(
                                         new RichFilterFunction<Long>() {
+
                                             @Override
                                             public void open(Configuration parameters)
                                                     throws Exception {
@@ -103,7 +103,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
                                                         new BufferedReader(new FileReader(file));
                                                 String output = reader.readLine();
                                                 reader.close();
-                                                assertEquals(output, testString);
+                                                assertThat(testString).isEqualTo(output);
                                             }
 
                                             @Override
@@ -142,7 +142,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
 
         List<Integer> expected = Arrays.asList(-3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
 
         List<Integer> expected = Arrays.asList(-3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -200,7 +200,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
 
         List<Integer> expected = Arrays.asList(-3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -239,7 +239,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
 
         List<Integer> expected = Arrays.asList(1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -278,7 +278,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
 
         List<Integer> expected = Arrays.asList(1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5);
 
-        assertEquals(result, expected);
+        assertThat(expected).isEqualTo(result);
     }
 
     @Test
@@ -317,7 +317,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
 
         List<Integer> expected = Arrays.asList(-3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 1, 1, 1, 1, 1);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @SuppressWarnings("serial")
@@ -443,7 +443,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
                         getIterationRuntimeContext()
                                 .getPreviousIterationAggregate(NEGATIVE_ELEMENTS_AGGR);
                 // check previous aggregator value
-                Assert.assertEquals(superstep - 1, previousAggr.getValue());
+                assertThat(previousAggr.getValue()).isEqualTo(superstep - 1);
             }
         }
 
@@ -509,7 +509,7 @@ public class AggregatorsITCase extends MultipleProgramsTestBase {
                         getIterationRuntimeContext()
                                 .getPreviousIterationAggregate(NEGATIVE_ELEMENTS_AGGR);
                 // check previous aggregator value
-                Assert.assertEquals(superstep - 1, previousAggr.getValue());
+                assertThat(previousAggr.getValue()).isEqualTo(superstep - 1);
             }
         }
 

@@ -52,7 +52,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests of {@link SubtaskCurrentAttemptDetailsHandler}. */
 public class SubtaskCurrentAttemptDetailsHandlerTest extends TestLogger {
@@ -162,6 +162,6 @@ public class SubtaskCurrentAttemptDetailsHandlerTest extends TestLogger {
                         ioMetricsInfo,
                         assignedResourceLocation.getResourceID().getResourceIdString());
 
-        assertEquals(expectedDetailsInfo, detailsInfo);
+        assertThat(detailsInfo).isEqualTo(expectedDetailsInfo);
     }
 }

@@ -37,9 +37,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -124,7 +122,7 @@ public class RMQSinkTest {
         try {
             createRMQSink();
         } catch (RuntimeException ex) {
-            assertEquals("None of RabbitMQ channels are available", ex.getMessage());
+            assertThat(ex.getMessage()).isEqualTo("None of RabbitMQ channels are available");
         }
     }
 
@@ -138,7 +136,9 @@ public class RMQSinkTest {
                 new AbstractStreamOperatorTestHarness<>(new StreamSink<>(producer), 1, 1, 0);
 
         testHarness.open();
-        assertThat("Open method was not called", serializationSchema.isOpenCalled(), is(true));
+        assertThat(serializationSchema.isOpenCalled())
+                .as("Open method was not called")
+                .isEqualTo(true);
     }
 
     private RMQSink<String> createRMQSink() throws Exception {

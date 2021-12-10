@@ -55,7 +55,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** End to end tests of both CEP operators and {@link NFA}. */
 @SuppressWarnings("serial")
@@ -150,7 +150,7 @@ public class CEPITCase extends AbstractTestBase {
 
         DataStreamUtils.collect(result).forEachRemaining(resultList::add);
 
-        assertEquals(Arrays.asList("2,6,8"), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList("2,6,8"));
     }
 
     @Test
@@ -237,7 +237,7 @@ public class CEPITCase extends AbstractTestBase {
 
         resultList.sort(String::compareTo);
 
-        assertEquals(Arrays.asList("2,2,2", "3,3,3", "42,42,42"), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList("2,2,2", "3,3,3", "42,42,42"));
     }
 
     @Test
@@ -334,7 +334,7 @@ public class CEPITCase extends AbstractTestBase {
 
         resultList.sort(String::compareTo);
 
-        assertEquals(Arrays.asList("1,5,4"), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList("1,5,4"));
     }
 
     @Test
@@ -444,7 +444,7 @@ public class CEPITCase extends AbstractTestBase {
 
         resultList.sort(String::compareTo);
 
-        assertEquals(Arrays.asList("1,1,1", "2,2,2"), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList("1,1,1", "2,2,2"));
     }
 
     @Test
@@ -485,7 +485,7 @@ public class CEPITCase extends AbstractTestBase {
 
         DataStreamUtils.collect(result).forEachRemaining(resultList::add);
 
-        assertEquals(Arrays.asList(new Tuple2<>(0, 1)), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList(new Tuple2<>(0, 1)));
     }
 
     @Test
@@ -516,7 +516,7 @@ public class CEPITCase extends AbstractTestBase {
 
         DataStreamUtils.collect(result).forEachRemaining(resultList::add);
 
-        assertEquals(Arrays.asList(3), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList(3));
     }
 
     @Test
@@ -627,7 +627,7 @@ public class CEPITCase extends AbstractTestBase {
                         Either.Left.of("2.0"),
                         Either.Right.of("2.0,2.0,2.0"));
 
-        assertEquals(expected, resultList);
+        assertThat(resultList).isEqualTo(expected);
     }
 
     /**
@@ -713,7 +713,7 @@ public class CEPITCase extends AbstractTestBase {
 
         resultList.sort(String::compareTo);
 
-        assertEquals(expected, resultList);
+        assertThat(resultList).isEqualTo(expected);
     }
 
     /**
@@ -822,7 +822,7 @@ public class CEPITCase extends AbstractTestBase {
 
         resultList.sort(String::compareTo);
 
-        assertEquals(expected, resultList);
+        assertThat(resultList).isEqualTo(expected);
     }
 
     private static class CustomEventComparator implements EventComparator<Event> {
@@ -881,7 +881,7 @@ public class CEPITCase extends AbstractTestBase {
         List<Tuple2<Integer, String>> expected =
                 Arrays.asList(Tuple2.of(1, "a"), Tuple2.of(3, "a"));
 
-        assertEquals(expected, resultList);
+        assertThat(resultList).isEqualTo(expected);
     }
 
     @Test
@@ -977,7 +977,7 @@ public class CEPITCase extends AbstractTestBase {
 
         DataStreamUtils.collect(result).forEachRemaining(resultList::add);
 
-        assertEquals(Arrays.asList("2,6,8"), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList("2,6,8"));
     }
 
     @Test
@@ -1087,7 +1087,7 @@ public class CEPITCase extends AbstractTestBase {
 
         resultList.sort(String::compareTo);
 
-        assertEquals(Arrays.asList("2,2,2", "3,3,3", "42,42,42"), resultList);
+        assertThat(resultList).isEqualTo(Arrays.asList("2,2,2", "3,3,3", "42,42,42"));
     }
 
     @Test

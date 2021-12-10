@@ -30,8 +30,6 @@ import org.apache.flink.streaming.connectors.gcp.pubsub.common.PubSubSubscriber;
 import org.apache.flink.streaming.connectors.gcp.pubsub.common.PubSubSubscriberFactory;
 
 import com.google.auth.Credentials;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,8 +39,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.refEq;
@@ -108,7 +105,7 @@ public class PubSubSourceTest {
 
         TypeInformation<String> actualTypeInformation = pubSubSource.getProducedType();
 
-        assertThat(actualTypeInformation, is(schemaTypeInformation));
+        assertThat(actualTypeInformation).isEqualTo(schemaTypeInformation);
         verify(deserializationSchema, times(1)).getProducedType();
     }
 
@@ -144,8 +141,7 @@ public class PubSubSourceTest {
                         (args) -> {
                             DeserializationSchema.InitializationContext context =
                                     args.getArgument(0);
-                            Assert.assertThat(
-                                    context.getMetricGroup(), Matchers.equalTo(metricGroup));
+                            assertThat(context.getMetricGroup()).isEqualTo(metricGroup);
                             return null;
                         })
                 .when(deserializationSchema)

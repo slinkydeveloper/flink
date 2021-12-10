@@ -38,9 +38,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the emission of latency markers by {@link SourceOperator} operators. */
 public class SourceOperatorLatencyMetricsTest extends TestLogger {
@@ -132,7 +132,7 @@ public class SourceOperatorLatencyMetricsTest extends TestLogger {
 
             List<LatencyMarker> expectedOutput = new ArrayList<>();
             if (!shouldExpectLatencyMarkers) {
-                assertTrue(testHarness.getOutput().isEmpty());
+                assertThat(testHarness.getOutput().isEmpty()).isTrue();
             } else {
                 expectedOutput.add(
                         new LatencyMarker(1, testHarness.getOperator().getOperatorID(), 0));
@@ -143,9 +143,8 @@ public class SourceOperatorLatencyMetricsTest extends TestLogger {
                             new LatencyMarker(
                                     markedTime, testHarness.getOperator().getOperatorID(), 0));
                 }
-                assertThat(
-                        (Collection<Object>) testHarness.getOutput(),
-                        contains(expectedOutput.toArray()));
+                assertThat((Collection<Object>) testHarness.getOutput())
+                        .satisfies(matching(contains(expectedOutput.toArray())));
             }
         }
     }

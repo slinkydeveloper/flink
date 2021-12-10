@@ -33,8 +33,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.net.URLClassLoader;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT Case for catalog ddl. */
 public class CatalogITCase {
@@ -52,8 +51,8 @@ public class CatalogITCase {
 
         tableEnv.executeSql(ddl);
 
-        assertTrue(tableEnv.getCatalog(name).isPresent());
-        assertTrue(tableEnv.getCatalog(name).get() instanceof GenericInMemoryCatalog);
+        assertThat(tableEnv.getCatalog(name).isPresent()).isTrue();
+        assertThat(tableEnv.getCatalog(name).get()).isInstanceOf(GenericInMemoryCatalog.class);
     }
 
     @Test
@@ -66,11 +65,11 @@ public class CatalogITCase {
                         "create catalog %s with('type'='%s')",
                         name, GenericInMemoryCatalogFactoryOptions.IDENTIFIER);
         tableEnv.executeSql(ddl);
-        assertTrue(tableEnv.getCatalog(name).isPresent());
+        assertThat(tableEnv.getCatalog(name).isPresent()).isTrue();
 
         ddl = String.format("drop catalog %s", name);
         tableEnv.executeSql(ddl);
-        assertFalse(tableEnv.getCatalog(name).isPresent());
+        assertThat(tableEnv.getCatalog(name).isPresent()).isFalse();
     }
 
     @Test
@@ -116,7 +115,7 @@ public class CatalogITCase {
             TableEnvironment tableEnvironment = getTableEnvironment();
             tableEnvironment.executeSql("CREATE CATALOG cat WITH ('type'='userCatalog')");
 
-            assertTrue(tableEnvironment.getCatalog("cat").isPresent());
+            assertThat(tableEnvironment.getCatalog("cat").isPresent()).isTrue();
         }
     }
 
@@ -165,7 +164,7 @@ public class CatalogITCase {
             TableEnvironment tableEnvironment = getTableEnvironment();
             tableEnvironment.executeSql("CREATE CATALOG cat WITH ('type'='userCatalog')");
 
-            assertTrue(tableEnvironment.getCatalog("cat").isPresent());
+            assertThat(tableEnvironment.getCatalog("cat").isPresent()).isTrue();
         }
     }
 

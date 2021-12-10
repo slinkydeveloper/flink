@@ -20,31 +20,31 @@ package org.apache.flink.optimizer.plandump;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NumberFormattingTest {
 
     @Test
     public void testFormatNumberNoDigit() {
-        assertEquals("0.0", PlanJSONDumpGenerator.formatNumber(0));
-        assertEquals("0.00", PlanJSONDumpGenerator.formatNumber(0.0000000001));
-        assertEquals("-1.0", PlanJSONDumpGenerator.formatNumber(-1.0));
-        assertEquals("1.00", PlanJSONDumpGenerator.formatNumber(1));
-        assertEquals("17.00", PlanJSONDumpGenerator.formatNumber(17));
-        assertEquals("17.44", PlanJSONDumpGenerator.formatNumber(17.44));
-        assertEquals("143.00", PlanJSONDumpGenerator.formatNumber(143));
-        assertEquals("143.40", PlanJSONDumpGenerator.formatNumber(143.4));
-        assertEquals("143.50", PlanJSONDumpGenerator.formatNumber(143.5));
-        assertEquals("143.60", PlanJSONDumpGenerator.formatNumber(143.6));
-        assertEquals("143.45", PlanJSONDumpGenerator.formatNumber(143.45));
-        assertEquals("143.55", PlanJSONDumpGenerator.formatNumber(143.55));
-        assertEquals("143.65", PlanJSONDumpGenerator.formatNumber(143.65));
-        assertEquals("143.66", PlanJSONDumpGenerator.formatNumber(143.655));
+        assertThat(PlanJSONDumpGenerator.formatNumber(0)).isEqualTo("0.0");
+        assertThat(PlanJSONDumpGenerator.formatNumber(0.0000000001)).isEqualTo("0.00");
+        assertThat(PlanJSONDumpGenerator.formatNumber(-1.0)).isEqualTo("-1.0");
+        assertThat(PlanJSONDumpGenerator.formatNumber(1)).isEqualTo("1.00");
+        assertThat(PlanJSONDumpGenerator.formatNumber(17)).isEqualTo("17.00");
+        assertThat(PlanJSONDumpGenerator.formatNumber(17.44)).isEqualTo("17.44");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143)).isEqualTo("143.00");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.4)).isEqualTo("143.40");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.5)).isEqualTo("143.50");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.6)).isEqualTo("143.60");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.45)).isEqualTo("143.45");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.55)).isEqualTo("143.55");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.65)).isEqualTo("143.65");
+        assertThat(PlanJSONDumpGenerator.formatNumber(143.655)).isEqualTo("143.66");
 
-        assertEquals("1.13 K", PlanJSONDumpGenerator.formatNumber(1126.0));
-        assertEquals("11.13 K", PlanJSONDumpGenerator.formatNumber(11126.0));
-        assertEquals("118.13 K", PlanJSONDumpGenerator.formatNumber(118126.0));
+        assertThat(PlanJSONDumpGenerator.formatNumber(1126.0)).isEqualTo("1.13 K");
+        assertThat(PlanJSONDumpGenerator.formatNumber(11126.0)).isEqualTo("11.13 K");
+        assertThat(PlanJSONDumpGenerator.formatNumber(118126.0)).isEqualTo("118.13 K");
 
-        assertEquals("1.44 M", PlanJSONDumpGenerator.formatNumber(1435126.0));
+        assertThat(PlanJSONDumpGenerator.formatNumber(1435126.0)).isEqualTo("1.44 M");
     }
 }

@@ -31,7 +31,7 @@ import org.junit.Test;
 import java.util.function.Function;
 
 import static org.apache.flink.util.CloseableIterator.ofElements;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link ChannelStateWriteRequestDispatcherImpl} test. */
 public class ChannelStateWriteRequestDispatcherImplTest {
@@ -73,7 +73,7 @@ public class ChannelStateWriteRequestDispatcherImplTest {
         NetworkBuffer[] buffers = new NetworkBuffer[] {buffer(), buffer()};
         dispatcher.dispatch(requestBuilder.apply(buffers));
         for (NetworkBuffer buffer : buffers) {
-            assertTrue(buffer.isRecycled());
+            assertThat(buffer.isRecycled()).isTrue();
         }
     }
 

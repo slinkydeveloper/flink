@@ -21,9 +21,10 @@ package org.apache.flink.graph.drivers.parameter;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.graph.drivers.parameter.Simplify.Ordering;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Simplify}. */
 public class SimplifyTest extends ParameterTestBase {
@@ -40,18 +41,18 @@ public class SimplifyTest extends ParameterTestBase {
     @Test
     public void testWithDirected() {
         parameter.configure(ParameterTool.fromArgs(new String[] {"--simplify", "directed"}));
-        Assert.assertEquals(Ordering.DIRECTED, parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(Ordering.DIRECTED);
     }
 
     @Test
     public void testWithUndirected() {
         parameter.configure(ParameterTool.fromArgs(new String[] {"--simplify", "undirected"}));
-        Assert.assertEquals(Ordering.UNDIRECTED, parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(Ordering.UNDIRECTED);
     }
 
     @Test
     public void testWithNoParameter() {
         parameter.configure(ParameterTool.fromArgs(new String[] {}));
-        Assert.assertEquals(Ordering.NONE, parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(Ordering.NONE);
     }
 }

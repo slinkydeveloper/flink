@@ -55,10 +55,7 @@ import static org.apache.flink.runtime.blob.BlobServerCleanupTest.checkFilesExis
 import static org.apache.flink.runtime.blob.BlobServerGetTest.get;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.verifyContents;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A few tests for the cleanup of {@link PermanentBlobCache} and {@link TransientBlobCache}. */
 public class BlobCacheCleanupTest extends TestLogger {
@@ -117,14 +114,14 @@ public class BlobCacheCleanupTest extends TestLogger {
                 cache.getFile(jobId, key);
             }
 
-            assertEquals(2, checkFilesExist(jobId, keys, cache, true));
+            assertThat(checkFilesExist(jobId, keys, cache, true)).isEqualTo(2);
             checkFileCountForJob(2, jobId, server);
             checkFileCountForJob(2, jobId, cache);
 
             // after releasing once, nothing should change
             cache.releaseJob(jobId);
 
-            assertEquals(2, checkFilesExist(jobId, keys, cache, true));
+            assertThat(checkFilesExist(jobId, keys, cache, true)).isEqualTo(2);
             checkFileCountForJob(2, jobId, server);
             checkFileCountForJob(2, jobId, cache);
 
@@ -170,41 +167,39 @@ public class BlobCacheCleanupTest extends TestLogger {
 
             // register once
             cache.registerJob(jobId);
-            assertEquals(1, cache.getJobRefCounters().get(jobId).references);
-            assertEquals(-1, cache.getJobRefCounters().get(jobId).keepUntil);
+            assertThat(cache.getJobRefCounters().get(jobId).references).isEqualTo(1);
+            assertThat(cache.getJobRefCounters().get(jobId).keepUntil).isEqualTo(-1);
 
             // register a second time
             cache.registerJob(jobId);
-            assertEquals(2, cache.getJobRefCounters().get(jobId).references);
-            assertEquals(-1, cache.getJobRefCounters().get(jobId).keepUntil);
+            assertThat(cache.getJobRefCounters().get(jobId).references).isEqualTo(2);
+            assertThat(cache.getJobRefCounters().get(jobId).keepUntil).isEqualTo(-1);
 
             // release once
             cache.releaseJob(jobId);
-            assertEquals(1, cache.getJobRefCounters().get(jobId).references);
-            assertEquals(-1, cache.getJobRefCounters().get(jobId).keepUntil);
+            assertThat(cache.getJobRefCounters().get(jobId).references).isEqualTo(1);
+            assertThat(cache.getJobRefCounters().get(jobId).keepUntil).isEqualTo(-1);
 
             // release a second time
             long cleanupLowerBound =
                     System.currentTimeMillis() + config.getLong(BlobServerOptions.CLEANUP_INTERVAL);
             cache.releaseJob(jobId);
-            assertEquals(0, cache.getJobRefCounters().get(jobId).references);
-            assertThat(
-                    cache.getJobRefCounters().get(jobId).keepUntil,
-                    greaterThanOrEqualTo(cleanupLowerBound));
+            assertThat(cache.getJobRefCounters().get(jobId).references).isEqualTo(0);
+            assertThat(cache.getJobRefCounters().get(jobId).keepUntil)
+                    .isGreaterThanOrEqualTo(cleanupLowerBound);
 
             // register again
             cache.registerJob(jobId);
-            assertEquals(1, cache.getJobRefCounters().get(jobId).references);
-            assertEquals(-1, cache.getJobRefCounters().get(jobId).keepUntil);
+            assertThat(cache.getJobRefCounters().get(jobId).references).isEqualTo(1);
+            assertThat(cache.getJobRefCounters().get(jobId).keepUntil).isEqualTo(-1);
 
             // finally release the job
             cleanupLowerBound =
                     System.currentTimeMillis() + config.getLong(BlobServerOptions.CLEANUP_INTERVAL);
             cache.releaseJob(jobId);
-            assertEquals(0, cache.getJobRefCounters().get(jobId).references);
-            assertThat(
-                    cache.getJobRefCounters().get(jobId).keepUntil,
-                    greaterThanOrEqualTo(cleanupLowerBound));
+            assertThat(cache.getJobRefCounters().get(jobId).references).isEqualTo(0);
+            assertThat(cache.getJobRefCounters().get(jobId).keepUntil)
+                    .isGreaterThanOrEqualTo(cleanupLowerBound);
         }
     }
 
@@ -267,7 +262,7 @@ public class BlobCacheCleanupTest extends TestLogger {
                 cache.readFile(jobId, key);
             }
 
-            assertEquals(2, checkFilesExist(jobId, keys, cache, true));
+            assertThat(checkFilesExist(jobId, keys, cache, true)).isEqualTo(2);
             checkFileCountForJob(2, jobId, server);
             checkFileCountForJob(2, jobId, cache);
             checkBlobCacheSizeTracker(tracker, jobId, 2);
@@ -275,7 +270,7 @@ public class BlobCacheCleanupTest extends TestLogger {
             // after releasing once, nothing should change
             cache.releaseJob(jobId);
 
-            assertEquals(2, checkFilesExist(jobId, keys, cache, true));
+            assertThat(checkFilesExist(jobId, keys, cache, true)).isEqualTo(2);
             checkFileCountForJob(2, jobId, server);
             checkFileCountForJob(2, jobId, cache);
             checkBlobCacheSizeTracker(tracker, jobId, 2);
@@ -284,12 +279,12 @@ public class BlobCacheCleanupTest extends TestLogger {
             cache.releaseJob(jobId);
 
             // files should still be accessible for now
-            assertEquals(2, checkFilesExist(jobId, keys, cache, true));
+            assertThat(checkFilesExist(jobId, keys, cache, true)).isEqualTo(2);
             checkFileCountForJob(2, jobId, cache);
 
             Thread.sleep(cleanupInterval / 5);
             // still accessible...
-            assertEquals(2, checkFilesExist(jobId, keys, cache, true));
+            assertThat(checkFilesExist(jobId, keys, cache, true)).isEqualTo(2);
             checkFileCountForJob(2, jobId, cache);
 
             Thread.sleep((cleanupInterval * 4) / 5);
@@ -369,19 +364,18 @@ public class BlobCacheCleanupTest extends TestLogger {
             cleanupLowerBound = System.currentTimeMillis() + cleanupInterval;
             verifyContents(cache, jobId, key1, data);
             final Long key1ExpiryFirstAccess = transientBlobExpiryTimes.get(Tuple2.of(jobId, key1));
-            assertThat(key1ExpiryFirstAccess, greaterThanOrEqualTo(cleanupLowerBound));
-            assertNull(transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)));
+            assertThat(key1ExpiryFirstAccess).isGreaterThanOrEqualTo(cleanupLowerBound);
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key2))).isNull();
 
             // access key2, verify expiry times (delay at least 1ms to also verify key1 expiry is
             // unchanged)
             Thread.sleep(1);
             cleanupLowerBound = System.currentTimeMillis() + cleanupInterval;
             verifyContents(cache, jobId, key2, data2);
-            assertEquals(
-                    key1ExpiryFirstAccess, transientBlobExpiryTimes.get(Tuple2.of(jobId, key1)));
-            assertThat(
-                    transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)),
-                    greaterThanOrEqualTo(cleanupLowerBound));
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key1)))
+                    .isEqualTo(key1ExpiryFirstAccess);
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)))
+                    .isGreaterThanOrEqualTo(cleanupLowerBound);
 
             // files are cached now for the given TTL - remove from server so that they are not
             // re-downloaded
@@ -458,6 +452,6 @@ public class BlobCacheCleanupTest extends TestLogger {
 
     private static void checkBlobCacheSizeTracker(
             BlobCacheSizeTracker tracker, JobID jobId, int expected) {
-        assertEquals(tracker.getBlobKeysByJobId(jobId).size(), expected);
+        assertThat(expected).isEqualTo(tracker.getBlobKeysByJobId(jobId).size());
     }
 }

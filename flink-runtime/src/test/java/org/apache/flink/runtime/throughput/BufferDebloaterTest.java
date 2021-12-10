@@ -25,11 +25,7 @@ import org.junit.Test;
 import java.util.OptionalInt;
 
 import static org.apache.flink.configuration.TaskManagerOptions.BUFFER_DEBLOAT_THRESHOLD_PERCENTAGES;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link BufferDebloater}. */
 public class BufferDebloaterTest extends TestLogger {
@@ -125,14 +121,14 @@ public class BufferDebloaterTest extends TestLogger {
 
         // Calculate the buffer size a little lower than the max buffer size.
         bufferDebloater.recalculateBufferSize(1000, numberOfBuffersInUse);
-        assertThat(bufferDebloater.getLastBufferSize(), is(1000));
+        assertThat(bufferDebloater.getLastBufferSize()).isEqualTo(1000);
 
         // Recalculate the buffer size to max value.
         bufferDebloater.recalculateBufferSize(2000, numberOfBuffersInUse);
 
         // The max value should be announced despite it differ from the previous one by less than
         // threshold value.
-        assertThat(bufferDebloater.getLastBufferSize(), is(1100));
+        assertThat(bufferDebloater.getLastBufferSize()).isEqualTo(1100);
 
         // Make sure that there is no repeated announcement of max buffer size.
         bufferDebloater.recalculateBufferSize(2000, numberOfBuffersInUse);
@@ -151,14 +147,14 @@ public class BufferDebloaterTest extends TestLogger {
 
         // Calculate the buffer size a little greater than the min buffer size.
         bufferDebloater.recalculateBufferSize(60, numberOfBuffersInUse);
-        assertThat(bufferDebloater.getLastBufferSize(), is(60));
+        assertThat(bufferDebloater.getLastBufferSize()).isEqualTo(60);
 
         // Recalculate the buffer size to min value.
         bufferDebloater.recalculateBufferSize(40, numberOfBuffersInUse);
 
         // The min value should be announced despite it differ from the previous one by less than
         // threshold value.
-        assertThat(bufferDebloater.getLastBufferSize(), is(50));
+        assertThat(bufferDebloater.getLastBufferSize()).isEqualTo(50);
 
         // Make sure that there is no repeated announcement of min buffer size.
         bufferDebloater.recalculateBufferSize(40, numberOfBuffersInUse);
@@ -180,36 +176,40 @@ public class BufferDebloaterTest extends TestLogger {
         int currentBufferSize = maxBufferSize / 2;
 
         OptionalInt optionalInt = bufferDebloater.recalculateBufferSize(currentBufferSize, 1);
-        assertTrue(optionalInt.isPresent());
-        assertEquals(currentBufferSize, optionalInt.getAsInt());
+        assertThat(optionalInt.isPresent()).isTrue();
+        assertThat(optionalInt.getAsInt()).isEqualTo(currentBufferSize);
 
         // It is true because less than threshold.
-        assertTrue(bufferDebloater.skipUpdate(currentBufferSize));
-        assertTrue(bufferDebloater.skipUpdate(currentBufferSize - 1));
-        assertTrue(bufferDebloater.skipUpdate(currentBufferSize + 1));
+        assertThat(bufferDebloater.skipUpdate(currentBufferSize)).isTrue();
+        assertThat(bufferDebloater.skipUpdate(currentBufferSize - 1)).isTrue();
+        assertThat(bufferDebloater.skipUpdate(currentBufferSize + 1)).isTrue();
 
-        assertTrue(
-                bufferDebloater.skipUpdate(
-                        currentBufferSize - (int) (currentBufferSize * threshold) + 1));
-        assertTrue(
-                bufferDebloater.skipUpdate(
-                        currentBufferSize + (int) (currentBufferSize * threshold) - 1));
+        assertThat(
+                        bufferDebloater.skipUpdate(
+                                currentBufferSize - (int) (currentBufferSize * threshold) + 1))
+                .isTrue();
+        assertThat(
+                        bufferDebloater.skipUpdate(
+                                currentBufferSize + (int) (currentBufferSize * threshold) - 1))
+                .isTrue();
 
         // It is false because it reaches threshold.
-        assertFalse(
-                bufferDebloater.skipUpdate(
-                        currentBufferSize - (int) (currentBufferSize * threshold)));
-        assertFalse(
-                bufferDebloater.skipUpdate(
-                        currentBufferSize + (int) (currentBufferSize * threshold)));
-        assertFalse(bufferDebloater.skipUpdate(minBufferSize + 1));
-        assertFalse(bufferDebloater.skipUpdate(minBufferSize));
-        assertFalse(bufferDebloater.skipUpdate(maxBufferSize - 1));
-        assertFalse(bufferDebloater.skipUpdate(maxBufferSize));
+        assertThat(
+                        bufferDebloater.skipUpdate(
+                                currentBufferSize - (int) (currentBufferSize * threshold)))
+                .isFalse();
+        assertThat(
+                        bufferDebloater.skipUpdate(
+                                currentBufferSize + (int) (currentBufferSize * threshold)))
+                .isFalse();
+        assertThat(bufferDebloater.skipUpdate(minBufferSize + 1)).isFalse();
+        assertThat(bufferDebloater.skipUpdate(minBufferSize)).isFalse();
+        assertThat(bufferDebloater.skipUpdate(maxBufferSize - 1)).isFalse();
+        assertThat(bufferDebloater.skipUpdate(maxBufferSize)).isFalse();
 
         // Beyond the min and max size is always false.
-        assertFalse(bufferDebloater.skipUpdate(maxBufferSize + 1));
-        assertFalse(bufferDebloater.skipUpdate(minBufferSize - 1));
+        assertThat(bufferDebloater.skipUpdate(maxBufferSize + 1)).isFalse();
+        assertThat(bufferDebloater.skipUpdate(minBufferSize - 1)).isFalse();
     }
 
     public static BufferDebloaterTestBuilder testBufferDebloater() {
@@ -257,7 +257,7 @@ public class BufferDebloaterTest extends TestLogger {
             final OptionalInt newBufferSize =
                     bufferDebloater.recalculateBufferSize(throughput, numberOfBuffersInUse);
 
-            assertFalse(newBufferSize.isPresent());
+            assertThat(newBufferSize.isPresent()).isFalse();
         }
 
         public BufferDebloater expectBufferSize(int expectedBufferSize) {
@@ -267,8 +267,8 @@ public class BufferDebloaterTest extends TestLogger {
             final OptionalInt newBufferSize =
                     bufferDebloater.recalculateBufferSize(throughput, numberOfBuffersInUse);
 
-            assertTrue(newBufferSize.isPresent());
-            assertThat(newBufferSize.getAsInt(), is(expectedBufferSize));
+            assertThat(newBufferSize.isPresent()).isTrue();
+            assertThat(newBufferSize.getAsInt()).isEqualTo(expectedBufferSize);
             return bufferDebloater;
         }
 

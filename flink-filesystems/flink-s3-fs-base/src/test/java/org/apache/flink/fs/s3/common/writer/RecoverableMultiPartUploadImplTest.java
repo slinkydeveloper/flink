@@ -50,10 +50,9 @@ import java.util.UUID;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 
 /** Tests for the {@link RecoverableMultiPartUploadImpl}. */
 public class RecoverableMultiPartUploadImplTest {
@@ -82,7 +81,7 @@ public class RecoverableMultiPartUploadImplTest {
 
         uploadPart(part);
 
-        assertThat(stubMultiPartUploader, hasMultiPartUploadWithPart(1, part));
+        assertThat(stubMultiPartUploader).satisfies(matching(hasMultiPartUploadWithPart(1, part)));
     }
 
     @Test
@@ -91,7 +90,7 @@ public class RecoverableMultiPartUploadImplTest {
 
         uploadObject(incompletePart);
 
-        assertThat(stubMultiPartUploader, hasUploadedObject(incompletePart));
+        assertThat(stubMultiPartUploader).satisfies(matching(hasUploadedObject(incompletePart)));
     }
 
     @Test
@@ -104,12 +103,13 @@ public class RecoverableMultiPartUploadImplTest {
         uploadPart(secondCompletePart);
         uploadObject(thirdIncompletePart);
 
-        assertThat(
-                stubMultiPartUploader,
-                allOf(
-                        hasMultiPartUploadWithPart(1, firstCompletePart),
-                        hasMultiPartUploadWithPart(2, secondCompletePart),
-                        hasUploadedObject(thirdIncompletePart)));
+        assertThat(stubMultiPartUploader)
+                .satisfies(
+                        matching(
+                                allOf(
+                                        hasMultiPartUploadWithPart(1, firstCompletePart),
+                                        hasMultiPartUploadWithPart(2, secondCompletePart),
+                                        hasUploadedObject(thirdIncompletePart))));
     }
 
     @Test
@@ -123,8 +123,13 @@ public class RecoverableMultiPartUploadImplTest {
 
         final S3Recoverable recoverable = uploadObject(thirdIncompletePart);
 
-        assertThat(
-                recoverable, isEqualTo(thirdIncompletePart, firstCompletePart, secondCompletePart));
+        assertThat(recoverable)
+                .satisfies(
+                        matching(
+                                isEqualTo(
+                                        thirdIncompletePart,
+                                        firstCompletePart,
+                                        secondCompletePart)));
     }
 
     @Test
@@ -135,9 +140,8 @@ public class RecoverableMultiPartUploadImplTest {
         S3Recoverable recoverableOne = uploadObject(incompletePartOne);
         S3Recoverable recoverableTwo = uploadObject(incompletePartTwo);
 
-        assertThat(
-                recoverableTwo.incompleteObjectName(),
-                not(equalTo(recoverableOne.incompleteObjectName())));
+        assertThat(recoverableTwo.incompleteObjectName())
+                .isNotEqualTo(recoverableOne.incompleteObjectName());
     }
 
     @Test(expected = IllegalStateException.class)

@@ -45,7 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the behaviors of the {@link
@@ -110,7 +110,7 @@ public class InputProcessorUtilTest {
                             false);
                 }
             }
-            assertTrue(barrierHandler.getAllBarriersReceivedFuture(1).isDone());
+            assertThat(barrierHandler.getAllBarriersReceivedFuture(1).isDone()).isTrue();
         }
     }
 

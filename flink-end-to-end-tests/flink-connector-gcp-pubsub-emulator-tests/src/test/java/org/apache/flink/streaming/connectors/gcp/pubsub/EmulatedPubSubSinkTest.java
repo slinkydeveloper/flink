@@ -37,8 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test of the PubSub SINK with the Google PubSub emulator. */
 public class EmulatedPubSubSinkTest extends GCloudUnitTestBase {
@@ -96,14 +95,14 @@ public class EmulatedPubSubSinkTest extends GCloudUnitTestBase {
         List<ReceivedMessage> receivedMessages =
                 pubsubHelper.pullMessages(PROJECT_NAME, SUBSCRIPTION_NAME, 100);
 
-        assertEquals("Wrong number of elements", input.size(), receivedMessages.size());
+        assertThat(receivedMessages.size()).as("Wrong number of elements").isEqualTo(input.size());
 
         // Check output strings
         List<String> output = new ArrayList<>();
         receivedMessages.forEach(msg -> output.add(msg.getMessage().getData().toStringUtf8()));
 
         for (String test : input) {
-            assertTrue("Missing " + test, output.contains(StringUtils.reverse(test)));
+            assertThat(output.contains(StringUtils.reverse(test))).as("Missing " + test).isTrue();
         }
     }
 

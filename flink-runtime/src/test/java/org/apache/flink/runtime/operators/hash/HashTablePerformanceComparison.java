@@ -38,7 +38,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class HashTablePerformanceComparison {
 
@@ -98,8 +99,8 @@ public class HashTablePerformanceComparison {
                     table.getProber(comparator, pairComparator);
             IntPair temp = new IntPair();
             while (probeTester.next(target) != null) {
-                assertNotNull(prober.getMatchFor(target, temp));
-                assertEquals(temp.getValue(), target.getValue());
+                assertThat(prober.getMatchFor(target, temp)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(temp.getValue());
             }
             end = System.currentTimeMillis();
             System.out.println("Probing done. Time: " + (end - start) + " ms");
@@ -116,8 +117,8 @@ public class HashTablePerformanceComparison {
             System.out.println("Starting second probing run...");
             start = System.currentTimeMillis();
             while (updateTester.next(target) != null) {
-                assertNotNull(prober.getMatchFor(target, temp));
-                assertEquals(target.getValue() + 1, temp.getValue());
+                assertThat(prober.getMatchFor(target, temp)).isNotNull();
+                assertThat(temp.getValue()).isEqualTo(target.getValue() + 1);
             }
             end = System.currentTimeMillis();
             System.out.println("Probing done. Time: " + (end - start) + " ms");
@@ -127,7 +128,7 @@ public class HashTablePerformanceComparison {
             end = System.currentTimeMillis();
             System.out.println("Overall time: " + (end - first) + " ms");
 
-            assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+            assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());
@@ -181,9 +182,9 @@ public class HashTablePerformanceComparison {
             while (probeTester.next(compare) != null) {
                 iter = table.getMatchesFor(compare);
                 iter.next(target);
-                assertEquals(target.getKey(), compare.getKey());
-                assertEquals(target.getValue(), compare.getValue());
-                assertTrue(iter.next(target) == null);
+                assertThat(compare.getKey()).isEqualTo(target.getKey());
+                assertThat(compare.getValue()).isEqualTo(target.getValue());
+                assertThat(iter.next(target) == null).isTrue();
             }
             end = System.currentTimeMillis();
             System.out.println("Probing done. Time: " + (end - start) + " ms");
@@ -206,9 +207,9 @@ public class HashTablePerformanceComparison {
                 compare.setValue(compare.getValue() + 1);
                 iter = table.getMatchesFor(compare);
                 iter.next(target);
-                assertEquals(target.getKey(), compare.getKey());
-                assertEquals(target.getValue(), compare.getValue());
-                assertTrue(iter.next(target) == null);
+                assertThat(compare.getKey()).isEqualTo(target.getKey());
+                assertThat(compare.getValue()).isEqualTo(target.getValue());
+                assertThat(iter.next(target) == null).isTrue();
             }
             end = System.currentTimeMillis();
             System.out.println("Probing done. Time: " + (end - start) + " ms");
@@ -218,7 +219,7 @@ public class HashTablePerformanceComparison {
             end = System.currentTimeMillis();
             System.out.println("Overall time: " + (end - first) + " ms");
 
-            assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreedMemory().size());
+            assertThat(table.getFreedMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());
@@ -268,8 +269,8 @@ public class HashTablePerformanceComparison {
                     table.getProber(comparator, pairComparator);
             IntPair temp = new IntPair();
             while (probeTester.next(target) != null) {
-                assertNotNull(prober.getMatchFor(target, temp));
-                assertEquals(temp.getValue(), target.getValue());
+                assertThat(prober.getMatchFor(target, temp)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(temp.getValue());
             }
             end = System.currentTimeMillis();
             System.out.println("Probing done. Time: " + (end - start) + " ms");
@@ -286,8 +287,8 @@ public class HashTablePerformanceComparison {
             System.out.println("Starting second probing run...");
             start = System.currentTimeMillis();
             while (updateTester.next(target) != null) {
-                assertNotNull(prober.getMatchFor(target, temp));
-                assertEquals(target.getValue() + 1, temp.getValue());
+                assertThat(prober.getMatchFor(target, temp)).isNotNull();
+                assertThat(temp.getValue()).isEqualTo(target.getValue() + 1);
             }
             end = System.currentTimeMillis();
             System.out.println("Probing done. Time: " + (end - start) + " ms");
@@ -297,7 +298,7 @@ public class HashTablePerformanceComparison {
             end = System.currentTimeMillis();
             System.out.println("Overall time: " + (end - first) + " ms");
 
-            assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+            assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());

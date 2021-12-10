@@ -42,11 +42,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Test selective reading. */
 public class StreamTaskMultipleInputSelectiveReadingTest {
@@ -177,9 +177,11 @@ public class StreamTaskMultipleInputSelectiveReadingTest {
             testHarness.waitForTaskCompletion();
 
             if (orderedCheck) {
-                assertThat(testHarness.getOutput(), contains(expectedOutput.toArray()));
+                assertThat(testHarness.getOutput())
+                        .satisfies(matching(contains(expectedOutput.toArray())));
             } else {
-                assertThat(testHarness.getOutput(), containsInAnyOrder(expectedOutput.toArray()));
+                assertThat(testHarness.getOutput())
+                        .satisfies(matching(containsInAnyOrder(expectedOutput.toArray())));
             }
         }
     }
@@ -208,7 +210,7 @@ public class StreamTaskMultipleInputSelectiveReadingTest {
             // StreamMultipleInputProcessor starts with all inputs available. Let it rotate and
             // refresh properly.
             testHarness.processSingleStep();
-            assertTrue(testHarness.getOutput().isEmpty());
+            assertThat(testHarness.getOutput().isEmpty()).isTrue();
 
             testHarness.processElement(new StreamRecord<>("NOT_SELECTED"), 0);
 
@@ -221,7 +223,8 @@ public class StreamTaskMultipleInputSelectiveReadingTest {
             expectedOutput.add(new StreamRecord<>("[2]: 1"));
             testHarness.processSingleStep();
             expectedOutput.add(new StreamRecord<>("[2]: 2"));
-            assertThat(testHarness.getOutput(), contains(expectedOutput.toArray()));
+            assertThat(testHarness.getOutput())
+                    .satisfies(matching(contains(expectedOutput.toArray())));
 
             // InputGate 2 was not available in previous steps, so let's check if we are not
             // starving it
@@ -234,7 +237,8 @@ public class StreamTaskMultipleInputSelectiveReadingTest {
             expectedOutput.add(new StreamRecord<>("[3]: 1"));
             expectedOutput.add(new StreamRecord<>("[2]: 3"));
 
-            assertThat(testHarness.getOutput(), containsInAnyOrder(expectedOutput.toArray()));
+            assertThat(testHarness.getOutput())
+                    .satisfies(matching(containsInAnyOrder(expectedOutput.toArray())));
         }
     }
 

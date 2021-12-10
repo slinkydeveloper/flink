@@ -23,12 +23,13 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link DefaultExecutionDeploymentTracker}. */
 public class DefaultExecutionDeploymentTrackerTest extends TestLogger {
@@ -41,15 +42,13 @@ public class DefaultExecutionDeploymentTrackerTest extends TestLogger {
         final ResourceID resourceId1 = ResourceID.generate();
         tracker.startTrackingPendingDeploymentOf(attemptId1, resourceId1);
 
-        assertThat(
-                tracker.getExecutionsOn(resourceId1),
-                hasEntry(attemptId1, ExecutionDeploymentState.PENDING));
+        assertThat(tracker.getExecutionsOn(resourceId1))
+                .satisfies(matching(hasEntry(attemptId1, ExecutionDeploymentState.PENDING)));
 
         tracker.completeDeploymentOf(attemptId1);
 
-        assertThat(
-                tracker.getExecutionsOn(resourceId1),
-                hasEntry(attemptId1, ExecutionDeploymentState.DEPLOYED));
+        assertThat(tracker.getExecutionsOn(resourceId1))
+                .satisfies(matching(hasEntry(attemptId1, ExecutionDeploymentState.DEPLOYED)));
     }
 
     @Test
@@ -64,7 +63,7 @@ public class DefaultExecutionDeploymentTrackerTest extends TestLogger {
 
         tracker.stopTrackingDeploymentOf(attemptId1);
 
-        assertThat(tracker.getExecutionsOn(resourceId1).entrySet(), empty());
+        assertThat(tracker.getExecutionsOn(resourceId1).entrySet()).satisfies(matching(empty()));
     }
 
     @Test
@@ -77,7 +76,7 @@ public class DefaultExecutionDeploymentTrackerTest extends TestLogger {
 
         tracker.stopTrackingDeploymentOf(attemptId1);
 
-        assertThat(tracker.getExecutionsOn(resourceId1).entrySet(), empty());
+        assertThat(tracker.getExecutionsOn(resourceId1).entrySet()).satisfies(matching(empty()));
     }
 
     @Test
@@ -91,7 +90,7 @@ public class DefaultExecutionDeploymentTrackerTest extends TestLogger {
 
         tracker.stopTrackingDeploymentOf(new ExecutionAttemptID());
 
-        assertThat(tracker.getExecutionsOn(resourceId1), hasKey(attemptId1));
+        assertThat(tracker.getExecutionsOn(resourceId1)).satisfies(matching(hasKey(attemptId1)));
     }
 
     @Test
@@ -113,8 +112,7 @@ public class DefaultExecutionDeploymentTrackerTest extends TestLogger {
     public void testGetExecutionsReturnsEmptySetForUnknownHost() {
         final DefaultExecutionDeploymentTracker tracker = new DefaultExecutionDeploymentTracker();
 
-        assertThat(
-                tracker.getExecutionsOn(ResourceID.generate()).entrySet(),
-                allOf(notNullValue(), empty()));
+        assertThat(tracker.getExecutionsOn(ResourceID.generate()).entrySet())
+                .satisfies(matching(allOf(notNullValue(), empty())));
     }
 }

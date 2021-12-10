@@ -37,9 +37,8 @@ import org.junit.Test;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the generation of execution plans. */
 public class ExecutionPlanCreationTest {
@@ -65,17 +64,17 @@ public class ExecutionPlanCreationTest {
                     new Optimizer(new DataStatistics(), new DefaultCostEstimator(), config);
             Plan plan = (Plan) PackagedProgramUtils.getPipelineFromProgram(prg, config, -1, true);
             OptimizedPlan op = optimizer.compile(plan);
-            assertNotNull(op);
+            assertThat(op).isNotNull();
 
             PlanJSONDumpGenerator dumper = new PlanJSONDumpGenerator();
-            assertNotNull(dumper.getOptimizerPlanAsJSON(op));
+            assertThat(dumper.getOptimizerPlanAsJSON(op)).isNotNull();
 
             // test HTML escaping
             PlanJSONDumpGenerator dumper2 = new PlanJSONDumpGenerator();
             dumper2.setEncodeForHTML(true);
             String htmlEscaped = dumper2.getOptimizerPlanAsJSON(op);
 
-            assertEquals(-1, htmlEscaped.indexOf('\\'));
+            assertThat(htmlEscaped.indexOf('\\')).isEqualTo(-1);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

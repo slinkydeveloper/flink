@@ -34,7 +34,7 @@ import org.apache.flink.api.java.typeutils.TypeExtractor;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for semantic properties utils. */
 public class SemanticPropUtilTest {
@@ -102,51 +102,51 @@ public class SemanticPropUtilTest {
         SingleInputSemanticProperties sp =
                 SemanticPropUtil.createProjectionPropertiesSingle(
                         pMap, (CompositeType<?>) fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(2)).isTrue();
 
         pMap = new int[] {2, 2, 1, 1};
         sp =
                 SemanticPropUtil.createProjectionPropertiesSingle(
                         pMap, (CompositeType<?>) fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 2);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 2);
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 2).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 2).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
 
         pMap = new int[] {2, 0};
         sp =
                 SemanticPropUtil.createProjectionPropertiesSingle(
                         pMap, (CompositeType<?>) nestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
 
         pMap = new int[] {2, 0, 1};
         sp =
                 SemanticPropUtil.createProjectionPropertiesSingle(
                         pMap, (CompositeType<?>) deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 6).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(6));
+        assertThat(sp.getForwardingTargetFields(0, 6).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(6)).isTrue();
 
         pMap = new int[] {2, 1};
         sp =
                 SemanticPropUtil.createProjectionPropertiesSingle(
                         pMap, (CompositeType<?>) pojoInTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(4)).isTrue();
     }
 
     @Test
@@ -157,96 +157,96 @@ public class SemanticPropUtilTest {
         DualInputSemanticProperties sp =
                 SemanticPropUtil.createProjectionPropertiesDual(
                         pMap, iMap, fiveIntTupleType, fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(3));
-        assertTrue(sp.getForwardingTargetFields(1, 3).contains(4));
-        assertTrue(sp.getForwardingTargetFields(1, 4).contains(5));
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 3).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 4).contains(5)).isTrue();
 
         pMap = new int[] {4, 2, 0, 4, 0, 1};
         iMap = new boolean[] {true, true, false, true, false, false};
         sp =
                 SemanticPropUtil.createProjectionPropertiesDual(
                         pMap, iMap, fiveIntTupleType, fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 4).size() == 2);
-        assertTrue(sp.getForwardingTargetFields(1, 0).size() == 2);
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(3));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(4));
-        assertTrue(sp.getForwardingTargetFields(1, 1).contains(5));
+        assertThat(sp.getForwardingTargetFields(0, 4).size() == 2).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).size() == 2).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 1).contains(5)).isTrue();
 
         pMap = new int[] {2, 1, 0, 1};
         iMap = new boolean[] {false, false, true, true};
         sp =
                 SemanticPropUtil.createProjectionPropertiesDual(
                         pMap, iMap, nestedTupleType, threeIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(1, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(5));
+        assertThat(sp.getForwardingTargetFields(1, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(5)).isTrue();
 
         pMap = new int[] {1, 0, 0};
         iMap = new boolean[] {false, false, true};
         sp =
                 SemanticPropUtil.createProjectionPropertiesDual(
                         pMap, iMap, nestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(1, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(1, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 3).contains(2));
-        assertTrue(sp.getForwardingTargetFields(1, 4).contains(3));
-        assertTrue(sp.getForwardingTargetFields(1, 5).contains(4));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(6));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(7));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(8));
+        assertThat(sp.getForwardingTargetFields(1, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 3).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 4).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 5).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(6)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(7)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(8)).isTrue();
 
         pMap = new int[] {4, 2, 1, 0};
         iMap = new boolean[] {true, false, true, false};
         sp =
                 SemanticPropUtil.createProjectionPropertiesDual(
                         pMap, iMap, fiveIntTupleType, pojoInTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(0));
-        assertTrue(sp.getForwardingTargetFields(1, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 3).contains(2));
-        assertTrue(sp.getForwardingTargetFields(1, 4).contains(3));
-        assertTrue(sp.getForwardingTargetFields(1, 5).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(5));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(6));
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 3).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 4).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 5).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(6)).isTrue();
 
         pMap = new int[] {2, 3, -1, 0};
         iMap = new boolean[] {true, true, false, true};
         sp = SemanticPropUtil.createProjectionPropertiesDual(pMap, iMap, fiveIntTupleType, intType);
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(3)).isTrue();
 
         pMap = new int[] {-1, -1};
         iMap = new boolean[] {false, true};
         sp = SemanticPropUtil.createProjectionPropertiesDual(pMap, iMap, intType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(1, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(1, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(1, 5).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(6));
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 5).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(6)).isTrue();
 
         pMap = new int[] {-1, -1};
         iMap = new boolean[] {true, false};
         sp = SemanticPropUtil.createProjectionPropertiesDual(pMap, iMap, intType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(1, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(1, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(1, 2).contains(3));
-        assertTrue(sp.getForwardingTargetFields(1, 3).contains(4));
-        assertTrue(sp.getForwardingTargetFields(1, 4).contains(5));
-        assertTrue(sp.getForwardingTargetFields(1, 5).contains(6));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 2).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 3).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 4).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(1, 5).contains(6)).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -265,38 +265,38 @@ public class SemanticPropUtilTest {
 
         SemanticProperties offsetProps = SemanticPropUtil.addSourceFieldOffset(semProps, 5, 0);
 
-        assertTrue(offsetProps.getForwardingTargetFields(0, 0).size() == 2);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 0).contains(4));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).contains(3));
+        assertThat(offsetProps.getForwardingTargetFields(0, 0).size() == 2).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 0).contains(4)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).contains(3)).isTrue();
 
-        assertTrue(offsetProps.getReadFields(0).size() == 2);
-        assertTrue(offsetProps.getReadFields(0).contains(0));
-        assertTrue(offsetProps.getReadFields(0).contains(3));
+        assertThat(offsetProps.getReadFields(0).size() == 2).isTrue();
+        assertThat(offsetProps.getReadFields(0).contains(0)).isTrue();
+        assertThat(offsetProps.getReadFields(0).contains(3)).isTrue();
 
         offsetProps = SemanticPropUtil.addSourceFieldOffset(semProps, 5, 3);
 
-        assertTrue(offsetProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).size() == 2);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).contains(4));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 5).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 5).contains(0));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 6).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 7).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 7).contains(3));
+        assertThat(offsetProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).size() == 2).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).contains(4)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 5).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 5).contains(0)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 6).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 7).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 7).contains(3)).isTrue();
 
-        assertTrue(offsetProps.getReadFields(0).size() == 2);
-        assertTrue(offsetProps.getReadFields(0).contains(3));
-        assertTrue(offsetProps.getReadFields(0).contains(6));
+        assertThat(offsetProps.getReadFields(0).size() == 2).isTrue();
+        assertThat(offsetProps.getReadFields(0).contains(3)).isTrue();
+        assertThat(offsetProps.getReadFields(0).contains(6)).isTrue();
 
         semProps = new SingleInputSemanticProperties();
         SemanticPropUtil.addSourceFieldOffset(semProps, 1, 0);
@@ -308,14 +308,14 @@ public class SemanticPropUtilTest {
 
         offsetProps = SemanticPropUtil.addSourceFieldOffset(semProps, 3, 2);
 
-        assertTrue(offsetProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).contains(2));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).contains(4));
+        assertThat(offsetProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).contains(2)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).contains(4)).isTrue();
     }
 
     @Test
@@ -332,28 +332,28 @@ public class SemanticPropUtilTest {
         DualInputSemanticProperties offsetProps =
                 SemanticPropUtil.addSourceFieldOffsets(semProps, 4, 3, 1, 2);
 
-        assertTrue(offsetProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 1).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(offsetProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(offsetProps.getForwardingTargetFields(0, 4).contains(3));
+        assertThat(offsetProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 1).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(0, 4).contains(3)).isTrue();
 
-        assertTrue(offsetProps.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(1, 1).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(1, 2).size() == 0);
-        assertTrue(offsetProps.getForwardingTargetFields(1, 3).size() == 2);
-        assertTrue(offsetProps.getForwardingTargetFields(1, 3).contains(2));
-        assertTrue(offsetProps.getForwardingTargetFields(1, 3).contains(4));
+        assertThat(offsetProps.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(1, 1).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(1, 2).size() == 0).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(1, 3).size() == 2).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(1, 3).contains(2)).isTrue();
+        assertThat(offsetProps.getForwardingTargetFields(1, 3).contains(4)).isTrue();
 
-        assertTrue(offsetProps.getReadFields(0).size() == 2);
-        assertTrue(offsetProps.getReadFields(0).contains(2));
-        assertTrue(offsetProps.getReadFields(0).contains(3));
-        assertTrue(offsetProps.getReadFields(1).size() == 3);
-        assertTrue(offsetProps.getReadFields(1).contains(2));
-        assertTrue(offsetProps.getReadFields(1).contains(5));
-        assertTrue(offsetProps.getReadFields(1).contains(6));
+        assertThat(offsetProps.getReadFields(0).size() == 2).isTrue();
+        assertThat(offsetProps.getReadFields(0).contains(2)).isTrue();
+        assertThat(offsetProps.getReadFields(0).contains(3)).isTrue();
+        assertThat(offsetProps.getReadFields(1).size() == 3).isTrue();
+        assertThat(offsetProps.getReadFields(1).contains(2)).isTrue();
+        assertThat(offsetProps.getReadFields(1).contains(5)).isTrue();
+        assertThat(offsetProps.getReadFields(1).contains(6)).isTrue();
 
         semProps = new DualInputSemanticProperties();
         SemanticPropUtil.addSourceFieldOffsets(semProps, 4, 3, 2, 2);
@@ -370,9 +370,9 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, fiveIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
     }
 
     @Test
@@ -382,25 +382,25 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, fiveIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
 
         forwardedFields[0] = "2;3;0";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, fiveIntTupleType, fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
 
         forwardedFields[0] = "2;3;0;";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, fiveIntTupleType, fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
     }
 
     @Test
@@ -410,9 +410,9 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, fiveIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
     }
 
     @Test
@@ -422,8 +422,8 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
     }
 
     @Test
@@ -433,15 +433,15 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
 
         forwardedFields[0] = "0->0;1->2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, fiveIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
     }
 
     @Test
@@ -451,8 +451,8 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
     }
 
     @Test
@@ -462,10 +462,10 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, fiveIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(0));
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(0)).isTrue();
     }
 
     @Test
@@ -475,21 +475,21 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, intType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
 
         forwardedFields[0] = "*->f2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, intType, threeIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(2)).isTrue();
 
         forwardedFields[0] = "*->*";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, intType, intType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
     }
 
     @Test
@@ -499,20 +499,20 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
 
         forwardedFields[0] = "*";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
     }
 
     @Test
@@ -521,87 +521,87 @@ public class SemanticPropUtilTest {
         SingleInputSemanticProperties sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, nestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
 
         forwardedFields[0] = "f0.f0->f1.f0.f2; f0.f1->f2; f2->f1.f2; f1->f0";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(6));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(0));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(6)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(0)).isTrue();
 
         forwardedFields[0] = "0.0->1.0.2; 0.1->2; 2->1.2; 1->0";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(6));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(0));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(6)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(0)).isTrue();
 
         forwardedFields[0] = "f1.f0.*->f0.*; f0->f2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, nestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(4)).isTrue();
 
         forwardedFields[0] = "1.0.*->0.*; 0->2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, nestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(4)).isTrue();
 
         forwardedFields[0] = "f1.f0->f0; f0->f2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, nestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(4)).isTrue();
 
         forwardedFields[0] = "1.0->0; 0->2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, nestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(4)).isTrue();
 
         forwardedFields[0] = "f1.f0.f1; f1.f1; f2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 6).contains(6));
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 5).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 6).contains(6)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
 
         forwardedFields[0] = "f1.f0.*; f1.f2";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, deepNestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 6).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 6).size() == 0).isTrue();
     }
 
     @Test
@@ -611,131 +611,131 @@ public class SemanticPropUtilTest {
         SingleInputSemanticProperties sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoType, pojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
 
         forwardedFields[0] = "f1->int1; f0->int3 ";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, threeIntTupleType, pojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
 
         forwardedFields[0] = "int1->f2; int2->f0; int3->f1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoType, threeIntTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(1));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(1)).isTrue();
 
         forwardedFields[0] = "*->pojo1.*";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(4)).isTrue();
 
         forwardedFields[0] = "*->pojo1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(4));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(4)).isTrue();
 
         forwardedFields[0] = "int1; string1; int2->pojo1.int3";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(5));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(5)).isTrue();
 
         forwardedFields[0] = "pojo1.*->f2.*; int1->f1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedPojoType, pojoInTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(5));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(5)).isTrue();
 
         forwardedFields[0] = "f2.*->*";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoInTupleType, pojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(3)).isTrue();
 
         forwardedFields[0] = "pojo1->f2; int1->f1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedPojoType, pojoInTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(5));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(5)).isTrue();
 
         forwardedFields[0] = "f2->*";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoInTupleType, pojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(3));
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(3)).isTrue();
 
         forwardedFields[0] = "int2; string1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, pojoType, pojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
 
         forwardedFields[0] = "pojo1.int1; string1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedPojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 4).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).size() == 0).isTrue();
 
         forwardedFields[0] = "pojo1.*; int1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedPojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 5).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
 
         forwardedFields[0] = "pojo1; int1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, null, nestedPojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 5).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
     }
 
     @Test(expected = InvalidSemanticAnnotationException.class)
@@ -869,9 +869,9 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
     }
 
     @Test
@@ -881,18 +881,18 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
 
         nonForwardedFields[0] = "f1;f2;";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
     }
 
     @Test
@@ -902,9 +902,9 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
     }
 
     @Test
@@ -914,9 +914,9 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
     }
 
     @Test
@@ -926,38 +926,38 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, deepNestedTupleType, deepNestedTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 6).contains(6));
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 6).contains(6)).isTrue();
 
         nonForwardedFields[0] = "f1.f0; f1.f2; f0";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, deepNestedTupleType, deepNestedTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 6).contains(6));
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 6).contains(6)).isTrue();
 
         nonForwardedFields[0] = "f2; f1.f1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, deepNestedTupleType, deepNestedTupleType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(5));
-        assertTrue(sp.getForwardingTargetFields(0, 6).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(5)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 6).size() == 0).isTrue();
     }
 
     @Test
@@ -967,10 +967,10 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, pojoType, pojoType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
     }
 
     @Test
@@ -980,23 +980,23 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, nestedPojoType, nestedPojoType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 5).contains(5));
+        assertThat(sp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).contains(5)).isTrue();
 
         nonForwardedFields[0] = "pojo1.int2; string1";
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, null, nestedPojoType, nestedPojoType);
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(sp.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(sp.getForwardingTargetFields(0, 5).size() == 0);
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
     }
 
     @Test(expected = InvalidSemanticAnnotationException.class)
@@ -1067,9 +1067,9 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, threeIntTupleType, threeIntTupleType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 2);
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(1));
+        assertThat(fs.size() == 2).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
     }
 
     @Test
@@ -1080,9 +1080,9 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, threeIntTupleType, threeIntTupleType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 2);
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(1));
+        assertThat(fs.size() == 2).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
 
         readFields[0] = "f1;f2;";
         sp = new SingleInputSemanticProperties();
@@ -1090,9 +1090,9 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, threeIntTupleType, threeIntTupleType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 2);
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(1));
+        assertThat(fs.size() == 2).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
     }
 
     @Test
@@ -1103,9 +1103,9 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, threeIntTupleType, threeIntTupleType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 2);
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(1));
+        assertThat(fs.size() == 2).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
     }
 
     @Test
@@ -1116,16 +1116,16 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, intType, intType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 1);
-        assertTrue(fs.contains(0));
+        assertThat(fs.size() == 1).isTrue();
+        assertThat(fs.contains(0)).isTrue();
 
         sp = new SingleInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, null, readFields, intType, fiveIntTupleType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 1);
-        assertTrue(fs.contains(0));
+        assertThat(fs.size() == 1).isTrue();
+        assertThat(fs.contains(0)).isTrue();
     }
 
     @Test
@@ -1136,10 +1136,10 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedTupleType, intType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 3);
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(4));
+        assertThat(fs.size() == 3).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(4)).isTrue();
 
         readFields[0] = "f0;f1";
         sp = new SingleInputSemanticProperties();
@@ -1147,11 +1147,11 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedTupleType, intType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 4);
-        assertTrue(fs.contains(0));
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(3));
+        assertThat(fs.size() == 4).isTrue();
+        assertThat(fs.contains(0)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
     }
 
     @Test
@@ -1162,12 +1162,12 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedTupleType, intType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 5);
-        assertTrue(fs.contains(0));
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(3));
-        assertTrue(fs.contains(4));
+        assertThat(fs.size() == 5).isTrue();
+        assertThat(fs.contains(0)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
+        assertThat(fs.contains(4)).isTrue();
 
         readFields[0] = "f0.*;f1";
         sp = new SingleInputSemanticProperties();
@@ -1175,11 +1175,11 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedTupleType, intType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 4);
-        assertTrue(fs.contains(0));
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(3));
+        assertThat(fs.size() == 4).isTrue();
+        assertThat(fs.contains(0)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
     }
 
     @Test
@@ -1190,9 +1190,9 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, pojoType, threeIntTupleType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 2);
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(3));
+        assertThat(fs.size() == 2).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
 
         readFields[0] = "*";
         sp = new SingleInputSemanticProperties();
@@ -1200,11 +1200,11 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, pojoType, intType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 4);
-        assertTrue(fs.contains(0));
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(3));
+        assertThat(fs.size() == 4).isTrue();
+        assertThat(fs.contains(0)).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
     }
 
     @Test
@@ -1215,10 +1215,10 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedPojoType, intType);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 3);
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(4));
-        assertTrue(fs.contains(5));
+        assertThat(fs.size() == 3).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(4)).isTrue();
+        assertThat(fs.contains(5)).isTrue();
 
         readFields[0] = "pojo1.*";
         sp = new SingleInputSemanticProperties();
@@ -1226,11 +1226,11 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedPojoType, intType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 4);
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(3));
-        assertTrue(fs.contains(4));
+        assertThat(fs.size() == 4).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
+        assertThat(fs.contains(4)).isTrue();
 
         readFields[0] = "pojo1";
         sp = new SingleInputSemanticProperties();
@@ -1238,11 +1238,11 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, nestedPojoType, intType);
 
         fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 4);
-        assertTrue(fs.contains(1));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(3));
-        assertTrue(fs.contains(4));
+        assertThat(fs.size() == 4).isTrue();
+        assertThat(fs.contains(1)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(3)).isTrue();
+        assertThat(fs.contains(4)).isTrue();
     }
 
     @Test
@@ -1253,10 +1253,10 @@ public class SemanticPropUtilTest {
                 sp, null, null, readFields, pojoInTupleType, pojo2Type);
 
         FieldSet fs = sp.getReadFields(0);
-        assertTrue(fs.size() == 3);
-        assertTrue(fs.contains(0));
-        assertTrue(fs.contains(2));
-        assertTrue(fs.contains(5));
+        assertThat(fs.size() == 3).isTrue();
+        assertThat(fs.contains(0)).isTrue();
+        assertThat(fs.contains(2)).isTrue();
+        assertThat(fs.contains(5)).isTrue();
     }
 
     @Test(expected = InvalidSemanticAnnotationException.class)
@@ -1288,12 +1288,12 @@ public class SemanticPropUtilTest {
                 fourIntTupleType,
                 fourIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 3).size() == 0);
+        assertThat(dsp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 3).size() == 0).isTrue();
 
         forwardedFieldsFirst[0] = "f1->f0;f3->f1";
         forwardedFieldsSecond[0] = "*->f2.*";
@@ -1310,14 +1310,14 @@ public class SemanticPropUtilTest {
                 pojoType,
                 pojoInTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 0).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(3));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).contains(4));
-        assertTrue(dsp.getForwardingTargetFields(1, 3).contains(5));
+        assertThat(dsp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 0).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(3)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).contains(4)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 3).contains(5)).isTrue();
 
         forwardedFieldsFirst[0] = "f1.f0.f2->int1; f2->pojo1.int3";
         forwardedFieldsSecond[0] = "string1; int2->pojo1.int1; int1->pojo1.int2";
@@ -1334,17 +1334,17 @@ public class SemanticPropUtilTest {
                 pojoType,
                 nestedPojoType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 3).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 6).contains(3));
-        assertTrue(dsp.getForwardingTargetFields(1, 0).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 3).contains(5));
+        assertThat(dsp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 3).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 6).contains(3)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 0).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 3).contains(5)).isTrue();
 
         String[] forwardedFieldsFirst2 = {"f1.f0.f2->int1", "f2->pojo1.int3"};
         String[] forwardedFieldsSecond2 = {"string1", "int2->pojo1.int1", "int1->pojo1.int2"};
@@ -1361,17 +1361,17 @@ public class SemanticPropUtilTest {
                 pojoType,
                 nestedPojoType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 3).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 6).contains(3));
-        assertTrue(dsp.getForwardingTargetFields(1, 0).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 3).contains(5));
+        assertThat(dsp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 3).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 6).contains(3)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 0).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 3).contains(5)).isTrue();
     }
 
     @Test
@@ -1391,12 +1391,12 @@ public class SemanticPropUtilTest {
                 threeIntTupleType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).contains(2));
+        assertThat(dsp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).contains(2)).isTrue();
 
         nonForwardedFieldsFirst[0] = "f1";
         nonForwardedFieldsSecond[0] = "";
@@ -1413,12 +1413,12 @@ public class SemanticPropUtilTest {
                 fiveIntTupleType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 2).size() == 0);
+        assertThat(dsp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).size() == 0).isTrue();
 
         nonForwardedFieldsFirst[0] = "";
         nonForwardedFieldsSecond[0] = "f2;f0";
@@ -1435,12 +1435,12 @@ public class SemanticPropUtilTest {
                 threeIntTupleType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).size() == 0);
+        assertThat(dsp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).size() == 0).isTrue();
 
         String[] nonForwardedFields = {"f1", "f3"};
         dsp = new DualInputSemanticProperties();
@@ -1456,11 +1456,11 @@ public class SemanticPropUtilTest {
                 threeIntTupleType,
                 fiveIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 2).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(0, 4).contains(4));
+        assertThat(dsp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 4).contains(4)).isTrue();
 
         dsp = new DualInputSemanticProperties();
         SemanticPropUtil.getSemanticPropsDualFromString(
@@ -1475,11 +1475,11 @@ public class SemanticPropUtilTest {
                 fiveIntTupleType,
                 fiveIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(1, 0).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(1, 1).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 2).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(1, 3).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 4).contains(4));
+        assertThat(dsp.getForwardingTargetFields(1, 0).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 3).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 4).contains(4)).isTrue();
     }
 
     @Test(expected = InvalidSemanticAnnotationException.class)
@@ -1535,11 +1535,11 @@ public class SemanticPropUtilTest {
                 threeIntTupleType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getReadFields(0).size() == 2);
-        assertTrue(dsp.getReadFields(0).contains(1));
-        assertTrue(dsp.getReadFields(0).contains(2));
-        assertTrue(dsp.getReadFields(1).size() == 1);
-        assertTrue(dsp.getReadFields(1).contains(0));
+        assertThat(dsp.getReadFields(0).size() == 2).isTrue();
+        assertThat(dsp.getReadFields(0).contains(1)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(2)).isTrue();
+        assertThat(dsp.getReadFields(1).size() == 1).isTrue();
+        assertThat(dsp.getReadFields(1).contains(0)).isTrue();
 
         readFieldsFirst[0] = "f0.*; f2";
         readFieldsSecond[0] = "int1; string1";
@@ -1556,14 +1556,14 @@ public class SemanticPropUtilTest {
                 pojoType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getReadFields(0).size() == 4);
-        assertTrue(dsp.getReadFields(0).contains(0));
-        assertTrue(dsp.getReadFields(0).contains(1));
-        assertTrue(dsp.getReadFields(0).contains(2));
-        assertTrue(dsp.getReadFields(0).contains(4));
-        assertTrue(dsp.getReadFields(1).size() == 2);
-        assertTrue(dsp.getReadFields(1).contains(0));
-        assertTrue(dsp.getReadFields(1).contains(3));
+        assertThat(dsp.getReadFields(0).size() == 4).isTrue();
+        assertThat(dsp.getReadFields(0).contains(0)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(1)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(2)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(4)).isTrue();
+        assertThat(dsp.getReadFields(1).size() == 2).isTrue();
+        assertThat(dsp.getReadFields(1).contains(0)).isTrue();
+        assertThat(dsp.getReadFields(1).contains(3)).isTrue();
 
         readFieldsFirst[0] = "pojo1.int2; string1";
         readFieldsSecond[0] = "f2.int2";
@@ -1580,11 +1580,11 @@ public class SemanticPropUtilTest {
                 pojoInTupleType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getReadFields(0).size() == 2);
-        assertTrue(dsp.getReadFields(0).contains(2));
-        assertTrue(dsp.getReadFields(0).contains(5));
-        assertTrue(dsp.getReadFields(1).size() == 1);
-        assertTrue(dsp.getReadFields(1).contains(3));
+        assertThat(dsp.getReadFields(0).size() == 2).isTrue();
+        assertThat(dsp.getReadFields(0).contains(2)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(5)).isTrue();
+        assertThat(dsp.getReadFields(1).size() == 1).isTrue();
+        assertThat(dsp.getReadFields(1).contains(3)).isTrue();
 
         String[] readFields = {"f0", "f2", "f4"};
         dsp = new DualInputSemanticProperties();
@@ -1600,14 +1600,14 @@ public class SemanticPropUtilTest {
                 fiveIntTupleType,
                 threeIntTupleType);
 
-        assertTrue(dsp.getReadFields(0).size() == 3);
-        assertTrue(dsp.getReadFields(0).contains(0));
-        assertTrue(dsp.getReadFields(0).contains(2));
-        assertTrue(dsp.getReadFields(0).contains(4));
-        assertTrue(dsp.getReadFields(1).size() == 3);
-        assertTrue(dsp.getReadFields(1).contains(0));
-        assertTrue(dsp.getReadFields(1).contains(2));
-        assertTrue(dsp.getReadFields(1).contains(4));
+        assertThat(dsp.getReadFields(0).size() == 3).isTrue();
+        assertThat(dsp.getReadFields(0).contains(0)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(2)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(4)).isTrue();
+        assertThat(dsp.getReadFields(1).size() == 3).isTrue();
+        assertThat(dsp.getReadFields(1).contains(0)).isTrue();
+        assertThat(dsp.getReadFields(1).contains(2)).isTrue();
+        assertThat(dsp.getReadFields(1).contains(4)).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -1622,11 +1622,11 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, forwardedFields, null, readFields, threeIntTupleType, fiveIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(sp.getReadFields(0).size() == 2);
-        assertTrue(sp.getReadFields(0).contains(0));
-        assertTrue(sp.getReadFields(0).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(sp.getReadFields(0).size() == 2).isTrue();
+        assertThat(sp.getReadFields(0).contains(0)).isTrue();
+        assertThat(sp.getReadFields(0).contains(2)).isTrue();
     }
 
     @Test
@@ -1637,12 +1637,12 @@ public class SemanticPropUtilTest {
         SemanticPropUtil.getSemanticPropsSingleFromString(
                 sp, null, nonForwardedFields, readFields, threeIntTupleType, threeIntTupleType);
 
-        assertTrue(sp.getForwardingTargetFields(0, 0).contains(0));
-        assertTrue(sp.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(sp.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(sp.getReadFields(0).size() == 2);
-        assertTrue(sp.getReadFields(0).contains(0));
-        assertTrue(sp.getReadFields(0).contains(2));
+        assertThat(sp.getForwardingTargetFields(0, 0).contains(0)).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(sp.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(sp.getReadFields(0).size() == 2).isTrue();
+        assertThat(sp.getReadFields(0).contains(0)).isTrue();
+        assertThat(sp.getReadFields(0).contains(2)).isTrue();
     }
 
     @Test
@@ -1664,17 +1664,17 @@ public class SemanticPropUtilTest {
                 fourIntTupleType,
                 fourIntTupleType);
 
-        assertTrue(dsp.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(dsp.getForwardingTargetFields(0, 2).contains(3));
-        assertTrue(dsp.getForwardingTargetFields(1, 1).contains(1));
-        assertTrue(dsp.getForwardingTargetFields(1, 2).contains(0));
-        assertTrue(dsp.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(dsp.getForwardingTargetFields(1, 3).size() == 0);
-        assertTrue(dsp.getReadFields(0).size() == 2);
-        assertTrue(dsp.getReadFields(0).contains(0));
-        assertTrue(dsp.getReadFields(0).contains(2));
-        assertTrue(dsp.getReadFields(1).size() == 1);
-        assertTrue(dsp.getReadFields(1).contains(1));
+        assertThat(dsp.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 2).contains(3)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 2).contains(0)).isTrue();
+        assertThat(dsp.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(dsp.getForwardingTargetFields(1, 3).size() == 0).isTrue();
+        assertThat(dsp.getReadFields(0).size() == 2).isTrue();
+        assertThat(dsp.getReadFields(0).contains(0)).isTrue();
+        assertThat(dsp.getReadFields(0).contains(2)).isTrue();
+        assertThat(dsp.getReadFields(1).size() == 1).isTrue();
+        assertThat(dsp.getReadFields(1).contains(1)).isTrue();
     }
 
     @Test(expected = InvalidSemanticAnnotationException.class)

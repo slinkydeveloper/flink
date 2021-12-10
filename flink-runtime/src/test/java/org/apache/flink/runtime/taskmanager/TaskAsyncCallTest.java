@@ -69,9 +69,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.isOneOf;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Testing asynchronous call of {@link Task}. */
@@ -128,10 +128,11 @@ public class TaskAsyncCallTest extends TestLogger {
 
             triggerLatch.await();
 
-            assertFalse(task.isCanceledOrFailed());
+            assertThat(task.isCanceledOrFailed()).isFalse();
 
             ExecutionState currentState = task.getExecutionState();
-            assertThat(currentState, isOneOf(ExecutionState.RUNNING, ExecutionState.FINISHED));
+            assertThat(currentState)
+                    .satisfies(matching(isOneOf(ExecutionState.RUNNING, ExecutionState.FINISHED)));
         }
     }
 
@@ -152,10 +153,11 @@ public class TaskAsyncCallTest extends TestLogger {
 
             triggerLatch.await();
 
-            assertFalse(task.isCanceledOrFailed());
+            assertThat(task.isCanceledOrFailed()).isFalse();
 
             ExecutionState currentState = task.getExecutionState();
-            assertThat(currentState, isOneOf(ExecutionState.RUNNING, ExecutionState.FINISHED));
+            assertThat(currentState)
+                    .satisfies(matching(isOneOf(ExecutionState.RUNNING, ExecutionState.FINISHED)));
         }
     }
 

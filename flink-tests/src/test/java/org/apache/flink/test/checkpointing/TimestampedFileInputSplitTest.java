@@ -22,13 +22,15 @@ import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.functions.source.TimestampedFileInputSplit;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test the {@link TimestampedFileInputSplit} for Continuous File Processing. */
 public class TimestampedFileInputSplitTest extends TestLogger {
@@ -41,20 +43,20 @@ public class TimestampedFileInputSplitTest extends TestLogger {
 
         TimestampedFileInputSplit richSecondSplit =
                 new TimestampedFileInputSplit(10, 2, new Path("test"), 0, 100, null);
-        Assert.assertEquals(richFirstSplit, richSecondSplit);
+        assertThat(richSecondSplit).isEqualTo(richFirstSplit);
 
         TimestampedFileInputSplit richModSecondSplit =
                 new TimestampedFileInputSplit(11, 2, new Path("test"), 0, 100, null);
-        Assert.assertNotEquals(richSecondSplit, richModSecondSplit);
+        assertThat(richModSecondSplit).isEqualTo(richSecondSplit);
 
         TimestampedFileInputSplit richThirdSplit =
                 new TimestampedFileInputSplit(10, 2, new Path("test/test1"), 0, 100, null);
-        Assert.assertEquals(richThirdSplit.getModificationTime(), 10);
-        Assert.assertNotEquals(richFirstSplit, richThirdSplit);
+        assertThat(10).isEqualTo(richThirdSplit.getModificationTime());
+        assertThat(richThirdSplit).isEqualTo(richFirstSplit);
 
         TimestampedFileInputSplit richThirdSplitCopy =
                 new TimestampedFileInputSplit(10, 2, new Path("test/test1"), 0, 100, null);
-        Assert.assertEquals(richThirdSplitCopy, richThirdSplit);
+        assertThat(richThirdSplit).isEqualTo(richThirdSplitCopy);
     }
 
     @Test
@@ -75,16 +77,16 @@ public class TimestampedFileInputSplitTest extends TestLogger {
                 new TimestampedFileInputSplit(11, 1, new Path("test/test3"), 0, 100, null);
 
         // smaller mod time
-        Assert.assertTrue(richFirstSplit.compareTo(richSecondSplit) < 0);
+        assertThat(richFirstSplit.compareTo(richSecondSplit) < 0).isTrue();
 
         // lexicographically on the path
-        Assert.assertTrue(richThirdSplit.compareTo(richFifthSplit) < 0);
+        assertThat(richThirdSplit.compareTo(richFifthSplit) < 0).isTrue();
 
         // same mod time, same file so smaller split number first
-        Assert.assertTrue(richThirdSplit.compareTo(richSecondSplit) < 0);
+        assertThat(richThirdSplit.compareTo(richSecondSplit) < 0).isTrue();
 
         // smaller modification time first
-        Assert.assertTrue(richThirdSplit.compareTo(richForthSplit) < 0);
+        assertThat(richThirdSplit.compareTo(richForthSplit) < 0).isTrue();
     }
 
     @Test
@@ -94,7 +96,7 @@ public class TimestampedFileInputSplitTest extends TestLogger {
                     -10, 2, new Path("test"), 0, 100, null); // invalid modification time
         } catch (Exception e) {
             if (!(e instanceof IllegalArgumentException)) {
-                Assert.fail(e.getMessage());
+                fail(e.getMessage());
             }
         }
     }
@@ -141,6 +143,6 @@ public class TimestampedFileInputSplitTest extends TestLogger {
         expectedSortedSplits.add(richFifthSplit);
         expectedSortedSplits.add(richFifthSplit);
 
-        Assert.assertArrayEquals(expectedSortedSplits.toArray(), actualSortedSplits.toArray());
+        assertThat(actualSortedSplits.toArray()).isEqualTo(expectedSortedSplits.toArray());
     }
 }

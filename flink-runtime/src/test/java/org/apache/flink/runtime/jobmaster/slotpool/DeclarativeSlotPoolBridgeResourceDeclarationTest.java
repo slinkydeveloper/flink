@@ -41,8 +41,8 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import static org.apache.flink.runtime.jobmaster.slotpool.DeclarativeSlotPoolBridgeTest.createAllocatedSlot;
 import static org.apache.flink.runtime.jobmaster.slotpool.DeclarativeSlotPoolBridgeTest.createDeclarativeSlotPoolBridge;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link DeclarativeSlotPoolBridge}. */
 public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger {
@@ -93,9 +93,8 @@ public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger
         // requesting the allocation of a new slot should increase the requirements
         declarativeSlotPoolBridge.requestNewAllocatedSlot(
                 new SlotRequestId(), ResourceProfile.UNKNOWN, Time.minutes(5));
-        assertThat(
-                requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN),
-                is(1));
+        assertThat(requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN))
+                .isEqualTo(1);
     }
 
     @Test
@@ -120,19 +119,22 @@ public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger
                             .get();
 
             // waiting for the timeout
-            assertThat(
-                    allocationFuture,
-                    FlinkMatchers.futureWillCompleteExceptionally(Duration.ofMinutes(1)));
+            assertThat(allocationFuture)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            Duration.ofMinutes(1))));
 
             // when the allocation fails the requirements should be reduced (it is the users
             // responsibility to retry)
             CompletableFuture.runAsync(
                             () ->
                                     assertThat(
-                                            requirementListener
-                                                    .getRequirements()
-                                                    .getResourceCount(ResourceProfile.UNKNOWN),
-                                            is(0)),
+                                                    requirementListener
+                                                            .getRequirements()
+                                                            .getResourceCount(
+                                                                    ResourceProfile.UNKNOWN))
+                                            .isEqualTo(0),
                             mainThreadExecutor)
                     .join();
         } finally {
@@ -147,9 +149,8 @@ public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger
         // notifications about new slots should not affect requirements
         final PhysicalSlot newSlot = createAllocatedSlot(new AllocationID());
         declarativeSlotPoolBridge.newSlotsAreAvailable(Collections.singleton(newSlot));
-        assertThat(
-                requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN),
-                is(0));
+        assertThat(requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN))
+                .isEqualTo(0);
     }
 
     @Test
@@ -163,9 +164,8 @@ public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger
         final SlotRequestId slotRequestId = new SlotRequestId();
         declarativeSlotPoolBridge.allocateAvailableSlot(
                 slotRequestId, newSlot.getAllocationId(), ResourceProfile.UNKNOWN);
-        assertThat(
-                requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN),
-                is(1));
+        assertThat(requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN))
+                .isEqualTo(1);
     }
 
     @Test
@@ -182,9 +182,8 @@ public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger
         // releasing (==freeing) a [reserved] slot should decrease the requirements
         declarativeSlotPoolBridge.releaseSlot(
                 slotRequestId, new RuntimeException("Test exception"));
-        assertThat(
-                requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN),
-                is(0));
+        assertThat(requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN))
+                .isEqualTo(0);
     }
 
     @Test
@@ -202,9 +201,8 @@ public class DeclarativeSlotPoolBridgeResourceDeclarationTest extends TestLogger
                 newSlot.getTaskManagerLocation().getResourceID(),
                 newSlot.getAllocationId(),
                 new RuntimeException("Test exception"));
-        assertThat(
-                requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN),
-                is(0));
+        assertThat(requirementListener.getRequirements().getResourceCount(ResourceProfile.UNKNOWN))
+                .isEqualTo(0);
     }
 
     private static final class RequirementListener {

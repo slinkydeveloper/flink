@@ -32,8 +32,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The tests verify that {@link PriorityQueueStateType#HEAP heap timers} are not serialized into raw
@@ -60,7 +59,7 @@ public class HeapTimersSnapshottingTest {
                     testHarness
                             .snapshotWithLocalState(0L, 1L, CheckpointType.SAVEPOINT)
                             .getJobManagerOwnedState();
-            assertThat(state.getRawKeyedState().isEmpty(), equalTo(true));
+            assertThat(state.getRawKeyedState().isEmpty()).isEqualTo(true);
         }
     }
 
@@ -79,7 +78,7 @@ public class HeapTimersSnapshottingTest {
                     testHarness
                             .snapshotWithLocalState(0L, 1L, CheckpointType.CHECKPOINT)
                             .getJobManagerOwnedState();
-            assertThat(state.getRawKeyedState().isEmpty(), equalTo(false));
+            assertThat(state.getRawKeyedState().isEmpty()).isEqualTo(false);
         }
     }
 

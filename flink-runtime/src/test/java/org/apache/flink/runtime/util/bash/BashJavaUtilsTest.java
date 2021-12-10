@@ -28,8 +28,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BashJavaUtils}. */
 public class BashJavaUtilsTest extends TestLogger {
@@ -41,7 +40,7 @@ public class BashJavaUtilsTest extends TestLogger {
         String jvmArgsLine = BashJavaUtils.getJmResourceParams(configuration).get(0);
         Map<String, String> jvmArgs = ConfigurationUtils.parseJvmArgString(jvmArgsLine);
         String heapSizeStr = Long.toString(heapSize.getBytes());
-        assertThat(jvmArgs.get("-Xmx"), is(heapSizeStr));
-        assertThat(jvmArgs.get("-Xms"), is(heapSizeStr));
+        assertThat(jvmArgs.get("-Xmx")).isEqualTo(heapSizeStr);
+        assertThat(jvmArgs.get("-Xms")).isEqualTo(heapSizeStr);
     }
 }

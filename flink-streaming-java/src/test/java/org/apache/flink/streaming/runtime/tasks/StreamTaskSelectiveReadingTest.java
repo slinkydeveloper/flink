@@ -40,8 +40,8 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test selective reading. */
 public class StreamTaskSelectiveReadingTest {
@@ -196,7 +196,7 @@ public class StreamTaskSelectiveReadingTest {
                             .toArray(String[]::new);
             Arrays.sort(result);
 
-            assertArrayEquals("Output was not correct.", expectedResult, result);
+            assertThat(result).as("Output was not correct.").isEqualTo(expectedResult);
         }
     }
 

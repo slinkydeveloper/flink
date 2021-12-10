@@ -67,7 +67,7 @@ import java.util.stream.Collectors;
 import static org.apache.flink.configuration.JobManagerOptions.ADDRESS;
 import static org.apache.flink.configuration.RestOptions.PORT;
 import static org.apache.flink.table.client.cli.utils.SqlScriptReader.parseSqlScript;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test that runs every {@code xx.q} file in "resources/sql/" path as a test. */
 @RunWith(Parameterized.class)
@@ -133,7 +133,7 @@ public class CliClientITCase extends AbstractTestBase {
         List<Result> actualResults = runSqlStatements(sqlStatements);
         String out = transformOutput(testSqlStatements, actualResults);
         String errorMsg = "SQL script " + sqlPath + " is not passed.";
-        assertEquals(errorMsg, in, out);
+        assertThat(out).as(errorMsg).isEqualTo(in);
     }
 
     /**

@@ -43,7 +43,6 @@ import org.apache.flink.util.concurrent.FutureUtils;
 import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseStatus;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -59,6 +58,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link JobSubmitHandler}. */
 @RunWith(Parameterized.class)
@@ -130,9 +132,9 @@ public class JobSubmitHandlerTest extends TestLogger {
             handler.handleRequest(
                     HandlerRequest.create(request, EmptyMessageParameters.getInstance()),
                     mockGateway);
-            Assert.fail();
+            fail("unknown failure");
         } catch (RestHandlerException rhe) {
-            Assert.assertEquals(HttpResponseStatus.BAD_REQUEST, rhe.getHttpResponseStatus());
+            assertThat(rhe.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
         }
     }
 
@@ -275,11 +277,11 @@ public class JobSubmitHandlerTest extends TestLogger {
                         dispatcherGateway)
                 .get();
 
-        Assert.assertTrue("No JobGraph was submitted.", submittedJobGraphFuture.isDone());
+        assertThat(submittedJobGraphFuture.isDone()).as("No JobGraph was submitted.").isTrue();
         final JobGraph submittedJobGraph = submittedJobGraphFuture.get();
-        Assert.assertEquals(1, submittedJobGraph.getUserJarBlobKeys().size());
-        Assert.assertEquals(1, submittedJobGraph.getUserArtifacts().size());
-        Assert.assertNotNull(submittedJobGraph.getUserArtifacts().get(dcEntryName).blobKey);
+        assertThat(submittedJobGraph.getUserJarBlobKeys().size()).isEqualTo(1);
+        assertThat(submittedJobGraph.getUserArtifacts().size()).isEqualTo(1);
+        assertThat(submittedJobGraph.getUserArtifacts().get(dcEntryName).blobKey).isNotNull();
     }
 
     @Test
@@ -324,7 +326,7 @@ public class JobSubmitHandlerTest extends TestLogger {
                     .get();
         } catch (Exception e) {
             Throwable t = ExceptionUtils.stripExecutionException(e);
-            Assert.assertEquals(errorMessage, t.getMessage());
+            assertThat(t.getMessage()).isEqualTo(errorMessage);
         }
     }
 }

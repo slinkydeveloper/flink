@@ -51,10 +51,8 @@ import static org.apache.flink.cep.operator.CepRuntimeContextTest.MockProcessFun
 import static org.apache.flink.cep.utils.CepOperatorBuilder.createOperatorForNFA;
 import static org.apache.flink.cep.utils.CepOperatorTestUtilities.getCepTestHarness;
 import static org.apache.flink.cep.utils.EventBuilder.event;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -132,15 +130,16 @@ public class CepRuntimeContextTest extends TestLogger {
 
         RuntimeContext runtimeContext = new CepRuntimeContext(mockedRuntimeContext);
 
-        assertEquals(taskName, runtimeContext.getTaskName());
-        assertEquals(metricGroup, runtimeContext.getMetricGroup());
-        assertEquals(numberOfParallelSubtasks, runtimeContext.getNumberOfParallelSubtasks());
-        assertEquals(indexOfSubtask, runtimeContext.getIndexOfThisSubtask());
-        assertEquals(attemptNumber, runtimeContext.getAttemptNumber());
-        assertEquals(taskNameWithSubtask, runtimeContext.getTaskNameWithSubtasks());
-        assertEquals(executionConfig, runtimeContext.getExecutionConfig());
-        assertEquals(userCodeClassLoader, runtimeContext.getUserCodeClassLoader());
-        assertEquals(distributedCache, runtimeContext.getDistributedCache());
+        assertThat(runtimeContext.getTaskName()).isEqualTo(taskName);
+        assertThat(runtimeContext.getMetricGroup()).isEqualTo(metricGroup);
+        assertThat(runtimeContext.getNumberOfParallelSubtasks())
+                .isEqualTo(numberOfParallelSubtasks);
+        assertThat(runtimeContext.getIndexOfThisSubtask()).isEqualTo(indexOfSubtask);
+        assertThat(runtimeContext.getAttemptNumber()).isEqualTo(attemptNumber);
+        assertThat(runtimeContext.getTaskNameWithSubtasks()).isEqualTo(taskNameWithSubtask);
+        assertThat(runtimeContext.getExecutionConfig()).isEqualTo(executionConfig);
+        assertThat(runtimeContext.getUserCodeClassLoader()).isEqualTo(userCodeClassLoader);
+        assertThat(runtimeContext.getDistributedCache()).isEqualTo(distributedCache);
 
         try {
             runtimeContext.getState(new ValueStateDescriptor<>("foobar", Integer.class, 42));
@@ -262,17 +261,17 @@ public class CepRuntimeContextTest extends TestLogger {
         }
 
         MockProcessFunctionAsserter checkOpenCalled() {
-            assertThat(function.openCalled, is(true));
+            assertThat(function.openCalled).isEqualTo(true);
             return this;
         }
 
         MockProcessFunctionAsserter checkCloseCalled() {
-            assertThat(function.openCalled, is(true));
+            assertThat(function.openCalled).isEqualTo(true);
             return this;
         }
 
         MockProcessFunctionAsserter checkProcessMatchCalled() {
-            assertThat(function.processMatchCalled, is(true));
+            assertThat(function.processMatchCalled).isEqualTo(true);
             return this;
         }
     }

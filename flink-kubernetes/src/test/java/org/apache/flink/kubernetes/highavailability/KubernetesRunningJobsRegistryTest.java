@@ -26,9 +26,9 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for {@link KubernetesRunningJobsRegistry} operations. */
 public class KubernetesRunningJobsRegistryTest extends KubernetesHighAvailabilityTestBase {
@@ -42,14 +42,12 @@ public class KubernetesRunningJobsRegistryTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesRunningJobsRegistry runningJobsRegistry =
                                     new KubernetesRunningJobsRegistry(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
                             runningJobsRegistry.setJobRunning(jobID);
-                            assertThat(
-                                    runningJobsRegistry.getJobSchedulingStatus(jobID),
-                                    is(RunningJobsRegistry.JobSchedulingStatus.RUNNING));
+                            assertThat(runningJobsRegistry.getJobSchedulingStatus(jobID))
+                                    .isEqualTo(RunningJobsRegistry.JobSchedulingStatus.RUNNING);
                         });
             }
         };
@@ -62,14 +60,12 @@ public class KubernetesRunningJobsRegistryTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesRunningJobsRegistry runningJobsRegistry =
                                     new KubernetesRunningJobsRegistry(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
                             final JobID jobId = JobID.generate();
-                            assertThat(
-                                    runningJobsRegistry.getJobSchedulingStatus(jobId),
-                                    is(RunningJobsRegistry.JobSchedulingStatus.PENDING));
+                            assertThat(runningJobsRegistry.getJobSchedulingStatus(jobId))
+                                    .isEqualTo(RunningJobsRegistry.JobSchedulingStatus.PENDING);
                         });
             }
         };
@@ -90,7 +86,8 @@ public class KubernetesRunningJobsRegistryTest extends KubernetesHighAvailabilit
                             } catch (IOException ex) {
                                 final String msg =
                                         "ConfigMap " + LEADER_CONFIGMAP_NAME + " does not exist";
-                                assertThat(ex, FlinkMatchers.containsMessage(msg));
+                                assertThat(ex)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(msg)));
                             }
                         });
             }
@@ -104,18 +101,15 @@ public class KubernetesRunningJobsRegistryTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesRunningJobsRegistry runningJobsRegistry =
                                     new KubernetesRunningJobsRegistry(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
                             runningJobsRegistry.setJobFinished(jobID);
-                            assertThat(
-                                    runningJobsRegistry.getJobSchedulingStatus(jobID),
-                                    is(RunningJobsRegistry.JobSchedulingStatus.DONE));
+                            assertThat(runningJobsRegistry.getJobSchedulingStatus(jobID))
+                                    .isEqualTo(RunningJobsRegistry.JobSchedulingStatus.DONE);
                             runningJobsRegistry.clearJob(jobID);
-                            assertThat(
-                                    runningJobsRegistry.getJobSchedulingStatus(jobID),
-                                    is(RunningJobsRegistry.JobSchedulingStatus.PENDING));
+                            assertThat(runningJobsRegistry.getJobSchedulingStatus(jobID))
+                                    .isEqualTo(RunningJobsRegistry.JobSchedulingStatus.PENDING);
                         });
             }
         };

@@ -31,9 +31,7 @@ import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link StateWithExecutionGraph} state. */
 public class StateWithExecutionGraphTest extends TestLogger {
@@ -57,7 +55,8 @@ public class StateWithExecutionGraphTest extends TestLogger {
 
             context.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.FAILED));
 
             // transition to FAILED
             testingExecutionGraph.failJob(
@@ -65,13 +64,13 @@ public class StateWithExecutionGraphTest extends TestLogger {
                     System.currentTimeMillis());
             testingExecutionGraph.completeTerminationFuture(JobStatus.FAILED);
 
-            assertThat(testingExecutionGraph.getState(), is(JobStatus.FAILED));
+            assertThat(testingExecutionGraph.getState()).isEqualTo(JobStatus.FAILED);
 
             // As long as we don't execute StateWithExecutionGraph#onGloballyTerminalState
             // immediately when reaching a globally terminal state or if don't immediately leave
             // this state when reaching a globally terminal state, this test is still valid because
             // the suspend call can happen asynchronously.
-            assertFalse(stateWithExecutionGraph.getGloballyTerminalStateFuture().isDone());
+            assertThat(stateWithExecutionGraph.getGloballyTerminalStateFuture().isDone()).isFalse();
             stateWithExecutionGraph.suspend(new FlinkException("Test exception"));
         }
     }
@@ -88,7 +87,7 @@ public class StateWithExecutionGraphTest extends TestLogger {
 
             stateWithExecutionGraph.onLeave(AdaptiveSchedulerTest.DummyState.class);
 
-            assertThat(testingOperatorCoordinatorHandler.isDisposed(), is(true));
+            assertThat(testingOperatorCoordinatorHandler.isDisposed()).isEqualTo(true);
         }
     }
 
@@ -100,7 +99,8 @@ public class StateWithExecutionGraphTest extends TestLogger {
             final TestingStateWithExecutionGraph stateWithExecutionGraph =
                     createStateWithExecutionGraph(context);
 
-            context.setExpectFinished(aeg -> assertThat(aeg.getState(), is(JobStatus.SUSPENDED)));
+            context.setExpectFinished(
+                    aeg -> assertThat(aeg.getState()).isEqualTo(JobStatus.SUSPENDED));
 
             stateWithExecutionGraph.suspend(new RuntimeException());
         }
@@ -118,9 +118,8 @@ public class StateWithExecutionGraphTest extends TestLogger {
 
         context.close();
 
-        assertThat(
-                stateWithExecutionGraph.getGloballyTerminalStateFuture().get(),
-                is(JobStatus.FINISHED));
+        assertThat(stateWithExecutionGraph.getGloballyTerminalStateFuture().get())
+                .isEqualTo(JobStatus.FINISHED);
     }
 
     @Test
@@ -135,7 +134,8 @@ public class StateWithExecutionGraphTest extends TestLogger {
 
         context.close();
 
-        assertThat(stateWithExecutionGraph.getGloballyTerminalStateFuture().isDone(), is(false));
+        assertThat(stateWithExecutionGraph.getGloballyTerminalStateFuture().isDone())
+                .isEqualTo(false);
     }
 
     private TestingStateWithExecutionGraph createStateWithExecutionGraph(

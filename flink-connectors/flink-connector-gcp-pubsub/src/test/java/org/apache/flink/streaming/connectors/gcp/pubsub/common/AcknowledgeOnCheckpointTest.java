@@ -24,11 +24,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -50,13 +49,13 @@ public class AcknowledgeOnCheckpointTest {
         List<AcknowledgeIdsForCheckpoint<String>> actual =
                 acknowledgeOnCheckpoint.snapshotState(2, 100);
 
-        assertThat(actual, hasSize(3));
-        assertThat(actual.get(0), equalTo(input.get(0)));
-        assertThat(actual.get(1), equalTo(input.get(1)));
-        assertThat(actual.get(2).getCheckpointId(), is(2L));
-        assertThat(actual.get(2).getAcknowledgeIds(), hasSize(0));
+        assertThat(actual).satisfies(matching(hasSize(3)));
+        assertThat(actual.get(0)).isEqualTo(input.get(0));
+        assertThat(actual.get(1)).isEqualTo(input.get(1));
+        assertThat(actual.get(2).getCheckpointId()).isEqualTo(2L);
+        assertThat(actual.get(2).getAcknowledgeIds()).satisfies(matching(hasSize(0)));
 
-        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements(), is(4));
+        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements()).isEqualTo(4);
     }
 
     @Test
@@ -69,10 +68,11 @@ public class AcknowledgeOnCheckpointTest {
         List<AcknowledgeIdsForCheckpoint<String>> actual =
                 acknowledgeOnCheckpoint.snapshotState(2, 100);
 
-        assertThat(actual.get(0).getCheckpointId(), is(2L));
-        assertThat(actual.get(0).getAcknowledgeIds(), containsInAnyOrder("ackId"));
+        assertThat(actual.get(0).getCheckpointId()).isEqualTo(2L);
+        assertThat(actual.get(0).getAcknowledgeIds())
+                .satisfies(matching(containsInAnyOrder("ackId")));
 
-        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements(), is(1));
+        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements()).isEqualTo(1);
     }
 
     @Test
@@ -91,12 +91,13 @@ public class AcknowledgeOnCheckpointTest {
         List<AcknowledgeIdsForCheckpoint<String>> actual =
                 acknowledgeOnCheckpoint.snapshotState(94, 100);
 
-        assertThat(actual.get(0), equalTo(input.get(0)));
-        assertThat(actual.get(1), equalTo(input.get(1)));
-        assertThat(actual.get(2).getCheckpointId(), is(94L));
-        assertThat(actual.get(2).getAcknowledgeIds(), containsInAnyOrder("ackId"));
+        assertThat(actual.get(0)).isEqualTo(input.get(0));
+        assertThat(actual.get(1)).isEqualTo(input.get(1));
+        assertThat(actual.get(2).getCheckpointId()).isEqualTo(94L);
+        assertThat(actual.get(2).getAcknowledgeIds())
+                .satisfies(matching(containsInAnyOrder("ackId")));
 
-        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements(), is(5));
+        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements()).isEqualTo(5);
     }
 
     @Test
@@ -110,10 +111,11 @@ public class AcknowledgeOnCheckpointTest {
         List<AcknowledgeIdsForCheckpoint<String>> actual =
                 acknowledgeOnCheckpoint.snapshotState(2, 100);
 
-        assertThat(actual.get(0).getCheckpointId(), is(2L));
-        assertThat(actual.get(0).getAcknowledgeIds(), containsInAnyOrder("ackId", "ackId2"));
+        assertThat(actual.get(0).getCheckpointId()).isEqualTo(2L);
+        assertThat(actual.get(0).getAcknowledgeIds())
+                .satisfies(matching(containsInAnyOrder("ackId", "ackId2")));
 
-        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements(), is(2));
+        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements()).isEqualTo(2);
     }
 
     @Test
@@ -132,20 +134,24 @@ public class AcknowledgeOnCheckpointTest {
 
         ArgumentCaptor<List<String>> argumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(mockedAcknowledger, times(1)).acknowledge(argumentCaptor.capture());
-        assertThat(
-                argumentCaptor.getValue(),
-                containsInAnyOrder(
-                        "idsFor0", "moreIdsFor0",
-                        "idsFor1", "moreIdsFor1",
-                        "idsFor2", "moreIdsFor2"));
+        assertThat(argumentCaptor.getValue())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        "idsFor0",
+                                        "moreIdsFor0",
+                                        "idsFor1",
+                                        "moreIdsFor1",
+                                        "idsFor2",
+                                        "moreIdsFor2")));
 
-        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements(), is(2));
+        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements()).isEqualTo(2);
     }
 
     @Test
     public void testNumberOfOutstandingAcknowledgementsOnEmptyState() {
         AcknowledgeOnCheckpoint<String> acknowledgeOnCheckpoint =
                 new AcknowledgeOnCheckpoint<>(mockedAcknowledger);
-        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements(), is(0));
+        assertThat(acknowledgeOnCheckpoint.numberOfOutstandingAcknowledgements()).isEqualTo(0);
     }
 }

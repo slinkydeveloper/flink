@@ -32,7 +32,6 @@ import org.apache.flink.streaming.api.operators.collect.utils.TestUncheckpointed
 import org.apache.flink.util.OptionalFailure;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -43,6 +42,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CollectResultIterator}. */
 public class CollectResultIteratorTest extends TestLogger {
@@ -82,7 +83,7 @@ public class CollectResultIteratorTest extends TestLogger {
             // this is an at least once iterator, so we expect each value to at least appear
             Set<Integer> actualSet = new HashSet<>(actual);
             for (int expectedValue : expected) {
-                Assert.assertTrue(actualSet.contains(expectedValue));
+                assertThat(actualSet.contains(expectedValue)).isTrue();
             }
 
             iterator.close();
@@ -109,12 +110,11 @@ public class CollectResultIteratorTest extends TestLogger {
             while (iterator.hasNext()) {
                 actual.add(iterator.next());
             }
-            Assert.assertEquals(expected.size(), actual.size());
+            assertThat(actual.size()).isEqualTo(expected.size());
 
             Collections.sort(expected);
             Collections.sort(actual);
-            Assert.assertArrayEquals(
-                    expected.toArray(new Integer[0]), actual.toArray(new Integer[0]));
+            assertThat(actual.toArray(new Integer[0])).isEqualTo(expected.toArray(new Integer[0]));
 
             iterator.close();
         }
@@ -136,13 +136,13 @@ public class CollectResultIteratorTest extends TestLogger {
         JobClient jobClient = tuple2.f1;
 
         for (int i = 0; i < 100; i++) {
-            Assert.assertTrue(iterator.hasNext());
-            Assert.assertNotNull(iterator.next());
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.next()).isNotNull();
         }
-        Assert.assertTrue(iterator.hasNext());
+        assertThat(iterator.hasNext()).isTrue();
         iterator.close();
 
-        Assert.assertEquals(JobStatus.CANCELED, jobClient.getJobStatus().get());
+        assertThat(jobClient.getJobStatus().get()).isEqualTo(JobStatus.CANCELED);
     }
 
     private Tuple2<CollectResultIterator<Integer>, JobClient> createIteratorAndJobClient(

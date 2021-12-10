@@ -41,12 +41,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.fail;
 
 /** Unit tests for {@link DefaultSchedulingPipelinedRegion}. */
 public class DefaultSchedulingPipelinedRegionTest extends TestLogger {
@@ -63,7 +62,7 @@ public class DefaultSchedulingPipelinedRegionTest extends TestLogger {
             pipelinedRegion.getVertex(unknownVertexId);
             fail("Expected exception not thrown");
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString(unknownVertexId + " not found"));
+            assertThat(e.getMessage()).contains(unknownVertexId + " not found");
         }
     }
 
@@ -83,9 +82,9 @@ public class DefaultSchedulingPipelinedRegionTest extends TestLogger {
         final Iterator<DefaultExecutionVertex> vertexIterator =
                 pipelinedRegion.getVertices().iterator();
 
-        assertThat(vertexIterator.hasNext(), is(true));
-        assertThat(vertexIterator.next(), is(sameInstance(vertex)));
-        assertThat(vertexIterator.hasNext(), is(false));
+        assertThat(vertexIterator.hasNext()).isEqualTo(true);
+        assertThat(vertexIterator.next()).isEqualTo(sameInstance(vertex));
+        assertThat(vertexIterator.hasNext()).isEqualTo(false);
     }
 
     /**
@@ -144,8 +143,12 @@ public class DefaultSchedulingPipelinedRegionTest extends TestLogger {
         }
 
         assertThat(
-                firstPipelinedRegion.getAllBlockingConsumedPartitionGroups().iterator().hasNext(),
-                is(false));
-        assertThat(secondPipelinedRegionConsumedResults, contains(b0ConsumedResultPartition));
+                        firstPipelinedRegion
+                                .getAllBlockingConsumedPartitionGroups()
+                                .iterator()
+                                .hasNext())
+                .isEqualTo(false);
+        assertThat(secondPipelinedRegionConsumedResults)
+                .satisfies(matching(contains(b0ConsumedResultPartition)));
     }
 }

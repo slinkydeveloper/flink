@@ -29,9 +29,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link FrontMetricGroup}. */
 public class FrontMetricGroupTest {
@@ -55,16 +55,16 @@ public class FrontMetricGroupTest {
                                         .build(),
                                 hostName));
 
-        assertThat(
-                frontMetricGroup.getMetricIdentifier(metricName),
-                is(
+        assertThat(frontMetricGroup.getMetricIdentifier(metricName))
+                .isEqualTo(
                         hostName.replace(delimiter, FrontMetricGroup.DEFAULT_REPLACEMENT)
                                 + delimiter
                                 + metricName.replace(
-                                        delimiter, FrontMetricGroup.DEFAULT_REPLACEMENT)));
+                                        delimiter, FrontMetricGroup.DEFAULT_REPLACEMENT));
         // delimiters in variables should not be filtered, because they are usually not used in a
         // context where the delimiter matters
-        assertThat(frontMetricGroup.getAllVariables(), hasEntry(ScopeFormat.SCOPE_HOST, hostName));
+        assertThat(frontMetricGroup.getAllVariables())
+                .satisfies(matching(hasEntry(ScopeFormat.SCOPE_HOST, hostName)));
     }
 
     @Test
@@ -86,18 +86,18 @@ public class FrontMetricGroupTest {
                                         .build(),
                                 hostName));
 
-        assertThat(
-                frontMetricGroup.getMetricIdentifier(metricName),
-                is(
+        assertThat(frontMetricGroup.getMetricIdentifier(metricName))
+                .isEqualTo(
                         hostName.replace(
                                         delimiter, FrontMetricGroup.DEFAULT_REPLACEMENT_ALTERNATIVE)
                                 + delimiter
                                 + metricName.replace(
                                         delimiter,
-                                        FrontMetricGroup.DEFAULT_REPLACEMENT_ALTERNATIVE)));
+                                        FrontMetricGroup.DEFAULT_REPLACEMENT_ALTERNATIVE));
         // delimiters in variables should not be filtered, because they are usually not used in a
         // context where the delimiter matters
-        assertThat(frontMetricGroup.getAllVariables(), hasEntry(ScopeFormat.SCOPE_HOST, hostName));
+        assertThat(frontMetricGroup.getAllVariables())
+                .satisfies(matching(hasEntry(ScopeFormat.SCOPE_HOST, hostName)));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class FrontMetricGroupTest {
                                 ImmutableMap.of(ScopeFormat.asVariable("foo"), "bar")),
                         new ProcessMetricGroup(TestingMetricRegistry.builder().build(), "host"));
 
-        assertThat(
-                frontMetricGroup.getAllVariables(), hasEntry(ScopeFormat.asVariable("foo"), "bar"));
+        assertThat(frontMetricGroup.getAllVariables())
+                .satisfies(matching(hasEntry(ScopeFormat.asVariable("foo"), "bar")));
     }
 }

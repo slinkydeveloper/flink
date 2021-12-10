@@ -37,8 +37,8 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests cases where accumulators: a) throw errors during runtime b) are not compatible with
@@ -89,7 +89,7 @@ public class AccumulatorErrorITCase extends TestLogger {
             env.execute();
             fail("Should have failed.");
         } catch (JobExecutionException e) {
-            assertTrue(findThrowable(e, UnsupportedOperationException.class).isPresent());
+            assertThat(findThrowable(e, UnsupportedOperationException.class).isPresent()).isTrue();
         }
     }
 
@@ -200,7 +200,7 @@ public class AccumulatorErrorITCase extends TestLogger {
             result.getAllAccumulatorResults();
             fail("Should have failed");
         } catch (Exception ex) {
-            assertTrue(findThrowable(ex, CustomException.class).isPresent());
+            assertThat(findThrowable(ex, CustomException.class).isPresent()).isTrue();
         }
     }
 }

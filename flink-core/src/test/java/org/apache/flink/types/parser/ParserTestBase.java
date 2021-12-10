@@ -26,10 +26,8 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** */
 public abstract class ParserTestBase<T> extends TestLogger {
@@ -48,12 +46,12 @@ public abstract class ParserTestBase<T> extends TestLogger {
 
     @Test
     public void testTest() {
-        assertNotNull(getParser());
-        assertNotNull(getTypeClass());
-        assertNotNull(getValidTestValues());
-        assertNotNull(getValidTestResults());
-        assertNotNull(getInvalidTestValues());
-        assertTrue(getValidTestValues().length == getValidTestResults().length);
+        assertThat(getParser()).isNotNull();
+        assertThat(getTypeClass()).isNotNull();
+        assertThat(getValidTestValues()).isNotNull();
+        assertThat(getValidTestResults()).isNotNull();
+        assertThat(getInvalidTestValues()).isNotNull();
+        assertThat(getValidTestValues().length == getValidTestResults().length).isTrue();
     }
 
     @Test
@@ -62,8 +60,10 @@ public abstract class ParserTestBase<T> extends TestLogger {
             FieldParser<?> parser = getParser();
             Object created = parser.createValue();
 
-            assertNotNull("Null type created", created);
-            assertTrue("Wrong type created", getTypeClass().isAssignableFrom(created.getClass()));
+            assertThat(created).as("Null type created").isNotNull();
+            assertThat(getTypeClass().isAssignableFrom(created.getClass()))
+                    .as("Wrong type created")
+                    .isTrue();
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -105,27 +105,39 @@ public abstract class ParserTestBase<T> extends TestLogger {
                                 new byte[] {'9', '9', '9'},
                                 parser3.createValue());
 
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        numRead1 != -1);
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        numRead2 != -1);
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        numRead3 != -1);
+                assertThat(numRead1 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
+                assertThat(numRead2 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
+                assertThat(numRead3 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
 
-                assertEquals("Invalid number of bytes read returned.", bytes1.length, numRead1);
-                assertEquals("Invalid number of bytes read returned.", bytes2.length, numRead2);
-                assertEquals("Invalid number of bytes read returned.", bytes3.length, numRead3);
+                assertThat(numRead1)
+                        .as("Invalid number of bytes read returned.")
+                        .isEqualTo(bytes1.length);
+                assertThat(numRead2)
+                        .as("Invalid number of bytes read returned.")
+                        .isEqualTo(bytes2.length);
+                assertThat(numRead3)
+                        .as("Invalid number of bytes read returned.")
+                        .isEqualTo(bytes3.length);
 
                 T result1 = parser1.getLastResult();
                 T result2 = parser2.getLastResult();
                 T result3 = parser3.getLastResult();
 
-                assertEquals("Parser parsed wrong. " + testValues[i], results[i], result1);
-                assertEquals("Parser parsed wrong. " + testValues[i], results[i], result2);
-                assertEquals("Parser parsed wrong. " + testValues[i], results[i], result3);
+                assertThat(result1)
+                        .as("Parser parsed wrong. " + testValues[i])
+                        .isEqualTo(results[i]);
+                assertThat(result2)
+                        .as("Parser parsed wrong. " + testValues[i])
+                        .isEqualTo(results[i]);
+                assertThat(result3)
+                        .as("Parser parsed wrong. " + testValues[i])
+                        .isEqualTo(results[i]);
             }
 
         } catch (Exception e) {
@@ -163,21 +175,25 @@ public abstract class ParserTestBase<T> extends TestLogger {
                                 new byte[] {'&', '&', '&', '&'},
                                 parser2.createValue());
 
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        numRead1 != -1);
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        numRead2 != -1);
+                assertThat(numRead1 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
+                assertThat(numRead2 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
 
-                assertEquals("Invalid number of bytes read returned.", bytes1.length, numRead1);
-                assertEquals("Invalid number of bytes read returned.", bytes2.length, numRead2);
+                assertThat(numRead1)
+                        .as("Invalid number of bytes read returned.")
+                        .isEqualTo(bytes1.length);
+                assertThat(numRead2)
+                        .as("Invalid number of bytes read returned.")
+                        .isEqualTo(bytes2.length);
 
                 T result1 = parser1.getLastResult();
                 T result2 = parser2.getLastResult();
 
-                assertEquals("Parser parsed wrong.", results[i], result1);
-                assertEquals("Parser parsed wrong.", results[i], result2);
+                assertThat(result1).as("Parser parsed wrong.").isEqualTo(results[i]);
+                assertThat(result2).as("Parser parsed wrong.").isEqualTo(results[i]);
             }
 
         } catch (Exception e) {
@@ -220,18 +236,18 @@ public abstract class ParserTestBase<T> extends TestLogger {
                                 new byte[] {','},
                                 val2);
 
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        pos1 != -1);
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        pos2 != -1);
+                assertThat(pos1 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
+                assertThat(pos2 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
 
                 T result1 = parser1.getLastResult();
                 T result2 = parser2.getLastResult();
 
-                assertEquals("Parser parsed wrong.", results[i], result1);
-                assertEquals("Parser parsed wrong.", results[i], result2);
+                assertThat(result1).as("Parser parsed wrong.").isEqualTo(results[i]);
+                assertThat(result2).as("Parser parsed wrong.").isEqualTo(results[i]);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -267,11 +283,11 @@ public abstract class ParserTestBase<T> extends TestLogger {
                                 allBytesWithDelimiter.length,
                                 new byte[] {'&', '&', '&', '&'},
                                 val1);
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        pos1 != -1);
+                assertThat(pos1 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
                 T result1 = parser1.getLastResult();
-                assertEquals("Parser parsed wrong.", results[i], result1);
+                assertThat(result1).as("Parser parsed wrong.").isEqualTo(results[i]);
 
                 pos2 =
                         parser2.parseField(
@@ -280,11 +296,11 @@ public abstract class ParserTestBase<T> extends TestLogger {
                                 allBytesNoDelimiterEnd.length,
                                 new byte[] {'9', '9', '9'},
                                 val2);
-                assertTrue(
-                        "Parser declared the valid value " + testValues[i] + " as invalid.",
-                        pos2 != -1);
+                assertThat(pos2 != -1)
+                        .as("Parser declared the valid value " + testValues[i] + " as invalid.")
+                        .isTrue();
                 T result2 = parser2.getLastResult();
-                assertEquals("Parser parsed wrong.", results[i], result2);
+                assertThat(result2).as("Parser parsed wrong.").isEqualTo(results[i]);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -307,8 +323,9 @@ public abstract class ParserTestBase<T> extends TestLogger {
                         parser.parseField(
                                 bytes, 0, bytes.length, new byte[] {'|'}, parser.createValue());
 
-                assertTrue(
-                        "Parser accepted the invalid value " + testValues[i] + ".", numRead == -1);
+                assertThat(numRead == -1)
+                        .as("Parser accepted the invalid value " + testValues[i] + ".")
+                        .isTrue();
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -349,16 +366,21 @@ public abstract class ParserTestBase<T> extends TestLogger {
                 for (int i = 0; i < splitPoint; i++) {
                     pos = parser.parseField(bytes, pos, bytes.length, new byte[] {'%'}, value);
 
-                    assertTrue(
-                            "Parser declared the valid value " + validValues[i] + " as invalid.",
-                            pos != -1);
+                    assertThat(pos != -1)
+                            .as(
+                                    "Parser declared the valid value "
+                                            + validValues[i]
+                                            + " as invalid.")
+                            .isTrue();
                     T result = parser.getLastResult();
-                    assertEquals("Parser parsed wrong.", validResults[i], result);
+                    assertThat(result).as("Parser parsed wrong.").isEqualTo(validResults[i]);
                 }
 
                 // fail on the invalid part
                 pos = parser.parseField(bytes, pos, bytes.length, new byte[] {'%'}, value);
-                assertTrue("Parser accepted the invalid value " + invalid + ".", pos == -1);
+                assertThat(pos == -1)
+                        .as("Parser accepted the invalid value " + invalid + ".")
+                        .isTrue();
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -401,7 +423,7 @@ public abstract class ParserTestBase<T> extends TestLogger {
                     fail("Error while parsing: " + e.getTargetException().getMessage());
                     return;
                 }
-                assertEquals("Parser parsed wrong.", results[i], result);
+                assertThat(result).as("Parser parsed wrong.").isEqualTo(results[i]);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -492,13 +514,18 @@ public abstract class ParserTestBase<T> extends TestLogger {
                         parser.parseField(
                                 bytes, i, bytes.length, new byte[] {'|'}, parser.createValue());
 
-                assertEquals(FieldParser.ParseErrorState.EMPTY_COLUMN, parser.getErrorState());
+                assertThat(parser.getErrorState())
+                        .isEqualTo(FieldParser.ParseErrorState.EMPTY_COLUMN);
 
                 if (this.allowsEmptyField()) {
-                    assertTrue("Parser declared the empty string as invalid.", numRead != -1);
-                    assertEquals("Invalid number of bytes read returned.", i + 1, numRead);
+                    assertThat(numRead != -1)
+                            .as("Parser declared the empty string as invalid.")
+                            .isTrue();
+                    assertThat(numRead)
+                            .as("Invalid number of bytes read returned.")
+                            .isEqualTo(i + 1);
                 } else {
-                    assertTrue("Parser accepted the empty string.", numRead == -1);
+                    assertThat(numRead == -1).as("Parser accepted the empty string.").isTrue();
                 }
 
                 parser.resetParserState();

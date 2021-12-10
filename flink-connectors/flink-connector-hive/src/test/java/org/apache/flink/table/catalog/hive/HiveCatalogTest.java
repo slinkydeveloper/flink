@@ -38,10 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.apache.flink.table.factories.FactoryUtil.CONNECTOR;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for HiveCatalog. */
 public class HiveCatalogTest {
@@ -76,10 +73,15 @@ public class HiveCatalogTest {
                         HiveTestUtils.createHiveConf());
 
         Map<String, String> prop = hiveTable.getParameters();
-        assertFalse(HiveCatalog.isHiveTable(prop));
-        assertTrue(
-                prop.keySet().stream()
-                        .allMatch(k -> k.startsWith(CatalogPropertiesUtil.FLINK_PROPERTY_PREFIX)));
+        assertThat(HiveCatalog.isHiveTable(prop)).isFalse();
+        assertThat(
+                        prop.keySet().stream()
+                                .allMatch(
+                                        k ->
+                                                k.startsWith(
+                                                        CatalogPropertiesUtil
+                                                                .FLINK_PROPERTY_PREFIX)))
+                .isTrue();
     }
 
     @Test
@@ -94,10 +96,15 @@ public class HiveCatalogTest {
                         HiveTestUtils.createHiveConf());
 
         Map<String, String> prop = hiveTable.getParameters();
-        assertTrue(HiveCatalog.isHiveTable(prop));
-        assertTrue(
-                prop.keySet().stream()
-                        .noneMatch(k -> k.startsWith(CatalogPropertiesUtil.FLINK_PROPERTY_PREFIX)));
+        assertThat(HiveCatalog.isHiveTable(prop)).isTrue();
+        assertThat(
+                        prop.keySet().stream()
+                                .noneMatch(
+                                        k ->
+                                                k.startsWith(
+                                                        CatalogPropertiesUtil
+                                                                .FLINK_PROPERTY_PREFIX)))
+                .isTrue();
     }
 
     @Test
@@ -113,16 +120,17 @@ public class HiveCatalogTest {
         hiveCatalog.createTable(hiveObjectPath, new CatalogTableImpl(schema, options, null), false);
 
         CatalogBaseTable hiveTable = hiveCatalog.getTable(hiveObjectPath);
-        assertEquals(hiveTable.getOptions().get("url"), "jdbc:clickhouse://host:port/testUrl1");
-        assertEquals(
-                hiveTable.getOptions().get("flink.url"), "jdbc:clickhouse://host:port/testUrl2");
+        assertThat("jdbc:clickhouse://host:port/testUrl1")
+                .isEqualTo(hiveTable.getOptions().get("url"));
+        assertThat("jdbc:clickhouse://host:port/testUrl2")
+                .isEqualTo(hiveTable.getOptions().get("flink.url"));
     }
 
     @Test
     public void testCreateHiveConf() {
         // hive-conf-dir not specified, should read hive-site from classpath
         HiveConf hiveConf = HiveCatalog.createHiveConf(null, null);
-        assertEquals("common-val", hiveConf.get("common-key"));
+        assertThat(hiveConf.get("common-key")).isEqualTo("common-val");
         // hive-conf-dir specified, shouldn't read hive-site from classpath
         String hiveConfDir =
                 Thread.currentThread()
@@ -130,7 +138,7 @@ public class HiveCatalogTest {
                         .getResource("test-catalog-factory-conf")
                         .getPath();
         hiveConf = HiveCatalog.createHiveConf(hiveConfDir, null);
-        assertNull(hiveConf.get("common-key", null));
+        assertThat(hiveConf.get("common-key", null)).isNull();
     }
 
     @Test
@@ -148,7 +156,7 @@ public class HiveCatalogTest {
                 false);
 
         CatalogBaseTable catalogTable = hiveCatalog.getTable(hiveObjectPath);
-        assertEquals(TableSchema.builder().build(), catalogTable.getSchema());
+        assertThat(catalogTable.getSchema()).isEqualTo(TableSchema.builder().build());
     }
 
     private static Map<String, String> getLegacyFileSystemConnectorOptions(String path) {

@@ -30,10 +30,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /** Unit tests for the {@link NonSplittingRecursiveEnumerator}. */
 public class NonSplittingRecursiveEnumeratorTest {
@@ -68,7 +67,7 @@ public class NonSplittingRecursiveEnumeratorTest {
         final Collection<FileSourceSplit> splits =
                 enumerator.enumerateSplits(new Path[] {new Path("testfs:///dir")}, 1);
 
-        assertThat(toPaths(splits), containsInAnyOrder(testPaths));
+        assertThat(toPaths(splits)).satisfies(matching(containsInAnyOrder(testPaths)));
     }
 
     @Test
@@ -86,7 +85,8 @@ public class NonSplittingRecursiveEnumeratorTest {
         final Collection<FileSourceSplit> splits =
                 enumerator.enumerateSplits(new Path[] {new Path("testfs:///")}, 1);
 
-        assertEquals(Collections.singletonList(new Path("testfs:///visiblefile")), toPaths(splits));
+        assertThat(toPaths(splits))
+                .isEqualTo(Collections.singletonList(new Path("testfs:///visiblefile")));
     }
 
     @Test
@@ -104,8 +104,8 @@ public class NonSplittingRecursiveEnumeratorTest {
         final Collection<FileSourceSplit> splits =
                 enumerator.enumerateSplits(new Path[] {new Path("testfs:///")}, 1);
 
-        assertEquals(
-                Collections.singletonList(new Path("testfs:///dir/visiblefile")), toPaths(splits));
+        assertThat(toPaths(splits))
+                .isEqualTo(Collections.singletonList(new Path("testfs:///dir/visiblefile")));
     }
 
     @Test
@@ -121,7 +121,7 @@ public class NonSplittingRecursiveEnumeratorTest {
         final Collection<FileSourceSplit> splits =
                 enumerator.enumerateSplits(new Path[] {new Path("testfs:///dir")}, 0);
 
-        assertEquals(1, splits.size());
+        assertThat(splits.size()).isEqualTo(1);
         assertSplitsEqual(
                 new FileSourceSplit("ignoredId", testPath, 0L, 12345L, 0, 12345L),
                 splits.iterator().next());
@@ -145,7 +145,7 @@ public class NonSplittingRecursiveEnumeratorTest {
         final Collection<FileSourceSplit> splits =
                 enumerator.enumerateSplits(new Path[] {new Path("testfs:///testdir")}, 0);
 
-        assertEquals(1, splits.size());
+        assertThat(splits.size()).isEqualTo(1);
         assertSplitsEqual(
                 new FileSourceSplit("ignoredId", testPath, 0L, 10000L, 0, 12345L),
                 splits.iterator().next());
@@ -200,16 +200,16 @@ public class NonSplittingRecursiveEnumeratorTest {
 
     protected static void assertSplitsEqual(
             final FileSourceSplit expected, final FileSourceSplit actual) {
-        assertEquals(expected.path(), actual.path());
-        assertEquals(expected.offset(), actual.offset());
-        assertEquals(expected.length(), actual.length());
-        assertArrayEquals(expected.hostnames(), actual.hostnames());
+        assertThat(actual.path()).isEqualTo(expected.path());
+        assertThat(actual.offset()).isEqualTo(expected.offset());
+        assertThat(actual.length()).isEqualTo(expected.length());
+        assertThat(actual.hostnames()).isEqualTo(expected.hostnames());
     }
 
     protected static void assertSplitsEqual(
             final Collection<FileSourceSplit> expected, final Collection<FileSourceSplit> actual) {
 
-        assertEquals(expected.size(), actual.size());
+        assertThat(actual.size()).isEqualTo(expected.size());
 
         final ArrayList<FileSourceSplit> expectedCopy = new ArrayList<>(expected);
         final ArrayList<FileSourceSplit> actualCopy = new ArrayList<>(expected);

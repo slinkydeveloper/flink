@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests that verify subsequent calls to {@link ExecutionEnvironment#getExecutionPlan()} and {@link

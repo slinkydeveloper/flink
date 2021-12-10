@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test verifies the behavior of DataStreamUtils.collect().
@@ -48,10 +48,10 @@ public class CollectITCase extends AbstractTestBase {
         long i = 1;
         for (Iterator<Long> it = DataStreamUtils.collect(stream); it.hasNext(); ) {
             long x = it.next();
-            assertEquals("received wrong element", i, x);
+            assertThat(x).as("received wrong element").isEqualTo(i);
             i++;
         }
 
-        assertEquals("received wrong number of elements", n + 1, i);
+        assertThat(i).as("received wrong number of elements").isEqualTo(n + 1);
     }
 }

@@ -23,7 +23,8 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.metrics.View.UPDATE_INTERVAL_SECONDS;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /** Tests for the MeterView. */
 public class MeterViewTest extends TestLogger {
@@ -33,7 +34,7 @@ public class MeterViewTest extends TestLogger {
         c.inc(5);
         Meter m = new MeterView(c);
 
-        assertEquals(5, m.getCount());
+        assertThat(m.getCount()).isEqualTo(5);
     }
 
     @Test
@@ -41,11 +42,11 @@ public class MeterViewTest extends TestLogger {
         Counter c = new SimpleCounter();
         Meter m = new MeterView(c);
 
-        assertEquals(0, m.getCount());
+        assertThat(m.getCount()).isEqualTo(0);
         m.markEvent();
-        assertEquals(1, m.getCount());
+        assertThat(m.getCount()).isEqualTo(1);
         m.markEvent(2);
-        assertEquals(3, m.getCount());
+        assertThat(m.getCount()).isEqualTo(3);
     }
 
     @Test
@@ -59,49 +60,49 @@ public class MeterViewTest extends TestLogger {
             m.update();
         }
         // values = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120]
-        assertEquals(2.0, m.getRate(), 0.1); // 120 - 0 / 60
+        assertThat(m.getRate()).isCloseTo(2.0, within(0.1)); // 120 - 0 / 60
 
         for (int x = 0; x < 12; x++) {
             m.markEvent(10);
             m.update();
         }
         // values = [130, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 120]
-        assertEquals(2.0, m.getRate(), 0.1); // 240 - 120 / 60
+        assertThat(m.getRate()).isCloseTo(2.0, within(0.1)); // 240 - 120 / 60
 
         for (int x = 0; x < 6; x++) {
             m.markEvent(20);
             m.update();
         }
         // values = [280, 300, 320, 340, 360, 180, 190, 200, 210, 220, 230, 240, 260]
-        assertEquals(3.0, m.getRate(), 0.1); // 360 - 180 / 60
+        assertThat(m.getRate()).isCloseTo(3.0, within(0.1)); // 360 - 180 / 60
 
         for (int x = 0; x < 6; x++) {
             m.markEvent(20);
             m.update();
         }
         // values = [280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 240, 260]
-        assertEquals(4.0, m.getRate(), 0.1); // 480 - 240 / 60
+        assertThat(m.getRate()).isCloseTo(4.0, within(0.1)); // 480 - 240 / 60
 
         for (int x = 0; x < 6; x++) {
             m.update();
         }
         // values = [480, 480, 480, 480, 360, 380, 400, 420, 440, 460, 480, 480, 480]
-        assertEquals(2.0, m.getRate(), 0.1); // 480 - 360 / 60
+        assertThat(m.getRate()).isCloseTo(2.0, within(0.1)); // 480 - 360 / 60
 
         for (int x = 0; x < 6; x++) {
             m.update();
         }
         // values = [480, 480, 480, 480, 480, 480, 480, 480, 480, 480, 480, 480, 480]
-        assertEquals(0.0, m.getRate(), 0.1); // 480 - 480 / 60
+        assertThat(m.getRate()).isCloseTo(0.0, within(0.1)); // 480 - 480 / 60
     }
 
     @Test
     public void testTimeSpanBelowUpdateRate() {
         int timeSpanInSeconds = 1;
         MeterView m = new MeterView(timeSpanInSeconds);
-        assert timeSpanInSeconds < UPDATE_INTERVAL_SECONDS;
+        assertThat(timeSpanInSeconds < UPDATE_INTERVAL_SECONDS).isTrue();
         m.markEvent();
         m.update();
-        assertEquals(0.2, m.getRate(), 0.0);
+        assertThat(m.getRate()).isEqualTo(0.2);
     }
 }

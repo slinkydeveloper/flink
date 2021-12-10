@@ -20,8 +20,9 @@ package org.apache.flink.streaming.api.operators;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link InternalTimeServiceManagerImpl}. */
 public class InternalTimeServiceManagerImplTest extends TestLogger {
@@ -30,13 +31,11 @@ public class InternalTimeServiceManagerImplTest extends TestLogger {
     @Test
     public void fixConstants() {
         String expectedTimerStatePrefix = "_timer_state";
-        Assert.assertEquals(
-                expectedTimerStatePrefix, InternalTimeServiceManagerImpl.TIMER_STATE_PREFIX);
-        Assert.assertEquals(
-                expectedTimerStatePrefix + "/processing_",
-                InternalTimeServiceManagerImpl.PROCESSING_TIMER_PREFIX);
-        Assert.assertEquals(
-                expectedTimerStatePrefix + "/event_",
-                InternalTimeServiceManagerImpl.EVENT_TIMER_PREFIX);
+        assertThat(InternalTimeServiceManagerImpl.TIMER_STATE_PREFIX)
+                .isEqualTo(expectedTimerStatePrefix);
+        assertThat(InternalTimeServiceManagerImpl.PROCESSING_TIMER_PREFIX)
+                .isEqualTo(expectedTimerStatePrefix + "/processing_");
+        assertThat(InternalTimeServiceManagerImpl.EVENT_TIMER_PREFIX)
+                .isEqualTo(expectedTimerStatePrefix + "/event_");
     }
 }

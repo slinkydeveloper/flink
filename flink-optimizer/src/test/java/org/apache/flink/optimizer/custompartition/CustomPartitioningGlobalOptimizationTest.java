@@ -35,9 +35,8 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"serial", "unchecked"})
 public class CustomPartitioningGlobalOptimizationTest extends CompilerTestBase {
@@ -72,18 +71,20 @@ public class CustomPartitioningGlobalOptimizationTest extends CompilerTestBase {
             SinkPlanNode sink = op.getDataSinks().iterator().next();
             SingleInputPlanNode reducer = (SingleInputPlanNode) sink.getInput().getSource();
 
-            assertTrue(
-                    "Reduce is not chained, property reuse does not happen",
-                    reducer.getInput().getSource() instanceof DualInputPlanNode);
+            assertThat(reducer.getInput().getSource())
+                    .as("Reduce is not chained, property reuse does not happen")
+                    .isInstanceOf(DualInputPlanNode.class);
 
             DualInputPlanNode join = (DualInputPlanNode) reducer.getInput().getSource();
 
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput1().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, join.getInput2().getShipStrategy());
-            assertEquals(partitioner, join.getInput1().getPartitioner());
-            assertEquals(partitioner, join.getInput2().getPartitioner());
+            assertThat(join.getInput1().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput2().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(join.getInput1().getPartitioner()).isEqualTo(partitioner);
+            assertThat(join.getInput2().getPartitioner()).isEqualTo(partitioner);
 
-            assertEquals(ShipStrategyType.FORWARD, reducer.getInput().getShipStrategy());
+            assertThat(reducer.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

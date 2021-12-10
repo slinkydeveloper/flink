@@ -20,14 +20,14 @@ package org.apache.flink.api.common.accumulators;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DoubleMinimumTest {
 
     @Test
     public void testGet() {
         DoubleMinimum min = new DoubleMinimum();
-        assertEquals(Double.POSITIVE_INFINITY, min.getLocalValue(), 0.0);
+        assertThat(min.getLocalValue()).isEqualTo(Double.POSITIVE_INFINITY);
     }
 
     @Test
@@ -36,10 +36,10 @@ public class DoubleMinimumTest {
         double value = 13.57902468;
 
         min.add(value);
-        assertEquals(value, min.getLocalValue(), 0.0);
+        assertThat(min.getLocalValue()).isEqualTo(value);
 
         min.resetLocal();
-        assertEquals(Double.POSITIVE_INFINITY, min.getLocalValue(), 0.0);
+        assertThat(min.getLocalValue()).isEqualTo(Double.POSITIVE_INFINITY);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class DoubleMinimumTest {
         min.add(-987.6543);
         min.add(-123.4567);
 
-        assertEquals(-987.6543, min.getLocalValue(), 0.0);
+        assertThat(min.getLocalValue()).isEqualTo(-987.6543);
     }
 
     @Test
@@ -63,10 +63,10 @@ public class DoubleMinimumTest {
         min2.add(5678.9012);
 
         min2.merge(min1);
-        assertEquals(1234.5768, min2.getLocalValue(), 0.0);
+        assertThat(min2.getLocalValue()).isEqualTo(1234.5768);
 
         min1.merge(min2);
-        assertEquals(1234.5768, min1.getLocalValue(), 0.0);
+        assertThat(min1.getLocalValue()).isEqualTo(1234.5768);
     }
 
     @Test
@@ -77,6 +77,6 @@ public class DoubleMinimumTest {
         min.add(value);
 
         DoubleMinimum clone = min.clone();
-        assertEquals(value, clone.getLocalValue(), 0.0);
+        assertThat(clone.getLocalValue()).isEqualTo(value);
     }
 }

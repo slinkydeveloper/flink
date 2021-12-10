@@ -38,7 +38,6 @@ import org.apache.flink.runtime.state.TestLocalRecoveryConfig;
 import org.apache.flink.runtime.state.filesystem.FsCheckpointStreamFactory;
 import org.apache.flink.util.ResourceGuard;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -58,6 +57,7 @@ import java.util.UUID;
 
 import static org.apache.flink.core.fs.Path.fromLocalFile;
 import static org.apache.flink.core.fs.local.LocalFileSystem.getSharedInstance;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RocksIncrementalSnapshotStrategy}. */
 public class RocksIncrementalSnapshotStrategyTest {
@@ -99,7 +99,7 @@ public class RocksIncrementalSnapshotStrategyTest {
                             .filter(e -> e.getValue() instanceof PlaceholderStreamStateHandle)
                             .count();
 
-            Assert.assertTrue(placeholderStateHandleCount > 0);
+            assertThat(placeholderStateHandleCount > 0).isTrue();
         }
     }
 

@@ -36,9 +36,9 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertFalse;
 
 /** Tests for the {@link ExecutionVertex}. */
 public class ExecutionVertexTest extends TestLogger {
@@ -74,11 +74,11 @@ public class ExecutionVertexTest extends TestLogger {
         Execution execution =
                 producerExecutionJobVertex.getTaskVertices()[0].getCurrentExecutionAttempt();
 
-        assertFalse(releasePartitionsFuture.isDone());
+        assertThat(releasePartitionsFuture.isDone()).isFalse();
 
         execution.markFinished();
 
-        assertFalse(releasePartitionsFuture.isDone());
+        assertThat(releasePartitionsFuture.isDone()).isFalse();
 
         for (ExecutionVertex executionVertex : producerExecutionJobVertex.getTaskVertices()) {
             executionVertex.resetForNewExecution();
@@ -94,6 +94,6 @@ public class ExecutionVertexTest extends TestLogger {
                         .getShuffleDescriptor()
                         .getResultPartitionID();
 
-        assertThat(releasePartitionsFuture.get(), contains(resultPartitionID));
+        assertThat(releasePartitionsFuture.get()).satisfies(matching(contains(resultPartitionID)));
     }
 }

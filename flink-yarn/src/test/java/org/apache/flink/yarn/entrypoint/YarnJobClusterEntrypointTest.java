@@ -25,9 +25,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link YarnJobClusterEntrypoint}. */
 public class YarnJobClusterEntrypointTest {
@@ -43,10 +42,9 @@ public class YarnJobClusterEntrypointTest {
                 new YarnJobClusterEntrypoint(configuration);
         try {
             yarnJobClusterEntrypoint.createDispatcherResourceManagerComponentFactory(configuration);
-            fail();
+            fail("unknown failure");
         } catch (IllegalStateException exception) {
-            assertThat(
-                    exception.getMessage(), containsString("the usrlib directory does not exist."));
+            assertThat(exception.getMessage()).contains("the usrlib directory does not exist.");
         }
     }
 }

@@ -57,7 +57,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.runtime.testutils.CommonTestUtils.waitForAllTaskRunning;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 
 /**
@@ -124,7 +125,8 @@ public class CheckpointRestoreWithUidHashITCase {
                             savepointPath);
             miniCluster.executeJobBlocking(secondJob);
         }
-        assertThat(result.get(), contains(IntStream.range(0, maxNumber).boxed().toArray()));
+        assertThat(result.get())
+                .satisfies(matching(contains(IntStream.range(0, maxNumber).boxed().toArray())));
     }
 
     @Test
@@ -148,7 +150,8 @@ public class CheckpointRestoreWithUidHashITCase {
             miniCluster.start();
             miniCluster.executeJobBlocking(jobGraph);
         }
-        assertThat(result.get(), contains(IntStream.range(0, maxNumber).boxed().toArray()));
+        assertThat(result.get())
+                .satisfies(matching(contains(IntStream.range(0, maxNumber).boxed().toArray())));
     }
 
     private MiniClusterConfiguration createMiniClusterConfig() {

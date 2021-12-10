@@ -25,9 +25,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Optional;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SharedStateRegistryTest {
 
@@ -41,19 +39,19 @@ public class SharedStateRegistryTest {
         TestSharedState firstState = new TestSharedState("first");
         SharedStateRegistry.Result result =
                 sharedStateRegistry.registerReference(firstState.getRegistrationKey(), firstState);
-        assertEquals(1, result.getReferenceCount());
-        assertTrue(firstState == result.getReference());
-        assertFalse(firstState.isDiscarded());
+        assertThat(result.getReferenceCount()).isEqualTo(1);
+        assertThat(firstState == result.getReference()).isTrue();
+        assertThat(firstState.isDiscarded()).isFalse();
 
         // register another state
         TestSharedState secondState = new TestSharedState("second");
         result =
                 sharedStateRegistry.registerReference(
                         secondState.getRegistrationKey(), secondState);
-        assertEquals(1, result.getReferenceCount());
-        assertTrue(secondState == result.getReference());
-        assertFalse(firstState.isDiscarded());
-        assertFalse(secondState.isDiscarded());
+        assertThat(result.getReferenceCount()).isEqualTo(1);
+        assertThat(secondState == result.getReference()).isTrue();
+        assertThat(firstState.isDiscarded()).isFalse();
+        assertThat(secondState.isDiscarded()).isFalse();
 
         // attempt to register state under an existing key
         TestSharedState firstStatePrime =
@@ -61,29 +59,29 @@ public class SharedStateRegistryTest {
         result =
                 sharedStateRegistry.registerReference(
                         firstState.getRegistrationKey(), firstStatePrime);
-        assertEquals(2, result.getReferenceCount());
-        assertFalse(firstStatePrime == result.getReference());
-        assertTrue(firstState == result.getReference());
-        assertTrue(firstStatePrime.isDiscarded());
-        assertFalse(firstState.isDiscarded());
+        assertThat(result.getReferenceCount()).isEqualTo(2);
+        assertThat(firstStatePrime == result.getReference()).isFalse();
+        assertThat(firstState == result.getReference()).isTrue();
+        assertThat(firstStatePrime.isDiscarded()).isTrue();
+        assertThat(firstState.isDiscarded()).isFalse();
 
         // reference the first state again
         result = sharedStateRegistry.registerReference(firstState.getRegistrationKey(), firstState);
-        assertEquals(3, result.getReferenceCount());
-        assertTrue(firstState == result.getReference());
-        assertFalse(firstState.isDiscarded());
+        assertThat(result.getReferenceCount()).isEqualTo(3);
+        assertThat(firstState == result.getReference()).isTrue();
+        assertThat(firstState.isDiscarded()).isFalse();
 
         // unregister the second state
         result = sharedStateRegistry.unregisterReference(secondState.getRegistrationKey());
-        assertEquals(0, result.getReferenceCount());
-        assertTrue(result.getReference() == null);
-        assertTrue(secondState.isDiscarded());
+        assertThat(result.getReferenceCount()).isEqualTo(0);
+        assertThat(result.getReference() == null).isTrue();
+        assertThat(secondState.isDiscarded()).isTrue();
 
         // unregister the first state
         result = sharedStateRegistry.unregisterReference(firstState.getRegistrationKey());
-        assertEquals(2, result.getReferenceCount());
-        assertTrue(firstState == result.getReference());
-        assertFalse(firstState.isDiscarded());
+        assertThat(result.getReferenceCount()).isEqualTo(2);
+        assertThat(firstState == result.getReference()).isTrue();
+        assertThat(firstState.isDiscarded()).isFalse();
     }
 
     /** Validate that unregister a nonexistent key will throw exception */

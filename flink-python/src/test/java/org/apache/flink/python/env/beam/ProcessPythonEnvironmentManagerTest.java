@@ -52,10 +52,7 @@ import static org.apache.flink.python.env.beam.ProcessPythonEnvironmentManager.P
 import static org.apache.flink.python.env.beam.ProcessPythonEnvironmentManager.PYTHON_REQUIREMENTS_FILE;
 import static org.apache.flink.python.env.beam.ProcessPythonEnvironmentManager.PYTHON_REQUIREMENTS_INSTALL_DIR;
 import static org.apache.flink.python.env.beam.ProcessPythonEnvironmentManager.PYTHON_WORKING_DIR;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link ProcessPythonEnvironmentManager}. */
 public class ProcessPythonEnvironmentManagerTest {
@@ -191,7 +188,7 @@ public class ProcessPythonEnvironmentManagerTest {
                     };
             String expectedPythonPath = String.join(File.pathSeparator, expectedUserPythonPaths);
 
-            assertEquals(expectedPythonPath, environmentVariable.get("PYTHONPATH"));
+            assertThat(environmentVariable.get("PYTHONPATH")).isEqualTo(expectedPythonPath);
             assertFileEquals(
                     new File(String.join(File.separator, tmpDir, "file1")),
                     new File(
@@ -263,7 +260,7 @@ public class ProcessPythonEnvironmentManagerTest {
             expected.put(
                     PYTHON_REQUIREMENTS_INSTALL_DIR,
                     String.join(File.separator, tmpBase, PYTHON_REQUIREMENTS_DIR));
-            assertEquals(expected, environmentVariable);
+            assertThat(environmentVariable).isEqualTo(expected);
         }
     }
 
@@ -285,7 +282,7 @@ public class ProcessPythonEnvironmentManagerTest {
             Map<String, String> expected = getBasicExpectedEnv(environmentManager);
             expected.put(
                     PYTHON_WORKING_DIR, String.join(File.separator, tmpBase, PYTHON_ARCHIVES_DIR));
-            assertEquals(expected, environmentVariable);
+            assertThat(environmentVariable).isEqualTo(expected);
             assertFileEquals(
                     new File(String.join(File.separator, tmpDir, "zipExpected0")),
                     new File(String.join(File.separator, tmpBase, PYTHON_ARCHIVES_DIR, "py27.zip")),
@@ -310,7 +307,7 @@ public class ProcessPythonEnvironmentManagerTest {
 
             Map<String, String> expected = getBasicExpectedEnv(environmentManager);
             expected.put("python", "/usr/local/bin/python");
-            assertEquals(expected, environmentVariable);
+            assertThat(environmentVariable).isEqualTo(expected);
         }
     }
 
@@ -332,7 +329,7 @@ public class ProcessPythonEnvironmentManagerTest {
             try (DataInputStream input = new DataInputStream(new FileInputStream(retrievalToken))) {
                 input.readFully(content);
             }
-            assertEquals("{\"manifest\": {}}", new String(content));
+            assertThat(new String(content)).isEqualTo("{\"manifest\": {}}");
         }
     }
 
@@ -350,7 +347,7 @@ public class ProcessPythonEnvironmentManagerTest {
                             environmentManager.getBaseDirectory());
             Map<String, String> expected = getBasicExpectedEnv(environmentManager);
             expected.put("BOOT_LOG_DIR", environmentManager.getBaseDirectory());
-            assertEquals(expected, env);
+            assertThat(env).isEqualTo(expected);
         }
     }
 
@@ -365,9 +362,9 @@ public class ProcessPythonEnvironmentManagerTest {
             environmentManager.createRetrievalToken();
 
             String tmpBase = environmentManager.getBaseDirectory();
-            assertTrue(new File(tmpBase).isDirectory());
+            assertThat(new File(tmpBase).isDirectory()).isTrue();
             environmentManager.close();
-            assertFalse(new File(tmpBase).exists());
+            assertThat(new File(tmpBase).exists()).isFalse();
         }
     }
 
@@ -378,8 +375,8 @@ public class ProcessPythonEnvironmentManagerTest {
 
     private static void assertFileEquals(File expectedFile, File actualFile, boolean checkUnixMode)
             throws IOException, NoSuchAlgorithmException {
-        assertTrue(actualFile.exists());
-        assertTrue(expectedFile.exists());
+        assertThat(actualFile.exists()).isTrue();
+        assertThat(expectedFile.exists()).isTrue();
         if (expectedFile.getAbsolutePath().equals(actualFile.getAbsolutePath())) {
             return;
         }
@@ -389,13 +386,13 @@ public class ProcessPythonEnvironmentManagerTest {
                     Files.getPosixFilePermissions(Paths.get(expectedFile.toURI()));
             Set<PosixFilePermission> actualPerm =
                     Files.getPosixFilePermissions(Paths.get(actualFile.toURI()));
-            assertEquals(expectedPerm, actualPerm);
+            assertThat(actualPerm).isEqualTo(expectedPerm);
         }
 
         if (expectedFile.isDirectory()) {
-            assertTrue(actualFile.isDirectory());
+            assertThat(actualFile.isDirectory()).isTrue();
             String[] expectedSubFiles = expectedFile.list();
-            assertArrayEquals(expectedSubFiles, actualFile.list());
+            assertThat(actualFile.list()).isEqualTo(expectedSubFiles);
             if (expectedSubFiles != null) {
                 for (String fileName : expectedSubFiles) {
                     assertFileEquals(
@@ -404,9 +401,10 @@ public class ProcessPythonEnvironmentManagerTest {
                 }
             }
         } else {
-            assertEquals(expectedFile.length(), actualFile.length());
+            assertThat(actualFile.length()).isEqualTo(expectedFile.length());
             if (expectedFile.length() > 0) {
-                assertTrue(org.apache.commons.io.FileUtils.contentEquals(expectedFile, actualFile));
+                assertThat(org.apache.commons.io.FileUtils.contentEquals(expectedFile, actualFile))
+                        .isTrue();
             }
         }
     }

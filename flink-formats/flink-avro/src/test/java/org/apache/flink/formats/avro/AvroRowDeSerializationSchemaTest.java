@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for the Avro serialization and deserialization schema. */
 public class AvroRowDeSerializationSchemaTest {
@@ -48,7 +48,7 @@ public class AvroRowDeSerializationSchemaTest {
         final byte[] bytes = serializationSchema.serialize(testData.f2);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f2, actual);
+        assertThat(actual).isEqualTo(testData.f2);
     }
 
     @Test
@@ -65,7 +65,7 @@ public class AvroRowDeSerializationSchemaTest {
         final byte[] bytes = serializationSchema.serialize(testData.f2);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f2, actual);
+        assertThat(actual).isEqualTo(testData.f2);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class AvroRowDeSerializationSchemaTest {
         final byte[] bytes = serializationSchema.serialize(testData.f1);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f1, actual);
+        assertThat(actual).isEqualTo(testData.f1);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class AvroRowDeSerializationSchemaTest {
         final byte[] bytes = serializationSchema.serialize(testData.f2);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f2, actual);
+        assertThat(actual).isEqualTo(testData.f2);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class AvroRowDeSerializationSchemaTest {
         final byte[] bytes = serializationSchema.serialize(testData.f2);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f2, actual);
+        assertThat(actual).isEqualTo(testData.f2);
     }
 
     @Test
@@ -134,7 +134,7 @@ public class AvroRowDeSerializationSchemaTest {
         final byte[] bytes = serializationSchema.serialize(testData.f1);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f1, actual);
+        assertThat(actual).isEqualTo(testData.f1);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class AvroRowDeSerializationSchemaTest {
         deserializationSchema.deserialize(bytes);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f2, actual);
+        assertThat(actual).isEqualTo(testData.f2);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class AvroRowDeSerializationSchemaTest {
         deserializationSchema.deserialize(bytes);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f2, actual);
+        assertThat(actual).isEqualTo(testData.f2);
     }
 
     @Test
@@ -188,7 +188,7 @@ public class AvroRowDeSerializationSchemaTest {
         deserializationSchema.deserialize(bytes);
         final Row actual = deserializationSchema.deserialize(bytes);
 
-        assertEquals(testData.f1, actual);
+        assertThat(actual).isEqualTo(testData.f1);
     }
 
     @Test
@@ -228,6 +228,6 @@ public class AvroRowDeSerializationSchemaTest {
         deserCopy.deserialize(bytes);
         final Row actual = deserCopy.deserialize(bytes);
 
-        assertEquals(data, actual);
+        assertThat(actual).isEqualTo(data);
     }
 }

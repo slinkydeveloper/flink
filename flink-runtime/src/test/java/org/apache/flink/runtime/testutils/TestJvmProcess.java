@@ -39,7 +39,7 @@ import static org.apache.flink.runtime.testutils.CommonTestUtils.getJavaCommandP
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkNotNull;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** A {@link Process} running a separate JVM. */
 public abstract class TestJvmProcess {

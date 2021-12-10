@@ -32,8 +32,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the CANCEL command. */
 public class CliFrontendCancelTest extends CliFrontendTestBase {
@@ -101,7 +100,7 @@ public class CliFrontendCancelTest extends CliFrontendTestBase {
             TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
             clusterClient.setCancelWithSavepointFunction(
                     (jobID, savepointDirectory) -> {
-                        assertNull(savepointDirectory);
+                        assertThat(savepointDirectory).isNull();
                         cancelWithSavepointLatch.trigger();
                         return CompletableFuture.completedFuture(savepointDirectory);
                     });
@@ -120,7 +119,7 @@ public class CliFrontendCancelTest extends CliFrontendTestBase {
             TestingClusterClient<String> clusterClient = new TestingClusterClient<>();
             clusterClient.setCancelWithSavepointFunction(
                     (jobID, savepointDirectory) -> {
-                        assertNotNull(savepointDirectory);
+                        assertThat(savepointDirectory).isNotNull();
                         cancelWithSavepointLatch.trigger();
                         return CompletableFuture.completedFuture(savepointDirectory);
                     });

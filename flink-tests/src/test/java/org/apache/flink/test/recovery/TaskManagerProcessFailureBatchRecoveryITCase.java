@@ -33,7 +33,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test the recovery of a simple batch program in the case of TaskManager process failure. */
 @SuppressWarnings("serial")
@@ -120,6 +120,6 @@ public class TaskManagerProcessFailureBatchRecoveryITCase
                                 });
 
         long sum = result.collect().get(0);
-        assertEquals(numElements * (numElements + 1L) / 2L, sum);
+        assertThat(sum).isEqualTo(numElements * (numElements + 1L) / 2L);
     }
 }

@@ -24,7 +24,7 @@ import org.apache.flink.runtime.jobgraph.tasks.AbstractInvokable;
 
 import org.junit.Test;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Test for {@link ExecutionJobVertex} */
 public class ExecutionJobVertexTest {
@@ -36,9 +36,8 @@ public class ExecutionJobVertexTest {
         jobVertex.setParallelism(172);
         jobVertex.setMaxParallelism(4);
 
-        assertThrows(
-                "higher than the max parallelism",
-                JobException.class,
-                () -> ExecutionGraphTestUtils.getExecutionJobVertex(jobVertex));
+        assertThatThrownBy(() -> ExecutionGraphTestUtils.getExecutionJobVertex(jobVertex))
+                .as("higher than the max parallelism")
+                .isInstanceOf(JobException.class);
     }
 }

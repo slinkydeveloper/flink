@@ -32,8 +32,8 @@ import org.hamcrest.TypeSafeDiagnosingMatcher;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** FlinkSqlParserImpl tests. * */
 public class FlinkSqlParserImplTest extends SqlParserTest {
@@ -1528,12 +1528,12 @@ public class FlinkSqlParserImplTest extends SqlParserTest {
                         createTable.validate();
                         fail("expected exception");
                     } catch (SqlValidateException e) {
-                        assertEquals(failMsg, e.getMessage());
+                        assertThat(e.getMessage()).isEqualTo(failMsg);
                     }
                 }
                 if (expectedColumnSql != null && item instanceof SqlCreateTable) {
-                    assertEquals(
-                            expectedColumnSql, ((SqlCreateTable) createTable).getColumnSqlString());
+                    assertThat(((SqlCreateTable) createTable).getColumnSqlString())
+                            .isEqualTo(expectedColumnSql);
                 }
                 return true;
             } else {

@@ -53,12 +53,9 @@ import java.util.stream.IntStream;
 
 import static java.util.Collections.singletonList;
 import static org.apache.flink.core.testutils.FlinkMatchers.containsMessage;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * Test base for testing {@link BuiltInFunctionDefinition}.
@@ -144,23 +141,27 @@ public abstract class BuiltInFunctionTestBase {
         final TableResult result = resultTable.execute();
         final Iterator<Row> iterator = result.collect();
 
-        assertTrue(iterator.hasNext());
+        assertThat(iterator.hasNext()).isTrue();
 
         final Row row = iterator.next();
 
-        assertFalse("No more rows expected.", iterator.hasNext());
+        assertThat(iterator.hasNext()).as("No more rows expected.").isFalse();
 
         for (int i = 0; i < row.getArity(); i++) {
-            assertEquals(
-                    "Logical type for spec [" + i + "] of test [" + testItem + "] doesn't match.",
-                    expectedDataTypes.get(i).getLogicalType(),
-                    result.getResolvedSchema().getColumnDataTypes().get(i).getLogicalType());
+            assertThat(result.getResolvedSchema().getColumnDataTypes().get(i).getLogicalType())
+                    .as(
+                            "Logical type for spec ["
+                                    + i
+                                    + "] of test ["
+                                    + testItem
+                                    + "] doesn't match.")
+                    .isEqualTo(expectedDataTypes.get(i).getLogicalType());
 
-            assertEquals(
-                    "Result for spec [" + i + "] of test [" + testItem + "] doesn't match.",
-                    // Use Row.equals() to enable equality for complex structure, i.e. byte[]
-                    Row.of(testItem.results.get(i)),
-                    Row.of(row.getField(i)));
+            assertThat(Row.of(row.getField(i)))
+                    .as("Result for spec [" + i + "] of test [" + testItem + "] doesn't match.")
+                    .isEqualTo( // Use Row.equals() to enable equality for complex structure, i.e.
+                                // byte[]
+                            Row.of(testItem.results.get(i)));
         }
     }
 
@@ -188,13 +189,15 @@ public abstract class BuiltInFunctionTestBase {
             } catch (AssertionError e) {
                 throw e;
             } catch (Throwable t) {
-                assertThat("Wrong error message", t, containsMessage(testItem.errorMessage));
+                assertThat(t)
+                        .as("Wrong error message")
+                        .satisfies(matching(containsMessage(testItem.errorMessage)));
             }
         } catch (AssertionError e) {
             throw e;
         } catch (Throwable t) {
-            assertTrue(t instanceof ValidationException);
-            assertThat(t.getMessage(), containsString(testItem.errorMessage));
+            assertThat(t).isInstanceOf(ValidationException.class);
+            assertThat(t.getMessage()).contains(testItem.errorMessage);
         }
     }
 

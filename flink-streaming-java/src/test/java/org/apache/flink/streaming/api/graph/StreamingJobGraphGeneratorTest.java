@@ -97,7 +97,6 @@ import org.apache.flink.shaded.guava30.com.google.common.collect.Iterables;
 
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -112,16 +111,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.streaming.api.graph.StreamingJobGraphGenerator.areOperatorsChainable;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link StreamingJobGraphGenerator}. */
 @SuppressWarnings("serial")
@@ -171,19 +165,17 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobGraph jobGraph = streamGraph.getJobGraph();
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
 
-        assertEquals(2, jobGraph.getNumberOfVertices());
-        assertEquals(1, verticesSorted.get(0).getParallelism());
-        assertEquals(1, verticesSorted.get(1).getParallelism());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(2);
+        assertThat(verticesSorted.get(0).getParallelism()).isEqualTo(1);
+        assertThat(verticesSorted.get(1).getParallelism()).isEqualTo(1);
 
         JobVertex sourceVertex = verticesSorted.get(0);
         JobVertex mapSinkVertex = verticesSorted.get(1);
 
-        assertEquals(
-                ResultPartitionType.PIPELINED_BOUNDED,
-                sourceVertex.getProducedDataSets().get(0).getResultType());
-        assertEquals(
-                ResultPartitionType.PIPELINED_BOUNDED,
-                mapSinkVertex.getInputs().get(0).getSource().getResultType());
+        assertThat(sourceVertex.getProducedDataSets().get(0).getResultType())
+                .isEqualTo(ResultPartitionType.PIPELINED_BOUNDED);
+        assertThat(mapSinkVertex.getInputs().get(0).getSource().getResultType())
+                .isEqualTo(ResultPartitionType.PIPELINED_BOUNDED);
     }
 
     /**
@@ -195,23 +187,24 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.fromElements(0).print();
         StreamGraph streamGraph = env.getStreamGraph();
-        assertFalse(
-                "Checkpointing enabled",
-                streamGraph.getCheckpointConfig().isCheckpointingEnabled());
+        assertThat(streamGraph.getCheckpointConfig().isCheckpointingEnabled())
+                .as("Checkpointing enabled")
+                .isFalse();
 
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
 
         JobCheckpointingSettings snapshottingSettings = jobGraph.getCheckpointingSettings();
-        assertEquals(
-                Long.MAX_VALUE,
-                snapshottingSettings
-                        .getCheckpointCoordinatorConfiguration()
-                        .getCheckpointInterval());
-        assertFalse(snapshottingSettings.getCheckpointCoordinatorConfiguration().isExactlyOnce());
+        assertThat(
+                        snapshottingSettings
+                                .getCheckpointCoordinatorConfiguration()
+                                .getCheckpointInterval())
+                .isEqualTo(Long.MAX_VALUE);
+        assertThat(snapshottingSettings.getCheckpointCoordinatorConfiguration().isExactlyOnce())
+                .isFalse();
 
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
         StreamConfig streamConfig = new StreamConfig(verticesSorted.get(0).getConfiguration());
-        assertEquals(CheckpointingMode.AT_LEAST_ONCE, streamConfig.getCheckpointMode());
+        assertThat(streamConfig.getCheckpointMode()).isEqualTo(CheckpointingMode.AT_LEAST_ONCE);
     }
 
     @Test
@@ -219,17 +212,17 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.fromElements(0).print();
         StreamGraph streamGraph = env.getStreamGraph();
-        assertFalse(
-                "Checkpointing enabled",
-                streamGraph.getCheckpointConfig().isCheckpointingEnabled());
+        assertThat(streamGraph.getCheckpointConfig().isCheckpointingEnabled())
+                .as("Checkpointing enabled")
+                .isFalse();
         env.getCheckpointConfig().enableUnalignedCheckpoints(true);
 
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
 
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
         StreamConfig streamConfig = new StreamConfig(verticesSorted.get(0).getConfiguration());
-        assertEquals(CheckpointingMode.AT_LEAST_ONCE, streamConfig.getCheckpointMode());
-        assertFalse(streamConfig.isUnalignedCheckpointsEnabled());
+        assertThat(streamConfig.getCheckpointMode()).isEqualTo(CheckpointingMode.AT_LEAST_ONCE);
+        assertThat(streamConfig.isUnalignedCheckpointsEnabled()).isFalse();
     }
 
     @Test
@@ -244,8 +237,8 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
         StreamConfig streamConfig = new StreamConfig(verticesSorted.get(0).getConfiguration());
-        assertEquals(CheckpointingMode.AT_LEAST_ONCE, streamConfig.getCheckpointMode());
-        assertFalse(streamConfig.isUnalignedCheckpointsEnabled());
+        assertThat(streamConfig.getCheckpointMode()).isEqualTo(CheckpointingMode.AT_LEAST_ONCE);
+        assertThat(streamConfig.isUnalignedCheckpointsEnabled()).isFalse();
     }
 
     @Test
@@ -259,7 +252,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
 
         SavepointRestoreSettings savepointRestoreSettings = jobGraph.getSavepointRestoreSettings();
-        assertThat(savepointRestoreSettings.getRestorePath(), is("hello"));
+        assertThat(savepointRestoreSettings.getRestorePath()).isEqualTo("hello");
     }
 
     /** Verifies that the chain start/end is correctly set. */
@@ -287,12 +280,10 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobVertex sourceVertex = verticesSorted.get(0);
         JobVertex mapPrintVertex = verticesSorted.get(1);
 
-        assertEquals(
-                ResultPartitionType.PIPELINED_BOUNDED,
-                sourceVertex.getProducedDataSets().get(0).getResultType());
-        assertEquals(
-                ResultPartitionType.PIPELINED_BOUNDED,
-                mapPrintVertex.getInputs().get(0).getSource().getResultType());
+        assertThat(sourceVertex.getProducedDataSets().get(0).getResultType())
+                .isEqualTo(ResultPartitionType.PIPELINED_BOUNDED);
+        assertThat(mapPrintVertex.getInputs().get(0).getSource().getResultType())
+                .isEqualTo(ResultPartitionType.PIPELINED_BOUNDED);
 
         StreamConfig sourceConfig = new StreamConfig(sourceVertex.getConfiguration());
         StreamConfig mapConfig = new StreamConfig(mapPrintVertex.getConfiguration());
@@ -300,14 +291,14 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                 mapConfig.getTransitiveChainedTaskConfigs(getClass().getClassLoader());
         StreamConfig printConfig = chainedConfigs.values().iterator().next();
 
-        assertTrue(sourceConfig.isChainStart());
-        assertTrue(sourceConfig.isChainEnd());
+        assertThat(sourceConfig.isChainStart()).isTrue();
+        assertThat(sourceConfig.isChainEnd()).isTrue();
 
-        assertTrue(mapConfig.isChainStart());
-        assertFalse(mapConfig.isChainEnd());
+        assertThat(mapConfig.isChainStart()).isTrue();
+        assertThat(mapConfig.isChainEnd()).isFalse();
 
-        assertFalse(printConfig.isChainStart());
-        assertTrue(printConfig.isChainEnd());
+        assertThat(printConfig.isChainStart()).isFalse();
+        assertThat(printConfig.isChainEnd()).isTrue();
     }
 
     @Test
@@ -331,7 +322,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
 
-        assertEquals(2, jobGraph.getVerticesAsArray()[0].getOperatorCoordinators().size());
+        assertThat(jobGraph.getVerticesAsArray()[0].getOperatorCoordinators().size()).isEqualTo(2);
     }
 
     /**
@@ -413,11 +404,13 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                 jobGraph.getVerticesSortedTopologicallyFromSources().get(0);
         JobVertex reduceSinkVertex = jobGraph.getVerticesSortedTopologicallyFromSources().get(1);
 
-        assertTrue(
-                sourceMapFilterVertex
-                        .getMinResources()
-                        .equals(resource3.merge(resource2).merge(resource1)));
-        assertTrue(reduceSinkVertex.getPreferredResources().equals(resource4.merge(resource5)));
+        assertThat(
+                        sourceMapFilterVertex
+                                .getMinResources()
+                                .equals(resource3.merge(resource2).merge(resource1)))
+                .isTrue();
+        assertThat(reduceSinkVertex.getPreferredResources().equals(resource4.merge(resource5)))
+                .isTrue();
     }
 
     /**
@@ -493,15 +486,15 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
         for (JobVertex jobVertex : jobGraph.getVertices()) {
             if (jobVertex.getName().contains("test_source")) {
-                assertTrue(jobVertex.getMinResources().equals(resource1));
+                assertThat(jobVertex.getMinResources().equals(resource1)).isTrue();
             } else if (jobVertex.getName().contains("Iteration_Source")) {
-                assertTrue(jobVertex.getPreferredResources().equals(resource2));
+                assertThat(jobVertex.getPreferredResources().equals(resource2)).isTrue();
             } else if (jobVertex.getName().contains("test_flatMap")) {
-                assertTrue(jobVertex.getMinResources().equals(resource3.merge(resource4)));
+                assertThat(jobVertex.getMinResources().equals(resource3.merge(resource4))).isTrue();
             } else if (jobVertex.getName().contains("Iteration_Tail")) {
-                assertTrue(jobVertex.getPreferredResources().equals(ResourceSpec.DEFAULT));
+                assertThat(jobVertex.getPreferredResources().equals(ResourceSpec.DEFAULT)).isTrue();
             } else if (jobVertex.getName().contains("test_sink")) {
-                assertTrue(jobVertex.getMinResources().equals(resource5));
+                assertThat(jobVertex.getMinResources().equals(resource5)).isTrue();
             }
         }
     }
@@ -524,10 +517,10 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
         StreamGraph streamGraph = env.getStreamGraph();
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
-        assertEquals(1, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(1);
 
         JobVertex jobVertex = jobGraph.getVertices().iterator().next();
-        assertTrue(jobVertex instanceof InputOutputFormatVertex);
+        assertThat(jobVertex).isInstanceOf(InputOutputFormatVertex.class);
 
         InputOutputFormatContainer formatContainer =
                 new InputOutputFormatContainer(
@@ -537,8 +530,8 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                 formatContainer.getInputFormats();
         Map<OperatorID, UserCodeWrapper<? extends OutputFormat<?>>> outputFormats =
                 formatContainer.getOutputFormats();
-        assertEquals(1, inputFormats.size());
-        assertEquals(2, outputFormats.size());
+        assertThat(inputFormats.size()).isEqualTo(1);
+        assertThat(outputFormats.size()).isEqualTo(2);
 
         Map<String, OperatorID> nameToOperatorIds = new HashMap<>();
         StreamConfig headConfig = new StreamConfig(jobVertex.getConfiguration());
@@ -553,15 +546,15 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
         InputFormat<?, ?> sourceFormat =
                 inputFormats.get(nameToOperatorIds.get("Source: source")).getUserCodeObject();
-        assertTrue(sourceFormat instanceof TypeSerializerInputFormat);
+        assertThat(sourceFormat).isInstanceOf(TypeSerializerInputFormat.class);
 
         OutputFormat<?> sinkFormat1 =
                 outputFormats.get(nameToOperatorIds.get("Sink: sink1")).getUserCodeObject();
-        assertTrue(sinkFormat1 instanceof DiscardingOutputFormat);
+        assertThat(sinkFormat1).isInstanceOf(DiscardingOutputFormat.class);
 
         OutputFormat<?> sinkFormat2 =
                 outputFormats.get(nameToOperatorIds.get("Sink: sink2")).getUserCodeObject();
-        assertTrue(sinkFormat2 instanceof DiscardingOutputFormat);
+        assertThat(sinkFormat2).isInstanceOf(DiscardingOutputFormat.class);
     }
 
     @Test
@@ -577,20 +570,21 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         StreamGraph streamGraph = env.getStreamGraph();
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
         // There should be only one job vertex.
-        assertEquals(1, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(1);
 
         JobVertex jobVertex = jobGraph.getVerticesAsArray()[0];
         List<SerializedValue<OperatorCoordinator.Provider>> coordinatorProviders =
                 jobVertex.getOperatorCoordinators();
         // There should be only one coordinator provider.
-        assertEquals(1, coordinatorProviders.size());
+        assertThat(coordinatorProviders.size()).isEqualTo(1);
         // The invokable class should be SourceOperatorStreamTask.
         final ClassLoader classLoader = getClass().getClassLoader();
-        assertEquals(SourceOperatorStreamTask.class, jobVertex.getInvokableClass(classLoader));
+        assertThat(jobVertex.getInvokableClass(classLoader))
+                .isEqualTo(SourceOperatorStreamTask.class);
         StreamOperatorFactory operatorFactory =
                 new StreamConfig(jobVertex.getConfiguration())
                         .getStreamOperatorFactory(classLoader);
-        assertTrue(operatorFactory instanceof SourceOperatorFactory);
+        assertThat(operatorFactory).isInstanceOf(SourceOperatorFactory.class);
     }
 
     /** Test setting exchange mode to {@link StreamExchangeMode#PIPELINED}. */
@@ -622,15 +616,14 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
 
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
-        assertEquals(2, verticesSorted.size());
+        assertThat(verticesSorted.size()).isEqualTo(2);
 
         // it can be chained with PIPELINED exchange mode
         JobVertex sourceAndMapVertex = verticesSorted.get(0);
 
         // PIPELINED exchange mode is translated into PIPELINED_BOUNDED result partition
-        assertEquals(
-                ResultPartitionType.PIPELINED_BOUNDED,
-                sourceAndMapVertex.getProducedDataSets().get(0).getResultType());
+        assertThat(sourceAndMapVertex.getProducedDataSets().get(0).getResultType())
+                .isEqualTo(ResultPartitionType.PIPELINED_BOUNDED);
     }
 
     /** Test setting exchange mode to {@link StreamExchangeMode#BATCH}. */
@@ -663,19 +656,17 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
 
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
-        assertEquals(3, verticesSorted.size());
+        assertThat(verticesSorted.size()).isEqualTo(3);
 
         // it can not be chained with BATCH exchange mode
         JobVertex sourceVertex = verticesSorted.get(0);
         JobVertex mapVertex = verticesSorted.get(1);
 
         // BATCH exchange mode is translated into BLOCKING result partition
-        assertEquals(
-                ResultPartitionType.BLOCKING,
-                sourceVertex.getProducedDataSets().get(0).getResultType());
-        assertEquals(
-                ResultPartitionType.BLOCKING,
-                mapVertex.getProducedDataSets().get(0).getResultType());
+        assertThat(sourceVertex.getProducedDataSets().get(0).getResultType())
+                .isEqualTo(ResultPartitionType.BLOCKING);
+        assertThat(mapVertex.getProducedDataSets().get(0).getResultType())
+                .isEqualTo(ResultPartitionType.BLOCKING);
     }
 
     /** Test setting exchange mode to {@link StreamExchangeMode#UNDEFINED}. */
@@ -707,15 +698,14 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
 
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
-        assertEquals(2, verticesSorted.size());
+        assertThat(verticesSorted.size()).isEqualTo(2);
 
         // it can be chained with UNDEFINED exchange mode
         JobVertex sourceAndMapVertex = verticesSorted.get(0);
 
         // UNDEFINED exchange mode is translated into PIPELINED_BOUNDED result partition by default
-        assertEquals(
-                ResultPartitionType.PIPELINED_BOUNDED,
-                sourceAndMapVertex.getProducedDataSets().get(0).getResultType());
+        assertThat(sourceAndMapVertex.getProducedDataSets().get(0).getResultType())
+                .isEqualTo(ResultPartitionType.PIPELINED_BOUNDED);
     }
 
     @Test
@@ -723,7 +713,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.fromElements("test").addSink(new DiscardingSink<>());
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
-        assertEquals(JobType.STREAMING, jobGraph.getJobType());
+        assertThat(jobGraph.getJobType()).isEqualTo(JobType.STREAMING);
     }
 
     @Test
@@ -732,7 +722,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         env.setRuntimeMode(RuntimeExecutionMode.BATCH);
         env.fromElements("test").addSink(new DiscardingSink<>());
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
-        assertEquals(JobType.BATCH, jobGraph.getJobType());
+        assertThat(jobGraph.getJobType()).isEqualTo(JobType.BATCH);
     }
 
     @Test
@@ -756,21 +746,31 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
         List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
-        assertThat(
-                verticesSorted.get(0) /* source - forward */,
-                hasOutputPartitionType(ResultPartitionType.BLOCKING));
-        assertThat(
-                verticesSorted.get(1) /* rescale */,
-                hasOutputPartitionType(ResultPartitionType.BLOCKING));
-        assertThat(
-                verticesSorted.get(2) /* rebalance */,
-                hasOutputPartitionType(ResultPartitionType.BLOCKING));
-        assertThat(
-                verticesSorted.get(3) /* keyBy */,
-                hasOutputPartitionType(ResultPartitionType.BLOCKING));
-        assertThat(
-                verticesSorted.get(4) /* forward - sink */,
-                hasOutputPartitionType(ResultPartitionType.BLOCKING));
+        assertThat(verticesSorted.get(0))
+                .satisfies(
+                        matching(
+                                /* source - forward */
+                                hasOutputPartitionType(ResultPartitionType.BLOCKING)));
+        assertThat(verticesSorted.get(1))
+                .satisfies(
+                        matching(
+                                /* rescale */
+                                hasOutputPartitionType(ResultPartitionType.BLOCKING)));
+        assertThat(verticesSorted.get(2))
+                .satisfies(
+                        matching(
+                                /* rebalance */
+                                hasOutputPartitionType(ResultPartitionType.BLOCKING)));
+        assertThat(verticesSorted.get(3))
+                .satisfies(
+                        matching(
+                                /* keyBy */
+                                hasOutputPartitionType(ResultPartitionType.BLOCKING)));
+        assertThat(verticesSorted.get(4))
+                .satisfies(
+                        matching(
+                                /* forward - sink */
+                                hasOutputPartitionType(ResultPartitionType.BLOCKING)));
     }
 
     private Matcher<JobVertex> hasOutputPartitionType(ResultPartitionType partitionType) {
@@ -823,7 +823,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
             final StreamConfig streamConfig = new StreamConfig(vertex.getConfiguration());
             for (StreamEdge streamEdge :
                     streamConfig.getOutEdgesInOrder(this.getClass().getClassLoader())) {
-                assertThat(streamEdge.getBufferTimeout(), equalTo(-1L));
+                assertThat(streamEdge.getBufferTimeout()).isEqualTo(-1L);
             }
         }
     }
@@ -843,32 +843,36 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(env.getStreamGraph());
 
         SlotSharingGroup slotSharingGroup = jobGraph.getVerticesAsArray()[0].getSlotSharingGroup();
-        assertNotNull(slotSharingGroup);
+        assertThat(slotSharingGroup).isNotNull();
 
         CoLocationGroup iterationSourceCoLocationGroup = null;
         CoLocationGroup iterationSinkCoLocationGroup = null;
 
         for (JobVertex jobVertex : jobGraph.getVertices()) {
             // all vertices have same slot sharing group by default
-            assertEquals(slotSharingGroup, jobVertex.getSlotSharingGroup());
+            assertThat(jobVertex.getSlotSharingGroup()).isEqualTo(slotSharingGroup);
 
             // all iteration vertices have same co-location group,
             // others have no co-location group by default
             if (jobVertex.getName().startsWith(StreamGraph.ITERATION_SOURCE_NAME_PREFIX)) {
                 iterationSourceCoLocationGroup = jobVertex.getCoLocationGroup();
-                assertTrue(
-                        iterationSourceCoLocationGroup.getVertexIds().contains(jobVertex.getID()));
+                assertThat(
+                                iterationSourceCoLocationGroup
+                                        .getVertexIds()
+                                        .contains(jobVertex.getID()))
+                        .isTrue();
             } else if (jobVertex.getName().startsWith(StreamGraph.ITERATION_SINK_NAME_PREFIX)) {
                 iterationSinkCoLocationGroup = jobVertex.getCoLocationGroup();
-                assertTrue(iterationSinkCoLocationGroup.getVertexIds().contains(jobVertex.getID()));
+                assertThat(iterationSinkCoLocationGroup.getVertexIds().contains(jobVertex.getID()))
+                        .isTrue();
             } else {
-                assertNull(jobVertex.getCoLocationGroup());
+                assertThat(jobVertex.getCoLocationGroup()).isNull();
             }
         }
 
-        assertNotNull(iterationSourceCoLocationGroup);
-        assertNotNull(iterationSinkCoLocationGroup);
-        assertEquals(iterationSourceCoLocationGroup, iterationSinkCoLocationGroup);
+        assertThat(iterationSourceCoLocationGroup).isNotNull();
+        assertThat(iterationSinkCoLocationGroup).isNotNull();
+        assertThat(iterationSinkCoLocationGroup).isEqualTo(iterationSourceCoLocationGroup);
     }
 
     /** Test default job type. */
@@ -881,7 +885,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                                 Collections.emptyList(), env.getConfig(), env.getCheckpointConfig())
                         .generate();
         JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
-        assertEquals(JobType.STREAMING, jobGraph.getJobType());
+        assertThat(jobGraph.getJobType()).isEqualTo(JobType.STREAMING);
     }
 
     @Test
@@ -900,8 +904,10 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                 streamGraph.getStreamNodes().stream()
                         .sorted(Comparator.comparingInt(StreamNode::getId))
                         .collect(Collectors.toList());
-        assertTrue(areOperatorsChainable(streamNodes.get(0), streamNodes.get(1), streamGraph));
-        assertFalse(areOperatorsChainable(streamNodes.get(1), streamNodes.get(2), streamGraph));
+        assertThat(areOperatorsChainable(streamNodes.get(0), streamNodes.get(1), streamGraph))
+                .isTrue();
+        assertThat(areOperatorsChainable(streamNodes.get(1), streamNodes.get(2), streamGraph))
+                .isFalse();
     }
 
     @Test
@@ -920,8 +926,10 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                 streamGraph.getStreamNodes().stream()
                         .sorted(Comparator.comparingInt(StreamNode::getId))
                         .collect(Collectors.toList());
-        assertFalse(areOperatorsChainable(streamNodes.get(0), streamNodes.get(1), streamGraph));
-        assertTrue(areOperatorsChainable(streamNodes.get(1), streamNodes.get(2), streamGraph));
+        assertThat(areOperatorsChainable(streamNodes.get(0), streamNodes.get(1), streamGraph))
+                .isFalse();
+        assertThat(areOperatorsChainable(streamNodes.get(1), streamNodes.get(2), streamGraph))
+                .isTrue();
     }
 
     /**
@@ -944,9 +952,9 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         final JobGraph jobGraph = chainEnv.getStreamGraph().getJobGraph();
 
         final List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
-        Assert.assertEquals(2, vertices.size());
-        assertEquals(2, vertices.get(0).getOperatorIDs().size());
-        assertEquals(5, vertices.get(1).getOperatorIDs().size());
+        assertThat(vertices.size()).isEqualTo(2);
+        assertThat(vertices.get(0).getOperatorIDs().size()).isEqualTo(2);
+        assertThat(vertices.get(1).getOperatorIDs().size()).isEqualTo(5);
     }
 
     /**
@@ -967,8 +975,8 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         final JobGraph jobGraph = chainEnv.getStreamGraph().getJobGraph();
 
         final List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
-        Assert.assertEquals(1, vertices.size());
-        assertEquals(4, vertices.get(0).getOperatorIDs().size());
+        assertThat(vertices.size()).isEqualTo(1);
+        assertThat(vertices.get(0).getOperatorIDs().size()).isEqualTo(4);
     }
 
     @Test
@@ -986,12 +994,16 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
             JobGraph jobGraph2 = getUnionJobGraph(env);
             JobVertex jobSink2 =
                     Iterables.getLast(jobGraph2.getVerticesSortedTopologicallyFromSources());
-            assertNotEquals("Different runs should yield different vertexes", jobSink, jobSink2);
+            assertThat(jobSink2)
+                    .as("Different runs should yield different vertexes")
+                    .isEqualTo(jobSink);
             List<String> actualSourceOrder =
                     jobSink2.getInputs().stream()
                             .map(edge -> edge.getSource().getProducer().getName())
                             .collect(Collectors.toList());
-            assertEquals("Union inputs reordered", expectedSourceOrder, actualSourceOrder);
+            assertThat(actualSourceOrder)
+                    .as("Union inputs reordered")
+                    .isEqualTo(expectedSourceOrder);
         }
     }
 
@@ -1183,25 +1195,24 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
             double expectedStateBackendFrac,
             Configuration tmConfig) {
         final double delta = 0.000001;
-        assertEquals(
-                expectedStateBackendFrac,
-                streamConfig.getManagedMemoryFractionOperatorUseCaseOfSlot(
-                        ManagedMemoryUseCase.STATE_BACKEND,
-                        tmConfig,
-                        ClassLoader.getSystemClassLoader()),
-                delta);
-        assertEquals(
-                expectedPythonFrac,
-                streamConfig.getManagedMemoryFractionOperatorUseCaseOfSlot(
-                        ManagedMemoryUseCase.PYTHON, tmConfig, ClassLoader.getSystemClassLoader()),
-                delta);
-        assertEquals(
-                expectedBatchFrac,
-                streamConfig.getManagedMemoryFractionOperatorUseCaseOfSlot(
-                        ManagedMemoryUseCase.OPERATOR,
-                        tmConfig,
-                        ClassLoader.getSystemClassLoader()),
-                delta);
+        assertThat(
+                        streamConfig.getManagedMemoryFractionOperatorUseCaseOfSlot(
+                                ManagedMemoryUseCase.STATE_BACKEND,
+                                tmConfig,
+                                ClassLoader.getSystemClassLoader()))
+                .isCloseTo(expectedStateBackendFrac, within(delta));
+        assertThat(
+                        streamConfig.getManagedMemoryFractionOperatorUseCaseOfSlot(
+                                ManagedMemoryUseCase.PYTHON,
+                                tmConfig,
+                                ClassLoader.getSystemClassLoader()))
+                .isCloseTo(expectedPythonFrac, within(delta));
+        assertThat(
+                        streamConfig.getManagedMemoryFractionOperatorUseCaseOfSlot(
+                                ManagedMemoryUseCase.OPERATOR,
+                                tmConfig,
+                                ClassLoader.getSystemClassLoader()))
+                .isCloseTo(expectedBatchFrac, within(delta));
     }
 
     @Test
@@ -1217,7 +1228,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         final JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
 
         final List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
-        assertEquals(4, verticesSorted.size());
+        assertThat(verticesSorted.size()).isEqualTo(4);
 
         final List<JobVertex> verticesMatched = getExpectedVerticesList(verticesSorted);
         final JobVertex source1Vertex = verticesMatched.get(0);
@@ -1238,7 +1249,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         final JobGraph jobGraph = StreamingJobGraphGenerator.createJobGraph(streamGraph);
 
         final List<JobVertex> verticesSorted = jobGraph.getVerticesSortedTopologicallyFromSources();
-        assertEquals(4, verticesSorted.size());
+        assertThat(verticesSorted.size()).isEqualTo(4);
 
         final List<JobVertex> verticesMatched = getExpectedVerticesList(verticesSorted);
         final JobVertex source1Vertex = verticesMatched.get(0);
@@ -1285,21 +1296,21 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         for (JobVertex jobVertex : jobGraph.getVertices()) {
             numVertex += 1;
             if (jobVertex.getName().contains(slotSharingGroup1)) {
-                assertEquals(
-                        jobVertex.getSlotSharingGroup().getResourceProfile(), resourceProfile1);
+                assertThat(resourceProfile1)
+                        .isEqualTo(jobVertex.getSlotSharingGroup().getResourceProfile());
             } else if (jobVertex.getName().contains(slotSharingGroup2)) {
-                assertEquals(
-                        jobVertex.getSlotSharingGroup().getResourceProfile(), resourceProfile2);
+                assertThat(resourceProfile2)
+                        .isEqualTo(jobVertex.getSlotSharingGroup().getResourceProfile());
             } else if (jobVertex
                     .getName()
                     .contains(StreamGraphGenerator.DEFAULT_SLOT_SHARING_GROUP)) {
-                assertEquals(
-                        jobVertex.getSlotSharingGroup().getResourceProfile(), resourceProfile3);
+                assertThat(resourceProfile3)
+                        .isEqualTo(jobVertex.getSlotSharingGroup().getResourceProfile());
             } else {
-                fail();
+                fail("unknown failure");
             }
         }
-        assertThat(numVertex, is(3));
+        assertThat(numVertex).isEqualTo(3);
     }
 
     @Test
@@ -1319,9 +1330,10 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         int numVertex = 0;
         for (JobVertex jobVertex : jobGraph.getVertices()) {
             numVertex += 1;
-            assertEquals(jobVertex.getSlotSharingGroup().getResourceProfile(), resourceProfile);
+            assertThat(resourceProfile)
+                    .isEqualTo(jobVertex.getSlotSharingGroup().getResourceProfile());
         }
-        assertThat(numVertex, is(2));
+        assertThat(numVertex).isEqualTo(2);
     }
 
     @Test
@@ -1329,7 +1341,8 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
         String[] sources = new String[] {"source-1", "source-2", "source-3"};
         JobGraph graph = createGraphWithMultipleInputs(true, sources);
         JobVertex head = graph.getVerticesSortedTopologicallyFromSources().iterator().next();
-        Arrays.stream(sources).forEach(source -> assertTrue(head.getName().contains(source)));
+        Arrays.stream(sources)
+                .forEach(source -> assertThat(head.getName().contains(source)).isTrue());
     }
 
     @Test
@@ -1342,7 +1355,7 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
                         vertex ->
                                 vertex.getInvokableClassName()
                                         .equals(MultipleInputStreamTask.class.getName()));
-        assertFalse(head.getName(), head.getName().contains("source-1"));
+        assertThat(head.getName().contains("source-1")).as(head.getName()).isFalse();
     }
 
     public JobGraph createGraphWithMultipleInputs(boolean chain, String... inputNames) {
@@ -1424,15 +1437,16 @@ public class StreamingJobGraphGeneratorTest extends TestLogger {
 
     private void assertSameSlotSharingGroup(JobVertex... vertices) {
         for (int i = 0; i < vertices.length - 1; i++) {
-            assertEquals(vertices[i].getSlotSharingGroup(), vertices[i + 1].getSlotSharingGroup());
+            assertThat(vertices[i + 1].getSlotSharingGroup())
+                    .isEqualTo(vertices[i].getSlotSharingGroup());
         }
     }
 
     private void assertDistinctSharingGroups(JobVertex... vertices) {
         for (int i = 0; i < vertices.length - 1; i++) {
             for (int j = i + 1; j < vertices.length; j++) {
-                assertNotEquals(
-                        vertices[i].getSlotSharingGroup(), vertices[j].getSlotSharingGroup());
+                assertThat(vertices[j].getSlotSharingGroup())
+                        .isEqualTo(vertices[i].getSlotSharingGroup());
             }
         }
     }

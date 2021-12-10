@@ -70,9 +70,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -147,11 +146,11 @@ public class ClientTest extends TestLogger {
                     false);
             fail(FAIL_MESSAGE);
         } catch (ProgramInvocationException e) {
-            assertEquals(
-                    DetachedJobExecutionResult.DETACHED_MESSAGE
-                            + DetachedJobExecutionResult.JOB_RESULT_MESSAGE
-                            + DetachedJobExecutionResult.EAGER_FUNCTION_MESSAGE,
-                    e.getCause().getMessage());
+            assertThat(e.getCause().getMessage())
+                    .isEqualTo(
+                            DetachedJobExecutionResult.DETACHED_MESSAGE
+                                    + DetachedJobExecutionResult.JOB_RESULT_MESSAGE
+                                    + DetachedJobExecutionResult.EAGER_FUNCTION_MESSAGE);
         }
 
         try {
@@ -169,10 +168,10 @@ public class ClientTest extends TestLogger {
                     false);
             fail(FAIL_MESSAGE);
         } catch (ProgramInvocationException e) {
-            assertEquals(
-                    DetachedJobExecutionResult.DETACHED_MESSAGE
-                            + DetachedJobExecutionResult.JOB_RESULT_MESSAGE,
-                    e.getCause().getMessage());
+            assertThat(e.getCause().getMessage())
+                    .isEqualTo(
+                            DetachedJobExecutionResult.DETACHED_MESSAGE
+                                    + DetachedJobExecutionResult.JOB_RESULT_MESSAGE);
         }
 
         try {
@@ -190,11 +189,11 @@ public class ClientTest extends TestLogger {
                     false);
             fail(FAIL_MESSAGE);
         } catch (ProgramInvocationException e) {
-            assertEquals(
-                    DetachedJobExecutionResult.DETACHED_MESSAGE
-                            + DetachedJobExecutionResult.JOB_RESULT_MESSAGE
-                            + DetachedJobExecutionResult.EAGER_FUNCTION_MESSAGE,
-                    e.getCause().getMessage());
+            assertThat(e.getCause().getMessage())
+                    .isEqualTo(
+                            DetachedJobExecutionResult.DETACHED_MESSAGE
+                                    + DetachedJobExecutionResult.JOB_RESULT_MESSAGE
+                                    + DetachedJobExecutionResult.EAGER_FUNCTION_MESSAGE);
         }
 
         try {
@@ -212,10 +211,10 @@ public class ClientTest extends TestLogger {
                     false);
             fail(FAIL_MESSAGE);
         } catch (ProgramInvocationException e) {
-            assertEquals(
-                    DetachedJobExecutionResult.DETACHED_MESSAGE
-                            + DetachedJobExecutionResult.JOB_RESULT_MESSAGE,
-                    e.getCause().getMessage());
+            assertThat(e.getCause().getMessage())
+                    .isEqualTo(
+                            DetachedJobExecutionResult.DETACHED_MESSAGE
+                                    + DetachedJobExecutionResult.JOB_RESULT_MESSAGE);
         }
     }
 
@@ -269,7 +268,7 @@ public class ClientTest extends TestLogger {
         jobGraph.addJars(Collections.emptyList());
         jobGraph.setClasspaths(Collections.emptyList());
 
-        assertNotNull(clusterClient.submitJob(jobGraph).get());
+        assertThat(clusterClient.submitJob(jobGraph).get()).isNotNull();
     }
 
     /**
@@ -326,17 +325,17 @@ public class ClientTest extends TestLogger {
                         PackagedProgramUtils.getPipelineFromProgram(
                                 prg, new Configuration(), 1, true);
         OptimizedPlan op = optimizer.compile(plan);
-        assertNotNull(op);
+        assertThat(op).isNotNull();
 
         PlanJSONDumpGenerator dumper = new PlanJSONDumpGenerator();
-        assertNotNull(dumper.getOptimizerPlanAsJSON(op));
+        assertThat(dumper.getOptimizerPlanAsJSON(op)).isNotNull();
 
         // test HTML escaping
         PlanJSONDumpGenerator dumper2 = new PlanJSONDumpGenerator();
         dumper2.setEncodeForHTML(true);
         String htmlEscaped = dumper2.getOptimizerPlanAsJSON(op);
 
-        assertEquals(-1, htmlEscaped.indexOf('\\'));
+        assertThat(htmlEscaped.indexOf('\\')).isEqualTo(-1);
     }
 
     // --------------------------------------------------------------------------------------------

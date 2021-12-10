@@ -38,9 +38,7 @@ import static java.util.Collections.emptyIterator;
 import static java.util.Collections.singletonList;
 import static org.apache.flink.runtime.metrics.groups.UnregisteredMetricGroups.createUnregisteredTaskManagerJobMetricGroup;
 import static org.apache.flink.util.Preconditions.checkArgument;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link StateChangelogStorageLoader}. */
 public class StateChangelogStorageLoaderTest {
@@ -48,19 +46,23 @@ public class StateChangelogStorageLoaderTest {
     @Test
     public void testLoadSpiImplementation() throws IOException {
         StateChangelogStorageLoader.initialize(getPluginManager(emptyIterator()));
-        assertNotNull(
-                StateChangelogStorageLoader.load(
-                        new Configuration(), createUnregisteredTaskManagerJobMetricGroup()));
+        assertThat(
+                        StateChangelogStorageLoader.load(
+                                new Configuration(), createUnregisteredTaskManagerJobMetricGroup()))
+                .isNotNull();
     }
 
     @Test
     public void testLoadNotExist() throws IOException {
         StateChangelogStorageLoader.initialize(getPluginManager(emptyIterator()));
-        assertNull(
-                StateChangelogStorageLoader.load(
-                        new Configuration()
-                                .set(StateChangelogOptions.STATE_CHANGE_LOG_STORAGE, "not_exist"),
-                        createUnregisteredTaskManagerJobMetricGroup()));
+        assertThat(
+                        StateChangelogStorageLoader.load(
+                                new Configuration()
+                                        .set(
+                                                StateChangelogOptions.STATE_CHANGE_LOG_STORAGE,
+                                                "not_exist"),
+                                createUnregisteredTaskManagerJobMetricGroup()))
+                .isNull();
     }
 
     @Test
@@ -72,7 +74,7 @@ public class StateChangelogStorageLoaderTest {
         StateChangelogStorage loaded =
                 StateChangelogStorageLoader.load(
                         new Configuration(), createUnregisteredTaskManagerJobMetricGroup());
-        assertTrue(loaded instanceof TestStateChangelogStorage);
+        assertThat(loaded).isInstanceOf(TestStateChangelogStorage.class);
     }
 
     private PluginManager getPluginManager(

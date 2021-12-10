@@ -28,7 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test to check whether all {@link LogicalType}s have been tested in {@link LogicalTypeSerdeTest}.
@@ -49,12 +49,13 @@ public class LogicalTypeSerdeCoverageTest {
             testedSubClasses.add(logicalType.getClass());
         }
         remainingSubClasses.removeAll(testedSubClasses);
-        assertTrue(
-                String.format(
-                        "[%s] are not tested in LogicalTypeSerdeTest.",
-                        remainingSubClasses.stream()
-                                .map(Class::getSimpleName)
-                                .collect(Collectors.joining(","))),
-                remainingSubClasses.isEmpty());
+        assertThat(remainingSubClasses.isEmpty())
+                .as(
+                        String.format(
+                                "[%s] are not tested in LogicalTypeSerdeTest.",
+                                remainingSubClasses.stream()
+                                        .map(Class::getSimpleName)
+                                        .collect(Collectors.joining(","))))
+                .isTrue();
     }
 }

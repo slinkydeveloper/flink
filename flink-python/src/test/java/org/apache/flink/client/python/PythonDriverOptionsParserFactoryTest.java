@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PythonDriverOptionsParserFactory}. */
 public class PythonDriverOptionsParserFactoryTest {
@@ -67,15 +67,15 @@ public class PythonDriverOptionsParserFactoryTest {
         final PythonDriverOptions pythonCommandOptions = commandLineParser.parse(args);
 
         if (pythonCommandOptions.getEntryPointScript().isPresent()) {
-            assertEquals("xxx.py", pythonCommandOptions.getEntryPointScript().get());
+            assertThat(pythonCommandOptions.getEntryPointScript().get()).isEqualTo("xxx.py");
         } else {
-            assertEquals("xxx", pythonCommandOptions.getEntryPointModule());
+            assertThat(pythonCommandOptions.getEntryPointModule()).isEqualTo("xxx");
         }
 
         // verify the python program arguments
         final List<String> programArgs = pythonCommandOptions.getProgramArgs();
-        assertEquals(2, programArgs.size());
-        assertEquals("--input", programArgs.get(0));
-        assertEquals("in.txt", programArgs.get(1));
+        assertThat(programArgs.size()).isEqualTo(2);
+        assertThat(programArgs.get(0)).isEqualTo("--input");
+        assertThat(programArgs.get(1)).isEqualTo("in.txt");
     }
 }

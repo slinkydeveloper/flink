@@ -35,11 +35,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Base test suite for JM/TM memory calculations to test common methods in {@link
@@ -81,15 +77,13 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         String jvmParamsStr = ProcessMemoryUtils.generateJvmParametersStr(spec, true);
         Map<String, String> configs = ConfigurationUtils.parseJvmArgString(jvmParamsStr);
 
-        assertThat(configs.size(), is(4));
-        assertThat(MemorySize.parse(configs.get("-Xmx")), is(spec.getJvmHeapMemorySize()));
-        assertThat(MemorySize.parse(configs.get("-Xms")), is(spec.getJvmHeapMemorySize()));
-        assertThat(
-                MemorySize.parse(configs.get("-XX:MaxMetaspaceSize=")),
-                is(spec.getJvmMetaspaceSize()));
-        assertThat(
-                MemorySize.parse(configs.get("-XX:MaxDirectMemorySize=")),
-                is(spec.getJvmDirectMemorySize()));
+        assertThat(configs.size()).isEqualTo(4);
+        assertThat(MemorySize.parse(configs.get("-Xmx"))).isEqualTo(spec.getJvmHeapMemorySize());
+        assertThat(MemorySize.parse(configs.get("-Xms"))).isEqualTo(spec.getJvmHeapMemorySize());
+        assertThat(MemorySize.parse(configs.get("-XX:MaxMetaspaceSize=")))
+                .isEqualTo(spec.getJvmMetaspaceSize());
+        assertThat(MemorySize.parse(configs.get("-XX:MaxDirectMemorySize=")))
+                .isEqualTo(spec.getJvmDirectMemorySize());
     }
 
     @Test
@@ -98,13 +92,12 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         String jvmParamsStr = ProcessMemoryUtils.generateJvmParametersStr(spec, false);
         Map<String, String> configs = ConfigurationUtils.parseJvmArgString(jvmParamsStr);
 
-        assertThat(configs.size(), is(3));
-        assertThat(MemorySize.parse(configs.get("-Xmx")), is(spec.getJvmHeapMemorySize()));
-        assertThat(MemorySize.parse(configs.get("-Xms")), is(spec.getJvmHeapMemorySize()));
-        assertThat(
-                MemorySize.parse(configs.get("-XX:MaxMetaspaceSize=")),
-                is(spec.getJvmMetaspaceSize()));
-        assertThat(configs.containsKey("-XX:MaxDirectMemorySize="), is(false));
+        assertThat(configs.size()).isEqualTo(3);
+        assertThat(MemorySize.parse(configs.get("-Xmx"))).isEqualTo(spec.getJvmHeapMemorySize());
+        assertThat(MemorySize.parse(configs.get("-Xms"))).isEqualTo(spec.getJvmHeapMemorySize());
+        assertThat(MemorySize.parse(configs.get("-XX:MaxMetaspaceSize=")))
+                .isEqualTo(spec.getJvmMetaspaceSize());
+        assertThat(configs.containsKey("-XX:MaxDirectMemorySize=")).isEqualTo(false);
     }
 
     @Test
@@ -115,7 +108,7 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         conf.set(options.getTotalFlinkMemoryOption(), totalFlinkMemorySize);
 
         T processSpec = processSpecFromConfig(conf);
-        assertThat(processSpec.getTotalFlinkMemorySize(), is(totalFlinkMemorySize));
+        assertThat(processSpec.getTotalFlinkMemorySize()).isEqualTo(totalFlinkMemorySize);
     }
 
     @Test
@@ -126,7 +119,7 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         conf.set(options.getTotalProcessMemoryOption(), totalProcessMemorySize);
 
         T processSpec = processSpecFromConfig(conf);
-        assertThat(processSpec.getTotalProcessMemorySize(), is(totalProcessMemorySize));
+        assertThat(processSpec.getTotalProcessMemorySize()).isEqualTo(totalProcessMemorySize);
     }
 
     @Test
@@ -135,9 +128,9 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
             processSpecFromConfig(new Configuration());
         } catch (IllegalConfigurationException e) {
             options.getRequiredFineGrainedOptions()
-                    .forEach(option -> assertThat(e.getMessage(), containsString(option.key())));
-            assertThat(e.getMessage(), containsString(options.getTotalFlinkMemoryOption().key()));
-            assertThat(e.getMessage(), containsString(options.getTotalProcessMemoryOption().key()));
+                    .forEach(option -> assertThat(e.getMessage()).contains(option.key()));
+            assertThat(e.getMessage()).contains(options.getTotalFlinkMemoryOption().key());
+            assertThat(e.getMessage()).contains(options.getTotalProcessMemoryOption().key());
         }
     }
 
@@ -178,7 +171,8 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
 
         validateInAllConfigurations(
                 conf,
-                processSpec -> assertThat(processSpec.getJvmMetaspaceSize(), is(jvmMetaspaceSize)));
+                processSpec ->
+                        assertThat(processSpec.getJvmMetaspaceSize()).isEqualTo(jvmMetaspaceSize));
     }
 
     @Test
@@ -193,12 +187,10 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         validateInAllConfigurations(
                 conf,
                 JobManagerProcessSpec -> {
-                    assertThat(
-                            JobManagerProcessSpec.getJvmOverheadSize().getBytes(),
-                            greaterThanOrEqualTo(minSize.getBytes()));
-                    assertThat(
-                            JobManagerProcessSpec.getJvmOverheadSize().getBytes(),
-                            lessThanOrEqualTo(maxSize.getBytes()));
+                    assertThat(JobManagerProcessSpec.getJvmOverheadSize().getBytes())
+                            .isGreaterThanOrEqualTo(minSize.getBytes());
+                    assertThat(JobManagerProcessSpec.getJvmOverheadSize().getBytes())
+                            .isLessThanOrEqualTo(maxSize.getBytes());
                 });
     }
 
@@ -229,12 +221,11 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         validateInAllConfigurations(
                 conf,
                 jobManagerProcessSpec ->
-                        assertThat(
-                                jobManagerProcessSpec.getJvmOverheadSize(),
-                                is(
+                        assertThat(jobManagerProcessSpec.getJvmOverheadSize())
+                                .isEqualTo(
                                         jobManagerProcessSpec
                                                 .getTotalProcessMemorySize()
-                                                .multiply(fraction))));
+                                                .multiply(fraction)));
     }
 
     @Test
@@ -264,7 +255,7 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         conf.set(options.getJvmOptions().getJvmOverheadFraction(), 0.5f);
 
         T jobManagerProcessSpec = processSpecFromConfig(conf);
-        assertThat(jobManagerProcessSpec.getJvmOverheadSize(), is(MemorySize.parse("100m")));
+        assertThat(jobManagerProcessSpec.getJvmOverheadSize()).isEqualTo(MemorySize.parse("100m"));
     }
 
     @Test
@@ -328,7 +319,7 @@ public abstract class ProcessMemoryUtilsTestBase<T extends ProcessMemorySpec> ex
         MemorySize newOptionValue =
                 getConfigurationWithLegacyHeapSizeMappedToNewConfigOption(configuration)
                         .get(getNewOptionForLegacyHeapOption());
-        assertThat(newOptionValue, is(expected));
+        assertThat(newOptionValue).isEqualTo(expected);
     }
 
     @Test

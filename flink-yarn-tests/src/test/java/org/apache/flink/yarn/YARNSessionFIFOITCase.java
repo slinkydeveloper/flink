@@ -36,7 +36,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.fifo.FifoScheduler;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -53,6 +52,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.yarn.util.TestUtils.getTestJarPath;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test starts a MiniYARNCluster with a FIFO scheduler. There are no queues for that scheduler.
@@ -186,11 +187,11 @@ public class YARNSessionFIFOITCase extends YarnTestBase {
             List<ApplicationReport> apps =
                     getApplicationReportWithRetryOnNPE(
                             yc, EnumSet.of(YarnApplicationState.RUNNING));
-            Assert.assertEquals(1, apps.size()); // Only one running
+            assertThat(apps.size()).isEqualTo(1); // Only one running
             ApplicationReport app = apps.get(0);
 
-            Assert.assertEquals("MyCustomName", app.getName());
-            Assert.assertEquals("Apache Flink 1.x", app.getApplicationType());
+            assertThat(app.getName()).isEqualTo("MyCustomName");
+            assertThat(app.getApplicationType()).isEqualTo("Apache Flink 1.x");
             ApplicationId id = app.getApplicationId();
             yc.killApplication(id);
 
@@ -206,7 +207,7 @@ public class YARNSessionFIFOITCase extends YarnTestBase {
                     testConditionIntervalInMillis);
         } catch (Throwable t) {
             LOG.warn("Killing failed", t);
-            Assert.fail();
+            fail("unknown failure");
         } finally {
 
             // cleanup the yarn-properties file

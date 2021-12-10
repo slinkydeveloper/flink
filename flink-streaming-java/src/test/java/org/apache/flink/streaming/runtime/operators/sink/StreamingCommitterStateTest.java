@@ -25,8 +25,7 @@ import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test {@link StreamingCommitterState}. */
 public class StreamingCommitterStateTest {
@@ -44,6 +43,6 @@ public class StreamingCommitterStateTest {
         final StreamingCommitterState<Integer> streamingCommitterState =
                 new StreamingCommitterState<>(r);
 
-        assertThat(streamingCommitterState.getCommittables(), equalTo(expectedList));
+        assertThat(streamingCommitterState.getCommittables()).isEqualTo(expectedList);
     }
 }

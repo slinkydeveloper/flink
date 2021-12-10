@@ -39,8 +39,9 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsMessage;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Integration tests for the {@link JobMaster}. */
 public class JobMasterITCase extends TestLogger {
@@ -60,7 +61,7 @@ public class JobMasterITCase extends TestLogger {
             miniCluster.getMiniCluster().submitJob(jobGraph).get();
             fail("Expect failure");
         } catch (Throwable t) {
-            assertThat(t, containsMessage("The given job is empty"));
+            assertThat(t).satisfies(matching(containsMessage("The given job is empty")));
         } finally {
             miniCluster.after();
         }
@@ -88,7 +89,7 @@ public class JobMasterITCase extends TestLogger {
         try {
             see.execute();
         } catch (Exception e) {
-            assertThat(e, containsMessage("Context was not yet initialized"));
+            assertThat(e).satisfies(matching(containsMessage("Context was not yet initialized")));
         }
     }
 

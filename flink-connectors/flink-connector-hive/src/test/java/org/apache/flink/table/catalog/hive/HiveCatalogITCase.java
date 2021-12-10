@@ -43,7 +43,6 @@ import org.apache.flink.util.CollectionUtil;
 import org.apache.flink.util.FileUtils;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -75,9 +74,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.table.api.Expressions.$;
 import static org.apache.flink.table.api.config.ExecutionConfigOptions.TABLE_EXEC_RESOURCE_DEFAULT_PARALLELISM;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * IT case for HiveCatalog. TODO: move to flink-connector-hive-test end-to-end test module once it's
@@ -128,9 +125,10 @@ public class HiveCatalogITCase {
         List<Row> result = CollectionUtil.iteratorToList(t.execute().collect());
 
         // assert query result
-        assertEquals(
-                new HashSet<>(Arrays.asList(Row.of("1", 1), Row.of("2", 2), Row.of("3", 3))),
-                new HashSet<>(result));
+        assertThat(new HashSet<>(result))
+                .isEqualTo(
+                        new HashSet<>(
+                                Arrays.asList(Row.of("1", 1), Row.of("2", 2), Row.of("3", 3))));
 
         tableEnv.executeSql("ALTER TABLE test2 RENAME TO newtable");
 
@@ -139,9 +137,10 @@ public class HiveCatalogITCase {
         result = CollectionUtil.iteratorToList(t.execute().collect());
 
         // assert query result
-        assertEquals(
-                new HashSet<>(Arrays.asList(Row.of("1", 1), Row.of("2", 2), Row.of("3", 3))),
-                new HashSet<>(result));
+        assertThat(new HashSet<>(result))
+                .isEqualTo(
+                        new HashSet<>(
+                                Arrays.asList(Row.of("1", 1), Row.of("2", 2), Row.of("3", 3))));
 
         tableEnv.executeSql("DROP TABLE newtable");
     }
@@ -190,7 +189,7 @@ public class HiveCatalogITCase {
         result.sort(Comparator.comparing(String::valueOf));
 
         // assert query result
-        assertEquals(Arrays.asList(Row.of("1", 1), Row.of("2", 2), Row.of("3", 3)), result);
+        assertThat(result).isEqualTo(Arrays.asList(Row.of("1", 1), Row.of("2", 2), Row.of("3", 3)));
 
         tableEnv.executeSql(
                         String.format(
@@ -204,11 +203,11 @@ public class HiveCatalogITCase {
         String readLine;
         for (int i = 0; i < 3; i++) {
             readLine = reader.readLine();
-            assertEquals(String.format("%d,%d", i + 1, i + 1), readLine);
+            assertThat(readLine).isEqualTo(String.format("%d,%d", i + 1, i + 1));
         }
 
         // No more line
-        assertNull(reader.readLine());
+        assertThat(reader.readLine()).isNull();
 
         tableEnv.executeSql(String.format("DROP TABLE %s", sourceTableName));
         tableEnv.executeSql(String.format("DROP TABLE %s", sinkTableName));
@@ -252,7 +251,7 @@ public class HiveCatalogITCase {
         String expected =
                 "2019-12-12 00:00:05.0,2019-12-12 00:00:04.004001,3,50.00\n"
                         + "2019-12-12 00:00:10.0,2019-12-12 00:00:06.006001,2,5.33\n";
-        assertEquals(expected, FileUtils.readFileUtf8(new File(new URI(sinkPath))));
+        assertThat(FileUtils.readFileUtf8(new File(new URI(sinkPath)))).isEqualTo(expected);
     }
 
     @Test
@@ -270,7 +269,7 @@ public class HiveCatalogITCase {
         List<Row> rows =
                 CollectionUtil.iteratorToList(
                         tableEnv.executeSql("SELECT * FROM proctime_src").collect());
-        Assert.assertEquals(5, rows.size());
+        assertThat(rows.size()).isEqualTo(5);
         tableEnv.executeSql("DROP TABLE proctime_src");
     }
 
@@ -292,7 +291,7 @@ public class HiveCatalogITCase {
                                 .select($("price"), $("ts"), $("l_proctime"))
                                 .execute()
                                 .collect());
-        Assert.assertEquals(5, rows.size());
+        assertThat(rows.size()).isEqualTo(5);
         tableEnv.executeSql("DROP TABLE proctime_src");
     }
 
@@ -374,10 +373,12 @@ public class HiveCatalogITCase {
                                     }
                                 })
                         .orElse(null);
-        assertNotNull(tableSchema);
-        assertEquals(
-                tableSchema.getPrimaryKey(),
-                Optional.of(UniqueConstraint.primaryKey("ct1", Collections.singletonList("uuid"))));
+        assertThat(tableSchema).isNotNull();
+        assertThat(
+                        Optional.of(
+                                UniqueConstraint.primaryKey(
+                                        "ct1", Collections.singletonList("uuid"))))
+                .isEqualTo(tableSchema.getPrimaryKey());
         tableEnv.executeSql("DROP TABLE pk_src");
     }
 
@@ -409,7 +410,7 @@ public class HiveCatalogITCase {
             tEnv.executeSql("insert into print_table select * from csv_table").await();
 
             // assert query result
-            assertEquals("+I[1, 1]\n+I[2, 2]\n+I[3, 3]\n", arrayOutputStream.toString());
+            assertThat(arrayOutputStream.toString()).isEqualTo("+I[1, 1]\n+I[2, 2]\n+I[3, 3]\n");
         } finally {
             if (System.out != originalSystemOut) {
                 System.out.close();
@@ -483,11 +484,12 @@ public class HiveCatalogITCase {
         CatalogBaseTable catalogTable =
                 builtInCat.getTable(
                         new ObjectPath(EnvironmentSettings.DEFAULT_BUILTIN_DATABASE, "copy"));
-        assertEquals(1, catalogTable.getOptions().size());
-        assertEquals("COLLECTION", catalogTable.getOptions().get(FactoryUtil.CONNECTOR.key()));
-        assertEquals(1, catalogTable.getSchema().getFieldCount());
-        assertEquals("x", catalogTable.getSchema().getFieldNames()[0]);
-        assertEquals(DataTypes.INT(), catalogTable.getSchema().getFieldDataTypes()[0]);
+        assertThat(catalogTable.getOptions().size()).isEqualTo(1);
+        assertThat(catalogTable.getOptions().get(FactoryUtil.CONNECTOR.key()))
+                .isEqualTo("COLLECTION");
+        assertThat(catalogTable.getSchema().getFieldCount()).isEqualTo(1);
+        assertThat(catalogTable.getSchema().getFieldNames()[0]).isEqualTo("x");
+        assertThat(catalogTable.getSchema().getFieldDataTypes()[0]).isEqualTo(DataTypes.INT());
     }
 
     @Test
@@ -506,38 +508,38 @@ public class HiveCatalogITCase {
             CatalogView catalogView =
                     (CatalogView) hiveCatalog.getTable(new ObjectPath("db1", "v1"));
             Schema viewSchema = catalogView.getUnresolvedSchema();
-            assertEquals(
-                    Schema.newBuilder()
-                            .fromFields(
-                                    new String[] {"x", "ts"},
-                                    new AbstractDataType[] {
-                                        DataTypes.INT(), DataTypes.TIMESTAMP(3)
-                                    })
-                            .build(),
-                    viewSchema);
+            assertThat(viewSchema)
+                    .isEqualTo(
+                            Schema.newBuilder()
+                                    .fromFields(
+                                            new String[] {"x", "ts"},
+                                            new AbstractDataType[] {
+                                                DataTypes.INT(), DataTypes.TIMESTAMP(3)
+                                            })
+                                    .build());
 
             List<Row> results =
                     CollectionUtil.iteratorToList(
                             tableEnv.executeSql("select x from v1").collect());
-            assertEquals(3, results.size());
+            assertThat(results.size()).isEqualTo(3);
 
             tableEnv.executeSql(
                     "create view v2 (v2_x,v2_ts) comment 'v2 comment' as select x,cast(ts as timestamp_ltz(3)) from v1");
             catalogView = (CatalogView) hiveCatalog.getTable(new ObjectPath("db1", "v2"));
-            assertEquals(
-                    Schema.newBuilder()
-                            .fromFields(
-                                    new String[] {"v2_x", "v2_ts"},
-                                    new AbstractDataType[] {
-                                        DataTypes.INT(), DataTypes.TIMESTAMP_LTZ(3)
-                                    })
-                            .build(),
-                    catalogView.getUnresolvedSchema());
-            assertEquals("v2 comment", catalogView.getComment());
+            assertThat(catalogView.getUnresolvedSchema())
+                    .isEqualTo(
+                            Schema.newBuilder()
+                                    .fromFields(
+                                            new String[] {"v2_x", "v2_ts"},
+                                            new AbstractDataType[] {
+                                                DataTypes.INT(), DataTypes.TIMESTAMP_LTZ(3)
+                                            })
+                                    .build());
+            assertThat(catalogView.getComment()).isEqualTo("v2 comment");
             results =
                     CollectionUtil.iteratorToList(
                             tableEnv.executeSql("select * from v2").collect());
-            assertEquals(3, results.size());
+            assertThat(results.size()).isEqualTo(3);
         } finally {
             tableEnv.executeSql("drop database db1 cascade");
         }

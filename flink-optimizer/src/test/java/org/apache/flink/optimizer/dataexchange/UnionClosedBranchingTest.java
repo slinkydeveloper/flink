@@ -49,9 +49,7 @@ import java.util.List;
 
 import static org.apache.flink.runtime.io.network.DataExchangeMode.BATCH;
 import static org.apache.flink.runtime.io.network.DataExchangeMode.PIPELINED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This tests a fix for FLINK-2540.
@@ -84,7 +82,7 @@ public class UnionClosedBranchingTest extends CompilerTestBase {
                         });
 
         // Make sure that changes to ExecutionMode are reflected in this test.
-        assertEquals(ExecutionMode.values().length, params.size());
+        assertThat(params.size()).isEqualTo(ExecutionMode.values().length);
 
         return params;
     }
@@ -147,26 +145,22 @@ public class UnionClosedBranchingTest extends CompilerTestBase {
 
         // Verify that the compiler correctly sets the expected data exchange modes.
         for (Channel channel : joinNode.getInputs()) {
-            assertEquals(
-                    "Unexpected data exchange mode between union and join node.",
-                    unionToJoin,
-                    channel.getDataExchangeMode());
-            assertEquals(
-                    "Unexpected ship strategy between union and join node.",
-                    unionToJoinStrategy,
-                    channel.getShipStrategy());
+            assertThat(channel.getDataExchangeMode())
+                    .as("Unexpected data exchange mode between union and join node.")
+                    .isEqualTo(unionToJoin);
+            assertThat(channel.getShipStrategy())
+                    .as("Unexpected ship strategy between union and join node.")
+                    .isEqualTo(unionToJoinStrategy);
         }
 
         for (SourcePlanNode src : optimizedPlan.getDataSources()) {
             for (Channel channel : src.getOutgoingChannels()) {
-                assertEquals(
-                        "Unexpected data exchange mode between source and union node.",
-                        sourceToUnion,
-                        channel.getDataExchangeMode());
-                assertEquals(
-                        "Unexpected ship strategy between source and union node.",
-                        sourceToUnionStrategy,
-                        channel.getShipStrategy());
+                assertThat(channel.getDataExchangeMode())
+                        .as("Unexpected data exchange mode between source and union node.")
+                        .isEqualTo(sourceToUnion);
+                assertThat(channel.getShipStrategy())
+                        .as("Unexpected ship strategy between source and union node.")
+                        .isEqualTo(sourceToUnionStrategy);
             }
         }
 
@@ -180,34 +174,35 @@ public class UnionClosedBranchingTest extends CompilerTestBase {
         List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
 
         // Sanity check for the test setup
-        assertEquals("Unexpected number of vertices created.", 4, vertices.size());
+        assertThat(vertices.size()).as("Unexpected number of vertices created.").isEqualTo(4);
 
         // Verify all sources
         JobVertex[] sources = new JobVertex[] {vertices.get(0), vertices.get(1)};
 
         for (JobVertex src : sources) {
             // Sanity check
-            assertTrue("Unexpected vertex type. Test setup is broken.", src.isInputVertex());
+            assertThat(src.isInputVertex())
+                    .as("Unexpected vertex type. Test setup is broken.")
+                    .isTrue();
 
             // The union is not translated to an extra union task, but the join uses a union
             // input gate to read multiple inputs. The source create a single result per consumer.
-            assertEquals(
-                    "Unexpected number of created results.",
-                    2,
-                    src.getNumberOfProducedIntermediateDataSets());
+            assertThat(src.getNumberOfProducedIntermediateDataSets())
+                    .as("Unexpected number of created results.")
+                    .isEqualTo(2);
 
             for (IntermediateDataSet dataSet : src.getProducedDataSets()) {
                 ResultPartitionType dsType = dataSet.getResultType();
 
                 // Ensure batch exchange unless PIPELINED_FORCE is enabled.
                 if (!executionMode.equals(ExecutionMode.PIPELINED_FORCED)) {
-                    assertTrue(
-                            "Expected batch exchange, but result type is " + dsType + ".",
-                            dsType.isBlocking());
+                    assertThat(dsType.isBlocking())
+                            .as("Expected batch exchange, but result type is " + dsType + ".")
+                            .isTrue();
                 } else {
-                    assertFalse(
-                            "Expected non-batch exchange, but result type is " + dsType + ".",
-                            dsType.isBlocking());
+                    assertThat(dsType.isBlocking())
+                            .as("Expected non-batch exchange, but result type is " + dsType + ".")
+                            .isFalse();
                 }
             }
         }

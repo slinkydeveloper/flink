@@ -49,10 +49,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class LargeRecordHandlerITCase extends TestLogger {
 
@@ -100,7 +98,7 @@ public class LargeRecordHandlerITCase extends TestLogger {
                             128,
                             owner.getExecutionConfig());
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             // add the test data
             Random rnd = new Random();
@@ -110,7 +108,7 @@ public class LargeRecordHandlerITCase extends TestLogger {
                 handler.addRecord(
                         new Tuple3<Long, SomeVeryLongValue, Byte>(
                                 val, new SomeVeryLongValue((int) val), (byte) val));
-                assertTrue(handler.hasData());
+                assertThat(handler.hasData()).isTrue();
             }
 
             MutableObjectIterator<Tuple3<Long, SomeVeryLongValue, Byte>> sorted =
@@ -128,22 +126,23 @@ public class LargeRecordHandlerITCase extends TestLogger {
 
             while ((next = sorted.next(null)) != null) {
                 // key and value must be equal
-                assertTrue(next.f0.intValue() == next.f1.val());
-                assertTrue(next.f0.byteValue() == next.f2);
+                assertThat(next.f0.intValue() == next.f1.val()).isTrue();
+                assertThat(next.f0.byteValue() == next.f2).isTrue();
 
                 // order must be correct
                 if (previous != null) {
-                    assertTrue(previous.f2 <= next.f2);
-                    assertTrue(
-                            previous.f2.byteValue() != next.f2.byteValue()
-                                    || previous.f0 <= next.f0);
+                    assertThat(previous.f2 <= next.f2).isTrue();
+                    assertThat(
+                                    previous.f2.byteValue() != next.f2.byteValue()
+                                            || previous.f0 <= next.f0)
+                            .isTrue();
                 }
                 previous = next;
             }
 
             handler.close();
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             handler.close();
 
@@ -154,7 +153,7 @@ public class LargeRecordHandlerITCase extends TestLogger {
                 // expected
             }
 
-            assertTrue(memMan.verifyEmpty());
+            assertThat(memMan.verifyEmpty()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -190,7 +189,7 @@ public class LargeRecordHandlerITCase extends TestLogger {
             val = in.readInt();
             for (byte bufferByte : BUFFER) {
                 byte b = in.readByte();
-                assertEquals(bufferByte, b);
+                assertThat(b).isEqualTo(bufferByte);
             }
         }
 
@@ -253,7 +252,7 @@ public class LargeRecordHandlerITCase extends TestLogger {
             out.close();
 
             for (int i = 1; i < offsets.size(); i++) {
-                assertTrue(offsets.get(i) > offsets.get(i - 1));
+                assertThat(offsets.get(i) > offsets.get(i - 1)).isTrue();
             }
 
             memMan.allocatePages(owner, memory, NUM_PAGES);
@@ -267,8 +266,8 @@ public class LargeRecordHandlerITCase extends TestLogger {
                 Tuple3<Long, SomeVeryLongValue, Byte> next = serializer.deserialize(in);
 
                 // key and value must be equal
-                assertTrue(next.f0.intValue() == next.f1.val());
-                assertTrue(next.f0.byteValue() == next.f2);
+                assertThat(next.f0.intValue() == next.f1.val()).isTrue();
+                assertThat(next.f0.byteValue() == next.f2).isTrue();
             }
 
             in.closeAndDelete();

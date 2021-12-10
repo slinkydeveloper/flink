@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ChecksumHashCode}. */
 public class ChecksumHashCodeTest {
@@ -53,8 +53,8 @@ public class ChecksumHashCodeTest {
 
         Checksum checksum = new ChecksumHashCode<Long>().run(dataset).execute();
 
-        assertEquals(list.size(), checksum.getCount());
-        assertEquals(list.size() * (list.size() - 1) / 2, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(list.size());
+        assertThat(checksum.getChecksum()).isEqualTo(list.size() * (list.size() - 1) / 2);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ChecksumHashCodeTest {
 
         Checksum checksum = new ChecksumHashCode<Long>().run(dataset).execute();
 
-        assertEquals(0, checksum.getCount());
-        assertEquals(0, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(0);
+        assertThat(checksum.getChecksum()).isEqualTo(0);
     }
 }

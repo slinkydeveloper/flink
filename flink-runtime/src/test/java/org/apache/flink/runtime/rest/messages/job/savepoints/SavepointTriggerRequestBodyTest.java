@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SavepointTriggerRequestBody}. */
 @RunWith(Parameterized.class)
@@ -65,7 +65,7 @@ public class SavepointTriggerRequestBodyTest
     @Override
     protected void assertOriginalEqualsToUnmarshalled(
             final SavepointTriggerRequestBody expected, final SavepointTriggerRequestBody actual) {
-        assertEquals(expected.getTargetDirectory(), actual.getTargetDirectory());
-        assertEquals(expected.getTriggerId(), actual.getTriggerId());
+        assertThat(actual.getTargetDirectory()).isEqualTo(expected.getTargetDirectory());
+        assertThat(actual.getTriggerId()).isEqualTo(expected.getTriggerId());
     }
 }

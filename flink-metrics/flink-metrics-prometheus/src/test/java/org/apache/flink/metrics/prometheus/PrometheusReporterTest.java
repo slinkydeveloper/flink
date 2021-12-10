@@ -43,7 +43,6 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -55,10 +54,8 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static org.apache.flink.metrics.prometheus.PrometheusReporterFactory.ARG_PORT;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Basic test for {@link PrometheusReporter}. */
 public class PrometheusReporterTest extends TestLogger {
@@ -155,9 +152,8 @@ public class PrometheusReporterTest extends TestLogger {
     private void assertThatGaugeIsExported(Metric metric, String name, String expectedValue)
             throws UnirestException {
         final String prometheusName = SCOPE_PREFIX + name;
-        assertThat(
-                addMetricAndPollResponse(metric, name),
-                containsString(
+        assertThat(addMetricAndPollResponse(metric, name))
+                .contains(
                         HELP_PREFIX
                                 + prometheusName
                                 + " "
@@ -171,7 +167,7 @@ public class PrometheusReporterTest extends TestLogger {
                                 + DEFAULT_LABELS
                                 + " "
                                 + expectedValue
-                                + "\n"));
+                                + "\n");
     }
 
     @Test
@@ -182,9 +178,8 @@ public class PrometheusReporterTest extends TestLogger {
         String summaryName = SCOPE_PREFIX + histogramName;
 
         String response = addMetricAndPollResponse(testHistogram, histogramName);
-        assertThat(
-                response,
-                containsString(
+        assertThat(response)
+                .contains(
                         HELP_PREFIX
                                 + summaryName
                                 + " "
@@ -198,11 +193,10 @@ public class PrometheusReporterTest extends TestLogger {
                                 + "_count"
                                 + DEFAULT_LABELS
                                 + " 1.0"
-                                + "\n"));
+                                + "\n");
         for (String quantile : Arrays.asList("0.5", "0.75", "0.95", "0.98", "0.99", "0.999")) {
-            assertThat(
-                    response,
-                    containsString(
+            assertThat(response)
+                    .contains(
                             summaryName
                                     + "{"
                                     + DIMENSIONS
@@ -210,7 +204,7 @@ public class PrometheusReporterTest extends TestLogger {
                                     + quantile
                                     + "\",} "
                                     + quantile
-                                    + "\n"));
+                                    + "\n");
         }
     }
 
@@ -239,83 +233,86 @@ public class PrometheusReporterTest extends TestLogger {
 
         String response = pollMetrics(reporter.getPort()).getBody();
 
-        assertThat(response, not(containsString("job_1")));
+        assertThat(response).doesNotContain("job_1");
     }
 
     @Test
     public void invalidCharactersAreReplacedWithUnderscore() {
-        assertThat(PrometheusReporter.replaceInvalidChars(""), equalTo(""));
-        assertThat(PrometheusReporter.replaceInvalidChars("abc"), equalTo("abc"));
-        assertThat(PrometheusReporter.replaceInvalidChars("abc\""), equalTo("abc_"));
-        assertThat(PrometheusReporter.replaceInvalidChars("\"abc"), equalTo("_abc"));
-        assertThat(PrometheusReporter.replaceInvalidChars("\"abc\""), equalTo("_abc_"));
-        assertThat(PrometheusReporter.replaceInvalidChars("\"a\"b\"c\""), equalTo("_a_b_c_"));
-        assertThat(PrometheusReporter.replaceInvalidChars("\"\"\"\""), equalTo("____"));
-        assertThat(PrometheusReporter.replaceInvalidChars("    "), equalTo("____"));
-        assertThat(PrometheusReporter.replaceInvalidChars("\"ab ;(c)'"), equalTo("_ab___c__"));
-        assertThat(PrometheusReporter.replaceInvalidChars("a b c"), equalTo("a_b_c"));
-        assertThat(PrometheusReporter.replaceInvalidChars("a b c "), equalTo("a_b_c_"));
-        assertThat(PrometheusReporter.replaceInvalidChars("a;b'c*"), equalTo("a_b_c_"));
-        assertThat(
-                PrometheusReporter.replaceInvalidChars("a,=;:?'b,=;:?'c"),
-                equalTo("a___:__b___:__c"));
+        assertThat(PrometheusReporter.replaceInvalidChars("")).isEqualTo("");
+        assertThat(PrometheusReporter.replaceInvalidChars("abc")).isEqualTo("abc");
+        assertThat(PrometheusReporter.replaceInvalidChars("abc\"")).isEqualTo("abc_");
+        assertThat(PrometheusReporter.replaceInvalidChars("\"abc")).isEqualTo("_abc");
+        assertThat(PrometheusReporter.replaceInvalidChars("\"abc\"")).isEqualTo("_abc_");
+        assertThat(PrometheusReporter.replaceInvalidChars("\"a\"b\"c\"")).isEqualTo("_a_b_c_");
+        assertThat(PrometheusReporter.replaceInvalidChars("\"\"\"\"")).isEqualTo("____");
+        assertThat(PrometheusReporter.replaceInvalidChars("    ")).isEqualTo("____");
+        assertThat(PrometheusReporter.replaceInvalidChars("\"ab ;(c)'")).isEqualTo("_ab___c__");
+        assertThat(PrometheusReporter.replaceInvalidChars("a b c")).isEqualTo("a_b_c");
+        assertThat(PrometheusReporter.replaceInvalidChars("a b c ")).isEqualTo("a_b_c_");
+        assertThat(PrometheusReporter.replaceInvalidChars("a;b'c*")).isEqualTo("a_b_c_");
+        assertThat(PrometheusReporter.replaceInvalidChars("a,=;:?'b,=;:?'c"))
+                .isEqualTo("a___:__b___:__c");
     }
 
     @Test
     public void doubleGaugeIsConvertedCorrectly() {
         assertThat(
-                reporter.gaugeFrom(
-                                new Gauge<Double>() {
-                                    @Override
-                                    public Double getValue() {
-                                        return 3.14;
-                                    }
-                                })
-                        .get(),
-                equalTo(3.14));
+                        reporter.gaugeFrom(
+                                        new Gauge<Double>() {
+
+                                            @Override
+                                            public Double getValue() {
+                                                return 3.14;
+                                            }
+                                        })
+                                .get())
+                .isEqualTo(3.14);
     }
 
     @Test
     public void shortGaugeIsConvertedCorrectly() {
         assertThat(
-                reporter.gaugeFrom(
-                                new Gauge<Short>() {
-                                    @Override
-                                    public Short getValue() {
-                                        return 13;
-                                    }
-                                })
-                        .get(),
-                equalTo(13.));
+                        reporter.gaugeFrom(
+                                        new Gauge<Short>() {
+
+                                            @Override
+                                            public Short getValue() {
+                                                return 13;
+                                            }
+                                        })
+                                .get())
+                .isEqualTo(13.);
     }
 
     @Test
     public void booleanGaugeIsConvertedCorrectly() {
         assertThat(
-                reporter.gaugeFrom(
-                                new Gauge<Boolean>() {
-                                    @Override
-                                    public Boolean getValue() {
-                                        return true;
-                                    }
-                                })
-                        .get(),
-                equalTo(1.));
+                        reporter.gaugeFrom(
+                                        new Gauge<Boolean>() {
+
+                                            @Override
+                                            public Boolean getValue() {
+                                                return true;
+                                            }
+                                        })
+                                .get())
+                .isEqualTo(1.);
     }
 
     /** Prometheus only supports numbers, so report non-numeric gauges as 0. */
     @Test
     public void stringGaugeCannotBeConverted() {
         assertThat(
-                reporter.gaugeFrom(
-                                new Gauge<String>() {
-                                    @Override
-                                    public String getValue() {
-                                        return "I am not a number";
-                                    }
-                                })
-                        .get(),
-                equalTo(0.));
+                        reporter.gaugeFrom(
+                                        new Gauge<String>() {
+
+                                            @Override
+                                            public String getValue() {
+                                                return "I am not a number";
+                                            }
+                                        })
+                                .get())
+                .isEqualTo(0.);
     }
 
     @Test
@@ -343,7 +340,7 @@ public class PrometheusReporterTest extends TestLogger {
 
         try {
             createReporterSetup("test2", String.valueOf(usedPort));
-            Assert.fail("Should've failed since port is unavailable.");
+            fail("Should've failed since port is unavailable.");
         } catch (Exception e) {
             // expected
         } finally {

@@ -25,12 +25,13 @@ import org.apache.flink.graph.examples.data.TriangleCountData;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.types.NullValue;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TriangleEnumerator}. */
 @RunWith(Parameterized.class)
@@ -52,9 +53,9 @@ public class TriangleEnumeratorITCase extends MultipleProgramsTestBase {
                 graph.run(new TriangleEnumerator<>()).collect();
         List<Tuple3<Long, Long, Long>> expectedResult = TriangleCountData.getListOfTriangles();
 
-        Assert.assertEquals(expectedResult.size(), actualOutput.size());
+        assertThat(actualOutput.size()).isEqualTo(expectedResult.size());
         for (Tuple3<Long, Long, Long> resultTriangle : actualOutput) {
-            Assert.assertTrue(expectedResult.indexOf(resultTriangle) >= 0);
+            assertThat(expectedResult.indexOf(resultTriangle) >= 0).isTrue();
         }
     }
 }

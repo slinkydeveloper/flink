@@ -20,8 +20,7 @@ package org.apache.flink.runtime.checkpoint;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test checkpoint statistics counters. */
 public class CheckpointStatsCountsTest {
@@ -30,48 +29,48 @@ public class CheckpointStatsCountsTest {
     @Test
     public void testCounts() {
         CheckpointStatsCounts counts = new CheckpointStatsCounts();
-        assertEquals(0, counts.getNumberOfRestoredCheckpoints());
-        assertEquals(0, counts.getTotalNumberOfCheckpoints());
-        assertEquals(0, counts.getNumberOfInProgressCheckpoints());
-        assertEquals(0, counts.getNumberOfCompletedCheckpoints());
-        assertEquals(0, counts.getNumberOfFailedCheckpoints());
+        assertThat(counts.getNumberOfRestoredCheckpoints()).isEqualTo(0);
+        assertThat(counts.getTotalNumberOfCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfInProgressCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfCompletedCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfFailedCheckpoints()).isEqualTo(0);
 
         counts.incrementRestoredCheckpoints();
-        assertEquals(1, counts.getNumberOfRestoredCheckpoints());
-        assertEquals(0, counts.getTotalNumberOfCheckpoints());
-        assertEquals(0, counts.getNumberOfInProgressCheckpoints());
-        assertEquals(0, counts.getNumberOfCompletedCheckpoints());
-        assertEquals(0, counts.getNumberOfFailedCheckpoints());
+        assertThat(counts.getNumberOfRestoredCheckpoints()).isEqualTo(1);
+        assertThat(counts.getTotalNumberOfCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfInProgressCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfCompletedCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfFailedCheckpoints()).isEqualTo(0);
 
         // 1st checkpoint
         counts.incrementInProgressCheckpoints();
-        assertEquals(1, counts.getNumberOfRestoredCheckpoints());
-        assertEquals(1, counts.getTotalNumberOfCheckpoints());
-        assertEquals(1, counts.getNumberOfInProgressCheckpoints());
-        assertEquals(0, counts.getNumberOfCompletedCheckpoints());
-        assertEquals(0, counts.getNumberOfFailedCheckpoints());
+        assertThat(counts.getNumberOfRestoredCheckpoints()).isEqualTo(1);
+        assertThat(counts.getTotalNumberOfCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfInProgressCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfCompletedCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfFailedCheckpoints()).isEqualTo(0);
 
         counts.incrementCompletedCheckpoints();
-        assertEquals(1, counts.getNumberOfRestoredCheckpoints());
-        assertEquals(1, counts.getTotalNumberOfCheckpoints());
-        assertEquals(0, counts.getNumberOfInProgressCheckpoints());
-        assertEquals(1, counts.getNumberOfCompletedCheckpoints());
-        assertEquals(0, counts.getNumberOfFailedCheckpoints());
+        assertThat(counts.getNumberOfRestoredCheckpoints()).isEqualTo(1);
+        assertThat(counts.getTotalNumberOfCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfInProgressCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfCompletedCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfFailedCheckpoints()).isEqualTo(0);
 
         // 2nd checkpoint
         counts.incrementInProgressCheckpoints();
-        assertEquals(1, counts.getNumberOfRestoredCheckpoints());
-        assertEquals(2, counts.getTotalNumberOfCheckpoints());
-        assertEquals(1, counts.getNumberOfInProgressCheckpoints());
-        assertEquals(1, counts.getNumberOfCompletedCheckpoints());
-        assertEquals(0, counts.getNumberOfFailedCheckpoints());
+        assertThat(counts.getNumberOfRestoredCheckpoints()).isEqualTo(1);
+        assertThat(counts.getTotalNumberOfCheckpoints()).isEqualTo(2);
+        assertThat(counts.getNumberOfInProgressCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfCompletedCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfFailedCheckpoints()).isEqualTo(0);
 
         counts.incrementFailedCheckpoints();
-        assertEquals(1, counts.getNumberOfRestoredCheckpoints());
-        assertEquals(2, counts.getTotalNumberOfCheckpoints());
-        assertEquals(0, counts.getNumberOfInProgressCheckpoints());
-        assertEquals(1, counts.getNumberOfCompletedCheckpoints());
-        assertEquals(1, counts.getNumberOfFailedCheckpoints());
+        assertThat(counts.getNumberOfRestoredCheckpoints()).isEqualTo(1);
+        assertThat(counts.getTotalNumberOfCheckpoints()).isEqualTo(2);
+        assertThat(counts.getNumberOfInProgressCheckpoints()).isEqualTo(0);
+        assertThat(counts.getNumberOfCompletedCheckpoints()).isEqualTo(1);
+        assertThat(counts.getNumberOfFailedCheckpoints()).isEqualTo(1);
     }
 
     /**
@@ -82,14 +81,14 @@ public class CheckpointStatsCountsTest {
     public void testCompleteOrFailWithoutInProgressCheckpoint() {
         CheckpointStatsCounts counts = new CheckpointStatsCounts();
         counts.incrementCompletedCheckpoints();
-        assertTrue(
-                "Number of checkpoints in progress should never be negative",
-                counts.getNumberOfInProgressCheckpoints() >= 0);
+        assertThat(counts.getNumberOfInProgressCheckpoints() >= 0)
+                .as("Number of checkpoints in progress should never be negative")
+                .isTrue();
 
         counts.incrementFailedCheckpoints();
-        assertTrue(
-                "Number of checkpoints in progress should never be negative",
-                counts.getNumberOfInProgressCheckpoints() >= 0);
+        assertThat(counts.getNumberOfInProgressCheckpoints() >= 0)
+                .as("Number of checkpoints in progress should never be negative")
+                .isTrue();
     }
 
     /** Tests that that taking snapshots of the state are independent from the parent. */
@@ -122,11 +121,11 @@ public class CheckpointStatsCountsTest {
         long failed = counts.getNumberOfFailedCheckpoints();
 
         CheckpointStatsCounts snapshot = counts.createSnapshot();
-        assertEquals(restored, snapshot.getNumberOfRestoredCheckpoints());
-        assertEquals(total, snapshot.getTotalNumberOfCheckpoints());
-        assertEquals(inProgress, snapshot.getNumberOfInProgressCheckpoints());
-        assertEquals(completed, snapshot.getNumberOfCompletedCheckpoints());
-        assertEquals(failed, snapshot.getNumberOfFailedCheckpoints());
+        assertThat(snapshot.getNumberOfRestoredCheckpoints()).isEqualTo(restored);
+        assertThat(snapshot.getTotalNumberOfCheckpoints()).isEqualTo(total);
+        assertThat(snapshot.getNumberOfInProgressCheckpoints()).isEqualTo(inProgress);
+        assertThat(snapshot.getNumberOfCompletedCheckpoints()).isEqualTo(completed);
+        assertThat(snapshot.getNumberOfFailedCheckpoints()).isEqualTo(failed);
 
         // Update the original
         counts.incrementRestoredCheckpoints();
@@ -138,10 +137,10 @@ public class CheckpointStatsCountsTest {
         counts.incrementInProgressCheckpoints();
         counts.incrementFailedCheckpoints();
 
-        assertEquals(restored, snapshot.getNumberOfRestoredCheckpoints());
-        assertEquals(total, snapshot.getTotalNumberOfCheckpoints());
-        assertEquals(inProgress, snapshot.getNumberOfInProgressCheckpoints());
-        assertEquals(completed, snapshot.getNumberOfCompletedCheckpoints());
-        assertEquals(failed, snapshot.getNumberOfFailedCheckpoints());
+        assertThat(snapshot.getNumberOfRestoredCheckpoints()).isEqualTo(restored);
+        assertThat(snapshot.getTotalNumberOfCheckpoints()).isEqualTo(total);
+        assertThat(snapshot.getNumberOfInProgressCheckpoints()).isEqualTo(inProgress);
+        assertThat(snapshot.getNumberOfCompletedCheckpoints()).isEqualTo(completed);
+        assertThat(snapshot.getNumberOfFailedCheckpoints()).isEqualTo(failed);
     }
 }

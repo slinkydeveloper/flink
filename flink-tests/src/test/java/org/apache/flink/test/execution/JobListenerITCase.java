@@ -40,8 +40,7 @@ import org.junit.Test;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link JobListener}. */
 public class JobListenerITCase extends TestLogger {
@@ -86,7 +85,7 @@ public class JobListenerITCase extends TestLogger {
         submissionLatch.await(2000L, TimeUnit.MILLISECONDS);
         executionLatch.await(2000L, TimeUnit.MILLISECONDS);
 
-        assertThat(jobExecutionResult.getJobID(), is(jobIdReference.get()));
+        assertThat(jobExecutionResult.getJobID()).isEqualTo(jobIdReference.get());
     }
 
     @Test
@@ -115,7 +114,7 @@ public class JobListenerITCase extends TestLogger {
         submissionLatch.await(2000L, TimeUnit.MILLISECONDS);
         // when executing asynchronously we don't get an "executed" callback
 
-        assertThat(jobClient.getJobID(), is(jobIdReference.get()));
+        assertThat(jobClient.getJobID()).isEqualTo(jobIdReference.get());
     }
 
     @Test
@@ -139,7 +138,7 @@ public class JobListenerITCase extends TestLogger {
         env.fromElements(1, 2, 3, 4, 5).output(new DiscardingOutputFormat<>());
         env.execute();
 
-        assertThat(Thread.currentThread(), is(threadReference.get()));
+        assertThat(Thread.currentThread()).isEqualTo(threadReference.get());
     }
 
     @Test
@@ -163,7 +162,7 @@ public class JobListenerITCase extends TestLogger {
         env.fromElements(1, 2, 3, 4, 5).output(new DiscardingOutputFormat<>());
         env.executeAsync();
 
-        assertThat(Thread.currentThread(), is(threadReference.get()));
+        assertThat(Thread.currentThread()).isEqualTo(threadReference.get());
     }
 
     @Test
@@ -195,7 +194,7 @@ public class JobListenerITCase extends TestLogger {
         submissionLatch.await(2000L, TimeUnit.MILLISECONDS);
         executionLatch.await(2000L, TimeUnit.MILLISECONDS);
 
-        assertThat(jobExecutionResult.getJobID(), is(jobIdReference.get()));
+        assertThat(jobExecutionResult.getJobID()).isEqualTo(jobIdReference.get());
     }
 
     @Test
@@ -224,7 +223,7 @@ public class JobListenerITCase extends TestLogger {
         submissionLatch.await(2000L, TimeUnit.MILLISECONDS);
         // when executing asynchronously we don't get an "executed" callback
 
-        assertThat(jobClient.getJobID(), is(jobIdReference.get()));
+        assertThat(jobClient.getJobID()).isEqualTo(jobIdReference.get());
     }
 
     @Test
@@ -248,7 +247,7 @@ public class JobListenerITCase extends TestLogger {
         env.fromElements(1, 2, 3, 4, 5).addSink(new DiscardingSink<>());
         env.execute();
 
-        assertThat(Thread.currentThread(), is(threadReference.get()));
+        assertThat(Thread.currentThread()).isEqualTo(threadReference.get());
     }
 
     @Test
@@ -272,6 +271,6 @@ public class JobListenerITCase extends TestLogger {
         env.fromElements(1, 2, 3, 4, 5).addSink(new DiscardingSink<>());
         env.executeAsync();
 
-        assertThat(Thread.currentThread(), is(threadReference.get()));
+        assertThat(Thread.currentThread()).isEqualTo(threadReference.get());
     }
 }

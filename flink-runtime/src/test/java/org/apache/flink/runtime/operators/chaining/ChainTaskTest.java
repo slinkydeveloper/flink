@@ -41,7 +41,6 @@ import org.apache.flink.types.IntValue;
 import org.apache.flink.types.Record;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -51,6 +50,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ChainTaskTest extends TaskTestBase {
 
@@ -120,14 +122,14 @@ public class ChainTaskTest extends TaskTestBase {
                     testTask.invoke();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Assert.fail("Invoke method caused exception.");
+                    fail("Invoke method caused exception.");
                 }
             }
 
-            Assert.assertEquals(keyCnt, this.outList.size());
+            assertThat(this.outList.size()).isEqualTo(keyCnt);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -186,11 +188,11 @@ public class ChainTaskTest extends TaskTestBase {
                     stubFailed = true;
                 }
 
-                Assert.assertTrue("Function exception was not forwarded.", stubFailed);
+                assertThat(stubFailed).as("Function exception was not forwarded.").isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -216,10 +218,10 @@ public class ChainTaskTest extends TaskTestBase {
             final BatchTask<FlatMapFunction<Record, Record>, Record> testTask =
                     new BatchTask<>(mockEnv);
             testTask.invoke();
-            Assert.assertEquals(keyCnt * valCnt + numChainedTasks, outList.size());
+            assertThat(outList.size()).isEqualTo(keyCnt * valCnt + numChainedTasks);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -250,10 +252,10 @@ public class ChainTaskTest extends TaskTestBase {
         }
         try {
             testTask.invoke();
-            Assert.assertEquals(keyCnt * valCnt + numChainedTasks, outList.size());
+            assertThat(outList.size()).isEqualTo(keyCnt * valCnt + numChainedTasks);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("Invoke method caused exception.");
+            fail("Invoke method caused exception.");
         }
     }
 

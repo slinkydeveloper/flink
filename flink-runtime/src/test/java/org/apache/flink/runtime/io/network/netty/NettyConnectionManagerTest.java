@@ -33,7 +33,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.net.InetAddress;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Simple netty connection manager test. */
 public class NettyConnectionManagerTest {
@@ -58,7 +58,7 @@ public class NettyConnectionManagerTest {
         NettyConnectionManager connectionManager = createNettyConnectionManager(config);
         connectionManager.start();
 
-        assertEquals(numberOfSlots, connectionManager.getBufferPool().getNumberOfArenas());
+        assertThat(connectionManager.getBufferPool().getNumberOfArenas()).isEqualTo(numberOfSlots);
 
         {
             // Client event loop group
@@ -69,7 +69,7 @@ public class NettyConnectionManagerTest {
             f.setAccessible(true);
             Object[] eventExecutors = (Object[]) f.get(group);
 
-            assertEquals(numberOfSlots, eventExecutors.length);
+            assertThat(eventExecutors.length).isEqualTo(numberOfSlots);
         }
 
         {
@@ -81,7 +81,7 @@ public class NettyConnectionManagerTest {
             f.setAccessible(true);
             Object[] eventExecutors = (Object[]) f.get(group);
 
-            assertEquals(numberOfSlots, eventExecutors.length);
+            assertThat(eventExecutors.length).isEqualTo(numberOfSlots);
         }
 
         {
@@ -93,7 +93,7 @@ public class NettyConnectionManagerTest {
             f.setAccessible(true);
             Object[] eventExecutors = (Object[]) f.get(group);
 
-            assertEquals(numberOfSlots, eventExecutors.length);
+            assertThat(eventExecutors.length).isEqualTo(numberOfSlots);
         }
     }
 
@@ -122,7 +122,7 @@ public class NettyConnectionManagerTest {
         NettyConnectionManager connectionManager = createNettyConnectionManager(config);
         connectionManager.start();
 
-        assertEquals(numberOfArenas, connectionManager.getBufferPool().getNumberOfArenas());
+        assertThat(connectionManager.getBufferPool().getNumberOfArenas()).isEqualTo(numberOfArenas);
 
         {
             // Client event loop group
@@ -133,7 +133,7 @@ public class NettyConnectionManagerTest {
             f.setAccessible(true);
             Object[] eventExecutors = (Object[]) f.get(group);
 
-            assertEquals(numberOfClientThreads, eventExecutors.length);
+            assertThat(eventExecutors.length).isEqualTo(numberOfClientThreads);
         }
 
         {
@@ -145,7 +145,7 @@ public class NettyConnectionManagerTest {
             f.setAccessible(true);
             Object[] eventExecutors = (Object[]) f.get(group);
 
-            assertEquals(numberOfServerThreads, eventExecutors.length);
+            assertThat(eventExecutors.length).isEqualTo(numberOfServerThreads);
         }
 
         {
@@ -157,7 +157,7 @@ public class NettyConnectionManagerTest {
             f.setAccessible(true);
             Object[] eventExecutors = (Object[]) f.get(group);
 
-            assertEquals(numberOfServerThreads, eventExecutors.length);
+            assertThat(eventExecutors.length).isEqualTo(numberOfServerThreads);
         }
     }
 

@@ -35,11 +35,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class JobTaskVertexTest {
@@ -51,18 +48,20 @@ public class JobTaskVertexTest {
         target.connectNewDataSetAsInput(
                 source, DistributionPattern.POINTWISE, ResultPartitionType.PIPELINED);
 
-        assertTrue(source.isInputVertex());
-        assertFalse(source.isOutputVertex());
-        assertFalse(target.isInputVertex());
-        assertTrue(target.isOutputVertex());
+        assertThat(source.isInputVertex()).isTrue();
+        assertThat(source.isOutputVertex()).isFalse();
+        assertThat(target.isInputVertex()).isFalse();
+        assertThat(target.isOutputVertex()).isTrue();
 
-        assertEquals(1, source.getNumberOfProducedIntermediateDataSets());
-        assertEquals(1, target.getNumberOfInputs());
+        assertThat(source.getNumberOfProducedIntermediateDataSets()).isEqualTo(1);
+        assertThat(target.getNumberOfInputs()).isEqualTo(1);
 
-        assertEquals(target.getInputs().get(0).getSource(), source.getProducedDataSets().get(0));
+        assertThat(source.getProducedDataSets().get(0))
+                .isEqualTo(target.getInputs().get(0).getSource());
 
-        assertEquals(1, source.getProducedDataSets().get(0).getConsumers().size());
-        assertEquals(target, source.getProducedDataSets().get(0).getConsumers().get(0).getTarget());
+        assertThat(source.getProducedDataSets().get(0).getConsumers().size()).isEqualTo(1);
+        assertThat(source.getProducedDataSets().get(0).getConsumers().get(0).getTarget())
+                .isEqualTo(target);
     }
 
     @Test
@@ -75,18 +74,20 @@ public class JobTaskVertexTest {
         target2.connectDataSetAsInput(
                 source.getProducedDataSets().get(0), DistributionPattern.ALL_TO_ALL);
 
-        assertTrue(source.isInputVertex());
-        assertFalse(source.isOutputVertex());
-        assertFalse(target1.isInputVertex());
-        assertTrue(target1.isOutputVertex());
-        assertFalse(target2.isInputVertex());
-        assertTrue(target2.isOutputVertex());
+        assertThat(source.isInputVertex()).isTrue();
+        assertThat(source.isOutputVertex()).isFalse();
+        assertThat(target1.isInputVertex()).isFalse();
+        assertThat(target1.isOutputVertex()).isTrue();
+        assertThat(target2.isInputVertex()).isFalse();
+        assertThat(target2.isOutputVertex()).isTrue();
 
-        assertEquals(1, source.getNumberOfProducedIntermediateDataSets());
-        assertEquals(2, source.getProducedDataSets().get(0).getConsumers().size());
+        assertThat(source.getNumberOfProducedIntermediateDataSets()).isEqualTo(1);
+        assertThat(source.getProducedDataSets().get(0).getConsumers().size()).isEqualTo(2);
 
-        assertEquals(target1.getInputs().get(0).getSource(), source.getProducedDataSets().get(0));
-        assertEquals(target2.getInputs().get(0).getSource(), source.getProducedDataSets().get(0));
+        assertThat(source.getProducedDataSets().get(0))
+                .isEqualTo(target1.getInputs().get(0).getSource());
+        assertThat(source.getProducedDataSets().get(0))
+                .isEqualTo(target2.getInputs().get(0).getSource());
     }
 
     @Test
@@ -119,10 +120,9 @@ public class JobTaskVertexTest {
             } catch (TestException e) {
                 // all good
             }
-            assertEquals(
-                    "Previous classloader was not restored.",
-                    ctxCl,
-                    Thread.currentThread().getContextClassLoader());
+            assertThat(Thread.currentThread().getContextClassLoader())
+                    .as("Previous classloader was not restored.")
+                    .isEqualTo(ctxCl);
 
             try {
                 copy.finalizeOnMaster(cl);
@@ -130,10 +130,9 @@ public class JobTaskVertexTest {
             } catch (TestException e) {
                 // all good
             }
-            assertEquals(
-                    "Previous classloader was not restored.",
-                    ctxCl,
-                    Thread.currentThread().getContextClassLoader());
+            assertThat(Thread.currentThread().getContextClassLoader())
+                    .as("Previous classloader was not restored.")
+                    .isEqualTo(ctxCl);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -158,9 +157,9 @@ public class JobTaskVertexTest {
             vertex.initializeOnMaster(cl);
             InputSplit[] splits = vertex.getInputSplitSource().createInputSplits(77);
 
-            assertNotNull(splits);
-            assertEquals(1, splits.length);
-            assertEquals(TestSplit.class, splits[0].getClass());
+            assertThat(splits).isNotNull();
+            assertThat(splits.length).isEqualTo(1);
+            assertThat(splits[0].getClass()).isEqualTo(TestSplit.class);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -216,8 +215,8 @@ public class JobTaskVertexTest {
                 throw new IllegalStateException("Context ClassLoader was not correctly switched.");
             }
             for (String key : expectedParameters.keySet()) {
-                assertEquals(
-                        expectedParameters.getString(key, null), parameters.getString(key, null));
+                assertThat(parameters.getString(key, null))
+                        .isEqualTo(expectedParameters.getString(key, null));
             }
             isConfigured = true;
         }
@@ -269,8 +268,8 @@ public class JobTaskVertexTest {
                 throw new IllegalStateException("Context ClassLoader was not correctly switched.");
             }
             for (String key : expectedParameters.keySet()) {
-                assertEquals(
-                        expectedParameters.getString(key, null), parameters.getString(key, null));
+                assertThat(parameters.getString(key, null))
+                        .isEqualTo(expectedParameters.getString(key, null));
             }
             isConfigured = true;
         }

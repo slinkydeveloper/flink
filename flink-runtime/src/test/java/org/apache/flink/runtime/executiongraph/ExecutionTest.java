@@ -41,11 +41,9 @@ import javax.annotation.Nonnull;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link Execution}. */
 public class ExecutionTest extends TestLogger {
@@ -97,7 +95,7 @@ public class ExecutionTest extends TestLogger {
         CompletableFuture<Boolean> restartFuture =
                 terminationFuture.thenApply(
                         ignored -> {
-                            assertTrue(returnedSlotFuture.isDone());
+                            assertThat(returnedSlotFuture.isDone()).isTrue();
                             return true;
                         });
 
@@ -134,12 +132,12 @@ public class ExecutionTest extends TestLogger {
                 new JobManagerTaskRestore(1L, new TaskStateSnapshot());
         execution.setInitialState(taskRestoreState);
 
-        assertThat(execution.getTaskRestore(), is(notNullValue()));
+        assertThat(execution.getTaskRestore()).isEqualTo(notNullValue());
 
         // schedule the execution vertex and wait for its deployment
         scheduler.startScheduling();
 
-        assertThat(execution.getTaskRestore(), is(nullValue()));
+        assertThat(execution.getTaskRestore()).isEqualTo(nullValue());
     }
 
     @Test
@@ -185,9 +183,8 @@ public class ExecutionTest extends TestLogger {
         // cancel the execution in case we could schedule the execution
         testMainThreadUtil.execute(execution::cancel);
 
-        assertThat(
-                physicalSlotProvider.getRequests().keySet(),
-                is(physicalSlotProvider.getCancellations().keySet()));
+        assertThat(physicalSlotProvider.getRequests().keySet())
+                .isEqualTo(physicalSlotProvider.getCancellations().keySet());
     }
 
     /** Tests that a slot release will atomically release the assigned {@link Execution}. */
@@ -220,13 +217,10 @@ public class ExecutionTest extends TestLogger {
         TestingPhysicalSlot physicalSlot = physicalSlotProvider.getFirstResponseOrFail().get();
         testMainThreadUtil.execute(
                 () -> {
-                    assertThat(
-                            execution.getAssignedAllocationID(),
-                            is(physicalSlot.getAllocationId()));
-
+                    assertThat(execution.getAssignedAllocationID())
+                            .isEqualTo(physicalSlot.getAllocationId());
                     physicalSlot.releasePayload(new FlinkException("Test exception"));
-
-                    assertThat(execution.getReleaseFuture().isDone(), is(true));
+                    assertThat(execution.getReleaseFuture().isDone()).isEqualTo(true);
                 });
     }
 

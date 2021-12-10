@@ -40,8 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.flink.api.common.typeinfo.BasicTypeInfo.STRING_TYPE_INFO;
 import static org.apache.flink.streaming.runtime.tasks.StreamTaskTest.createTask;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the StreamTask cancellation. */
 public class StreamTaskCancellationTest extends TestLogger {
@@ -71,7 +70,7 @@ public class StreamTaskCancellationTest extends TestLogger {
             thread.start();
             try {
                 getContainingTask().maybeInterruptOnCancel(thread, null, null);
-                assertFalse(thread.isInterrupted());
+                assertThat(thread.isInterrupted()).isFalse();
             } finally {
                 running.set(false);
             }
@@ -104,7 +103,7 @@ public class StreamTaskCancellationTest extends TestLogger {
             task.cancelExecution();
             task.getExecutingThread().join();
 
-            assertEquals(ExecutionState.CANCELED, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
         }
     }
 
@@ -222,7 +221,7 @@ public class StreamTaskCancellationTest extends TestLogger {
             task.startTaskThread();
             task.getExecutingThread().join();
 
-            assertEquals(ExecutionState.CANCELED, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
         }
     }
 

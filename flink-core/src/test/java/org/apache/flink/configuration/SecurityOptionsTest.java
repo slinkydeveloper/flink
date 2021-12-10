@@ -21,8 +21,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link SecurityOptions}. */
 public class SecurityOptionsTest extends TestLogger {
@@ -34,23 +33,23 @@ public class SecurityOptionsTest extends TestLogger {
         // backwards compatibility
         Configuration oldConf = new Configuration();
         oldConf.setBoolean(SecurityOptions.SSL_ENABLED, true);
-        assertTrue(SecurityOptions.isInternalSSLEnabled(oldConf));
-        assertTrue(SecurityOptions.isRestSSLEnabled(oldConf));
+        assertThat(SecurityOptions.isInternalSSLEnabled(oldConf)).isTrue();
+        assertThat(SecurityOptions.isRestSSLEnabled(oldConf)).isTrue();
 
         // new options take precedence
         Configuration newOptions = new Configuration();
         newOptions.setBoolean(SecurityOptions.SSL_INTERNAL_ENABLED, true);
         newOptions.setBoolean(SecurityOptions.SSL_REST_ENABLED, false);
-        assertTrue(SecurityOptions.isInternalSSLEnabled(newOptions));
-        assertFalse(SecurityOptions.isRestSSLEnabled(newOptions));
+        assertThat(SecurityOptions.isInternalSSLEnabled(newOptions)).isTrue();
+        assertThat(SecurityOptions.isRestSSLEnabled(newOptions)).isFalse();
 
         // new options take precedence
         Configuration precedence = new Configuration();
         precedence.setBoolean(SecurityOptions.SSL_ENABLED, true);
         precedence.setBoolean(SecurityOptions.SSL_INTERNAL_ENABLED, false);
         precedence.setBoolean(SecurityOptions.SSL_REST_ENABLED, false);
-        assertFalse(SecurityOptions.isInternalSSLEnabled(precedence));
-        assertFalse(SecurityOptions.isRestSSLEnabled(precedence));
+        assertThat(SecurityOptions.isInternalSSLEnabled(precedence)).isFalse();
+        assertThat(SecurityOptions.isRestSSLEnabled(precedence)).isFalse();
     }
 
     /**
@@ -63,16 +62,16 @@ public class SecurityOptionsTest extends TestLogger {
         Configuration noSSLOptions = new Configuration();
         noSSLOptions.setBoolean(SecurityOptions.SSL_REST_ENABLED, false);
         noSSLOptions.setBoolean(SecurityOptions.SSL_REST_AUTHENTICATION_ENABLED, true);
-        assertFalse(SecurityOptions.isRestSSLAuthenticationEnabled(noSSLOptions));
+        assertThat(SecurityOptions.isRestSSLAuthenticationEnabled(noSSLOptions)).isFalse();
 
         // authentication is disabled by default
         Configuration defaultOptions = new Configuration();
         defaultOptions.setBoolean(SecurityOptions.SSL_REST_ENABLED, true);
-        assertFalse(SecurityOptions.isRestSSLAuthenticationEnabled(defaultOptions));
+        assertThat(SecurityOptions.isRestSSLAuthenticationEnabled(defaultOptions)).isFalse();
 
         Configuration options = new Configuration();
         options.setBoolean(SecurityOptions.SSL_REST_ENABLED, true);
         options.setBoolean(SecurityOptions.SSL_REST_AUTHENTICATION_ENABLED, true);
-        assertTrue(SecurityOptions.isRestSSLAuthenticationEnabled(options));
+        assertThat(SecurityOptions.isRestSSLAuthenticationEnabled(options)).isTrue();
     }
 }

@@ -36,7 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests auxiliary shared services created by {@link JobManagerSharedServices} and used by the
@@ -137,7 +137,7 @@ public class JobManagerSharedServicesTest extends TestLogger {
 
         // the expected pool size latch should complete since we expect to have enough threads
         expectedPoolSizeLatch.await();
-        assertEquals(1, expectedPoolSizePlusOneLatch.getCount());
+        assertThat(expectedPoolSizePlusOneLatch.getCount()).isEqualTo(1);
 
         // unblock the runnables
         releaseLatch.trigger();

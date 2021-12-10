@@ -25,9 +25,7 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link FailureRateRestartBackoffTimeStrategy}. */
 public class FailureRateRestartBackoffTimeStrategyTest extends TestLogger {
@@ -46,11 +44,11 @@ public class FailureRateRestartBackoffTimeStrategyTest extends TestLogger {
 
         for (int failuresLeft = numFailures; failuresLeft > 0; failuresLeft--) {
             restartStrategy.notifyFailure(failure);
-            assertTrue(restartStrategy.canRestart());
+            assertThat(restartStrategy.canRestart()).isTrue();
             clock.advanceTime(intervalMS + 1, TimeUnit.MILLISECONDS);
         }
 
-        assertTrue(restartStrategy.canRestart());
+        assertThat(restartStrategy.canRestart()).isTrue();
     }
 
     @Test
@@ -64,11 +62,11 @@ public class FailureRateRestartBackoffTimeStrategyTest extends TestLogger {
 
         for (int failuresLeft = numFailures; failuresLeft > 0; failuresLeft--) {
             restartStrategy.notifyFailure(failure);
-            assertTrue(restartStrategy.canRestart());
+            assertThat(restartStrategy.canRestart()).isTrue();
         }
 
         restartStrategy.notifyFailure(failure);
-        assertFalse(restartStrategy.canRestart());
+        assertThat(restartStrategy.canRestart()).isFalse();
     }
 
     @Test
@@ -78,6 +76,6 @@ public class FailureRateRestartBackoffTimeStrategyTest extends TestLogger {
         final FailureRateRestartBackoffTimeStrategy restartStrategy =
                 new FailureRateRestartBackoffTimeStrategy(new ManualClock(), 1, 1, backoffTimeMS);
 
-        assertEquals(backoffTimeMS, restartStrategy.getBackoffTime());
+        assertThat(restartStrategy.getBackoffTime()).isEqualTo(backoffTimeMS);
     }
 }

@@ -24,7 +24,6 @@ import org.apache.flink.runtime.operators.testutils.DummyInvokable;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,8 +34,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the memory manager. */
 public class MemoryManagerTest extends TestLogger {
@@ -104,7 +103,7 @@ public class MemoryManagerTest extends TestLogger {
                     segments.addAll(this.memoryManager.allocatePages(mockInvoke, 2));
                 }
             } catch (MemoryAllocationException e) {
-                Assert.fail("Unable to allocate memory");
+                fail("Unable to allocate memory");
             }
 
             this.memoryManager.release(segments);
@@ -139,16 +138,16 @@ public class MemoryManagerTest extends TestLogger {
             for (int i = 0; i < numOwners; i++) {
                 this.memoryManager.releaseAll(owners[i]);
                 owners[i] = null;
-                Assert.assertTrue(
-                        "Released memory segments have not been destroyed.",
-                        allMemorySegmentsFreed(mems[i]));
+                assertThat(allMemorySegmentsFreed(mems[i]))
+                        .as("Released memory segments have not been destroyed.")
+                        .isTrue();
                 mems[i] = null;
 
                 // check that the owner owners were not affected
                 for (int k = i + 1; k < numOwners; k++) {
-                    Assert.assertTrue(
-                            "Non-released memory segments are accidentaly destroyed.",
-                            allMemorySegmentsValid(mems[k]));
+                    assertThat(allMemorySegmentsValid(mems[k]))
+                            .as("Non-released memory segments are accidentaly destroyed.")
+                            .isTrue();
                 }
             }
         } catch (Exception e) {
@@ -166,9 +165,9 @@ public class MemoryManagerTest extends TestLogger {
 
             testCannotAllocateAnymore(mockInvoke, 1);
 
-            Assert.assertTrue(
-                    "The previously allocated segments were not valid any more.",
-                    allMemorySegmentsValid(segs));
+            assertThat(allMemorySegmentsValid(segs))
+                    .as("The previously allocated segments were not valid any more.")
+                    .isTrue();
 
             this.memoryManager.releaseAll(mockInvoke);
         } catch (Exception e) {
@@ -292,7 +291,9 @@ public class MemoryManagerTest extends TestLogger {
         memoryManager.releaseMemory(owner, PAGE_SIZE);
         memoryManager.releaseMemory(owner, PAGE_SIZE);
         long heapMemoryLeft = memoryManager.availableMemory();
-        assertEquals("Memory leak happens", totalHeapMemorySize - PAGE_SIZE, heapMemoryLeft);
+        assertThat(heapMemoryLeft)
+                .as("Memory leak happens")
+                .isEqualTo(totalHeapMemorySize - PAGE_SIZE);
         memoryManager.releaseAllMemory(owner2);
     }
 
@@ -308,7 +309,9 @@ public class MemoryManagerTest extends TestLogger {
         memoryManager.reserveMemory(owner, PAGE_SIZE);
         memoryManager.releaseMemory(owner, PAGE_SIZE * 2);
         long heapMemoryLeft = memoryManager.availableMemory();
-        assertEquals("Memory leak happens", totalHeapMemorySize - PAGE_SIZE, heapMemoryLeft);
+        assertThat(heapMemoryLeft)
+                .as("Memory leak happens")
+                .isEqualTo(totalHeapMemorySize - PAGE_SIZE);
         memoryManager.releaseAllMemory(owner2);
     }
 
@@ -336,14 +339,12 @@ public class MemoryManagerTest extends TestLogger {
     @Test
     public void testComputeMemorySize() {
         double fraction = 0.6;
-        assertEquals(
-                (long) (memoryManager.getMemorySize() * fraction),
-                memoryManager.computeMemorySize(fraction));
+        assertThat(memoryManager.computeMemorySize(fraction))
+                .isEqualTo((long) (memoryManager.getMemorySize() * fraction));
 
         fraction = 1.0;
-        assertEquals(
-                (long) (memoryManager.getMemorySize() * fraction),
-                memoryManager.computeMemorySize(fraction));
+        assertThat(memoryManager.computeMemorySize(fraction))
+                .isEqualTo((long) (memoryManager.getMemorySize() * fraction));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -375,7 +376,7 @@ public class MemoryManagerTest extends TestLogger {
     private void testCannotAllocateAnymore(Object owner, int numPages) {
         try {
             memoryManager.allocatePages(owner, numPages);
-            Assert.fail(
+            fail(
                     "Expected MemoryAllocationException. "
                             + "We should not be able to allocate after allocating or(and) reserving all memory of a certain type.");
         } catch (MemoryAllocationException maex) {
@@ -386,7 +387,7 @@ public class MemoryManagerTest extends TestLogger {
     private void testCannotReserveAnymore(long size) {
         try {
             memoryManager.reserveMemory(new Object(), size);
-            Assert.fail(
+            fail(
                     "Expected MemoryAllocationException. "
                             + "We should not be able to any more memory after allocating or(and) reserving all memory of a certain type.");
         } catch (MemoryReservationException maex) {

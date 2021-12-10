@@ -32,8 +32,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test validates that the RPC service gives a good message when it cannot connect to an
@@ -64,10 +64,10 @@ public class RpcConnectionTest extends TestLogger {
             fail("should not fail with a generic timeout exception");
         } catch (ExecutionException e) {
             // that is what we want
-            assertTrue(e.getCause() instanceof RpcConnectionException);
-            assertTrue(
-                    "wrong error message",
-                    e.getCause().getMessage().contains("foo.bar.com.test.invalid"));
+            assertThat(e.getCause()).isInstanceOf(RpcConnectionException.class);
+            assertThat(e.getCause().getMessage().contains("foo.bar.com.test.invalid"))
+                    .as("wrong error message")
+                    .isTrue();
         } catch (Throwable t) {
             fail("wrong exception: " + t);
         } finally {

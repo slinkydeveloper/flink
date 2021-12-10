@@ -32,8 +32,7 @@ import org.junit.Test;
 import java.util.function.Consumer;
 
 import static org.apache.flink.runtime.scheduler.adaptive.WaitingForResourcesTest.assertNonNull;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link Failing} state of the {@link AdaptiveScheduler}. */
 public class FailingTest extends TestLogger {
@@ -47,7 +46,7 @@ public class FailingTest extends TestLogger {
 
             createFailingState(ctx, meg);
 
-            assertThat(meg.getState(), is(JobStatus.FAILING));
+            assertThat(meg.getState()).isEqualTo(JobStatus.FAILING);
             ctx.assertNoStateTransition();
         }
     }
@@ -59,7 +58,8 @@ public class FailingTest extends TestLogger {
             Failing failing = createFailingState(ctx, meg);
             ctx.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.FAILED));
             meg.completeTerminationFuture(JobStatus.FAILED);
         }
     }
@@ -81,7 +81,8 @@ public class FailingTest extends TestLogger {
             Failing failing = createFailingState(ctx, meg);
             ctx.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.SUSPENDED));
             failing.suspend(new RuntimeException("suspend"));
         }
     }
@@ -131,11 +132,11 @@ public class FailingTest extends TestLogger {
             meg.completeTerminationFuture(JobStatus.FAILED);
 
             // this is just a sanity check for the test
-            assertThat(meg.getState(), is(JobStatus.FAILED));
+            assertThat(meg.getState()).isEqualTo(JobStatus.FAILED);
 
-            assertThat(failing.getJobStatus(), is(JobStatus.FAILING));
-            assertThat(failing.getJob().getState(), is(JobStatus.FAILING));
-            assertThat(failing.getJob().getStatusTimestamp(JobStatus.FAILED), is(0L));
+            assertThat(failing.getJobStatus()).isEqualTo(JobStatus.FAILING);
+            assertThat(failing.getJob().getState()).isEqualTo(JobStatus.FAILING);
+            assertThat(failing.getJob().getStatusTimestamp(JobStatus.FAILED)).isEqualTo(0L);
         }
     }
 

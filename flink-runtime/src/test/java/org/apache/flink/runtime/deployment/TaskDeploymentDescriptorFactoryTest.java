@@ -51,7 +51,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TaskDeploymentDescriptorFactory}. */
 public class TaskDeploymentDescriptorFactoryTest extends TestLogger {
@@ -85,14 +85,14 @@ public class TaskDeploymentDescriptorFactoryTest extends TestLogger {
                 deserializeShuffleDescriptors(maybeOffloaded, jobId, blobWriter);
 
         // Check if the ShuffleDescriptors are cached correctly
-        assertEquals(ev21.getConsumedPartitionGroup(0).size(), cachedShuffleDescriptors.length);
+        assertThat(cachedShuffleDescriptors.length)
+                .isEqualTo(ev21.getConsumedPartitionGroup(0).size());
 
         int idx = 0;
         for (IntermediateResultPartitionID consumedPartitionId :
                 ev21.getConsumedPartitionGroup(0)) {
-            assertEquals(
-                    consumedPartitionId,
-                    cachedShuffleDescriptors[idx++].getResultPartitionID().getPartitionId());
+            assertThat(cachedShuffleDescriptors[idx++].getResultPartitionID().getPartitionId())
+                    .isEqualTo(consumedPartitionId);
         }
     }
 

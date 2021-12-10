@@ -62,14 +62,8 @@ import java.util.stream.Collectors;
 import static org.apache.flink.configuration.GlobalConfiguration.FLINK_CONF_FILENAME;
 import static org.apache.flink.kubernetes.utils.Constants.CONFIG_FILE_LOG4J_NAME;
 import static org.apache.flink.kubernetes.utils.Constants.CONFIG_FILE_LOGBACK_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** General tests for the {@link KubernetesJobManagerFactory}. */
 public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBase {
@@ -131,20 +125,18 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                 KubernetesJobManagerFactory.buildKubernetesJobManagerSpecification(
                         flinkPod, kubernetesJobManagerParameters);
         final Deployment resultDeployment = this.kubernetesJobManagerSpecification.getDeployment();
-        assertEquals(Constants.APPS_API_VERSION, resultDeployment.getApiVersion());
-        assertEquals(
-                KubernetesUtils.getDeploymentName(CLUSTER_ID),
-                resultDeployment.getMetadata().getName());
+        assertThat(resultDeployment.getApiVersion()).isEqualTo(Constants.APPS_API_VERSION);
+        assertThat(resultDeployment.getMetadata().getName())
+                .isEqualTo(KubernetesUtils.getDeploymentName(CLUSTER_ID));
         final Map<String, String> expectedLabels = getCommonLabels();
         expectedLabels.put(Constants.LABEL_COMPONENT_KEY, Constants.LABEL_COMPONENT_JOB_MANAGER);
         expectedLabels.putAll(userLabels);
-        assertEquals(expectedLabels, resultDeployment.getMetadata().getLabels());
+        assertThat(resultDeployment.getMetadata().getLabels()).isEqualTo(expectedLabels);
 
-        assertThat(resultDeployment.getMetadata().getAnnotations(), equalTo(userAnnotations));
+        assertThat(resultDeployment.getMetadata().getAnnotations()).isEqualTo(userAnnotations);
 
-        assertThat(
-                resultDeployment.getMetadata().getOwnerReferences(),
-                Matchers.containsInAnyOrder(OWNER_REFERENCES.toArray()));
+        assertThat(resultDeployment.getMetadata().getOwnerReferences())
+                .satisfies(matching(Matchers.containsInAnyOrder(OWNER_REFERENCES.toArray())));
     }
 
     @Test
@@ -155,21 +147,21 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
 
         final DeploymentSpec resultDeploymentSpec =
                 this.kubernetesJobManagerSpecification.getDeployment().getSpec();
-        assertEquals(1, resultDeploymentSpec.getReplicas().intValue());
+        assertThat(resultDeploymentSpec.getReplicas().intValue()).isEqualTo(1);
 
         final Map<String, String> expectedLabels = new HashMap<>(getCommonLabels());
         expectedLabels.put(Constants.LABEL_COMPONENT_KEY, Constants.LABEL_COMPONENT_JOB_MANAGER);
 
-        assertEquals(expectedLabels, resultDeploymentSpec.getSelector().getMatchLabels());
+        assertThat(resultDeploymentSpec.getSelector().getMatchLabels()).isEqualTo(expectedLabels);
 
         expectedLabels.putAll(userLabels);
-        assertEquals(expectedLabels, resultDeploymentSpec.getTemplate().getMetadata().getLabels());
+        assertThat(resultDeploymentSpec.getTemplate().getMetadata().getLabels())
+                .isEqualTo(expectedLabels);
 
-        assertThat(
-                resultDeploymentSpec.getTemplate().getMetadata().getAnnotations(),
-                equalTo(userAnnotations));
+        assertThat(resultDeploymentSpec.getTemplate().getMetadata().getAnnotations())
+                .isEqualTo(userAnnotations);
 
-        assertNotNull(resultDeploymentSpec.getTemplate().getSpec());
+        assertThat(resultDeploymentSpec.getTemplate().getSpec()).isNotNull();
     }
 
     @Test
@@ -185,32 +177,34 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                         .getTemplate()
                         .getSpec();
 
-        assertEquals(1, resultPodSpec.getContainers().size());
-        assertEquals(SERVICE_ACCOUNT_NAME, resultPodSpec.getServiceAccountName());
-        assertEquals(3, resultPodSpec.getVolumes().size());
+        assertThat(resultPodSpec.getContainers().size()).isEqualTo(1);
+        assertThat(resultPodSpec.getServiceAccountName()).isEqualTo(SERVICE_ACCOUNT_NAME);
+        assertThat(resultPodSpec.getVolumes().size()).isEqualTo(3);
 
         final Container resultedMainContainer = resultPodSpec.getContainers().get(0);
-        assertEquals(Constants.MAIN_CONTAINER_NAME, resultedMainContainer.getName());
-        assertEquals(CONTAINER_IMAGE, resultedMainContainer.getImage());
-        assertEquals(
-                CONTAINER_IMAGE_PULL_POLICY.name(), resultedMainContainer.getImagePullPolicy());
+        assertThat(resultedMainContainer.getName()).isEqualTo(Constants.MAIN_CONTAINER_NAME);
+        assertThat(resultedMainContainer.getImage()).isEqualTo(CONTAINER_IMAGE);
+        assertThat(resultedMainContainer.getImagePullPolicy())
+                .isEqualTo(CONTAINER_IMAGE_PULL_POLICY.name());
 
-        assertEquals(3, resultedMainContainer.getEnv().size());
-        assertTrue(
-                resultedMainContainer.getEnv().stream()
-                        .anyMatch(envVar -> envVar.getName().equals("key1")));
+        assertThat(resultedMainContainer.getEnv().size()).isEqualTo(3);
+        assertThat(
+                        resultedMainContainer.getEnv().stream()
+                                .anyMatch(envVar -> envVar.getName().equals("key1")))
+                .isTrue();
 
-        assertEquals(3, resultedMainContainer.getPorts().size());
+        assertThat(resultedMainContainer.getPorts().size()).isEqualTo(3);
 
         final Map<String, Quantity> requests = resultedMainContainer.getResources().getRequests();
-        assertEquals(Double.toString(JOB_MANAGER_CPU), requests.get("cpu").getAmount());
-        assertEquals(String.valueOf(JOB_MANAGER_MEMORY), requests.get("memory").getAmount());
+        assertThat(requests.get("cpu").getAmount()).isEqualTo(Double.toString(JOB_MANAGER_CPU));
+        assertThat(requests.get("memory").getAmount())
+                .isEqualTo(String.valueOf(JOB_MANAGER_MEMORY));
 
-        assertEquals(1, resultedMainContainer.getCommand().size());
+        assertThat(resultedMainContainer.getCommand().size()).isEqualTo(1);
         // The args list is [bash, -c, 'java -classpath $FLINK_CLASSPATH ...'].
-        assertEquals(3, resultedMainContainer.getArgs().size());
+        assertThat(resultedMainContainer.getArgs().size()).isEqualTo(3);
 
-        assertEquals(3, resultedMainContainer.getVolumeMounts().size());
+        assertThat(resultedMainContainer.getVolumeMounts().size()).isEqualTo(3);
     }
 
     @Test
@@ -221,25 +215,25 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
 
         final List<HasMetadata> resultAdditionalResources =
                 this.kubernetesJobManagerSpecification.getAccompanyingResources();
-        assertEquals(5, resultAdditionalResources.size());
+        assertThat(resultAdditionalResources.size()).isEqualTo(5);
 
         final List<HasMetadata> resultServices =
                 resultAdditionalResources.stream()
                         .filter(x -> x instanceof Service)
                         .collect(Collectors.toList());
-        assertEquals(2, resultServices.size());
+        assertThat(resultServices.size()).isEqualTo(2);
 
         final List<HasMetadata> resultConfigMaps =
                 resultAdditionalResources.stream()
                         .filter(x -> x instanceof ConfigMap)
                         .collect(Collectors.toList());
-        assertEquals(2, resultConfigMaps.size());
+        assertThat(resultConfigMaps.size()).isEqualTo(2);
 
         final List<HasMetadata> resultSecrets =
                 resultAdditionalResources.stream()
                         .filter(x -> x instanceof Secret)
                         .collect(Collectors.toList());
-        assertEquals(1, resultSecrets.size());
+        assertThat(resultSecrets.size()).isEqualTo(1);
     }
 
     @Test
@@ -254,7 +248,7 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                         .map(x -> (Service) x)
                         .collect(Collectors.toList());
 
-        assertEquals(2, resultServices.size());
+        assertThat(resultServices.size()).isEqualTo(2);
 
         final List<Service> internalServiceCandidates =
                 resultServices.stream()
@@ -267,7 +261,7 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                                                                 .getInternalServiceName(
                                                                         CLUSTER_ID)))
                         .collect(Collectors.toList());
-        assertEquals(1, internalServiceCandidates.size());
+        assertThat(internalServiceCandidates.size()).isEqualTo(1);
 
         final List<Service> restServiceCandidates =
                 resultServices.stream()
@@ -280,24 +274,23 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                                                                 .getExternalServiceName(
                                                                         CLUSTER_ID)))
                         .collect(Collectors.toList());
-        assertEquals(1, restServiceCandidates.size());
+        assertThat(restServiceCandidates.size()).isEqualTo(1);
 
         final Service resultInternalService = internalServiceCandidates.get(0);
-        assertEquals(2, resultInternalService.getMetadata().getLabels().size());
+        assertThat(resultInternalService.getMetadata().getLabels().size()).isEqualTo(2);
 
-        assertNull(resultInternalService.getSpec().getType());
-        assertEquals(
-                Constants.HEADLESS_SERVICE_CLUSTER_IP,
-                resultInternalService.getSpec().getClusterIP());
-        assertEquals(2, resultInternalService.getSpec().getPorts().size());
-        assertEquals(3, resultInternalService.getSpec().getSelector().size());
+        assertThat(resultInternalService.getSpec().getType()).isNull();
+        assertThat(resultInternalService.getSpec().getClusterIP())
+                .isEqualTo(Constants.HEADLESS_SERVICE_CLUSTER_IP);
+        assertThat(resultInternalService.getSpec().getPorts().size()).isEqualTo(2);
+        assertThat(resultInternalService.getSpec().getSelector().size()).isEqualTo(3);
 
         final Service resultRestService = restServiceCandidates.get(0);
-        assertEquals(2, resultRestService.getMetadata().getLabels().size());
+        assertThat(resultRestService.getMetadata().getLabels().size()).isEqualTo(2);
 
-        assertEquals("ClusterIP", resultRestService.getSpec().getType());
-        assertEquals(1, resultRestService.getSpec().getPorts().size());
-        assertEquals(3, resultRestService.getSpec().getSelector().size());
+        assertThat(resultRestService.getSpec().getType()).isEqualTo("ClusterIP");
+        assertThat(resultRestService.getSpec().getPorts().size()).isEqualTo(1);
+        assertThat(resultRestService.getSpec().getSelector().size()).isEqualTo(3);
     }
 
     @Test
@@ -321,15 +314,14 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                                 .collect(Collectors.toList())
                                 .get(0);
 
-        assertEquals(Constants.API_VERSION, resultConfigMap.getApiVersion());
+        assertThat(resultConfigMap.getApiVersion()).isEqualTo(Constants.API_VERSION);
 
-        assertEquals(
-                KerberosMountDecorator.getKerberosKrb5confConfigMapName(CLUSTER_ID),
-                resultConfigMap.getMetadata().getName());
+        assertThat(resultConfigMap.getMetadata().getName())
+                .isEqualTo(KerberosMountDecorator.getKerberosKrb5confConfigMapName(CLUSTER_ID));
 
         final Map<String, String> resultDatas = resultConfigMap.getData();
-        assertEquals(1, resultDatas.size());
-        assertEquals("some conf", resultDatas.get(KRB5_CONF_FILE));
+        assertThat(resultDatas.size()).isEqualTo(1);
+        assertThat(resultDatas.get(KRB5_CONF_FILE)).isEqualTo("some conf");
     }
 
     @Test
@@ -354,10 +346,9 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                                 .get(0);
 
         final Map<String, String> resultDatas = resultSecret.getData();
-        assertEquals(1, resultDatas.size());
-        assertEquals(
-                Base64.getEncoder().encodeToString("some keytab".getBytes()),
-                resultDatas.get(KEYTAB_FILE));
+        assertThat(resultDatas.size()).isEqualTo(1);
+        assertThat(resultDatas.get(KEYTAB_FILE))
+                .isEqualTo(Base64.getEncoder().encodeToString("some keytab".getBytes()));
     }
 
     @Test
@@ -381,19 +372,20 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                                 .collect(Collectors.toList())
                                 .get(0);
 
-        assertEquals(2, resultConfigMap.getMetadata().getLabels().size());
+        assertThat(resultConfigMap.getMetadata().getLabels().size()).isEqualTo(2);
 
         final Map<String, String> resultDatas = resultConfigMap.getData();
-        assertEquals(3, resultDatas.size());
-        assertEquals("some data", resultDatas.get(CONFIG_FILE_LOG4J_NAME));
-        assertEquals("some data", resultDatas.get(CONFIG_FILE_LOGBACK_NAME));
-        assertTrue(
-                resultDatas
-                        .get(FLINK_CONF_FILENAME)
-                        .contains(
-                                KubernetesConfigOptionsInternal.ENTRY_POINT_CLASS.key()
-                                        + ": "
-                                        + ENTRY_POINT_CLASS));
+        assertThat(resultDatas.size()).isEqualTo(3);
+        assertThat(resultDatas.get(CONFIG_FILE_LOG4J_NAME)).isEqualTo("some data");
+        assertThat(resultDatas.get(CONFIG_FILE_LOGBACK_NAME)).isEqualTo("some data");
+        assertThat(
+                        resultDatas
+                                .get(FLINK_CONF_FILENAME)
+                                .contains(
+                                        KubernetesConfigOptionsInternal.ENTRY_POINT_CLASS.key()
+                                                + ": "
+                                                + ENTRY_POINT_CLASS))
+                .isTrue();
     }
 
     @Test
@@ -404,26 +396,28 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                 KubernetesJobManagerFactory.buildKubernetesJobManagerSpecification(
                         flinkPod, kubernetesJobManagerParameters);
 
-        assertFalse(
-                kubernetesJobManagerSpecification.getAccompanyingResources().stream()
-                        .anyMatch(
-                                resource ->
-                                        resource.getMetadata()
-                                                .getName()
-                                                .equals(
-                                                        HadoopConfMountDecorator
-                                                                .getHadoopConfConfigMapName(
-                                                                        CLUSTER_ID))));
+        assertThat(
+                        kubernetesJobManagerSpecification.getAccompanyingResources().stream()
+                                .anyMatch(
+                                        resource ->
+                                                resource.getMetadata()
+                                                        .getName()
+                                                        .equals(
+                                                                HadoopConfMountDecorator
+                                                                        .getHadoopConfConfigMapName(
+                                                                                CLUSTER_ID))))
+                .isFalse();
 
         final PodSpec podSpec =
                 kubernetesJobManagerSpecification.getDeployment().getSpec().getTemplate().getSpec();
-        assertTrue(
-                podSpec.getVolumes().stream()
-                        .anyMatch(
-                                volume ->
-                                        volume.getConfigMap()
-                                                .getName()
-                                                .equals(EXISTING_HADOOP_CONF_CONFIG_MAP)));
+        assertThat(
+                        podSpec.getVolumes().stream()
+                                .anyMatch(
+                                        volume ->
+                                                volume.getConfigMap()
+                                                        .getName()
+                                                        .equals(EXISTING_HADOOP_CONF_CONFIG_MAP)))
+                .isTrue();
     }
 
     @Test
@@ -449,12 +443,12 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                                 .collect(Collectors.toList())
                                 .get(0);
 
-        assertEquals(2, resultConfigMap.getMetadata().getLabels().size());
+        assertThat(resultConfigMap.getMetadata().getLabels().size()).isEqualTo(2);
 
         final Map<String, String> resultDatas = resultConfigMap.getData();
-        assertEquals(2, resultDatas.size());
-        assertEquals("some data", resultDatas.get("core-site.xml"));
-        assertEquals("some data", resultDatas.get("hdfs-site.xml"));
+        assertThat(resultDatas.size()).isEqualTo(2);
+        assertThat(resultDatas.get("core-site.xml")).isEqualTo("some data");
+        assertThat(resultDatas.get("hdfs-site.xml")).isEqualTo("some data");
     }
 
     @Test
@@ -464,16 +458,17 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
                 KubernetesJobManagerFactory.buildKubernetesJobManagerSpecification(
                         flinkPod, kubernetesJobManagerParameters);
 
-        assertFalse(
-                kubernetesJobManagerSpecification.getAccompanyingResources().stream()
-                        .anyMatch(
-                                resource ->
-                                        resource.getMetadata()
-                                                .getName()
-                                                .equals(
-                                                        HadoopConfMountDecorator
-                                                                .getHadoopConfConfigMapName(
-                                                                        CLUSTER_ID))));
+        assertThat(
+                        kubernetesJobManagerSpecification.getAccompanyingResources().stream()
+                                .anyMatch(
+                                        resource ->
+                                                resource.getMetadata()
+                                                        .getName()
+                                                        .equals(
+                                                                HadoopConfMountDecorator
+                                                                        .getHadoopConfConfigMapName(
+                                                                                CLUSTER_ID))))
+                .isFalse();
     }
 
     @Test
@@ -486,8 +481,7 @@ public class KubernetesJobManagerFactoryTest extends KubernetesJobManagerTestBas
         kubernetesJobManagerSpecification =
                 KubernetesJobManagerFactory.buildKubernetesJobManagerSpecification(
                         flinkPod, kubernetesJobManagerParameters);
-        assertThat(
-                kubernetesJobManagerSpecification.getDeployment().getSpec().getReplicas(),
-                is(JOBMANAGER_REPLICAS));
+        assertThat(kubernetesJobManagerSpecification.getDeployment().getSpec().getReplicas())
+                .isEqualTo(JOBMANAGER_REPLICAS);
     }
 }

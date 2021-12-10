@@ -34,10 +34,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test cases for the {@link RestServerEndpoint}. */
 public class RestServerEndpointTest extends TestLogger {
@@ -69,16 +67,16 @@ public class RestServerEndpointTest extends TestLogger {
                 handlerUrls,
                 new RestServerEndpoint.RestHandlerUrlComparator.CaseInsensitiveOrderComparator());
 
-        assertEquals(expected, handlerUrls);
+        assertThat(handlerUrls).isEqualTo(expected);
     }
 
     @Test
     public void testCreateUploadDir() throws Exception {
         final File file = temporaryFolder.newFolder();
         final Path testUploadDir = file.toPath().resolve("testUploadDir");
-        assertFalse(Files.exists(testUploadDir));
+        assertThat(Files.exists(testUploadDir)).isFalse();
         RestServerEndpoint.createUploadDir(testUploadDir, NOPLogger.NOP_LOGGER, true);
-        assertTrue(Files.exists(testUploadDir));
+        assertThat(Files.exists(testUploadDir)).isTrue();
     }
 
     @Test
@@ -87,7 +85,7 @@ public class RestServerEndpointTest extends TestLogger {
         Assume.assumeTrue(file.setWritable(false));
 
         final Path testUploadDir = file.toPath().resolve("testUploadDir");
-        assertFalse(Files.exists(testUploadDir));
+        assertThat(Files.exists(testUploadDir)).isFalse();
         try {
             RestServerEndpoint.createUploadDir(testUploadDir, NOPLogger.NOP_LOGGER, true);
             fail("Expected exception not thrown.");

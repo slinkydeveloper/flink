@@ -33,12 +33,11 @@ import org.apache.flink.types.IntValue;
 import org.apache.flink.types.LongValue;
 import org.apache.flink.types.StringValue;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GlobalPropertiesFilteringTest {
 
@@ -76,10 +75,10 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(semProps, 0);
 
-        assertEquals(PartitioningProperty.RANDOM_PARTITIONED, result.getPartitioning());
-        assertNull(result.getPartitioningFields());
-        assertNull(result.getPartitioningOrdering());
-        assertNull(result.getUniqueFieldCombination());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANDOM_PARTITIONED);
+        assertThat(result.getPartitioningFields()).isNull();
+        assertThat(result.getPartitioningOrdering()).isNull();
+        assertThat(result.getUniqueFieldCombination()).isNull();
     }
 
     @Test
@@ -96,10 +95,10 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(semProps, 0);
 
-        assertEquals(PartitioningProperty.RANDOM_PARTITIONED, result.getPartitioning());
-        assertNull(result.getPartitioningFields());
-        assertNull(result.getPartitioningOrdering());
-        assertNull(result.getUniqueFieldCombination());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANDOM_PARTITIONED);
+        assertThat(result.getPartitioningFields()).isNull();
+        assertThat(result.getPartitioningOrdering()).isNull();
+        assertThat(result.getUniqueFieldCombination()).isNull();
     }
 
     @Test
@@ -114,12 +113,12 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.HASH_PARTITIONED, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.HASH_PARTITIONED);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(3, pFields.size());
-        assertTrue(pFields.contains(0));
-        assertTrue(pFields.contains(1));
-        assertTrue(pFields.contains(4));
+        assertThat(pFields.size()).isEqualTo(3);
+        assertThat(pFields.contains(0)).isTrue();
+        assertThat(pFields.contains(1)).isTrue();
+        assertThat(pFields.contains(4)).isTrue();
     }
 
     @Test
@@ -134,12 +133,12 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.HASH_PARTITIONED, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.HASH_PARTITIONED);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(3, pFields.size());
-        assertTrue(pFields.contains(1));
-        assertTrue(pFields.contains(2));
-        assertTrue(pFields.contains(3));
+        assertThat(pFields.size()).isEqualTo(3);
+        assertThat(pFields.contains(1)).isTrue();
+        assertThat(pFields.contains(2)).isTrue();
+        assertThat(pFields.contains(3)).isTrue();
     }
 
     @Test
@@ -154,8 +153,8 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.RANDOM_PARTITIONED, result.getPartitioning());
-        assertNull(result.getPartitioningFields());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANDOM_PARTITIONED);
+        assertThat(result.getPartitioningFields()).isNull();
     }
 
     @Test
@@ -170,12 +169,12 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.ANY_PARTITIONING, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.ANY_PARTITIONING);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(3, pFields.size());
-        assertTrue(pFields.contains(0));
-        assertTrue(pFields.contains(1));
-        assertTrue(pFields.contains(4));
+        assertThat(pFields.size()).isEqualTo(3);
+        assertThat(pFields.contains(0)).isTrue();
+        assertThat(pFields.contains(1)).isTrue();
+        assertThat(pFields.contains(4)).isTrue();
     }
 
     @Test
@@ -190,12 +189,12 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.ANY_PARTITIONING, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.ANY_PARTITIONING);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(3, pFields.size());
-        assertTrue(pFields.contains(1));
-        assertTrue(pFields.contains(2));
-        assertTrue(pFields.contains(3));
+        assertThat(pFields.size()).isEqualTo(3);
+        assertThat(pFields.contains(1)).isTrue();
+        assertThat(pFields.contains(2)).isTrue();
+        assertThat(pFields.contains(3)).isTrue();
     }
 
     @Test
@@ -210,8 +209,8 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.RANDOM_PARTITIONED, result.getPartitioning());
-        assertNull(result.getPartitioningFields());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANDOM_PARTITIONED);
+        assertThat(result.getPartitioningFields()).isNull();
     }
 
     @Test
@@ -227,12 +226,12 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.CUSTOM_PARTITIONING, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.CUSTOM_PARTITIONING);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(2, pFields.size());
-        assertTrue(pFields.contains(0));
-        assertTrue(pFields.contains(4));
-        assertEquals(myP, result.getCustomPartitioner());
+        assertThat(pFields.size()).isEqualTo(2);
+        assertThat(pFields.contains(0)).isTrue();
+        assertThat(pFields.contains(4)).isTrue();
+        assertThat(result.getCustomPartitioner()).isEqualTo(myP);
     }
 
     @Test
@@ -248,12 +247,12 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.CUSTOM_PARTITIONING, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.CUSTOM_PARTITIONING);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(2, pFields.size());
-        assertTrue(pFields.contains(1));
-        assertTrue(pFields.contains(3));
-        assertEquals(myP, result.getCustomPartitioner());
+        assertThat(pFields.size()).isEqualTo(2);
+        assertThat(pFields.contains(1)).isTrue();
+        assertThat(pFields.contains(3)).isTrue();
+        assertThat(result.getCustomPartitioner()).isEqualTo(myP);
     }
 
     @Test
@@ -269,9 +268,9 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.RANDOM_PARTITIONED, result.getPartitioning());
-        assertNull(result.getPartitioningFields());
-        assertNull(result.getCustomPartitioner());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANDOM_PARTITIONED);
+        assertThat(result.getPartitioningFields()).isNull();
+        assertThat(result.getCustomPartitioner()).isNull();
     }
 
     @Test
@@ -290,23 +289,23 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.RANGE_PARTITIONED, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANGE_PARTITIONED);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(3, pFields.size());
-        assertEquals(1, pFields.get(0).intValue());
-        assertEquals(5, pFields.get(1).intValue());
-        assertEquals(2, pFields.get(2).intValue());
+        assertThat(pFields.size()).isEqualTo(3);
+        assertThat(pFields.get(0).intValue()).isEqualTo(1);
+        assertThat(pFields.get(1).intValue()).isEqualTo(5);
+        assertThat(pFields.get(2).intValue()).isEqualTo(2);
         Ordering pOrder = result.getPartitioningOrdering();
-        assertEquals(3, pOrder.getNumberOfFields());
-        assertEquals(1, pOrder.getFieldNumber(0).intValue());
-        assertEquals(5, pOrder.getFieldNumber(1).intValue());
-        assertEquals(2, pOrder.getFieldNumber(2).intValue());
-        assertEquals(Order.ASCENDING, pOrder.getOrder(0));
-        assertEquals(Order.DESCENDING, pOrder.getOrder(1));
-        assertEquals(Order.ASCENDING, pOrder.getOrder(2));
-        assertEquals(IntValue.class, pOrder.getType(0));
-        assertEquals(LongValue.class, pOrder.getType(1));
-        assertEquals(StringValue.class, pOrder.getType(2));
+        assertThat(pOrder.getNumberOfFields()).isEqualTo(3);
+        assertThat(pOrder.getFieldNumber(0).intValue()).isEqualTo(1);
+        assertThat(pOrder.getFieldNumber(1).intValue()).isEqualTo(5);
+        assertThat(pOrder.getFieldNumber(2).intValue()).isEqualTo(2);
+        assertThat(pOrder.getOrder(0)).isEqualTo(Order.ASCENDING);
+        assertThat(pOrder.getOrder(1)).isEqualTo(Order.DESCENDING);
+        assertThat(pOrder.getOrder(2)).isEqualTo(Order.ASCENDING);
+        assertThat(pOrder.getType(0)).isEqualTo(IntValue.class);
+        assertThat(pOrder.getType(1)).isEqualTo(LongValue.class);
+        assertThat(pOrder.getType(2)).isEqualTo(StringValue.class);
     }
 
     @Test
@@ -325,23 +324,23 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.RANGE_PARTITIONED, result.getPartitioning());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANGE_PARTITIONED);
         FieldList pFields = result.getPartitioningFields();
-        assertEquals(3, pFields.size());
-        assertEquals(3, pFields.get(0).intValue());
-        assertEquals(1, pFields.get(1).intValue());
-        assertEquals(0, pFields.get(2).intValue());
+        assertThat(pFields.size()).isEqualTo(3);
+        assertThat(pFields.get(0).intValue()).isEqualTo(3);
+        assertThat(pFields.get(1).intValue()).isEqualTo(1);
+        assertThat(pFields.get(2).intValue()).isEqualTo(0);
         Ordering pOrder = result.getPartitioningOrdering();
-        assertEquals(3, pOrder.getNumberOfFields());
-        assertEquals(3, pOrder.getFieldNumber(0).intValue());
-        assertEquals(1, pOrder.getFieldNumber(1).intValue());
-        assertEquals(0, pOrder.getFieldNumber(2).intValue());
-        assertEquals(Order.ASCENDING, pOrder.getOrder(0));
-        assertEquals(Order.DESCENDING, pOrder.getOrder(1));
-        assertEquals(Order.ASCENDING, pOrder.getOrder(2));
-        assertEquals(IntValue.class, pOrder.getType(0));
-        assertEquals(LongValue.class, pOrder.getType(1));
-        assertEquals(StringValue.class, pOrder.getType(2));
+        assertThat(pOrder.getNumberOfFields()).isEqualTo(3);
+        assertThat(pOrder.getFieldNumber(0).intValue()).isEqualTo(3);
+        assertThat(pOrder.getFieldNumber(1).intValue()).isEqualTo(1);
+        assertThat(pOrder.getFieldNumber(2).intValue()).isEqualTo(0);
+        assertThat(pOrder.getOrder(0)).isEqualTo(Order.ASCENDING);
+        assertThat(pOrder.getOrder(1)).isEqualTo(Order.DESCENDING);
+        assertThat(pOrder.getOrder(2)).isEqualTo(Order.ASCENDING);
+        assertThat(pOrder.getType(0)).isEqualTo(IntValue.class);
+        assertThat(pOrder.getType(1)).isEqualTo(LongValue.class);
+        assertThat(pOrder.getType(2)).isEqualTo(StringValue.class);
     }
 
     @Test
@@ -360,9 +359,9 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.RANDOM_PARTITIONED, result.getPartitioning());
-        assertNull(result.getPartitioningOrdering());
-        assertNull(result.getPartitioningFields());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.RANDOM_PARTITIONED);
+        assertThat(result.getPartitioningOrdering()).isNull();
+        assertThat(result.getPartitioningFields()).isNull();
     }
 
     @Test
@@ -377,8 +376,8 @@ public class GlobalPropertiesFilteringTest {
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
 
-        assertEquals(PartitioningProperty.FORCED_REBALANCED, result.getPartitioning());
-        assertNull(result.getPartitioningFields());
+        assertThat(result.getPartitioning()).isEqualTo(PartitioningProperty.FORCED_REBALANCED);
+        assertThat(result.getPartitioningFields()).isNull();
     }
 
     @Test
@@ -400,9 +399,9 @@ public class GlobalPropertiesFilteringTest {
         FieldSet expected1 = new FieldSet(0, 1, 2);
         FieldSet expected2 = new FieldSet(3, 4);
 
-        Assert.assertTrue(unique.size() == 2);
-        Assert.assertTrue(unique.contains(expected1));
-        Assert.assertTrue(unique.contains(expected2));
+        assertThat(unique.size() == 2).isTrue();
+        assertThat(unique.contains(expected1)).isTrue();
+        assertThat(unique.contains(expected2)).isTrue();
     }
 
     @Test
@@ -424,9 +423,9 @@ public class GlobalPropertiesFilteringTest {
         FieldSet expected1 = new FieldSet(1, 2, 5);
         FieldSet expected2 = new FieldSet(4, 6);
 
-        Assert.assertTrue(unique.size() == 2);
-        Assert.assertTrue(unique.contains(expected1));
-        Assert.assertTrue(unique.contains(expected2));
+        assertThat(unique.size() == 2).isTrue();
+        assertThat(unique.contains(expected1)).isTrue();
+        assertThat(unique.contains(expected2)).isTrue();
     }
 
     @Test
@@ -444,7 +443,7 @@ public class GlobalPropertiesFilteringTest {
         gprops.addUniqueFieldCombination(set3);
 
         GlobalProperties result = gprops.filterBySemanticProperties(sprops, 0);
-        Assert.assertNull(result.getUniqueFieldCombination());
+        assertThat(result.getUniqueFieldCombination()).isNull();
     }
 
     @Test(expected = IndexOutOfBoundsException.class)

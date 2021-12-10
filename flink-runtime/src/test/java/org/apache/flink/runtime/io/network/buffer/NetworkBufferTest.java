@@ -22,17 +22,12 @@ import org.apache.flink.core.memory.MemorySegment;
 import org.apache.flink.core.memory.MemorySegmentFactory;
 import org.apache.flink.runtime.io.network.netty.NettyBufferPool;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link NetworkBuffer} class. */
 public class NetworkBufferTest extends AbstractByteBufTest {
@@ -84,20 +79,20 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         buffer.capacity(length);
         buffer.setAllocator(NETTY_BUFFER_POOL);
 
-        assertSame(ByteOrder.BIG_ENDIAN, buffer.order());
-        assertEquals(0, buffer.readerIndex());
-        assertEquals(0, buffer.writerIndex());
+        assertThat(buffer.order()).isSameAs(ByteOrder.BIG_ENDIAN);
+        assertThat(buffer.readerIndex()).isEqualTo(0);
+        assertThat(buffer.writerIndex()).isEqualTo(0);
         return buffer;
     }
 
     @Test
     public void testDataBufferIsBuffer() {
-        assertFalse(newBuffer(1024, 1024, false).isBuffer());
+        assertThat(newBuffer(1024, 1024, false).isBuffer()).isFalse();
     }
 
     @Test
     public void testEventBufferIsBuffer() {
-        assertFalse(newBuffer(1024, 1024, false).isBuffer());
+        assertThat(newBuffer(1024, 1024, false).isBuffer()).isFalse();
     }
 
     @Test
@@ -113,7 +108,7 @@ public class NetworkBufferTest extends AbstractByteBufTest {
     private static void testTagAsEvent(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
         buffer.setDataType(Buffer.DataType.EVENT_BUFFER);
-        assertFalse(buffer.isBuffer());
+        assertThat(buffer.isBuffer()).isFalse();
     }
 
     @Test
@@ -131,7 +126,7 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         Buffer.DataType dataType =
                 isBuffer ? Buffer.DataType.DATA_BUFFER : Buffer.DataType.EVENT_BUFFER;
         NetworkBuffer buffer = new NetworkBuffer(segment, FreeingBufferRecycler.INSTANCE, dataType);
-        assertSame(segment, buffer.getMemorySegment());
+        assertThat(buffer.getMemorySegment()).isSameAs(segment);
     }
 
     @Test
@@ -148,7 +143,7 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         BufferRecycler recycler = MemorySegment::free;
 
         NetworkBuffer dataBuffer = newBuffer(1024, 1024, isBuffer, recycler);
-        assertSame(recycler, dataBuffer.getRecycler());
+        assertThat(dataBuffer.getRecycler()).isSameAs(recycler);
     }
 
     @Test
@@ -167,10 +162,10 @@ public class NetworkBufferTest extends AbstractByteBufTest {
      */
     private static void testRecycleBuffer(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
-        assertFalse(buffer.isRecycled());
+        assertThat(buffer.isRecycled()).isFalse();
         buffer.recycleBuffer();
-        assertTrue(buffer.isRecycled());
-        assertEquals(0, buffer.refCnt());
+        assertThat(buffer.isRecycled()).isTrue();
+        assertThat(buffer.refCnt()).isEqualTo(0);
     }
 
     @Test
@@ -189,10 +184,10 @@ public class NetworkBufferTest extends AbstractByteBufTest {
      */
     private static void testRetainBuffer(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
-        assertFalse(buffer.isRecycled());
+        assertThat(buffer.isRecycled()).isFalse();
         buffer.retainBuffer();
-        assertFalse(buffer.isRecycled());
-        assertEquals(2, buffer.refCnt());
+        assertThat(buffer.isRecycled()).isFalse();
+        assertThat(buffer.refCnt()).isEqualTo(2);
     }
 
     @Test
@@ -210,15 +205,15 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         buffer.setSize(10); // fake some data
         ReadOnlySlicedNetworkBuffer slice = buffer.readOnlySlice();
 
-        assertEquals(0, slice.getReaderIndex());
-        assertEquals(10, slice.getSize());
-        assertSame(buffer, slice.unwrap().unwrap());
+        assertThat(slice.getReaderIndex()).isEqualTo(0);
+        assertThat(slice.getSize()).isEqualTo(10);
+        assertThat(slice.unwrap().unwrap()).isSameAs(buffer);
 
         // slice indices should be independent:
         buffer.setSize(8);
         buffer.setReaderIndex(2);
-        assertEquals(0, slice.getReaderIndex());
-        assertEquals(10, slice.getSize());
+        assertThat(slice.getReaderIndex()).isEqualTo(0);
+        assertThat(slice.getSize()).isEqualTo(10);
     }
 
     @Test
@@ -236,15 +231,15 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         buffer.setSize(2); // fake some data
         ReadOnlySlicedNetworkBuffer slice = buffer.readOnlySlice(1, 10);
 
-        assertEquals(0, slice.getReaderIndex());
-        assertEquals(10, slice.getSize());
-        assertSame(buffer, slice.unwrap().unwrap());
+        assertThat(slice.getReaderIndex()).isEqualTo(0);
+        assertThat(slice.getSize()).isEqualTo(10);
+        assertThat(slice.unwrap().unwrap()).isSameAs(buffer);
 
         // slice indices should be independent:
         buffer.setSize(8);
         buffer.setReaderIndex(2);
-        assertEquals(0, slice.getReaderIndex());
-        assertEquals(10, slice.getSize());
+        assertThat(slice.getReaderIndex()).isEqualTo(0);
+        assertThat(slice.getSize()).isEqualTo(10);
     }
 
     @Test
@@ -259,10 +254,10 @@ public class NetworkBufferTest extends AbstractByteBufTest {
 
     private static void testGetMaxCapacity(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(100, 1024, isBuffer);
-        assertEquals(1024, buffer.getMaxCapacity());
+        assertThat(buffer.getMaxCapacity()).isEqualTo(1024);
         MemorySegment segment = buffer.getMemorySegment();
-        Assert.assertEquals(segment.size(), buffer.getMaxCapacity());
-        Assert.assertEquals(segment.size(), buffer.maxCapacity());
+        assertThat(buffer.getMaxCapacity()).isEqualTo(segment.size());
+        assertThat(buffer.maxCapacity()).isEqualTo(segment.size());
     }
 
     @Test
@@ -281,13 +276,13 @@ public class NetworkBufferTest extends AbstractByteBufTest {
      */
     private static void testGetSetReaderIndex(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(100, 1024, isBuffer);
-        assertEquals(0, buffer.getReaderIndex());
+        assertThat(buffer.getReaderIndex()).isEqualTo(0);
 
         // fake some data
         buffer.setSize(100);
-        assertEquals(0, buffer.getReaderIndex());
+        assertThat(buffer.getReaderIndex()).isEqualTo(0);
         buffer.setReaderIndex(1);
-        assertEquals(1, buffer.getReaderIndex());
+        assertThat(buffer.getReaderIndex()).isEqualTo(1);
     }
 
     @Test
@@ -303,14 +298,14 @@ public class NetworkBufferTest extends AbstractByteBufTest {
     private static void testSetGetSize(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
 
-        assertEquals(0, buffer.getSize()); // initially 0
-        assertEquals(buffer.writerIndex(), buffer.getSize());
-        assertEquals(0, buffer.readerIndex()); // initially 0
+        assertThat(buffer.getSize()).isEqualTo(0); // initially 0
+        assertThat(buffer.getSize()).isEqualTo(buffer.writerIndex());
+        assertThat(buffer.readerIndex()).isEqualTo(0); // initially 0
 
         buffer.setSize(10);
-        assertEquals(10, buffer.getSize());
-        assertEquals(buffer.writerIndex(), buffer.getSize());
-        assertEquals(0, buffer.readerIndex()); // independent
+        assertThat(buffer.getSize()).isEqualTo(10);
+        assertThat(buffer.getSize()).isEqualTo(buffer.writerIndex());
+        assertThat(buffer.readerIndex()).isEqualTo(0); // independent
     }
 
     @Test
@@ -326,13 +321,13 @@ public class NetworkBufferTest extends AbstractByteBufTest {
     private static void testReadableBytes(boolean isBuffer) {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
 
-        assertEquals(0, buffer.readableBytes());
+        assertThat(buffer.readableBytes()).isEqualTo(0);
         buffer.setSize(10);
-        assertEquals(10, buffer.readableBytes());
+        assertThat(buffer.readableBytes()).isEqualTo(10);
         buffer.setReaderIndex(2);
-        assertEquals(8, buffer.readableBytes());
+        assertThat(buffer.readableBytes()).isEqualTo(8);
         buffer.setReaderIndex(10);
-        assertEquals(0, buffer.readableBytes());
+        assertThat(buffer.readableBytes()).isEqualTo(0);
     }
 
     @Test
@@ -349,28 +344,28 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
 
         ByteBuffer byteBuffer = buffer.getNioBufferReadable();
-        assertFalse(byteBuffer.isReadOnly());
-        assertEquals(0, byteBuffer.remaining());
-        assertEquals(0, byteBuffer.limit());
-        assertEquals(0, byteBuffer.capacity());
+        assertThat(byteBuffer.isReadOnly()).isFalse();
+        assertThat(byteBuffer.remaining()).isEqualTo(0);
+        assertThat(byteBuffer.limit()).isEqualTo(0);
+        assertThat(byteBuffer.capacity()).isEqualTo(0);
 
         // add some data
         buffer.setSize(10);
         // nothing changes in the byteBuffer
-        assertEquals(0, byteBuffer.remaining());
-        assertEquals(0, byteBuffer.limit());
-        assertEquals(0, byteBuffer.capacity());
+        assertThat(byteBuffer.remaining()).isEqualTo(0);
+        assertThat(byteBuffer.limit()).isEqualTo(0);
+        assertThat(byteBuffer.capacity()).isEqualTo(0);
         // get a new byteBuffer (should have updated indices)
         byteBuffer = buffer.getNioBufferReadable();
-        assertFalse(byteBuffer.isReadOnly());
-        assertEquals(10, byteBuffer.remaining());
-        assertEquals(10, byteBuffer.limit());
-        assertEquals(10, byteBuffer.capacity());
+        assertThat(byteBuffer.isReadOnly()).isFalse();
+        assertThat(byteBuffer.remaining()).isEqualTo(10);
+        assertThat(byteBuffer.limit()).isEqualTo(10);
+        assertThat(byteBuffer.capacity()).isEqualTo(10);
 
         // modify byteBuffer position and verify nothing has changed in the original buffer
         byteBuffer.position(1);
-        assertEquals(0, buffer.getReaderIndex());
-        assertEquals(10, buffer.getSize());
+        assertThat(buffer.getReaderIndex()).isEqualTo(0);
+        assertThat(buffer.getSize()).isEqualTo(10);
     }
 
     @Test
@@ -383,10 +378,12 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         ByteBuffer buf1 = buffer.getNioBufferReadable();
         ByteBuffer buf2 = buffer.getNioBufferReadable();
 
-        assertNotNull(buf1);
-        assertNotNull(buf2);
+        assertThat(buf1).isNotNull();
+        assertThat(buf2).isNotNull();
 
-        assertTrue("Repeated call to getNioBuffer() returns the same nio buffer", buf1 != buf2);
+        assertThat(buf1 != buf2)
+                .as("Repeated call to getNioBuffer() returns the same nio buffer")
+                .isTrue();
     }
 
     @Test
@@ -403,28 +400,28 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         NetworkBuffer buffer = newBuffer(1024, 1024, isBuffer);
 
         ByteBuffer byteBuffer = buffer.getNioBuffer(1, 1);
-        assertFalse(byteBuffer.isReadOnly());
-        assertEquals(1, byteBuffer.remaining());
-        assertEquals(1, byteBuffer.limit());
-        assertEquals(1, byteBuffer.capacity());
+        assertThat(byteBuffer.isReadOnly()).isFalse();
+        assertThat(byteBuffer.remaining()).isEqualTo(1);
+        assertThat(byteBuffer.limit()).isEqualTo(1);
+        assertThat(byteBuffer.capacity()).isEqualTo(1);
 
         // add some data
         buffer.setSize(10);
         // nothing changes in the byteBuffer
-        assertEquals(1, byteBuffer.remaining());
-        assertEquals(1, byteBuffer.limit());
-        assertEquals(1, byteBuffer.capacity());
+        assertThat(byteBuffer.remaining()).isEqualTo(1);
+        assertThat(byteBuffer.limit()).isEqualTo(1);
+        assertThat(byteBuffer.capacity()).isEqualTo(1);
         // get a new byteBuffer (should have updated indices)
         byteBuffer = buffer.getNioBuffer(1, 2);
-        assertFalse(byteBuffer.isReadOnly());
-        assertEquals(2, byteBuffer.remaining());
-        assertEquals(2, byteBuffer.limit());
-        assertEquals(2, byteBuffer.capacity());
+        assertThat(byteBuffer.isReadOnly()).isFalse();
+        assertThat(byteBuffer.remaining()).isEqualTo(2);
+        assertThat(byteBuffer.limit()).isEqualTo(2);
+        assertThat(byteBuffer.capacity()).isEqualTo(2);
 
         // modify byteBuffer position and verify nothing has changed in the original buffer
         byteBuffer.position(1);
-        assertEquals(0, buffer.getReaderIndex());
-        assertEquals(10, buffer.getSize());
+        assertThat(buffer.getReaderIndex()).isEqualTo(0);
+        assertThat(buffer.getSize()).isEqualTo(10);
     }
 
     @Test
@@ -437,12 +434,12 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         ByteBuffer buf1 = buffer.getNioBuffer(0, length);
         ByteBuffer buf2 = buffer.getNioBuffer(0, length);
 
-        assertNotNull(buf1);
-        assertNotNull(buf2);
+        assertThat(buf1).isNotNull();
+        assertThat(buf2).isNotNull();
 
-        assertTrue(
-                "Repeated call to getNioBuffer(int, int) returns the same nio buffer",
-                buf1 != buf2);
+        assertThat(buf1 != buf2)
+                .as("Repeated call to getNioBuffer(int, int) returns the same nio buffer")
+                .isTrue();
     }
 
     @Test
@@ -460,6 +457,6 @@ public class NetworkBufferTest extends AbstractByteBufTest {
         NettyBufferPool allocator = new NettyBufferPool(1);
 
         buffer.setAllocator(allocator);
-        assertSame(allocator, buffer.alloc());
+        assertThat(buffer.alloc()).isSameAs(allocator);
     }
 }

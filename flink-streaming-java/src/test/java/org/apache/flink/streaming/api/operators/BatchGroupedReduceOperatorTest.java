@@ -32,9 +32,10 @@ import org.junit.rules.ExpectedException;
 
 import java.util.ArrayDeque;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
 
 /** Tests {@link BatchGroupedReduceOperator}. */
 public class BatchGroupedReduceOperatorTest extends TestLogger {
@@ -51,7 +52,7 @@ public class BatchGroupedReduceOperatorTest extends TestLogger {
         testHarness.processElement(new StreamRecord<>("ciao"));
         testHarness.processElement(new StreamRecord<>("ciao"));
 
-        assertThat(testHarness.getOutput(), empty());
+        assertThat(testHarness.getOutput()).satisfies(matching(empty()));
     }
 
     @Test
@@ -72,7 +73,7 @@ public class BatchGroupedReduceOperatorTest extends TestLogger {
         expectedOutput.add(new StreamRecord<>("ciaociaociao", Long.MAX_VALUE));
         expectedOutput.add(new Watermark(Long.MAX_VALUE));
 
-        assertThat(testHarness.getOutput(), contains(expectedOutput.toArray()));
+        assertThat(testHarness.getOutput()).satisfies(matching(contains(expectedOutput.toArray())));
     }
 
     @Test
@@ -90,7 +91,7 @@ public class BatchGroupedReduceOperatorTest extends TestLogger {
         expectedOutput.add(new StreamRecord<>("ciao", Long.MAX_VALUE));
         expectedOutput.add(new Watermark(Long.MAX_VALUE));
 
-        assertThat(testHarness.getOutput(), contains(expectedOutput.toArray()));
+        assertThat(testHarness.getOutput()).satisfies(matching(contains(expectedOutput.toArray())));
     }
 
     private KeyedOneInputStreamOperatorTestHarness<String, String, String> createTestHarness()

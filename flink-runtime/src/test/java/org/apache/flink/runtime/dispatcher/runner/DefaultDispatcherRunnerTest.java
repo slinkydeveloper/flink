@@ -37,10 +37,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link DefaultDispatcherRunner}. */
 public class DefaultDispatcherRunnerTest extends TestLogger {
@@ -79,7 +77,7 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
 
         final CompletableFuture<ApplicationStatus> shutDownFuture =
                 dispatcherRunner.getShutDownFuture();
-        assertThat(shutDownFuture.isDone(), is(false));
+        assertThat(shutDownFuture.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -100,12 +98,12 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
             final CompletableFuture<ApplicationStatus> dispatcherShutDownFuture =
                     dispatcherRunner.getShutDownFuture();
 
-            assertFalse(dispatcherShutDownFuture.isDone());
+            assertThat(dispatcherShutDownFuture.isDone()).isFalse();
 
             final ApplicationStatus finalApplicationStatus = ApplicationStatus.UNKNOWN;
             shutDownFuture.complete(finalApplicationStatus);
 
-            assertThat(dispatcherShutDownFuture.get(), is(finalApplicationStatus));
+            assertThat(dispatcherShutDownFuture.get()).isEqualTo(finalApplicationStatus);
         }
     }
 
@@ -127,7 +125,7 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
             final CompletableFuture<ApplicationStatus> dispatcherShutDownFuture =
                     dispatcherRunner.getShutDownFuture();
 
-            assertFalse(dispatcherShutDownFuture.isDone());
+            assertThat(dispatcherShutDownFuture.isDone()).isFalse();
 
             dispatcherRunner.closeAsync();
 
@@ -165,14 +163,14 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
             final CompletableFuture<ApplicationStatus> dispatcherShutDownFuture =
                     dispatcherRunner.getShutDownFuture();
 
-            assertFalse(dispatcherShutDownFuture.isDone());
+            assertThat(dispatcherShutDownFuture.isDone()).isFalse();
 
             testingLeaderElectionService.isLeader(secondLeaderSessionId);
 
             final ApplicationStatus finalApplicationStatus = ApplicationStatus.UNKNOWN;
             shutDownFuture.complete(finalApplicationStatus);
 
-            assertFalse(dispatcherShutDownFuture.isDone());
+            assertThat(dispatcherShutDownFuture.isDone()).isFalse();
         }
     }
 
@@ -224,13 +222,13 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
         try (final DispatcherRunner dispatcherRunner = createDispatcherRunner()) {
             testingLeaderElectionService.isLeader(firstLeaderSessionId);
 
-            assertThat(firstTestingDispatcherLeaderProcess.isStarted(), is(true));
+            assertThat(firstTestingDispatcherLeaderProcess.isStarted()).isEqualTo(true);
 
             testingLeaderElectionService.isLeader(secondLeaderSessionId);
 
-            assertThat(secondTestingDispatcherLeaderProcess.isStarted(), is(false));
+            assertThat(secondTestingDispatcherLeaderProcess.isStarted()).isEqualTo(false);
             firstTestingDispatcherLeaderProcess.terminateProcess();
-            assertThat(secondTestingDispatcherLeaderProcess.isStarted(), is(true));
+            assertThat(secondTestingDispatcherLeaderProcess.isStarted()).isEqualTo(true);
             secondTestingDispatcherLeaderProcess
                     .terminateProcess(); // make the dispatcherRunner terminate
         }
@@ -247,7 +245,7 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
                     testingLeaderElectionService.getConfirmationFuture();
 
             final LeaderConnectionInfo leaderConnectionInfo = confirmationFuture.get();
-            assertThat(leaderConnectionInfo.getLeaderSessionId(), is(leaderSessionId));
+            assertThat(leaderConnectionInfo.getLeaderSessionId()).isEqualTo(leaderSessionId);
         }
     }
 
@@ -325,11 +323,11 @@ public class DefaultDispatcherRunnerTest extends TestLogger {
 
             firstDispatcherLeaderProcessTerminationFuture.complete(null);
 
-            assertThat(thirdDispatcherLeaderProcessHasBeenStartedFuture.isDone(), is(false));
+            assertThat(thirdDispatcherLeaderProcessHasBeenStartedFuture.isDone()).isEqualTo(false);
 
             secondDispatcherLeaderProcessTerminationFuture.complete(null);
 
-            assertThat(thirdDispatcherLeaderProcessHasBeenStartedFuture.isDone(), is(true));
+            assertThat(thirdDispatcherLeaderProcessHasBeenStartedFuture.isDone()).isEqualTo(true);
         } finally {
             firstDispatcherLeaderProcessTerminationFuture.complete(null);
             secondDispatcherLeaderProcessTerminationFuture.complete(null);

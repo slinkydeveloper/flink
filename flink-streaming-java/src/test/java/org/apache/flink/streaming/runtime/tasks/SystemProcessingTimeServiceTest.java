@@ -22,7 +22,6 @@ import org.apache.flink.core.testutils.OneShotLatch;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.CancellationException;
@@ -34,13 +33,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link SystemProcessingTimeService}. */
 public class SystemProcessingTimeServiceTest extends TestLogger {
@@ -102,7 +97,7 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
                             0L,
                             period);
 
-            assertFalse(scheduledFuture.isDone());
+            assertThat(scheduledFuture.isDone()).isFalse();
 
             // this should cancel our future
             timer.quiesce().get();
@@ -128,9 +123,9 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
                             0L,
                             100L);
 
-            assertNotNull(scheduledFuture);
+            assertThatObject(scheduledFuture).isNotNull();
 
-            assertEquals(0, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(0);
 
             if (errorRef.get() != null) {
                 throw new Exception(errorRef.get());
@@ -148,7 +143,7 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
         final SystemProcessingTimeService timer = createSystemProcessingTimeService(errorFuture);
 
         try {
-            assertFalse(timer.isTerminated());
+            assertThat(timer.isTerminated()).isFalse();
 
             final OneShotLatch latch = new OneShotLatch();
 
@@ -163,8 +158,8 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
             latch.await();
             timer.shutdownService();
 
-            assertTrue(timer.isTerminated());
-            assertEquals(0, timer.getNumTasksScheduled());
+            assertThat(timer.isTerminated()).isTrue();
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(0);
 
             try {
                 timer.registerTimer(
@@ -185,8 +180,8 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
             }
 
             // check that the task eventually responded to interruption
-            assertThat(
-                    errorFuture.get(30L, TimeUnit.SECONDS), instanceOf(InterruptedException.class));
+            assertThat(errorFuture.get(30L, TimeUnit.SECONDS))
+                    .isInstanceOf(InterruptedException.class);
         } finally {
             timer.shutdownService();
         }
@@ -226,7 +221,7 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
 
             // should be able to immediately acquire the lock, since the task must have exited by
             // now
-            assertTrue(scopeLock.tryLock());
+            assertThat(scopeLock.tryLock()).isTrue();
 
             // should be able to schedule more tasks (that never get executed)
             ScheduledFuture<?> future =
@@ -238,10 +233,10 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
                                     throw new Exception("test");
                                 }
                             });
-            assertNotNull(future);
+            assertThatObject(future).isNotNull();
 
             // nothing should be scheduled right now
-            assertEquals(0L, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(0L);
 
             // check that no asynchronous error was reported - that ensures that the newly scheduled
             // triggerable did, in fact, not trigger
@@ -261,24 +256,24 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
         final SystemProcessingTimeService timer = createSystemProcessingTimeService(errorRef);
 
         try {
-            assertEquals(0, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(0);
 
             // schedule something
             ScheduledFuture<?> future =
                     timer.registerTimer(System.currentTimeMillis() + 100000000, timestamp -> {});
-            assertEquals(1, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(1);
 
             future.cancel(false);
 
-            assertEquals(0, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(0);
 
             future = timer.scheduleAtFixedRate(timestamp -> {}, 10000000000L, 50L);
 
-            assertEquals(1, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(1);
 
             future.cancel(false);
 
-            assertEquals(0, timer.getNumTasksScheduled());
+            assertThat(timer.getNumTasksScheduled()).isEqualTo(0);
 
             // check that no asynchronous error was reported
             if (errorRef.get() != null) {
@@ -299,14 +294,14 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
                 createBlockingSystemProcessingTimeService(
                         blockUntilTriggered, timerExecutionFinished);
 
-        Assert.assertFalse(timeService.isTerminated());
+        assertThat(timeService.isTerminated()).isFalse();
 
         // Check that we wait for the timer to terminate. As the timer blocks on the second latch,
         // this should time out.
         try {
-            Assert.assertFalse(timeService.shutdownAndAwaitPending(1, TimeUnit.SECONDS));
+            assertThat(timeService.shutdownAndAwaitPending(1, TimeUnit.SECONDS)).isFalse();
         } catch (InterruptedException e) {
-            Assert.fail("Unexpected interruption.");
+            fail("Unexpected interruption.");
         }
 
         // Let the timer proceed.
@@ -314,13 +309,13 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
 
         // Now we should succeed in terminating the timer.
         try {
-            Assert.assertTrue(timeService.shutdownAndAwaitPending(60, TimeUnit.SECONDS));
+            assertThat(timeService.shutdownAndAwaitPending(60, TimeUnit.SECONDS)).isTrue();
         } catch (InterruptedException e) {
-            Assert.fail("Unexpected interruption.");
+            fail("Unexpected interruption.");
         }
 
-        Assert.assertTrue(timerExecutionFinished.get());
-        Assert.assertTrue(timeService.isTerminated());
+        assertThat(timerExecutionFinished.get()).isTrue();
+        assertThat(timeService.isTerminated()).isTrue();
     }
 
     @Test
@@ -331,7 +326,7 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
         final SystemProcessingTimeService timeService =
                 createBlockingSystemProcessingTimeService(blockUntilTriggered, timerFinished);
 
-        Assert.assertFalse(timeService.isTerminated());
+        assertThat(timeService.isTerminated()).isFalse();
 
         final Thread interruptTarget = Thread.currentThread();
         final AtomicBoolean runInterrupts = new AtomicBoolean(true);
@@ -351,15 +346,15 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
 
         final long timeoutMs = 50L;
         final long startTime = System.nanoTime();
-        Assert.assertFalse(timeService.isTerminated());
+        assertThat(timeService.isTerminated()).isFalse();
         // check that termination did not succeed (because of blocking timer execution)
-        Assert.assertFalse(timeService.shutdownServiceUninterruptible(timeoutMs));
+        assertThat(timeService.shutdownServiceUninterruptible(timeoutMs)).isFalse();
         // check that termination flag was set.
-        Assert.assertTrue(timeService.isTerminated());
+        assertThat(timeService.isTerminated()).isTrue();
         // check that the blocked timer is still in flight.
-        Assert.assertFalse(timerFinished.get());
+        assertThat(timerFinished.get()).isFalse();
         // check that we waited until timeout
-        Assert.assertTrue((System.nanoTime() - startTime) >= (1_000_000L * timeoutMs));
+        assertThat((System.nanoTime() - startTime) >= (1_000_000L * timeoutMs)).isTrue();
 
         runInterrupts.set(false);
 
@@ -374,8 +369,8 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
         final boolean ignored = Thread.interrupted();
 
         blockUntilTriggered.trigger();
-        Assert.assertTrue(timeService.shutdownServiceUninterruptible(timeoutMs));
-        Assert.assertTrue(timerFinished.get());
+        assertThat(timeService.shutdownServiceUninterruptible(timeoutMs)).isTrue();
+        assertThat(timerFinished.get()).isTrue();
     }
 
     private static SystemProcessingTimeService createSystemProcessingTimeService(
@@ -424,7 +419,7 @@ public class SystemProcessingTimeServiceTest extends TestLogger {
         try {
             waitUntilTimerStarted.await();
         } catch (InterruptedException e) {
-            Assert.fail("Problem while starting up service.");
+            fail("Problem while starting up service.");
         }
 
         return timeService;

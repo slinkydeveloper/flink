@@ -20,10 +20,11 @@ package org.apache.flink.streaming.runtime.operators.windowing;
 
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TimeWindow}. */
 public class TimeWindowTest {
@@ -31,37 +32,37 @@ public class TimeWindowTest {
     public void testGetWindowStartWithOffset() {
         // [0, 7), [7, 14), [14, 21)...
         long offset = 0;
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(1, offset, 7), 0);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(6, offset, 7), 0);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(7, offset, 7), 7);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(8, offset, 7), 7);
+        assertThat(0).isEqualTo(TimeWindow.getWindowStartWithOffset(1, offset, 7));
+        assertThat(0).isEqualTo(TimeWindow.getWindowStartWithOffset(6, offset, 7));
+        assertThat(7).isEqualTo(TimeWindow.getWindowStartWithOffset(7, offset, 7));
+        assertThat(7).isEqualTo(TimeWindow.getWindowStartWithOffset(8, offset, 7));
 
         // [-4, 3), [3, 10), [10, 17)...
         offset = 3;
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(1, offset, 7), -4);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(2, offset, 7), -4);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(3, offset, 7), 3);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(9, offset, 7), 3);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(10, offset, 7), 10);
+        assertThat(-4).isEqualTo(TimeWindow.getWindowStartWithOffset(1, offset, 7));
+        assertThat(-4).isEqualTo(TimeWindow.getWindowStartWithOffset(2, offset, 7));
+        assertThat(3).isEqualTo(TimeWindow.getWindowStartWithOffset(3, offset, 7));
+        assertThat(3).isEqualTo(TimeWindow.getWindowStartWithOffset(9, offset, 7));
+        assertThat(10).isEqualTo(TimeWindow.getWindowStartWithOffset(10, offset, 7));
 
         // [-2, 5), [5, 12), [12, 19)...
         offset = -2;
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(1, offset, 7), -2);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(-2, offset, 7), -2);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(3, offset, 7), -2);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(4, offset, 7), -2);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(7, offset, 7), 5);
-        Assert.assertEquals(TimeWindow.getWindowStartWithOffset(12, offset, 7), 12);
+        assertThat(-2).isEqualTo(TimeWindow.getWindowStartWithOffset(1, offset, 7));
+        assertThat(-2).isEqualTo(TimeWindow.getWindowStartWithOffset(-2, offset, 7));
+        assertThat(-2).isEqualTo(TimeWindow.getWindowStartWithOffset(3, offset, 7));
+        assertThat(-2).isEqualTo(TimeWindow.getWindowStartWithOffset(4, offset, 7));
+        assertThat(5).isEqualTo(TimeWindow.getWindowStartWithOffset(7, offset, 7));
+        assertThat(12).isEqualTo(TimeWindow.getWindowStartWithOffset(12, offset, 7));
 
         // for GMT+08:00
         offset = -TimeUnit.HOURS.toMillis(8);
         long size = TimeUnit.DAYS.toMillis(1);
-        Assert.assertEquals(
-                TimeWindow.getWindowStartWithOffset(1470902048450L, offset, size), 1470844800000L);
+        assertThat(1470844800000L)
+                .isEqualTo(TimeWindow.getWindowStartWithOffset(1470902048450L, offset, size));
     }
 
     private boolean intersects(TimeWindow w0, TimeWindow w1) {
-        Assert.assertEquals(w0.intersects(w1), w1.intersects(w0));
+        assertThat(w1.intersects(w0)).isEqualTo(w0.intersects(w1));
         return w0.intersects(w1);
     }
 
@@ -69,15 +70,15 @@ public class TimeWindowTest {
     public void testIntersect() {
         // must intersect with itself
         TimeWindow window = new TimeWindow(10, 20);
-        Assert.assertTrue(window.intersects(window));
+        assertThat(window.intersects(window)).isTrue();
 
         // windows are next to each other
-        Assert.assertTrue(intersects(window, new TimeWindow(20, 30)));
+        assertThat(intersects(window, new TimeWindow(20, 30))).isTrue();
 
         // there is distance between the windows
-        Assert.assertFalse(intersects(window, new TimeWindow(21, 30)));
+        assertThat(intersects(window, new TimeWindow(21, 30))).isFalse();
 
         // overlaps by one
-        Assert.assertTrue(intersects(window, new TimeWindow(19, 22)));
+        assertThat(intersects(window, new TimeWindow(19, 22))).isTrue();
     }
 }

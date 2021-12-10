@@ -48,9 +48,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** IT cases for {@link RestClient} and {@link RestServerEndpoint}. */
 public class RestExternalHandlersITCase extends TestLogger {
@@ -118,21 +117,17 @@ public class RestExternalHandlersITCase extends TestLogger {
 
     @Test
     void testHandlersMustBeLoaded() throws Exception {
-        assertEquals(serverEndpoint.inboundChannelHandlerFactories.size(), 2);
-        assertTrue(
-                serverEndpoint.inboundChannelHandlerFactories.get(0)
-                        instanceof Prio1InboundChannelHandlerFactory);
-        assertTrue(
-                serverEndpoint.inboundChannelHandlerFactories.get(1)
-                        instanceof Prio0InboundChannelHandlerFactory);
+        assertThat(2).isEqualTo(serverEndpoint.inboundChannelHandlerFactories.size());
+        assertThat(serverEndpoint.inboundChannelHandlerFactories.get(0))
+                .isInstanceOf(Prio1InboundChannelHandlerFactory.class);
+        assertThat(serverEndpoint.inboundChannelHandlerFactories.get(1))
+                .isInstanceOf(Prio0InboundChannelHandlerFactory.class);
 
-        assertEquals(restClient.outboundChannelHandlerFactories.size(), 2);
-        assertTrue(
-                restClient.outboundChannelHandlerFactories.get(0)
-                        instanceof Prio1OutboundChannelHandlerFactory);
-        assertTrue(
-                restClient.outboundChannelHandlerFactories.get(1)
-                        instanceof Prio0OutboundChannelHandlerFactory);
+        assertThat(2).isEqualTo(restClient.outboundChannelHandlerFactories.size());
+        assertThat(restClient.outboundChannelHandlerFactories.get(0))
+                .isInstanceOf(Prio1OutboundChannelHandlerFactory.class);
+        assertThat(restClient.outboundChannelHandlerFactories.get(1))
+                .isInstanceOf(Prio0OutboundChannelHandlerFactory.class);
 
         try {
             final CompletableFuture<TestResponse> response =
@@ -140,7 +135,7 @@ public class RestExternalHandlersITCase extends TestLogger {
             response.get();
             fail("Request must fail with 2 times redirected URL");
         } catch (Exception e) {
-            assertTrue(e.getMessage().contains(REDIRECT2_URL));
+            assertThat(e.getMessage().contains(REDIRECT2_URL)).isTrue();
         }
     }
 

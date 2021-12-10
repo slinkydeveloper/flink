@@ -22,7 +22,7 @@ import org.apache.flink.api.common.ExecutionMode;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** This test verifies that the data exchange modes are defined for every execution mode. */
 public class DataExchangeModeTest {
@@ -30,21 +30,21 @@ public class DataExchangeModeTest {
     @Test
     public void testForward() {
         for (ExecutionMode mode : ExecutionMode.values()) {
-            assertNotNull(DataExchangeMode.getForForwardExchange(mode));
+            assertThat(DataExchangeMode.getForForwardExchange(mode)).isNotNull();
         }
     }
 
     @Test
     public void testShuffleAndBroadcast() {
         for (ExecutionMode mode : ExecutionMode.values()) {
-            assertNotNull(DataExchangeMode.getForShuffleOrBroadcast(mode));
+            assertThat(DataExchangeMode.getForShuffleOrBroadcast(mode)).isNotNull();
         }
     }
 
     @Test
     public void testPipelineBreaking() {
         for (ExecutionMode mode : ExecutionMode.values()) {
-            assertNotNull(DataExchangeMode.getPipelineBreakingExchange(mode));
+            assertThat(DataExchangeMode.getPipelineBreakingExchange(mode)).isNotNull();
         }
     }
 }

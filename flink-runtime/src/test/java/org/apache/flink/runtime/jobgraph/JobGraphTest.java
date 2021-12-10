@@ -37,14 +37,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link JobGraph}. */
 public class JobGraphTest extends TestLogger {
@@ -78,19 +76,18 @@ public class JobGraphTest extends TestLogger {
             // de-/serialize and compare
             JobGraph copy = CommonTestUtils.createCopySerializable(jg);
 
-            assertEquals(jg.getName(), copy.getName());
-            assertEquals(jg.getJobID(), copy.getJobID());
-            assertEquals(jg.getJobConfiguration(), copy.getJobConfiguration());
-            assertEquals(jg.getNumberOfVertices(), copy.getNumberOfVertices());
+            assertThat(copy.getName()).isEqualTo(jg.getName());
+            assertThat(copy.getJobID()).isEqualTo(jg.getJobID());
+            assertThat(copy.getJobConfiguration()).isEqualTo(jg.getJobConfiguration());
+            assertThat(copy.getNumberOfVertices()).isEqualTo(jg.getNumberOfVertices());
 
             for (JobVertex vertex : copy.getVertices()) {
                 JobVertex original = jg.findVertexByID(vertex.getID());
-                assertNotNull(original);
-                assertEquals(original.getName(), vertex.getName());
-                assertEquals(original.getNumberOfInputs(), vertex.getNumberOfInputs());
-                assertEquals(
-                        original.getNumberOfProducedIntermediateDataSets(),
-                        vertex.getNumberOfProducedIntermediateDataSets());
+                assertThat(original).isNotNull();
+                assertThat(vertex.getName()).isEqualTo(original.getName());
+                assertThat(vertex.getNumberOfInputs()).isEqualTo(original.getNumberOfInputs());
+                assertThat(vertex.getNumberOfProducedIntermediateDataSets())
+                        .isEqualTo(original.getNumberOfProducedIntermediateDataSets());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -124,7 +121,7 @@ public class JobGraphTest extends TestLogger {
 
         List<JobVertex> sorted = graph.getVerticesSortedTopologicallyFromSources();
 
-        assertEquals(6, sorted.size());
+        assertThat(sorted.size()).isEqualTo(6);
 
         assertBefore(source1, target1, sorted);
         assertBefore(source1, target2, sorted);
@@ -173,7 +170,7 @@ public class JobGraphTest extends TestLogger {
                     JobGraphTestUtils.streamingJobGraph(source1, source2, root, l11, l13, l12, l2);
             List<JobVertex> sorted = graph.getVerticesSortedTopologicallyFromSources();
 
-            assertEquals(7, sorted.size());
+            assertThat(sorted.size()).isEqualTo(7);
 
             assertBefore(source1, root, sorted);
             assertBefore(source2, root, sorted);
@@ -222,7 +219,7 @@ public class JobGraphTest extends TestLogger {
             JobGraph graph = JobGraphTestUtils.streamingJobGraph(source, op1, op2, op3);
             List<JobVertex> sorted = graph.getVerticesSortedTopologicallyFromSources();
 
-            assertEquals(4, sorted.size());
+            assertThat(sorted.size()).isEqualTo(4);
 
             assertBefore(source, op1, sorted);
             assertBefore(source, op2, sorted);
@@ -340,14 +337,16 @@ public class JobGraphTest extends TestLogger {
 
             DistributedCache.DistributedCacheEntry jobGraphEntry =
                     jb.getUserArtifacts().get(entry.filePath);
-            assertNotNull(jobGraphEntry);
-            assertEquals(
-                    blobKey,
-                    InstantiationUtil.deserializeObject(
-                            jobGraphEntry.blobKey, ClassLoader.getSystemClassLoader(), false));
-            assertEquals(entry.isExecutable, jobGraphEntry.isExecutable);
-            assertEquals(entry.isZipped, jobGraphEntry.isZipped);
-            assertEquals(entry.filePath, jobGraphEntry.filePath);
+            assertThat(jobGraphEntry).isNotNull();
+            assertThatObject(
+                            InstantiationUtil.deserializeObject(
+                                    jobGraphEntry.blobKey,
+                                    ClassLoader.getSystemClassLoader(),
+                                    false))
+                    .isEqualTo(blobKey);
+            assertThat(jobGraphEntry.isExecutable).isEqualTo(entry.isExecutable);
+            assertThat(jobGraphEntry.isZipped).isEqualTo(entry.isZipped);
+            assertThat(jobGraphEntry.filePath).isEqualTo(entry.filePath);
         }
     }
 
@@ -355,14 +354,14 @@ public class JobGraphTest extends TestLogger {
     public void checkpointingIsDisabledByDefaultForStreamingJobGraph() {
         final JobGraph jobGraph = JobGraphBuilder.newStreamingJobGraphBuilder().build();
 
-        assertFalse(jobGraph.isCheckpointingEnabled());
+        assertThat(jobGraph.isCheckpointingEnabled()).isFalse();
     }
 
     @Test
     public void checkpointingIsDisabledByDefaultForBatchJobGraph() {
         final JobGraph jobGraph = JobGraphBuilder.newBatchJobGraphBuilder().build();
 
-        assertFalse(jobGraph.isCheckpointingEnabled());
+        assertThat(jobGraph.isCheckpointingEnabled()).isFalse();
     }
 
     @Test
@@ -372,7 +371,7 @@ public class JobGraphTest extends TestLogger {
                         .setJobCheckpointingSettings(createCheckpointSettingsWithInterval(10))
                         .build();
 
-        assertTrue(jobGraph.isCheckpointingEnabled());
+        assertThat(jobGraph.isCheckpointingEnabled()).isTrue();
     }
 
     @Test
@@ -383,7 +382,7 @@ public class JobGraphTest extends TestLogger {
                                 createCheckpointSettingsWithInterval(Long.MAX_VALUE))
                         .build();
 
-        assertFalse(jobGraph.isCheckpointingEnabled());
+        assertThat(jobGraph.isCheckpointingEnabled()).isFalse();
     }
 
     private static JobCheckpointingSettings createCheckpointSettingsWithInterval(
@@ -423,7 +422,8 @@ public class JobGraphTest extends TestLogger {
                         .addJobVertices(Arrays.asList(v1, v2, v3, v4))
                         .build();
 
-        assertThat(jobGraph.getSlotSharingGroups(), containsInAnyOrder(group1, group2));
+        assertThat(jobGraph.getSlotSharingGroups())
+                .satisfies(matching(containsInAnyOrder(group1, group2)));
     }
 
     @Test
@@ -443,10 +443,11 @@ public class JobGraphTest extends TestLogger {
                         .addJobVertices(Arrays.asList(v1, v2, v3, v4))
                         .build();
 
-        assertThat(jobGraph.getCoLocationGroups(), hasSize(1));
+        assertThat(jobGraph.getCoLocationGroups()).satisfies(matching(hasSize(1)));
 
         final CoLocationGroup onlyCoLocationGroup =
                 jobGraph.getCoLocationGroups().iterator().next();
-        assertThat(onlyCoLocationGroup.getVertexIds(), containsInAnyOrder(v1.getID(), v2.getID()));
+        assertThat(onlyCoLocationGroup.getVertexIds())
+                .satisfies(matching(containsInAnyOrder(v1.getID(), v2.getID())));
     }
 }

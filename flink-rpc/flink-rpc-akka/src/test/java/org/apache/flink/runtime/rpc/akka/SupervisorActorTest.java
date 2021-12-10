@@ -36,9 +36,8 @@ import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link SupervisorActor}. */
 public class SupervisorActorTest extends TestLogger {
@@ -58,7 +57,7 @@ public class SupervisorActorTest extends TestLogger {
                 startAkkaRpcActor(supervisor, "foobar");
 
         final CompletableFuture<Void> terminationFuture = actorRegistration.getTerminationFuture();
-        assertThat(terminationFuture.isDone(), is(false));
+        assertThat(terminationFuture.isDone()).isEqualTo(false);
 
         actorRegistration
                 .getActorRef()
@@ -79,7 +78,7 @@ public class SupervisorActorTest extends TestLogger {
                 startAkkaRpcActor(supervisor, "foobar");
 
         final CompletableFuture<Void> terminationFuture = actorRegistration.getTerminationFuture();
-        assertThat(terminationFuture.isDone(), is(false));
+        assertThat(terminationFuture.isDone()).isEqualTo(false);
 
         final FlinkException cause = new FlinkException("Test cause.");
         actorRegistration
@@ -107,7 +106,7 @@ public class SupervisorActorTest extends TestLogger {
                 startAkkaRpcActor(supervisor, "foobar");
 
         final CompletableFuture<Void> terminationFuture = actorRegistration.getTerminationFuture();
-        assertThat(terminationFuture.isDone(), is(false));
+        assertThat(terminationFuture.isDone()).isEqualTo(false);
 
         actorRegistration.getActorRef().tell(Terminate.INSTANCE, ActorRef.noSender());
 
@@ -129,7 +128,7 @@ public class SupervisorActorTest extends TestLogger {
                 startAkkaRpcActor(supervisor, "foobar");
 
         final CompletableFuture<Void> terminationFuture = actorRegistration.getTerminationFuture();
-        assertThat(terminationFuture.isDone(), is(false));
+        assertThat(terminationFuture.isDone()).isEqualTo(false);
 
         final CompletableFuture<Terminated> actorSystemTerminationFuture =
                 actorSystem.getWhenTerminated().toCompletableFuture();
@@ -162,7 +161,7 @@ public class SupervisorActorTest extends TestLogger {
                 startAkkaRpcActor(supervisor, "foobar2");
 
         final CompletableFuture<Void> terminationFuture = actorRegistration2.getTerminationFuture();
-        assertThat(terminationFuture.isDone(), is(false));
+        assertThat(terminationFuture.isDone()).isEqualTo(false);
 
         final FlinkException cause = new FlinkException("Test cause.");
         actorRegistration1.getActorRef().tell(Fail.exceptionally(cause), ActorRef.noSender());

@@ -27,7 +27,7 @@ import org.apache.flink.test.util.AbstractTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test creation of context for chained streaming operators. */
 @SuppressWarnings("serial")
@@ -43,7 +43,7 @@ public class ChainedRuntimeContextITCase extends AbstractTestBase {
         env.addSource(new TestSource()).map(new TestMap()).addSink(new DiscardingSink<Integer>());
         env.execute();
 
-        assertNotEquals(srcContext, mapContext);
+        assertThat(mapContext).isEqualTo(srcContext);
     }
 
     private static class TestSource extends RichParallelSourceFunction<Integer> {

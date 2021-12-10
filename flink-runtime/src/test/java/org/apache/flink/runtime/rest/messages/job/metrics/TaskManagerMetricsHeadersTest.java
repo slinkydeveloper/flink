@@ -23,9 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TaskManagerMetricsHeaders}. */
 public class TaskManagerMetricsHeadersTest extends TestLogger {
@@ -35,15 +33,13 @@ public class TaskManagerMetricsHeadersTest extends TestLogger {
 
     @Test
     public void testUrl() {
-        assertThat(
-                taskManagerMetricsHeaders.getTargetRestEndpointURL(),
-                equalTo("/taskmanagers/:" + TaskManagerIdPathParameter.KEY + "/metrics"));
+        assertThat(taskManagerMetricsHeaders.getTargetRestEndpointURL())
+                .isEqualTo("/taskmanagers/:" + TaskManagerIdPathParameter.KEY + "/metrics");
     }
 
     @Test
     public void testMessageParameters() {
-        assertThat(
-                taskManagerMetricsHeaders.getUnresolvedMessageParameters(),
-                instanceOf(TaskManagerMetricsMessageParameters.class));
+        assertThat(taskManagerMetricsHeaders.getUnresolvedMessageParameters())
+                .isInstanceOf(TaskManagerMetricsMessageParameters.class);
     }
 }

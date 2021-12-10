@@ -44,15 +44,14 @@ import org.apache.flink.streaming.util.MockStreamTask;
 import org.apache.flink.streaming.util.MockStreamTaskBuilder;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /** Tests for the emission of latency markers by {@link StreamSource} operators. */
@@ -196,7 +195,7 @@ public class StreamSourceOperatorLatencyMetricsTest extends TestLogger {
             operatorChain.close();
         }
 
-        assertEquals(numberLatencyMarkers, output.size());
+        assertThat(output.size()).isEqualTo(numberLatencyMarkers);
 
         long timestamp = 0L;
         int expectedLatencyIndex = 0;
@@ -205,9 +204,9 @@ public class StreamSourceOperatorLatencyMetricsTest extends TestLogger {
         // verify that its only latency markers
         for (; i < numberLatencyMarkers; i++) {
             StreamElement se = output.get(i);
-            Assert.assertTrue(se.isLatencyMarker());
-            Assert.assertEquals(operator.getOperatorID(), se.asLatencyMarker().getOperatorId());
-            Assert.assertEquals(0, se.asLatencyMarker().getSubtaskIndex());
+            assertThat(se.isLatencyMarker()).isTrue();
+            assertThat(se.asLatencyMarker().getOperatorId()).isEqualTo(operator.getOperatorID());
+            assertThat(se.asLatencyMarker().getSubtaskIndex()).isEqualTo(0);
 
             // determines the next latency mark that should've been emitted
             // latency marks are emitted once per latencyMarkInterval,
@@ -215,9 +214,8 @@ public class StreamSourceOperatorLatencyMetricsTest extends TestLogger {
             while (timestamp > processingTimes.get(expectedLatencyIndex)) {
                 expectedLatencyIndex++;
             }
-            Assert.assertEquals(
-                    processingTimes.get(expectedLatencyIndex).longValue(),
-                    se.asLatencyMarker().getMarkedTime());
+            assertThat(se.asLatencyMarker().getMarkedTime())
+                    .isEqualTo(processingTimes.get(expectedLatencyIndex).longValue());
 
             timestamp += latencyMarkInterval;
         }

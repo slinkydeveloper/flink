@@ -46,7 +46,7 @@ import org.mockito.stubbing.Answer;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.eq;
@@ -98,8 +98,8 @@ public class RegularWindowOperatorContractTest extends WindowOperatorContractTes
         when(mockAssigner.assignWindows(anyInt(), anyLong(), anyAssignerContext()))
                 .thenReturn(Arrays.asList(new TimeWindow(2, 4), new TimeWindow(0, 2)));
 
-        assertEquals(0, testHarness.getOutput().size());
-        assertEquals(0, testHarness.numKeyedStateEntries());
+        assertThat(testHarness.getOutput().size()).isEqualTo(0);
+        assertThat(testHarness.numKeyedStateEntries()).isEqualTo(0);
 
         // insert two elements without firing
         testHarness.processElement(new StreamRecord<>(1, 0L));
@@ -153,8 +153,9 @@ public class RegularWindowOperatorContractTest extends WindowOperatorContractTes
         verify(mockTrigger, never()).clear(anyTimeWindow(), anyTriggerContext());
 
         // FIRE should not purge contents
-        assertEquals(4, testHarness.numKeyedStateEntries()); // window contents plus trigger state
-        assertEquals(4, testHarness.numEventTimeTimers()); // window timers/gc timers
+        assertThat(testHarness.numKeyedStateEntries())
+                .isEqualTo(4); // window contents plus trigger state
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(4); // window timers/gc timers
     }
 
     /**

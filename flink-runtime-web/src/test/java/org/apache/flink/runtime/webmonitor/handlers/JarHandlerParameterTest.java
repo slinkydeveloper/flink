@@ -38,7 +38,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseStatus;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -57,11 +56,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /** Base test class for jar request handlers. */
 public abstract class JarHandlerParameterTest<
@@ -166,7 +163,7 @@ public abstract class JarHandlerParameterTest<
             testConfigurationViaQueryParameters(ProgramArgsParType.Both);
             fail("RestHandlerException is excepted");
         } catch (RestHandlerException e) {
-            assertEquals(HttpResponseStatus.BAD_REQUEST, e.getHttpResponseStatus());
+            assertThat(e.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
         }
     }
 
@@ -198,7 +195,7 @@ public abstract class JarHandlerParameterTest<
             testConfigurationViaJsonRequest(ProgramArgsParType.Both);
             fail("RestHandlerException is excepted");
         } catch (RestHandlerException e) {
-            assertEquals(HttpResponseStatus.BAD_REQUEST, e.getHttpResponseStatus());
+            assertThat(e.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
         }
     }
 
@@ -217,8 +214,8 @@ public abstract class JarHandlerParameterTest<
 
         Optional<JobGraph> jobGraph = getLastSubmittedJobGraphAndReset();
 
-        assertThat(jobGraph.isPresent(), is(true));
-        assertThat(jobGraph.get().getJobID(), is(equalTo(jobId)));
+        assertThat(jobGraph.isPresent()).isEqualTo(true);
+        assertThat(jobGraph.get().getJobID()).isEqualTo(equalTo(jobId));
     }
 
     private void testConfigurationViaJsonRequest(ProgramArgsParType programArgsParType)
@@ -248,7 +245,7 @@ public abstract class JarHandlerParameterTest<
             testParameterPrioritization(ProgramArgsParType.Both);
             fail("RestHandlerException is excepted");
         } catch (RestHandlerException e) {
-            assertEquals(HttpResponseStatus.BAD_REQUEST, e.getHttpResponseStatus());
+            assertThat(e.getHttpResponseStatus()).isEqualTo(HttpResponseStatus.BAD_REQUEST);
         }
     }
 
@@ -320,17 +317,16 @@ public abstract class JarHandlerParameterTest<
 
     JobGraph validateDefaultGraph() {
         JobGraph jobGraph = LAST_SUBMITTED_JOB_GRAPH_REFERENCE.getAndSet(null);
-        Assert.assertEquals(0, ParameterProgram.actualArguments.length);
-        Assert.assertEquals(
-                CoreOptions.DEFAULT_PARALLELISM.defaultValue().intValue(),
-                getExecutionConfig(jobGraph).getParallelism());
+        assertThat(ParameterProgram.actualArguments.length).isEqualTo(0);
+        assertThat(getExecutionConfig(jobGraph).getParallelism())
+                .isEqualTo(CoreOptions.DEFAULT_PARALLELISM.defaultValue().intValue());
         return jobGraph;
     }
 
     JobGraph validateGraph() {
         JobGraph jobGraph = LAST_SUBMITTED_JOB_GRAPH_REFERENCE.getAndSet(null);
-        Assert.assertArrayEquals(PROG_ARGS, ParameterProgram.actualArguments);
-        Assert.assertEquals(PARALLELISM, getExecutionConfig(jobGraph).getParallelism());
+        assertThat(ParameterProgram.actualArguments).isEqualTo(PROG_ARGS);
+        assertThat(getExecutionConfig(jobGraph).getParallelism()).isEqualTo(PARALLELISM);
         return jobGraph;
     }
 

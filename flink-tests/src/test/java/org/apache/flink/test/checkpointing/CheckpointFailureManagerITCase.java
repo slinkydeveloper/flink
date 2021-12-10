@@ -52,7 +52,6 @@ import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -63,6 +62,8 @@ import java.util.HashMap;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests to verify end-to-end logic of checkpoint failure manager. */
 public class CheckpointFailureManagerITCase extends TestLogger {
@@ -87,13 +88,13 @@ public class CheckpointFailureManagerITCase extends TestLogger {
         } catch (JobExecutionException jobException) {
             Optional<FlinkRuntimeException> throwable =
                     ExceptionUtils.findThrowable(jobException, FlinkRuntimeException.class);
-            Assert.assertTrue(throwable.isPresent());
-            Assert.assertEquals(
-                    CheckpointFailureManager.EXCEEDED_CHECKPOINT_TOLERABLE_FAILURE_MESSAGE,
-                    throwable.get().getMessage());
+            assertThat(throwable.isPresent()).isTrue();
+            assertThat(throwable.get().getMessage())
+                    .isEqualTo(
+                            CheckpointFailureManager.EXCEEDED_CHECKPOINT_TOLERABLE_FAILURE_MESSAGE);
         }
         // assert that the job only failed once.
-        Assert.assertEquals(1, StringGeneratingSourceFunction.INITIALIZE_TIMES.get());
+        assertThat(StringGeneratingSourceFunction.INITIALIZE_TIMES.get()).isEqualTo(1);
     }
 
     private static class StringGeneratingSourceFunction extends RichParallelSourceFunction<String>

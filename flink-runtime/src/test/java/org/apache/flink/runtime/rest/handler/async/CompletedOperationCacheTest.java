@@ -32,13 +32,10 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link CompletedOperationCache}. */
 public class CompletedOperationCacheTest extends TestLogger {
@@ -62,28 +59,28 @@ public class CompletedOperationCacheTest extends TestLogger {
     public void testShouldFinishClosingCacheIfAllResultsAreEvicted() {
         completedOperationCache.registerOngoingOperation(TEST_OPERATION_KEY, TEST_OPERATION_RESULT);
         final CompletableFuture<Void> closeCacheFuture = completedOperationCache.closeAsync();
-        assertThat(closeCacheFuture.isDone(), is(false));
+        assertThat(closeCacheFuture.isDone()).isEqualTo(false);
 
         manualTicker.advanceTime(300, TimeUnit.SECONDS);
         completedOperationCache.cleanUp();
 
-        assertThat(closeCacheFuture.isDone(), is(true));
+        assertThat(closeCacheFuture.isDone()).isEqualTo(true);
     }
 
     @Test
     public void testShouldFinishClosingCacheIfAllResultsAccessed() throws Exception {
         completedOperationCache.registerOngoingOperation(TEST_OPERATION_KEY, TEST_OPERATION_RESULT);
         final CompletableFuture<Void> closeCacheFuture = completedOperationCache.closeAsync();
-        assertThat(closeCacheFuture.isDone(), is(false));
+        assertThat(closeCacheFuture.isDone()).isEqualTo(false);
 
         final Optional<OperationResult<String>> operationResultOptional =
                 completedOperationCache.get(TEST_OPERATION_KEY);
 
-        assertTrue(operationResultOptional.isPresent());
+        assertThat(operationResultOptional.isPresent()).isTrue();
         OperationResult<String> operationResult = operationResultOptional.get();
-        assertEquals(operationResult.getStatus(), OperationResultStatus.SUCCESS);
-        assertThat(operationResult.getResult(), is(equalTo(TEST_OPERATION_RESULT.get())));
-        assertThat(closeCacheFuture.isDone(), is(true));
+        assertThat(OperationResultStatus.SUCCESS).isEqualTo(operationResult.getStatus());
+        assertThat(operationResult.getResult()).isEqualTo(equalTo(TEST_OPERATION_RESULT.get()));
+        assertThat(closeCacheFuture.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -92,7 +89,7 @@ public class CompletedOperationCacheTest extends TestLogger {
                 TEST_OPERATION_KEY, new CompletableFuture<>());
         final CompletableFuture<Void> terminationFuture = completedOperationCache.closeAsync();
 
-        assertFalse(terminationFuture.isDone());
+        assertThat(terminationFuture.isDone()).isFalse();
 
         try {
             completedOperationCache.registerOngoingOperation(
@@ -112,10 +109,10 @@ public class CompletedOperationCacheTest extends TestLogger {
         final Optional<OperationResult<String>> operationResultOptional =
                 completedOperationCache.get(TEST_OPERATION_KEY);
 
-        assertTrue(operationResultOptional.isPresent());
+        assertThat(operationResultOptional.isPresent()).isTrue();
         final OperationResult<String> operationResult = operationResultOptional.get();
-        assertEquals(operationResult.getStatus(), OperationResultStatus.SUCCESS);
-        assertThat(operationResult.getResult(), is(equalTo(TEST_OPERATION_RESULT.get())));
+        assertThat(OperationResultStatus.SUCCESS).isEqualTo(operationResult.getStatus());
+        assertThat(operationResult.getResult()).isEqualTo(equalTo(TEST_OPERATION_RESULT.get()));
     }
 
     @Test
@@ -126,11 +123,11 @@ public class CompletedOperationCacheTest extends TestLogger {
         completedOperationCache.registerOngoingOperation(TEST_OPERATION_KEY, TEST_OPERATION_RESULT);
 
         // sanity check that the operation can be retrieved before the timeout
-        assertTrue(completedOperationCache.get(TEST_OPERATION_KEY).isPresent());
+        assertThat(completedOperationCache.get(TEST_OPERATION_KEY).isPresent()).isTrue();
 
         manualTicker.advanceTime(timeout.multipliedBy(2).getSeconds(), TimeUnit.SECONDS);
 
-        assertFalse(completedOperationCache.get(TEST_OPERATION_KEY).isPresent());
+        assertThat(completedOperationCache.get(TEST_OPERATION_KEY).isPresent()).isFalse();
     }
 
     @Test
@@ -141,7 +138,7 @@ public class CompletedOperationCacheTest extends TestLogger {
 
         manualTicker.advanceTime(365, TimeUnit.DAYS);
 
-        assertTrue(completedOperationCache.get(TEST_OPERATION_KEY).isPresent());
+        assertThat(completedOperationCache.get(TEST_OPERATION_KEY).isPresent()).isTrue();
     }
 
     @Test
@@ -154,35 +151,34 @@ public class CompletedOperationCacheTest extends TestLogger {
 
         manualTicker.advanceTime(baseTimeout.multipliedBy(2).getSeconds(), TimeUnit.SECONDS);
 
-        assertTrue(completedOperationCache.get(TEST_OPERATION_KEY).isPresent());
+        assertThat(completedOperationCache.get(TEST_OPERATION_KEY).isPresent()).isTrue();
     }
 
     @Test
     public void containsReturnsFalseForUnknownOperation() {
-        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY), is(false));
+        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY)).isEqualTo(false);
     }
 
     @Test
     public void containsChecksOnoingOperations() {
         completedOperationCache.registerOngoingOperation(
                 TEST_OPERATION_KEY, new CompletableFuture<>());
-        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY), is(true));
+        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY)).isEqualTo(true);
     }
 
     @Test
     public void containsChecksCompletedOperations() {
         completedOperationCache.registerOngoingOperation(
                 TEST_OPERATION_KEY, CompletableFuture.completedFuture(null));
-        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY), is(true));
+        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY)).isEqualTo(true);
     }
 
     @Test
     public void containsDoesNotMarkResultAsAccessed() {
         completedOperationCache.registerOngoingOperation(
                 TEST_OPERATION_KEY, CompletableFuture.completedFuture(null));
-        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY), is(true));
-        assertThat(
-                completedOperationCache.closeAsync(),
-                FlinkMatchers.willNotComplete(Duration.ofMillis(10)));
+        assertThat(completedOperationCache.containsOperation(TEST_OPERATION_KEY)).isEqualTo(true);
+        assertThat(completedOperationCache.closeAsync())
+                .satisfies(matching(FlinkMatchers.willNotComplete(Duration.ofMillis(10))));
     }
 }

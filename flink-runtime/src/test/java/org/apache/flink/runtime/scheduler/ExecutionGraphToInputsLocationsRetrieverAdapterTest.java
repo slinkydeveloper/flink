@@ -38,14 +38,11 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link ExecutionGraphToInputsLocationsRetrieverAdapter}. */
 public class ExecutionGraphToInputsLocationsRetrieverAdapterTest extends TestLogger {
@@ -77,11 +74,11 @@ public class ExecutionGraphToInputsLocationsRetrieverAdapterTest extends TestLog
         Collection<Collection<ExecutionVertexID>> producersOfConsumer =
                 inputsLocationsRetriever.getConsumedResultPartitionsProducers(evIdOfConsumer);
 
-        assertThat(producersOfProducer1, is(empty()));
-        assertThat(producersOfProducer2, is(empty()));
-        assertThat(producersOfConsumer, hasSize(2));
-        assertThat(producersOfConsumer, hasItem(Collections.singletonList(evIdOfProducer1)));
-        assertThat(producersOfConsumer, hasItem(Collections.singletonList(evIdOfProducer2)));
+        assertThat(producersOfProducer1).isEqualTo(empty());
+        assertThat(producersOfProducer2).isEqualTo(empty());
+        assertThat(producersOfConsumer).satisfies(matching(hasSize(2)));
+        assertThat(producersOfConsumer).contains(Collections.singletonList(evIdOfProducer1));
+        assertThat(producersOfConsumer).contains(Collections.singletonList(evIdOfProducer2));
     }
 
     /** Tests that it will get empty task manager location if vertex is not scheduled. */
@@ -97,7 +94,7 @@ public class ExecutionGraphToInputsLocationsRetrieverAdapterTest extends TestLog
         Optional<CompletableFuture<TaskManagerLocation>> taskManagerLocation =
                 inputsLocationsRetriever.getTaskManagerLocation(executionVertexId);
 
-        assertFalse(taskManagerLocation.isPresent());
+        assertThat(taskManagerLocation.isPresent()).isFalse();
     }
 
     /** Tests that it can get the task manager location in an Execution. */
@@ -118,12 +115,12 @@ public class ExecutionGraphToInputsLocationsRetrieverAdapterTest extends TestLog
         Optional<CompletableFuture<TaskManagerLocation>> taskManagerLocationOptional =
                 inputsLocationsRetriever.getTaskManagerLocation(executionVertexId);
 
-        assertTrue(taskManagerLocationOptional.isPresent());
+        assertThat(taskManagerLocationOptional.isPresent()).isTrue();
 
         final CompletableFuture<TaskManagerLocation> taskManagerLocationFuture =
                 taskManagerLocationOptional.get();
-        assertThat(
-                taskManagerLocationFuture.get(), is(testingLogicalSlot.getTaskManagerLocation()));
+        assertThat(taskManagerLocationFuture.get())
+                .isEqualTo(testingLogicalSlot.getTaskManagerLocation());
     }
 
     /**

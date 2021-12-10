@@ -25,7 +25,6 @@ import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.contrib.streaming.state.RocksDBKeyedStateBackend;
 import org.apache.flink.runtime.state.KeyedStateBackend;
 
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Rule;
 import org.junit.Test;
@@ -44,6 +43,7 @@ import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBen
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getListState;
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getMapState;
 import static org.apache.flink.contrib.streaming.state.benchmark.StateBackendBenchmarkUtils.getValueState;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 
@@ -113,7 +113,7 @@ public class StateBackendBenchmarkUtilsTest {
                 });
         for (long i = 0; i < 10; i++) {
             backend.setCurrentKey(i);
-            Assert.assertNull(listState.get());
+            assertThat(listState.get()).isNull();
         }
         cleanUp(backend);
     }

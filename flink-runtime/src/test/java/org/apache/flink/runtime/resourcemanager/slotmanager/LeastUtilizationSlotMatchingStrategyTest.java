@@ -32,9 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link LeastUtilizationSlotMatchingStrategy}. */
 public class LeastUtilizationSlotMatchingStrategyTest extends TestLogger {
@@ -71,8 +69,8 @@ public class LeastUtilizationSlotMatchingStrategyTest extends TestLogger {
                         freeSlots,
                         createRegisteredSlotsLookupFunction(registeredSlotPerTaskExecutor));
 
-        assertTrue(matchingSlot.isPresent());
-        assertThat(matchingSlot.get().getSlotId(), is(leastUtilizedSlot.getSlotId()));
+        assertThat(matchingSlot.isPresent()).isTrue();
+        assertThat(matchingSlot.get().getSlotId()).isEqualTo(leastUtilizedSlot.getSlotId());
     }
 
     private Function<InstanceID, Integer> createRegisteredSlotsLookupFunction(

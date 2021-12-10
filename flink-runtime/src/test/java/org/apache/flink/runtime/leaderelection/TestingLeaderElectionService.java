@@ -25,6 +25,8 @@ import javax.annotation.Nonnull;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Test {@link LeaderElectionService} implementation which directly forwards isLeader and notLeader
  * calls to the contender.
@@ -48,7 +50,7 @@ public class TestingLeaderElectionService implements LeaderElectionService {
 
     @Override
     public synchronized void start(LeaderContender contender) {
-        assert (!getStartFuture().isDone());
+        assertThat((!getStartFuture().isDone())).isTrue();
 
         this.contender = contender;
 

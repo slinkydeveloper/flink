@@ -34,12 +34,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.hamcrest.core.Is.is;
 
 /** Test for the {@link ResourceManagerPartitionTrackerImpl}. */
 public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
@@ -60,8 +60,8 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
                 new ResourceManagerPartitionTrackerImpl(partitionReleaser);
 
         reportEmpty(tracker, TASK_EXECUTOR_ID_1);
-        assertThat(partitionReleaser.releaseCalls, empty());
-        assertThat(tracker.areAllMapsEmpty(), is(true));
+        assertThat(partitionReleaser.releaseCalls).satisfies(matching(empty()));
+        assertThat(tracker.areAllMapsEmpty()).isEqualTo(true);
     }
 
     /**
@@ -77,9 +77,13 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
         report(tracker, TASK_EXECUTOR_ID_1, DATA_SET_ID, 2, PARTITION_ID_1, PARTITION_ID_2);
         report(tracker, TASK_EXECUTOR_ID_1, DATA_SET_ID, 2, PARTITION_ID_2);
 
-        assertThat(
-                partitionReleaser.releaseCalls,
-                contains(Tuple2.of(TASK_EXECUTOR_ID_1, Collections.singleton(DATA_SET_ID))));
+        assertThat(partitionReleaser.releaseCalls)
+                .satisfies(
+                        matching(
+                                contains(
+                                        Tuple2.of(
+                                                TASK_EXECUTOR_ID_1,
+                                                Collections.singleton(DATA_SET_ID)))));
     }
 
     /**
@@ -97,9 +101,13 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
 
         reportEmpty(tracker, TASK_EXECUTOR_ID_1);
 
-        assertThat(
-                partitionReleaser.releaseCalls,
-                contains(Tuple2.of(TASK_EXECUTOR_ID_2, Collections.singleton(DATA_SET_ID))));
+        assertThat(partitionReleaser.releaseCalls)
+                .satisfies(
+                        matching(
+                                contains(
+                                        Tuple2.of(
+                                                TASK_EXECUTOR_ID_2,
+                                                Collections.singleton(DATA_SET_ID)))));
     }
 
     @Test
@@ -107,7 +115,7 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
         final ResourceManagerPartitionTrackerImpl tracker =
                 new ResourceManagerPartitionTrackerImpl(new TestClusterPartitionReleaser());
 
-        assertThat(tracker.listDataSets().size(), is(0));
+        assertThat(tracker.listDataSets().size()).isEqualTo(0);
 
         report(tracker, TASK_EXECUTOR_ID_1, DATA_SET_ID, 2, PARTITION_ID_1);
         checkListedDataSets(tracker, 1, 2);
@@ -119,18 +127,18 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
         checkListedDataSets(tracker, 1, 2);
 
         reportEmpty(tracker, TASK_EXECUTOR_ID_2);
-        assertThat(tracker.listDataSets().size(), is(0));
+        assertThat(tracker.listDataSets().size()).isEqualTo(0);
 
-        assertThat(tracker.areAllMapsEmpty(), is(true));
+        assertThat(tracker.areAllMapsEmpty()).isEqualTo(true);
     }
 
     private static void checkListedDataSets(
             ResourceManagerPartitionTracker tracker, int expectedRegistered, int expectedTotal) {
         final Map<IntermediateDataSetID, DataSetMetaInfo> listing = tracker.listDataSets();
-        assertThat(listing, hasKey(DATA_SET_ID));
+        assertThat(listing).satisfies(matching(hasKey(DATA_SET_ID)));
         DataSetMetaInfo metaInfo = listing.get(DATA_SET_ID);
-        assertThat(metaInfo.getNumRegisteredPartitions().orElse(-1), is(expectedRegistered));
-        assertThat(metaInfo.getNumTotalPartitions(), is(expectedTotal));
+        assertThat(metaInfo.getNumRegisteredPartitions().orElse(-1)).isEqualTo(expectedRegistered);
+        assertThat(metaInfo.getNumTotalPartitions()).isEqualTo(expectedTotal);
     }
 
     @Test
@@ -145,21 +153,26 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
         final CompletableFuture<Void> partitionReleaseFuture =
                 tracker.releaseClusterPartitions(DATA_SET_ID);
 
-        assertThat(
-                partitionReleaser.releaseCalls,
-                containsInAnyOrder(
-                        Tuple2.of(TASK_EXECUTOR_ID_1, Collections.singleton(DATA_SET_ID)),
-                        Tuple2.of(TASK_EXECUTOR_ID_2, Collections.singleton(DATA_SET_ID))));
+        assertThat(partitionReleaser.releaseCalls)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        Tuple2.of(
+                                                TASK_EXECUTOR_ID_1,
+                                                Collections.singleton(DATA_SET_ID)),
+                                        Tuple2.of(
+                                                TASK_EXECUTOR_ID_2,
+                                                Collections.singleton(DATA_SET_ID)))));
 
         // the data set should still be tracked, since the partition release was not confirmed yet
         // by the task executors
-        assertThat(tracker.listDataSets().keySet(), contains(DATA_SET_ID));
+        assertThat(tracker.listDataSets().keySet()).satisfies(matching(contains(DATA_SET_ID)));
 
         // ack the partition release
         reportEmpty(tracker, TASK_EXECUTOR_ID_1, TASK_EXECUTOR_ID_2);
 
-        assertThat(partitionReleaseFuture.isDone(), is(true));
-        assertThat(tracker.areAllMapsEmpty(), is(true));
+        assertThat(partitionReleaseFuture.isDone()).isEqualTo(true);
+        assertThat(tracker.areAllMapsEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -169,22 +182,26 @@ public class ResourceManagerPartitionTrackerImplTest extends TestLogger {
                 new ResourceManagerPartitionTrackerImpl(partitionReleaser);
 
         tracker.processTaskExecutorShutdown(TASK_EXECUTOR_ID_1);
-        assertThat(partitionReleaser.releaseCalls, empty());
+        assertThat(partitionReleaser.releaseCalls).satisfies(matching(empty()));
 
         report(tracker, TASK_EXECUTOR_ID_1, DATA_SET_ID, 3, PARTITION_ID_1, PARTITION_ID_2);
         report(tracker, TASK_EXECUTOR_ID_2, DATA_SET_ID, 3, new ResultPartitionID());
 
         tracker.processTaskExecutorShutdown(TASK_EXECUTOR_ID_1);
 
-        assertThat(
-                partitionReleaser.releaseCalls,
-                contains(Tuple2.of(TASK_EXECUTOR_ID_2, Collections.singleton(DATA_SET_ID))));
+        assertThat(partitionReleaser.releaseCalls)
+                .satisfies(
+                        matching(
+                                contains(
+                                        Tuple2.of(
+                                                TASK_EXECUTOR_ID_2,
+                                                Collections.singleton(DATA_SET_ID)))));
 
-        assertThat(tracker.areAllMapsEmpty(), is(false));
+        assertThat(tracker.areAllMapsEmpty()).isEqualTo(false);
 
         tracker.processTaskExecutorShutdown(TASK_EXECUTOR_ID_2);
 
-        assertThat(tracker.areAllMapsEmpty(), is(true));
+        assertThat(tracker.areAllMapsEmpty()).isEqualTo(true);
     }
 
     private static void reportEmpty(

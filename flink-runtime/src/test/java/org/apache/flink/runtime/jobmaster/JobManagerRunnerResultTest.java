@@ -25,10 +25,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link JobManagerRunnerResult}. */
 public class JobManagerRunnerResultTest extends TestLogger {
@@ -42,8 +39,8 @@ public class JobManagerRunnerResultTest extends TestLogger {
         final JobManagerRunnerResult jobManagerRunnerResult =
                 JobManagerRunnerResult.forSuccess(executionGraphInfo);
 
-        assertTrue(jobManagerRunnerResult.isSuccess());
-        assertFalse(jobManagerRunnerResult.isInitializationFailure());
+        assertThat(jobManagerRunnerResult.isSuccess()).isTrue();
+        assertThat(jobManagerRunnerResult.isInitializationFailure()).isFalse();
     }
 
     @Test
@@ -51,8 +48,8 @@ public class JobManagerRunnerResultTest extends TestLogger {
         final JobManagerRunnerResult jobManagerRunnerResult =
                 JobManagerRunnerResult.forInitializationFailure(executionGraphInfo, testException);
 
-        assertTrue(jobManagerRunnerResult.isInitializationFailure());
-        assertFalse(jobManagerRunnerResult.isSuccess());
+        assertThat(jobManagerRunnerResult.isInitializationFailure()).isTrue();
+        assertThat(jobManagerRunnerResult.isSuccess()).isFalse();
     }
 
     @Test
@@ -60,7 +57,7 @@ public class JobManagerRunnerResultTest extends TestLogger {
         final JobManagerRunnerResult jobManagerRunnerResult =
                 JobManagerRunnerResult.forSuccess(executionGraphInfo);
 
-        assertThat(jobManagerRunnerResult.getExecutionGraphInfo(), is(executionGraphInfo));
+        assertThat(jobManagerRunnerResult.getExecutionGraphInfo()).isEqualTo(executionGraphInfo);
     }
 
     @Test
@@ -68,7 +65,7 @@ public class JobManagerRunnerResultTest extends TestLogger {
         final JobManagerRunnerResult jobManagerRunnerResult =
                 JobManagerRunnerResult.forInitializationFailure(executionGraphInfo, testException);
 
-        assertThat(jobManagerRunnerResult.getInitializationFailure(), is(testException));
+        assertThat(jobManagerRunnerResult.getInitializationFailure()).isEqualTo(testException);
     }
 
     @Test(expected = IllegalStateException.class)

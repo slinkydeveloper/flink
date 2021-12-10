@@ -47,9 +47,8 @@ import org.junit.Test;
 import java.util.Map;
 
 import static org.apache.flink.test.util.TestUtils.tryExecute;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test uses a custom non-serializable data type to to ensure that state serializability is
@@ -106,9 +105,8 @@ public class ProcessingTimeWindowCheckpointingITCase extends TestLogger {
 
                                 @Override
                                 public void open(Configuration parameters) {
-                                    assertEquals(
-                                            PARALLELISM,
-                                            getRuntimeContext().getNumberOfParallelSubtasks());
+                                    assertThat(getRuntimeContext().getNumberOfParallelSubtasks())
+                                            .isEqualTo(PARALLELISM);
                                     open = true;
                                 }
 
@@ -118,12 +116,10 @@ public class ProcessingTimeWindowCheckpointingITCase extends TestLogger {
                                         TimeWindow window,
                                         Iterable<Tuple2<Long, IntType>> values,
                                         Collector<Tuple2<Long, IntType>> out) {
-
                                     // validate that the function has been opened properly
-                                    assertTrue(open);
-
+                                    assertThat(open).isTrue();
                                     for (Tuple2<Long, IntType> value : values) {
-                                        assertEquals(value.f0.intValue(), value.f1.value);
+                                        assertThat(value.f1.value).isEqualTo(value.f0.intValue());
                                         out.collect(new Tuple2<>(value.f0, new IntType(1)));
                                     }
                                 }
@@ -167,9 +163,8 @@ public class ProcessingTimeWindowCheckpointingITCase extends TestLogger {
 
                                 @Override
                                 public void open(Configuration parameters) {
-                                    assertEquals(
-                                            PARALLELISM,
-                                            getRuntimeContext().getNumberOfParallelSubtasks());
+                                    assertThat(getRuntimeContext().getNumberOfParallelSubtasks())
+                                            .isEqualTo(PARALLELISM);
                                     open = true;
                                 }
 
@@ -179,12 +174,10 @@ public class ProcessingTimeWindowCheckpointingITCase extends TestLogger {
                                         TimeWindow window,
                                         Iterable<Tuple2<Long, IntType>> values,
                                         Collector<Tuple2<Long, IntType>> out) {
-
                                     // validate that the function has been opened properly
-                                    assertTrue(open);
-
+                                    assertThat(open).isTrue();
                                     for (Tuple2<Long, IntType> value : values) {
-                                        assertEquals(value.f0.intValue(), value.f1.value);
+                                        assertThat(value.f1.value).isEqualTo(value.f0.intValue());
                                         out.collect(new Tuple2<>(value.f0, new IntType(1)));
                                     }
                                 }

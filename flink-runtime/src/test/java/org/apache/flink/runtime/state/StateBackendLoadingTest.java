@@ -42,11 +42,8 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.net.URI;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** This test validates that state backends are properly loaded from configuration. */
 public class StateBackendLoadingTest {
@@ -63,7 +60,8 @@ public class StateBackendLoadingTest {
 
     @Test
     public void testNoStateBackendDefined() throws Exception {
-        assertNull(StateBackendLoader.loadStateBackendFromConfig(new Configuration(), cl, null));
+        assertThat(StateBackendLoader.loadStateBackendFromConfig(new Configuration(), cl, null))
+                .isNull();
     }
 
     @Test
@@ -72,7 +70,7 @@ public class StateBackendLoadingTest {
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         null, TernaryBoolean.UNDEFINED, new Configuration(), cl, null);
 
-        assertTrue(backend instanceof HashMapStateBackend);
+        assertThat(backend).isInstanceOf(HashMapStateBackend.class);
     }
 
     @Test
@@ -85,7 +83,7 @@ public class StateBackendLoadingTest {
         StateBackend backend =
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         appBackend, TernaryBoolean.UNDEFINED, config, cl, null);
-        assertEquals(appBackend, backend);
+        assertThat(backend).isEqualTo(appBackend);
     }
 
     // ------------------------------------------------------------------------
@@ -108,8 +106,8 @@ public class StateBackendLoadingTest {
         StateBackend backend1 = StateBackendLoader.loadStateBackendFromConfig(config1, cl, null);
         StateBackend backend2 = StateBackendLoader.loadStateBackendFromConfig(config2, cl, null);
 
-        assertTrue(backend1 instanceof MemoryStateBackend);
-        assertTrue(backend2 instanceof MemoryStateBackend);
+        assertThat(backend1).isInstanceOf(MemoryStateBackend.class);
+        assertThat(backend2).isInstanceOf(MemoryStateBackend.class);
     }
 
     /**
@@ -144,13 +142,13 @@ public class StateBackendLoadingTest {
                 (MemoryStateBackend)
                         StateBackendLoader.loadStateBackendFromConfig(config2, cl, null);
 
-        assertNotNull(backend1);
-        assertNotNull(backend2);
+        assertThat(backend1).isNotNull();
+        assertThat(backend2).isNotNull();
 
-        assertEquals(expectedCheckpointPath, backend1.getCheckpointPath());
-        assertEquals(expectedSavepointPath, backend1.getSavepointPath());
-        assertEquals(expectedCheckpointPath, backend2.getCheckpointPath());
-        assertEquals(expectedSavepointPath, backend2.getSavepointPath());
+        assertThat(backend1.getCheckpointPath()).isEqualTo(expectedCheckpointPath);
+        assertThat(backend1.getSavepointPath()).isEqualTo(expectedSavepointPath);
+        assertThat(backend2.getCheckpointPath()).isEqualTo(expectedCheckpointPath);
+        assertThat(backend2.getSavepointPath()).isEqualTo(expectedSavepointPath);
     }
 
     /**
@@ -176,12 +174,12 @@ public class StateBackendLoadingTest {
         StateBackend loadedBackend =
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         backend, TernaryBoolean.UNDEFINED, config, cl, null);
-        assertTrue(loadedBackend instanceof MemoryStateBackend);
+        assertThat(loadedBackend).isInstanceOf(MemoryStateBackend.class);
 
         final MemoryStateBackend memBackend = (MemoryStateBackend) loadedBackend;
-        assertEquals(expectedCheckpointPath, memBackend.getCheckpointPath());
-        assertEquals(expectedSavepointPath, memBackend.getSavepointPath());
-        assertEquals(maxSize, memBackend.getMaxStateSize());
+        assertThat(memBackend.getCheckpointPath()).isEqualTo(expectedCheckpointPath);
+        assertThat(memBackend.getSavepointPath()).isEqualTo(expectedSavepointPath);
+        assertThat(memBackend.getMaxStateSize()).isEqualTo(maxSize);
     }
 
     /**
@@ -210,11 +208,11 @@ public class StateBackendLoadingTest {
         StateBackend loadedBackend =
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         backend, TernaryBoolean.UNDEFINED, config, cl, null);
-        assertTrue(loadedBackend instanceof MemoryStateBackend);
+        assertThat(loadedBackend).isInstanceOf(MemoryStateBackend.class);
 
         final MemoryStateBackend memBackend = (MemoryStateBackend) loadedBackend;
-        assertEquals(expectedCheckpointPath, memBackend.getCheckpointPath());
-        assertEquals(expectedSavepointPath, memBackend.getSavepointPath());
+        assertThat(memBackend.getCheckpointPath()).isEqualTo(expectedCheckpointPath);
+        assertThat(memBackend.getSavepointPath()).isEqualTo(expectedSavepointPath);
     }
 
     // ------------------------------------------------------------------------
@@ -254,16 +252,17 @@ public class StateBackendLoadingTest {
         StateBackend backend1 = StateBackendLoader.loadStateBackendFromConfig(config1, cl, null);
         StateBackend backend2 = StateBackendLoader.loadStateBackendFromConfig(config2, cl, null);
 
-        assertTrue(backend1 instanceof HashMapStateBackend);
-        assertTrue(backend2 instanceof FsStateBackend);
+        assertThat(backend1).isInstanceOf(HashMapStateBackend.class);
+        assertThat(backend2).isInstanceOf(FsStateBackend.class);
 
         HashMapStateBackend fs1 = (HashMapStateBackend) backend1;
         FsStateBackend fs2 = (FsStateBackend) backend2;
 
-        assertEquals(expectedCheckpointsPath, fs2.getCheckpointPath());
-        assertEquals(expectedSavepointsPath, fs2.getSavepointPath());
-        assertEquals(threshold.getBytes(), fs2.getMinFileSizeThreshold());
-        assertEquals(Math.max(threshold.getBytes(), minWriteBufferSize), fs2.getWriteBufferSize());
+        assertThat(fs2.getCheckpointPath()).isEqualTo(expectedCheckpointsPath);
+        assertThat(fs2.getSavepointPath()).isEqualTo(expectedSavepointsPath);
+        assertThat(fs2.getMinFileSizeThreshold()).isEqualTo(threshold.getBytes());
+        assertThat(fs2.getWriteBufferSize())
+                .isEqualTo(Math.max(threshold.getBytes(), minWriteBufferSize));
     }
 
     /**
@@ -306,13 +305,13 @@ public class StateBackendLoadingTest {
         final StateBackend loadedBackend =
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         backend, TernaryBoolean.UNDEFINED, config, cl, null);
-        assertTrue(loadedBackend instanceof FsStateBackend);
+        assertThat(loadedBackend).isInstanceOf(FsStateBackend.class);
 
         final FsStateBackend fs = (FsStateBackend) loadedBackend;
-        assertEquals(expectedCheckpointsPath, fs.getCheckpointPath());
-        assertEquals(expectedSavepointsPath, fs.getSavepointPath());
-        assertEquals(threshold, fs.getMinFileSizeThreshold());
-        assertEquals(writeBufferSize, fs.getWriteBufferSize());
+        assertThat(fs.getCheckpointPath()).isEqualTo(expectedCheckpointsPath);
+        assertThat(fs.getSavepointPath()).isEqualTo(expectedSavepointsPath);
+        assertThat(fs.getMinFileSizeThreshold()).isEqualTo(threshold);
+        assertThat(fs.getWriteBufferSize()).isEqualTo(writeBufferSize);
     }
 
     // ------------------------------------------------------------------------
@@ -419,24 +418,24 @@ public class StateBackendLoadingTest {
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         null, TernaryBoolean.UNDEFINED, config2, cl, null);
 
-        assertTrue(loaded1 instanceof MemoryStateBackend);
-        assertTrue(loaded2 instanceof HashMapStateBackend);
-        assertTrue(loaded3 instanceof MemoryStateBackend);
+        assertThat(loaded1).isInstanceOf(MemoryStateBackend.class);
+        assertThat(loaded2).isInstanceOf(HashMapStateBackend.class);
+        assertThat(loaded3).isInstanceOf(MemoryStateBackend.class);
 
         final MemoryStateBackend memBackend1 = (MemoryStateBackend) loaded1;
         final MemoryStateBackend memBackend2 = (MemoryStateBackend) loaded3;
 
-        assertNull(memBackend1.getSavepointPath());
+        assertThat(memBackend1.getSavepointPath()).isNull();
 
         if (checkpointPath != null) {
-            assertNotNull(memBackend1.getCheckpointPath());
-            assertNotNull(memBackend2.getCheckpointPath());
+            assertThat(memBackend1.getCheckpointPath()).isNotNull();
+            assertThat(memBackend2.getCheckpointPath()).isNotNull();
 
-            assertEquals(checkpointPath, memBackend1.getCheckpointPath());
-            assertEquals(checkpointPath, memBackend2.getCheckpointPath());
+            assertThat(memBackend1.getCheckpointPath()).isEqualTo(checkpointPath);
+            assertThat(memBackend2.getCheckpointPath()).isEqualTo(checkpointPath);
         } else {
-            assertNull(memBackend1.getCheckpointPath());
-            assertNull(memBackend2.getCheckpointPath());
+            assertThat(memBackend1.getCheckpointPath()).isNull();
+            assertThat(memBackend2.getCheckpointPath()).isNull();
         }
     }
 

@@ -29,10 +29,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the {@link DefaultResourceTracker}.
@@ -49,7 +50,7 @@ public class DefaultResourceTrackerTest extends TestLogger {
     public void testInitialBehavior() {
         DefaultResourceTracker tracker = new DefaultResourceTracker();
 
-        assertThat(tracker.isEmpty(), is(true));
+        assertThat(tracker.isEmpty()).isEqualTo(true);
         tracker.notifyLostResource(JobID.generate(), ResourceProfile.ANY);
     }
 
@@ -72,10 +73,12 @@ public class DefaultResourceTrackerTest extends TestLogger {
 
         Map<JobID, Collection<ResourceRequirement>> requiredResources =
                 tracker.getMissingResources();
-        assertThat(
-                requiredResources, IsMapContaining.hasEntry(is(JOB_ID_1), contains(requirement1)));
-        assertThat(
-                requiredResources, IsMapContaining.hasEntry(is(JOB_ID_2), contains(requirement2)));
+        assertThat(requiredResources)
+                .satisfies(
+                        matching(IsMapContaining.hasEntry(is(JOB_ID_1), contains(requirement1))));
+        assertThat(requiredResources)
+                .satisfies(
+                        matching(IsMapContaining.hasEntry(is(JOB_ID_2), contains(requirement2))));
     }
 
     @Test
@@ -90,11 +93,13 @@ public class DefaultResourceTrackerTest extends TestLogger {
             tracker.notifyAcquiredResource(JOB_ID_2, requirement2.getResourceProfile());
         }
 
-        assertThat(tracker.getAcquiredResources(JOB_ID_1), contains(requirement1));
-        assertThat(tracker.getAcquiredResources(JOB_ID_2), contains(requirement2));
+        assertThat(tracker.getAcquiredResources(JOB_ID_1))
+                .satisfies(matching(contains(requirement1)));
+        assertThat(tracker.getAcquiredResources(JOB_ID_2))
+                .satisfies(matching(contains(requirement2)));
 
         tracker.notifyLostResource(JOB_ID_1, requirement1.getResourceProfile());
-        assertThat(tracker.getAcquiredResources(JOB_ID_1), empty());
+        assertThat(tracker.getAcquiredResources(JOB_ID_1)).satisfies(matching(empty()));
     }
 
     @Test
@@ -104,10 +109,10 @@ public class DefaultResourceTrackerTest extends TestLogger {
         tracker.notifyResourceRequirements(
                 JOB_ID_1,
                 Collections.singletonList(ResourceRequirement.create(ResourceProfile.ANY, 1)));
-        assertThat(tracker.isEmpty(), is(false));
+        assertThat(tracker.isEmpty()).isEqualTo(false);
 
         tracker.notifyResourceRequirements(JOB_ID_1, Collections.emptyList());
-        assertThat(tracker.isEmpty(), is(true));
+        assertThat(tracker.isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -115,10 +120,10 @@ public class DefaultResourceTrackerTest extends TestLogger {
         DefaultResourceTracker tracker = new DefaultResourceTracker();
 
         tracker.notifyAcquiredResource(JOB_ID_1, ResourceProfile.ANY);
-        assertThat(tracker.isEmpty(), is(false));
+        assertThat(tracker.isEmpty()).isEqualTo(false);
 
         tracker.notifyLostResource(JOB_ID_1, ResourceProfile.ANY);
-        assertThat(tracker.isEmpty(), is(true));
+        assertThat(tracker.isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -131,10 +136,10 @@ public class DefaultResourceTrackerTest extends TestLogger {
                 Collections.singletonList(ResourceRequirement.create(ResourceProfile.ANY, 1)));
 
         tracker.notifyLostResource(JOB_ID_1, ResourceProfile.ANY);
-        assertThat(tracker.isEmpty(), is(false));
+        assertThat(tracker.isEmpty()).isEqualTo(false);
 
         tracker.notifyResourceRequirements(JOB_ID_1, Collections.emptyList());
-        assertThat(tracker.isEmpty(), is(true));
+        assertThat(tracker.isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -147,9 +152,9 @@ public class DefaultResourceTrackerTest extends TestLogger {
                 Collections.singletonList(ResourceRequirement.create(ResourceProfile.ANY, 1)));
 
         tracker.notifyResourceRequirements(JOB_ID_1, Collections.emptyList());
-        assertThat(tracker.isEmpty(), is(false));
+        assertThat(tracker.isEmpty()).isEqualTo(false);
 
         tracker.notifyLostResource(JOB_ID_1, ResourceProfile.ANY);
-        assertThat(tracker.isEmpty(), is(true));
+        assertThat(tracker.isEmpty()).isEqualTo(true);
     }
 }

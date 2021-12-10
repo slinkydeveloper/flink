@@ -62,7 +62,6 @@ import org.apache.flink.shaded.netty4.io.netty.handler.codec.LengthFieldBasedFra
 
 import org.hamcrest.core.CombinableMatcher;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -87,12 +86,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.either;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link Client}. */
 public class ClientTest extends TestLogger {
@@ -157,12 +154,12 @@ public class ClientTest extends TestLogger {
 
             for (long i = 0L; i < numQueries; i++) {
                 ByteBuf buf = received.take();
-                assertNotNull("Receive timed out", buf);
+                assertThat(buf).as("Receive timed out").isNotNull();
 
                 Channel ch = channel.get();
-                assertNotNull("Channel not active", ch);
+                assertThat(ch).as("Channel not active").isNotNull();
 
-                assertEquals(MessageType.REQUEST, MessageSerializer.deserializeHeader(buf));
+                assertThat(MessageSerializer.deserializeHeader(buf)).isEqualTo(MessageType.REQUEST);
                 long requestId = MessageSerializer.getRequestId(buf);
                 KvStateInternalRequest deserRequest = serializer.deserializeRequest(buf);
 
@@ -189,7 +186,7 @@ public class ClientTest extends TestLogger {
 
                 if (i % 2L == 0L) {
                     KvStateResponse serializedResult = futures.get((int) i).get();
-                    assertArrayEquals(expected, serializedResult.getContent());
+                    assertThat(serializedResult.getContent()).isEqualTo(expected);
                 } else {
                     try {
                         futures.get((int) i).get();
@@ -204,7 +201,7 @@ public class ClientTest extends TestLogger {
                 }
             }
 
-            assertEquals(numQueries, stats.getNumRequests());
+            assertThat(stats.getNumRequests()).isEqualTo(numQueries);
             long expectedRequests = numQueries / 2L;
 
             // Counts can take some time to propagate
@@ -213,8 +210,8 @@ public class ClientTest extends TestLogger {
                 Thread.sleep(100L);
             }
 
-            assertEquals(expectedRequests, stats.getNumSuccessful());
-            assertEquals(expectedRequests, stats.getNumFailed());
+            assertThat(stats.getNumSuccessful()).isEqualTo(expectedRequests);
+            assertThat(stats.getNumFailed()).isEqualTo(expectedRequests);
         } finally {
             if (client != null) {
                 Exception exc = null;
@@ -231,15 +228,16 @@ public class ClientTest extends TestLogger {
                     LOG.error("An exception occurred while shutting down netty.", e);
                 }
 
-                Assert.assertTrue(
-                        ExceptionUtils.stringifyException(exc), client.isEventGroupShutdown());
+                assertThat(client.isEventGroupShutdown())
+                        .as(ExceptionUtils.stringifyException(exc))
+                        .isTrue();
             }
 
             if (serverChannel != null) {
                 serverChannel.close();
             }
 
-            assertEquals("Channel leak", 0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).as("Channel leak").isEqualTo(0L);
         }
     }
 
@@ -267,10 +265,11 @@ public class ClientTest extends TestLogger {
                     new KvStateInternalRequest(new KvStateID(), new byte[0]);
             CompletableFuture<KvStateResponse> future = client.sendRequest(serverAddress, request);
 
-            assertThat(
-                    future,
-                    FlinkMatchers.futureWillCompleteExceptionally(
-                            ConnectException.class, Duration.ofHours(1)));
+            assertThat(future)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            ConnectException.class, Duration.ofHours(1))));
         } finally {
             if (client != null) {
                 try {
@@ -278,10 +277,10 @@ public class ClientTest extends TestLogger {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Assert.assertTrue(client.isEventGroupShutdown());
+                assertThat(client.isEventGroupShutdown()).isTrue();
             }
 
-            assertEquals("Channel leak", 0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).as("Channel leak").isEqualTo(0L);
         }
     }
 
@@ -341,7 +340,7 @@ public class ClientTest extends TestLogger {
                 List<CompletableFuture<KvStateResponse>> results = future.get();
                 for (CompletableFuture<KvStateResponse> result : results) {
                     KvStateResponse actual = result.get();
-                    assertArrayEquals(serializedResult, actual.getContent());
+                    assertThat(actual.getContent()).isEqualTo(serializedResult);
                 }
             }
 
@@ -352,8 +351,8 @@ public class ClientTest extends TestLogger {
                 Thread.sleep(100L);
             }
 
-            assertEquals(totalQueries, stats.getNumRequests());
-            assertEquals(totalQueries, stats.getNumSuccessful());
+            assertThat(stats.getNumRequests()).isEqualTo(totalQueries);
+            assertThat(stats.getNumSuccessful()).isEqualTo(totalQueries);
         } finally {
             if (executor != null) {
                 executor.shutdown();
@@ -369,10 +368,10 @@ public class ClientTest extends TestLogger {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Assert.assertTrue(client.isEventGroupShutdown());
+                assertThat(client.isEventGroupShutdown()).isTrue();
             }
 
-            assertEquals("Channel leak", 0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).as("Channel leak").isEqualTo(0L);
         }
     }
 
@@ -412,17 +411,17 @@ public class ClientTest extends TestLogger {
             futures.add(client.sendRequest(serverAddress, request));
 
             ByteBuf buf = received.take();
-            assertNotNull("Receive timed out", buf);
+            assertThat(buf).as("Receive timed out").isNotNull();
             buf.release();
 
             buf = received.take();
-            assertNotNull("Receive timed out", buf);
+            assertThat(buf).as("Receive timed out").isNotNull();
             buf.release();
 
-            assertEquals(1L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).isEqualTo(1L);
 
             Channel ch = channel.get();
-            assertNotNull("Channel not active", ch);
+            assertThat(ch).as("Channel not active").isNotNull();
 
             // Respond with failure
             ch.writeAndFlush(
@@ -452,16 +451,16 @@ public class ClientTest extends TestLogger {
                 // Expected
             }
 
-            assertEquals(0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).isEqualTo(0L);
 
             // Counts can take some time to propagate
             while (stats.getNumSuccessful() != 0L || stats.getNumFailed() != 2L) {
                 Thread.sleep(100L);
             }
 
-            assertEquals(2L, stats.getNumRequests());
-            assertEquals(0L, stats.getNumSuccessful());
-            assertEquals(2L, stats.getNumFailed());
+            assertThat(stats.getNumRequests()).isEqualTo(2L);
+            assertThat(stats.getNumSuccessful()).isEqualTo(0L);
+            assertThat(stats.getNumFailed()).isEqualTo(2L);
         } finally {
             if (client != null) {
                 try {
@@ -469,14 +468,14 @@ public class ClientTest extends TestLogger {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Assert.assertTrue(client.isEventGroupShutdown());
+                assertThat(client.isEventGroupShutdown()).isTrue();
             }
 
             if (serverChannel != null) {
                 serverChannel.close();
             }
 
-            assertEquals("Channel leak", 0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).as("Channel leak").isEqualTo(0L);
         }
     }
 
@@ -514,7 +513,7 @@ public class ClientTest extends TestLogger {
 
             received.take();
 
-            assertEquals(1, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).isEqualTo(1);
 
             channel.get().close().await();
 
@@ -528,16 +527,16 @@ public class ClientTest extends TestLogger {
                 // Expected
             }
 
-            assertEquals(0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).isEqualTo(0L);
 
             // Counts can take some time to propagate
             while (stats.getNumSuccessful() != 0L || stats.getNumFailed() != 1L) {
                 Thread.sleep(100L);
             }
 
-            assertEquals(1L, stats.getNumRequests());
-            assertEquals(0L, stats.getNumSuccessful());
-            assertEquals(1L, stats.getNumFailed());
+            assertThat(stats.getNumRequests()).isEqualTo(1L);
+            assertThat(stats.getNumSuccessful()).isEqualTo(0L);
+            assertThat(stats.getNumFailed()).isEqualTo(1L);
         } finally {
             if (client != null) {
                 try {
@@ -545,14 +544,14 @@ public class ClientTest extends TestLogger {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Assert.assertTrue(client.isEventGroupShutdown());
+                assertThat(client.isEventGroupShutdown()).isTrue();
             }
 
             if (serverChannel != null) {
                 serverChannel.close();
             }
 
-            assertEquals("Channel leak", 0L, stats.getNumConnections());
+            assertThat(stats.getNumConnections()).as("Channel leak").isEqualTo(0L);
         }
     }
 
@@ -703,7 +702,7 @@ public class ClientTest extends TestLogger {
                                 int value =
                                         KvStateSerializer.deserializeValue(
                                                 buf, IntSerializer.INSTANCE);
-                                assertEquals(201L + targetServer, value);
+                                assertThat(value).isEqualTo(201L + targetServer);
                             }
                         }
                     };
@@ -725,7 +724,7 @@ public class ClientTest extends TestLogger {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            Assert.assertTrue(client.isEventGroupShutdown());
+            assertThat(client.isEventGroupShutdown()).isTrue();
 
             final CombinableMatcher<Throwable> exceptionMatcher =
                     either(FlinkMatchers.containsCause(ClosedChannelException.class))
@@ -736,18 +735,21 @@ public class ClientTest extends TestLogger {
                     future.get();
                     fail("Did not throw expected Exception after shut down");
                 } catch (ExecutionException t) {
-                    assertThat(t, exceptionMatcher);
+                    assertThat(t).satisfies(matching(exceptionMatcher));
                 }
             }
 
-            assertEquals("Connection leak (client)", 0L, clientStats.getNumConnections());
+            assertThat(clientStats.getNumConnections())
+                    .as("Connection leak (client)")
+                    .isEqualTo(0L);
             for (int i = 0; i < numServers; i++) {
                 boolean success = false;
                 int numRetries = 0;
                 while (!success) {
                     try {
-                        assertEquals(
-                                "Connection leak (server)", 0L, serverStats[i].getNumConnections());
+                        assertThat(serverStats[i].getNumConnections())
+                                .as("Connection leak (server)")
+                                .isEqualTo(0L);
                         success = true;
                     } catch (Throwable t) {
                         if (numRetries < 10) {
@@ -767,7 +769,7 @@ public class ClientTest extends TestLogger {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Assert.assertTrue(client.isEventGroupShutdown());
+                assertThat(client.isEventGroupShutdown()).isTrue();
             }
 
             for (int i = 0; i < numServers; i++) {
@@ -849,7 +851,7 @@ public class ClientTest extends TestLogger {
         @Override
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             ByteBuf buf = (ByteBuf) msg;
-            assertEquals(MessageType.REQUEST, MessageSerializer.deserializeHeader(buf));
+            assertThat(MessageSerializer.deserializeHeader(buf)).isEqualTo(MessageType.REQUEST);
             long requestId = MessageSerializer.getRequestId(buf);
             KvStateInternalRequest request = serializer.deserializeRequest(buf);
 

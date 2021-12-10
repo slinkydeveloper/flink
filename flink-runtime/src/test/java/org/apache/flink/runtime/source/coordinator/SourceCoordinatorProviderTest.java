@@ -34,9 +34,7 @@ import org.junit.Test;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link SourceCoordinatorProvider}. */
 public class SourceCoordinatorProviderTest {
@@ -60,7 +58,7 @@ public class SourceCoordinatorProviderTest {
     public void testCreate() throws Exception {
         OperatorCoordinator coordinator =
                 provider.create(new MockOperatorCoordinatorContext(OPERATOR_ID, NUM_SPLITS));
-        assertTrue(coordinator instanceof RecreateOnResetOperatorCoordinator);
+        assertThat(coordinator).isInstanceOf(RecreateOnResetOperatorCoordinator.class);
     }
 
     @Test
@@ -91,15 +89,13 @@ public class SourceCoordinatorProviderTest {
         coordinator.resetToCheckpoint(0L, bytes);
         final SourceCoordinator<?, ?> restoredSourceCoordinator =
                 (SourceCoordinator<?, ?>) coordinator.getInternalCoordinator();
-        assertNotEquals(
-                "The restored source coordinator should be a different instance",
-                restoredSourceCoordinator,
-                sourceCoordinator);
+        assertThat(sourceCoordinator)
+                .as("The restored source coordinator should be a different instance")
+                .isEqualTo(restoredSourceCoordinator);
         // FLINK-21452: do not (re)store registered readers
-        assertEquals(
-                "There should be no registered reader.",
-                0,
-                restoredSourceCoordinator.getContext().registeredReaders().size());
+        assertThat(restoredSourceCoordinator.getContext().registeredReaders().size())
+                .as("There should be no registered reader.")
+                .isEqualTo(0);
     }
 
     @Test

@@ -42,9 +42,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 
 import static org.apache.flink.api.common.JobStatus.FINISHED;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests that co-location constraints work as expected in the case of task restarts. */
 public class ExecutionGraphCoLocationRestartTest {
@@ -91,7 +90,7 @@ public class ExecutionGraphCoLocationRestartTest {
         final ExecutionGraph eg = scheduler.getExecutionGraph();
 
         // enable the queued scheduling for the slot pool
-        assertEquals(JobStatus.CREATED, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.CREATED);
 
         scheduler.startScheduling();
 
@@ -99,14 +98,14 @@ public class ExecutionGraphCoLocationRestartTest {
                 ExecutionGraphTestUtils.isInExecutionState(ExecutionState.DEPLOYING);
         ExecutionGraphTestUtils.waitForAllExecutionsPredicate(eg, isDeploying, timeout);
 
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
 
         // sanity checks
         validateConstraints(eg);
 
-        eg.getAllExecutionVertices().iterator().next().fail(new FlinkException("Test exception"));
+        fail("unknown failure", new FlinkException("Test exception"));
 
-        assertEquals(JobStatus.RESTARTING, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.RESTARTING);
 
         // trigger registration of restartTasks(...) callback to cancelFuture before completing the
         // cancellation. This ensures the restarting actions to be performed in main thread.
@@ -128,7 +127,7 @@ public class ExecutionGraphCoLocationRestartTest {
 
         ExecutionGraphTestUtils.finishAllVertices(eg);
 
-        assertThat(eg.getState(), is(FINISHED));
+        assertThat(eg.getState()).isEqualTo(FINISHED);
     }
 
     private void validateConstraints(ExecutionGraph eg) {
@@ -142,7 +141,7 @@ public class ExecutionGraphCoLocationRestartTest {
             TaskManagerLocation taskManagerLocation1 =
                     tasks[1].getTaskVertices()[i].getCurrentAssignedResourceLocation();
 
-            assertThat(taskManagerLocation0, is(taskManagerLocation1));
+            assertThat(taskManagerLocation0).isEqualTo(taskManagerLocation1);
         }
     }
 }

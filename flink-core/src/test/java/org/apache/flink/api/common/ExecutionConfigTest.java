@@ -43,12 +43,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ExecutionConfigTest extends TestLogger {
 
@@ -65,10 +61,10 @@ public class ExecutionConfigTest extends TestLogger {
         int counter = 0;
 
         for (Class<?> tpe : config.getRegisteredKryoTypes()) {
-            assertEquals(tpe, expectedTypes.get(counter++));
+            assertThat(expectedTypes.get(counter++)).isEqualTo(tpe);
         }
 
-        assertEquals(expectedTypes.size(), counter);
+        assertThat(counter).isEqualTo(expectedTypes.size());
     }
 
     @Test
@@ -79,13 +75,13 @@ public class ExecutionConfigTest extends TestLogger {
         int parallelism = 36;
         config.setParallelism(parallelism);
 
-        assertEquals(parallelism, config.getParallelism());
+        assertThat(config.getParallelism()).isEqualTo(parallelism);
 
         // verify that parallelism is reset to default flag value
         parallelism = ExecutionConfig.PARALLELISM_DEFAULT;
         config.setParallelism(parallelism);
 
-        assertEquals(parallelism, config.getParallelism());
+        assertThat(config.getParallelism()).isEqualTo(parallelism);
     }
 
     @Test
@@ -95,7 +91,7 @@ public class ExecutionConfigTest extends TestLogger {
 
         // by default, generic types are supported
         TypeSerializer<Object> serializer = typeInfo.createSerializer(conf);
-        assertTrue(serializer instanceof KryoSerializer);
+        assertThat(serializer).isInstanceOf(KryoSerializer.class);
 
         // expect an exception when generic types are disabled
         conf.disableGenericTypes();
@@ -151,25 +147,25 @@ public class ExecutionConfigTest extends TestLogger {
         final ExecutionConfig copy2 =
                 new SerializedValue<>(config).deserializeValue(getClass().getClassLoader());
 
-        assertNotNull(copy1);
-        assertNotNull(copy2);
+        assertThat(copy1).isNotNull();
+        assertThat(copy2).isNotNull();
 
-        assertEquals(config, copy1);
-        assertEquals(config, copy2);
+        assertThat(copy1).isEqualTo(config);
+        assertThat(copy2).isEqualTo(config);
 
-        assertEquals(closureCleanerEnabled, copy1.isClosureCleanerEnabled());
-        assertEquals(forceAvroEnabled, copy1.isForceAvroEnabled());
-        assertEquals(forceKryoEnabled, copy1.isForceKryoEnabled());
-        assertEquals(disableGenericTypes, copy1.hasGenericTypesDisabled());
-        assertEquals(objectReuseEnabled, copy1.isObjectReuseEnabled());
-        assertEquals(parallelism, copy1.getParallelism());
+        assertThat(copy1.isClosureCleanerEnabled()).isEqualTo(closureCleanerEnabled);
+        assertThat(copy1.isForceAvroEnabled()).isEqualTo(forceAvroEnabled);
+        assertThat(copy1.isForceKryoEnabled()).isEqualTo(forceKryoEnabled);
+        assertThat(copy1.hasGenericTypesDisabled()).isEqualTo(disableGenericTypes);
+        assertThat(copy1.isObjectReuseEnabled()).isEqualTo(objectReuseEnabled);
+        assertThat(copy1.getParallelism()).isEqualTo(parallelism);
     }
 
     @Test
     public void testGlobalParametersNotNull() {
         final ExecutionConfig config = new ExecutionConfig();
 
-        assertNotNull(config.getGlobalJobParameters());
+        assertThat(config.getGlobalJobParameters()).isNotNull();
     }
 
     @Test
@@ -177,9 +173,8 @@ public class ExecutionConfigTest extends TestLogger {
         ExecutionConfig config = new ExecutionConfig();
         ExecutionConfig anotherConfig = new ExecutionConfig();
 
-        assertEquals(
-                config.getGlobalJobParameters().hashCode(),
-                anotherConfig.getGlobalJobParameters().hashCode());
+        assertThat(anotherConfig.getGlobalJobParameters().hashCode())
+                .isEqualTo(config.getGlobalJobParameters().hashCode());
     }
 
     @Test
@@ -190,7 +185,7 @@ public class ExecutionConfigTest extends TestLogger {
         // mutate config according to configuration
         executionConfig.configure(configuration, ExecutionConfigTest.class.getClassLoader());
 
-        assertThat(executionConfig, equalTo(new ExecutionConfig()));
+        assertThat(executionConfig).isEqualTo(new ExecutionConfig());
     }
 
     @Test
@@ -211,7 +206,7 @@ public class ExecutionConfigTest extends TestLogger {
         configFromConfiguration.configure(
                 configuration, Thread.currentThread().getContextClassLoader());
 
-        assertThat(configFromConfiguration, equalTo(configFromSetters));
+        assertThat(configFromConfiguration).isEqualTo(configFromSetters);
     }
 
     @Test
@@ -232,7 +227,7 @@ public class ExecutionConfigTest extends TestLogger {
         configFromConfiguration.configure(
                 configuration, Thread.currentThread().getContextClassLoader());
 
-        assertThat(configFromConfiguration, equalTo(configFromSetters));
+        assertThat(configFromConfiguration).isEqualTo(configFromSetters);
     }
 
     @Test
@@ -252,7 +247,7 @@ public class ExecutionConfigTest extends TestLogger {
         configFromConfiguration.configure(
                 configuration, Thread.currentThread().getContextClassLoader());
 
-        assertThat(configFromConfiguration, equalTo(configFromSetters));
+        assertThat(configFromConfiguration).isEqualTo(configFromSetters);
     }
 
     @Test
@@ -276,7 +271,7 @@ public class ExecutionConfigTest extends TestLogger {
         configFromConfiguration.configure(
                 configuration, Thread.currentThread().getContextClassLoader());
 
-        assertThat(configFromConfiguration, equalTo(configFromSetters));
+        assertThat(configFromConfiguration).isEqualTo(configFromSetters);
     }
 
     @Test
@@ -293,7 +288,7 @@ public class ExecutionConfigTest extends TestLogger {
         LinkedHashSet<Object> set = new LinkedHashSet<>();
         set.add(ExecutionConfigTest.class);
         set.add(TestSerializer1.class);
-        assertThat(config.getRegisteredKryoTypes(), equalTo(set));
+        assertThat(config.getRegisteredKryoTypes()).isEqualTo(set);
     }
 
     @Test
@@ -310,7 +305,7 @@ public class ExecutionConfigTest extends TestLogger {
         LinkedHashSet<Object> set = new LinkedHashSet<>();
         set.add(ExecutionConfigTest.class);
         set.add(TestSerializer1.class);
-        assertThat(config.getRegisteredPojoTypes(), equalTo(set));
+        assertThat(config.getRegisteredPojoTypes()).isEqualTo(set);
     }
 
     @Test
@@ -323,7 +318,7 @@ public class ExecutionConfigTest extends TestLogger {
         // mutate config according to configuration
         config.configure(new Configuration(), Thread.currentThread().getContextClassLoader());
 
-        assertThat(config.getRestartStrategy(), equalTo(restartStrategyConfiguration));
+        assertThat(config.getRestartStrategy()).isEqualTo(restartStrategyConfiguration);
     }
 
     @Test
@@ -340,7 +335,7 @@ public class ExecutionConfigTest extends TestLogger {
         LinkedHashMap<Class<?>, Class<? extends Serializer>> serialiers = new LinkedHashMap<>();
         serialiers.put(ExecutionConfigTest.class, TestSerializer1.class);
         serialiers.put(TestSerializer1.class, TestSerializer2.class);
-        assertThat(config.getDefaultKryoSerializerClasses(), equalTo(serialiers));
+        assertThat(config.getDefaultKryoSerializerClasses()).isEqualTo(serialiers);
     }
 
     private static class TestSerializer1 extends Serializer<ExecutionConfigTest>

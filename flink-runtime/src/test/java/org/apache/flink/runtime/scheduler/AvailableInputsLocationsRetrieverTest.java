@@ -26,9 +26,9 @@ import org.junit.Test;
 import java.util.Collection;
 
 import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.createRandomExecutionVertexId;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link AvailableInputsLocationsRetriever}. */
 public class AvailableInputsLocationsRetrieverTest extends TestLogger {
@@ -40,9 +40,8 @@ public class AvailableInputsLocationsRetrieverTest extends TestLogger {
         TestingInputsLocationsRetriever originalLocationRetriever = getOriginalLocationRetriever();
         InputsLocationsRetriever availableInputsLocationsRetriever =
                 new AvailableInputsLocationsRetriever(originalLocationRetriever);
-        assertThat(
-                availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent(),
-                is(false));
+        assertThat(availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -51,9 +50,8 @@ public class AvailableInputsLocationsRetrieverTest extends TestLogger {
         originalLocationRetriever.markScheduled(EV1);
         InputsLocationsRetriever availableInputsLocationsRetriever =
                 new AvailableInputsLocationsRetriever(originalLocationRetriever);
-        assertThat(
-                availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent(),
-                is(false));
+        assertThat(availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -62,9 +60,8 @@ public class AvailableInputsLocationsRetrieverTest extends TestLogger {
         originalLocationRetriever.failTaskManagerLocation(EV1, new Throwable());
         InputsLocationsRetriever availableInputsLocationsRetriever =
                 new AvailableInputsLocationsRetriever(originalLocationRetriever);
-        assertThat(
-                availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent(),
-                is(false));
+        assertThat(availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -73,9 +70,8 @@ public class AvailableInputsLocationsRetrieverTest extends TestLogger {
         originalLocationRetriever.assignTaskManagerLocation(EV1);
         InputsLocationsRetriever availableInputsLocationsRetriever =
                 new AvailableInputsLocationsRetriever(originalLocationRetriever);
-        assertThat(
-                availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent(),
-                is(true));
+        assertThat(availableInputsLocationsRetriever.getTaskManagerLocation(EV1).isPresent())
+                .isEqualTo(true);
     }
 
     @Test
@@ -85,9 +81,9 @@ public class AvailableInputsLocationsRetrieverTest extends TestLogger {
                 new AvailableInputsLocationsRetriever(originalLocationRetriever);
         Collection<Collection<ExecutionVertexID>> producers =
                 availableInputsLocationsRetriever.getConsumedResultPartitionsProducers(EV2);
-        assertThat(producers.size(), is(1));
+        assertThat(producers.size()).isEqualTo(1);
         Collection<ExecutionVertexID> resultProducers = producers.iterator().next();
-        assertThat(resultProducers, contains(EV1));
+        assertThat(resultProducers).satisfies(matching(contains(EV1)));
     }
 
     private static TestingInputsLocationsRetriever getOriginalLocationRetriever() {

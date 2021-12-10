@@ -51,11 +51,7 @@ import java.util.Random;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.formats.avro.utils.AvroTestUtils.writeRecord;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link AvroRowDataDeserializationSchema} and {@link AvroRowDataSerializationSchema} for
@@ -109,7 +105,7 @@ public class RegistryAvroRowDataSeDeSchemaTest {
     public void testRowDataWriteReadWithCompatibleSchema() throws Exception {
         testRowDataWriteReadWithSchema(ADDRESS_SCHEMA_COMPATIBLE);
         // Validates new schema has been registered.
-        assertThat(client.getAllVersions(SUBJECT).size(), is(1));
+        assertThat(client.getAllVersions(SUBJECT).size()).isEqualTo(1);
     }
 
     @Test
@@ -117,7 +113,7 @@ public class RegistryAvroRowDataSeDeSchemaTest {
         client.register(SUBJECT, ADDRESS_SCHEMA);
         testRowDataWriteReadWithSchema(ADDRESS_SCHEMA);
         // Validates it does not produce new schema.
-        assertThat(client.getAllVersions(SUBJECT).size(), is(1));
+        assertThat(client.getAllVersions(SUBJECT).size()).isEqualTo(1);
     }
 
     @Test
@@ -150,18 +146,18 @@ public class RegistryAvroRowDataSeDeSchemaTest {
         serializer.open(null);
         deserializer.open(null);
 
-        assertNull(deserializer.deserialize(null));
+        assertThat(deserializer.deserialize(null)).isNull();
 
         RowData oriData = address2RowData(address);
         byte[] serialized = serializer.serialize(oriData);
         RowData rowData = deserializer.deserialize(serialized);
-        assertThat(rowData.getArity(), equalTo(schema.getFields().size()));
-        assertEquals(address.getNum(), rowData.getInt(0));
-        assertEquals(address.getStreet(), rowData.getString(1).toString());
+        assertThat(rowData.getArity()).isEqualTo(schema.getFields().size());
+        assertThat(rowData.getInt(0)).isEqualTo(address.getNum());
+        assertThat(rowData.getString(1).toString()).isEqualTo(address.getStreet());
         if (schema != ADDRESS_SCHEMA_COMPATIBLE) {
-            assertEquals(address.getCity(), rowData.getString(2).toString());
-            assertEquals(address.getState(), rowData.getString(3).toString());
-            assertEquals(address.getZip(), rowData.getString(4).toString());
+            assertThat(rowData.getString(2).toString()).isEqualTo(address.getCity());
+            assertThat(rowData.getString(3).toString()).isEqualTo(address.getState());
+            assertThat(rowData.getString(4).toString()).isEqualTo(address.getZip());
         }
     }
 

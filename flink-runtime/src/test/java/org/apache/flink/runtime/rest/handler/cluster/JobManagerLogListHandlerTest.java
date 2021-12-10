@@ -49,10 +49,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Unit tests for {@link JobManagerLogListHandler}. */
 public class JobManagerLogListHandlerTest extends TestLogger {
@@ -91,9 +91,8 @@ public class JobManagerLogListHandlerTest extends TestLogger {
         LogListInfo logListInfo =
                 jobManagerLogListHandler.handleRequest(testRequest, dispatcherGateway).get();
 
-        assertThat(
-                logListInfo.getLogInfos(),
-                containsInAnyOrder(expectedLogInfo.toArray(new LogInfo[0])));
+        assertThat(logListInfo.getLogInfos())
+                .satisfies(matching(containsInAnyOrder(expectedLogInfo.toArray(new LogInfo[0]))));
     }
 
     @Test
@@ -102,7 +101,7 @@ public class JobManagerLogListHandlerTest extends TestLogger {
         LogListInfo logListInfo =
                 jobManagerLogListHandler.handleRequest(testRequest, dispatcherGateway).get();
 
-        assertThat(logListInfo.getLogInfos(), is(empty()));
+        assertThat(logListInfo.getLogInfos()).isEqualTo(empty());
     }
 
     private JobManagerLogListHandler createHandler(@Nullable final File jobManagerLogRoot) {

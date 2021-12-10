@@ -36,9 +36,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test the creation of a {@link GatherSumApplyIteration} program. */
 public class GSATranslationTest {
@@ -97,39 +95,41 @@ public class GSATranslationTest {
 
         // ------------- validate the java program ----------------
 
-        assertTrue(result instanceof DeltaIterationResultSet);
+        assertThat(result).isInstanceOf(DeltaIterationResultSet.class);
 
         DeltaIterationResultSet<?, ?> resultSet = (DeltaIterationResultSet<?, ?>) result;
         DeltaIteration<?, ?> iteration = resultSet.getIterationHead();
 
         // check the basic iteration properties
-        assertEquals(NUM_ITERATIONS, resultSet.getMaxIterations());
-        assertArrayEquals(new int[] {0}, resultSet.getKeyPositions());
-        assertEquals(ITERATION_parallelism, iteration.getParallelism());
-        assertEquals(ITERATION_NAME, iteration.getName());
+        assertThat(resultSet.getMaxIterations()).isEqualTo(NUM_ITERATIONS);
+        assertThat(resultSet.getKeyPositions()).isEqualTo(new int[] {0});
+        assertThat(iteration.getParallelism()).isEqualTo(ITERATION_parallelism);
+        assertThat(iteration.getName()).isEqualTo(ITERATION_NAME);
 
-        assertEquals(
-                AGGREGATOR_NAME,
-                iteration
-                        .getAggregators()
-                        .getAllRegisteredAggregators()
-                        .iterator()
-                        .next()
-                        .getName());
+        assertThat(
+                        iteration
+                                .getAggregators()
+                                .getAllRegisteredAggregators()
+                                .iterator()
+                                .next()
+                                .getName())
+                .isEqualTo(AGGREGATOR_NAME);
 
         // validate that the semantic properties are set as they should
         TwoInputUdfOperator<?, ?, ?, ?> solutionSetJoin =
                 (TwoInputUdfOperator<?, ?, ?, ?>) resultSet.getNextWorkset();
-        assertTrue(
-                solutionSetJoin
-                        .getSemanticProperties()
-                        .getForwardingTargetFields(0, 0)
-                        .contains(0));
-        assertTrue(
-                solutionSetJoin
-                        .getSemanticProperties()
-                        .getForwardingTargetFields(1, 0)
-                        .contains(0));
+        assertThat(
+                        solutionSetJoin
+                                .getSemanticProperties()
+                                .getForwardingTargetFields(0, 0)
+                                .contains(0))
+                .isTrue();
+        assertThat(
+                        solutionSetJoin
+                                .getSemanticProperties()
+                                .getForwardingTargetFields(1, 0)
+                                .contains(0))
+                .isTrue();
 
         SingleInputUdfOperator<?, ?, ?> sumReduce =
                 (SingleInputUdfOperator<?, ?, ?>) solutionSetJoin.getInput1();
@@ -137,9 +137,9 @@ public class GSATranslationTest {
                 (SingleInputUdfOperator<?, ?, ?>) sumReduce.getInput();
 
         // validate that the broadcast sets are forwarded
-        assertEquals(bcGather, gatherMap.getBroadcastSets().get(BC_SET_GATHER_NAME));
-        assertEquals(bcSum, sumReduce.getBroadcastSets().get(BC_SET_SUM_NAME));
-        assertEquals(bcApply, solutionSetJoin.getBroadcastSets().get(BC_SET_APLLY_NAME));
+        assertThat(gatherMap.getBroadcastSets().get(BC_SET_GATHER_NAME)).isEqualTo(bcGather);
+        assertThat(sumReduce.getBroadcastSets().get(BC_SET_SUM_NAME)).isEqualTo(bcSum);
+        assertThat(solutionSetJoin.getBroadcastSets().get(BC_SET_APLLY_NAME)).isEqualTo(bcApply);
     }
 
     @SuppressWarnings("serial")

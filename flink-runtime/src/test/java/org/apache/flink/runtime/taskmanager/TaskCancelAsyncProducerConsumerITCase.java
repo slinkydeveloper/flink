@@ -56,9 +56,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.runtime.io.network.buffer.LocalBufferPoolDestroyTest.isInBlockingBufferRequest;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith({TestLoggerExtension.class})
 public class TaskCancelAsyncProducerConsumerITCase {
@@ -148,10 +146,11 @@ public class TaskCancelAsyncProducerConsumerITCase {
         }
 
         // Verify that async producer is in blocking request
-        assertTrue(
-                "Producer thread is not blocked: "
-                        + Arrays.toString(ASYNC_PRODUCER_THREAD.getStackTrace()),
-                producerBlocked);
+        assertThat(producerBlocked)
+                .as(
+                        "Producer thread is not blocked: "
+                                + Arrays.toString(ASYNC_PRODUCER_THREAD.getStackTrace()))
+                .isTrue();
 
         boolean consumerWaiting = false;
         for (int i = 0; i < 50; i++) {
@@ -170,7 +169,7 @@ public class TaskCancelAsyncProducerConsumerITCase {
         }
 
         // Verify that async consumer is in blocking request
-        assertTrue("Consumer thread is not blocked.", consumerWaiting);
+        assertThat(consumerWaiting).as("Consumer thread is not blocked.").isTrue();
 
         flink.cancelJob(jobGraph.getJobID())
                 .get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS);
@@ -185,11 +184,11 @@ public class TaskCancelAsyncProducerConsumerITCase {
                 .get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS);
 
         // Verify the expected Exceptions
-        assertNotNull(ASYNC_PRODUCER_EXCEPTION);
-        assertEquals(CancelTaskException.class, ASYNC_PRODUCER_EXCEPTION.getClass());
+        assertThat(ASYNC_PRODUCER_EXCEPTION).isNotNull();
+        assertThat(ASYNC_PRODUCER_EXCEPTION.getClass()).isEqualTo(CancelTaskException.class);
 
-        assertNotNull(ASYNC_CONSUMER_EXCEPTION);
-        assertEquals(IllegalStateException.class, ASYNC_CONSUMER_EXCEPTION.getClass());
+        assertThat(ASYNC_CONSUMER_EXCEPTION).isNotNull();
+        assertThat(ASYNC_CONSUMER_EXCEPTION.getClass()).isEqualTo(IllegalStateException.class);
     }
 
     /** Invokable emitting records in a separate Thread (not the main Task thread). */

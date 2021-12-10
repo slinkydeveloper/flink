@@ -23,9 +23,8 @@ import org.apache.flink.util.InstantiationUtil;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.flink.connector.pulsar.source.enumerator.topic.TopicRange.MAX_RANGE;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link TopicRange}. */
 class TopicRangeTest {
@@ -34,26 +33,28 @@ class TopicRangeTest {
     void topicRangeIsSerializable() throws Exception {
         final TopicRange range = new TopicRange(1, 5);
         final TopicRange cloneRange = InstantiationUtil.clone(range);
-        assertEquals(range, cloneRange);
+        assertThat(cloneRange).isEqualTo(range);
     }
 
     @Test
     void negativeStart() {
-        assertThrows(IllegalArgumentException.class, () -> new TopicRange(-1, 1));
+        assertThatThrownBy(() -> new TopicRange(-1, 1))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void endBelowTheMaximum() {
-        assertDoesNotThrow(() -> new TopicRange(1, MAX_RANGE - 1));
+        assertThatThrownBy(() -> new TopicRange(1, MAX_RANGE - 1)).isNull();
     }
 
     @Test
     void endOnTheMaximum() {
-        assertDoesNotThrow(() -> new TopicRange(1, MAX_RANGE));
+        assertThatThrownBy(() -> new TopicRange(1, MAX_RANGE)).isNull();
     }
 
     @Test
     void endAboveTheMaximum() {
-        assertThrows(IllegalArgumentException.class, () -> new TopicRange(1, MAX_RANGE + 1));
+        assertThatThrownBy(() -> new TopicRange(1, MAX_RANGE + 1))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

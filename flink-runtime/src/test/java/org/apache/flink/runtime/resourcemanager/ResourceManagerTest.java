@@ -70,15 +70,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link ResourceManager}. */
 public class ResourceManagerTest extends TestLogger {
@@ -178,14 +177,14 @@ public class ResourceManagerTest extends TestLogger {
         TaskManagerInfoWithSlots taskManagerInfoWithSlots = taskManagerInfoFuture.get();
         TaskManagerInfo taskManagerInfo = taskManagerInfoWithSlots.getTaskManagerInfo();
 
-        assertEquals(taskManagerId, taskManagerInfo.getResourceId());
-        assertEquals(hardwareDescription, taskManagerInfo.getHardwareDescription());
-        assertEquals(taskExecutorGateway.getAddress(), taskManagerInfo.getAddress());
-        assertEquals(dataPort, taskManagerInfo.getDataPort());
-        assertEquals(jmxPort, taskManagerInfo.getJmxPort());
-        assertEquals(0, taskManagerInfo.getNumberSlots());
-        assertEquals(0, taskManagerInfo.getNumberAvailableSlots());
-        assertThat(taskManagerInfoWithSlots.getAllocatedSlots(), is(empty()));
+        assertThat(taskManagerInfo.getResourceId()).isEqualTo(taskManagerId);
+        assertThat(taskManagerInfo.getHardwareDescription()).isEqualTo(hardwareDescription);
+        assertThat(taskManagerInfo.getAddress()).isEqualTo(taskExecutorGateway.getAddress());
+        assertThat(taskManagerInfo.getDataPort()).isEqualTo(dataPort);
+        assertThat(taskManagerInfo.getJmxPort()).isEqualTo(jmxPort);
+        assertThat(taskManagerInfo.getNumberSlots()).isEqualTo(0);
+        assertThat(taskManagerInfo.getNumberAvailableSlots()).isEqualTo(0);
+        assertThat(taskManagerInfoWithSlots.getAllocatedSlots()).isEqualTo(empty());
     }
 
     /**
@@ -214,7 +213,7 @@ public class ResourceManagerTest extends TestLogger {
 
         TaskExecutorThreadInfoGateway taskExecutorGatewayResult = taskExecutorGatewayFuture.get();
 
-        assertEquals(taskExecutorGateway, taskExecutorGatewayResult);
+        assertThat(taskExecutorGatewayResult).isEqualTo(taskExecutorGateway);
     }
 
     private void registerTaskExecutor(
@@ -237,7 +236,7 @@ public class ResourceManagerTest extends TestLogger {
                 resourceManagerGateway.registerTaskExecutor(
                         taskExecutorRegistration, TestingUtils.TIMEOUT);
 
-        assertThat(registrationFuture.get(), instanceOf(RegistrationResponse.Success.class));
+        assertThat(registrationFuture.get()).isInstanceOf(RegistrationResponse.Success.class);
     }
 
     @Test
@@ -294,7 +293,7 @@ public class ResourceManagerTest extends TestLogger {
         resourceManagerGateway.disconnectJobManager(
                 jobId, JobStatus.FINISHED, new FlinkException("Test exception"));
 
-        assertThat(clearRequirementsFuture.get(5, TimeUnit.SECONDS), is(jobId));
+        assertThat(clearRequirementsFuture.get(5, TimeUnit.SECONDS)).isEqualTo(jobId);
     }
 
     @Test
@@ -319,7 +318,7 @@ public class ResourceManagerTest extends TestLogger {
 
         highAvailabilityServices.setJobMasterLeaderRetrieverFunction(
                 requestedJobId -> {
-                    assertThat(requestedJobId, is(equalTo(jobId)));
+                    assertThat(requestedJobId).isEqualTo(equalTo(jobId));
                     return jobMasterLeaderRetrievalService;
                 });
 
@@ -333,20 +332,19 @@ public class ResourceManagerTest extends TestLogger {
                                     jobMasterGateway.getAddress(),
                                     jobId,
                                     TIMEOUT);
-
-                    assertThat(
-                            registrationFuture.get(),
-                            instanceOf(RegistrationResponse.Success.class));
+                    assertThat(registrationFuture.get())
+                            .isInstanceOf(RegistrationResponse.Success.class);
                 },
                 resourceManagerResourceId -> {
                     // might have been completed or not depending whether the timeout was triggered
                     // first
                     final ResourceID optionalHeartbeatRequestOrigin =
                             heartbeatRequestFuture.getNow(null);
-                    assertThat(
-                            optionalHeartbeatRequestOrigin,
-                            anyOf(is(resourceManagerResourceId), is(nullValue())));
-                    assertThat(disconnectFuture.get(), is(equalTo(resourceManagerId)));
+                    assertThat(optionalHeartbeatRequestOrigin)
+                            .satisfies(
+                                    matching(
+                                            anyOf(is(resourceManagerResourceId), is(nullValue()))));
+                    assertThat(disconnectFuture.get()).isEqualTo(equalTo(resourceManagerId));
                 });
     }
 
@@ -375,7 +373,7 @@ public class ResourceManagerTest extends TestLogger {
 
         highAvailabilityServices.setJobMasterLeaderRetrieverFunction(
                 requestedJobId -> {
-                    assertThat(requestedJobId, is(equalTo(jobId)));
+                    assertThat(requestedJobId).isEqualTo(equalTo(jobId));
                     return jobMasterLeaderRetrievalService;
                 });
 
@@ -389,13 +387,11 @@ public class ResourceManagerTest extends TestLogger {
                                     jobMasterGateway.getAddress(),
                                     jobId,
                                     TIMEOUT);
-
-                    assertThat(
-                            registrationFuture.get(),
-                            instanceOf(RegistrationResponse.Success.class));
+                    assertThat(registrationFuture.get())
+                            .isInstanceOf(RegistrationResponse.Success.class);
                 },
                 resourceManagerResourceId ->
-                        assertThat(disconnectFuture.get(), is(equalTo(resourceManagerId))));
+                        assertThat(disconnectFuture.get()).isEqualTo(equalTo(resourceManagerId)));
     }
 
     @Test
@@ -433,11 +429,12 @@ public class ResourceManagerTest extends TestLogger {
                     // first
                     final ResourceID optionalHeartbeatRequestOrigin =
                             heartbeatRequestFuture.getNow(null);
-                    assertThat(
-                            optionalHeartbeatRequestOrigin,
-                            anyOf(is(resourceManagerResourceId), is(nullValue())));
-                    assertThat(disconnectFuture.get(), instanceOf(TimeoutException.class));
-                    assertThat(stopWorkerFuture.get(), is(taskExecutorId));
+                    assertThat(optionalHeartbeatRequestOrigin)
+                            .satisfies(
+                                    matching(
+                                            anyOf(is(resourceManagerResourceId), is(nullValue()))));
+                    assertThat(disconnectFuture.get()).isInstanceOf(TimeoutException.class);
+                    assertThat(stopWorkerFuture.get()).isEqualTo(taskExecutorId);
                 });
     }
 
@@ -473,8 +470,8 @@ public class ResourceManagerTest extends TestLogger {
                                 taskExecutorId,
                                 taskExecutorGateway.getAddress()),
                 resourceManagerResourceId -> {
-                    assertThat(disconnectFuture.get(), instanceOf(ResourceManagerException.class));
-                    assertThat(stopWorkerFuture.get(), is(taskExecutorId));
+                    assertThat(disconnectFuture.get()).isInstanceOf(ResourceManagerException.class);
+                    assertThat(stopWorkerFuture.get()).isEqualTo(taskExecutorId);
                 });
     }
 
@@ -508,8 +505,8 @@ public class ResourceManagerTest extends TestLogger {
         registerTaskExecutor(resourceManager, taskExecutorId, taskExecutorGateway.getAddress());
         resourceManager.disconnectTaskManager(taskExecutorId, new FlinkException("Test exception"));
 
-        assertThat(disconnectFuture.get(), instanceOf(FlinkException.class));
-        assertThat(stopWorkerFuture.get(), is(taskExecutorId));
+        assertThat(disconnectFuture.get()).isInstanceOf(FlinkException.class);
+        assertThat(stopWorkerFuture.get()).isEqualTo(taskExecutorId);
     }
 
     private void testDisconnectJobManager(JobStatus jobStatus) throws Exception {

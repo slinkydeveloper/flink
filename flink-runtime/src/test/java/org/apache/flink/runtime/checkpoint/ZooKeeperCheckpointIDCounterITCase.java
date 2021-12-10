@@ -27,8 +27,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Unit tests for the {@link ZooKeeperCheckpointIDCounter}. The tests are inherited from the test
@@ -55,10 +54,10 @@ public class ZooKeeperCheckpointIDCounterITCase extends CheckpointIDCounterTestB
         counter.start();
 
         CuratorFramework client = ZooKeeper.getClient();
-        assertNotNull(client.checkExists().forPath(counter.getPath()));
+        assertThat(client.checkExists().forPath(counter.getPath())).isNotNull();
 
         counter.shutdown(JobStatus.FINISHED);
-        assertNull(client.checkExists().forPath(counter.getPath()));
+        assertThat(client.checkExists().forPath(counter.getPath())).isNull();
     }
 
     /** Tests that counter node is NOT removed from ZooKeeper after suspend. */
@@ -68,10 +67,10 @@ public class ZooKeeperCheckpointIDCounterITCase extends CheckpointIDCounterTestB
         counter.start();
 
         CuratorFramework client = ZooKeeper.getClient();
-        assertNotNull(client.checkExists().forPath(counter.getPath()));
+        assertThat(client.checkExists().forPath(counter.getPath())).isNotNull();
 
         counter.shutdown(JobStatus.SUSPENDED);
-        assertNotNull(client.checkExists().forPath(counter.getPath()));
+        assertThat(client.checkExists().forPath(counter.getPath())).isNotNull();
     }
 
     @Override

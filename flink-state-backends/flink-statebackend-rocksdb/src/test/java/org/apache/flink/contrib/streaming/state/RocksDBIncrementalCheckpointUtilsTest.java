@@ -24,7 +24,6 @@ import org.apache.flink.runtime.state.KeyGroupRange;
 import org.apache.flink.runtime.state.KeyedStateHandle;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -38,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -96,31 +96,32 @@ public class RocksDBIncrementalCheckpointUtilsTest extends TestLogger {
         keyedStateHandles.add(keyedStateHandle3);
 
         // this should choose no one handle.
-        Assert.assertNull(
-                RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
-                        keyedStateHandles, new KeyGroupRange(3, 5)));
+        assertThat(
+                        RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
+                                keyedStateHandles, new KeyGroupRange(3, 5)))
+                .isNull();
 
         // this should choose keyedStateHandle2, because keyedStateHandle2's key-group range
         // satisfies the overlap fraction demand.
-        Assert.assertEquals(
-                keyedStateHandle2,
-                RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
-                        keyedStateHandles, new KeyGroupRange(3, 6)));
+        assertThat(
+                        RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
+                                keyedStateHandles, new KeyGroupRange(3, 6)))
+                .isEqualTo(keyedStateHandle2);
 
         // both keyedStateHandle2 & keyedStateHandle3's key-group range satisfies the overlap
         // fraction, but keyedStateHandle3's overlap fraction is better.
-        Assert.assertEquals(
-                keyedStateHandle3,
-                RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
-                        keyedStateHandles, new KeyGroupRange(5, 12)));
+        assertThat(
+                        RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
+                                keyedStateHandles, new KeyGroupRange(5, 12)))
+                .isEqualTo(keyedStateHandle3);
 
         // both keyedStateHandle2 & keyedStateHandle3's key-group range are covered by [3, 12],
         // but this should choose the keyedStateHandle3, because keyedStateHandle3's key-group is
         // bigger than keyedStateHandle2.
-        Assert.assertEquals(
-                keyedStateHandle3,
-                RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
-                        keyedStateHandles, new KeyGroupRange(3, 12)));
+        assertThat(
+                        RocksDBIncrementalCheckpointUtils.chooseTheBestStateHandleForInitial(
+                                keyedStateHandles, new KeyGroupRange(3, 12)))
+                .isEqualTo(keyedStateHandle3);
     }
 
     private void testClipDBWithKeyGroupRangeHelper(
@@ -159,7 +160,7 @@ public class RocksDBIncrementalCheckpointUtilsTest extends TestLogger {
                     CompositeKeySerializationUtils.writeKey(
                             j, IntSerializer.INSTANCE, outputView, false);
                     byte[] value = rocksDB.get(columnFamilyHandle, outputView.getCopyOfBuffer());
-                    Assert.assertEquals(String.valueOf(j), new String(value));
+                    assertThat(new String(value)).isEqualTo(String.valueOf(j));
                 }
             }
 
@@ -180,9 +181,9 @@ public class RocksDBIncrementalCheckpointUtilsTest extends TestLogger {
                             j, IntSerializer.INSTANCE, outputView, false);
                     byte[] value = rocksDB.get(columnFamilyHandle, outputView.getCopyOfBuffer());
                     if (targetGroupRange.contains(i)) {
-                        Assert.assertEquals(String.valueOf(j), new String(value));
+                        assertThat(new String(value)).isEqualTo(String.valueOf(j));
                     } else {
-                        Assert.assertNull(value);
+                        assertThat(value).isNull();
                     }
                 }
             }

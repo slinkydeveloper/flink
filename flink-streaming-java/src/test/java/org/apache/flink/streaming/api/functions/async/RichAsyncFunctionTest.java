@@ -35,8 +35,8 @@ import org.apache.flink.metrics.groups.UnregisteredMetricsGroup;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +68,7 @@ public class RichAsyncFunctionTest {
 
         IterationRuntimeContext iterationRuntimeContext = function.getIterationRuntimeContext();
 
-        assertEquals(superstepNumber, iterationRuntimeContext.getSuperstepNumber());
+        assertThat(iterationRuntimeContext.getSuperstepNumber()).isEqualTo(superstepNumber);
 
         try {
             iterationRuntimeContext.getIterationAggregator("foobar");
@@ -126,14 +126,15 @@ public class RichAsyncFunctionTest {
 
         RuntimeContext runtimeContext = function.getRuntimeContext();
 
-        assertEquals(taskName, runtimeContext.getTaskName());
-        assertEquals(metricGroup, runtimeContext.getMetricGroup());
-        assertEquals(numberOfParallelSubtasks, runtimeContext.getNumberOfParallelSubtasks());
-        assertEquals(indexOfSubtask, runtimeContext.getIndexOfThisSubtask());
-        assertEquals(attemptNumber, runtimeContext.getAttemptNumber());
-        assertEquals(taskNameWithSubtask, runtimeContext.getTaskNameWithSubtasks());
-        assertEquals(executionConfig, runtimeContext.getExecutionConfig());
-        assertEquals(userCodeClassLoader, runtimeContext.getUserCodeClassLoader());
+        assertThat(runtimeContext.getTaskName()).isEqualTo(taskName);
+        assertThat(runtimeContext.getMetricGroup()).isEqualTo(metricGroup);
+        assertThat(runtimeContext.getNumberOfParallelSubtasks())
+                .isEqualTo(numberOfParallelSubtasks);
+        assertThat(runtimeContext.getIndexOfThisSubtask()).isEqualTo(indexOfSubtask);
+        assertThat(runtimeContext.getAttemptNumber()).isEqualTo(attemptNumber);
+        assertThat(runtimeContext.getTaskNameWithSubtasks()).isEqualTo(taskNameWithSubtask);
+        assertThat(runtimeContext.getExecutionConfig()).isEqualTo(executionConfig);
+        assertThat(runtimeContext.getUserCodeClassLoader()).isEqualTo(userCodeClassLoader);
 
         try {
             runtimeContext.getDistributedCache();

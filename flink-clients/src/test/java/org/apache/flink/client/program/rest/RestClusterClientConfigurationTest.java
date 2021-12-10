@@ -25,7 +25,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RestClusterClientConfiguration}. */
 public class RestClusterClientConfigurationTest extends TestLogger {
@@ -43,8 +43,8 @@ public class RestClusterClientConfigurationTest extends TestLogger {
 
     @Test
     public void testConfiguration() {
-        assertEquals(1, restClusterClientConfiguration.getAwaitLeaderTimeout());
-        assertEquals(2, restClusterClientConfiguration.getRetryMaxAttempts());
-        assertEquals(3, restClusterClientConfiguration.getRetryDelay());
+        assertThat(restClusterClientConfiguration.getAwaitLeaderTimeout()).isEqualTo(1);
+        assertThat(restClusterClientConfiguration.getRetryMaxAttempts()).isEqualTo(2);
+        assertThat(restClusterClientConfiguration.getRetryDelay()).isEqualTo(3);
     }
 }

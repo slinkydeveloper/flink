@@ -30,7 +30,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ChangelogMode} serialization and deserialization. */
 public class ChangelogModeJsonSerdeTest {
@@ -57,6 +57,6 @@ public class ChangelogModeJsonSerdeTest {
         }
         String json = writer.toString();
         ChangelogMode actual = mapper.readValue(json, ChangelogMode.class);
-        assertEquals(changelogMode, actual);
+        assertThat(actual).isEqualTo(changelogMode);
     }
 }

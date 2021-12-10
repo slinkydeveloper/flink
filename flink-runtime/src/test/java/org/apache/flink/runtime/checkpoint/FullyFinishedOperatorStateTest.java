@@ -23,9 +23,8 @@ import org.apache.flink.runtime.state.memory.ByteStreamStateHandle;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests the properties of {@link FullyFinishedOperatorState}. */
 public class FullyFinishedOperatorStateTest {
@@ -33,11 +32,11 @@ public class FullyFinishedOperatorStateTest {
     @Test
     public void testFullyFinishedOperatorState() {
         OperatorState operatorState = new FullyFinishedOperatorState(new OperatorID(), 5, 256);
-        assertTrue(operatorState.isFullyFinished());
+        assertThat(operatorState.isFullyFinished()).isTrue();
 
-        assertEquals(0, operatorState.getSubtaskStates().size());
-        assertEquals(0, operatorState.getStates().size());
-        assertEquals(0, operatorState.getNumberCollectedStates());
+        assertThat(operatorState.getSubtaskStates().size()).isEqualTo(0);
+        assertThat(operatorState.getStates().size()).isEqualTo(0);
+        assertThat(operatorState.getNumberCollectedStates()).isEqualTo(0);
 
         try {
             operatorState.putState(0, OperatorSubtaskState.builder().build());

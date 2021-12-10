@@ -32,8 +32,7 @@ import java.io.PrintStream;
 import java.time.Duration;
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link CliFrontend}. */
 public class CliFrontendITCase {
@@ -72,7 +71,7 @@ public class CliFrontendITCase {
                     "run", "-c", TestingJob.class.getName(), CliFrontendTestUtils.getTestJarPath()
                 });
 
-        assertThat(getStdoutString(), containsString("Watermark interval is 42"));
+        assertThat(getStdoutString()).contains("Watermark interval is 42");
     }
 
     @Test
@@ -97,7 +96,7 @@ public class CliFrontendITCase {
                     CliFrontendTestUtils.getTestJarPath()
                 });
 
-        assertThat(getStdoutString(), containsString("Watermark interval is 142"));
+        assertThat(getStdoutString()).contains("Watermark interval is 142");
     }
 
     /**

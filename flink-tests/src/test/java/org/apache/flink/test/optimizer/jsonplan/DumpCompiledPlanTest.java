@@ -38,7 +38,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.core.JsonParser;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** The tests in this class simply invokes the JSON dump code for the optimized plan. */
 public class DumpCompiledPlanTest extends CompilerTestBase {
@@ -130,7 +130,7 @@ public class DumpCompiledPlanTest extends CompilerTestBase {
         final Pipeline pipeline =
                 PackagedProgramUtils.getPipelineFromProgram(program, new Configuration(), 1, true);
 
-        assertTrue(pipeline instanceof Plan);
+        assertThat(pipeline).isInstanceOf(Plan.class);
 
         final Plan plan = (Plan) pipeline;
 

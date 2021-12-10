@@ -29,10 +29,8 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ExecutionGraphVariousFailuesTest extends TestLogger {
 
@@ -51,7 +49,7 @@ public class ExecutionGraphVariousFailuesTest extends TestLogger {
 
         final ExecutionGraph eg = scheduler.getExecutionGraph();
 
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
         ExecutionGraphTestUtils.switchAllVerticesToRunning(eg);
 
         IntermediateResultPartitionID intermediateResultPartitionId =
@@ -68,9 +66,9 @@ public class ExecutionGraphVariousFailuesTest extends TestLogger {
             fail("Error expected.");
         } catch (IllegalStateException e) {
             // we've expected this exception to occur
-            assertThat(e.getMessage(), containsString("Cannot find execution for execution Id"));
+            assertThat(e.getMessage()).contains("Cannot find execution for execution Id");
         }
 
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
     }
 }

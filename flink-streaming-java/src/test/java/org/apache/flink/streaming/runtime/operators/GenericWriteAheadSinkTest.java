@@ -26,12 +26,13 @@ import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GenericWriteAheadSink}. */
 public class GenericWriteAheadSinkTest
@@ -63,12 +64,12 @@ public class GenericWriteAheadSinkTest
         for (Integer i : sink.values) {
             list.remove(i);
         }
-        Assert.assertTrue(
-                "The following ID's where not found in the result list: " + list.toString(),
-                list.isEmpty());
-        Assert.assertTrue(
-                "The sink emitted to many values: " + (sink.values.size() - 60),
-                sink.values.size() == 60);
+        assertThat(list.isEmpty())
+                .as("The following ID's where not found in the result list: " + list.toString())
+                .isTrue();
+        assertThat(sink.values.size() == 60)
+                .as("The sink emitted to many values: " + (sink.values.size() - 60))
+                .isTrue();
     }
 
     @Override
@@ -82,12 +83,12 @@ public class GenericWriteAheadSinkTest
         for (Integer i : sink.values) {
             list.remove(i);
         }
-        Assert.assertTrue(
-                "The following ID's where not found in the result list: " + list.toString(),
-                list.isEmpty());
-        Assert.assertTrue(
-                "The sink emitted to many values: " + (sink.values.size() - 60),
-                sink.values.size() == 60);
+        assertThat(list.isEmpty())
+                .as("The following ID's where not found in the result list: " + list.toString())
+                .isTrue();
+        assertThat(sink.values.size() == 60)
+                .as("The sink emitted to many values: " + (sink.values.size() - 60))
+                .isTrue();
     }
 
     @Override
@@ -104,12 +105,12 @@ public class GenericWriteAheadSinkTest
         for (Integer i : sink.values) {
             list.remove(i);
         }
-        Assert.assertTrue(
-                "The following ID's where not found in the result list: " + list.toString(),
-                list.isEmpty());
-        Assert.assertTrue(
-                "The sink emitted to many values: " + (sink.values.size() - 40),
-                sink.values.size() == 40);
+        assertThat(list.isEmpty())
+                .as("The following ID's where not found in the result list: " + list.toString())
+                .isTrue();
+        assertThat(sink.values.size() == 40)
+                .as("The sink emitted to many values: " + (sink.values.size() - 40))
+                .isTrue();
     }
 
     @Override
@@ -122,7 +123,7 @@ public class GenericWriteAheadSinkTest
         }
 
         Collections.sort(sink.values);
-        Assert.assertArrayEquals(list.toArray(), sink.values.toArray());
+        assertThat(sink.values.toArray()).isEqualTo(list.toArray());
     }
 
     @Test
@@ -150,7 +151,7 @@ public class GenericWriteAheadSinkTest
         testHarness.notifyOfCompletedCheckpoint(0);
 
         // isCommitted should have failed, thus sendValues() should never have been called
-        Assert.assertEquals(0, sink.values.size());
+        assertThat(sink.values.size()).isEqualTo(0);
 
         for (int x = 0; x < 11; x++) {
             testHarness.processElement(new StreamRecord<>(generateValue(elementCounter, 1)));
@@ -161,7 +162,7 @@ public class GenericWriteAheadSinkTest
         testHarness.notifyOfCompletedCheckpoint(1);
 
         // previous CP should be retried, but will fail the CP commit. Second CP should be skipped.
-        Assert.assertEquals(10, sink.values.size());
+        assertThat(sink.values.size()).isEqualTo(10);
 
         for (int x = 0; x < 12; x++) {
             testHarness.processElement(new StreamRecord<>(generateValue(elementCounter, 2)));
@@ -173,7 +174,7 @@ public class GenericWriteAheadSinkTest
 
         // all CP's should be retried and succeed; since one CP was written twice we have 2 * 10 +
         // 11 + 12 = 43 values
-        Assert.assertEquals(43, sink.values.size());
+        assertThat(sink.values.size()).isEqualTo(43);
     }
 
     /** Simple sink that stores all records in a public list. */

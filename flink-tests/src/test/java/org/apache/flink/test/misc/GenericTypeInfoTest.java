@@ -23,10 +23,9 @@ import org.apache.flink.api.java.Utils;
 import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.test.operators.util.CollectionDataSets;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test TypeInfo serializer tree. */
 public class GenericTypeInfoTest {
@@ -50,9 +49,8 @@ public class GenericTypeInfoTest {
                         .replaceAll(
                                 "( {8}[a-zA-Z]+:java\\.math\\.BigInteger\\R)( {12}\\S*\\R)+", "$1");
 
-        Assert.assertThat(
-                serTree,
-                equalTo(
+        assertThat(serTree)
+                .isEqualTo(
                         "GenericTypeInfo (PojoWithCollectionGeneric)\n"
                                 + "    pojos:java.util.List\n"
                                 + "    key:int\n"
@@ -67,6 +65,6 @@ public class GenericTypeInfoTest {
                                 + "    makeMeGeneric:org.apache.flink.test.operators.util.CollectionDataSets$PojoWithDateAndEnum\n"
                                 + "        group:java.lang.String\n"
                                 + "        date:java.util.Date\n"
-                                + "        cat:org.apache.flink.test.operators.util.CollectionDataSets$Category (is enum)\n"));
+                                + "        cat:org.apache.flink.test.operators.util.CollectionDataSets$Category (is enum)\n");
     }
 }

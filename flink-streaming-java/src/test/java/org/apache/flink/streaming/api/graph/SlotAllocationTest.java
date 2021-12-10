@@ -29,8 +29,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This verifies that slot sharing groups are correctly forwarded from user job to JobGraph.
@@ -84,30 +83,28 @@ public class SlotAllocationTest extends TestLogger {
 
         List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
 
-        assertEquals(vertices.get(0).getSlotSharingGroup(), vertices.get(3).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(0).getSlotSharingGroup(), vertices.get(2).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(3).getSlotSharingGroup(), vertices.get(4).getSlotSharingGroup());
-        assertEquals(vertices.get(4).getSlotSharingGroup(), vertices.get(5).getSlotSharingGroup());
-        assertEquals(vertices.get(5).getSlotSharingGroup(), vertices.get(6).getSlotSharingGroup());
+        assertThat(vertices.get(3).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(2).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(4).getSlotSharingGroup())
+                .isEqualTo(vertices.get(3).getSlotSharingGroup());
+        assertThat(vertices.get(5).getSlotSharingGroup())
+                .isEqualTo(vertices.get(4).getSlotSharingGroup());
+        assertThat(vertices.get(6).getSlotSharingGroup())
+                .isEqualTo(vertices.get(5).getSlotSharingGroup());
 
         int pipelineStart = 6;
-        assertEquals(
-                vertices.get(1).getSlotSharingGroup(),
-                vertices.get(pipelineStart + 2).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(1).getSlotSharingGroup(),
-                vertices.get(pipelineStart + 1).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(pipelineStart + 2).getSlotSharingGroup(),
-                vertices.get(pipelineStart + 3).getSlotSharingGroup());
-        assertEquals(
-                vertices.get(pipelineStart + 3).getSlotSharingGroup(),
-                vertices.get(pipelineStart + 4).getSlotSharingGroup());
-        assertEquals(
-                vertices.get(pipelineStart + 4).getSlotSharingGroup(),
-                vertices.get(pipelineStart + 5).getSlotSharingGroup());
+        assertThat(vertices.get(pipelineStart + 2).getSlotSharingGroup())
+                .isEqualTo(vertices.get(1).getSlotSharingGroup());
+        assertThat(vertices.get(pipelineStart + 1).getSlotSharingGroup())
+                .isEqualTo(vertices.get(1).getSlotSharingGroup());
+        assertThat(vertices.get(pipelineStart + 3).getSlotSharingGroup())
+                .isEqualTo(vertices.get(pipelineStart + 2).getSlotSharingGroup());
+        assertThat(vertices.get(pipelineStart + 4).getSlotSharingGroup())
+                .isEqualTo(vertices.get(pipelineStart + 3).getSlotSharingGroup());
+        assertThat(vertices.get(pipelineStart + 5).getSlotSharingGroup())
+                .isEqualTo(vertices.get(pipelineStart + 4).getSlotSharingGroup());
     }
 
     @Test
@@ -139,16 +136,20 @@ public class SlotAllocationTest extends TestLogger {
         List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
 
         // first pipeline
-        assertEquals(vertices.get(0).getSlotSharingGroup(), vertices.get(4).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(0).getSlotSharingGroup(), vertices.get(1).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(1).getSlotSharingGroup(), vertices.get(4).getSlotSharingGroup());
+        assertThat(vertices.get(4).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(1).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(4).getSlotSharingGroup())
+                .isEqualTo(vertices.get(1).getSlotSharingGroup());
 
         // second pipeline
-        assertEquals(vertices.get(2).getSlotSharingGroup(), vertices.get(3).getSlotSharingGroup());
-        assertEquals(vertices.get(2).getSlotSharingGroup(), vertices.get(5).getSlotSharingGroup());
-        assertEquals(vertices.get(3).getSlotSharingGroup(), vertices.get(5).getSlotSharingGroup());
+        assertThat(vertices.get(3).getSlotSharingGroup())
+                .isEqualTo(vertices.get(2).getSlotSharingGroup());
+        assertThat(vertices.get(5).getSlotSharingGroup())
+                .isEqualTo(vertices.get(2).getSlotSharingGroup());
+        assertThat(vertices.get(5).getSlotSharingGroup())
+                .isEqualTo(vertices.get(3).getSlotSharingGroup());
     }
 
     @Test
@@ -174,11 +175,12 @@ public class SlotAllocationTest extends TestLogger {
 
         List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
 
-        assertEquals(vertices.get(0).getSlotSharingGroup(), vertices.get(1).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(0).getSlotSharingGroup(), vertices.get(2).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(1).getSlotSharingGroup(), vertices.get(2).getSlotSharingGroup());
+        assertThat(vertices.get(1).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(2).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(2).getSlotSharingGroup())
+                .isEqualTo(vertices.get(1).getSlotSharingGroup());
     }
 
     @Test
@@ -215,15 +217,19 @@ public class SlotAllocationTest extends TestLogger {
         List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
 
         // first pipeline
-        assertEquals(vertices.get(0).getSlotSharingGroup(), vertices.get(4).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(0).getSlotSharingGroup(), vertices.get(1).getSlotSharingGroup());
-        assertNotEquals(
-                vertices.get(1).getSlotSharingGroup(), vertices.get(4).getSlotSharingGroup());
+        assertThat(vertices.get(4).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(1).getSlotSharingGroup())
+                .isEqualTo(vertices.get(0).getSlotSharingGroup());
+        assertThat(vertices.get(4).getSlotSharingGroup())
+                .isEqualTo(vertices.get(1).getSlotSharingGroup());
 
         // second pipeline
-        assertEquals(vertices.get(2).getSlotSharingGroup(), vertices.get(3).getSlotSharingGroup());
-        assertEquals(vertices.get(2).getSlotSharingGroup(), vertices.get(5).getSlotSharingGroup());
-        assertEquals(vertices.get(3).getSlotSharingGroup(), vertices.get(5).getSlotSharingGroup());
+        assertThat(vertices.get(3).getSlotSharingGroup())
+                .isEqualTo(vertices.get(2).getSlotSharingGroup());
+        assertThat(vertices.get(5).getSlotSharingGroup())
+                .isEqualTo(vertices.get(2).getSlotSharingGroup());
+        assertThat(vertices.get(5).getSlotSharingGroup())
+                .isEqualTo(vertices.get(3).getSlotSharingGroup());
     }
 }

@@ -51,7 +51,6 @@ import org.apache.flink.testutils.serialization.types.Util;
 import org.apache.flink.types.IntValue;
 import org.apache.flink.util.XORShiftRandom;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -61,10 +60,7 @@ import java.util.ArrayDeque;
 import java.util.Random;
 
 import static org.apache.flink.runtime.io.network.partition.PartitionTestUtils.createPartition;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RecordWriter}. */
 public class RecordWriterTest {
@@ -102,16 +98,16 @@ public class RecordWriterTest {
         // No records emitted yet, broadcast should not request a buffer
         writer.broadcastEvent(barrier);
 
-        assertEquals(0, partition.getBufferPool().bestEffortGetNumOfUsedBuffers());
+        assertThat(partition.getBufferPool().bestEffortGetNumOfUsedBuffers()).isEqualTo(0);
 
         for (int i = 0; i < numberOfChannels; i++) {
-            assertEquals(1, partition.getNumberOfQueuedBuffers(i));
+            assertThat(partition.getNumberOfQueuedBuffers(i)).isEqualTo(1);
             ResultSubpartitionView view =
                     partition.createSubpartitionView(i, new NoOpBufferAvailablityListener());
             BufferOrEvent boe = parseBuffer(view.getNextBuffer().buffer(), i);
-            assertTrue(boe.isEvent());
-            assertEquals(barrier, boe.getEvent());
-            assertFalse(view.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable());
+            assertThat(boe.isEvent()).isTrue();
+            assertThat(boe.getEvent()).isEqualTo(barrier);
+            assertThat(view.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable()).isFalse();
         }
     }
 
@@ -157,46 +153,47 @@ public class RecordWriterTest {
         writer.broadcastEvent(barrier);
 
         if (isBroadcastWriter) {
-            assertEquals(3, partition.getBufferPool().bestEffortGetNumOfUsedBuffers());
+            assertThat(partition.getBufferPool().bestEffortGetNumOfUsedBuffers()).isEqualTo(3);
 
             for (int i = 0; i < numberOfChannels; i++) {
-                assertEquals(4, partition.getNumberOfQueuedBuffers(i)); // 3 buffer + 1 event
+                assertThat(partition.getNumberOfQueuedBuffers(i))
+                        .isEqualTo(4); // 3 buffer + 1 event
 
                 ResultSubpartitionView view =
                         partition.createSubpartitionView(i, new NoOpBufferAvailablityListener());
                 for (int j = 0; j < 3; j++) {
-                    assertTrue(parseBuffer(view.getNextBuffer().buffer(), 0).isBuffer());
+                    assertThat(parseBuffer(view.getNextBuffer().buffer(), 0).isBuffer()).isTrue();
                 }
 
                 BufferOrEvent boe = parseBuffer(view.getNextBuffer().buffer(), i);
-                assertTrue(boe.isEvent());
-                assertEquals(barrier, boe.getEvent());
+                assertThat(boe.isEvent()).isTrue();
+                assertThat(boe.getEvent()).isEqualTo(barrier);
             }
         } else {
-            assertEquals(4, partition.getBufferPool().bestEffortGetNumOfUsedBuffers());
+            assertThat(partition.getBufferPool().bestEffortGetNumOfUsedBuffers()).isEqualTo(4);
             ResultSubpartitionView[] views = new ResultSubpartitionView[4];
 
-            assertEquals(2, partition.getNumberOfQueuedBuffers(0)); // 1 buffer + 1 event
+            assertThat(partition.getNumberOfQueuedBuffers(0)).isEqualTo(2); // 1 buffer + 1 event
             views[0] = partition.createSubpartitionView(0, new NoOpBufferAvailablityListener());
-            assertTrue(parseBuffer(views[0].getNextBuffer().buffer(), 0).isBuffer());
+            assertThat(parseBuffer(views[0].getNextBuffer().buffer(), 0).isBuffer()).isTrue();
 
-            assertEquals(3, partition.getNumberOfQueuedBuffers(1)); // 2 buffers + 1 event
+            assertThat(partition.getNumberOfQueuedBuffers(1)).isEqualTo(3); // 2 buffers + 1 event
             views[1] = partition.createSubpartitionView(1, new NoOpBufferAvailablityListener());
-            assertTrue(parseBuffer(views[1].getNextBuffer().buffer(), 1).isBuffer());
-            assertTrue(parseBuffer(views[1].getNextBuffer().buffer(), 1).isBuffer());
+            assertThat(parseBuffer(views[1].getNextBuffer().buffer(), 1).isBuffer()).isTrue();
+            assertThat(parseBuffer(views[1].getNextBuffer().buffer(), 1).isBuffer()).isTrue();
 
-            assertEquals(2, partition.getNumberOfQueuedBuffers(2)); // 1 buffer + 1 event
+            assertThat(partition.getNumberOfQueuedBuffers(2)).isEqualTo(2); // 1 buffer + 1 event
             views[2] = partition.createSubpartitionView(2, new NoOpBufferAvailablityListener());
-            assertTrue(parseBuffer(views[2].getNextBuffer().buffer(), 2).isBuffer());
+            assertThat(parseBuffer(views[2].getNextBuffer().buffer(), 2).isBuffer()).isTrue();
 
             views[3] = partition.createSubpartitionView(3, new NoOpBufferAvailablityListener());
-            assertEquals(1, partition.getNumberOfQueuedBuffers(3)); // 0 buffers + 1 event
+            assertThat(partition.getNumberOfQueuedBuffers(3)).isEqualTo(1); // 0 buffers + 1 event
 
             // every queue's last element should be the event
             for (int i = 0; i < numberOfChannels; i++) {
                 BufferOrEvent boe = parseBuffer(views[i].getNextBuffer().buffer(), i);
-                assertTrue(boe.isEvent());
-                assertEquals(barrier, boe.getEvent());
+                assertThat(boe.isEvent()).isTrue();
+                assertThat(boe.getEvent()).isEqualTo(barrier);
             }
         }
     }
@@ -219,15 +216,15 @@ public class RecordWriterTest {
 
         // process all collected events (recycles the buffer)
         for (int i = 0; i < numSubpartitions; i++) {
-            assertEquals(1, partition.getNumberOfQueuedBuffers(i));
+            assertThat(partition.getNumberOfQueuedBuffers(i)).isEqualTo(1);
             ResultSubpartitionView view =
                     partition.createSubpartitionView(i, new NoOpBufferAvailablityListener());
             buffers[i] = view.getNextBuffer().buffer();
-            assertTrue(parseBuffer(buffers[i], i).isEvent());
+            assertThat(parseBuffer(buffers[i], i).isEvent()).isTrue();
         }
 
         for (int i = 0; i < numSubpartitions; ++i) {
-            assertTrue(buffers[i].isRecycled());
+            assertThat(buffers[i].isRecycled()).isTrue();
         }
     }
 
@@ -275,16 +272,15 @@ public class RecordWriterTest {
 
         final int numRequiredBuffers = numValues / (bufferSize / (4 + serializationLength));
         if (isBroadcastWriter) {
-            assertEquals(
-                    numRequiredBuffers, partition.getBufferPool().bestEffortGetNumOfUsedBuffers());
+            assertThat(partition.getBufferPool().bestEffortGetNumOfUsedBuffers())
+                    .isEqualTo(numRequiredBuffers);
         } else {
-            assertEquals(
-                    numRequiredBuffers * numberOfChannels,
-                    partition.getBufferPool().bestEffortGetNumOfUsedBuffers());
+            assertThat(partition.getBufferPool().bestEffortGetNumOfUsedBuffers())
+                    .isEqualTo(numRequiredBuffers * numberOfChannels);
         }
 
         for (int i = 0; i < numberOfChannels; i++) {
-            assertEquals(numRequiredBuffers, partition.getNumberOfQueuedBuffers(i));
+            assertThat(partition.getNumberOfQueuedBuffers(i)).isEqualTo(numRequiredBuffers);
             ResultSubpartitionView view =
                     partition.createSubpartitionView(i, new NoOpBufferAvailablityListener());
             verifyDeserializationResults(
@@ -309,19 +305,19 @@ public class RecordWriterTest {
 
         try {
             // record writer is available because of initial available global pool
-            assertTrue(recordWriter.getAvailableFuture().isDone());
+            assertThat(recordWriter.getAvailableFuture().isDone()).isTrue();
 
             // request one buffer from the local pool to make it unavailable afterwards
             try (BufferBuilder bufferBuilder = localPool.requestBufferBuilder(0)) {
-                assertNotNull(bufferBuilder);
-                assertFalse(recordWriter.getAvailableFuture().isDone());
+                assertThat(bufferBuilder).isNotNull();
+                assertThat(recordWriter.getAvailableFuture().isDone()).isFalse();
 
                 // recycle the buffer to make the local pool available again
                 final Buffer buffer = BufferBuilderTestUtils.buildSingleBuffer(bufferBuilder);
                 buffer.recycleBuffer();
             }
-            assertTrue(recordWriter.getAvailableFuture().isDone());
-            assertEquals(recordWriter.AVAILABLE, recordWriter.getAvailableFuture());
+            assertThat(recordWriter.getAvailableFuture().isDone()).isTrue();
+            assertThat(recordWriter.getAvailableFuture()).isEqualTo(recordWriter.AVAILABLE);
 
         } finally {
             localPool.lazyDestroy();
@@ -340,8 +336,8 @@ public class RecordWriterTest {
         }
 
         // verify added to all queues
-        assertEquals(1, partition.getNumberOfQueuedBuffers(0));
-        assertEquals(1, partition.getNumberOfQueuedBuffers(1));
+        assertThat(partition.getNumberOfQueuedBuffers(0)).isEqualTo(1);
+        assertThat(partition.getNumberOfQueuedBuffers(1)).isEqualTo(1);
 
         ResultSubpartitionView view0 =
                 partition.createSubpartitionView(0, new NoOpBufferAvailablityListener());
@@ -351,11 +347,12 @@ public class RecordWriterTest {
         // these two buffers may share the memory but not the indices!
         Buffer buffer1 = view0.getNextBuffer().buffer();
         Buffer buffer2 = view1.getNextBuffer().buffer();
-        assertEquals(0, buffer1.getReaderIndex());
-        assertEquals(0, buffer2.getReaderIndex());
+        assertThat(buffer1.getReaderIndex()).isEqualTo(0);
+        assertThat(buffer2.getReaderIndex()).isEqualTo(0);
         buffer1.setReaderIndex(1);
-        assertEquals(
-                "Buffer 2 shares the same reader index as buffer 1", 0, buffer2.getReaderIndex());
+        assertThat(buffer2.getReaderIndex())
+                .as("Buffer 2 shares the same reader index as buffer 1")
+                .isEqualTo(0);
     }
 
     protected void verifyDeserializationResults(
@@ -372,8 +369,8 @@ public class RecordWriterTest {
 
             assertRecords += DeserializationUtils.deserializeRecords(expectedRecords, deserializer);
         }
-        assertFalse(view.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable());
-        Assert.assertEquals(numValues, assertRecords);
+        assertThat(view.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable()).isFalse();
+        assertThat(assertRecords).isEqualTo(numValues);
     }
 
     /** Creates the {@link RecordWriter} instance based on whether it is a broadcast writer. */

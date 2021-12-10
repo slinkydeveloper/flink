@@ -31,9 +31,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /** Test cases for the {@link LeaderGatewayRetriever}. */
@@ -69,10 +68,10 @@ public class LeaderGatewayRetrieverTest extends TestLogger {
         }
 
         // the second attempt should fail as well
-        assertFalse((leaderGatewayRetriever.getNow().isPresent()));
+        assertThat((leaderGatewayRetriever.getNow().isPresent())).isFalse();
 
         // the third attempt should succeed
-        assertEquals(rpcGateway, leaderGatewayRetriever.getNow().get());
+        assertThat(leaderGatewayRetriever.getNow().get()).isEqualTo(rpcGateway);
     }
 
     private static class TestingLeaderGatewayRetriever extends LeaderGatewayRetriever<RpcGateway> {

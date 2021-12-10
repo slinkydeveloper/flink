@@ -43,7 +43,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * {@code RootExceptionHistoryEntryTest} tests the creation of {@link RootExceptionHistoryEntry}.
@@ -83,22 +84,25 @@ public class RootExceptionHistoryEntryTest extends TestLogger {
         final RootExceptionHistoryEntry actualEntry =
                 RootExceptionHistoryEntry.fromFailureHandlingResultSnapshot(snapshot);
 
-        assertThat(
-                actualEntry,
-                ExceptionHistoryEntryMatcher.matchesFailure(
-                        rootException,
-                        rootTimestamp,
-                        rootExecutionVertex.getTaskNameWithSubtaskIndex(),
-                        rootExecutionVertex.getCurrentAssignedResourceLocation()));
-        assertThat(
-                actualEntry.getConcurrentExceptions(),
-                IsIterableContainingInOrder.contains(
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                concurrentException,
-                                concurrentExceptionTimestamp,
-                                concurrentlyFailedExecutionVertex.getTaskNameWithSubtaskIndex(),
-                                concurrentlyFailedExecutionVertex
-                                        .getCurrentAssignedResourceLocation())));
+        assertThat(actualEntry)
+                .satisfies(
+                        matching(
+                                ExceptionHistoryEntryMatcher.matchesFailure(
+                                        rootException,
+                                        rootTimestamp,
+                                        rootExecutionVertex.getTaskNameWithSubtaskIndex(),
+                                        rootExecutionVertex.getCurrentAssignedResourceLocation())));
+        assertThat(actualEntry.getConcurrentExceptions())
+                .satisfies(
+                        matching(
+                                IsIterableContainingInOrder.contains(
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                concurrentException,
+                                                concurrentExceptionTimestamp,
+                                                concurrentlyFailedExecutionVertex
+                                                        .getTaskNameWithSubtaskIndex(),
+                                                concurrentlyFailedExecutionVertex
+                                                        .getCurrentAssignedResourceLocation()))));
     }
 
     @Test
@@ -127,24 +131,29 @@ public class RootExceptionHistoryEntryTest extends TestLogger {
                                 .map(ExecutionVertex::getCurrentExecutionAttempt)
                                 .collect(Collectors.toSet()));
 
-        assertThat(
-                actualEntry,
-                ExceptionHistoryEntryMatcher.matchesGlobalFailure(rootCause, rootTimestamp));
-        assertThat(
-                actualEntry.getConcurrentExceptions(),
-                IsIterableContainingInAnyOrder.containsInAnyOrder(
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                concurrentException0,
-                                concurrentExceptionTimestamp0,
-                                concurrentlyFailedExecutionVertex0.getTaskNameWithSubtaskIndex(),
-                                concurrentlyFailedExecutionVertex0
-                                        .getCurrentAssignedResourceLocation()),
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                concurrentException1,
-                                concurrentExceptionTimestamp1,
-                                concurrentlyFailedExecutionVertex1.getTaskNameWithSubtaskIndex(),
-                                concurrentlyFailedExecutionVertex1
-                                        .getCurrentAssignedResourceLocation())));
+        assertThat(actualEntry)
+                .satisfies(
+                        matching(
+                                ExceptionHistoryEntryMatcher.matchesGlobalFailure(
+                                        rootCause, rootTimestamp)));
+        assertThat(actualEntry.getConcurrentExceptions())
+                .satisfies(
+                        matching(
+                                IsIterableContainingInAnyOrder.containsInAnyOrder(
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                concurrentException0,
+                                                concurrentExceptionTimestamp0,
+                                                concurrentlyFailedExecutionVertex0
+                                                        .getTaskNameWithSubtaskIndex(),
+                                                concurrentlyFailedExecutionVertex0
+                                                        .getCurrentAssignedResourceLocation()),
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                concurrentException1,
+                                                concurrentExceptionTimestamp1,
+                                                concurrentlyFailedExecutionVertex1
+                                                        .getTaskNameWithSubtaskIndex(),
+                                                concurrentlyFailedExecutionVertex1
+                                                        .getCurrentAssignedResourceLocation()))));
     }
 
     private long triggerFailure(ExecutionVertex executionVertex, Throwable throwable) {

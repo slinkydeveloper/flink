@@ -41,7 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test behaviors of {@link ZooKeeperLeaderElectionDriver} when losing the connection to ZooKeeper.
@@ -83,7 +83,7 @@ public class ZooKeeperLeaderElectionConnectionHandlingTest extends TestLogger {
                 (connectionStateListener, contender) -> {
                     connectionStateListener.awaitSuspendedConnection();
                     connectionStateListener.awaitReconnectedConnection();
-                    assertFalse(contender.hasRevokeLeadershipBeenTriggered());
+                    assertThat(contender.hasRevokeLeadershipBeenTriggered()).isFalse();
                 });
     }
 

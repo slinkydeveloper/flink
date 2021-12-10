@@ -33,9 +33,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RocksDBStateBackendFactory. */
 public class RocksDBStateBackendFactoryTest {
@@ -55,7 +53,7 @@ public class RocksDBStateBackendFactoryTest {
         factoryName += "ksDBStateBackendFactory";
 
         // !!! if this fails, the code in StateBackendLoader must be adjusted
-        assertEquals(factoryName, RocksDBStateBackendFactory.class.getName());
+        assertThat(RocksDBStateBackendFactory.class.getName()).isEqualTo(factoryName);
     }
 
     @Test
@@ -65,7 +63,7 @@ public class RocksDBStateBackendFactoryTest {
         factoryName += "ksDBStateBackendFactory";
 
         // !!! if this fails, the code in StateBackendLoader must be adjusted
-        assertEquals(factoryName, EmbeddedRocksDBStateBackendFactory.class.getName());
+        assertThat(EmbeddedRocksDBStateBackendFactory.class.getName()).isEqualTo(factoryName);
     }
 
     /**
@@ -95,14 +93,14 @@ public class RocksDBStateBackendFactoryTest {
         StateBackend backend1 = StateBackendLoader.loadStateBackendFromConfig(config1, cl, null);
         StateBackend backend2 = StateBackendLoader.loadStateBackendFromConfig(config2, cl, null);
 
-        assertTrue(backend1 instanceof EmbeddedRocksDBStateBackend);
-        assertTrue(backend2 instanceof EmbeddedRocksDBStateBackend);
+        assertThat(backend1).isInstanceOf(EmbeddedRocksDBStateBackend.class);
+        assertThat(backend2).isInstanceOf(EmbeddedRocksDBStateBackend.class);
 
         EmbeddedRocksDBStateBackend fs1 = (EmbeddedRocksDBStateBackend) backend1;
         EmbeddedRocksDBStateBackend fs2 = (EmbeddedRocksDBStateBackend) backend2;
 
-        assertEquals(incremental, fs1.isIncrementalCheckpointsEnabled());
-        assertEquals(incremental, fs2.isIncrementalCheckpointsEnabled());
+        assertThat(fs1.isIncrementalCheckpointsEnabled()).isEqualTo(incremental);
+        assertThat(fs2.isIncrementalCheckpointsEnabled()).isEqualTo(incremental);
         checkPaths(fs1.getDbStoragePaths(), localDir1, localDir2);
         checkPaths(fs2.getDbStoragePaths(), localDir1, localDir2);
     }
@@ -136,26 +134,26 @@ public class RocksDBStateBackendFactoryTest {
         final StateBackend loadedBackend =
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         backend, TernaryBoolean.UNDEFINED, config, cl, null);
-        assertTrue(loadedBackend instanceof EmbeddedRocksDBStateBackend);
+        assertThat(loadedBackend).isInstanceOf(EmbeddedRocksDBStateBackend.class);
 
         final EmbeddedRocksDBStateBackend loadedRocks = (EmbeddedRocksDBStateBackend) loadedBackend;
 
-        assertEquals(incremental, loadedRocks.isIncrementalCheckpointsEnabled());
+        assertThat(loadedRocks.isIncrementalCheckpointsEnabled()).isEqualTo(incremental);
         checkPaths(loadedRocks.getDbStoragePaths(), localDir1, localDir2);
     }
 
     // ------------------------------------------------------------------------
 
     private static void checkPaths(String[] pathsArray, String... paths) {
-        assertNotNull(pathsArray);
-        assertNotNull(paths);
+        assertThat(pathsArray).isNotNull();
+        assertThat(paths).isNotNull();
 
-        assertEquals(pathsArray.length, paths.length);
+        assertThat(paths.length).isEqualTo(pathsArray.length);
 
         HashSet<String> pathsSet = new HashSet<>(Arrays.asList(pathsArray));
 
         for (String path : paths) {
-            assertTrue(pathsSet.contains(path));
+            assertThat(pathsSet.contains(path)).isTrue();
         }
     }
 }

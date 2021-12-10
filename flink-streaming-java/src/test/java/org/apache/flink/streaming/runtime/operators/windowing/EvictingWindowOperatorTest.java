@@ -52,13 +52,15 @@ import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.TestHarnessUtil;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link EvictingWindowOperator}. */
 public class EvictingWindowOperatorTest {
@@ -156,7 +158,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     /** Tests TimeEvictor evictAfter behavior. */
@@ -238,7 +240,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     /** Tests TimeEvictor evictBefore behavior. */
@@ -319,7 +321,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     /**
@@ -402,7 +404,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     /** Tests DeltaEvictor, evictBefore behavior. */
@@ -496,7 +498,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     /** Tests DeltaEvictor, evictAfter behavior. */
@@ -590,7 +592,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     @Test
@@ -766,7 +768,7 @@ public class EvictingWindowOperatorTest {
 
         testHarness.close();
 
-        Assert.assertEquals("Close was not called.", 1, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(1);
     }
 
     @Test
@@ -890,7 +892,7 @@ public class EvictingWindowOperatorTest {
                 throws Exception {
 
             if (!openCalled) {
-                Assert.fail("Open was not called");
+                fail("Open was not called");
             }
             int sum = 0;
 

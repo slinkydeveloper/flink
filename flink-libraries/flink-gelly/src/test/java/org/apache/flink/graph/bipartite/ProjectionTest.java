@@ -22,7 +22,7 @@ import org.apache.flink.graph.Vertex;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Projection}. */
 public class ProjectionTest {
@@ -39,32 +39,32 @@ public class ProjectionTest {
 
     @Test
     public void testIntermediateVertexGetId() {
-        assertEquals(Integer.valueOf(ID), projection.getIntermediateVertexId());
+        assertThat(projection.getIntermediateVertexId()).isEqualTo(Integer.valueOf(ID));
     }
 
     @Test
     public void testGetIntermediateVertexValue() {
-        assertEquals(VERTEX_VALUE, projection.getIntermediateVertexValue());
+        assertThat(projection.getIntermediateVertexValue()).isEqualTo(VERTEX_VALUE);
     }
 
     @Test
     public void testGetSourceEdgeValue() {
-        assertEquals(SOURCE_EDGE_VALUE, projection.getSourceEdgeValue());
+        assertThat(projection.getSourceEdgeValue()).isEqualTo(SOURCE_EDGE_VALUE);
     }
 
     @Test
     public void testGetTargetEdgeValue() {
-        assertEquals(TARGET_EDGE_VALUE, projection.getTargetEdgeValue());
+        assertThat(projection.getTargetEdgeValue()).isEqualTo(TARGET_EDGE_VALUE);
     }
 
     @Test
     public void testGetSourceVertexValue() {
-        assertEquals(SOURCE_VERTEX_VALUE, projection.getsSourceVertexValue());
+        assertThat(projection.getsSourceVertexValue()).isEqualTo(SOURCE_VERTEX_VALUE);
     }
 
     @Test
     public void testGetTargetVertexValue() {
-        assertEquals(TARGET_VERTEX_VALUE, projection.getTargetVertexValue());
+        assertThat(projection.getTargetVertexValue()).isEqualTo(TARGET_VERTEX_VALUE);
     }
 
     private Projection<Integer, String, String, String> createProjection() {

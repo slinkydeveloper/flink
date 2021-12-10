@@ -27,10 +27,8 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This class verifies that the Unmodifiable Configuration class overrides all setter methods in
@@ -44,7 +42,7 @@ public class UnmodifiableConfigurationTest extends TestLogger {
             Class<UnmodifiableConfiguration> clazz = UnmodifiableConfiguration.class;
             for (Method m : clazz.getMethods()) {
                 if (m.getName().startsWith("add")) {
-                    assertEquals(clazz, m.getDeclaringClass());
+                    assertThat(m.getDeclaringClass()).isEqualTo(clazz);
                 }
             }
         } catch (Exception e) {
@@ -81,13 +79,14 @@ public class UnmodifiableConfigurationTest extends TestLogger {
                     Object key = keyClass == String.class ? "key" : rawOption;
 
                     Object parameter = parameters.get(parameterClass);
-                    assertNotNull("method " + m + " not covered by test", parameter);
+                    assertThat(parameter).as("method " + m + " not covered by test").isNotNull();
 
                     try {
                         m.invoke(config, key, parameter);
                         fail("should fail with an exception");
                     } catch (InvocationTargetException e) {
-                        assertTrue(e.getTargetException() instanceof UnsupportedOperationException);
+                        assertThat(e.getTargetException())
+                                .isInstanceOf(UnsupportedOperationException.class);
                     }
                 }
             }

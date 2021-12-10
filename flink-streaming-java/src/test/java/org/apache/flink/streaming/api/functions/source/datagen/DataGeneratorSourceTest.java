@@ -26,7 +26,6 @@ import org.apache.flink.streaming.api.operators.StreamSource;
 import org.apache.flink.streaming.api.watermark.Watermark;
 import org.apache.flink.streaming.util.AbstractStreamOperatorTestHarness;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -36,6 +35,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link DataGeneratorSource}. */
 public class DataGeneratorSourceTest {
@@ -87,7 +89,7 @@ public class DataGeneratorSourceTest {
                 });
 
         for (Long l : results) {
-            Assert.assertTrue(l >= min && l <= max);
+            assertThat(l >= min && l <= max).isTrue();
         }
     }
 
@@ -214,7 +216,7 @@ public class DataGeneratorSourceTest {
         runner3.start();
         runner3.join();
 
-        Assert.assertEquals(3, outputCollector.size()); // we have 3 tasks.
+        assertThat(outputCollector.size()).isEqualTo(3); // we have 3 tasks.
 
         // test for at-most-once
         Set<T> dedupRes = new HashSet<>(expectedOutput.size());
@@ -223,21 +225,21 @@ public class DataGeneratorSourceTest {
             List<T> elements = outputCollector.get(key);
 
             // this tests the correctness of the latches in the test
-            Assert.assertTrue(elements.size() > 0);
+            assertThat(elements.size() > 0).isTrue();
 
             for (T elem : elements) {
                 if (!dedupRes.add(elem)) {
-                    Assert.fail("Duplicate entry: " + elem);
+                    fail("Duplicate entry: " + elem);
                 }
 
                 if (!expectedOutput.contains(elem)) {
-                    Assert.fail("Unexpected element: " + elem);
+                    fail("Unexpected element: " + elem);
                 }
             }
         }
 
         // test for exactly-once
-        Assert.assertEquals(expectedOutput.size(), dedupRes.size());
+        assertThat(dedupRes.size()).isEqualTo(expectedOutput.size());
 
         latchToWait1.trigger();
         latchToWait2.trigger();

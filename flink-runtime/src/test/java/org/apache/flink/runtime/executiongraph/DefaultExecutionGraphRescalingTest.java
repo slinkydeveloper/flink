@@ -33,9 +33,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This class contains tests that verify when rescaling a {@link JobGraph}, constructed {@link
@@ -56,7 +55,7 @@ public class DefaultExecutionGraphRescalingTest extends TestLogger {
                 TestingDefaultExecutionGraphBuilder.newBuilder().setJobGraph(jobGraph).build();
 
         for (JobVertex jv : jobVertices) {
-            assertThat(jv.getParallelism(), is(initialParallelism));
+            assertThat(jv.getParallelism()).isEqualTo(initialParallelism);
         }
         verifyGeneratedExecutionGraphOfSimpleBitartiteJobGraph(eg, jobVertices);
 
@@ -71,7 +70,7 @@ public class DefaultExecutionGraphRescalingTest extends TestLogger {
         eg = TestingDefaultExecutionGraphBuilder.newBuilder().setJobGraph(jobGraph).build();
 
         for (JobVertex jv : jobVertices) {
-            assertThat(jv.getParallelism(), is(1));
+            assertThat(jv.getParallelism()).isEqualTo(1);
         }
         verifyGeneratedExecutionGraphOfSimpleBitartiteJobGraph(eg, jobVertices);
 
@@ -86,7 +85,7 @@ public class DefaultExecutionGraphRescalingTest extends TestLogger {
         eg = TestingDefaultExecutionGraphBuilder.newBuilder().setJobGraph(jobGraph).build();
 
         for (JobVertex jv : jobVertices) {
-            assertThat(jv.getParallelism(), is(scaleUpParallelism));
+            assertThat(jv.getParallelism()).isEqualTo(scaleUpParallelism);
         }
         verifyGeneratedExecutionGraphOfSimpleBitartiteJobGraph(eg, jobVertices);
     }

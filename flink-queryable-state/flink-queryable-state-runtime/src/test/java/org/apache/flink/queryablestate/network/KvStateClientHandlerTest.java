@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import java.nio.channels.ClosedChannelException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -66,7 +66,7 @@ public class KvStateClientHandlerTest {
         // Verify callback
         channel.writeInbound(buf);
         verify(callback, times(1)).onRequestResult(eq(1222112277L), any(KvStateResponse.class));
-        assertEquals("Buffer not recycled", 0, buf.refCnt());
+        assertThat(buf.refCnt()).as("Buffer not recycled").isEqualTo(0);
 
         //
         // Request failure
@@ -81,7 +81,7 @@ public class KvStateClientHandlerTest {
         // Verify callback
         channel.writeInbound(buf);
         verify(callback, times(1)).onRequestFailure(eq(1222112278L), isA(RuntimeException.class));
-        assertEquals("Buffer not recycled", 0, buf.refCnt());
+        assertThat(buf.refCnt()).as("Buffer not recycled").isEqualTo(0);
 
         //
         // Server failure
@@ -103,7 +103,7 @@ public class KvStateClientHandlerTest {
         // Verify callback
         channel.writeInbound(buf);
         verify(callback, times(1)).onFailure(isA(IllegalStateException.class));
-        assertEquals("Buffer not recycled", 0, buf.refCnt());
+        assertThat(buf.refCnt()).as("Buffer not recycled").isEqualTo(0);
 
         //
         // Exception caught

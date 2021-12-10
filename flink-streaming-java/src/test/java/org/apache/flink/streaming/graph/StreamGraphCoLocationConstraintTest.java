@@ -29,9 +29,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test that check the hidden API to set co location constraints on the stream transformations. */
 public class StreamGraphCoLocationConstraintTest {
@@ -56,15 +55,17 @@ public class StreamGraphCoLocationConstraintTest {
 
         // get the graph
         final JobGraph jobGraph = env.getStreamGraph().getJobGraph();
-        assertEquals(4, jobGraph.getNumberOfVertices());
+        assertThat(jobGraph.getNumberOfVertices()).isEqualTo(4);
 
         List<JobVertex> vertices = jobGraph.getVerticesSortedTopologicallyFromSources();
         for (JobVertex vertex : vertices) {
-            assertNotNull(vertex.getCoLocationGroup());
+            assertThat(vertex.getCoLocationGroup()).isNotNull();
         }
 
-        assertEquals(vertices.get(0).getCoLocationGroup(), vertices.get(2).getCoLocationGroup());
-        assertEquals(vertices.get(1).getCoLocationGroup(), vertices.get(3).getCoLocationGroup());
+        assertThat(vertices.get(2).getCoLocationGroup())
+                .isEqualTo(vertices.get(0).getCoLocationGroup());
+        assertThat(vertices.get(3).getCoLocationGroup())
+                .isEqualTo(vertices.get(1).getCoLocationGroup());
     }
 
     @Test

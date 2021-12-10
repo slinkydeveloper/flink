@@ -23,7 +23,7 @@ import org.apache.flink.metrics.util.TestCounter;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the FlinkCounterWrapper. */
 public class FlinkCounterWrapperTest {
@@ -34,12 +34,12 @@ public class FlinkCounterWrapperTest {
         counter.inc();
 
         FlinkCounterWrapper wrapper = new FlinkCounterWrapper(counter);
-        assertEquals(1L, wrapper.getCount());
+        assertThat(wrapper.getCount()).isEqualTo(1L);
         wrapper.dec();
-        assertEquals(0L, wrapper.getCount());
+        assertThat(wrapper.getCount()).isEqualTo(0L);
         wrapper.inc(2);
-        assertEquals(2L, wrapper.getCount());
+        assertThat(wrapper.getCount()).isEqualTo(2L);
         wrapper.dec(2);
-        assertEquals(0L, wrapper.getCount());
+        assertThat(wrapper.getCount()).isEqualTo(0L);
     }
 }

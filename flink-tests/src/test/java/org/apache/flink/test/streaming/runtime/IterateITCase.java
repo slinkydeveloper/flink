@@ -60,9 +60,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for streaming iterations. */
 @SuppressWarnings({"unchecked", "unused", "serial"})
@@ -191,12 +190,11 @@ public class IterateITCase extends AbstractTestBase {
 
         StreamGraph graph = env.getStreamGraph();
 
-        assertEquals(2, graph.getIterationSourceSinkPairs().size());
+        assertThat(graph.getIterationSourceSinkPairs().size()).isEqualTo(2);
 
         for (Tuple2<StreamNode, StreamNode> sourceSinkPair : graph.getIterationSourceSinkPairs()) {
-            assertEquals(
-                    graph.getTargetVertex(sourceSinkPair.f0.getOutEdges().get(0)),
-                    graph.getSourceVertex(sourceSinkPair.f1.getInEdges().get(0)));
+            assertThat(graph.getSourceVertex(sourceSinkPair.f1.getInEdges().get(0)))
+                    .isEqualTo(graph.getTargetVertex(sourceSinkPair.f0.getOutEdges().get(0)));
         }
     }
 
@@ -252,42 +250,42 @@ public class IterateITCase extends AbstractTestBase {
 
         JobGraph jg = graph.getJobGraph();
 
-        assertEquals(1, graph.getIterationSourceSinkPairs().size());
+        assertThat(graph.getIterationSourceSinkPairs().size()).isEqualTo(1);
 
         Tuple2<StreamNode, StreamNode> sourceSinkPair =
                 graph.getIterationSourceSinkPairs().iterator().next();
         StreamNode itSource = sourceSinkPair.f0;
         StreamNode itSink = sourceSinkPair.f1;
 
-        assertEquals(4, itSource.getOutEdges().size());
-        assertEquals(3, itSink.getInEdges().size());
+        assertThat(itSource.getOutEdges().size()).isEqualTo(4);
+        assertThat(itSink.getInEdges().size()).isEqualTo(3);
 
-        assertEquals(itSource.getParallelism(), itSink.getParallelism());
+        assertThat(itSink.getParallelism()).isEqualTo(itSource.getParallelism());
 
         for (StreamEdge edge : itSource.getOutEdges()) {
             if (graph.getTargetVertex(edge).getOperatorName().equals("IterRebalanceMap")) {
-                assertTrue(edge.getPartitioner() instanceof RebalancePartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(RebalancePartitioner.class);
             } else if (graph.getTargetVertex(edge).getOperatorName().equals("IterForwardMap")) {
-                assertTrue(edge.getPartitioner() instanceof ForwardPartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(ForwardPartitioner.class);
             }
         }
         for (StreamEdge edge : itSink.getInEdges()) {
             if (graph.getStreamNode(edge.getSourceId())
                     .getOperatorName()
                     .equals("ParallelizeMapShuffle")) {
-                assertTrue(edge.getPartitioner() instanceof ShufflePartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(ShufflePartitioner.class);
             }
 
             if (graph.getStreamNode(edge.getSourceId())
                     .getOperatorName()
                     .equals("ParallelizeMapForward")) {
-                assertTrue(edge.getPartitioner() instanceof ForwardPartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(ForwardPartitioner.class);
             }
 
             if (graph.getStreamNode(edge.getSourceId())
                     .getOperatorName()
                     .equals("EvenOddSourceMap")) {
-                assertTrue(edge.getPartitioner() instanceof ForwardPartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(ForwardPartitioner.class);
             }
         }
 
@@ -305,8 +303,8 @@ public class IterateITCase extends AbstractTestBase {
             }
         }
 
-        assertTrue(itSource1.getCoLocationGroup() != null);
-        assertEquals(itSource1.getCoLocationGroup(), itSink1.getCoLocationGroup());
+        assertThat(itSource1.getCoLocationGroup() != null).isTrue();
+        assertThat(itSink1.getCoLocationGroup()).isEqualTo(itSource1.getCoLocationGroup());
     }
 
     @Test
@@ -359,35 +357,35 @@ public class IterateITCase extends AbstractTestBase {
 
         JobGraph jg = graph.getJobGraph();
 
-        assertEquals(1, graph.getIterationSourceSinkPairs().size());
+        assertThat(graph.getIterationSourceSinkPairs().size()).isEqualTo(1);
 
         Tuple2<StreamNode, StreamNode> sourceSinkPair =
                 graph.getIterationSourceSinkPairs().iterator().next();
         StreamNode itSource = sourceSinkPair.f0;
         StreamNode itSink = sourceSinkPair.f1;
 
-        assertEquals(4, itSource.getOutEdges().size());
-        assertEquals(3, itSink.getInEdges().size());
+        assertThat(itSource.getOutEdges().size()).isEqualTo(4);
+        assertThat(itSink.getInEdges().size()).isEqualTo(3);
 
-        assertEquals(itSource.getParallelism(), itSink.getParallelism());
+        assertThat(itSink.getParallelism()).isEqualTo(itSource.getParallelism());
 
         for (StreamEdge edge : itSource.getOutEdges()) {
             if (graph.getTargetVertex(edge).getOperatorName().equals("map1")) {
-                assertTrue(edge.getPartitioner() instanceof ForwardPartitioner);
-                assertEquals(4, graph.getTargetVertex(edge).getParallelism());
+                assertThat(edge.getPartitioner()).isInstanceOf(ForwardPartitioner.class);
+                assertThat(graph.getTargetVertex(edge).getParallelism()).isEqualTo(4);
             } else if (graph.getTargetVertex(edge).getOperatorName().equals("shuffle")) {
-                assertTrue(edge.getPartitioner() instanceof RebalancePartitioner);
-                assertEquals(2, graph.getTargetVertex(edge).getParallelism());
+                assertThat(edge.getPartitioner()).isInstanceOf(RebalancePartitioner.class);
+                assertThat(graph.getTargetVertex(edge).getParallelism()).isEqualTo(2);
             }
         }
         for (StreamEdge edge : itSink.getInEdges()) {
             String tailName = graph.getSourceVertex(edge).getOperatorName();
             if (tailName.equals("split")) {
-                assertTrue(edge.getPartitioner() instanceof ForwardPartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(ForwardPartitioner.class);
             } else if (tailName.equals("bc")) {
-                assertTrue(edge.getPartitioner() instanceof BroadcastPartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(BroadcastPartitioner.class);
             } else if (tailName.equals("shuffle")) {
-                assertTrue(edge.getPartitioner() instanceof ShufflePartitioner);
+                assertThat(edge.getPartitioner()).isInstanceOf(ShufflePartitioner.class);
             }
         }
 
@@ -404,10 +402,10 @@ public class IterateITCase extends AbstractTestBase {
             }
         }
 
-        assertTrue(itSource1.getCoLocationGroup() != null);
-        assertTrue(itSink1.getCoLocationGroup() != null);
+        assertThat(itSource1.getCoLocationGroup() != null).isTrue();
+        assertThat(itSink1.getCoLocationGroup() != null).isTrue();
 
-        assertEquals(itSource1.getCoLocationGroup(), itSink1.getCoLocationGroup());
+        assertThat(itSink1.getCoLocationGroup()).isEqualTo(itSource1.getCoLocationGroup());
     }
 
     @SuppressWarnings("rawtypes")
@@ -439,7 +437,7 @@ public class IterateITCase extends AbstractTestBase {
                 env.execute();
 
                 for (boolean iter : iterated) {
-                    assertTrue(iter);
+                    assertThat(iter).isTrue();
                 }
 
                 break; // success
@@ -480,7 +478,7 @@ public class IterateITCase extends AbstractTestBase {
 
                 try {
                     coIt.keyBy(1, 2);
-                    fail();
+                    fail("unknown failure");
                 } catch (InvalidProgramException e) {
                     // this is expected
                 }
@@ -490,6 +488,7 @@ public class IterateITCase extends AbstractTestBase {
                                 new RichCoFlatMapFunction<Integer, String, String>() {
 
                                     private static final long serialVersionUID = 1L;
+
                                     boolean seenFromSource = false;
 
                                     @Override
@@ -512,7 +511,7 @@ public class IterateITCase extends AbstractTestBase {
 
                                     @Override
                                     public void close() {
-                                        assertTrue(seenFromSource);
+                                        assertThat(seenFromSource).isTrue();
                                     }
                                 });
 
@@ -535,12 +534,14 @@ public class IterateITCase extends AbstractTestBase {
 
                 head.addSink(new TestSink()).setParallelism(1);
 
-                assertEquals(1, env.getStreamGraph(false).getIterationSourceSinkPairs().size());
+                assertThat(env.getStreamGraph(false).getIterationSourceSinkPairs().size())
+                        .isEqualTo(1);
 
                 env.execute();
 
                 Collections.sort(TestSink.collected);
-                assertEquals(Arrays.asList("1", "1", "2", "2", "2", "2"), TestSink.collected);
+                assertThat(TestSink.collected)
+                        .isEqualTo(Arrays.asList("1", "1", "2", "2", "2", "2"));
 
                 break; // success
             } catch (Throwable t) {
@@ -595,6 +596,7 @@ public class IterateITCase extends AbstractTestBase {
                                 new RichFlatMapFunction<Integer, Integer>() {
 
                                     int received = 0;
+
                                     int key = -1;
 
                                     @Override
@@ -604,7 +606,8 @@ public class IterateITCase extends AbstractTestBase {
                                         if (key == -1) {
                                             key = MathUtils.murmurHash(value % 3) % 3;
                                         } else {
-                                            assertEquals(key, MathUtils.murmurHash(value % 3) % 3);
+                                            assertThat(MathUtils.murmurHash(value % 3) % 3)
+                                                    .isEqualTo(key);
                                         }
                                         if (value > 0) {
                                             out.collect(value - 1);
@@ -613,7 +616,7 @@ public class IterateITCase extends AbstractTestBase {
 
                                     @Override
                                     public void close() {
-                                        assertTrue(received > 1);
+                                        assertThat(received > 1).isTrue();
                                     }
                                 });
 
@@ -651,7 +654,7 @@ public class IterateITCase extends AbstractTestBase {
                     env.execute();
 
                     // this statement should never be reached
-                    fail();
+                    fail("unknown failure");
                 } catch (UnsupportedOperationException e) {
                     // expected behaviour
                 }
@@ -667,7 +670,7 @@ public class IterateITCase extends AbstractTestBase {
                     env.execute();
 
                     // this statement should never be reached
-                    fail();
+                    fail("unknown failure");
                 } catch (UnsupportedOperationException e) {
                     // expected behaviour
                 }

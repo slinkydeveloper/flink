@@ -32,7 +32,6 @@ import org.apache.flink.runtime.state.heap.HeapPriorityQueueSetFactory;
 import org.apache.flink.streaming.runtime.tasks.ProcessingTimeService;
 import org.apache.flink.streaming.runtime.tasks.TestProcessingTimeService;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -50,9 +49,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
@@ -97,7 +96,7 @@ public class InternalTimerServiceImplTest {
                         StringSerializer.INSTANCE,
                         createQueueFactory());
 
-        Assert.assertEquals(startKeyGroupIdx, service.getLocalKeyGroupRangeStartIdx());
+        assertThat(service.getLocalKeyGroupRangeStartIdx()).isEqualTo(startKeyGroupIdx);
     }
 
     @Test
@@ -166,11 +165,11 @@ public class InternalTimerServiceImplTest {
                     processingTimeTimers.get(i);
 
             if (expected == null) {
-                Assert.assertTrue(actualEvent.isEmpty());
-                Assert.assertTrue(actualProcessing.isEmpty());
+                assertThat(actualEvent.isEmpty()).isTrue();
+                assertThat(actualProcessing.isEmpty()).isTrue();
             } else {
-                Assert.assertEquals(expected, actualEvent);
-                Assert.assertEquals(expected, actualProcessing);
+                assertThat(actualEvent).isEqualTo(expected);
+                assertThat(actualProcessing).isEqualTo(expected);
             }
         }
     }
@@ -206,40 +205,43 @@ public class InternalTimerServiceImplTest {
         timerService.registerProcessingTimeTimer("hello", 10);
         timerService.registerProcessingTimeTimer("hello", 20);
 
-        assertEquals(5, timerService.numProcessingTimeTimers());
-        assertEquals(2, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(3, timerService.numProcessingTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(5);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(2);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(3);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(10L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(10L)));
 
         processingTimeService.setCurrentTime(10);
 
-        assertEquals(3, timerService.numProcessingTimeTimers());
-        assertEquals(1, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(2, timerService.numProcessingTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(3);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(2);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(20L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(20L)));
 
         processingTimeService.setCurrentTime(20);
 
-        assertEquals(1, timerService.numProcessingTimeTimers());
-        assertEquals(0, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(1, timerService.numProcessingTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(1);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(0);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(1);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(30L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(30L)));
 
         processingTimeService.setCurrentTime(30);
 
-        assertEquals(0, timerService.numProcessingTimeTimers());
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(0);
 
-        assertEquals(0, processingTimeService.getNumActiveTimers());
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(0);
 
         timerService.registerProcessingTimeTimer("ciao", 40);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
     }
 
     /**
@@ -270,17 +272,19 @@ public class InternalTimerServiceImplTest {
 
         timerService.registerProcessingTimeTimer("ciao", 20);
 
-        assertEquals(1, timerService.numProcessingTimeTimers());
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(1);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(20L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(20L)));
 
         timerService.registerProcessingTimeTimer("ciao", 10);
 
-        assertEquals(2, timerService.numProcessingTimeTimers());
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(2);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(10L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(10L)));
     }
 
     /** */
@@ -308,10 +312,11 @@ public class InternalTimerServiceImplTest {
 
         timerService.registerProcessingTimeTimer("ciao", 10);
 
-        assertEquals(1, timerService.numProcessingTimeTimers());
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(1);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(10L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(10L)));
 
         doAnswer(
                         new Answer<Object>() {
@@ -326,8 +331,9 @@ public class InternalTimerServiceImplTest {
 
         processingTimeService.setCurrentTime(10);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(20L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(20L)));
 
         doAnswer(
                         new Answer<Object>() {
@@ -342,10 +348,11 @@ public class InternalTimerServiceImplTest {
 
         processingTimeService.setCurrentTime(20);
 
-        assertEquals(1, timerService.numProcessingTimeTimers());
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(1);
 
-        assertEquals(1, processingTimeService.getNumActiveTimers());
-        assertThat(processingTimeService.getActiveTimerTimestamps(), containsInAnyOrder(30L));
+        assertThat(processingTimeService.getNumActiveTimers()).isEqualTo(1);
+        assertThat(processingTimeService.getActiveTimerTimestamps())
+                .satisfies(matching(containsInAnyOrder(30L)));
     }
 
     @Test
@@ -365,10 +372,10 @@ public class InternalTimerServiceImplTest {
                         createQueueFactory());
 
         processingTimeService.setCurrentTime(17L);
-        assertEquals(17, timerService.currentProcessingTime());
+        assertThat(timerService.currentProcessingTime()).isEqualTo(17);
 
         processingTimeService.setCurrentTime(42);
-        assertEquals(42, timerService.currentProcessingTime());
+        assertThat(timerService.currentProcessingTime()).isEqualTo(42);
     }
 
     @Test
@@ -388,10 +395,10 @@ public class InternalTimerServiceImplTest {
                         createQueueFactory());
 
         timerService.advanceWatermark(17);
-        assertEquals(17, timerService.currentWatermark());
+        assertThat(timerService.currentWatermark()).isEqualTo(17);
 
         timerService.advanceWatermark(42);
-        assertEquals(42, timerService.currentWatermark());
+        assertThat(timerService.currentWatermark()).isEqualTo(42);
     }
 
     /** This also verifies that we don't have leakage between keys/namespaces. */
@@ -427,9 +434,9 @@ public class InternalTimerServiceImplTest {
         timerService.registerEventTimeTimer("ciao", 10);
         timerService.registerEventTimeTimer("hello", 10);
 
-        assertEquals(4, timerService.numEventTimeTimers());
-        assertEquals(2, timerService.numEventTimeTimers("hello"));
-        assertEquals(2, timerService.numEventTimeTimers("ciao"));
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(4);
+        assertThat(timerService.numEventTimeTimers("hello")).isEqualTo(2);
+        assertThat(timerService.numEventTimeTimers("ciao")).isEqualTo(2);
 
         timerService.advanceWatermark(10);
 
@@ -443,7 +450,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable, times(1))
                 .onEventTime(eq(new TimerHeapInternalTimer<>(10, key2, "hello")));
 
-        assertEquals(0, timerService.numEventTimeTimers());
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(0);
     }
 
     /** This also verifies that we don't have leakage between keys/namespaces. */
@@ -479,9 +486,9 @@ public class InternalTimerServiceImplTest {
         timerService.registerProcessingTimeTimer("ciao", 10);
         timerService.registerProcessingTimeTimer("hello", 10);
 
-        assertEquals(4, timerService.numProcessingTimeTimers());
-        assertEquals(2, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(2, timerService.numProcessingTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(4);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(2);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(2);
 
         processingTimeService.setCurrentTime(10);
 
@@ -495,7 +502,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable, times(1))
                 .onProcessingTime(eq(new TimerHeapInternalTimer<>(10, key2, "hello")));
 
-        assertEquals(0, timerService.numProcessingTimeTimers());
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(0);
     }
 
     /**
@@ -535,9 +542,9 @@ public class InternalTimerServiceImplTest {
         timerService.registerEventTimeTimer("ciao", 10);
         timerService.registerEventTimeTimer("hello", 10);
 
-        assertEquals(4, timerService.numEventTimeTimers());
-        assertEquals(2, timerService.numEventTimeTimers("hello"));
-        assertEquals(2, timerService.numEventTimeTimers("ciao"));
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(4);
+        assertThat(timerService.numEventTimeTimers("hello")).isEqualTo(2);
+        assertThat(timerService.numEventTimeTimers("ciao")).isEqualTo(2);
 
         keyContext.setCurrentKey(key1);
         timerService.deleteEventTimeTimer("hello", 10);
@@ -545,9 +552,9 @@ public class InternalTimerServiceImplTest {
         keyContext.setCurrentKey(key2);
         timerService.deleteEventTimeTimer("ciao", 10);
 
-        assertEquals(2, timerService.numEventTimeTimers());
-        assertEquals(1, timerService.numEventTimeTimers("hello"));
-        assertEquals(1, timerService.numEventTimeTimers("ciao"));
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(2);
+        assertThat(timerService.numEventTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numEventTimeTimers("ciao")).isEqualTo(1);
 
         timerService.advanceWatermark(10);
 
@@ -561,7 +568,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable, times(1))
                 .onEventTime(eq(new TimerHeapInternalTimer<>(10, key2, "hello")));
 
-        assertEquals(0, timerService.numEventTimeTimers());
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(0);
     }
 
     /**
@@ -601,9 +608,9 @@ public class InternalTimerServiceImplTest {
         timerService.registerProcessingTimeTimer("ciao", 10);
         timerService.registerProcessingTimeTimer("hello", 10);
 
-        assertEquals(4, timerService.numProcessingTimeTimers());
-        assertEquals(2, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(2, timerService.numProcessingTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(4);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(2);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(2);
 
         keyContext.setCurrentKey(key1);
         timerService.deleteProcessingTimeTimer("hello", 10);
@@ -611,9 +618,9 @@ public class InternalTimerServiceImplTest {
         keyContext.setCurrentKey(key2);
         timerService.deleteProcessingTimeTimer("ciao", 10);
 
-        assertEquals(2, timerService.numProcessingTimeTimers());
-        assertEquals(1, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(1, timerService.numProcessingTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(1);
 
         processingTimeService.setCurrentTime(10);
 
@@ -627,7 +634,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable, times(1))
                 .onProcessingTime(eq(new TimerHeapInternalTimer<>(10, key2, "hello")));
 
-        assertEquals(0, timerService.numEventTimeTimers());
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(0);
     }
 
     /**
@@ -672,7 +679,7 @@ public class InternalTimerServiceImplTest {
                     results.add(Tuple3.of((Integer) keyContext.getCurrentKey(), namespace, timer));
                 });
 
-        Assert.assertEquals(timers, results);
+        assertThat(results).isEqualTo(timers);
     }
 
     /**
@@ -717,7 +724,7 @@ public class InternalTimerServiceImplTest {
                     results.add(Tuple3.of((Integer) keyContext.getCurrentKey(), namespace, timer));
                 });
 
-        Assert.assertEquals(timers, results);
+        assertThat(results).isEqualTo(timers);
     }
 
     @Test
@@ -775,12 +782,12 @@ public class InternalTimerServiceImplTest {
         timerService.registerEventTimeTimer("ciao", 10);
         timerService.registerProcessingTimeTimer("hello", 10);
 
-        assertEquals(2, timerService.numProcessingTimeTimers());
-        assertEquals(1, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(1, timerService.numProcessingTimeTimers("ciao"));
-        assertEquals(2, timerService.numEventTimeTimers());
-        assertEquals(1, timerService.numEventTimeTimers("hello"));
-        assertEquals(1, timerService.numEventTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(1);
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(2);
+        assertThat(timerService.numEventTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numEventTimeTimers("ciao")).isEqualTo(1);
 
         Map<Integer, byte[]> snapshot = new HashMap<>();
         for (Integer keyGroupIndex : testKeyGroupRange) {
@@ -829,7 +836,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable2, times(1))
                 .onEventTime(eq(new TimerHeapInternalTimer<>(10, key2, "ciao")));
 
-        assertEquals(0, timerService.numEventTimeTimers());
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(0);
     }
 
     private void testSnapshotAndRebalancingRestore(int snapshotVersion) throws Exception {
@@ -873,12 +880,12 @@ public class InternalTimerServiceImplTest {
         timerService.registerEventTimeTimer("ciao", 10);
         timerService.registerProcessingTimeTimer("hello", 10);
 
-        assertEquals(2, timerService.numProcessingTimeTimers());
-        assertEquals(1, timerService.numProcessingTimeTimers("hello"));
-        assertEquals(1, timerService.numProcessingTimeTimers("ciao"));
-        assertEquals(2, timerService.numEventTimeTimers());
-        assertEquals(1, timerService.numEventTimeTimers("hello"));
-        assertEquals(1, timerService.numEventTimeTimers("ciao"));
+        assertThat(timerService.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(timerService.numProcessingTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numProcessingTimeTimers("ciao")).isEqualTo(1);
+        assertThat(timerService.numEventTimeTimers()).isEqualTo(2);
+        assertThat(timerService.numEventTimeTimers("hello")).isEqualTo(1);
+        assertThat(timerService.numEventTimeTimers("ciao")).isEqualTo(1);
 
         // one map per sub key-group range
         Map<Integer, byte[]> snapshot1 = new HashMap<>();
@@ -953,7 +960,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable1, never())
                 .onEventTime(eq(new TimerHeapInternalTimer<>(10, key2, "ciao")));
 
-        assertEquals(0, timerService1.numEventTimeTimers());
+        assertThat(timerService1.numEventTimeTimers()).isEqualTo(0);
 
         processingTimeService2.setCurrentTime(10);
         timerService2.advanceWatermark(10);
@@ -969,7 +976,7 @@ public class InternalTimerServiceImplTest {
         verify(mockTriggerable2, times(1))
                 .onEventTime(eq(new TimerHeapInternalTimer<>(10, key2, "ciao")));
 
-        assertEquals(0, timerService2.numEventTimeTimers());
+        assertThat(timerService2.numEventTimeTimers()).isEqualTo(0);
     }
 
     private static class TestKeyContext implements KeyContext {

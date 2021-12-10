@@ -42,8 +42,8 @@ import org.junit.rules.TemporaryFolder;
 
 import java.time.Duration;
 
-import static junit.framework.TestCase.assertEquals;
 import static org.apache.flink.runtime.testutils.CommonTestUtils.waitForAllTaskRunning;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for canceling the job. */
 @SuppressWarnings("serial")
@@ -103,7 +103,7 @@ public class JobCancelingITCase extends TestLogger {
         client.cancel(jobID).get();
         while (!client.getJobStatus(jobID).get().isTerminalState()) {}
 
-        assertEquals(JobStatus.CANCELED, client.getJobStatus(jobID).get());
+        assertThat(client.getJobStatus(jobID).get()).isEqualTo(JobStatus.CANCELED);
     }
 
     private static class InfiniteLongSourceFunction implements SourceFunction<Long> {

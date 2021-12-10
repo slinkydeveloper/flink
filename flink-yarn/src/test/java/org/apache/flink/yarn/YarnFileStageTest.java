@@ -56,11 +56,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.yarn.YarnTestUtils.generateFilesInDirectory;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 /** Tests for verifying file staging during submission to YARN works. */
 public class YarnFileStageTest extends TestLogger {
@@ -190,7 +188,7 @@ public class YarnFileStageTest extends TestLogger {
             throws Exception {
 
         // directory must not yet exist
-        assertFalse(targetFileSystem.exists(targetDir));
+        assertThat(targetFileSystem.exists(targetDir)).isFalse();
 
         final File srcDir = tempFolder.newFolder();
 
@@ -241,17 +239,18 @@ public class YarnFileStageTest extends TestLogger {
 
             final Path basePath = new Path(localResourceDirectory, srcPath.getName());
             final Path nestedPath = new Path(basePath, "nested");
-            assertThat(
-                    classpath,
-                    containsInAnyOrder(
-                            basePath.toString(),
-                            nestedPath.toString(),
-                            new Path(nestedPath, "4").toString(),
-                            new Path(basePath, "test.jar").toString()));
+            assertThat(classpath)
+                    .satisfies(
+                            matching(
+                                    containsInAnyOrder(
+                                            basePath.toString(),
+                                            nestedPath.toString(),
+                                            new Path(nestedPath, "4").toString(),
+                                            new Path(basePath, "test.jar").toString())));
 
             final Map<String, LocalResource> localResources =
                     uploader.getRegisteredLocalResources();
-            assertEquals(srcFiles.size(), localResources.size());
+            assertThat(localResources.size()).isEqualTo(srcFiles.size());
 
             final Path workDir =
                     ConverterUtils.getPathFromYarnURL(
@@ -320,9 +319,12 @@ public class YarnFileStageTest extends TestLogger {
                             localResourceDirectory,
                             LocalResourceType.FILE);
 
-            assertThat(
-                    classpath,
-                    containsInAnyOrder(new Path(localResourceDirectory, localFile).toString()));
+            assertThat(classpath)
+                    .satisfies(
+                            matching(
+                                    containsInAnyOrder(
+                                            new Path(localResourceDirectory, localFile)
+                                                    .toString())));
 
             final Map<String, LocalResource> localResources =
                     uploader.getRegisteredLocalResources();
@@ -393,11 +395,13 @@ public class YarnFileStageTest extends TestLogger {
                             LocalResourceType.FILE);
 
             // resource directories go first
-            assertThat(
-                    classpath,
-                    containsInAnyOrder(
-                            new Path(localResourceDirectory).toString(),
-                            new Path(localResourceDirectory, "nested/local.jar").toString()));
+            assertThat(classpath)
+                    .satisfies(
+                            matching(
+                                    containsInAnyOrder(
+                                            new Path(localResourceDirectory).toString(),
+                                            new Path(localResourceDirectory, "nested/local.jar")
+                                                    .toString())));
 
             final Map<String, LocalResource> localResources =
                     uploader.getRegisteredLocalResources();
@@ -443,7 +447,9 @@ public class YarnFileStageTest extends TestLogger {
                     String relativePath = absolutePathString.substring(workDirPrefixLength);
                     targetFiles.put(relativePath, in.readUTF());
 
-                    assertEquals("extraneous data in file " + relativePath, -1, in.read());
+                    assertThat(in.read())
+                            .as("extraneous data in file " + relativePath)
+                            .isEqualTo(-1);
                     break;
                 } catch (FileNotFoundException e) {
                     // For S3, read-after-write may be eventually consistent, i.e. when trying
@@ -454,6 +460,6 @@ public class YarnFileStageTest extends TestLogger {
                 }
             } while ((retries--) > 0);
         }
-        assertThat(targetFiles, equalTo(expectedFiles));
+        assertThat(targetFiles).isEqualTo(expectedFiles);
     }
 }

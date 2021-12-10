@@ -35,9 +35,9 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 
 import static org.apache.flink.runtime.scheduler.exceptionhistory.ArchivedTaskManagerLocationMatcher.isArchivedTaskManagerLocation;
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 /** {@code ExceptionHistoryEntryTest} tests the creation of {@link ExceptionHistoryEntry}. */
 public class ExceptionHistoryEntryTest extends TestLogger {
@@ -54,14 +54,13 @@ public class ExceptionHistoryEntryTest extends TestLogger {
 
         final ExceptionHistoryEntry entry = ExceptionHistoryEntry.create(execution, taskName);
 
-        assertThat(
-                entry.getException().deserializeError(ClassLoader.getSystemClassLoader()),
-                is(failure));
-        assertThat(entry.getTimestamp(), is(timestamp));
-        assertThat(entry.getFailingTaskName(), is(taskName));
-        assertThat(
-                entry.getTaskManagerLocation(), isArchivedTaskManagerLocation(taskManagerLocation));
-        assertThat(entry.isGlobal(), is(false));
+        assertThat(entry.getException().deserializeError(ClassLoader.getSystemClassLoader()))
+                .isEqualTo(failure);
+        assertThat(entry.getTimestamp()).isEqualTo(timestamp);
+        assertThat(entry.getFailingTaskName()).isEqualTo(taskName);
+        assertThat(entry.getTaskManagerLocation())
+                .satisfies(matching(isArchivedTaskManagerLocation(taskManagerLocation)));
+        assertThat(entry.isGlobal()).isEqualTo(false);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -99,13 +98,12 @@ public class ExceptionHistoryEntryTest extends TestLogger {
                         new TestAccessExecution(new ExecutionAttemptID(), failure, timestamp, null),
                         taskName);
 
-        assertThat(
-                entry.getException().deserializeError(ClassLoader.getSystemClassLoader()),
-                is(failure));
-        assertThat(entry.getTimestamp(), is(timestamp));
-        assertThat(entry.getFailingTaskName(), is(taskName));
-        assertThat(entry.getTaskManagerLocation(), is(nullValue()));
-        assertThat(entry.isGlobal(), is(false));
+        assertThat(entry.getException().deserializeError(ClassLoader.getSystemClassLoader()))
+                .isEqualTo(failure);
+        assertThat(entry.getTimestamp()).isEqualTo(timestamp);
+        assertThat(entry.getFailingTaskName()).isEqualTo(taskName);
+        assertThat(entry.getTaskManagerLocation()).isEqualTo(nullValue());
+        assertThat(entry.isGlobal()).isEqualTo(false);
     }
 
     private static class TestAccessExecution implements AccessExecution {

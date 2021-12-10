@@ -26,8 +26,7 @@ import org.junit.jupiter.api.Test;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.flink.connector.pulsar.source.enumerator.topic.TopicRange.createFullRange;
 import static org.apache.flink.connector.pulsar.source.split.PulsarPartitionSplitSerializer.INSTANCE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link PulsarPartitionSplitSerializer}. */
 class PulsarPartitionSplitSerializerTest {
@@ -42,7 +41,7 @@ class PulsarPartitionSplitSerializerTest {
         byte[] bytes = INSTANCE.serialize(split);
         PulsarPartitionSplit split1 = INSTANCE.deserialize(INSTANCE.getVersion(), bytes);
 
-        assertEquals(split, split1);
-        assertNotSame(split, split1);
+        assertThat(split1).isEqualTo(split);
+        assertThat(split1).isNotSameAs(split);
     }
 }

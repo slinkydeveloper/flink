@@ -43,7 +43,6 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.serialization.ByteArrayDeserializer;
 import org.apache.kafka.common.serialization.IntegerDeserializer;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -66,12 +65,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.connector.kafka.source.testutils.KafkaSourceTestEnv.NUM_RECORDS_PER_PARTITION;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link KafkaPartitionSplitReader}. */
 public class KafkaPartitionSplitReaderTest {
@@ -132,7 +126,7 @@ public class KafkaPartitionSplitReaderTest {
             reader.wakeUp();
             Thread.sleep(10);
         }
-        assertNull(error.get());
+        assertThat(error.get()).isNull();
     }
 
     @Test
@@ -154,7 +148,7 @@ public class KafkaPartitionSplitReaderTest {
         final long latestNumBytesIn = numBytesInCounter.getCount();
         // Since it's hard to know the exact number of bytes consumed, we just check if it is
         // greater than 0
-        assertThat(latestNumBytesIn, Matchers.greaterThan(0L));
+        assertThat(latestNumBytesIn).isGreaterThan(0L);
         // Add another split
         reader.handleSplitsChanges(
                 new SplitsAddition<>(
@@ -162,7 +156,7 @@ public class KafkaPartitionSplitReaderTest {
                                 new KafkaPartitionSplit(new TopicPartition(TOPIC2, 0), 0L))));
         reader.fetch();
         // We just check if numBytesIn is increasing
-        assertThat(numBytesInCounter.getCount(), Matchers.greaterThan(latestNumBytesIn));
+        assertThat(numBytesInCounter.getCount()).isGreaterThan(latestNumBytesIn);
     }
 
     @ParameterizedTest
@@ -190,18 +184,19 @@ public class KafkaPartitionSplitReaderTest {
                         Collections.singletonList(
                                 new KafkaPartitionSplit(new TopicPartition(topic1Name, 0), 0L))));
         // pendingRecords should have not been registered because of lazily registration
-        assertFalse(metricListener.getGauge(MetricNames.PENDING_RECORDS).isPresent());
+        assertThat(metricListener.getGauge(MetricNames.PENDING_RECORDS).isPresent()).isFalse();
         // Trigger first fetch
         reader.fetch();
         final Optional<Gauge<Long>> pendingRecords =
                 metricListener.getGauge(MetricNames.PENDING_RECORDS);
-        assertTrue(pendingRecords.isPresent());
+        assertThat(pendingRecords.isPresent()).isTrue();
         // Validate pendingRecords
-        assertNotNull(pendingRecords);
-        assertEquals(NUM_RECORDS_PER_PARTITION - 1, (long) pendingRecords.get().getValue());
+        assertThat(pendingRecords).isNotNull();
+        assertThat((long) pendingRecords.get().getValue()).isEqualTo(NUM_RECORDS_PER_PARTITION - 1);
         for (int i = 1; i < NUM_RECORDS_PER_PARTITION; i++) {
             reader.fetch();
-            assertEquals(NUM_RECORDS_PER_PARTITION - i - 1, (long) pendingRecords.get().getValue());
+            assertThat((long) pendingRecords.get().getValue())
+                    .isEqualTo(NUM_RECORDS_PER_PARTITION - i - 1);
         }
         // Add another split
         reader.handleSplitsChanges(
@@ -211,7 +206,8 @@ public class KafkaPartitionSplitReaderTest {
         // Validate pendingRecords
         for (int i = 0; i < NUM_RECORDS_PER_PARTITION; i++) {
             reader.fetch();
-            assertEquals(NUM_RECORDS_PER_PARTITION - i - 1, (long) pendingRecords.get().getValue());
+            assertThat((long) pendingRecords.get().getValue())
+                    .isEqualTo(NUM_RECORDS_PER_PARTITION - i - 1);
         }
     }
 
@@ -232,7 +228,7 @@ public class KafkaPartitionSplitReaderTest {
 
         // Fetch and check empty splits is added to finished splits
         RecordsWithSplitIds<Tuple3<Integer, Long, Long>> recordsWithSplitIds = reader.fetch();
-        assertTrue(recordsWithSplitIds.finishedSplits().contains(emptySplit.splitId()));
+        assertThat(recordsWithSplitIds.finishedSplits().contains(emptySplit.splitId())).isTrue();
 
         // Assign another valid split to avoid consumer.poll() blocking
         final KafkaPartitionSplit anotherNormalSplit =
@@ -245,7 +241,7 @@ public class KafkaPartitionSplitReaderTest {
 
         // Fetch again and check empty split set is cleared
         recordsWithSplitIds = reader.fetch();
-        assertTrue(recordsWithSplitIds.finishedSplits().isEmpty());
+        assertThat(recordsWithSplitIds.finishedSplits().isEmpty()).isTrue();
     }
 
     // ------------------
@@ -294,12 +290,12 @@ public class KafkaPartitionSplitReaderTest {
                     TopicPartition tp = splits.get(splitId).getTopicPartition();
                     long earliestOffset = earliestOffsets.get(tp);
                     long expectedRecordCount = NUM_RECORDS_PER_PARTITION - earliestOffset;
-                    assertEquals(
-                            expectedRecordCount,
-                            (long) recordCount,
-                            String.format(
-                                    "%s should have %d records.",
-                                    splits.get(splitId), expectedRecordCount));
+                    assertThat((long) recordCount)
+                            .as(
+                                    String.format(
+                                            "%s should have %d records.",
+                                            splits.get(splitId), expectedRecordCount))
+                            .isEqualTo(expectedRecordCount);
                 });
     }
 
@@ -349,9 +345,9 @@ public class KafkaPartitionSplitReaderTest {
             int expectedValue = (int) expectedOffset;
             long expectedTimestamp = expectedOffset * 1000L;
 
-            assertEquals(expectedValue, (int) record.f0);
-            assertEquals(expectedOffset, (long) record.f1);
-            assertEquals(expectedTimestamp, (long) record.f2);
+            assertThat((int) record.f0).isEqualTo(expectedValue);
+            assertThat((long) record.f1).isEqualTo(expectedOffset);
+            assertThat((long) record.f2).isEqualTo(expectedTimestamp);
 
             expectedOffset++;
         }

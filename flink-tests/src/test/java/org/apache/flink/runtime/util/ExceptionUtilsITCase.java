@@ -39,8 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ExceptionUtils} which require to spawn JVM process and set JVM memory args. */
 public class ExceptionUtilsITCase extends TestLogger {
@@ -56,7 +55,7 @@ public class ExceptionUtilsITCase extends TestLogger {
     public void testIsDirectOutOfMemoryError() throws IOException, InterruptedException {
         String className = DummyDirectAllocatingProgram.class.getName();
         RunResult result = run(className, Collections.emptyList(), DIRECT_MEMORY_SIZE, -1);
-        assertThat(result.getErrorOut() + "|" + result.getStandardOut(), is("|"));
+        assertThat(result.getErrorOut() + "|" + result.getStandardOut()).isEqualTo("|");
     }
 
     @Test
@@ -70,7 +69,7 @@ public class ExceptionUtilsITCase extends TestLogger {
         RunResult oomOut = run(className, getDummyClassLoadingProgramArgs(1000), -1, okMetaspace);
         // 'OutOfMemoryError: Metaspace' errors are caught, hence no output means we produced the
         // expected exception.
-        assertThat(oomOut.getErrorOut() + "|" + oomOut.getStandardOut(), is("|"));
+        assertThat(oomOut.getErrorOut() + "|" + oomOut.getStandardOut()).isEqualTo("|");
     }
 
     private static RunResult run(

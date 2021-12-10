@@ -31,8 +31,8 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests that validate optimizer choices when using operators that are requesting certain specific
@@ -62,8 +62,8 @@ public class AdditionalOperatorsTest extends CompilerTestBase {
             Channel in1 = crossPlanNode.getInput1();
             Channel in2 = crossPlanNode.getInput2();
 
-            assertEquals(ShipStrategyType.FORWARD, in1.getShipStrategy());
-            assertEquals(ShipStrategyType.BROADCAST, in2.getShipStrategy());
+            assertThat(in1.getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(in2.getShipStrategy()).isEqualTo(ShipStrategyType.BROADCAST);
         } catch (CompilerException ce) {
             ce.printStackTrace();
             fail("The Flink optimizer is unable to compile this plan correctly.");
@@ -91,8 +91,8 @@ public class AdditionalOperatorsTest extends CompilerTestBase {
             Channel in1 = crossPlanNode.getInput1();
             Channel in2 = crossPlanNode.getInput2();
 
-            assertEquals(ShipStrategyType.BROADCAST, in1.getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, in2.getShipStrategy());
+            assertThat(in1.getShipStrategy()).isEqualTo(ShipStrategyType.BROADCAST);
+            assertThat(in2.getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
         } catch (CompilerException ce) {
             ce.printStackTrace();
             fail("The pact compiler is unable to compile this plan correctly.");

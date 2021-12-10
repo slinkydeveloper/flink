@@ -30,9 +30,9 @@ import java.util.List;
 
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.committableRecord;
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.committableRecords;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
 
 /** Tests for {@link BatchCommitterHandler}. */
 public class BatchCommitterHandlerTest extends TestLogger {
@@ -56,7 +56,8 @@ public class BatchCommitterHandlerTest extends TestLogger {
         testHarness.processElement(committableRecord("these"));
         testHarness.endInput();
         testHarness.close();
-        assertThat(committer.getCommittedData(), Matchers.contains("those", "these"));
+        assertThat(committer.getCommittedData())
+                .satisfies(matching(Matchers.contains("those", "these")));
     }
 
     @Test
@@ -74,8 +75,8 @@ public class BatchCommitterHandlerTest extends TestLogger {
         testHarness.endInput();
         testHarness.close();
 
-        assertThat(
-                committer.getCommittedData(), containsInAnyOrder(expectedCommittedData.toArray()));
+        assertThat(committer.getCommittedData())
+                .satisfies(matching(containsInAnyOrder(expectedCommittedData.toArray())));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class BatchCommitterHandlerTest extends TestLogger {
         testHarness.open();
         testHarness.close();
 
-        assertThat(committer.isClosed(), is(true));
+        assertThat(committer.isClosed()).isEqualTo(true);
     }
 
     private OneInputStreamOperatorTestHarness<byte[], byte[]> createTestHarness(

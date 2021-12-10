@@ -80,11 +80,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.apache.flink.runtime.scheduler.adaptive.WaitingForResourcesTest.assertNonNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /** Tests for {@link AdaptiveScheduler AdaptiveScheduler's} {@link Executing} state. */
 public class ExecutingTest extends TestLogger {
@@ -102,8 +100,8 @@ public class ExecutingTest extends TestLogger {
             Executing exec =
                     new ExecutingStateBuilder().setExecutionGraph(executionGraph).build(ctx);
 
-            assertThat(mockExecutionVertex.isDeployCalled(), is(true));
-            assertThat(executionGraph.getState(), is(JobStatus.RUNNING));
+            assertThat(mockExecutionVertex.isDeployCalled()).isEqualTo(true);
+            assertThat(executionGraph.getState()).isEqualTo(JobStatus.RUNNING);
         }
     }
 
@@ -126,7 +124,7 @@ public class ExecutingTest extends TestLogger {
                     log,
                     ctx,
                     ClassLoader.getSystemClassLoader());
-            assertThat(mockExecutionVertex.isDeployCalled(), is(false));
+            assertThat(mockExecutionVertex.isDeployCalled()).isEqualTo(false);
         }
     }
 
@@ -134,7 +132,7 @@ public class ExecutingTest extends TestLogger {
     public void testIllegalStateExceptionOnNotRunningExecutionGraph() throws Exception {
         try (MockExecutingContext ctx = new MockExecutingContext()) {
             ExecutionGraph notRunningExecutionGraph = new StateTrackingMockExecutionGraph();
-            assertThat(notRunningExecutionGraph.getState(), is(not(JobStatus.RUNNING)));
+            assertThat(notRunningExecutionGraph.getState()).isEqualTo(not(JobStatus.RUNNING));
 
             new Executing(
                     notRunningExecutionGraph,
@@ -158,7 +156,7 @@ public class ExecutingTest extends TestLogger {
                             .build(ctx);
             exec.onLeave(MockState.class);
 
-            assertThat(operatorCoordinator.isDisposed(), is(true));
+            assertThat(operatorCoordinator.isDisposed()).isEqualTo(true);
         }
     }
 
@@ -169,8 +167,9 @@ public class ExecutingTest extends TestLogger {
             Executing exec = new ExecutingStateBuilder().build(ctx);
             ctx.setExpectFailing(
                     (failingArguments -> {
-                        assertThat(failingArguments.getExecutionGraph(), notNullValue());
-                        assertThat(failingArguments.getFailureCause().getMessage(), is(failureMsg));
+                        assertThat(failingArguments.getExecutionGraph()).isNotNull();
+                        assertThat(failingArguments.getFailureCause().getMessage())
+                                .isEqualTo(failureMsg);
                     }));
             ctx.setHowToHandleFailure(Executing.FailureResult::canNotRestart);
             exec.handleGlobalFailure(new RuntimeException(failureMsg));
@@ -184,7 +183,7 @@ public class ExecutingTest extends TestLogger {
             Executing exec = new ExecutingStateBuilder().build(ctx);
             ctx.setExpectRestarting(
                     (restartingArguments ->
-                            assertThat(restartingArguments.getBackoffTime(), is(duration))));
+                            assertThat(restartingArguments.getBackoffTime()).isEqualTo(duration)));
             ctx.setHowToHandleFailure((t) -> Executing.FailureResult.canRestart(t, duration));
             exec.handleGlobalFailure(new RuntimeException("Recoverable error"));
         }
@@ -205,7 +204,8 @@ public class ExecutingTest extends TestLogger {
             Executing exec = new ExecutingStateBuilder().build(ctx);
             ctx.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.FAILED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.FAILED));
 
             // transition EG into terminal state, which will notify the Executing state about the
             // failure (async via the supplied executor)
@@ -220,7 +220,8 @@ public class ExecutingTest extends TestLogger {
             Executing exec = new ExecutingStateBuilder().build(ctx);
             ctx.setExpectFinished(
                     archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED));
+                        assertThat(archivedExecutionGraph.getState())
+                                .isEqualTo(JobStatus.SUSPENDED);
                     });
             exec.suspend(new RuntimeException("suspend"));
         }
@@ -235,7 +236,7 @@ public class ExecutingTest extends TestLogger {
             ctx.setExpectRestarting(
                     restartingArguments -> {
                         // expect immediate restart on scale up
-                        assertThat(restartingArguments.getBackoffTime(), is(Duration.ZERO));
+                        assertThat(restartingArguments.getBackoffTime()).isEqualTo(Duration.ZERO);
                     });
             ctx.setCanScaleUp(() -> true);
             exec.notifyNewResourcesAvailable();
@@ -314,9 +315,9 @@ public class ExecutingTest extends TestLogger {
                     new ExecutingStateBuilder().setExecutionGraph(executionGraph).build(ctx);
 
             assertThat(
-                    ((FailOnDeployMockExecutionVertex) mejv.getMockExecutionVertex())
-                            .getMarkedFailure(),
-                    is(instanceOf(JobException.class)));
+                            ((FailOnDeployMockExecutionVertex) mejv.getMockExecutionVertex())
+                                    .getMarkedFailure())
+                    .isEqualTo(instanceOf(JobException.class));
         }
     }
 
@@ -364,12 +365,12 @@ public class ExecutingTest extends TestLogger {
             coordinator.startCheckpointScheduler();
 
             // we assume checkpointing to be enabled
-            assertThat(coordinator.isPeriodicCheckpointingStarted(), is(true));
+            assertThat(coordinator.isPeriodicCheckpointingStarted()).isEqualTo(true);
 
             ctx.setExpectStopWithSavepoint(assertNonNull());
             exec.stopWithSavepoint("file:///tmp/target", true);
 
-            assertThat(coordinator.isPeriodicCheckpointingStarted(), is(false));
+            assertThat(coordinator.isPeriodicCheckpointingStarted()).isEqualTo(false);
         }
     }
 
@@ -384,9 +385,9 @@ public class ExecutingTest extends TestLogger {
         try (MockExecutingContext ctx = new MockExecutingContext()) {
             Executing exec = new ExecutingStateBuilder().build(ctx);
             final JobID jobId = exec.getExecutionGraph().getJobID();
-            assertThat(exec.getJob(), instanceOf(ArchivedExecutionGraph.class));
-            assertThat(exec.getJob().getJobID(), is(jobId));
-            assertThat(exec.getJobStatus(), is(JobStatus.RUNNING));
+            assertThat(exec.getJob()).isInstanceOf(ArchivedExecutionGraph.class);
+            assertThat(exec.getJob().getJobID()).isEqualTo(jobId);
+            assertThat(exec.getJobStatus()).isEqualTo(JobStatus.RUNNING);
         }
     }
 
@@ -407,11 +408,11 @@ public class ExecutingTest extends TestLogger {
             finishingMockExecutionGraph.completeTerminationFuture(JobStatus.FINISHED);
 
             // this is just a sanity check for the test
-            assertThat(executing.getExecutionGraph().getState(), is(JobStatus.FINISHED));
+            assertThat(executing.getExecutionGraph().getState()).isEqualTo(JobStatus.FINISHED);
 
-            assertThat(executing.getJobStatus(), is(JobStatus.RUNNING));
-            assertThat(executing.getJob().getState(), is(JobStatus.RUNNING));
-            assertThat(executing.getJob().getStatusTimestamp(JobStatus.FINISHED), is(0L));
+            assertThat(executing.getJobStatus()).isEqualTo(JobStatus.RUNNING);
+            assertThat(executing.getJob().getState()).isEqualTo(JobStatus.RUNNING);
+            assertThat(executing.getJob().getStatusTimestamp(JobStatus.FINISHED)).isEqualTo(0L);
         }
     }
 
@@ -422,7 +423,7 @@ public class ExecutingTest extends TestLogger {
             context.setExpectRestarting(
                     restartingArguments -> {
                         // expect immediate restart on scale up
-                        assertThat(restartingArguments.getBackoffTime(), is(Duration.ZERO));
+                        assertThat(restartingArguments.getBackoffTime()).isEqualTo(Duration.ZERO);
                     });
 
             final Executing executing = new ExecutingStateBuilder().build(context);

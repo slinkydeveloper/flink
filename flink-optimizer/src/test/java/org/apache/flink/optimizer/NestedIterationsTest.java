@@ -34,7 +34,8 @@ import org.apache.flink.optimizer.util.CompilerTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"serial", "unchecked"})
 public class NestedIterationsTest extends CompilerTestBase {
@@ -64,7 +65,8 @@ public class NestedIterationsTest extends CompilerTestBase {
             try {
                 compileNoStats(p);
             } catch (CompilerException e) {
-                assertTrue(e.getMessage().toLowerCase().indexOf("nested iterations") != -1);
+                assertThat(e.getMessage().toLowerCase().indexOf("nested iterations") != -1)
+                        .isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -106,7 +108,8 @@ public class NestedIterationsTest extends CompilerTestBase {
             try {
                 compileNoStats(p);
             } catch (CompilerException e) {
-                assertTrue(e.getMessage().toLowerCase().indexOf("nested iterations") != -1);
+                assertThat(e.getMessage().toLowerCase().indexOf("nested iterations") != -1)
+                        .isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();

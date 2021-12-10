@@ -30,8 +30,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class ExecutionConfigFromConfigurationTest {
@@ -225,11 +224,11 @@ public class ExecutionConfigFromConfigurationTest {
         }
 
         public void assertEqual(ExecutionConfig configFromFile, ExecutionConfig configFromSetters) {
-            assertThat(getter.apply(configFromFile), equalTo(getter.apply(configFromSetters)));
+            assertThat(getter.apply(configFromFile)).isEqualTo(getter.apply(configFromSetters));
         }
 
         public void assertEqualNonDefault(ExecutionConfig configFromFile) {
-            assertThat(getter.apply(configFromFile), equalTo(nonDefaultValue));
+            assertThat(getter.apply(configFromFile)).isEqualTo(nonDefaultValue);
         }
 
         @Override

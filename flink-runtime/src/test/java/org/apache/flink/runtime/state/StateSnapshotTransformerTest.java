@@ -41,6 +41,8 @@ import java.util.Random;
 import java.util.concurrent.RunnableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class StateSnapshotTransformerTest {
     private final CheckpointableKeyedStateBackend<Integer> backend;
     private final BlockerCheckpointStreamFactory streamFactory;
@@ -212,8 +214,7 @@ class StateSnapshotTransformerTest {
 
         void checkSingleThreadAccess() {
             currentThreadRef.compareAndSet(null, Thread.currentThread());
-            assert (Thread.currentThread().equals(currentThreadRef.get()))
-                    : "Concurrent access from another thread";
+            assertThat((Thread.currentThread().equals(currentThreadRef.get()))).isTrue();
         }
     }
 }

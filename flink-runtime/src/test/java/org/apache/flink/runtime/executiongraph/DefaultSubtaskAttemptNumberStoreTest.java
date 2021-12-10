@@ -25,8 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultSubtaskAttemptNumberStore}. */
 public class DefaultSubtaskAttemptNumberStoreTest extends TestLogger {
@@ -37,7 +36,8 @@ public class DefaultSubtaskAttemptNumberStoreTest extends TestLogger {
         final DefaultSubtaskAttemptNumberStore subtaskAttemptNumberStore =
                 new DefaultSubtaskAttemptNumberStore(initialAttemptCounts);
 
-        assertThat(subtaskAttemptNumberStore.getAttemptCount(1), is(initialAttemptCounts.get(1)));
+        assertThat(subtaskAttemptNumberStore.getAttemptCount(1))
+                .isEqualTo(initialAttemptCounts.get(1));
     }
 
     @Test
@@ -46,8 +46,8 @@ public class DefaultSubtaskAttemptNumberStoreTest extends TestLogger {
         final DefaultSubtaskAttemptNumberStore subtaskAttemptNumberStore =
                 new DefaultSubtaskAttemptNumberStore(initialAttemptCounts);
 
-        assertThat(
-                subtaskAttemptNumberStore.getAttemptCount(initialAttemptCounts.size() * 2), is(0));
+        assertThat(subtaskAttemptNumberStore.getAttemptCount(initialAttemptCounts.size() * 2))
+                .isEqualTo(0);
     }
 
     @Test(expected = IllegalArgumentException.class)

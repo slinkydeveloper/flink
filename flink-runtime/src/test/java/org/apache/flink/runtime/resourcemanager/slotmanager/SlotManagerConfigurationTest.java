@@ -26,9 +26,8 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link SlotManagerConfiguration}. */
 public class SlotManagerConfigurationTest extends TestLogger {
@@ -46,9 +45,8 @@ public class SlotManagerConfigurationTest extends TestLogger {
         final SlotManagerConfiguration slotManagerConfiguration =
                 SlotManagerConfiguration.fromConfiguration(configuration, WorkerResourceSpec.ZERO);
 
-        assertThat(
-                slotManagerConfiguration.getSlotRequestTimeout().toMilliseconds(),
-                is(equalTo(slotIdleTimeout)));
+        assertThat(slotManagerConfiguration.getSlotRequestTimeout().toMilliseconds())
+                .isEqualTo(equalTo(slotIdleTimeout));
     }
 
     /**
@@ -65,8 +63,7 @@ public class SlotManagerConfigurationTest extends TestLogger {
         final SlotManagerConfiguration slotManagerConfiguration =
                 SlotManagerConfiguration.fromConfiguration(configuration, WorkerResourceSpec.ZERO);
 
-        assertThat(
-                slotManagerConfiguration.getSlotRequestTimeout().toMilliseconds(),
-                is(equalTo(legacySlotIdleTimeout)));
+        assertThat(slotManagerConfiguration.getSlotRequestTimeout().toMilliseconds())
+                .isEqualTo(equalTo(legacySlotIdleTimeout));
     }
 }

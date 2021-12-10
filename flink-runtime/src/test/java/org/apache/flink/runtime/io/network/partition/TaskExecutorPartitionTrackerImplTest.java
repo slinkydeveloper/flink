@@ -41,12 +41,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
 
 /** Tests for the {@link TaskExecutorPartitionTrackerImpl}. */
 public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
@@ -56,7 +54,7 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
         final TaskExecutorPartitionTrackerImpl partitionTracker =
                 new TaskExecutorPartitionTrackerImpl(new NettyShuffleEnvironmentBuilder().build());
 
-        assertThat(partitionTracker.createClusterPartitionReport().getEntries(), is(empty()));
+        assertThat(partitionTracker.createClusterPartitionReport().getEntries()).isEqualTo(empty());
 
         final IntermediateDataSetID dataSetId = new IntermediateDataSetID();
         final JobID jobId = new JobID();
@@ -78,9 +76,10 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
 
         final ClusterPartitionReport.ClusterPartitionReportEntry reportEntry =
                 Iterables.getOnlyElement(clusterPartitionReport.getEntries());
-        assertThat(reportEntry.getDataSetId(), is(dataSetId));
-        assertThat(reportEntry.getNumTotalPartitions(), is(numberOfPartitions));
-        assertThat(reportEntry.getHostedPartitions(), hasItems(clusterPartitionId));
+        assertThat(reportEntry.getDataSetId()).isEqualTo(dataSetId);
+        assertThat(reportEntry.getNumTotalPartitions()).isEqualTo(numberOfPartitions);
+        assertThat(reportEntry.getHostedPartitions())
+                .satisfies(matching(hasItems(clusterPartitionId)));
     }
 
     @Test
@@ -104,7 +103,7 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
         partitionTracker.stopTrackingAndReleaseJobPartitions(
                 Collections.singleton(resultPartitionId1));
 
-        assertThat(shuffleReleaseFuture.get(), hasItem(resultPartitionId1));
+        assertThat(shuffleReleaseFuture.get()).contains(resultPartitionId1);
     }
 
     @Test
@@ -129,7 +128,7 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
                 new TaskExecutorPartitionInfo(resultPartitionId2, new IntermediateDataSetID(), 1));
         partitionTracker.stopTrackingAndReleaseJobPartitionsFor(jobId1);
 
-        assertThat(shuffleReleaseFuture.get(), hasItem(resultPartitionId1));
+        assertThat(shuffleReleaseFuture.get()).contains(resultPartitionId1);
     }
 
     @Test
@@ -154,7 +153,7 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
         partitionTracker.promoteJobPartitions(Collections.singleton(resultPartitionId1));
 
         partitionTracker.stopTrackingAndReleaseJobPartitionsFor(jobId);
-        assertThat(shuffleReleaseFuture.get(), not(hasItem(resultPartitionId1)));
+        assertThat(shuffleReleaseFuture.get()).doesNotContain(resultPartitionId1);
     }
 
     @Test
@@ -178,7 +177,7 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
         partitionTracker.promoteJobPartitions(Collections.singleton(resultPartitionId1));
 
         partitionTracker.stopTrackingAndReleaseAllClusterPartitions();
-        assertThat(shuffleReleaseFuture.get(), hasItem(resultPartitionId1));
+        assertThat(shuffleReleaseFuture.get()).contains(resultPartitionId1);
     }
 
     @Test
@@ -203,7 +202,7 @@ public class TaskExecutorPartitionTrackerImplTest extends TestLogger {
         partitionTracker.promoteJobPartitions(Collections.singleton(resultPartitionId1));
 
         partitionTracker.stopTrackingAndReleaseClusterPartitions(Collections.singleton(dataSetId1));
-        assertThat(shuffleReleaseFuture.get(), hasItem(resultPartitionId1));
+        assertThat(shuffleReleaseFuture.get()).contains(resultPartitionId1);
     }
 
     private static class TestingShuffleEnvironment

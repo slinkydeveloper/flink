@@ -29,12 +29,13 @@ import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.junit.Assert;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class contains utilities and a pre-defined source function and Elasticsearch Sink function
@@ -140,7 +141,7 @@ public class SourceSinkDataTestKit {
         for (int i = 0; i < NUM_ELEMENTS; i++) {
             GetResponse response =
                     client.get(new GetRequest(index, TYPE_NAME, Integer.toString(i))).actionGet();
-            Assert.assertEquals(DATA_PREFIX + i, response.getSource().get(DATA_FIELD_NAME));
+            assertThat(response.getSource().get(DATA_FIELD_NAME)).isEqualTo(DATA_PREFIX + i);
         }
     }
 

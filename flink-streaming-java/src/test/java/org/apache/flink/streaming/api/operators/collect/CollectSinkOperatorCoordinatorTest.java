@@ -28,7 +28,6 @@ import org.apache.flink.streaming.api.operators.collect.utils.CollectTestUtils;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.NetUtils;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -41,6 +40,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link CollectSinkOperatorCoordinator}. */
 public class CollectSinkOperatorCoordinatorTest {
@@ -125,16 +126,16 @@ public class CollectSinkOperatorCoordinatorTest {
             long expectedLastCheckpointedOffset,
             List<Row> expectedResults)
             throws Exception {
-        Assert.assertEquals(request.getVersion(), response.getVersion());
-        Assert.assertEquals(expectedLastCheckpointedOffset, response.getLastCheckpointedOffset());
+        assertThat(response.getVersion()).isEqualTo(request.getVersion());
+        assertThat(response.getLastCheckpointedOffset()).isEqualTo(expectedLastCheckpointedOffset);
         List<Row> results = response.getResults(serializer);
-        Assert.assertEquals(expectedResults.size(), results.size());
+        assertThat(results.size()).isEqualTo(expectedResults.size());
         for (int i = 0; i < results.size(); i++) {
             Row expectedRow = expectedResults.get(i);
             Row actualRow = results.get(i);
-            Assert.assertEquals(expectedRow.getArity(), actualRow.getArity());
+            assertThat(actualRow.getArity()).isEqualTo(expectedRow.getArity());
             for (int j = 0; j < actualRow.getArity(); j++) {
-                Assert.assertEquals(expectedRow.getField(j), actualRow.getField(j));
+                assertThat(actualRow.getField(j)).isEqualTo(expectedRow.getField(j));
             }
         }
     }

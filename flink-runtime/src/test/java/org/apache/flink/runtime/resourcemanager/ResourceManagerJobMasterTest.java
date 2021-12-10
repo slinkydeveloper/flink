@@ -47,8 +47,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the interaction between the {@link ResourceManager} and the {@link JobMaster}. */
 public class ResourceManagerJobMasterTest extends TestLogger {
@@ -153,7 +153,7 @@ public class ResourceManagerJobMasterTest extends TestLogger {
                         TIMEOUT);
         RegistrationResponse response =
                 successfulFuture.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
-        assertTrue(response instanceof JobMasterRegistrationSuccess);
+        assertThat(response).isInstanceOf(JobMasterRegistrationSuccess.class);
     }
 
     /** Test receive registration with unmatched leadershipId from job master. */
@@ -181,7 +181,8 @@ public class ResourceManagerJobMasterTest extends TestLogger {
             unMatchedLeaderFuture.get(5L, TimeUnit.SECONDS);
             fail("Should fail because we are using the wrong fencing token.");
         } catch (ExecutionException e) {
-            assertTrue(ExceptionUtils.stripExecutionException(e) instanceof FencingTokenException);
+            assertThat(ExceptionUtils.stripExecutionException(e))
+                    .isInstanceOf(FencingTokenException.class);
         }
     }
 
@@ -198,7 +199,7 @@ public class ResourceManagerJobMasterTest extends TestLogger {
                         jobMasterGateway.getAddress(),
                         jobId,
                         TIMEOUT);
-        assertTrue(unMatchedLeaderFuture.get() instanceof RegistrationResponse.Failure);
+        assertThat(unMatchedLeaderFuture.get()).isInstanceOf(RegistrationResponse.Failure.class);
     }
 
     /** Test receive registration with invalid address from job master. */
@@ -214,9 +215,8 @@ public class ResourceManagerJobMasterTest extends TestLogger {
                         invalidAddress,
                         jobId,
                         TIMEOUT);
-        assertTrue(
-                invalidAddressFuture.get(5, TimeUnit.SECONDS)
-                        instanceof RegistrationResponse.Failure);
+        assertThat(invalidAddressFuture.get(5, TimeUnit.SECONDS))
+                .isInstanceOf(RegistrationResponse.Failure.class);
     }
 
     /**
@@ -240,8 +240,8 @@ public class ResourceManagerJobMasterTest extends TestLogger {
             registrationFuture.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
             fail("Expected to fail with a ResourceManagerException.");
         } catch (ExecutionException e) {
-            assertTrue(
-                    ExceptionUtils.stripExecutionException(e) instanceof ResourceManagerException);
+            assertThat(ExceptionUtils.stripExecutionException(e))
+                    .isInstanceOf(ResourceManagerException.class);
         }
 
         // ignore the reported error

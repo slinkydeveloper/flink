@@ -34,9 +34,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
@@ -88,9 +86,10 @@ public class EmbeddedHaServicesTest extends TestLogger {
         verify(leaderContender1, atLeast(0)).grantLeadership(leaderIdArgumentCaptor1.capture());
         verify(leaderContender2, atLeast(0)).grantLeadership(leaderIdArgumentCaptor2.capture());
 
-        assertTrue(
-                leaderIdArgumentCaptor1.getAllValues().isEmpty()
-                        ^ leaderIdArgumentCaptor2.getAllValues().isEmpty());
+        assertThat(
+                        leaderIdArgumentCaptor1.getAllValues().isEmpty()
+                                ^ leaderIdArgumentCaptor2.getAllValues().isEmpty())
+                .isTrue();
 
         verify(leaderContenderDifferentJobId).grantLeadership(any(UUID.class));
     }
@@ -114,9 +113,10 @@ public class EmbeddedHaServicesTest extends TestLogger {
         verify(leaderContender1, atLeast(0)).grantLeadership(leaderIdArgumentCaptor1.capture());
         verify(leaderContender2, atLeast(0)).grantLeadership(leaderIdArgumentCaptor2.capture());
 
-        assertTrue(
-                leaderIdArgumentCaptor1.getAllValues().isEmpty()
-                        ^ leaderIdArgumentCaptor2.getAllValues().isEmpty());
+        assertThat(
+                        leaderIdArgumentCaptor1.getAllValues().isEmpty()
+                                ^ leaderIdArgumentCaptor2.getAllValues().isEmpty())
+                .isTrue();
     }
 
     /** Tests the JobManager leader retrieval for a given job. */
@@ -150,8 +150,8 @@ public class EmbeddedHaServicesTest extends TestLogger {
         final LeaderConnectionInfo leaderConnectionInfo =
                 leaderRetrievalListener.getLeaderConnectionInfoFuture().get();
 
-        assertThat(leaderConnectionInfo.getAddress(), is(ADDRESS));
-        assertThat(leaderConnectionInfo.getLeaderSessionId(), is(leaderId));
+        assertThat(leaderConnectionInfo.getAddress()).isEqualTo(ADDRESS);
+        assertThat(leaderConnectionInfo.getLeaderSessionId()).isEqualTo(leaderId);
     }
 
     /** Tests the ResourceManager leader retrieval for a given job. */
@@ -179,20 +179,24 @@ public class EmbeddedHaServicesTest extends TestLogger {
 
         final UUID oldLeaderSessionId = leaderContender.getLeaderSessionFuture().get();
 
-        assertThat(dispatcherLeaderElectionService.hasLeadership(oldLeaderSessionId), is(true));
+        assertThat(dispatcherLeaderElectionService.hasLeadership(oldLeaderSessionId))
+                .isEqualTo(true);
 
         embeddedHaServices.getDispatcherLeaderService().revokeLeadership().get();
-        assertThat(dispatcherLeaderElectionService.hasLeadership(oldLeaderSessionId), is(false));
+        assertThat(dispatcherLeaderElectionService.hasLeadership(oldLeaderSessionId))
+                .isEqualTo(false);
 
         embeddedHaServices.getDispatcherLeaderService().grantLeadership();
         final UUID newLeaderSessionId = leaderContender.getLeaderSessionFuture().get();
 
-        assertThat(dispatcherLeaderElectionService.hasLeadership(newLeaderSessionId), is(true));
+        assertThat(dispatcherLeaderElectionService.hasLeadership(newLeaderSessionId))
+                .isEqualTo(true);
 
         dispatcherLeaderElectionService.confirmLeadership(oldLeaderSessionId, ADDRESS);
         dispatcherLeaderElectionService.confirmLeadership(newLeaderSessionId, ADDRESS);
 
-        assertThat(dispatcherLeaderElectionService.hasLeadership(newLeaderSessionId), is(true));
+        assertThat(dispatcherLeaderElectionService.hasLeadership(newLeaderSessionId))
+                .isEqualTo(true);
 
         leaderContender.tryRethrowException();
     }

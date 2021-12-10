@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A test for the {@link org.apache.flink.api.common.typeutils.base.array.StringArraySerializer}.
@@ -91,6 +91,6 @@ public class StringArraySerializerTest extends SerializerTestBase<String[]> {
     @Test
     public void arrayTypeIsMutable() {
         StringArraySerializer serializer = (StringArraySerializer) createSerializer();
-        assertFalse(serializer.isImmutableType());
+        assertThat(serializer.isImmutableType()).isFalse();
     }
 }

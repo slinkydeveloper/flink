@@ -26,13 +26,13 @@ import org.apache.flink.table.data.GenericRowData;
 import org.apache.flink.table.data.RowData;
 import org.apache.flink.table.data.StringData;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
 import static org.apache.flink.connector.file.table.stream.compact.CompactMessages.CoordinatorInput;
 import static org.apache.flink.connector.file.table.stream.compact.CompactMessages.InputFile;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link CompactFileWriter}. */
 public class CompactFileWriterTest extends AbstractCompactTestBase {
@@ -53,11 +53,11 @@ public class CompactFileWriterTest extends AbstractCompactTestBase {
 
             List<CoordinatorInput> coordinatorInputs = harness.extractOutputValues();
 
-            Assert.assertEquals(2, coordinatorInputs.size());
+            assertThat(coordinatorInputs.size()).isEqualTo(2);
             // assert emit InputFile
-            Assert.assertTrue(coordinatorInputs.get(0) instanceof InputFile);
+            assertThat(coordinatorInputs.get(0)).isInstanceOf(InputFile.class);
             // assert emit EndCheckpoint
-            Assert.assertEquals(1, ((EndCheckpoint) coordinatorInputs.get(1)).getCheckpointId());
+            assertThat(((EndCheckpoint) coordinatorInputs.get(1)).getCheckpointId()).isEqualTo(1);
 
             harness.processElement(row("test1"), 0);
             harness.processElement(row("test2"), 0);
@@ -70,7 +70,7 @@ public class CompactFileWriterTest extends AbstractCompactTestBase {
             // assert emit EndCheckpoint with Long.MAX_VALUE lastly
             EndCheckpoint endCheckpoint =
                     (EndCheckpoint) coordinatorInputs.get(coordinatorInputs.size() - 1);
-            Assert.assertEquals(Long.MAX_VALUE, endCheckpoint.getCheckpointId());
+            assertThat(endCheckpoint.getCheckpointId()).isEqualTo(Long.MAX_VALUE);
         }
     }
 

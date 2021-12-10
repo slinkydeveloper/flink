@@ -35,11 +35,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.fail;
 
 /** Tests for remote AkkaRpcActors. */
 public class RemoteAkkaRpcActorTest extends TestLogger {
@@ -81,7 +80,7 @@ public class RemoteAkkaRpcActorTest extends TestLogger {
 
             final CompletableFuture<Integer> nullValuedResponseFuture = rpcGateway.foobar();
 
-            assertThat(nullValuedResponseFuture.join(), is(nullValue()));
+            assertThat(nullValuedResponseFuture.join()).isEqualTo(nullValue());
         }
     }
 
@@ -100,7 +99,7 @@ public class RemoteAkkaRpcActorTest extends TestLogger {
 
             final Integer value = rpcGateway.synchronousFoobar();
 
-            assertThat(value, is(nullValue()));
+            assertThat(value).isEqualTo(nullValue());
         }
     }
 
@@ -117,16 +116,14 @@ public class RemoteAkkaRpcActorTest extends TestLogger {
                                     AkkaRpcActorTest.SerializedValueRespondingGateway.class)
                             .join();
 
-            assertThat(
-                    remoteGateway.getSerializedValueSynchronously(),
-                    equalTo(AkkaRpcActorTest.SerializedValueRespondingEndpoint.SERIALIZED_VALUE));
+            assertThat(remoteGateway.getSerializedValueSynchronously())
+                    .isEqualTo(AkkaRpcActorTest.SerializedValueRespondingEndpoint.SERIALIZED_VALUE);
 
             final CompletableFuture<SerializedValue<String>> responseFuture =
                     remoteGateway.getSerializedValue();
 
-            assertThat(
-                    responseFuture.get(),
-                    equalTo(AkkaRpcActorTest.SerializedValueRespondingEndpoint.SERIALIZED_VALUE));
+            assertThat(responseFuture.get())
+                    .isEqualTo(AkkaRpcActorTest.SerializedValueRespondingEndpoint.SERIALIZED_VALUE);
         }
     }
 
@@ -150,7 +147,11 @@ public class RemoteAkkaRpcActorTest extends TestLogger {
                 fail("The endpoint should have been stopped.");
             } catch (Exception e) {
                 // the rpc result should not fail because of a TimeoutException
-                assertThat(e, FlinkMatchers.containsCause(RecipientUnreachableException.class));
+                assertThat(e)
+                        .satisfies(
+                                matching(
+                                        FlinkMatchers.containsCause(
+                                                RecipientUnreachableException.class)));
             }
         }
     }
@@ -178,7 +179,11 @@ public class RemoteAkkaRpcActorTest extends TestLogger {
                 fail("The endpoint should have been stopped.");
             } catch (Exception e) {
                 // the rpc result should not fail because of a TimeoutException
-                assertThat(e, FlinkMatchers.containsCause(RecipientUnreachableException.class));
+                assertThat(e)
+                        .satisfies(
+                                matching(
+                                        FlinkMatchers.containsCause(
+                                                RecipientUnreachableException.class)));
             }
         } finally {
             RpcUtils.terminateRpcService(toBeClosedRpcService, Time.seconds(10L));

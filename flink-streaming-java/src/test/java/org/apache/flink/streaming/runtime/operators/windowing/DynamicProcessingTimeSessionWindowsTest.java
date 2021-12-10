@@ -36,14 +36,11 @@ import org.mockito.Matchers;
 import java.util.Collection;
 
 import static org.apache.flink.streaming.util.StreamRecordMatchers.timeWindow;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Mockito.eq;
@@ -71,19 +68,16 @@ public class DynamicProcessingTimeSessionWindowsTest extends TestLogger {
                 DynamicProcessingTimeSessionWindows.withDynamicGap(extractor);
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(0L);
-        assertThat(
-                assigner.assignWindows("gap5000", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(0, 5000)));
+        assertThat(assigner.assignWindows("gap5000", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(0, 5000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(4999L);
-        assertThat(
-                assigner.assignWindows("gap4000", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(4999, 8999)));
+        assertThat(assigner.assignWindows("gap4000", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(4999, 8999))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5000L);
-        assertThat(
-                assigner.assignWindows("gap9000", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(5000, 14000)));
+        assertThat(assigner.assignWindows("gap9000", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(5000, 14000))));
     }
 
     @Test
@@ -206,7 +200,7 @@ public class DynamicProcessingTimeSessionWindowsTest extends TestLogger {
             assigner.assignWindows(Lists.newArrayList(new Object()), 1, mockContext);
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("0 < gap"));
+            assertThat(e.toString()).contains("0 < gap");
         }
 
         try {
@@ -218,7 +212,7 @@ public class DynamicProcessingTimeSessionWindowsTest extends TestLogger {
             assigner.assignWindows(Lists.newArrayList(new Object()), 1, mockContext);
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("0 < gap"));
+            assertThat(e.toString()).contains("0 < gap");
         }
     }
 
@@ -230,11 +224,10 @@ public class DynamicProcessingTimeSessionWindowsTest extends TestLogger {
         DynamicProcessingTimeSessionWindows assigner =
                 DynamicProcessingTimeSessionWindows.withDynamicGap(extractor);
 
-        assertFalse(assigner.isEventTime());
-        assertEquals(
-                new TimeWindow.Serializer(), assigner.getWindowSerializer(new ExecutionConfig()));
-        assertThat(
-                assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)),
-                instanceOf(ProcessingTimeTrigger.class));
+        assertThat(assigner.isEventTime()).isFalse();
+        assertThat(assigner.getWindowSerializer(new ExecutionConfig()))
+                .isEqualTo(new TimeWindow.Serializer());
+        assertThat(assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)))
+                .isInstanceOf(ProcessingTimeTrigger.class);
     }
 }

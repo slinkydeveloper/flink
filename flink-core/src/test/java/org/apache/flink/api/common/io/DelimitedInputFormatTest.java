@@ -44,11 +44,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DelimitedInputFormatTest {
 
@@ -77,11 +73,11 @@ public class DelimitedInputFormatTest {
         cfg.setString("delimited-format.delimiter", "\n");
 
         format.configure(cfg);
-        assertEquals("\n", new String(format.getDelimiter(), format.getCharset()));
+        assertThat(new String(format.getDelimiter(), format.getCharset())).isEqualTo("\n");
 
         cfg.setString("delimited-format.delimiter", "&-&");
         format.configure(cfg);
-        assertEquals("&-&", new String(format.getDelimiter(), format.getCharset()));
+        assertThat(new String(format.getDelimiter(), format.getCharset())).isEqualTo("&-&");
     }
 
     @Test
@@ -107,10 +103,10 @@ public class DelimitedInputFormatTest {
         @SuppressWarnings("unchecked")
         DelimitedInputFormat<String> deserialized = (DelimitedInputFormat<String>) ois.readObject();
 
-        assertEquals(NUM_LINE_SAMPLES, deserialized.getNumLineSamples());
-        assertEquals(LINE_LENGTH_LIMIT, deserialized.getLineLengthLimit());
-        assertEquals(BUFFER_SIZE, deserialized.getBufferSize());
-        assertArrayEquals(DELIMITER, deserialized.getDelimiter());
+        assertThat(deserialized.getNumLineSamples()).isEqualTo(NUM_LINE_SAMPLES);
+        assertThat(deserialized.getLineLengthLimit()).isEqualTo(LINE_LENGTH_LIMIT);
+        assertThat(deserialized.getBufferSize()).isEqualTo(BUFFER_SIZE);
+        assertThat(deserialized.getDelimiter()).isEqualTo(DELIMITER);
     }
 
     @Test
@@ -121,9 +117,9 @@ public class DelimitedInputFormatTest {
         int bufferSize = 5;
         format.setBufferSize(bufferSize);
         format.open(split);
-        assertEquals(0, format.splitStart);
-        assertEquals(myString.length() - bufferSize, format.splitLength);
-        assertEquals(bufferSize, format.getBufferSize());
+        assertThat(format.splitStart).isEqualTo(0);
+        assertThat(format.splitLength).isEqualTo(myString.length() - bufferSize);
+        assertThat(format.getBufferSize()).isEqualTo(bufferSize);
     }
 
     @Test
@@ -141,14 +137,14 @@ public class DelimitedInputFormatTest {
         String first = format.nextRecord(null);
         String second = format.nextRecord(null);
 
-        assertNotNull(first);
-        assertNotNull(second);
+        assertThat(first).isNotNull();
+        assertThat(second).isNotNull();
 
-        assertEquals("my key|my val$$$my key2", first);
-        assertEquals("$$ctd.$$|my value2", second);
+        assertThat(first).isEqualTo("my key|my val$$$my key2");
+        assertThat(second).isEqualTo("$$ctd.$$|my value2");
 
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
     }
 
     @Test
@@ -166,14 +162,14 @@ public class DelimitedInputFormatTest {
         String first = format.nextRecord(null);
         String second = format.nextRecord(null);
 
-        assertNotNull(first);
-        assertNotNull(second);
+        assertThat(first).isNotNull();
+        assertThat(second).isNotNull();
 
-        assertEquals("my key|my val$$$my key2", first);
-        assertEquals("$$ctd.$$|my value2", second);
+        assertThat(first).isEqualTo("my key|my val$$$my key2");
+        assertThat(second).isEqualTo("$$ctd.$$|my value2");
 
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
     }
 
     @Test
@@ -188,15 +184,15 @@ public class DelimitedInputFormatTest {
         format.open(split);
 
         String first = format.nextRecord(null);
-        assertNotNull(first);
-        assertEquals("my key|my val", first);
+        assertThat(first).isNotNull();
+        assertThat(first).isEqualTo("my key|my val");
 
         String second = format.nextRecord(null);
-        assertNotNull(second);
-        assertEquals("my key2\n$$ctd.$$|my value2", second);
+        assertThat(second).isNotNull();
+        assertThat(second).isEqualTo("my key2\n$$ctd.$$|my value2");
 
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
     }
 
     @Test
@@ -211,19 +207,19 @@ public class DelimitedInputFormatTest {
         format.open(split);
 
         String first = format.nextRecord(null);
-        assertNotNull(first);
-        assertEquals("www112xx", first);
+        assertThat(first).isNotNull();
+        assertThat(first).isEqualTo("www112xx");
 
         String second = format.nextRecord(null);
-        assertNotNull(second);
-        assertEquals("yyy1", second);
+        assertThat(second).isNotNull();
+        assertThat(second).isEqualTo("yyy1");
 
         String third = format.nextRecord(null);
-        assertNotNull(third);
-        assertEquals("zzzzz", third);
+        assertThat(third).isNotNull();
+        assertThat(third).isEqualTo("zzzzz");
 
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
     }
 
     @Test
@@ -263,11 +259,11 @@ public class DelimitedInputFormatTest {
 
             for (String record : records) {
                 String value = format.nextRecord(null);
-                assertEquals(record, value);
+                assertThat(value).isEqualTo(record);
             }
 
-            assertNull(format.nextRecord(null));
-            assertTrue(format.reachedEnd());
+            assertThat(format.nextRecord(null)).isNull();
+            assertThat(format.reachedEnd()).isTrue();
         }
     }
 
@@ -296,17 +292,17 @@ public class DelimitedInputFormatTest {
         format.configure(parameters);
         format.open(split1);
 
-        assertEquals("value1", format.nextRecord(null));
-        assertEquals("value2", format.nextRecord(null));
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isEqualTo("value1");
+        assertThat(format.nextRecord(null)).isEqualTo("value2");
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
 
         format.close();
         format.open(split2);
 
-        assertEquals("value3", format.nextRecord(null));
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isEqualTo("value3");
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
 
         format.close();
     }
@@ -342,27 +338,27 @@ public class DelimitedInputFormatTest {
         // read split 1
         format.open(split1);
         while ((next = format.nextRecord(null)) != null) {
-            assertEquals(7, next.length());
+            assertThat(next.length()).isEqualTo(7);
             count++;
         }
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
         format.close();
 
         // this one must have read one too many, because the next split will skip the trailing
         // remainder
         // which happens to be one full record
-        assertEquals(3, count);
+        assertThat(count).isEqualTo(3);
 
         // read split 2
         format.open(split2);
         while ((next = format.nextRecord(null)) != null) {
-            assertEquals(7, next.length());
+            assertThat(next.length()).isEqualTo(7);
             count++;
         }
         format.close();
 
-        assertEquals(4, count);
+        assertThat(count).isEqualTo(4);
     }
 
     @Test
@@ -379,15 +375,15 @@ public class DelimitedInputFormatTest {
         String next;
         int count = 0;
         while ((next = format.nextRecord(null)) != null) {
-            assertEquals(7, next.length());
+            assertThat(next.length()).isEqualTo(7);
             count++;
         }
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
 
         format.close();
 
-        assertEquals(4, count);
+        assertThat(count).isEqualTo(4);
     }
 
     @Test
@@ -422,20 +418,20 @@ public class DelimitedInputFormatTest {
         while ((next = format.nextRecord(null)) != null) {
             result.add(next);
         }
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
         format.close();
 
         format.open(split2);
         while ((next = format.nextRecord(null)) != null) {
             result.add(next);
         }
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
         format.close();
 
-        assertEquals(4, result.size());
-        assertEquals(Arrays.asList(myString.split("\n")), result);
+        assertThat(result.size()).isEqualTo(4);
+        assertThat(result).isEqualTo(Arrays.asList(myString.split("\n")));
     }
 
     @Test
@@ -474,11 +470,11 @@ public class DelimitedInputFormatTest {
 
         for (String record : records) {
             String value = format.nextRecord(null);
-            assertEquals(record, value);
+            assertThat(value).isEqualTo(record);
         }
 
-        assertNull(format.nextRecord(null));
-        assertTrue(format.reachedEnd());
+        assertThat(format.nextRecord(null)).isNull();
+        assertThat(format.reachedEnd()).isTrue();
 
         format.close();
     }
@@ -501,11 +497,10 @@ public class DelimitedInputFormatTest {
         format.setFilePaths(filePath.toUri().toString(), filePath2.toUri().toString());
 
         FileInputFormat.FileBaseStatistics stats = format.getStatistics(null);
-        assertNotNull(stats);
-        assertEquals(
-                "The file size from the statistics is wrong.",
-                totalSize,
-                stats.getTotalInputSize());
+        assertThat(stats).isNotNull();
+        assertThat(stats.getTotalInputSize())
+                .as("The file size from the statistics is wrong.")
+                .isEqualTo(totalSize);
     }
 
     @Test
@@ -515,7 +510,7 @@ public class DelimitedInputFormatTest {
                 "file:///path/does/not/really/exist", "file:///another/path/that/does/not/exist");
 
         FileBaseStatistics stats = format.getStatistics(null);
-        assertNull("The file statistics should be null.", stats);
+        assertThat(stats).as("The file statistics should be null.").isNull();
     }
 
     @Test
@@ -530,16 +525,17 @@ public class DelimitedInputFormatTest {
         format.configure(new Configuration());
 
         FileBaseStatistics stats = format.getStatistics(null);
-        assertNotNull(stats);
-        assertEquals(
-                "The file size from the statistics is wrong.", size, stats.getTotalInputSize());
+        assertThat(stats).isNotNull();
+        assertThat(stats.getTotalInputSize())
+                .as("The file size from the statistics is wrong.")
+                .isEqualTo(size);
 
         format = new MyTextInputFormat();
         format.setFilePath(tempFile);
         format.configure(new Configuration());
 
         FileBaseStatistics newStats = format.getStatistics(stats);
-        assertEquals("Statistics object was changed.", newStats, stats);
+        assertThat(stats).as("Statistics object was changed.").isEqualTo(newStats);
 
         // insert fake stats with the correct modification time. the call should return the fake
         // stats
@@ -553,10 +549,9 @@ public class DelimitedInputFormatTest {
                         fakeSize,
                         BaseStatistics.AVG_RECORD_BYTES_UNKNOWN);
         BaseStatistics latest = format.getStatistics(fakeStats);
-        assertEquals(
-                "The file size from the statistics is wrong.",
-                fakeSize,
-                latest.getTotalInputSize());
+        assertThat(latest.getTotalInputSize())
+                .as("The file size from the statistics is wrong.")
+                .isEqualTo(fakeSize);
 
         // insert fake stats with the expired modification time. the call should return new accurate
         // stats
@@ -570,10 +565,9 @@ public class DelimitedInputFormatTest {
                         fakeSize,
                         BaseStatistics.AVG_RECORD_BYTES_UNKNOWN);
         BaseStatistics reGathered = format.getStatistics(outDatedFakeStats);
-        assertEquals(
-                "The file size from the statistics is wrong.",
-                size,
-                reGathered.getTotalInputSize());
+        assertThat(reGathered.getTotalInputSize())
+                .as("The file size from the statistics is wrong.")
+                .isEqualTo(size);
     }
 
     static FileInputSplit createTempFile(String contents) throws IOException {

@@ -35,8 +35,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link DeclarativeSlotPoolBridge} interactions. */
 public class SlotPoolInteractionsTest extends TestLogger {
@@ -71,7 +71,8 @@ public class SlotPoolInteractionsTest extends TestLogger {
                 future.get();
                 fail("We expected an ExecutionException.");
             } catch (ExecutionException e) {
-                assertTrue(ExceptionUtils.stripExecutionException(e) instanceof TimeoutException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(TimeoutException.class);
             }
         }
     }
@@ -93,7 +94,8 @@ public class SlotPoolInteractionsTest extends TestLogger {
                 future.get();
                 fail("We expected a TimeoutException.");
             } catch (ExecutionException e) {
-                assertTrue(ExceptionUtils.stripExecutionException(e) instanceof TimeoutException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(TimeoutException.class);
             }
 
             CommonTestUtils.waitUntilCondition(
@@ -120,7 +122,8 @@ public class SlotPoolInteractionsTest extends TestLogger {
                 future.get();
                 fail("We expected a TimeoutException.");
             } catch (ExecutionException e) {
-                assertTrue(ExceptionUtils.stripExecutionException(e) instanceof TimeoutException);
+                assertThat(ExceptionUtils.stripExecutionException(e))
+                        .isInstanceOf(TimeoutException.class);
             }
 
             CommonTestUtils.waitUntilCondition(

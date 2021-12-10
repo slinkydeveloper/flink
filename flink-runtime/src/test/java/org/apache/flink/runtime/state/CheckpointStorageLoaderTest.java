@@ -40,15 +40,17 @@ import org.apache.flink.util.TestLogger;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.util.Collection;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** This test validates that checkpoint storage is properly loaded from configuration. */
 public class CheckpointStorageLoaderTest extends TestLogger {
@@ -59,8 +61,8 @@ public class CheckpointStorageLoaderTest extends TestLogger {
 
     @Test
     public void testNoCheckpointStorageDefined() throws Exception {
-        Assert.assertFalse(
-                CheckpointStorageLoader.fromConfig(new Configuration(), cl, null).isPresent());
+        assertThat(CheckpointStorageLoader.fromConfig(new Configuration(), cl, null).isPresent())
+                .isFalse();
     }
 
     @Test
@@ -71,8 +73,9 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         CheckpointStorage configured =
                 CheckpointStorageLoader.load(storage, null, legacy, new Configuration(), cl, log);
 
-        Assert.assertEquals(
-                "Legacy state backends should always take precedence", legacy, configured);
+        assertThat(configured)
+                .as("Legacy state backends should always take precedence")
+                .isEqualTo(legacy);
     }
 
     @Test
@@ -83,8 +86,9 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         CheckpointStorage configured =
                 CheckpointStorageLoader.load(storage, null, modern, new Configuration(), cl, log);
 
-        Assert.assertEquals(
-                "Modern state backends should never take precedence", storage, configured);
+        assertThat(configured)
+                .as("Modern state backends should never take precedence")
+                .isEqualTo(storage);
     }
 
     @Test
@@ -94,7 +98,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         config.set(CheckpointingOptions.CHECKPOINT_STORAGE, WorkingFactory.class.getName());
         CheckpointStorage storage =
                 CheckpointStorageLoader.load(null, null, new ModernStateBackend(), config, cl, log);
-        Assert.assertThat(storage, Matchers.instanceOf(MockStorage.class));
+        assertThat(storage).isInstanceOf(MockStorage.class);
     }
 
     @Test
@@ -103,7 +107,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
                 CheckpointStorageLoader.load(
                         null, null, new ModernStateBackend(), new Configuration(), cl, log);
 
-        Assert.assertThat(storage1, Matchers.instanceOf(JobManagerCheckpointStorage.class));
+        assertThat(storage1).isInstanceOf(JobManagerCheckpointStorage.class);
 
         final String checkpointDir = new Path(tmp.newFolder().toURI()).toString();
         Configuration config = new Configuration();
@@ -111,7 +115,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         CheckpointStorage storage2 =
                 CheckpointStorageLoader.load(null, null, new ModernStateBackend(), config, cl, log);
 
-        Assert.assertThat(storage2, Matchers.instanceOf(FileSystemCheckpointStorage.class));
+        assertThat(storage2).isInstanceOf(FileSystemCheckpointStorage.class);
     }
 
     @Test
@@ -121,7 +125,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         config.set(CheckpointingOptions.CHECKPOINT_STORAGE, "does.not.exist");
         try {
             CheckpointStorageLoader.load(null, null, new ModernStateBackend(), config, cl, log);
-            Assert.fail("should fail with exception");
+            fail("should fail with exception");
         } catch (DynamicCodeLoadingException e) {
             // expected
         }
@@ -130,7 +134,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         config.set(CheckpointingOptions.CHECKPOINT_STORAGE, java.io.File.class.getName());
         try {
             CheckpointStorageLoader.load(null, null, new ModernStateBackend(), config, cl, log);
-            Assert.fail("should fail with exception");
+            fail("should fail with exception");
         } catch (DynamicCodeLoadingException e) {
             // expected
         }
@@ -139,7 +143,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         config.set(CheckpointingOptions.CHECKPOINT_STORAGE, FailingFactory.class.getName());
         try {
             CheckpointStorageLoader.load(null, null, new ModernStateBackend(), config, cl, log);
-            Assert.fail("should fail with exception");
+            fail("should fail with exception");
         } catch (IllegalConfigurationException e) {
             // expected
         }
@@ -160,7 +164,7 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         config.set(CheckpointingOptions.CHECKPOINT_STORAGE, "jobmanager");
 
         CheckpointStorage storage = CheckpointStorageLoader.fromConfig(config, cl, null).get();
-        Assert.assertThat(storage, Matchers.instanceOf(JobManagerCheckpointStorage.class));
+        assertThat(storage).isInstanceOf(JobManagerCheckpointStorage.class);
     }
 
     /**
@@ -182,10 +186,10 @@ public class CheckpointStorageLoaderTest extends TestLogger {
 
         CheckpointStorage storage1 = CheckpointStorageLoader.fromConfig(config1, cl, null).get();
 
-        Assert.assertThat(storage1, Matchers.instanceOf(JobManagerCheckpointStorage.class));
+        assertThat(storage1).isInstanceOf(JobManagerCheckpointStorage.class);
 
-        Assert.assertEquals(
-                expectedSavepointPath, ((JobManagerCheckpointStorage) storage1).getSavepointPath());
+        assertThat(((JobManagerCheckpointStorage) storage1).getSavepointPath())
+                .isEqualTo(expectedSavepointPath);
     }
 
     /**
@@ -214,11 +218,12 @@ public class CheckpointStorageLoaderTest extends TestLogger {
                         cl,
                         log);
 
-        Assert.assertThat(storage, Matchers.instanceOf(JobManagerCheckpointStorage.class));
+        assertThat(storage).isInstanceOf(JobManagerCheckpointStorage.class);
         JobManagerCheckpointStorage jmStorage = (JobManagerCheckpointStorage) storage;
 
-        Assert.assertThat(jmStorage.getSavepointPath(), normalizedPath(expectedSavepointPath));
-        Assert.assertEquals(maxSize, jmStorage.getMaxStateSize());
+        assertThat(jmStorage.getSavepointPath())
+                .satisfies(matching(normalizedPath(expectedSavepointPath)));
+        assertThat(jmStorage.getMaxStateSize()).isEqualTo(maxSize);
     }
 
     /** Tests that job parameters take precedence over cluster configurations. */
@@ -239,9 +244,10 @@ public class CheckpointStorageLoaderTest extends TestLogger {
                         cl,
                         log);
 
-        Assert.assertThat(storage, Matchers.instanceOf(JobManagerCheckpointStorage.class));
+        assertThat(storage).isInstanceOf(JobManagerCheckpointStorage.class);
         JobManagerCheckpointStorage jmStorage = (JobManagerCheckpointStorage) storage;
-        Assert.assertThat(jmStorage.getSavepointPath(), normalizedPath(savepointDirJob));
+        assertThat(jmStorage.getSavepointPath())
+                .satisfies(matching(normalizedPath(savepointDirJob)));
     }
 
     // ------------------------------------------------------------------------
@@ -273,15 +279,17 @@ public class CheckpointStorageLoaderTest extends TestLogger {
 
         CheckpointStorage storage1 = CheckpointStorageLoader.fromConfig(config1, cl, null).get();
 
-        Assert.assertThat(storage1, Matchers.instanceOf(FileSystemCheckpointStorage.class));
+        assertThat(storage1).isInstanceOf(FileSystemCheckpointStorage.class);
 
         FileSystemCheckpointStorage fs1 = (FileSystemCheckpointStorage) storage1;
 
-        Assert.assertThat(fs1.getCheckpointPath(), normalizedPath(expectedCheckpointsPath));
-        Assert.assertThat(fs1.getSavepointPath(), normalizedPath(expectedSavepointsPath));
-        Assert.assertEquals(threshold.getBytes(), fs1.getMinFileSizeThreshold());
-        Assert.assertEquals(
-                Math.max(threshold.getBytes(), minWriteBufferSize), fs1.getWriteBufferSize());
+        assertThat(fs1.getCheckpointPath())
+                .satisfies(matching(normalizedPath(expectedCheckpointsPath)));
+        assertThat(fs1.getSavepointPath())
+                .satisfies(matching(normalizedPath(expectedSavepointsPath)));
+        assertThat(fs1.getMinFileSizeThreshold()).isEqualTo(threshold.getBytes());
+        assertThat(fs1.getWriteBufferSize())
+                .isEqualTo(Math.max(threshold.getBytes(), minWriteBufferSize));
     }
 
     /**
@@ -320,13 +328,14 @@ public class CheckpointStorageLoaderTest extends TestLogger {
         final CheckpointStorage loadedStorage =
                 CheckpointStorageLoader.load(
                         storage, null, new ModernStateBackend(), config, cl, log);
-        Assert.assertThat(loadedStorage, Matchers.instanceOf(FileSystemCheckpointStorage.class));
+        assertThat(loadedStorage).isInstanceOf(FileSystemCheckpointStorage.class);
 
         final FileSystemCheckpointStorage fs = (FileSystemCheckpointStorage) loadedStorage;
-        Assert.assertThat(fs.getCheckpointPath(), normalizedPath(appCheckpointDir));
-        Assert.assertThat(fs.getSavepointPath(), normalizedPath(expectedSavepointsPath));
-        Assert.assertEquals(threshold, fs.getMinFileSizeThreshold());
-        Assert.assertEquals(writeBufferSize, fs.getWriteBufferSize());
+        assertThat(fs.getCheckpointPath()).satisfies(matching(normalizedPath(appCheckpointDir)));
+        assertThat(fs.getSavepointPath())
+                .satisfies(matching(normalizedPath(expectedSavepointsPath)));
+        assertThat(fs.getMinFileSizeThreshold()).isEqualTo(threshold);
+        assertThat(fs.getWriteBufferSize()).isEqualTo(writeBufferSize);
     }
 
     // ------------------------------------------------------------------------
@@ -387,21 +396,23 @@ public class CheckpointStorageLoaderTest extends TestLogger {
                 CheckpointStorageLoader.load(
                         null, null, new ModernStateBackend(), config2, cl, log);
 
-        Assert.assertThat(loaded1, Matchers.instanceOf(JobManagerCheckpointStorage.class));
-        Assert.assertThat(loaded2, Matchers.instanceOf(JobManagerCheckpointStorage.class));
+        assertThat(loaded1).isInstanceOf(JobManagerCheckpointStorage.class);
+        assertThat(loaded2).isInstanceOf(JobManagerCheckpointStorage.class);
 
         final JobManagerCheckpointStorage memStorage1 = (JobManagerCheckpointStorage) loaded1;
         final JobManagerCheckpointStorage memStorage2 = (JobManagerCheckpointStorage) loaded2;
 
-        Assert.assertNull(memStorage1.getSavepointPath());
-        Assert.assertNull(memStorage2.getSavepointPath());
+        assertThat(memStorage1.getSavepointPath()).isNull();
+        assertThat(memStorage2.getSavepointPath()).isNull();
 
         if (checkpointPath != null) {
-            Assert.assertThat(memStorage1.getCheckpointPath(), normalizedPath(checkpointPath));
-            Assert.assertThat(memStorage2.getCheckpointPath(), normalizedPath(checkpointPath));
+            assertThat(memStorage1.getCheckpointPath())
+                    .satisfies(matching(normalizedPath(checkpointPath)));
+            assertThat(memStorage2.getCheckpointPath())
+                    .satisfies(matching(normalizedPath(checkpointPath)));
         } else {
-            Assert.assertNull(memStorage1.getCheckpointPath());
-            Assert.assertNull(memStorage2.getCheckpointPath());
+            assertThat(memStorage1.getCheckpointPath()).isNull();
+            assertThat(memStorage2.getCheckpointPath()).isNull();
         }
     }
 

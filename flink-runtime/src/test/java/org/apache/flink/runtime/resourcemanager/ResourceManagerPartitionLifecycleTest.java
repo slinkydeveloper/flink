@@ -50,9 +50,9 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the partition-lifecycle logic in the {@link ResourceManager}. */
 public class ResourceManagerPartitionLifecycleTest extends TestLogger {
@@ -97,22 +97,19 @@ public class ResourceManagerPartitionLifecycleTest extends TestLogger {
                 (resourceManagerGateway, taskManagerId1, ignored) -> {
                     IntermediateDataSetID dataSetID = new IntermediateDataSetID();
                     ResultPartitionID resultPartitionID = new ResultPartitionID();
-
                     resourceManagerGateway.heartbeatFromTaskManager(
                             taskManagerId1,
                             createTaskExecutorHeartbeatPayload(
                                     dataSetID, 2, resultPartitionID, new ResultPartitionID()));
-
                     // send a heartbeat containing 1 partition less -> partition loss -> should
                     // result in partition release
                     resourceManagerGateway.heartbeatFromTaskManager(
                             taskManagerId1,
                             createTaskExecutorHeartbeatPayload(dataSetID, 2, resultPartitionID));
-
                     Collection<IntermediateDataSetID> intermediateDataSetIDS =
                             clusterPartitionReleaseFuture.get(
                                     TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
-                    assertThat(intermediateDataSetIDS, contains(dataSetID));
+                    assertThat(intermediateDataSetIDS).satisfies(matching(contains(dataSetID)));
                 });
     }
 
@@ -126,25 +123,22 @@ public class ResourceManagerPartitionLifecycleTest extends TestLogger {
                                 clusterPartitionReleaseFuture::complete),
                 (resourceManagerGateway, taskManagerId1, taskManagerId2) -> {
                     IntermediateDataSetID dataSetID = new IntermediateDataSetID();
-
                     resourceManagerGateway.heartbeatFromTaskManager(
                             taskManagerId1,
                             createTaskExecutorHeartbeatPayload(
                                     dataSetID, 2, new ResultPartitionID()));
-
                     // we need a partition on another task executor so that there's something to
                     // release when one task executor goes down
                     resourceManagerGateway.heartbeatFromTaskManager(
                             taskManagerId2,
                             createTaskExecutorHeartbeatPayload(
                                     dataSetID, 2, new ResultPartitionID()));
-
                     resourceManagerGateway.disconnectTaskManager(
                             taskManagerId2, new RuntimeException("test exception"));
                     Collection<IntermediateDataSetID> intermediateDataSetIDS =
                             clusterPartitionReleaseFuture.get(
                                     TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
-                    assertThat(intermediateDataSetIDS, contains(dataSetID));
+                    assertThat(intermediateDataSetIDS).satisfies(matching(contains(dataSetID)));
                 });
     }
 
@@ -197,7 +191,7 @@ public class ResourceManagerPartitionLifecycleTest extends TestLogger {
                 resourceManagerGateway.registerTaskExecutor(
                         taskExecutorRegistration, TestingUtils.TIMEOUT);
 
-        assertThat(registrationFuture.get(), instanceOf(RegistrationResponse.Success.class));
+        assertThat(registrationFuture.get()).isInstanceOf(RegistrationResponse.Success.class);
     }
 
     private ResourceManagerGateway createAndStartResourceManager() throws Exception {

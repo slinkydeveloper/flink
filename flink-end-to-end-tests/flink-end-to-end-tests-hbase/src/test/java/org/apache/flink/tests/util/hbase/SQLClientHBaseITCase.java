@@ -33,7 +33,6 @@ import org.apache.flink.util.FileUtils;
 import org.apache.flink.util.TestLogger;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -62,9 +61,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
 
 /** End-to-end test for the HBase connectors. */
 @RunWith(Parameterized.class)
@@ -167,39 +167,40 @@ public class SQLClientHBaseITCase extends TestLogger {
             final List<String> lines = hbase.scanTable("sink");
             if (lines.size() == 6) {
                 success = true;
-                assertThat(
-                        lines.toArray(new String[0]),
-                        arrayContainingInAnyOrder(
-                                CoreMatchers.allOf(
-                                        containsString("row1"),
-                                        containsString("family1"),
-                                        containsString("f1c1"),
-                                        containsString("value1")),
-                                CoreMatchers.allOf(
-                                        containsString("row1"),
-                                        containsString("family2"),
-                                        containsString("f2c1"),
-                                        containsString("v2")),
-                                CoreMatchers.allOf(
-                                        containsString("row1"),
-                                        containsString("family2"),
-                                        containsString("f2c2"),
-                                        containsString("v3")),
-                                CoreMatchers.allOf(
-                                        containsString("row2"),
-                                        containsString("family1"),
-                                        containsString("f1c1"),
-                                        containsString("value4")),
-                                CoreMatchers.allOf(
-                                        containsString("row2"),
-                                        containsString("family2"),
-                                        containsString("f2c1"),
-                                        containsString("v5")),
-                                CoreMatchers.allOf(
-                                        containsString("row2"),
-                                        containsString("family2"),
-                                        containsString("f2c2"),
-                                        containsString("v6"))));
+                assertThat(lines.toArray(new String[0]))
+                        .satisfies(
+                                matching(
+                                        arrayContainingInAnyOrder(
+                                                CoreMatchers.allOf(
+                                                        containsString("row1"),
+                                                        containsString("family1"),
+                                                        containsString("f1c1"),
+                                                        containsString("value1")),
+                                                CoreMatchers.allOf(
+                                                        containsString("row1"),
+                                                        containsString("family2"),
+                                                        containsString("f2c1"),
+                                                        containsString("v2")),
+                                                CoreMatchers.allOf(
+                                                        containsString("row1"),
+                                                        containsString("family2"),
+                                                        containsString("f2c2"),
+                                                        containsString("v3")),
+                                                CoreMatchers.allOf(
+                                                        containsString("row2"),
+                                                        containsString("family1"),
+                                                        containsString("f1c1"),
+                                                        containsString("value4")),
+                                                CoreMatchers.allOf(
+                                                        containsString("row2"),
+                                                        containsString("family2"),
+                                                        containsString("f2c1"),
+                                                        containsString("v5")),
+                                                CoreMatchers.allOf(
+                                                        containsString("row2"),
+                                                        containsString("family2"),
+                                                        containsString("f2c2"),
+                                                        containsString("v6")))));
                 break;
             } else {
                 LOG.info(
@@ -209,7 +210,7 @@ public class SQLClientHBaseITCase extends TestLogger {
             }
             Thread.sleep(500);
         }
-        Assert.assertTrue("Did not get expected results before timeout.", success);
+        assertThat(success).as("Did not get expected results before timeout.").isTrue();
     }
 
     private List<String> initializeSqlLines(Map<String, String> vars) throws IOException {

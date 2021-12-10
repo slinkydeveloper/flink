@@ -24,7 +24,6 @@ import org.apache.flink.runtime.util.BlobServerResource;
 import org.apache.flink.runtime.webmonitor.TestingDispatcherGateway;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -39,7 +38,7 @@ import static org.apache.flink.runtime.webmonitor.handlers.JarHandlers.listJars;
 import static org.apache.flink.runtime.webmonitor.handlers.JarHandlers.runJar;
 import static org.apache.flink.runtime.webmonitor.handlers.JarHandlers.showPlan;
 import static org.apache.flink.runtime.webmonitor.handlers.JarHandlers.uploadJar;
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the entire lifecycle of a jar submission. */
 public class JarSubmissionITCase extends TestLogger {
@@ -76,22 +75,22 @@ public class JarSubmissionITCase extends TestLogger {
         final String storedJarName = Paths.get(storedJarPath).getFileName().toString();
 
         final JarListInfo postUploadListResponse = listJars(listHandler, restfulGateway);
-        Assert.assertEquals(1, postUploadListResponse.jarFileList.size());
+        assertThat(postUploadListResponse.jarFileList.size()).isEqualTo(1);
         final JarListInfo.JarFileInfo listEntry =
                 postUploadListResponse.jarFileList.iterator().next();
-        Assert.assertEquals(jar.getFileName().toString(), listEntry.name);
-        Assert.assertEquals(storedJarName, listEntry.id);
+        assertThat(listEntry.name).isEqualTo(jar.getFileName().toString());
+        assertThat(listEntry.id).isEqualTo(storedJarName);
 
         final JobPlanInfo planResponse = showPlan(planHandler, storedJarName, restfulGateway);
         // we're only interested in the core functionality so checking for a small detail is
         // sufficient
-        Assert.assertThat(planResponse.getJsonPlan(), containsString("TestProgram.java:28"));
+        assertThat(planResponse.getJsonPlan()).contains("TestProgram.java:28");
 
         runJar(runHandler, storedJarName, restfulGateway);
 
         deleteJar(deleteHandler, storedJarName, restfulGateway);
 
         final JarListInfo postDeleteListResponse = listJars(listHandler, restfulGateway);
-        Assert.assertEquals(0, postDeleteListResponse.jarFileList.size());
+        assertThat(postDeleteListResponse.jarFileList.size()).isEqualTo(0);
     }
 }

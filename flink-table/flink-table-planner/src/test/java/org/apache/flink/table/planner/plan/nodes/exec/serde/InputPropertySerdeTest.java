@@ -32,7 +32,7 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link InputProperty} serialization and deserialization. */
 @RunWith(Parameterized.class)
@@ -48,7 +48,7 @@ public class InputPropertySerdeTest {
         }
         String json = writer.toString();
         InputProperty actual = mapper.readValue(json, InputProperty.class);
-        assertEquals(inputProperty, actual);
+        assertThat(actual).isEqualTo(inputProperty);
     }
 
     @Parameterized.Parameters(name = "{0}")

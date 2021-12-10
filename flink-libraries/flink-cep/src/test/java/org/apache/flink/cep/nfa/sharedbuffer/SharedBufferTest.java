@@ -38,9 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SharedBuffer}. */
 @RunWith(Parameterized.class)
@@ -145,25 +143,28 @@ public class SharedBufferTest extends TestLogger {
 
             List<Map<String, List<EventId>>> patterns3 =
                     sharedBufferAccessor.extractPatterns(b3, b3Version);
-            assertEquals(1L, patterns3.size());
-            assertEquals(expectedPattern3, sharedBufferAccessor.materializeMatch(patterns3.get(0)));
+            assertThat(patterns3.size()).isEqualTo(1L);
+            assertThat(sharedBufferAccessor.materializeMatch(patterns3.get(0)))
+                    .isEqualTo(expectedPattern3);
             sharedBufferAccessor.releaseNode(b3, b3Version);
 
             List<Map<String, List<EventId>>> patterns4 =
                     sharedBufferAccessor.extractPatterns(b3, b3Version);
-            assertEquals(0L, patterns4.size());
-            assertTrue(patterns4.isEmpty());
+            assertThat(patterns4.size()).isEqualTo(0L);
+            assertThat(patterns4.isEmpty()).isTrue();
 
             List<Map<String, List<EventId>>> patterns1 =
                     sharedBufferAccessor.extractPatterns(b1, b1Version);
-            assertEquals(1L, patterns1.size());
-            assertEquals(expectedPattern1, sharedBufferAccessor.materializeMatch(patterns1.get(0)));
+            assertThat(patterns1.size()).isEqualTo(1L);
+            assertThat(sharedBufferAccessor.materializeMatch(patterns1.get(0)))
+                    .isEqualTo(expectedPattern1);
             sharedBufferAccessor.releaseNode(b1, b1Version);
 
             List<Map<String, List<EventId>>> patterns2 =
                     sharedBufferAccessor.extractPatterns(b0, b0Version);
-            assertEquals(1L, patterns2.size());
-            assertEquals(expectedPattern2, sharedBufferAccessor.materializeMatch(patterns2.get(0)));
+            assertThat(patterns2.size()).isEqualTo(1L);
+            assertThat(sharedBufferAccessor.materializeMatch(patterns2.get(0)))
+                    .isEqualTo(expectedPattern2);
             sharedBufferAccessor.releaseNode(b0, b0Version);
 
             for (EventId eventId : eventIds) {
@@ -171,7 +172,7 @@ public class SharedBufferTest extends TestLogger {
             }
         }
 
-        assertTrue(sharedBuffer.isEmpty());
+        assertThat(sharedBuffer.isEmpty()).isTrue();
     }
 
     @Test
@@ -218,7 +219,7 @@ public class SharedBufferTest extends TestLogger {
         }
 
         // There should be still events[1] and events[2] in the buffer
-        assertFalse(sharedBuffer.isEmpty());
+        assertThat(sharedBuffer.isEmpty()).isFalse();
     }
 
     @Test
@@ -277,7 +278,7 @@ public class SharedBufferTest extends TestLogger {
                 sharedBufferAccessor.releaseEvent(eventId);
             }
             List<String> resultOrder = new ArrayList<>(patternsResult.keySet());
-            assertEquals(expectedOrder, resultOrder);
+            assertThat(resultOrder).isEqualTo(expectedOrder);
         }
     }
 
@@ -297,9 +298,9 @@ public class SharedBufferTest extends TestLogger {
 
         Iterator<Map.Entry<Long, Integer>> counters = sharedBuffer.getEventCounters();
         Map.Entry<Long, Integer> entry = counters.next();
-        assertEquals(3, entry.getKey().longValue());
-        assertEquals(1, entry.getValue().intValue());
-        assertFalse(counters.hasNext());
+        assertThat(entry.getKey().longValue()).isEqualTo(3);
+        assertThat(entry.getValue().intValue()).isEqualTo(1);
+        assertThat(counters.hasNext()).isFalse();
     }
 
     @Test
@@ -317,8 +318,8 @@ public class SharedBufferTest extends TestLogger {
                 eventIds[i] = sharedBufferAccessor.registerEvent(events[i], timestamp);
             }
             int expectedEvents = Math.min(cacheConfig.getEventsBufferCacheSlots(), numberEvents);
-            assertEquals(expectedEvents, sharedBuffer.getEventsBufferCacheSize());
-            assertEquals(0, sharedBuffer.getSharedBufferNodeCacheSize());
+            assertThat(sharedBuffer.getEventsBufferCacheSize()).isEqualTo(expectedEvents);
+            assertThat(sharedBuffer.getSharedBufferNodeCacheSize()).isEqualTo(0);
 
             NodeId start =
                     sharedBufferAccessor.put(
@@ -336,9 +337,9 @@ public class SharedBufferTest extends TestLogger {
                     "branching", eventIds[4], b00, DeweyNumber.fromString("1.0.0.0"));
 
             int expectedEntries = Math.min(cacheConfig.getEntryCacheSlots(), 4);
-            assertEquals(expectedEntries, sharedBuffer.getSharedBufferNodeCacheSize());
+            assertThat(sharedBuffer.getSharedBufferNodeCacheSize()).isEqualTo(expectedEntries);
             System.out.println(expectedEntries);
-            assertEquals(4 - expectedEntries, sharedBuffer.getSharedBufferNodeSize());
+            assertThat(sharedBuffer.getSharedBufferNodeSize()).isEqualTo(4 - expectedEntries);
 
             sharedBufferAccessor.lockNode(b0, DeweyNumber.fromString("1.0.0"));
 
@@ -346,10 +347,10 @@ public class SharedBufferTest extends TestLogger {
                 sharedBufferAccessor.releaseEvent(eventId);
             }
         }
-        assertEquals(0, sharedBuffer.getEventsBufferCacheSize());
-        assertEquals(4, sharedBuffer.getEventsBufferSize());
-        assertEquals(0, sharedBuffer.getSharedBufferNodeCacheSize());
-        assertEquals(4, sharedBuffer.getSharedBufferNodeSize());
+        assertThat(sharedBuffer.getEventsBufferCacheSize()).isEqualTo(0);
+        assertThat(sharedBuffer.getEventsBufferSize()).isEqualTo(4);
+        assertThat(sharedBuffer.getSharedBufferNodeCacheSize()).isEqualTo(0);
+        assertThat(sharedBuffer.getSharedBufferNodeSize()).isEqualTo(4);
     }
 
     /**
@@ -392,6 +393,6 @@ public class SharedBufferTest extends TestLogger {
             }
         }
 
-        assertTrue(sharedBuffer.isEmpty());
+        assertThat(sharedBuffer.isEmpty()).isTrue();
     }
 }

@@ -53,7 +53,6 @@ import org.apache.flink.util.function.CheckedSupplier;
 
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mockito.stubbing.Answer;
 
@@ -76,13 +75,8 @@ import static org.apache.flink.runtime.io.network.partition.InputGateFairnessTes
 import static org.apache.flink.runtime.io.network.partition.consumer.SingleInputGateTest.TestingResultPartitionManager;
 import static org.apache.flink.runtime.state.CheckpointStorageLocationReference.getDefault;
 import static org.apache.flink.util.Preconditions.checkArgument;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -121,9 +115,9 @@ public class LocalInputChannelTest {
         channel.checkpointStarted(barrier);
         // pull data
         channel.getNextBuffer();
-        assertTrue(
-                "no data should be persisted after receiving a barrier",
-                stateWriter.getAddedInput().isEmpty());
+        assertThat(stateWriter.getAddedInput().isEmpty())
+                .as("no data should be persisted after receiving a barrier")
+                .isTrue();
     }
 
     /**
@@ -319,7 +313,7 @@ public class LocalInputChannelTest {
 
             fail("Should throw a PartitionNotFoundException.");
         } catch (PartitionNotFoundException notFound) {
-            assertThat(localChannel.getPartitionId(), Matchers.is(notFound.getPartitionId()));
+            assertThat(localChannel.getPartitionId()).isEqualTo(notFound.getPartitionId());
         }
     }
 
@@ -338,7 +332,7 @@ public class LocalInputChannelTest {
         localChannel.requestSubpartition(0);
 
         // The timer should be initialized at the first time of retriggering partition request.
-        assertNotNull(inputGate.getRetriggerLocalRequestTimer());
+        assertThat(inputGate.getRetriggerLocalRequestTimer()).isNotNull();
     }
 
     /**
@@ -362,9 +356,8 @@ public class LocalInputChannelTest {
 
                             fail("Should throw a PartitionNotFoundException.");
                         } catch (PartitionNotFoundException notFound) {
-                            assertThat(
-                                    localChannel.partitionId,
-                                    Matchers.is(notFound.getPartitionId()));
+                            assertThat(localChannel.partitionId)
+                                    .isEqualTo(notFound.getPartitionId());
                         } catch (IOException ex) {
                             fail("Should throw a PartitionNotFoundException.");
                         }
@@ -459,7 +452,7 @@ public class LocalInputChannelTest {
                 createLocalInputChannel(new SingleInputGateBuilder().build(), partitionManager);
 
         channel.requestSubpartition(0);
-        assertFalse(channel.getNextBuffer().isPresent());
+        assertThat(channel.getNextBuffer().isPresent()).isFalse();
 
         // release the subpartition view
         subpartitionView.releaseAllResources();
@@ -471,7 +464,7 @@ public class LocalInputChannelTest {
         }
 
         channel.releaseAllResources();
-        assertFalse(channel.getNextBuffer().isPresent());
+        assertThat(channel.getNextBuffer().isPresent()).isFalse();
     }
 
     /** Verifies that buffer is not compressed when getting from a {@link LocalInputChannel}. */
@@ -488,8 +481,8 @@ public class LocalInputChannelTest {
         channel.requestSubpartition(0);
         Optional<InputChannel.BufferAndAvailability> bufferAndAvailability =
                 channel.getNextBuffer();
-        assertTrue(bufferAndAvailability.isPresent());
-        assertFalse(bufferAndAvailability.get().buffer().isCompressed());
+        assertThat(bufferAndAvailability.isPresent()).isTrue();
+        assertThat(bufferAndAvailability.get().buffer().isCompressed()).isFalse();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -543,20 +536,20 @@ public class LocalInputChannelTest {
                         new CheckpointBarrier(
                                 1, 1, CheckpointOptions.forCheckpointWithDefaultLocation()),
                         false));
-        assertTrue(channel.getNextBuffer().isPresent());
+        assertThat(channel.getNextBuffer().isPresent()).isTrue();
 
         // Add more data
         subpartition.add(createFilledFinishedBufferConsumer(4096));
         subpartition.flush();
 
         // No buffer since the subpartition is blocked.
-        assertFalse(channel.inputGate.pollNext().isPresent());
+        assertThat(channel.inputGate.pollNext().isPresent()).isFalse();
 
         // Resumption makes the subpartition available.
         channel.resumeConsumption();
         Optional<BufferOrEvent> nextBuffer = channel.inputGate.pollNext();
-        assertTrue(nextBuffer.isPresent());
-        assertTrue(nextBuffer.get().isBuffer());
+        assertThat(nextBuffer.isPresent()).isTrue();
+        assertThat(nextBuffer.get().isBuffer()).isTrue();
     }
 
     @Test
@@ -589,19 +582,19 @@ public class LocalInputChannelTest {
         // add 1 buffer before barrier and 1 buffer afterwards. Only the first buffer should be
         // written.
         subpartition.add(createFilledFinishedBufferConsumer(1));
-        assertTrue(channel.getNextBuffer().isPresent());
+        assertThat(channel.getNextBuffer().isPresent()).isTrue();
 
         subpartition.add(EventSerializer.toBufferConsumer(barrier, true));
-        assertTrue(channel.getNextBuffer().isPresent());
+        assertThat(channel.getNextBuffer().isPresent()).isTrue();
 
         subpartition.add(createFilledFinishedBufferConsumer(2));
-        assertTrue(channel.getNextBuffer().isPresent());
+        assertThat(channel.getNextBuffer().isPresent()).isTrue();
 
-        assertArrayEquals(
-                stateWriter.getAddedInput().get(channel.getChannelInfo()).stream()
-                        .mapToInt(Buffer::getSize)
-                        .toArray(),
-                new int[] {1});
+        assertThat(new int[] {1})
+                .isEqualTo(
+                        stateWriter.getAddedInput().get(channel.getChannelInfo()).stream()
+                                .mapToInt(Buffer::getSize)
+                                .toArray());
     }
 
     @Test
@@ -630,16 +623,18 @@ public class LocalInputChannelTest {
         channel1.requestSubpartition(0);
 
         // and: Preferable buffer size is default value.
-        assertEquals(Integer.MAX_VALUE, subpartition0.add(createFilledFinishedBufferConsumer(16)));
-        assertEquals(Integer.MAX_VALUE, subpartition1.add(createFilledFinishedBufferConsumer(16)));
+        assertThat(subpartition0.add(createFilledFinishedBufferConsumer(16)))
+                .isEqualTo(Integer.MAX_VALUE);
+        assertThat(subpartition1.add(createFilledFinishedBufferConsumer(16)))
+                .isEqualTo(Integer.MAX_VALUE);
 
         // when: Announce the different buffer size for different channels via LocalInputChannel.
         channel0.announceBufferSize(9);
         channel1.announceBufferSize(20);
 
         // then: The corresponded subpartitions have the new size.
-        assertEquals(9, subpartition0.add(createFilledFinishedBufferConsumer(16)));
-        assertEquals(20, subpartition1.add(createFilledFinishedBufferConsumer(16)));
+        assertThat(subpartition0.add(createFilledFinishedBufferConsumer(16))).isEqualTo(9);
+        assertThat(subpartition1.add(createFilledFinishedBufferConsumer(16))).isEqualTo(20);
     }
 
     @Test
@@ -658,13 +653,13 @@ public class LocalInputChannelTest {
         inputGate.setInputChannels(localChannel);
 
         // then: Buffers in use should be equal to 0 until subpartition view initialization.
-        assertEquals(0, localChannel.getBuffersInUseCount());
+        assertThat(localChannel.getBuffersInUseCount()).isEqualTo(0);
 
         // when: The subpartition view is initialized.
         localChannel.requestSubpartition(0);
 
         // then: Buffers in use should show correct value.
-        assertEquals(3, localChannel.getBuffersInUseCount());
+        assertThat(localChannel.getBuffersInUseCount()).isEqualTo(3);
     }
 
     // ---------------------------------------------------------------------------------------------

@@ -47,8 +47,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test validates that connections are failing when mutual auth is enabled but untrusted keys
@@ -129,7 +129,8 @@ public class RestServerSSLAuthITCase extends TestLogger {
             fail("should never complete normally");
         } catch (ExecutionException exception) {
             // that is what we want
-            assertTrue(ExceptionUtils.findThrowable(exception, SSLException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(exception, SSLException.class).isPresent())
+                    .isTrue();
         } finally {
             if (restClient != null) {
                 restClient.shutdown(timeout);

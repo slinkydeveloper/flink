@@ -31,9 +31,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class IOManagerTest {
 
@@ -61,12 +59,16 @@ public class IOManagerTest {
 
                 File path = id.getPathFile();
 
-                assertTrue("Channel IDs must name an absolute path.", path.isAbsolute());
-                assertFalse("Channel IDs must name a file, not a directory.", path.isDirectory());
+                assertThat(path.isAbsolute())
+                        .as("Channel IDs must name an absolute path.")
+                        .isTrue();
+                assertThat(path.isDirectory())
+                        .as("Channel IDs must name a file, not a directory.")
+                        .isFalse();
 
-                assertTrue(
-                        "Path is not in the temp directory.",
-                        tempPath.equals(path.getParentFile().getParentFile().getParentFile()));
+                assertThat(tempPath.equals(path.getParentFile().getParentFile().getParentFile()))
+                        .as("Path is not in the temp directory.")
+                        .isTrue();
 
                 for (int k = 0; k < tempDirs.length; k++) {
                     if (path.getParentFile().getParent().equals(tempDirs[k])) {
@@ -76,7 +78,7 @@ public class IOManagerTest {
             }
 
             for (int k = 0; k < tempDirs.length; k++) {
-                assertEquals(3, counters[k]);
+                assertThat(counters[k]).isEqualTo(3);
             }
         }
     }

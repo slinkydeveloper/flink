@@ -39,11 +39,11 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link KubernetesStateHandleStore} operations. */
 public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTestBase {
@@ -70,7 +70,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -81,8 +80,8 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             store.addAndLock(key, state);
-                            assertThat(store.getAllAndLock().size(), is(1));
-                            assertThat(store.getAndLock(key).retrieveState(), is(state));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(1);
+                            assertThat(store.getAndLock(key).retrieveState()).isEqualTo(state);
                         });
             }
         };
@@ -95,9 +94,7 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             getLeaderConfigMap().getData().put(key, "existing data");
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -107,7 +104,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             try {
                                 store.addAndLock(key, state);
                                 fail("Exception should be thrown.");
@@ -116,13 +112,15 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                         String.format(
                                                 "%s already exists in ConfigMap %s",
                                                 key, LEADER_CONFIGMAP_NAME);
-                                assertThat(ex, FlinkMatchers.containsMessage(msg));
+                                assertThat(ex)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(msg)));
                             }
-                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize(), is(1));
+                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize())
+                                    .isEqualTo(1);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(0),
-                                    is(1));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(0))
+                                    .isEqualTo(1);
                         });
             }
         };
@@ -135,7 +133,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final FlinkKubeClient anotherFlinkKubeClient =
                                     createFlinkKubeClientBuilder()
                                             .setCheckAndUpdateConfigMapFunction(
@@ -152,15 +149,16 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             try {
                                 store.addAndLock(key, state);
                                 fail("PossibleInconsistentStateException should have been thrown.");
                             } catch (PossibleInconsistentStateException ex) {
                                 // PossibleInconsistentStateException is expected
                             }
-                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize(), is(1));
-                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount(), is(0));
+                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize())
+                                    .isEqualTo(1);
+                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount())
+                                    .isEqualTo(0);
                         });
             }
         };
@@ -181,7 +179,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             try {
                                 store.addAndLock(key, state);
                                 fail("Exception should be thrown.");
@@ -190,13 +187,15 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                         String.format(
                                                 "ConfigMap %s does not exist.",
                                                 LEADER_CONFIGMAP_NAME);
-                                assertThat(ex, FlinkMatchers.containsMessage(msg));
+                                assertThat(ex)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(msg)));
                             }
-                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize(), is(1));
+                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize())
+                                    .isEqualTo(1);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(0),
-                                    is(1));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(0))
+                                    .isEqualTo(1);
                         });
             }
         };
@@ -209,7 +208,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -219,16 +217,13 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             store.addAndLock(key, state);
-
                             final TestingLongStateHandleHelper.LongStateHandle newState =
                                     new TestingLongStateHandleHelper.LongStateHandle(23456L);
                             final StringResourceVersion resourceVersion = store.exists(key);
                             store.replace(key, resourceVersion, newState);
-
-                            assertThat(store.getAllAndLock().size(), is(1));
-                            assertThat(store.getAndLock(key).retrieveState(), is(newState));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(1);
+                            assertThat(store.getAndLock(key).retrieveState()).isEqualTo(newState);
                         });
             }
         };
@@ -241,7 +236,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -253,10 +247,9 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     LOCK_IDENTITY);
                             final TestingLongStateHandleHelper.LongStateHandle newState =
                                     new TestingLongStateHandleHelper.LongStateHandle(23456L);
-
                             try {
-                                assertThat(
-                                        store.exists(key), is(StringResourceVersion.notExisting()));
+                                assertThat(store.exists(key))
+                                        .isEqualTo(StringResourceVersion.notExisting());
                                 store.replace(key, StringResourceVersion.notExisting(), newState);
                                 fail("Exception should be thrown.");
                             } catch (StateHandleStore.NotExistException e) {
@@ -264,9 +257,10 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                         String.format(
                                                 "Could not find %s in ConfigMap %s",
                                                 key, LEADER_CONFIGMAP_NAME);
-                                assertThat(e, FlinkMatchers.containsMessage(msg));
+                                assertThat(e)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(msg)));
                             }
-                            assertThat(store.getAllAndLock().size(), is(0));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(0);
                         });
             }
         };
@@ -279,7 +273,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -291,7 +284,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     LOCK_IDENTITY);
                             final TestingLongStateHandleHelper.LongStateHandle newState =
                                     new TestingLongStateHandleHelper.LongStateHandle(23456L);
-
                             store.addAndLock(key, state);
                             // Lost leadership
                             getLeaderCallback().notLeader();
@@ -299,22 +291,21 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                             getLeaderConfigMap()
                                     .getAnnotations()
                                     .remove(KubernetesLeaderElector.LEADER_ANNOTATION_KEY);
-
                             final StringResourceVersion resourceVersion = store.exists(key);
                             store.replace(key, resourceVersion, newState);
-                            assertThat(store.getAllAndLock().size(), is(1));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(1);
                             // The state do not change
-                            assertThat(store.getAndLock(key).retrieveState(), is(state));
-
-                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize(), is(2));
+                            assertThat(store.getAndLock(key).retrieveState()).isEqualTo(state);
+                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize())
+                                    .isEqualTo(2);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(0),
-                                    is(0));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(0))
+                                    .isEqualTo(0);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(1),
-                                    is(1));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(1))
+                                    .isEqualTo(1);
                         });
             }
         };
@@ -328,7 +319,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -339,7 +329,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             store.addAndLock(key, state);
-
                             final FlinkKubeClient anotherFlinkKubeClient =
                                     createFlinkKubeClientBuilder()
                                             .setCheckAndUpdateConfigMapFunction(
@@ -356,31 +345,35 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             final TestingLongStateHandleHelper.LongStateHandle newState =
                                     new TestingLongStateHandleHelper.LongStateHandle(23456L);
                             final StringResourceVersion resourceVersion = anotherStore.exists(key);
-                            assertThat(resourceVersion.isExisting(), is(true));
+                            assertThat(resourceVersion.isExisting()).isEqualTo(true);
                             try {
                                 anotherStore.replace(key, resourceVersion, newState);
                                 fail(
                                         "We should get an exception when kube client failed to update.");
                             } catch (Exception ex) {
-                                assertThat(ex, FlinkMatchers.containsCause(updateException));
+                                assertThat(ex)
+                                        .satisfies(
+                                                matching(
+                                                        FlinkMatchers.containsCause(
+                                                                updateException)));
                             }
-                            assertThat(anotherStore.getAllAndLock().size(), is(1));
+                            assertThat(anotherStore.getAllAndLock().size()).isEqualTo(1);
                             // The state do not change
-                            assertThat(anotherStore.getAndLock(key).retrieveState(), is(state));
-
-                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize(), is(2));
+                            assertThat(anotherStore.getAndLock(key).retrieveState())
+                                    .isEqualTo(state);
+                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize())
+                                    .isEqualTo(2);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(0),
-                                    is(0));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(0))
+                                    .isEqualTo(0);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(1),
-                                    is(1));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(1))
+                                    .isEqualTo(1);
                         });
             }
         };
@@ -395,7 +388,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -406,7 +398,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             store.addAndLock(key, state);
-
                             final FlinkKubeClient anotherFlinkKubeClient =
                                     createFlinkKubeClientBuilder()
                                             .setCheckAndUpdateConfigMapFunction(
@@ -423,9 +414,8 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             final StringResourceVersion resourceVersion = anotherStore.exists(key);
-                            assertThat(resourceVersion.isExisting(), is(true));
+                            assertThat(resourceVersion.isExisting()).isEqualTo(true);
                             try {
                                 anotherStore.replace(
                                         key,
@@ -434,22 +424,23 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                 fail(
                                         "An exception having a PossibleInconsistentStateException as its cause should have been thrown.");
                             } catch (Exception ex) {
-                                assertThat(ex, is(updateException));
+                                assertThat(ex).isEqualTo(updateException);
                             }
-                            assertThat(anotherStore.getAllAndLock().size(), is(1));
+                            assertThat(anotherStore.getAllAndLock().size()).isEqualTo(1);
                             // The state does not change
-                            assertThat(anotherStore.getAndLock(key).retrieveState(), is(state));
-
-                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize(), is(2));
+                            assertThat(anotherStore.getAndLock(key).retrieveState())
+                                    .isEqualTo(state);
+                            assertThat(TestingLongStateHandleHelper.getGlobalStorageSize())
+                                    .isEqualTo(2);
                             // no state was discarded
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(0),
-                                    is(0));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(0))
+                                    .isEqualTo(0);
                             assertThat(
-                                    TestingLongStateHandleHelper
-                                            .getDiscardCallCountForStateHandleByIndex(1),
-                                    is(0));
+                                            TestingLongStateHandleHelper
+                                                    .getDiscardCallCountForStateHandleByIndex(1))
+                                    .isEqualTo(0);
                         });
             }
         };
@@ -462,7 +453,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -473,10 +463,9 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             store.addAndLock(key, state);
-                            assertThat(
-                                    store.exists(key),
-                                    is(not(StringResourceVersion.notExisting())));
-                            assertThat(store.getAndLock(key).retrieveState(), is(state));
+                            assertThat(store.exists(key))
+                                    .isEqualTo(not(StringResourceVersion.notExisting()));
+                            assertThat(store.getAndLock(key).retrieveState()).isEqualTo(state);
                         });
             }
         };
@@ -489,7 +478,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -501,9 +489,8 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     LOCK_IDENTITY);
                             final String nonExistingKey = "non-existing-key";
                             store.addAndLock(key, state);
-                            assertThat(
-                                    store.exists(nonExistingKey),
-                                    is(StringResourceVersion.notExisting()));
+                            assertThat(store.exists(nonExistingKey))
+                                    .isEqualTo(StringResourceVersion.notExisting());
                             try {
                                 store.getAndLock(nonExistingKey);
                                 fail("Exception should be thrown.");
@@ -512,7 +499,8 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                         String.format(
                                                 "Could not find %s in ConfigMap %s",
                                                 nonExistingKey, LEADER_CONFIGMAP_NAME);
-                                assertThat(e, FlinkMatchers.containsMessage(msg));
+                                assertThat(e)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(msg)));
                             }
                         });
             }
@@ -526,7 +514,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -537,7 +524,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             final List<Long> expected = Arrays.asList(3L, 2L, 1L);
-
                             for (Long each : expected) {
                                 store.addAndLock(
                                         key + each,
@@ -552,12 +538,13 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     TestingLongStateHandleHelper.LongStateHandle[]
                                                             ::new);
                             assertThat(
-                                    Arrays.stream(actual)
-                                            .map(
-                                                    TestingLongStateHandleHelper.LongStateHandle
-                                                            ::getValue)
-                                            .collect(Collectors.toList()),
-                                    containsInAnyOrder(expected.toArray()));
+                                            Arrays.stream(actual)
+                                                    .map(
+                                                            TestingLongStateHandleHelper
+                                                                            .LongStateHandle
+                                                                    ::getValue)
+                                                    .collect(Collectors.toList()))
+                                    .satisfies(matching(containsInAnyOrder(expected.toArray())));
                         });
             }
         };
@@ -570,7 +557,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -581,14 +567,13 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             final List<String> expected = Arrays.asList(key + 3, key + 2, key + 1);
-
                             for (String each : expected) {
                                 store.addAndLock(each, state);
                             }
                             final String[] actual = store.getAllHandles().toArray(new String[0]);
                             expected.sort(Comparator.comparing(e -> e));
-                            assertThat(
-                                    Arrays.asList(actual), containsInAnyOrder(expected.toArray()));
+                            assertThat(Arrays.asList(actual))
+                                    .satisfies(matching(containsInAnyOrder(expected.toArray())));
                         });
             }
         };
@@ -601,7 +586,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -612,12 +596,12 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     filter,
                                                     LOCK_IDENTITY);
                             store.addAndLock(key, state);
-                            assertThat(store.getAllAndLock().size(), is(1));
-                            assertThat(store.releaseAndTryRemove(key), is(true));
-                            assertThat(store.getAllAndLock().size(), is(0));
-
+                            assertThat(store.getAllAndLock().size()).isEqualTo(1);
+                            assertThat(store.releaseAndTryRemove(key)).isEqualTo(true);
+                            assertThat(store.getAllAndLock().size()).isEqualTo(0);
                             // State should also be discarded.
-                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount(), is(1));
+                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount())
+                                    .isEqualTo(1);
                         });
             }
         };
@@ -630,7 +614,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -640,7 +623,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                                                     longStateStorage,
                                                     filter,
                                                     LOCK_IDENTITY);
-
                             store.addAndLock(key, state);
                             // Lost leadership
                             getLeaderCallback().notLeader();
@@ -648,11 +630,10 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                             getLeaderConfigMap()
                                     .getAnnotations()
                                     .remove(KubernetesLeaderElector.LEADER_ANNOTATION_KEY);
-
-                            assertThat(store.releaseAndTryRemove(key), is(false));
-                            assertThat(store.getAllAndLock().size(), is(1));
-
-                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount(), is(0));
+                            assertThat(store.releaseAndTryRemove(key)).isEqualTo(false);
+                            assertThat(store.getAllAndLock().size()).isEqualTo(1);
+                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount())
+                                    .isEqualTo(0);
                         });
             }
         };
@@ -665,7 +646,6 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -679,10 +659,11 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                             store.addAndLock(
                                     key + "1",
                                     new TestingLongStateHandleHelper.LongStateHandle(2L));
-                            assertThat(store.getAllAndLock().size(), is(2));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(2);
                             store.releaseAndTryRemoveAll();
-                            assertThat(store.getAllAndLock().size(), is(0));
-                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount(), is(2));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(0);
+                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount())
+                                    .isEqualTo(2);
                         });
             }
         };
@@ -695,10 +676,8 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final String anotherKey = "key-not-with-prefix";
                             getLeaderConfigMap().getData().put(anotherKey, "value");
-
                             final KubernetesStateHandleStore<
                                             TestingLongStateHandleHelper.LongStateHandle>
                                     store =
@@ -712,15 +691,14 @@ public class KubernetesStateHandleStoreTest extends KubernetesHighAvailabilityTe
                             store.addAndLock(
                                     key + "1",
                                     new TestingLongStateHandleHelper.LongStateHandle(2L));
-                            assertThat(store.getAllAndLock().size(), is(2));
+                            assertThat(store.getAllAndLock().size()).isEqualTo(2);
                             store.clearEntries();
-                            assertThat(store.getAllAndLock().size(), is(0));
-                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount(), is(0));
-
+                            assertThat(store.getAllAndLock().size()).isEqualTo(0);
+                            assertThat(TestingLongStateHandleHelper.getGlobalDiscardCount())
+                                    .isEqualTo(0);
                             // Should only remove the key with specified prefix.
-                            assertThat(
-                                    getLeaderConfigMap().getData().containsKey(anotherKey),
-                                    is(true));
+                            assertThat(getLeaderConfigMap().getData().containsKey(anotherKey))
+                                    .isEqualTo(true);
                         });
             }
         };

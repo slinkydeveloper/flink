@@ -46,11 +46,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.configuration.description.TextElement.text;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
 
 /** Tests for the {@link ConfigOptionsDocGenerator}. */
 @SuppressWarnings("unused")
@@ -204,7 +202,7 @@ public class ConfigOptionsDocGeneratorTest {
                         .get(0)
                         .f1;
 
-        assertEquals(expectedTable, htmlTable);
+        assertThat(htmlTable).isEqualTo(expectedTable);
     }
 
     @Test
@@ -237,7 +235,7 @@ public class ConfigOptionsDocGeneratorTest {
         final String htmlTable =
                 ConfigOptionsDocGenerator.generateTablesForClass(TestConfigGroup.class).get(0).f1;
 
-        assertEquals(expectedTable, htmlTable);
+        assertThat(htmlTable).isEqualTo(expectedTable);
     }
 
     @ConfigGroups(
@@ -280,19 +278,19 @@ public class ConfigOptionsDocGeneratorTest {
         final List<Tuple2<ConfigGroup, String>> tables =
                 ConfigOptionsDocGenerator.generateTablesForClass(TestConfigPrefix.class);
 
-        assertEquals(3, tables.size());
+        assertThat(tables.size()).isEqualTo(3);
         final Map<String, String> tablesConverted = new HashMap<>(tables.size());
         for (final Tuple2<ConfigGroup, String> table : tables) {
             tablesConverted.put(table.f0 != null ? table.f0.name() : "default", table.f1);
         }
 
-        assertThat(tablesConverted.get("group1"), containsString("a.b.option"));
-        assertThat(tablesConverted.get("group1"), containsString("a.b.c.option"));
-        assertThat(tablesConverted.get("group1"), containsString("a.b.c.e.option"));
-        assertThat(tablesConverted.get("group2"), containsString("a.b.c.d.option"));
-        assertThat(tablesConverted.get("group1"), not(containsString("a.b.c.d.option")));
-        assertThat(tablesConverted.get("default"), containsString("a.option"));
-        assertThat(tablesConverted.get("default"), containsString("a.c.b.option"));
+        assertThat(tablesConverted.get("group1")).contains("a.b.option");
+        assertThat(tablesConverted.get("group1")).contains("a.b.c.option");
+        assertThat(tablesConverted.get("group1")).contains("a.b.c.e.option");
+        assertThat(tablesConverted.get("group2")).contains("a.b.c.d.option");
+        assertThat(tablesConverted.get("group1")).doesNotContain("a.b.c.d.option");
+        assertThat(tablesConverted.get("default")).contains("a.option");
+        assertThat(tablesConverted.get("default")).contains("a.c.b.option");
     }
 
     @ConfigGroups(
@@ -331,78 +329,78 @@ public class ConfigOptionsDocGeneratorTest {
         final List<Tuple2<ConfigGroup, String>> tables =
                 ConfigOptionsDocGenerator.generateTablesForClass(TestConfigMultipleSubGroup.class);
 
-        assertEquals(tables.size(), 3);
+        assertThat(3).isEqualTo(tables.size());
         final HashMap<String, String> tablesConverted = new HashMap<>();
         for (Tuple2<ConfigGroup, String> table : tables) {
             tablesConverted.put(table.f0 != null ? table.f0.name() : "default", table.f1);
         }
 
-        assertEquals(
-                "<table class=\"configuration table table-bordered\">\n"
-                        + "    <thead>\n"
-                        + "        <tr>\n"
-                        + "            <th class=\"text-left\" style=\"width: 20%\">Key</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 15%\">Default</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 10%\">Type</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 55%\">Description</th>\n"
-                        + "        </tr>\n"
-                        + "    </thead>\n"
-                        + "    <tbody>\n"
-                        + "        <tr>\n"
-                        + "            <td><h5>first.option.a</h5></td>\n"
-                        + "            <td style=\"word-wrap: break-word;\">2</td>\n"
-                        + "            <td>Integer</td>\n"
-                        + "            <td>This is example description for the first option.</td>\n"
-                        + "        </tr>\n"
-                        + "    </tbody>\n"
-                        + "</table>\n",
-                tablesConverted.get("firstGroup"));
-        assertEquals(
-                "<table class=\"configuration table table-bordered\">\n"
-                        + "    <thead>\n"
-                        + "        <tr>\n"
-                        + "            <th class=\"text-left\" style=\"width: 20%\">Key</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 15%\">Default</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 10%\">Type</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 55%\">Description</th>\n"
-                        + "        </tr>\n"
-                        + "    </thead>\n"
-                        + "    <tbody>\n"
-                        + "        <tr>\n"
-                        + "            <td><h5>second.option.a</h5></td>\n"
-                        + "            <td style=\"word-wrap: break-word;\">(none)</td>\n"
-                        + "            <td>String</td>\n"
-                        + "            <td>This is long example description for the second option.</td>\n"
-                        + "        </tr>\n"
-                        + "    </tbody>\n"
-                        + "</table>\n",
-                tablesConverted.get("secondGroup"));
-        assertEquals(
-                "<table class=\"configuration table table-bordered\">\n"
-                        + "    <thead>\n"
-                        + "        <tr>\n"
-                        + "            <th class=\"text-left\" style=\"width: 20%\">Key</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 15%\">Default</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 10%\">Type</th>\n"
-                        + "            <th class=\"text-left\" style=\"width: 55%\">Description</th>\n"
-                        + "        </tr>\n"
-                        + "    </thead>\n"
-                        + "    <tbody>\n"
-                        + "        <tr>\n"
-                        + "            <td><h5>fourth.option.a</h5></td>\n"
-                        + "            <td style=\"word-wrap: break-word;\">(none)</td>\n"
-                        + "            <td>String</td>\n"
-                        + "            <td>This is long example description for the fourth option.</td>\n"
-                        + "        </tr>\n"
-                        + "        <tr>\n"
-                        + "            <td><h5>third.option.a</h5></td>\n"
-                        + "            <td style=\"word-wrap: break-word;\">2</td>\n"
-                        + "            <td>Integer</td>\n"
-                        + "            <td>This is example description for the third option.</td>\n"
-                        + "        </tr>\n"
-                        + "    </tbody>\n"
-                        + "</table>\n",
-                tablesConverted.get("default"));
+        assertThat(tablesConverted.get("firstGroup"))
+                .isEqualTo(
+                        "<table class=\"configuration table table-bordered\">\n"
+                                + "    <thead>\n"
+                                + "        <tr>\n"
+                                + "            <th class=\"text-left\" style=\"width: 20%\">Key</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 15%\">Default</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 10%\">Type</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 55%\">Description</th>\n"
+                                + "        </tr>\n"
+                                + "    </thead>\n"
+                                + "    <tbody>\n"
+                                + "        <tr>\n"
+                                + "            <td><h5>first.option.a</h5></td>\n"
+                                + "            <td style=\"word-wrap: break-word;\">2</td>\n"
+                                + "            <td>Integer</td>\n"
+                                + "            <td>This is example description for the first option.</td>\n"
+                                + "        </tr>\n"
+                                + "    </tbody>\n"
+                                + "</table>\n");
+        assertThat(tablesConverted.get("secondGroup"))
+                .isEqualTo(
+                        "<table class=\"configuration table table-bordered\">\n"
+                                + "    <thead>\n"
+                                + "        <tr>\n"
+                                + "            <th class=\"text-left\" style=\"width: 20%\">Key</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 15%\">Default</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 10%\">Type</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 55%\">Description</th>\n"
+                                + "        </tr>\n"
+                                + "    </thead>\n"
+                                + "    <tbody>\n"
+                                + "        <tr>\n"
+                                + "            <td><h5>second.option.a</h5></td>\n"
+                                + "            <td style=\"word-wrap: break-word;\">(none)</td>\n"
+                                + "            <td>String</td>\n"
+                                + "            <td>This is long example description for the second option.</td>\n"
+                                + "        </tr>\n"
+                                + "    </tbody>\n"
+                                + "</table>\n");
+        assertThat(tablesConverted.get("default"))
+                .isEqualTo(
+                        "<table class=\"configuration table table-bordered\">\n"
+                                + "    <thead>\n"
+                                + "        <tr>\n"
+                                + "            <th class=\"text-left\" style=\"width: 20%\">Key</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 15%\">Default</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 10%\">Type</th>\n"
+                                + "            <th class=\"text-left\" style=\"width: 55%\">Description</th>\n"
+                                + "        </tr>\n"
+                                + "    </thead>\n"
+                                + "    <tbody>\n"
+                                + "        <tr>\n"
+                                + "            <td><h5>fourth.option.a</h5></td>\n"
+                                + "            <td style=\"word-wrap: break-word;\">(none)</td>\n"
+                                + "            <td>String</td>\n"
+                                + "            <td>This is long example description for the fourth option.</td>\n"
+                                + "        </tr>\n"
+                                + "        <tr>\n"
+                                + "            <td><h5>third.option.a</h5></td>\n"
+                                + "            <td style=\"word-wrap: break-word;\">2</td>\n"
+                                + "            <td>Integer</td>\n"
+                                + "            <td>This is example description for the third option.</td>\n"
+                                + "        </tr>\n"
+                                + "    </tbody>\n"
+                                + "</table>\n");
     }
 
     static class TestConfigGroupWithOverriddenDefault {
@@ -454,7 +452,7 @@ public class ConfigOptionsDocGeneratorTest {
                         .get(0)
                         .f1;
 
-        assertEquals(expectedTable, htmlTable);
+        assertThat(htmlTable).isEqualTo(expectedTable);
     }
 
     @Test
@@ -548,8 +546,8 @@ public class ConfigOptionsDocGeneratorTest {
                 FileUtils.readFile(
                         new File(outputDirectory, fileName2), StandardCharsets.UTF_8.name());
 
-        assertEquals(expected1, output1);
-        assertEquals(expected2, output2);
+        assertThat(output1).isEqualTo(expected1);
+        assertThat(output2).isEqualTo(expected2);
     }
 
     static class TestConfigGroupWithExclusion {
@@ -597,7 +595,7 @@ public class ConfigOptionsDocGeneratorTest {
                         .get(0)
                         .f1;
 
-        assertEquals(expectedTable, htmlTable);
+        assertThat(htmlTable).isEqualTo(expectedTable);
     }
 
     @ConfigGroups(groups = {@ConfigGroup(name = "firstGroup", keyPrefix = "first")})
@@ -605,16 +603,17 @@ public class ConfigOptionsDocGeneratorTest {
 
     @Test
     public void testClassWithoutOptionsIsIgnored() {
-        assertThat(
-                ConfigOptionsDocGenerator.generateTablesForClass(EmptyConfigOptions.class),
-                empty());
+        assertThat(ConfigOptionsDocGenerator.generateTablesForClass(EmptyConfigOptions.class))
+                .satisfies(matching(empty()));
     }
 
     @Test
     public void testSnakeCaseConversion() {
-        assertEquals("rocks_options", ConfigOptionsDocGenerator.toSnakeCase("RocksOptions"));
-        assertEquals("rocksdb_options", ConfigOptionsDocGenerator.toSnakeCase("RocksDBOptions"));
-        assertEquals("db_options", ConfigOptionsDocGenerator.toSnakeCase("DBOptions"));
+        assertThat(ConfigOptionsDocGenerator.toSnakeCase("RocksOptions"))
+                .isEqualTo("rocks_options");
+        assertThat(ConfigOptionsDocGenerator.toSnakeCase("RocksDBOptions"))
+                .isEqualTo("rocksdb_options");
+        assertThat(ConfigOptionsDocGenerator.toSnakeCase("DBOptions")).isEqualTo("db_options");
     }
 
     static String getProjectRootDir() {

@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.function.Predicate;
 
 import static org.apache.flink.test.util.TestUtils.submitJobAndWaitForResult;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for failing job submissions. */
 public class JobSubmissionFailsITCase extends TestLogger {

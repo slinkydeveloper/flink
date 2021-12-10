@@ -30,9 +30,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link CollectionExecutor} with broadcast variables. */
 @SuppressWarnings("serial")
@@ -59,9 +58,9 @@ public class CollectionExecutionWithBroadcastVariableTest {
 
             env.execute();
 
-            assertEquals(TEST_DATA.length, result.size());
+            assertThat(result.size()).isEqualTo(TEST_DATA.length);
             for (String s : result) {
-                assertTrue(s.indexOf(SUFFIX) > 0);
+                assertThat(s.indexOf(SUFFIX) > 0).isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -86,9 +85,9 @@ public class CollectionExecutionWithBroadcastVariableTest {
 
             env.execute();
 
-            assertEquals(TEST_DATA.length * TEST_DATA.length, result.size());
+            assertThat(result.size()).isEqualTo(TEST_DATA.length * TEST_DATA.length);
             for (String s : result) {
-                assertTrue(s.indexOf(SUFFIX) == 2);
+                assertThat(s.indexOf(SUFFIX) == 2).isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();

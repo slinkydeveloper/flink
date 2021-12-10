@@ -36,10 +36,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests the {@link JobStatusPollingUtils}. */
 public class JobStatusPollingUtilsTest {
@@ -66,7 +64,7 @@ public class JobStatusPollingUtilsTest {
 
             result.join();
 
-            assertThat(jobStatusSupplier.getAttemptCounter(), is(equalTo(maxAttemptCounter)));
+            assertThat(jobStatusSupplier.getAttemptCounter()).isEqualTo(equalTo(maxAttemptCounter));
 
         } finally {
             ExecutorUtils.gracefulShutdown(5, TimeUnit.SECONDS, executor);
@@ -95,8 +93,8 @@ public class JobStatusPollingUtilsTest {
 
             result.join();
 
-            assertThat(jobStatusSupplier.getAttemptCounter(), is(equalTo(maxAttemptCounter)));
-            assertTrue(result.isDone() && result.get().isSuccess());
+            assertThat(jobStatusSupplier.getAttemptCounter()).isEqualTo(equalTo(maxAttemptCounter));
+            assertThat(result.isDone() && result.get().isSuccess()).isTrue();
 
         } finally {
             ExecutorUtils.gracefulShutdown(5, TimeUnit.SECONDS, executor);
@@ -125,8 +123,9 @@ public class JobStatusPollingUtilsTest {
 
             result.join();
 
-            assertThat(jobStatusSupplier.getAttemptCounter(), is(equalTo(maxAttemptCounter)));
-            assertTrue(result.isDone() && result.get().getSerializedThrowable().isPresent());
+            assertThat(jobStatusSupplier.getAttemptCounter()).isEqualTo(equalTo(maxAttemptCounter));
+            assertThat(result.isDone() && result.get().getSerializedThrowable().isPresent())
+                    .isTrue();
 
         } finally {
             ExecutorUtils.gracefulShutdown(5, TimeUnit.SECONDS, executor);

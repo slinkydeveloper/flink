@@ -54,9 +54,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.table.api.Expressions.$;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT cases for HBase connector (including source and sink). */
 public class HBaseConnectorITCase extends HBaseTestBase {
@@ -268,8 +266,9 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         // wait to finish
         tableResult.await();
 
-        assertEquals(
-                "Expected INSERT rowKind", RowKind.INSERT, tableResult.collect().next().getKind());
+        assertThat(tableResult.collect().next().getKind())
+                .as("Expected INSERT rowKind")
+                .isEqualTo(RowKind.INSERT);
 
         // start a batch scan job to verify contents in HBase table
         TableEnvironment batchEnv = TableEnvironment.create(batchSettings);
@@ -288,7 +287,8 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         Table countTable =
                 batchEnv.sqlQuery("SELECT COUNT(h.rowkey) FROM " + TEST_TABLE_2 + " AS h");
 
-        assertEquals(new Long(expected.size()), countTable.execute().collect().next().getField(0));
+        assertThat(countTable.execute().collect().next().getField(0))
+                .isEqualTo(new Long(expected.size()));
 
         Table table =
                 batchEnv.sqlQuery(
@@ -340,8 +340,9 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         // wait to finish
         tableResult.await();
 
-        assertEquals(
-                "Expected INSERT rowKind", RowKind.INSERT, tableResult.collect().next().getKind());
+        assertThat(tableResult.collect().next().getKind())
+                .as("Expected INSERT rowKind")
+                .isEqualTo(RowKind.INSERT);
 
         // start a batch scan job to verify contents in HBase table
         TableEnvironment batchEnv = TableEnvironment.create(batchSettings);
@@ -368,7 +369,8 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         Table countTable =
                 batchEnv.sqlQuery("SELECT COUNT(h.rowkey) FROM " + TEST_TABLE_3 + " AS h");
 
-        assertEquals(new Long(expected.size()), countTable.execute().collect().next().getField(0));
+        assertThat(countTable.execute().collect().next().getField(0))
+                .isEqualTo(new Long(expected.size()));
 
         String query =
                 "SELECT "
@@ -395,7 +397,7 @@ public class HBaseConnectorITCase extends HBaseTestBase {
                         .sorted()
                         .collect(Collectors.toList());
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -415,11 +417,12 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         AbstractTableInputFormat<?> inputFormat =
                 new HBaseRowDataInputFormat(getConf(), TEST_TABLE_1, tableSchema, "null");
         inputFormat.open(inputFormat.createInputSplits(1)[0]);
-        assertNotNull(inputFormat.getConnection());
-        assertNotNull(inputFormat.getConnection().getTable(TableName.valueOf(TEST_TABLE_1)));
+        assertThat(inputFormat.getConnection()).isNotNull();
+        assertThat(inputFormat.getConnection().getTable(TableName.valueOf(TEST_TABLE_1)))
+                .isNotNull();
 
         inputFormat.close();
-        assertNull(inputFormat.getConnection());
+        assertThat(inputFormat.getConnection()).isNull();
     }
 
     private void verifyHBaseLookupJoin(boolean async) {
@@ -490,7 +493,7 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         expected.add(
                 "+I[3, 3, 30, Hello-3, 300, 3.03, false, Welt-3, 2019-08-18T19:02, 2019-08-18, 19:02, 12345678.0003]");
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     // -------------------------------------------------------------------------------------

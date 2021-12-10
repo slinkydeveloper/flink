@@ -40,9 +40,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that when sources implement {@link WithMasterCheckpointHook} the hooks are properly
@@ -90,18 +88,18 @@ public class WithMasterCheckpointHookConfigTest extends TestLogger {
 
         SerializedValue<Factory[]> serializedConfiguredHooks =
                 jg.getCheckpointingSettings().getMasterHooks();
-        assertNotNull(serializedConfiguredHooks);
+        assertThat(serializedConfiguredHooks).isNotNull();
 
         Factory[] configuredHooks =
                 serializedConfiguredHooks.deserializeValue(getClass().getClassLoader());
-        assertEquals(hooks.size(), configuredHooks.length);
+        assertThat(configuredHooks.length).isEqualTo(hooks.size());
 
         // check that all hooks are contained and exist exactly once
         for (Factory f : configuredHooks) {
             MasterTriggerRestoreHook<?> hook = f.create();
-            assertTrue(hooks.remove(hook));
+            assertThat(hooks.remove(hook)).isTrue();
         }
-        assertTrue(hooks.isEmpty());
+        assertThat(hooks.isEmpty()).isTrue();
     }
 
     // -----------------------------------------------------------------------

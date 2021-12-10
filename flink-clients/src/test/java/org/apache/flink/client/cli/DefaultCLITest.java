@@ -27,8 +27,7 @@ import org.junit.Test;
 
 import java.time.Duration;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultCLI}. */
 public class DefaultCLITest {
@@ -45,8 +44,8 @@ public class DefaultCLITest {
 
         Configuration configuration = defaultCLI.toConfiguration(commandLine);
 
-        assertThat(configuration.get(RestOptions.ADDRESS), is(hostname));
-        assertThat(configuration.get(RestOptions.PORT), is(port));
+        assertThat(configuration.get(RestOptions.ADDRESS)).isEqualTo(hostname);
+        assertThat(configuration.get(RestOptions.PORT)).isEqualTo(port);
     }
 
     @Test
@@ -61,9 +60,8 @@ public class DefaultCLITest {
 
         Configuration configuration = defaultCLI.toConfiguration(commandLine);
 
-        assertThat(
-                configuration.get(PipelineOptions.AUTO_WATERMARK_INTERVAL),
-                is(Duration.ofMillis(42L)));
-        assertThat(configuration.get(PipelineOptions.AUTO_GENERATE_UIDS), is(true));
+        assertThat(configuration.get(PipelineOptions.AUTO_WATERMARK_INTERVAL))
+                .isEqualTo(Duration.ofMillis(42L));
+        assertThat(configuration.get(PipelineOptions.AUTO_GENERATE_UIDS)).isEqualTo(true);
     }
 }

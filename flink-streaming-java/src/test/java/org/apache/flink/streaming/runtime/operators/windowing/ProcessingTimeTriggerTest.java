@@ -27,8 +27,7 @@ import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ProcessingTimeTrigger}. */
 public class ProcessingTimeTriggerTest {
@@ -41,43 +40,38 @@ public class ProcessingTimeTriggerTest {
                         ProcessingTimeTrigger.create(), new TimeWindow.Serializer());
 
         // inject several elements
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)));
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)))
+                .isEqualTo(TriggerResult.CONTINUE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(2, testHarness.numProcessingTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(1);
 
-        assertEquals(
-                TriggerResult.FIRE, testHarness.advanceProcessingTime(2, new TimeWindow(0, 2)));
+        assertThat(testHarness.advanceProcessingTime(2, new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.FIRE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(1);
 
-        assertEquals(
-                TriggerResult.FIRE, testHarness.advanceProcessingTime(4, new TimeWindow(2, 4)));
+        assertThat(testHarness.advanceProcessingTime(4, new TimeWindow(2, 4)))
+                .isEqualTo(TriggerResult.FIRE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numEventTimeTimers());
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
     }
 
     /** Verify that clear() does not leak across windows. */
@@ -87,32 +81,30 @@ public class ProcessingTimeTriggerTest {
                 new TriggerTestHarness<>(
                         ProcessingTimeTrigger.create(), new TimeWindow.Serializer());
 
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)));
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)))
+                .isEqualTo(TriggerResult.CONTINUE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(2, testHarness.numProcessingTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(1);
 
         testHarness.clearTriggerState(new TimeWindow(2, 4));
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(0);
 
         testHarness.clearTriggerState(new TimeWindow(0, 2));
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers());
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(0);
     }
 
     @Test
@@ -121,38 +113,36 @@ public class ProcessingTimeTriggerTest {
                 new TriggerTestHarness<>(
                         ProcessingTimeTrigger.create(), new TimeWindow.Serializer());
 
-        assertTrue(ProcessingTimeTrigger.create().canMerge());
+        assertThat(ProcessingTimeTrigger.create().canMerge()).isTrue();
 
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)));
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)))
+                .isEqualTo(TriggerResult.CONTINUE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(2, testHarness.numProcessingTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(1);
 
         testHarness.mergeWindows(
                 new TimeWindow(0, 4),
                 Lists.newArrayList(new TimeWindow(0, 2), new TimeWindow(2, 4)));
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(0, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 4))).isEqualTo(1);
 
-        assertEquals(
-                TriggerResult.FIRE, testHarness.advanceProcessingTime(4, new TimeWindow(0, 4)));
+        assertThat(testHarness.advanceProcessingTime(4, new TimeWindow(0, 4)))
+                .isEqualTo(TriggerResult.FIRE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numEventTimeTimers());
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
     }
 
     /**
@@ -165,38 +155,36 @@ public class ProcessingTimeTriggerTest {
                 new TriggerTestHarness<>(
                         ProcessingTimeTrigger.create(), new TimeWindow.Serializer());
 
-        assertTrue(ProcessingTimeTrigger.create().canMerge());
+        assertThat(ProcessingTimeTrigger.create().canMerge()).isTrue();
 
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)));
-        assertEquals(
-                TriggerResult.CONTINUE,
-                testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)));
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(0, 2)))
+                .isEqualTo(TriggerResult.CONTINUE);
+        assertThat(testHarness.processElement(new StreamRecord<Object>(1), new TimeWindow(2, 4)))
+                .isEqualTo(TriggerResult.CONTINUE);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(2, testHarness.numProcessingTimeTimers());
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(1, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(2);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(1);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(1);
 
         testHarness.advanceProcessingTime(10);
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(0);
 
         testHarness.mergeWindows(
                 new TimeWindow(0, 4),
                 Lists.newArrayList(new TimeWindow(0, 2), new TimeWindow(2, 4)));
 
-        assertEquals(0, testHarness.numStateEntries());
-        assertEquals(0, testHarness.numEventTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers());
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(0, 2)));
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(2, 4)));
-        assertEquals(0, testHarness.numProcessingTimeTimers(new TimeWindow(0, 4)));
+        assertThat(testHarness.numStateEntries()).isEqualTo(0);
+        assertThat(testHarness.numEventTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers()).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 2))).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(2, 4))).isEqualTo(0);
+        assertThat(testHarness.numProcessingTimeTimers(new TimeWindow(0, 4))).isEqualTo(0);
     }
 }

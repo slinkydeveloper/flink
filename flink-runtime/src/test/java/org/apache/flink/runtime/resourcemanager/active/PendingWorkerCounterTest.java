@@ -23,8 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PendingWorkerCounter}. */
 public class PendingWorkerCounterTest extends TestLogger {
@@ -35,34 +34,34 @@ public class PendingWorkerCounterTest extends TestLogger {
         final WorkerResourceSpec spec2 = new WorkerResourceSpec.Builder().setCpuCores(2.0).build();
 
         final PendingWorkerCounter counter = new PendingWorkerCounter();
-        assertThat(counter.getTotalNum(), is(0));
-        assertThat(counter.getNum(spec1), is(0));
-        assertThat(counter.getNum(spec2), is(0));
+        assertThat(counter.getTotalNum()).isEqualTo(0);
+        assertThat(counter.getNum(spec1)).isEqualTo(0);
+        assertThat(counter.getNum(spec2)).isEqualTo(0);
 
-        assertThat(counter.increaseAndGet(spec1), is(1));
-        assertThat(counter.getTotalNum(), is(1));
-        assertThat(counter.getNum(spec1), is(1));
-        assertThat(counter.getNum(spec2), is(0));
+        assertThat(counter.increaseAndGet(spec1)).isEqualTo(1);
+        assertThat(counter.getTotalNum()).isEqualTo(1);
+        assertThat(counter.getNum(spec1)).isEqualTo(1);
+        assertThat(counter.getNum(spec2)).isEqualTo(0);
 
-        assertThat(counter.increaseAndGet(spec1), is(2));
-        assertThat(counter.getTotalNum(), is(2));
-        assertThat(counter.getNum(spec1), is(2));
-        assertThat(counter.getNum(spec2), is(0));
+        assertThat(counter.increaseAndGet(spec1)).isEqualTo(2);
+        assertThat(counter.getTotalNum()).isEqualTo(2);
+        assertThat(counter.getNum(spec1)).isEqualTo(2);
+        assertThat(counter.getNum(spec2)).isEqualTo(0);
 
-        assertThat(counter.increaseAndGet(spec2), is(1));
-        assertThat(counter.getTotalNum(), is(3));
-        assertThat(counter.getNum(spec1), is(2));
-        assertThat(counter.getNum(spec2), is(1));
+        assertThat(counter.increaseAndGet(spec2)).isEqualTo(1);
+        assertThat(counter.getTotalNum()).isEqualTo(3);
+        assertThat(counter.getNum(spec1)).isEqualTo(2);
+        assertThat(counter.getNum(spec2)).isEqualTo(1);
 
-        assertThat(counter.decreaseAndGet(spec1), is(1));
-        assertThat(counter.getTotalNum(), is(2));
-        assertThat(counter.getNum(spec1), is(1));
-        assertThat(counter.getNum(spec2), is(1));
+        assertThat(counter.decreaseAndGet(spec1)).isEqualTo(1);
+        assertThat(counter.getTotalNum()).isEqualTo(2);
+        assertThat(counter.getNum(spec1)).isEqualTo(1);
+        assertThat(counter.getNum(spec2)).isEqualTo(1);
 
-        assertThat(counter.decreaseAndGet(spec2), is(0));
-        assertThat(counter.getTotalNum(), is(1));
-        assertThat(counter.getNum(spec1), is(1));
-        assertThat(counter.getNum(spec2), is(0));
+        assertThat(counter.decreaseAndGet(spec2)).isEqualTo(0);
+        assertThat(counter.getTotalNum()).isEqualTo(1);
+        assertThat(counter.getNum(spec1)).isEqualTo(1);
+        assertThat(counter.getNum(spec2)).isEqualTo(0);
     }
 
     @Test(expected = IllegalStateException.class)

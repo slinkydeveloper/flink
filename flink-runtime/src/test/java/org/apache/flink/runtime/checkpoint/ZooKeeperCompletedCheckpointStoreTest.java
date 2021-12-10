@@ -52,9 +52,9 @@ import java.util.function.Function;
 
 import static java.util.Collections.emptyList;
 import static org.apache.flink.runtime.checkpoint.CheckpointRetentionPolicy.NEVER_RETAIN_AFTER_TERMINATION;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for {@link DefaultCompletedCheckpointStore} with {@link ZooKeeperStateHandleStore}. */
 public class ZooKeeperCompletedCheckpointStoreTest extends TestLogger {
@@ -70,7 +70,7 @@ public class ZooKeeperCompletedCheckpointStoreTest extends TestLogger {
 
         final String path = zooKeeperCheckpointStoreUtil.checkpointIDToName(checkpointId);
 
-        assertEquals(checkpointId, zooKeeperCheckpointStoreUtil.nameToCheckpointID(path));
+        assertThat(zooKeeperCheckpointStoreUtil.nameToCheckpointID(path)).isEqualTo(checkpointId);
     }
 
     @Test
@@ -99,13 +99,13 @@ public class ZooKeeperCompletedCheckpointStoreTest extends TestLogger {
                         id -> {
                             throw new ExpectedTestException();
                         }));
-        final Exception exception =
-                assertThrows(
-                        Exception.class,
+
+        assertThatThrownBy(
                         () ->
                                 DefaultCompletedCheckpointStoreUtils.retrieveCompletedCheckpoints(
-                                        checkpointsInZooKeeper, zooKeeperCheckpointStoreUtil));
-        assertThat(exception, FlinkMatchers.containsCause(ExpectedTestException.class));
+                                        checkpointsInZooKeeper, zooKeeperCheckpointStoreUtil))
+                .isInstanceOf(Exception.class)
+                .satisfies(matching(FlinkMatchers.containsCause(ExpectedTestException.class)));
     }
 
     private Tuple2<RetrievableStateHandle<CompletedCheckpoint>, String> createHandle(
@@ -134,15 +134,17 @@ public class ZooKeeperCompletedCheckpointStoreTest extends TestLogger {
 
             checkpointStore.addCheckpointAndSubsumeOldestOne(
                     checkpoint1, new CheckpointsCleaner(), () -> {});
-            assertThat(checkpointStore.getAllCheckpoints(), Matchers.contains(checkpoint1));
+            assertThat(checkpointStore.getAllCheckpoints())
+                    .satisfies(matching(Matchers.contains(checkpoint1)));
 
             final CompletedCheckpointStoreTest.TestCompletedCheckpoint checkpoint2 =
                     CompletedCheckpointStoreTest.createCheckpoint(1, sharedStateRegistry);
             checkpointStore.addCheckpointAndSubsumeOldestOne(
                     checkpoint2, new CheckpointsCleaner(), () -> {});
             final List<CompletedCheckpoint> allCheckpoints = checkpointStore.getAllCheckpoints();
-            assertThat(allCheckpoints, Matchers.contains(checkpoint2));
-            assertThat(allCheckpoints, Matchers.not(Matchers.contains(checkpoint1)));
+            assertThat(allCheckpoints).satisfies(matching(Matchers.contains(checkpoint2)));
+            assertThat(allCheckpoints)
+                    .satisfies(matching(Matchers.not(Matchers.contains(checkpoint1))));
 
             // verify that the subsumed checkpoint is discarded
             CompletedCheckpointStoreTest.verifyCheckpointDiscarded(checkpoint1);
@@ -173,7 +175,8 @@ public class ZooKeeperCompletedCheckpointStoreTest extends TestLogger {
 
             checkpointStore.addCheckpointAndSubsumeOldestOne(
                     checkpoint1, new CheckpointsCleaner(), () -> {});
-            assertThat(checkpointStore.getAllCheckpoints(), Matchers.contains(checkpoint1));
+            assertThat(checkpointStore.getAllCheckpoints())
+                    .satisfies(matching(Matchers.contains(checkpoint1)));
 
             checkpointStore.shutdown(JobStatus.FINISHED, new CheckpointsCleaner());
 

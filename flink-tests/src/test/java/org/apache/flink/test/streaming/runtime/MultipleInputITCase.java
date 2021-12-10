@@ -47,9 +47,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
 
 /** Integration tests for {@link MultipleInputStreamOperator}. */
 @SuppressWarnings("serial")
@@ -106,7 +106,7 @@ public class MultipleInputITCase extends AbstractTestBase {
         List<Long> result = resultSink.getResult();
         Collections.sort(result);
         long actualSum = result.get(result.size() - 1);
-        assertEquals(1 + 10 + 2 + 11 + 42 + 44, actualSum);
+        assertThat(actualSum).isEqualTo(1 + 10 + 2 + 11 + 42 + 44);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class MultipleInputITCase extends AbstractTestBase {
 
         List<Long> result = resultSink.getResult();
         Collections.sort(result);
-        assertThat(result, contains(0L, 3L, 13L, 13L + 16L, 101L, 101L + 104L));
+        assertThat(result).satisfies(matching(contains(0L, 3L, 13L, 13L + 16L, 101L, 101L + 104L)));
     }
 
     private static class KeyedSumMultipleInputOperator extends AbstractStreamOperatorV2<Long>

@@ -42,11 +42,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests that ask timeouts report the call stack of the calling function. */
 public class TimeoutCallStackTest {
@@ -93,10 +90,10 @@ public class TimeoutCallStackTest {
             failureCause = e.getCause();
         }
 
-        assertThat(failureCause, instanceOf(TimeoutException.class));
-        assertThat(failureCause.getMessage(), containsString("callThatTimesOut"));
-        assertThat(
-                failureCause.getStackTrace()[0].getMethodName(), equalTo("testTimeoutException"));
+        assertThat(failureCause).isInstanceOf(TimeoutException.class);
+        assertThat(failureCause.getMessage()).contains("callThatTimesOut");
+        assertThat(failureCause.getStackTrace()[0].getMethodName())
+                .isEqualTo("testTimeoutException");
     }
 
     // ------------------------------------------------------------------------

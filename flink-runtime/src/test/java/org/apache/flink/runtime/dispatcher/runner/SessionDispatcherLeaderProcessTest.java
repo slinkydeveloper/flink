@@ -55,11 +55,10 @@ import java.util.concurrent.TimeoutException;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.core.testutils.FlinkMatchers.willNotComplete;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link SessionDispatcherLeaderProcess}. */
 public class SessionDispatcherLeaderProcessTest extends TestLogger {
@@ -111,9 +110,8 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
         dispatcherLeaderProcess.close();
         dispatcherLeaderProcess.start();
 
-        assertThat(
-                dispatcherLeaderProcess.getState(),
-                is(SessionDispatcherLeaderProcess.State.STOPPED));
+        assertThat(dispatcherLeaderProcess.getState())
+                .isEqualTo(SessionDispatcherLeaderProcess.State.STOPPED);
     }
 
     @Test
@@ -137,13 +135,12 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
         try (final SessionDispatcherLeaderProcess dispatcherLeaderProcess =
                 createDispatcherLeaderProcess()) {
             dispatcherLeaderProcess.start();
-            assertThat(
-                    dispatcherLeaderProcess.getState(),
-                    is(SessionDispatcherLeaderProcess.State.RUNNING));
+            assertThat(dispatcherLeaderProcess.getState())
+                    .isEqualTo(SessionDispatcherLeaderProcess.State.RUNNING);
 
             final Collection<JobGraph> recoveredJobGraphs = recoveredJobGraphsFuture.get();
 
-            assertThat(recoveredJobGraphs, containsInAnyOrder(JOB_GRAPH));
+            assertThat(recoveredJobGraphs).satisfies(matching(containsInAnyOrder(JOB_GRAPH)));
         }
     }
 
@@ -177,8 +174,8 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
 
             final CompletableFuture<Void> terminationFuture = dispatcherLeaderProcess.closeAsync();
 
-            assertThat(jobGraphStopFuture.isDone(), is(false));
-            assertThat(terminationFuture.isDone(), is(false));
+            assertThat(jobGraphStopFuture.isDone()).isEqualTo(false);
+            assertThat(terminationFuture.isDone()).isEqualTo(false);
 
             dispatcherServiceTerminationFuture.complete(null);
 
@@ -209,7 +206,7 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
         terminationFuture.completeExceptionally(expectedFailure);
 
         final Throwable error = fatalErrorHandler.getErrorFuture().join();
-        assertThat(error, containsCause(expectedFailure));
+        assertThat(error).satisfies(matching(containsCause(expectedFailure)));
 
         fatalErrorHandler.clearError();
     }
@@ -236,7 +233,8 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
         final FlinkException expectedFailure = new FlinkException("Expected test failure.");
         terminationFuture.completeExceptionally(expectedFailure);
 
-        assertThat(fatalErrorHandler.getErrorFuture(), willNotComplete(Duration.ofMillis(10)));
+        assertThat(fatalErrorHandler.getErrorFuture())
+                .satisfies(matching(willNotComplete(Duration.ofMillis(10))));
     }
 
     @Test
@@ -266,11 +264,11 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
 
             dispatcherLeaderProcess.start();
 
-            assertThat(confirmLeaderSessionFuture.isDone(), is(false));
+            assertThat(confirmLeaderSessionFuture.isDone()).isEqualTo(false);
 
             createDispatcherServiceLatch.trigger();
 
-            assertThat(confirmLeaderSessionFuture.get(), is(dispatcherAddress));
+            assertThat(confirmLeaderSessionFuture.get()).isEqualTo(dispatcherAddress);
         }
     }
 
@@ -352,7 +350,7 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
             jobGraphStore.removeJobGraph(JOB_GRAPH.getJobID());
             dispatcherLeaderProcess.onRemovedJobGraph(JOB_GRAPH.getJobID());
 
-            assertThat(terminateJobFuture.get(), is(JOB_GRAPH.getJobID()));
+            assertThat(terminateJobFuture.get()).isEqualTo(JOB_GRAPH.getJobID());
         }
     }
 
@@ -385,9 +383,11 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
 
             final Throwable fatalError = fatalErrorHandler.getErrorFuture().join();
 
-            assertTrue(
-                    ExceptionUtils.findThrowable(fatalError, cause -> cause.equals(testException))
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(
+                                            fatalError, cause -> cause.equals(testException))
+                                    .isPresent())
+                    .isTrue();
 
             fatalErrorHandler.clearError();
         }
@@ -419,7 +419,7 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
 
             final JobGraph submittedJobGraph = submittedJobFuture.get();
 
-            assertThat(submittedJobGraph.getJobID(), is(JOB_GRAPH.getJobID()));
+            assertThat(submittedJobGraph.getJobID()).isEqualTo(JOB_GRAPH.getJobID());
         }
     }
 
@@ -480,13 +480,11 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
 
             final CompletableFuture<Throwable> errorFuture = fatalErrorHandler.getErrorFuture();
             final Throwable throwable = errorFuture.get();
-            assertThat(
-                    ExceptionUtils.findThrowable(throwable, expectedFailure::equals).isPresent(),
-                    is(true));
+            assertThat(ExceptionUtils.findThrowable(throwable, expectedFailure::equals).isPresent())
+                    .isEqualTo(true);
 
-            assertThat(
-                    dispatcherLeaderProcess.getState(),
-                    is(SessionDispatcherLeaderProcess.State.STOPPED));
+            assertThat(dispatcherLeaderProcess.getState())
+                    .isEqualTo(SessionDispatcherLeaderProcess.State.STOPPED);
 
             fatalErrorHandler.clearError();
         }
@@ -529,9 +527,10 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
             // we expect that a fatal error occurred
             final Throwable error = fatalErrorHandler.getErrorFuture().get();
             assertThat(
-                    ExceptionUtils.findThrowableWithMessage(error, testException.getMessage())
-                            .isPresent(),
-                    is(true));
+                            ExceptionUtils.findThrowableWithMessage(
+                                            error, testException.getMessage())
+                                    .isPresent())
+                    .isEqualTo(true);
 
             fatalErrorHandler.clearError();
         }
@@ -555,9 +554,10 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
             TestingFatalErrorHandler fatalErrorHandler) {
         final Throwable actualCause = fatalErrorHandler.getErrorFuture().join();
 
-        assertTrue(
-                ExceptionUtils.findThrowable(actualCause, JobSubmissionException.class)
-                        .isPresent());
+        assertThat(
+                        ExceptionUtils.findThrowable(actualCause, JobSubmissionException.class)
+                                .isPresent())
+                .isTrue();
 
         fatalErrorHandler.clearError();
     }
@@ -589,8 +589,8 @@ public class SessionDispatcherLeaderProcessTest extends TestLogger {
                 TestingDispatcherServiceFactory.newBuilder()
                         .setCreateFunction(
                                 (dispatcherId, jobGraphs, jobGraphWriter) -> {
-                                    assertThat(jobGraphs, containsInAnyOrder(JOB_GRAPH));
-
+                                    assertThat(jobGraphs)
+                                            .satisfies(matching(containsInAnyOrder(JOB_GRAPH)));
                                     return TestingDispatcherGatewayService.newBuilder()
                                             .setDispatcherGateway(dispatcherGateway)
                                             .build();

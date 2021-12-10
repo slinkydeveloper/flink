@@ -35,8 +35,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ZooKeeperCheckpointIDCounter} in a ZooKeeper ensemble. */
 public final class ZKCheckpointIDCounterMultiServersTest extends TestLogger {
@@ -73,20 +72,18 @@ public final class ZKCheckpointIDCounterMultiServersTest extends TestLogger {
 
             AtomicLong localCounter = new AtomicLong(1L);
 
-            assertThat(
-                    "ZooKeeperCheckpointIDCounter doesn't properly work.",
-                    idCounter.getAndIncrement(),
-                    is(localCounter.getAndIncrement()));
+            assertThat(idCounter.getAndIncrement())
+                    .as("ZooKeeperCheckpointIDCounter doesn't properly work.")
+                    .isEqualTo(localCounter.getAndIncrement());
 
             zooKeeperResource.restart();
 
             connectionLossLatch.await();
             reconnectedLatch.await();
 
-            assertThat(
-                    "ZooKeeperCheckpointIDCounter doesn't properly work after reconnected.",
-                    idCounter.getAndIncrement(),
-                    is(localCounter.getAndIncrement()));
+            assertThat(idCounter.getAndIncrement())
+                    .as("ZooKeeperCheckpointIDCounter doesn't properly work after reconnected.")
+                    .isEqualTo(localCounter.getAndIncrement());
         } finally {
             curatorFrameworkWrapper.close();
         }

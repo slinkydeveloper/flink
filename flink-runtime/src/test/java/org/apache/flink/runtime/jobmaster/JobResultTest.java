@@ -30,11 +30,10 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link JobResult}. */
 public class JobResultTest extends TestLogger {
@@ -45,7 +44,7 @@ public class JobResultTest extends TestLogger {
             new JobResult.Builder().jobId(new JobID()).build();
             fail("Expected exception not thrown");
         } catch (final IllegalArgumentException e) {
-            assertThat(e.getMessage(), equalTo("netRuntime must be greater than or equals 0"));
+            assertThat(e.getMessage()).isEqualTo("netRuntime must be greater than or equals 0");
         }
     }
 
@@ -58,7 +57,7 @@ public class JobResultTest extends TestLogger {
                         .netRuntime(Long.MAX_VALUE)
                         .build();
 
-        assertThat(jobResult.isSuccess(), equalTo(false));
+        assertThat(jobResult.isSuccess()).isEqualTo(false);
     }
 
     @Test
@@ -66,7 +65,7 @@ public class JobResultTest extends TestLogger {
         final JobResult jobResult =
                 new JobResult.Builder().jobId(new JobID()).netRuntime(Long.MAX_VALUE).build();
 
-        assertThat(jobResult.isSuccess(), equalTo(true));
+        assertThat(jobResult.isSuccess()).isEqualTo(true);
     }
 
     @Test
@@ -78,7 +77,7 @@ public class JobResultTest extends TestLogger {
                                 .setState(JobStatus.CANCELED)
                                 .build());
 
-        assertThat(jobResult.isSuccess(), is(false));
+        assertThat(jobResult.isSuccess()).isEqualTo(false);
     }
 
     @Test
@@ -92,7 +91,7 @@ public class JobResultTest extends TestLogger {
                                         new ErrorInfo(new FlinkException("Test exception"), 42L))
                                 .build());
 
-        assertThat(jobResult.isSuccess(), is(false));
+        assertThat(jobResult.isSuccess()).isEqualTo(false);
     }
 
     @Test
@@ -112,7 +111,7 @@ public class JobResultTest extends TestLogger {
         } catch (JobCancellationException expected) {
             // the failure cause in the execution graph should not be the cause of the canceled job
             // result
-            assertThat(expected.getCause(), is(nullValue()));
+            assertThat(expected.getCause()).isEqualTo(nullValue());
         }
     }
 
@@ -131,7 +130,7 @@ public class JobResultTest extends TestLogger {
             jobResult.toJobExecutionResult(getClass().getClassLoader());
             fail("Job should fail with JobExecutionException.");
         } catch (JobExecutionException expected) {
-            assertThat(expected.getCause(), is(equalTo(cause)));
+            assertThat(expected.getCause()).isEqualTo(equalTo(cause));
         }
     }
 

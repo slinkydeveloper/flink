@@ -29,8 +29,9 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.createRandomExecutionVertexId;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link DefaultSyncPreferredLocationsRetriever}. */
 public class DefaultSyncPreferredLocationsRetrieverTest extends TestLogger {
@@ -64,6 +65,6 @@ public class DefaultSyncPreferredLocationsRetrieverTest extends TestLogger {
         TaskManagerLocation expectedLocation =
                 originalLocationRetriever.getTaskManagerLocation(EV1).get().join();
 
-        assertThat(preferredLocations, contains(expectedLocation));
+        assertThat(preferredLocations).satisfies(matching(contains(expectedLocation)));
     }
 }

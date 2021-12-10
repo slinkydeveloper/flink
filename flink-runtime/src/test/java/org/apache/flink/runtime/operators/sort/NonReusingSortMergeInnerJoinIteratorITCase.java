@@ -47,7 +47,6 @@ import org.apache.flink.util.MutableObjectIterator;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -57,6 +56,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("deprecation")
 public class NonReusingSortMergeInnerJoinIteratorITCase extends TestLogger {
@@ -128,9 +130,9 @@ public class NonReusingSortMergeInnerJoinIteratorITCase extends TestLogger {
         }
 
         if (this.memoryManager != null) {
-            Assert.assertTrue(
-                    "Memory Leak: Not all memory has been returned to the memory manager.",
-                    this.memoryManager.verifyEmpty());
+            assertThat(this.memoryManager.verifyEmpty())
+                    .as("Memory Leak: Not all memory has been returned to the memory manager.")
+                    .isTrue();
             this.memoryManager.shutdown();
             this.memoryManager = null;
         }
@@ -199,13 +201,13 @@ public class NonReusingSortMergeInnerJoinIteratorITCase extends TestLogger {
 
             // assert that each expected match was seen
             for (Entry<Integer, Collection<Match>> entry : expectedMatchesMap.entrySet()) {
-                Assert.assertTrue(
-                        "Collection for key " + entry.getKey() + " is not empty",
-                        entry.getValue().isEmpty());
+                assertThat(entry.getValue().isEmpty())
+                        .as("Collection for key " + entry.getKey() + " is not empty")
+                        .isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("An exception occurred during the test: " + e.getMessage());
+            fail("An exception occurred during the test: " + e.getMessage());
         }
     }
 
@@ -319,12 +321,12 @@ public class NonReusingSortMergeInnerJoinIteratorITCase extends TestLogger {
             // assert that each expected match was seen
             for (Entry<Integer, Collection<Match>> entry : expectedMatchesMap.entrySet()) {
                 if (!entry.getValue().isEmpty()) {
-                    Assert.fail("Collection for key " + entry.getKey() + " is not empty");
+                    fail("Collection for key " + entry.getKey() + " is not empty");
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("An exception occurred during the test: " + e.getMessage());
+            fail("An exception occurred during the test: " + e.getMessage());
         }
     }
 

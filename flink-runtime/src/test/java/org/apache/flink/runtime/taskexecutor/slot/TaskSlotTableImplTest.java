@@ -42,11 +42,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link TaskSlotTable}. */
 public class TaskSlotTableImplTest extends TestLogger {
@@ -69,24 +69,22 @@ public class TaskSlotTableImplTest extends TestLogger {
 
             taskSlotTable.markSlotActive(allocationId1);
 
-            assertThat(taskSlotTable.isAllocated(0, jobId1, allocationId1), is(true));
-            assertThat(taskSlotTable.isAllocated(1, jobId1, allocationId2), is(true));
-            assertThat(taskSlotTable.isAllocated(2, jobId2, allocationId3), is(true));
+            assertThat(taskSlotTable.isAllocated(0, jobId1, allocationId1)).isEqualTo(true);
+            assertThat(taskSlotTable.isAllocated(1, jobId1, allocationId2)).isEqualTo(true);
+            assertThat(taskSlotTable.isAllocated(2, jobId2, allocationId3)).isEqualTo(true);
 
-            assertThat(
-                    taskSlotTable.getActiveTaskSlotAllocationIdsPerJob(jobId1),
-                    is(equalTo(Sets.newHashSet(allocationId1))));
+            assertThat(taskSlotTable.getActiveTaskSlotAllocationIdsPerJob(jobId1))
+                    .isEqualTo(equalTo(Sets.newHashSet(allocationId1)));
 
-            assertThat(taskSlotTable.tryMarkSlotActive(jobId1, allocationId1), is(true));
-            assertThat(taskSlotTable.tryMarkSlotActive(jobId1, allocationId2), is(true));
-            assertThat(taskSlotTable.tryMarkSlotActive(jobId1, allocationId3), is(false));
+            assertThat(taskSlotTable.tryMarkSlotActive(jobId1, allocationId1)).isEqualTo(true);
+            assertThat(taskSlotTable.tryMarkSlotActive(jobId1, allocationId2)).isEqualTo(true);
+            assertThat(taskSlotTable.tryMarkSlotActive(jobId1, allocationId3)).isEqualTo(false);
 
-            assertThat(
-                    taskSlotTable.getActiveTaskSlotAllocationIdsPerJob(jobId1),
-                    is(equalTo(new HashSet<>(Arrays.asList(allocationId2, allocationId1)))));
+            assertThat(taskSlotTable.getActiveTaskSlotAllocationIdsPerJob(jobId1))
+                    .isEqualTo(equalTo(new HashSet<>(Arrays.asList(allocationId2, allocationId1))));
         } finally {
             taskSlotTable.close();
-            assertThat(taskSlotTable.isClosed(), is(true));
+            assertThat(taskSlotTable.isClosed()).isEqualTo(true);
         }
     }
 
@@ -106,9 +104,8 @@ public class TaskSlotTableImplTest extends TestLogger {
             taskSlotTable.markSlotActive(allocationId1);
             taskSlotTable.markSlotActive(allocationId3);
 
-            assertThat(
-                    taskSlotTable.getActiveTaskSlotAllocationIds(),
-                    is(Sets.newHashSet(allocationId1, allocationId3)));
+            assertThat(taskSlotTable.getActiveTaskSlotAllocationIds())
+                    .isEqualTo(Sets.newHashSet(allocationId1, allocationId3));
         }
     }
 
@@ -123,19 +120,20 @@ public class TaskSlotTableImplTest extends TestLogger {
             final AllocationID allocationId1 = new AllocationID();
             final AllocationID allocationId2 = new AllocationID();
 
-            assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId1, SLOT_TIMEOUT), is(true));
-            assertThat(
-                    taskSlotTable.allocateSlot(1, jobId, allocationId1, SLOT_TIMEOUT), is(false));
-            assertThat(
-                    taskSlotTable.allocateSlot(0, jobId, allocationId2, SLOT_TIMEOUT), is(false));
+            assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId1, SLOT_TIMEOUT))
+                    .isEqualTo(true);
+            assertThat(taskSlotTable.allocateSlot(1, jobId, allocationId1, SLOT_TIMEOUT))
+                    .isEqualTo(false);
+            assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId2, SLOT_TIMEOUT))
+                    .isEqualTo(false);
 
-            assertThat(taskSlotTable.isAllocated(0, jobId, allocationId1), is(true));
-            assertThat(taskSlotTable.isSlotFree(1), is(true));
+            assertThat(taskSlotTable.isAllocated(0, jobId, allocationId1)).isEqualTo(true);
+            assertThat(taskSlotTable.isSlotFree(1)).isEqualTo(true);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
-            assertThat(allocatedSlots.next().getIndex(), is(0));
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(allocatedSlots.next().getIndex()).isEqualTo(0);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -150,17 +148,17 @@ public class TaskSlotTableImplTest extends TestLogger {
             final JobID jobId2 = new JobID();
             final AllocationID allocationId = new AllocationID();
 
-            assertThat(
-                    taskSlotTable.allocateSlot(-1, jobId1, allocationId, SLOT_TIMEOUT), is(true));
-            assertThat(
-                    taskSlotTable.allocateSlot(-1, jobId2, allocationId, SLOT_TIMEOUT), is(false));
+            assertThat(taskSlotTable.allocateSlot(-1, jobId1, allocationId, SLOT_TIMEOUT))
+                    .isEqualTo(true);
+            assertThat(taskSlotTable.allocateSlot(-1, jobId2, allocationId, SLOT_TIMEOUT))
+                    .isEqualTo(false);
 
-            assertThat(taskSlotTable.isAllocated(1, jobId1, allocationId), is(true));
+            assertThat(taskSlotTable.isAllocated(1, jobId1, allocationId)).isEqualTo(true);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId1);
-            assertThat(allocatedSlots.next().getAllocationId(), is(allocationId));
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(allocatedSlots.next().getAllocationId()).isEqualTo(allocationId);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -171,21 +169,21 @@ public class TaskSlotTableImplTest extends TestLogger {
             final AllocationID allocationId = new AllocationID();
 
             assertThat(
-                    taskSlotTable.allocateSlot(
-                            0, jobId, allocationId, ResourceProfile.UNKNOWN, SLOT_TIMEOUT),
-                    is(true));
+                            taskSlotTable.allocateSlot(
+                                    0, jobId, allocationId, ResourceProfile.UNKNOWN, SLOT_TIMEOUT))
+                    .isEqualTo(true);
             assertThat(
-                    taskSlotTable.allocateSlot(
-                            0, jobId, allocationId, ResourceProfile.UNKNOWN, SLOT_TIMEOUT),
-                    is(true));
+                            taskSlotTable.allocateSlot(
+                                    0, jobId, allocationId, ResourceProfile.UNKNOWN, SLOT_TIMEOUT))
+                    .isEqualTo(true);
 
-            assertThat(taskSlotTable.isAllocated(0, jobId, allocationId), is(true));
-            assertThat(taskSlotTable.isSlotFree(1), is(true));
+            assertThat(taskSlotTable.isAllocated(0, jobId, allocationId)).isEqualTo(true);
+            assertThat(taskSlotTable.isSlotFree(1)).isEqualTo(true);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
-            assertThat(allocatedSlots.next().getIndex(), is(0));
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(allocatedSlots.next().getIndex()).isEqualTo(0);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -195,18 +193,20 @@ public class TaskSlotTableImplTest extends TestLogger {
             final JobID jobId = new JobID();
             final AllocationID allocationId = new AllocationID();
 
-            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId, SLOT_TIMEOUT), is(true));
+            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId, SLOT_TIMEOUT))
+                    .isEqualTo(true);
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
             TaskSlot<TaskSlotPayload> taskSlot1 = allocatedSlots.next();
 
-            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId, SLOT_TIMEOUT), is(true));
+            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId, SLOT_TIMEOUT))
+                    .isEqualTo(true);
             allocatedSlots = taskSlotTable.getAllocatedSlots(jobId);
             TaskSlot<TaskSlotPayload> taskSlot2 = allocatedSlots.next();
 
-            assertThat(taskSlotTable.isAllocated(1, jobId, allocationId), is(true));
-            assertEquals(taskSlot1, taskSlot2);
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(taskSlotTable.isAllocated(1, jobId, allocationId)).isEqualTo(true);
+            assertThat(taskSlot2).isEqualTo(taskSlot1);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -217,18 +217,20 @@ public class TaskSlotTableImplTest extends TestLogger {
             final AllocationID allocationId1 = new AllocationID();
             final AllocationID allocationId2 = new AllocationID();
 
-            assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId1, SLOT_TIMEOUT), is(true));
-            assertThat(taskSlotTable.allocateSlot(1, jobId, allocationId2, SLOT_TIMEOUT), is(true));
+            assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId1, SLOT_TIMEOUT))
+                    .isEqualTo(true);
+            assertThat(taskSlotTable.allocateSlot(1, jobId, allocationId2, SLOT_TIMEOUT))
+                    .isEqualTo(true);
 
-            assertThat(taskSlotTable.freeSlot(allocationId2), is(1));
+            assertThat(taskSlotTable.freeSlot(allocationId2)).isEqualTo(1);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
-            assertThat(allocatedSlots.next().getIndex(), is(0));
-            assertThat(allocatedSlots.hasNext(), is(false));
-            assertThat(taskSlotTable.isAllocated(1, jobId, allocationId1), is(false));
-            assertThat(taskSlotTable.isAllocated(1, jobId, allocationId2), is(false));
-            assertThat(taskSlotTable.isSlotFree(1), is(true));
+            assertThat(allocatedSlots.next().getIndex()).isEqualTo(0);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
+            assertThat(taskSlotTable.isAllocated(1, jobId, allocationId1)).isEqualTo(false);
+            assertThat(taskSlotTable.isAllocated(1, jobId, allocationId2)).isEqualTo(false);
+            assertThat(taskSlotTable.isSlotFree(1)).isEqualTo(true);
         }
     }
 
@@ -238,13 +240,14 @@ public class TaskSlotTableImplTest extends TestLogger {
             final JobID jobId = new JobID();
             final AllocationID allocationId = new AllocationID();
 
-            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId, SLOT_TIMEOUT), is(true));
+            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId, SLOT_TIMEOUT))
+                    .isEqualTo(true);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
-            assertThat(allocatedSlots.next().getIndex(), is(2));
-            assertThat(allocatedSlots.hasNext(), is(false));
-            assertThat(taskSlotTable.isAllocated(2, jobId, allocationId), is(true));
+            assertThat(allocatedSlots.next().getIndex()).isEqualTo(2);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
+            assertThat(taskSlotTable.isAllocated(2, jobId, allocationId)).isEqualTo(true);
         }
     }
 
@@ -258,16 +261,16 @@ public class TaskSlotTableImplTest extends TestLogger {
                             ResourceProfile.newBuilder().setCpuCores(0.1).build());
 
             assertThat(
-                    taskSlotTable.allocateSlot(
-                            -1, jobId, allocationId, resourceProfile, SLOT_TIMEOUT),
-                    is(true));
+                            taskSlotTable.allocateSlot(
+                                    -1, jobId, allocationId, resourceProfile, SLOT_TIMEOUT))
+                    .isEqualTo(true);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
             TaskSlot<TaskSlotPayload> allocatedSlot = allocatedSlots.next();
-            assertThat(allocatedSlot.getIndex(), is(2));
-            assertThat(allocatedSlot.getResourceProfile(), is(resourceProfile));
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(allocatedSlot.getIndex()).isEqualTo(2);
+            assertThat(allocatedSlot.getResourceProfile()).isEqualTo(resourceProfile);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -279,17 +282,17 @@ public class TaskSlotTableImplTest extends TestLogger {
             final AllocationID allocationId = new AllocationID();
 
             assertThat(
-                    taskSlotTable.allocateSlot(
-                            -1, jobId, allocationId, ResourceProfile.UNKNOWN, SLOT_TIMEOUT),
-                    is(true));
+                            taskSlotTable.allocateSlot(
+                                    -1, jobId, allocationId, ResourceProfile.UNKNOWN, SLOT_TIMEOUT))
+                    .isEqualTo(true);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
             TaskSlot<TaskSlotPayload> allocatedSlot = allocatedSlots.next();
-            assertThat(allocatedSlot.getIndex(), is(2));
-            assertThat(
-                    allocatedSlot.getResourceProfile(), is(TaskSlotUtils.DEFAULT_RESOURCE_PROFILE));
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(allocatedSlot.getIndex()).isEqualTo(2);
+            assertThat(allocatedSlot.getResourceProfile())
+                    .isEqualTo(TaskSlotUtils.DEFAULT_RESOURCE_PROFILE);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -302,13 +305,13 @@ public class TaskSlotTableImplTest extends TestLogger {
             resourceProfile = resourceProfile.merge(resourceProfile).merge(resourceProfile);
 
             assertThat(
-                    taskSlotTable.allocateSlot(
-                            -1, jobId, allocationId, resourceProfile, SLOT_TIMEOUT),
-                    is(false));
+                            taskSlotTable.allocateSlot(
+                                    -1, jobId, allocationId, resourceProfile, SLOT_TIMEOUT))
+                    .isEqualTo(false);
 
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -320,51 +323,49 @@ public class TaskSlotTableImplTest extends TestLogger {
             final AllocationID allocationId2 = new AllocationID();
             final AllocationID allocationId3 = new AllocationID();
 
-            assertThat(
-                    taskSlotTable.allocateSlot(0, jobId, allocationId1, SLOT_TIMEOUT),
-                    is(true)); // index 0
-            assertThat(
-                    taskSlotTable.allocateSlot(-1, jobId, allocationId2, SLOT_TIMEOUT),
-                    is(true)); // index 3
-            assertThat(
-                    taskSlotTable.allocateSlot(-1, jobId, allocationId3, SLOT_TIMEOUT),
-                    is(true)); // index 4
+            assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId1, SLOT_TIMEOUT))
+                    .isEqualTo(true); // index 0
+            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId2, SLOT_TIMEOUT))
+                    .isEqualTo(true); // index 3
+            assertThat(taskSlotTable.allocateSlot(-1, jobId, allocationId3, SLOT_TIMEOUT))
+                    .isEqualTo(true); // index 4
 
-            assertThat(taskSlotTable.freeSlot(allocationId2), is(3));
+            assertThat(taskSlotTable.freeSlot(allocationId2)).isEqualTo(3);
 
             ResourceID resourceId = ResourceID.generate();
             SlotReport slotReport = taskSlotTable.createSlotReport(resourceId);
             List<SlotStatus> slotStatuses = new ArrayList<>();
             slotReport.iterator().forEachRemaining(slotStatuses::add);
 
-            assertThat(slotStatuses.size(), is(4));
-            assertThat(
-                    slotStatuses,
-                    containsInAnyOrder(
-                            is(
-                                    new SlotStatus(
-                                            new SlotID(resourceId, 0),
-                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
-                                            jobId,
-                                            allocationId1)),
-                            is(
-                                    new SlotStatus(
-                                            new SlotID(resourceId, 1),
-                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
-                                            null,
-                                            null)),
-                            is(
-                                    new SlotStatus(
-                                            new SlotID(resourceId, 2),
-                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
-                                            null,
-                                            null)),
-                            is(
-                                    new SlotStatus(
-                                            new SlotID(resourceId, 4),
-                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
-                                            jobId,
-                                            allocationId3))));
+            assertThat(slotStatuses.size()).isEqualTo(4);
+            assertThat(slotStatuses)
+                    .satisfies(
+                            matching(
+                                    containsInAnyOrder(
+                                            is(
+                                                    new SlotStatus(
+                                                            new SlotID(resourceId, 0),
+                                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
+                                                            jobId,
+                                                            allocationId1)),
+                                            is(
+                                                    new SlotStatus(
+                                                            new SlotID(resourceId, 1),
+                                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
+                                                            null,
+                                                            null)),
+                                            is(
+                                                    new SlotStatus(
+                                                            new SlotID(resourceId, 2),
+                                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
+                                                            null,
+                                                            null)),
+                                            is(
+                                                    new SlotStatus(
+                                                            new SlotID(resourceId, 4),
+                                                            TaskSlotUtils.DEFAULT_RESOURCE_PROFILE,
+                                                            jobId,
+                                                            allocationId3)))));
         }
     }
 
@@ -378,10 +379,10 @@ public class TaskSlotTableImplTest extends TestLogger {
             Iterator<TaskSlot<TaskSlotPayload>> allocatedSlots =
                     taskSlotTable.getAllocatedSlots(jobId);
             TaskSlot<TaskSlotPayload> nextSlot = allocatedSlots.next();
-            assertThat(nextSlot.getIndex(), is(0));
-            assertThat(nextSlot.getAllocationId(), is(allocationId));
-            assertThat(nextSlot.getJobId(), is(jobId));
-            assertThat(allocatedSlots.hasNext(), is(false));
+            assertThat(nextSlot.getIndex()).isEqualTo(0);
+            assertThat(nextSlot.getAllocationId()).isEqualTo(allocationId);
+            assertThat(nextSlot.getJobId()).isEqualTo(jobId);
+            assertThat(allocatedSlots.hasNext()).isEqualTo(false);
         }
     }
 
@@ -396,9 +397,9 @@ public class TaskSlotTableImplTest extends TestLogger {
                 createTaskSlotTableWithStartedTask(task)) {
             Iterator<TaskSlotPayload> tasks = taskSlotTable.getTasks(jobId);
             TaskSlotPayload nextTask = tasks.next();
-            assertThat(nextTask.getExecutionId(), is(executionAttemptId));
-            assertThat(nextTask.getAllocationId(), is(allocationId));
-            assertThat(tasks.hasNext(), is(false));
+            assertThat(nextTask.getExecutionId()).isEqualTo(executionAttemptId);
+            assertThat(nextTask.getAllocationId()).isEqualTo(allocationId);
+            assertThat(tasks.hasNext()).isEqualTo(false);
         }
     }
 
@@ -418,7 +419,7 @@ public class TaskSlotTableImplTest extends TestLogger {
             // to enable that the last remaining finished task does the final slot freeing
             taskSlotTable.freeSlot(allocationId);
             taskSlotTable.removeTask(executionAttemptId);
-            assertThat(freeSlotFuture.get(), is(allocationId));
+            assertThat(freeSlotFuture.get()).isEqualTo(allocationId);
         }
     }
 
@@ -427,7 +428,7 @@ public class TaskSlotTableImplTest extends TestLogger {
         TestingTaskSlotPayload task = new TestingTaskSlotPayload();
         try (final TaskSlotTable<TaskSlotPayload> taskSlotTable =
                 createTaskSlotTableWithStartedTask(task)) {
-            assertThat(taskSlotTable.freeSlot(task.getAllocationId()), is(-1));
+            assertThat(taskSlotTable.freeSlot(task.getAllocationId())).isEqualTo(-1);
             task.waitForFailure();
             task.terminate();
         }
@@ -438,9 +439,9 @@ public class TaskSlotTableImplTest extends TestLogger {
         TestingTaskSlotPayload task = new TestingTaskSlotPayload();
         final TaskSlotTable<TaskSlotPayload> taskSlotTable =
                 createTaskSlotTableWithStartedTask(task);
-        assertThat(taskSlotTable.freeSlot(task.getAllocationId()), is(-1));
+        assertThat(taskSlotTable.freeSlot(task.getAllocationId())).isEqualTo(-1);
         CompletableFuture<Void> closingFuture = taskSlotTable.closeAsync();
-        assertThat(closingFuture.isDone(), is(false));
+        assertThat(closingFuture.isDone()).isEqualTo(false);
         task.terminate();
         closingFuture.get();
     }
@@ -458,9 +459,10 @@ public class TaskSlotTableImplTest extends TestLogger {
                 createTaskSlotTableAndStart(1, testingSlotActions)) {
             final AllocationID allocationId = new AllocationID();
             assertThat(
-                    taskSlotTable.allocateSlot(0, new JobID(), allocationId, Time.milliseconds(1L)),
-                    is(true));
-            assertThat(timeoutFuture.join(), is(allocationId));
+                            taskSlotTable.allocateSlot(
+                                    0, new JobID(), allocationId, Time.milliseconds(1L)))
+                    .isEqualTo(true);
+            assertThat(timeoutFuture.join()).isEqualTo(allocationId);
         }
     }
 
@@ -497,9 +499,11 @@ public class TaskSlotTableImplTest extends TestLogger {
             final long timeout = 50L;
             final JobID jobId = new JobID();
             assertThat(
-                    taskSlotTable.allocateSlot(0, jobId, allocationId, Time.milliseconds(timeout)),
-                    is(true));
-            assertThat(taskSlotTableAction.apply(taskSlotTable, jobId, allocationId), is(true));
+                            taskSlotTable.allocateSlot(
+                                    0, jobId, allocationId, Time.milliseconds(timeout)))
+                    .isEqualTo(true);
+            assertThat(taskSlotTableAction.apply(taskSlotTable, jobId, allocationId))
+                    .isEqualTo(true);
 
             timeoutCancellationFuture.get();
         }
@@ -525,7 +529,8 @@ public class TaskSlotTableImplTest extends TestLogger {
             final JobID jobId, final AllocationID allocationId, final SlotActions slotActions) {
         final TaskSlotTable<TaskSlotPayload> taskSlotTable =
                 createTaskSlotTableAndStart(1, slotActions);
-        assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId, SLOT_TIMEOUT), is(true));
+        assertThat(taskSlotTable.allocateSlot(0, jobId, allocationId, SLOT_TIMEOUT))
+                .isEqualTo(true);
         return taskSlotTable;
     }
 

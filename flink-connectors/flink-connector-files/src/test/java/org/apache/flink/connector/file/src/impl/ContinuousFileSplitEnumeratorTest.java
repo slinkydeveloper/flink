@@ -31,10 +31,10 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Collections;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 
 /** Unit tests for the {@link ContinuousFileSplitEnumerator}. */
 public class ContinuousFileSplitEnumeratorTest {
@@ -57,7 +57,7 @@ public class ContinuousFileSplitEnumeratorTest {
         fileEnumerator.addSplits(split);
         context.triggerAllActions();
 
-        assertThat(enumerator.snapshotState(1L).getSplits(), contains(split));
+        assertThat(enumerator.snapshotState(1L).getSplits()).satisfies(matching(contains(split)));
     }
 
     @Test
@@ -77,8 +77,9 @@ public class ContinuousFileSplitEnumeratorTest {
         fileEnumerator.addSplits(split);
         context.triggerAllActions();
 
-        assertThat(enumerator.snapshotState(1L).getSplits(), empty());
-        assertThat(context.getSplitAssignments().get(2).getAssignedSplits(), contains(split));
+        assertThat(enumerator.snapshotState(1L).getSplits()).satisfies(matching(empty()));
+        assertThat(context.getSplitAssignments().get(2).getAssignedSplits())
+                .satisfies(matching(contains(split)));
     }
 
     @Test
@@ -101,8 +102,8 @@ public class ContinuousFileSplitEnumeratorTest {
         fileEnumerator.addSplits(split);
         context.triggerAllActions();
 
-        assertFalse(context.getSplitAssignments().containsKey(2));
-        assertThat(enumerator.snapshotState(1L).getSplits(), contains(split));
+        assertThat(context.getSplitAssignments().containsKey(2)).isFalse();
+        assertThat(enumerator.snapshotState(1L).getSplits()).satisfies(matching(contains(split)));
     }
 
     // ------------------------------------------------------------------------

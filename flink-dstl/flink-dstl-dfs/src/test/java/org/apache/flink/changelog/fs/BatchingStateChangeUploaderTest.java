@@ -46,10 +46,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.apache.flink.changelog.fs.UnregisteredChangelogStorageMetricGroup.createUnregisteredChangelogStorageMetricGroup;
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
 import static org.apache.flink.util.ExceptionUtils.rethrow;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link BatchingStateChangeUploader} test. */
 public class BatchingStateChangeUploaderTest {
@@ -98,7 +96,7 @@ public class BatchingStateChangeUploaderTest {
                         if (runningSize >= threshold) {
                             assertSaved(probe, expected);
                         } else {
-                            assertTrue(probe.getUploaded().isEmpty());
+                            assertThat(probe.getUploaded().isEmpty()).isTrue();
                         }
                     }
                 });
@@ -118,14 +116,16 @@ public class BatchingStateChangeUploaderTest {
                     scheduler.triggerAll();
                     List<StateChangeSet> changeSets = getChanges(4);
                     upload(store, changeSets);
-                    assertTrue(probe.getUploaded().isEmpty());
-                    assertTrue(
-                            scheduler.getAllNonPeriodicScheduledTask().stream()
-                                    .anyMatch(
-                                            scheduled ->
-                                                    scheduled.getDelay(MILLISECONDS) == delayMs));
+                    assertThat(probe.getUploaded().isEmpty()).isTrue();
+                    assertThat(
+                                    scheduler.getAllNonPeriodicScheduledTask().stream()
+                                            .anyMatch(
+                                                    scheduled ->
+                                                            scheduled.getDelay(MILLISECONDS)
+                                                                    == delayMs))
+                            .isTrue();
                     scheduler.triggerAllNonPeriodicTasks();
-                    assertEquals(changeSets, probe.getUploaded());
+                    assertThat(probe.getUploaded()).isEqualTo(changeSets);
                 });
     }
 
@@ -209,9 +209,9 @@ public class BatchingStateChangeUploaderTest {
                                         .getAttemptsPerUpload()),
                         createUnregisteredChangelogStorageMetricGroup())
                 .close();
-        assertTrue(probe.isClosed());
-        assertTrue(scheduler.isShutdown());
-        assertTrue(retryScheduler.isShutdown());
+        assertThat(probe.isClosed()).isTrue();
+        assertThat(scheduler.isShutdown()).isTrue();
+        assertThat(retryScheduler.isShutdown()).isTrue();
     }
 
     @Test
@@ -222,13 +222,14 @@ public class BatchingStateChangeUploaderTest {
         TestScenario test =
                 (uploader, probe) -> {
                     List<StateChangeSet> changes1 = getChanges(sizeLimit + 1);
-                    assertTrue(uploader.getAvailabilityProvider().isAvailable());
-                    assertTrue(uploader.getAvailabilityProvider().isApproximatelyAvailable());
+                    assertThat(uploader.getAvailabilityProvider().isAvailable()).isTrue();
+                    assertThat(uploader.getAvailabilityProvider().isApproximatelyAvailable())
+                            .isTrue();
                     upload(uploader, changes1);
                     assertSaved(probe, changes1); // sent to upload, not finished yet
                     thresholdExceededFuture.complete(probe);
                     List<StateChangeSet> changes2 = getChanges(1);
-                    assertFalse(uploader.getAvailabilityProvider().isAvailable());
+                    assertThat(uploader.getAvailabilityProvider().isAvailable()).isFalse();
                     upload(uploader, changes2); // should block until capacity released
                     assertSaved(probe, changes1, changes2);
                 };
@@ -238,10 +239,10 @@ public class BatchingStateChangeUploaderTest {
         TestingStateChangeUploader probe = thresholdExceededFuture.get();
         int uploadedInTheBeginning = probe.getUploaded().size();
         Thread.sleep(500); // allow failing, i.e. to proceed with upload
-        assertEquals(uploadedInTheBeginning, probe.getUploaded().size());
+        assertThat(probe.getUploaded().size()).isEqualTo(uploadedInTheBeginning);
         probe.completeUpload(); // release capacity
         uploadFuture.join();
-        assertTrue(uploadedInTheBeginning < probe.getUploaded().size());
+        assertThat(uploadedInTheBeginning < probe.getUploaded().size()).isTrue();
     }
 
     @Test
@@ -258,7 +259,7 @@ public class BatchingStateChangeUploaderTest {
                         fail("upload shouldn't succeed after exceeding the limit");
                     } catch (IOException e) {
                         if (findThrowable(e, InterruptedException.class).isPresent()) {
-                            assertTrue(probe.getUploaded().isEmpty());
+                            assertThat(probe.getUploaded().isEmpty()).isTrue();
                         } else {
                             rethrow(e);
                         }
@@ -320,9 +321,11 @@ public class BatchingStateChangeUploaderTest {
     @SafeVarargs
     private final void assertSaved(
             TestingStateChangeUploader probe, List<StateChangeSet>... expected) {
-        assertEquals(
-                Arrays.stream(expected).flatMap(Collection::stream).collect(Collectors.toList()),
-                new ArrayList<>(probe.getUploaded()));
+        assertThat(new ArrayList<>(probe.getUploaded()))
+                .isEqualTo(
+                        Arrays.stream(expected)
+                                .flatMap(Collection::stream)
+                                .collect(Collectors.toList()));
     }
 
     private interface TestScenario

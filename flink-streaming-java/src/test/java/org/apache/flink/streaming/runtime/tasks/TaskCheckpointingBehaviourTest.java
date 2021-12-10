@@ -90,7 +90,6 @@ import org.apache.flink.util.SerializedValue;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -102,8 +101,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.concurrent.RunnableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -155,8 +153,8 @@ public class TaskCheckpointingBehaviourTest extends TestLogger {
         task.cancelExecution();
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(task.getFailureCause()).isNull();
     }
 
     private void runTaskExpectCheckpointDeclined(
@@ -166,7 +164,7 @@ public class TaskCheckpointingBehaviourTest extends TestLogger {
 
         checkpointResponder.declinedLatch.await();
 
-        Assert.assertEquals(ExecutionState.RUNNING, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.RUNNING);
 
         task.cancelExecution();
         task.getExecutingThread().join();
@@ -175,7 +173,7 @@ public class TaskCheckpointingBehaviourTest extends TestLogger {
     private void runTaskExpectFailure(Task task) throws Exception {
         task.startTaskThread();
         task.getExecutingThread().join();
-        Assert.assertEquals(ExecutionState.FAILED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
     }
 
     // ------------------------------------------------------------------------

@@ -30,8 +30,8 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
 
 /** Unit tests for {@link LogicalPipelinedRegionComputeUtil}. */
 public class LogicalPipelinedRegionComputeUtilTest {
@@ -206,7 +206,7 @@ public class LogicalPipelinedRegionComputeUtilTest {
 
     private static void checkRegionSize(
             Set<Set<LogicalVertex>> regions, int numOfRegions, int... sizes) {
-        assertEquals(numOfRegions, regions.size());
+        assertThat(regions.size()).isEqualTo(numOfRegions);
         containsInAnyOrder(regions.stream().map(Set::size).collect(Collectors.toList()), sizes);
     }
 }

@@ -57,8 +57,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** An integration test for various fail-over scenarios of the {@link Dispatcher} component. */
 public class DispatcherFailoverITCase extends AbstractDispatcherTest {
@@ -74,8 +73,8 @@ public class DispatcherFailoverITCase extends AbstractDispatcherTest {
                             if (previous != null) {
                                 // First job attempt failed before cleaning up the checkpoint
                                 // store.
-                                assertFalse(previous.getShutdownStatus().isPresent());
-                                assertFalse(previous.getAllCheckpoints().isEmpty());
+                                assertThat(previous.getShutdownStatus().isPresent()).isFalse();
+                                assertThat(previous.getAllCheckpoints().isEmpty()).isFalse();
                                 return new EmbeddedCompletedCheckpointStore(
                                         maxCheckpoints,
                                         previous.getAllCheckpoints(),
@@ -189,7 +188,7 @@ public class DispatcherFailoverITCase extends AbstractDispatcherTest {
                             .map(TaskDeploymentDescriptor::getTaskRestore)
                             .filter(Objects::nonNull)
                             .findAny();
-            assertTrue("Job has recovered from checkpoint.", maybeRestore.isPresent());
+            assertThat(maybeRestore.isPresent()).as("Job has recovered from checkpoint.").isTrue();
         }
     }
 

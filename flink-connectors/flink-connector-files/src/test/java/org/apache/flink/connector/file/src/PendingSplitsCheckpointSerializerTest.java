@@ -31,8 +31,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link FileSourceSplitSerializer}. */
 public class PendingSplitsCheckpointSerializerTest {
@@ -103,7 +102,7 @@ public class PendingSplitsCheckpointSerializerTest {
                 new PendingSplitsCheckpointSerializer<>(FileSourceSplitSerializer.INSTANCE)
                         .serialize(checkpoint);
 
-        assertSame(ser1, ser2);
+        assertThat(ser2).isSameAs(ser1);
     }
 
     // ------------------------------------------------------------------------
@@ -159,7 +158,7 @@ public class PendingSplitsCheckpointSerializerTest {
     private static <E> void assertOrderedCollectionEquals(
             Collection<E> expected, Collection<E> actual, BiConsumer<E, E> equalityAsserter) {
 
-        assertEquals(expected.size(), actual.size());
+        assertThat(actual.size()).isEqualTo(expected.size());
         final Iterator<E> expectedIter = expected.iterator();
         final Iterator<E> actualIter = actual.iterator();
         while (expectedIter.hasNext()) {

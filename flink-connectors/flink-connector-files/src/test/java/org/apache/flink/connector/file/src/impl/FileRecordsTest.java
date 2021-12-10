@@ -26,9 +26,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link FileRecords} class. */
 public class FileRecordsTest {
@@ -38,7 +36,7 @@ public class FileRecordsTest {
         final String split = "empty";
         final FileRecords<Object> records = FileRecords.finishedSplit(split);
 
-        assertEquals(Collections.singleton(split), records.finishedSplits());
+        assertThat(records.finishedSplits()).isEqualTo(Collections.singleton(split));
     }
 
     @Test
@@ -49,7 +47,7 @@ public class FileRecordsTest {
 
         final String firstSplitId = records.nextSplit();
 
-        assertEquals(splitId, firstSplitId);
+        assertThat(firstSplitId).isEqualTo(splitId);
     }
 
     @Test
@@ -60,7 +58,7 @@ public class FileRecordsTest {
 
         final String secondSplitId = records.nextSplit();
 
-        assertNull(secondSplitId);
+        assertThat(secondSplitId).isNull();
     }
 
     @Test
@@ -72,9 +70,9 @@ public class FileRecordsTest {
 
         final RecordAndPosition<String> recAndPos = records.nextRecordFromSplit();
 
-        assertEquals("test", recAndPos.getRecord());
-        assertEquals(18, recAndPos.getOffset());
-        assertEquals(99, recAndPos.getRecordSkipCount());
+        assertThat(recAndPos.getRecord()).isEqualTo("test");
+        assertThat(recAndPos.getOffset()).isEqualTo(18);
+        assertThat(recAndPos.getRecordSkipCount()).isEqualTo(99);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -107,11 +105,11 @@ public class FileRecordsTest {
         records.nextRecordFromSplit();
 
         // make sure we exhausted the iterator
-        assertNull(records.nextRecordFromSplit());
-        assertNull(records.nextSplit());
+        assertThat(records.nextRecordFromSplit()).isNull();
+        assertThat(records.nextSplit()).isNull();
 
         records.recycle();
-        assertTrue(recycled.get());
+        assertThat(recycled.get()).isTrue();
     }
 
     @Test
@@ -125,6 +123,6 @@ public class FileRecordsTest {
         records.nextSplit();
 
         records.recycle();
-        assertTrue(recycled.get());
+        assertThat(recycled.get()).isTrue();
     }
 }

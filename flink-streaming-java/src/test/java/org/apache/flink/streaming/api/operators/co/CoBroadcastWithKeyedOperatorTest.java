@@ -54,10 +54,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link CoBroadcastWithKeyedOperator}. */
 public class CoBroadcastWithKeyedOperatorTest {
@@ -77,7 +75,9 @@ public class CoBroadcastWithKeyedOperatorTest {
             public void processElement(
                     Tuple2<Integer, String> value, ReadOnlyContext ctx, Collector<String> out)
                     throws Exception {
-                assertTrue("Did not get expected key.", ctx.getCurrentKey().equals(value.f0));
+                assertThat(ctx.getCurrentKey().equals(value.f0))
+                        .as("Did not get expected key.")
+                        .isTrue();
 
                 // we check that we receive this output, to ensure that the assert was actually
                 // checked
@@ -189,15 +189,15 @@ public class CoBroadcastWithKeyedOperatorTest {
             ctx.applyToKeyedState(
                     listStateDesc,
                     new KeyedStateFunction<String, ListState<String>>() {
+
                         @Override
                         public void process(String key, ListState<String> state) throws Exception {
                             final Iterator<String> it = state.get().iterator();
-
                             final List<String> list = new ArrayList<>();
                             while (it.hasNext()) {
                                 list.add(it.next());
                             }
-                            assertEquals(expectedKeyedStates.get(key), list);
+                            assertThat(list).isEqualTo(expectedKeyedStates.get(key));
                         }
                     });
         }
@@ -279,7 +279,7 @@ public class CoBroadcastWithKeyedOperatorTest {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(expectedKey, ctx.getCurrentKey());
+            assertThat(ctx.getCurrentKey()).isEqualTo(expectedKey);
             out.collect("TIMER:" + timestamp);
         }
     }
@@ -390,29 +390,29 @@ public class CoBroadcastWithKeyedOperatorTest {
             testHarness.processWatermark2(new Watermark(50L));
 
             Queue<Object> output = testHarness.getOutput();
-            assertEquals(3L, output.size());
+            assertThat(output.size()).isEqualTo(3L);
 
             Object firstRawWm = output.poll();
-            assertTrue(firstRawWm instanceof Watermark);
+            assertThat(firstRawWm).isInstanceOf(Watermark.class);
             Watermark firstWm = (Watermark) firstRawWm;
-            assertEquals(10L, firstWm.getTimestamp());
+            assertThat(firstWm.getTimestamp()).isEqualTo(10L);
 
             Object rawOutputElem = output.poll();
-            assertTrue(rawOutputElem instanceof StreamRecord);
+            assertThat(rawOutputElem).isInstanceOf(StreamRecord.class);
             StreamRecord<?> outputRec = (StreamRecord<?>) rawOutputElem;
-            assertTrue(outputRec.getValue() instanceof String);
+            assertThat(outputRec.getValue()).isInstanceOf(String.class);
             String outputElem = (String) outputRec.getValue();
 
             expectedBroadcastState.put("51.key", 51);
             List<Map.Entry<String, Integer>> expectedEntries = new ArrayList<>();
             expectedEntries.addAll(expectedBroadcastState.entrySet());
             String expected = "TS:41 " + mapToString(expectedEntries);
-            assertEquals(expected, outputElem);
+            assertThat(outputElem).isEqualTo(expected);
 
             Object secondRawWm = output.poll();
-            assertTrue(secondRawWm instanceof Watermark);
+            assertThat(secondRawWm).isInstanceOf(Watermark.class);
             Watermark secondWm = (Watermark) secondRawWm;
-            assertEquals(50L, secondWm.getTimestamp());
+            assertThat(secondWm.getTimestamp()).isEqualTo(50L);
         }
     }
 
@@ -453,14 +453,14 @@ public class CoBroadcastWithKeyedOperatorTest {
             Iterator<Map.Entry<String, Integer>> iter = broadcastStateIt.iterator();
 
             for (int i = 0; i < expectedBroadcastState.size(); i++) {
-                assertTrue(iter.hasNext());
+                assertThat(iter.hasNext()).isTrue();
 
                 Map.Entry<String, Integer> entry = iter.next();
-                assertTrue(expectedBroadcastState.containsKey(entry.getKey()));
-                assertEquals(expectedBroadcastState.get(entry.getKey()), entry.getValue());
+                assertThat(expectedBroadcastState.containsKey(entry.getKey())).isTrue();
+                assertThat(entry.getValue()).isEqualTo(expectedBroadcastState.get(entry.getKey()));
             }
 
-            assertFalse(iter.hasNext());
+            assertThat(iter.hasNext()).isFalse();
 
             ctx.timerService().registerEventTimeTimer(timerTs);
         }
@@ -476,7 +476,7 @@ public class CoBroadcastWithKeyedOperatorTest {
                 map.add(iter.next());
             }
 
-            assertEquals(expectedKey, ctx.getCurrentKey());
+            assertThat(ctx.getCurrentKey()).isEqualTo(expectedKey);
             final String mapToStr = mapToString(map);
             out.collect("TS:" + timestamp + " " + mapToStr);
         }
@@ -564,22 +564,22 @@ public class CoBroadcastWithKeyedOperatorTest {
             Queue<?> output2 = testHarness2.getOutput();
             Queue<?> output3 = testHarness3.getOutput();
 
-            assertEquals(expected.size(), output1.size());
+            assertThat(output1.size()).isEqualTo(expected.size());
             for (Object o : output1) {
                 StreamRecord<String> rec = (StreamRecord<String>) o;
-                assertTrue(expected.contains(rec.getValue()));
+                assertThat(expected.contains(rec.getValue())).isTrue();
             }
 
-            assertEquals(expected.size(), output2.size());
+            assertThat(output2.size()).isEqualTo(expected.size());
             for (Object o : output2) {
                 StreamRecord<String> rec = (StreamRecord<String>) o;
-                assertTrue(expected.contains(rec.getValue()));
+                assertThat(expected.contains(rec.getValue())).isTrue();
             }
 
-            assertEquals(expected.size(), output3.size());
+            assertThat(output3.size()).isEqualTo(expected.size());
             for (Object o : output3) {
                 StreamRecord<String> rec = (StreamRecord<String>) o;
-                assertTrue(expected.contains(rec.getValue()));
+                assertThat(expected.contains(rec.getValue())).isTrue();
             }
         }
     }
@@ -665,16 +665,16 @@ public class CoBroadcastWithKeyedOperatorTest {
             Queue<?> output1 = testHarness1.getOutput();
             Queue<?> output2 = testHarness2.getOutput();
 
-            assertEquals(expected.size(), output1.size());
+            assertThat(output1.size()).isEqualTo(expected.size());
             for (Object o : output1) {
                 StreamRecord<String> rec = (StreamRecord<String>) o;
-                assertTrue(expected.contains(rec.getValue()));
+                assertThat(expected.contains(rec.getValue())).isTrue();
             }
 
-            assertEquals(expected.size(), output2.size());
+            assertThat(output2.size()).isEqualTo(expected.size());
             for (Object o : output2) {
                 StreamRecord<String> rec = (StreamRecord<String>) o;
-                assertTrue(expected.contains(rec.getValue()));
+                assertThat(expected.contains(rec.getValue())).isTrue();
             }
         }
     }
@@ -746,9 +746,9 @@ public class CoBroadcastWithKeyedOperatorTest {
             testHarness.processWatermark2(new Watermark(10L));
             testHarness.processElement2(new StreamRecord<>(5, 12L));
         } catch (NullPointerException e) {
-            assertEquals(
-                    "No key set. This method should not be called outside of a keyed context.",
-                    e.getMessage());
+            assertThat(e.getMessage())
+                    .isEqualTo(
+                            "No key set. This method should not be called outside of a keyed context.");
             exceptionThrown = true;
         }
 

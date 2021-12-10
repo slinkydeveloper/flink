@@ -33,13 +33,14 @@ import org.apache.flink.runtime.state.VoidNamespaceSerializer;
 import org.apache.flink.runtime.state.ttl.TtlTimeProvider;
 import org.apache.flink.runtime.state.ttl.mock.MockStateBackend;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for the multi-state key iterator. */
 public class MultiStateKeyIteratorTest {
@@ -95,8 +96,8 @@ public class MultiStateKeyIteratorTest {
             keys.add(iterator.next());
         }
 
-        Assert.assertEquals("Unexpected number of keys", 2, keys.size());
-        Assert.assertEquals("Unexpected keys found", Arrays.asList(1, 2), keys);
+        assertThat(keys.size()).as("Unexpected number of keys").isEqualTo(2);
+        assertThat(keys).as("Unexpected keys found").isEqualTo(Arrays.asList(1, 2));
     }
 
     @Test
@@ -110,19 +111,20 @@ public class MultiStateKeyIteratorTest {
                 new MultiStateKeyIterator<>(descriptors, keyedStateBackend);
 
         int key = iterator.next();
-        Assert.assertEquals("Unexpected keys pulled from state backend", 1, key);
+        assertThat(key).as("Unexpected keys pulled from state backend").isEqualTo(1);
 
         iterator.remove();
-        Assert.assertFalse(
-                "Failed to drop key from all descriptors in state backend", iterator.hasNext());
+        assertThat(iterator.hasNext())
+                .as("Failed to drop key from all descriptors in state backend")
+                .isFalse();
 
         for (StateDescriptor<?, ?> descriptor : descriptors) {
-            Assert.assertEquals(
-                    "Failed to drop key for state descriptor",
-                    0,
-                    keyedStateBackend
-                            .getKeys(descriptor.getName(), VoidNamespace.INSTANCE)
-                            .count());
+            assertThat(
+                            keyedStateBackend
+                                    .getKeys(descriptor.getName(), VoidNamespace.INSTANCE)
+                                    .count())
+                    .as("Failed to drop key for state descriptor")
+                    .isEqualTo(0);
         }
     }
 }

@@ -25,10 +25,10 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.test.optimizer.iterations.MultipleJoinsWithSolutionSetCompilerTest;
 import org.apache.flink.test.util.JavaProgramTestBase;
 
-import org.junit.Assert;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test multiple joins with the solution set. */
 public class MultipleSolutionSetJoinsITCase extends JavaProgramTestBase {
@@ -61,7 +61,7 @@ public class MultipleSolutionSetJoinsITCase extends JavaProgramTestBase {
         env.execute();
 
         for (Tuple2<Long, Double> tuple : resultCollector) {
-            Assert.assertEquals(expectedFactor * tuple.f0, tuple.f1.doubleValue(), 0.0);
+            assertThat(tuple.f1.doubleValue()).isEqualTo(expectedFactor * tuple.f0);
         }
     }
 }

@@ -28,10 +28,9 @@ import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link SourceOutputWithWatermarks}. */
 public class SourceOutputWithWatermarksTest {
@@ -46,8 +45,9 @@ public class SourceOutputWithWatermarksTest {
         out.collect(17);
 
         final Object event = dataOutput.events.get(0);
-        assertThat(event, instanceOf(StreamRecord.class));
-        assertEquals(TimestampAssigner.NO_TIMESTAMP, ((StreamRecord<?>) event).getTimestamp());
+        assertThat(event).isInstanceOf(StreamRecord.class);
+        assertThat(((StreamRecord<?>) event).getTimestamp())
+                .isEqualTo(TimestampAssigner.NO_TIMESTAMP);
     }
 
     @Test
@@ -61,11 +61,13 @@ public class SourceOutputWithWatermarksTest {
 
         out.collect(42, 12345L);
 
-        assertThat(
-                dataOutput.events,
-                contains(
-                        new StreamRecord<>(42, 12345L),
-                        new org.apache.flink.streaming.api.watermark.Watermark(12345L)));
+        assertThat(dataOutput.events)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new StreamRecord<>(42, 12345L),
+                                        new org.apache.flink.streaming.api.watermark.Watermark(
+                                                12345L))));
     }
 
     // ------------------------------------------------------------------------

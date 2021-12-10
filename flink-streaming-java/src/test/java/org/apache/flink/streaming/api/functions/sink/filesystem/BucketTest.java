@@ -34,7 +34,6 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.utils.NoOpRecove
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -47,8 +46,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@code Bucket}. */
 public class BucketTest {
@@ -67,12 +67,13 @@ public class BucketTest {
         bucketUnderTest.write("test-element", 0L);
 
         final BucketState<String> state = bucketUnderTest.onReceptionOfCheckpoint(0L);
-        assertThat(state, hasActiveInProgressFile());
+        assertThat(state).satisfies(matching(hasActiveInProgressFile()));
 
         bucketUnderTest.onSuccessfulCompletionOfCheckpoint(0L);
-        assertThat(
-                recoverableWriter,
-                hasCalledDiscard(0)); // it did not discard as this is still valid.
+        assertThat(recoverableWriter)
+                .satisfies(
+                        matching( // it did not discard as this is still valid.
+                                hasCalledDiscard(0))); // it did not discard as this is still valid.
     }
 
     @Test
@@ -87,7 +88,7 @@ public class BucketTest {
         bucketUnderTest.write("test-element", 0L);
 
         final BucketState<String> state = bucketUnderTest.onReceptionOfCheckpoint(0L);
-        assertThat(state, hasActiveInProgressFile());
+        assertThat(state).satisfies(matching(hasActiveInProgressFile()));
 
         bucketUnderTest.onSuccessfulCompletionOfCheckpoint(0L);
 
@@ -95,7 +96,8 @@ public class BucketTest {
         bucketUnderTest.onReceptionOfCheckpoint(2L);
 
         bucketUnderTest.onSuccessfulCompletionOfCheckpoint(2L);
-        assertThat(recoverableWriter, hasCalledDiscard(2)); // that is for checkpoints 0 and 1
+        assertThat(recoverableWriter)
+                .satisfies(matching(hasCalledDiscard(2))); // that is for checkpoints 0 and 1
     }
 
     @Test
@@ -108,13 +110,14 @@ public class BucketTest {
                 createBucket(recoverableWriter, path, 0, 0, OutputFileConfig.builder().build());
 
         final BucketState<String> state = bucketUnderTest.onReceptionOfCheckpoint(0L);
-        assertThat(state, hasNoActiveInProgressFile());
+        assertThat(state).satisfies(matching(hasNoActiveInProgressFile()));
 
         bucketUnderTest.onReceptionOfCheckpoint(1L);
         bucketUnderTest.onReceptionOfCheckpoint(2L);
 
         bucketUnderTest.onSuccessfulCompletionOfCheckpoint(2L);
-        assertThat(recoverableWriter, hasCalledDiscard(0)); // we have no in-progress file.
+        assertThat(recoverableWriter)
+                .satisfies(matching(hasCalledDiscard(0))); // we have no in-progress file.
     }
 
     // --------------------------- Checking Restore ---------------------------
@@ -125,8 +128,8 @@ public class BucketTest {
         final Bucket<String, String> bucket =
                 getRestoredBucketWithOnlyInProgressPart(nonResumableWriter);
 
-        Assert.assertThat(nonResumableWriter, hasMethodCallCountersEqualTo(1, 0, 1));
-        Assert.assertThat(bucket, hasNullInProgressFile(true));
+        assertThat(nonResumableWriter).satisfies(matching(hasMethodCallCountersEqualTo(1, 0, 1)));
+        assertThat(bucket).satisfies(matching(hasNullInProgressFile(true)));
     }
 
     @Test
@@ -135,8 +138,8 @@ public class BucketTest {
         final Bucket<String, String> bucket =
                 getRestoredBucketWithOnlyInProgressPart(resumableWriter);
 
-        Assert.assertThat(resumableWriter, hasMethodCallCountersEqualTo(1, 1, 0));
-        Assert.assertThat(bucket, hasNullInProgressFile(false));
+        assertThat(resumableWriter).satisfies(matching(hasMethodCallCountersEqualTo(1, 1, 0)));
+        assertThat(bucket).satisfies(matching(hasNullInProgressFile(false)));
     }
 
     @Test
@@ -147,9 +150,12 @@ public class BucketTest {
         final Bucket<String, String> bucket =
                 getRestoredBucketWithOnlyPendingParts(writer, expectedRecoverForCommitCounter);
 
-        Assert.assertThat(
-                writer, hasMethodCallCountersEqualTo(0, 0, expectedRecoverForCommitCounter));
-        Assert.assertThat(bucket, hasNullInProgressFile(true));
+        assertThat(writer)
+                .satisfies(
+                        matching(
+                                hasMethodCallCountersEqualTo(
+                                        0, 0, expectedRecoverForCommitCounter)));
+        assertThat(bucket).satisfies(matching(hasNullInProgressFile(true)));
     }
 
     // ------------------------------- Matchers --------------------------------
@@ -417,7 +423,7 @@ public class BucketTest {
             }
             return new TestRecoverableWriter((LocalFileSystem) fs);
         } catch (IOException e) {
-            fail();
+            fail("unknown failure");
         }
         return null;
     }

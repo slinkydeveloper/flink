@@ -34,9 +34,7 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BufferCompressor} and {@link BufferDecompressor}. */
 @RunWith(Parameterized.class)
@@ -86,11 +84,11 @@ public class BufferCompressionTest {
     @Test
     public void testCompressAndDecompressNetWorkBuffer() {
         Buffer compressedBuffer = compress(compressor, bufferToCompress, compressToOriginalBuffer);
-        assertTrue(compressedBuffer.isCompressed());
+        assertThat(compressedBuffer.isCompressed()).isTrue();
 
         Buffer decompressedBuffer =
                 decompress(decompressor, compressedBuffer, decompressToOriginalBuffer);
-        assertFalse(decompressedBuffer.isCompressed());
+        assertThat(decompressedBuffer.isCompressed()).isFalse();
 
         verifyDecompressionResult(decompressedBuffer, 0, NUM_LONGS);
     }
@@ -103,11 +101,11 @@ public class BufferCompressionTest {
         Buffer readOnlySlicedBuffer = bufferToCompress.readOnlySlice(offset, length);
         Buffer compressedBuffer =
                 compress(compressor, readOnlySlicedBuffer, compressToOriginalBuffer);
-        assertTrue(compressedBuffer.isCompressed());
+        assertThat(compressedBuffer.isCompressed()).isTrue();
 
         Buffer decompressedBuffer =
                 decompress(decompressor, compressedBuffer, decompressToOriginalBuffer);
-        assertFalse(decompressedBuffer.isCompressed());
+        assertThat(decompressedBuffer.isCompressed()).isFalse();
 
         verifyDecompressionResult(decompressedBuffer, NUM_LONGS / 4, NUM_LONGS / 2);
     }
@@ -185,9 +183,9 @@ public class BufferCompressionTest {
 
         Buffer compressedBuffer =
                 compress(compressor, readOnlySlicedBuffer, compressToOriginalBuffer);
-        assertFalse(compressedBuffer.isCompressed());
-        assertEquals(readOnlySlicedBuffer, compressedBuffer);
-        assertEquals(numBytes, compressedBuffer.readableBytes());
+        assertThat(compressedBuffer.isCompressed()).isFalse();
+        assertThat(compressedBuffer).isEqualTo(readOnlySlicedBuffer);
+        assertThat(compressedBuffer.readableBytes()).isEqualTo(numBytes);
     }
 
     private static Buffer createBufferAndFillWithLongValues(boolean isDirect) {
@@ -208,7 +206,7 @@ public class BufferCompressionTest {
     private static void verifyDecompressionResult(Buffer buffer, long start, int numLongs) {
         ByteBuffer byteBuffer = buffer.getNioBufferReadable().order(ByteOrder.LITTLE_ENDIAN);
         for (int i = 0; i < numLongs; ++i) {
-            assertEquals(start + i, byteBuffer.getLong());
+            assertThat(byteBuffer.getLong()).isEqualTo(start + i);
         }
     }
 

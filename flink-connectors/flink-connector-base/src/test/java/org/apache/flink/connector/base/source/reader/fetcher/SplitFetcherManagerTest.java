@@ -37,10 +37,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Queue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Unit tests for the {@link SplitFetcherManager}. */
 public class SplitFetcherManagerTest {
@@ -67,9 +65,8 @@ public class SplitFetcherManagerTest {
         try {
             fetcherManager.checkErrors();
         } catch (Exception e) {
-            assertEquals(
-                    "Artificial exception on closing the split reader.",
-                    ExceptionUtils.getRootCause(e).getMessage());
+            assertThat(ExceptionUtils.getRootCause(e).getMessage())
+                    .isEqualTo("Artificial exception on closing the split reader.");
         }
     }
 
@@ -90,7 +87,7 @@ public class SplitFetcherManagerTest {
         reader.awaitAllRecordsReturned();
         drainQueue(queue);
 
-        assertFalse(queue.getAvailabilityFuture().isDone());
+        assertThat(queue.getAvailabilityFuture().isDone()).isFalse();
         reader.triggerThrowException();
 
         // await the error propagation
@@ -100,7 +97,7 @@ public class SplitFetcherManagerTest {
             fetcher.checkErrors();
             fail("expected exception");
         } catch (Exception e) {
-            assertSame(testingException, e.getCause().getCause());
+            assertThat(e.getCause().getCause()).isSameAs(testingException);
         } finally {
             fetcher.close(20_000L);
         }

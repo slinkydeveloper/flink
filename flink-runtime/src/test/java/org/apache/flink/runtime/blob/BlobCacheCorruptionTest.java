@@ -44,11 +44,10 @@ import static org.apache.flink.runtime.blob.BlobKey.BlobType.PERMANENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.TRANSIENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobServerGetTest.get;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests how GET requests react to corrupt files when downloaded via a {@link BlobCacheService}.
@@ -162,9 +161,9 @@ public class BlobCacheCorruptionTest extends TestLogger {
             ExpectedException expectedException)
             throws IOException {
 
-        assertTrue(
-                "corrupt HA file requires a HA setup",
-                !corruptOnHAStore || blobType == PERMANENT_BLOB);
+        assertThat(!corruptOnHAStore || blobType == PERMANENT_BLOB)
+                .as("corrupt HA file requires a HA setup")
+                .isTrue();
 
         Random rnd = new Random();
 
@@ -182,7 +181,7 @@ public class BlobCacheCorruptionTest extends TestLogger {
 
             // put content addressable (like libraries)
             BlobKey key = put(server, jobId, data, blobType);
-            assertNotNull(key);
+            assertThat(key).isNotNull();
 
             // change server/HA store file contents to make sure that GET requests fail
             byte[] data2 = Arrays.copyOf(data, data.length);
@@ -200,10 +199,10 @@ public class BlobCacheCorruptionTest extends TestLogger {
                 // delete local (correct) file on server to make sure that the GET request does not
                 // fall back to downloading the file from the BlobServer's local store
                 File blobFile = server.getStorageLocation(jobId, key);
-                assertTrue(blobFile.delete());
+                assertThat(blobFile.delete()).isTrue();
             } else {
                 File blobFile = server.getStorageLocation(jobId, key);
-                assertTrue(blobFile.exists());
+                assertThat(blobFile.exists()).isTrue();
                 FileUtils.writeByteArrayToFile(blobFile, data2);
             }
 

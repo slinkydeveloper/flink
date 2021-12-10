@@ -41,11 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link TaskExecutorManager}. */
 public class TaskExecutorManagerTest extends TestLogger {
@@ -72,14 +68,14 @@ public class TaskExecutorManagerTest extends TestLogger {
 
             // create pending slot
             taskExecutorManager.allocateWorker(requestedSlotProfile);
-            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots(), is(1));
+            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots()).isEqualTo(1);
 
             createAndRegisterTaskExecutor(taskExecutorManager, 1, offeredSlotProfile);
 
             // the slot from the task executor should be accepted, but we should still be waiting
             // for the originally requested slot
-            assertThat(taskExecutorManager.getNumberRegisteredSlots(), is(1));
-            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots(), is(1));
+            assertThat(taskExecutorManager.getNumberRegisteredSlots()).isEqualTo(1);
+            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots()).isEqualTo(1);
         }
     }
 
@@ -103,7 +99,7 @@ public class TaskExecutorManagerTest extends TestLogger {
 
             // create pending slot
             taskExecutorManager.allocateWorker(requestedSlotProfile);
-            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots(), is(1));
+            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots()).isEqualTo(1);
 
             final TaskExecutorConnection taskExecutorConnection = createTaskExecutorConnection();
             final SlotReport slotReport =
@@ -118,8 +114,8 @@ public class TaskExecutorManagerTest extends TestLogger {
 
             // the slot from the task executor should be accepted, but we should still be waiting
             // for the originally requested slot
-            assertThat(taskExecutorManager.getNumberRegisteredSlots(), is(1));
-            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots(), is(1));
+            assertThat(taskExecutorManager.getNumberRegisteredSlots()).isEqualTo(1);
+            assertThat(taskExecutorManager.getNumberPendingTaskManagerSlots()).isEqualTo(1);
         }
     }
 
@@ -155,22 +151,25 @@ public class TaskExecutorManagerTest extends TestLogger {
                                 InstanceID newTaskExecutorId =
                                         createAndRegisterTaskExecutor(
                                                 taskExecutorManager, 1, ResourceProfile.ANY);
-                                assertEquals(1, taskExecutorManager.getNumberRegisteredSlots());
+                                assertThat(taskExecutorManager.getNumberRegisteredSlots())
+                                        .isEqualTo(1);
                                 return newTaskExecutorId;
                             },
                             mainThreadExecutor)
-                    // wait for the timeout to occur
-                    .thenCombine(
+                    . // wait for the timeout to occur
+                    thenCombine(
                             releaseResourceFuture,
                             (registeredInstance, releasedInstance) -> {
-                                assertThat(registeredInstance, is(releasedInstance));
-                                assertEquals(1, taskExecutorManager.getNumberRegisteredSlots());
+                                assertThat(registeredInstance).isEqualTo(releasedInstance);
+                                assertThat(taskExecutorManager.getNumberRegisteredSlots())
+                                        .isEqualTo(1);
                                 return registeredInstance;
                             })
                     .thenAccept(
                             taskExecutorId -> {
                                 taskExecutorManager.unregisterTaskExecutor(taskExecutorId);
-                                assertEquals(0, taskExecutorManager.getNumberRegisteredSlots());
+                                assertThat(taskExecutorManager.getNumberRegisteredSlots())
+                                        .isEqualTo(0);
                             })
                     .get();
         }
@@ -209,18 +208,16 @@ public class TaskExecutorManagerTest extends TestLogger {
                                 InstanceID taskExecutorId =
                                         createAndRegisterTaskExecutor(
                                                 taskExecutorManager, 1, resourceProfile);
-
                                 taskExecutorManager.occupySlot(taskExecutorId);
                                 taskExecutorManager.freeSlot(taskExecutorId);
-
                                 return taskExecutorId;
                             },
                             mainThreadExecutor)
-                    // wait for the timeout to occur
-                    .thenAcceptBoth(
+                    . // wait for the timeout to occur
+                    thenAcceptBoth(
                             releaseResourceFuture,
                             (registeredInstance, releasedInstance) ->
-                                    assertThat(registeredInstance, is(releasedInstance)))
+                                    assertThat(registeredInstance).isEqualTo(releasedInstance))
                     .get();
         }
     }
@@ -257,9 +254,8 @@ public class TaskExecutorManagerTest extends TestLogger {
                         .setResourceActions(resourceActions)
                         .createTaskExecutorManager()) {
 
-            assertThat(
-                    taskExecutorManager.allocateWorker(requestedProfile).orElse(null), nullValue());
-            assertThat(resourceRequests.get(), is(0));
+            assertThat(taskExecutorManager.allocateWorker(requestedProfile).orElse(null)).isNull();
+            assertThat(resourceRequests.get()).isEqualTo(0);
         }
     }
 
@@ -289,13 +285,13 @@ public class TaskExecutorManagerTest extends TestLogger {
                         .setResourceActions(resourceActions)
                         .createTaskExecutorManager()) {
 
-            assertThat(resourceRequests.get(), is(0));
+            assertThat(resourceRequests.get()).isEqualTo(0);
 
             taskExecutorManager.allocateWorker(ResourceProfile.UNKNOWN);
-            assertThat(resourceRequests.get(), is(1));
+            assertThat(resourceRequests.get()).isEqualTo(1);
 
             taskExecutorManager.allocateWorker(ResourceProfile.UNKNOWN);
-            assertThat(resourceRequests.get(), is(1));
+            assertThat(resourceRequests.get()).isEqualTo(1);
         }
     }
 
@@ -326,7 +322,7 @@ public class TaskExecutorManagerTest extends TestLogger {
             InstanceID rejectedTaskExecutorId =
                     createAndRegisterTaskExecutor(taskExecutorManager, 1, ResourceProfile.ANY);
 
-            assertThat(releasedResourceFuture.get(), is(rejectedTaskExecutorId));
+            assertThat(releasedResourceFuture.get()).isEqualTo(rejectedTaskExecutorId);
         }
     }
 
@@ -344,24 +340,18 @@ public class TaskExecutorManagerTest extends TestLogger {
             taskExecutorManager.occupySlot(instanceId1);
             taskExecutorManager.occupySlot(instanceId2);
 
-            assertThat(
-                    taskExecutorManager.getTotalFreeResources(),
-                    equalTo(resourceProfile1.merge(resourceProfile2)));
-            assertThat(
-                    taskExecutorManager.getTotalFreeResourcesOf(instanceId1),
-                    equalTo(resourceProfile1));
-            assertThat(
-                    taskExecutorManager.getTotalFreeResourcesOf(instanceId2),
-                    equalTo(resourceProfile2));
-            assertThat(
-                    taskExecutorManager.getTotalRegisteredResources(),
-                    equalTo(resourceProfile1.merge(resourceProfile2).multiply(2)));
-            assertThat(
-                    taskExecutorManager.getTotalRegisteredResourcesOf(instanceId1),
-                    equalTo(resourceProfile1.multiply(2)));
-            assertThat(
-                    taskExecutorManager.getTotalRegisteredResourcesOf(instanceId2),
-                    equalTo(resourceProfile2.multiply(2)));
+            assertThat(taskExecutorManager.getTotalFreeResources())
+                    .isEqualTo(resourceProfile1.merge(resourceProfile2));
+            assertThat(taskExecutorManager.getTotalFreeResourcesOf(instanceId1))
+                    .isEqualTo(resourceProfile1);
+            assertThat(taskExecutorManager.getTotalFreeResourcesOf(instanceId2))
+                    .isEqualTo(resourceProfile2);
+            assertThat(taskExecutorManager.getTotalRegisteredResources())
+                    .isEqualTo(resourceProfile1.merge(resourceProfile2).multiply(2));
+            assertThat(taskExecutorManager.getTotalRegisteredResourcesOf(instanceId1))
+                    .isEqualTo(resourceProfile1.multiply(2));
+            assertThat(taskExecutorManager.getTotalRegisteredResourcesOf(instanceId2))
+                    .isEqualTo(resourceProfile2.multiply(2));
         }
     }
 

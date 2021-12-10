@@ -50,11 +50,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link JobVertexWatermarksHandler}. */
 public class JobVertexWatermarksHandlerTest {
@@ -127,11 +127,12 @@ public class JobVertexWatermarksHandlerTest {
 
         MetricCollectionResponseBody response = watermarkHandler.handleRequest(request, vertex);
 
-        assertThat(
-                response.getMetrics(),
-                containsInAnyOrder(
-                        new MetricMatcher("0.currentInputWatermark", "23"),
-                        new MetricMatcher("1.currentInputWatermark", "42")));
+        assertThat(response.getMetrics())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        new MetricMatcher("0.currentInputWatermark", "23"),
+                                        new MetricMatcher("1.currentInputWatermark", "42"))));
     }
 
     @Test
@@ -141,9 +142,8 @@ public class JobVertexWatermarksHandlerTest {
 
         MetricCollectionResponseBody response = watermarkHandler.handleRequest(request, vertex);
 
-        assertThat(
-                response.getMetrics(),
-                contains(new MetricMatcher("0.currentInputWatermark", "23")));
+        assertThat(response.getMetrics())
+                .satisfies(matching(contains(new MetricMatcher("0.currentInputWatermark", "23"))));
     }
 
     @Test
@@ -153,7 +153,7 @@ public class JobVertexWatermarksHandlerTest {
 
         MetricCollectionResponseBody response = watermarkHandler.handleRequest(request, vertex);
 
-        assertThat(response.getMetrics(), is(empty()));
+        assertThat(response.getMetrics()).isEqualTo(empty());
     }
 
     private static class MetricMatcher extends BaseMatcher<Metric> {

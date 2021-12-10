@@ -31,9 +31,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for properties set by {@link RegistryAvroFormatFactory} in {@link
@@ -46,7 +44,7 @@ public class CachedSchemaCoderProviderTest {
         CachedSchemaCoderProvider provider = initCachedSchemaCoderProvider(new HashMap<>());
         SSLSocketFactory sslSocketFactory = getSslSocketFactoryFromProvider(provider);
 
-        assertNull(sslSocketFactory);
+        assertThat(sslSocketFactory).isNull();
     }
 
     @Test
@@ -62,7 +60,7 @@ public class CachedSchemaCoderProviderTest {
         CachedSchemaCoderProvider provider = initCachedSchemaCoderProvider(configs);
         SSLSocketFactory sslSocketFactory = getSslSocketFactoryFromProvider(provider);
 
-        assertNotNull(sslSocketFactory);
+        assertThat(sslSocketFactory).isNotNull();
     }
 
     @Test
@@ -71,7 +69,7 @@ public class CachedSchemaCoderProviderTest {
         BasicAuthCredentialProvider basicAuthCredentialProvider =
                 getBasicAuthFromProvider(provider);
 
-        assertNull(basicAuthCredentialProvider);
+        assertThat(basicAuthCredentialProvider).isNull();
     }
 
     @Test
@@ -85,8 +83,8 @@ public class CachedSchemaCoderProviderTest {
         BasicAuthCredentialProvider basicAuthCredentialProvider =
                 getBasicAuthFromProvider(provider);
 
-        assertNotNull(basicAuthCredentialProvider);
-        assertEquals(basicAuthCredentialProvider.getUserInfo(null), userPassword);
+        assertThat(basicAuthCredentialProvider).isNotNull();
+        assertThat(userPassword).isEqualTo(basicAuthCredentialProvider.getUserInfo(null));
     }
 
     @Test
@@ -95,7 +93,7 @@ public class CachedSchemaCoderProviderTest {
         BearerAuthCredentialProvider bearerAuthCredentialProvider =
                 getBearerAuthFromProvider(provider);
 
-        assertNull(bearerAuthCredentialProvider);
+        assertThat(bearerAuthCredentialProvider).isNull();
     }
 
     @Test
@@ -109,8 +107,8 @@ public class CachedSchemaCoderProviderTest {
         BearerAuthCredentialProvider bearerAuthCredentialProvider =
                 getBearerAuthFromProvider(provider);
 
-        assertNotNull(bearerAuthCredentialProvider);
-        assertEquals(bearerAuthCredentialProvider.getBearerToken(null), token);
+        assertThat(bearerAuthCredentialProvider).isNotNull();
+        assertThat(token).isEqualTo(bearerAuthCredentialProvider.getBearerToken(null));
     }
 
     private String getAbsolutePath(String path) throws URISyntaxException {

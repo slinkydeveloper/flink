@@ -34,7 +34,7 @@ import org.apache.flink.runtime.operators.util.TaskConfig;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TempInIterationsTest {
 
@@ -76,10 +76,10 @@ public class TempInIterationsTest {
 
                 // check if input of solution set delta is temped
                 TaskConfig tc = new TaskConfig(v.getConfiguration());
-                assertTrue(tc.isInputAsynchronouslyMaterialized(0));
+                assertThat(tc.isInputAsynchronouslyMaterialized(0)).isTrue();
                 solutionSetUpdateChecked = true;
             }
         }
-        assertTrue(solutionSetUpdateChecked);
+        assertThat(solutionSetUpdateChecked).isTrue();
     }
 }

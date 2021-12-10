@@ -35,7 +35,8 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class GroupingPojoTranslationTest extends CompilerTestBase {
@@ -59,9 +60,10 @@ public class GroupingPojoTranslationTest extends CompilerTestBase {
             SingleInputPlanNode reducer = (SingleInputPlanNode) sink.getInput().getSource();
             SingleInputPlanNode combiner = (SingleInputPlanNode) reducer.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, reducer.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, combiner.getInput().getShipStrategy());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(reducer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(combiner.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -87,9 +89,10 @@ public class GroupingPojoTranslationTest extends CompilerTestBase {
             SingleInputPlanNode reducer = (SingleInputPlanNode) sink.getInput().getSource();
             SingleInputPlanNode combiner = (SingleInputPlanNode) reducer.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, reducer.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, combiner.getInput().getShipStrategy());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(reducer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(combiner.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -116,9 +119,10 @@ public class GroupingPojoTranslationTest extends CompilerTestBase {
             SingleInputPlanNode reducer = (SingleInputPlanNode) sink.getInput().getSource();
             SingleInputPlanNode combiner = (SingleInputPlanNode) reducer.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, reducer.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, combiner.getInput().getShipStrategy());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(reducer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(combiner.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -146,9 +150,10 @@ public class GroupingPojoTranslationTest extends CompilerTestBase {
             SingleInputPlanNode reducer = (SingleInputPlanNode) sink.getInput().getSource();
             SingleInputPlanNode combiner = (SingleInputPlanNode) reducer.getInput().getSource();
 
-            assertEquals(ShipStrategyType.FORWARD, sink.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.PARTITION_CUSTOM, reducer.getInput().getShipStrategy());
-            assertEquals(ShipStrategyType.FORWARD, combiner.getInput().getShipStrategy());
+            assertThat(sink.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+            assertThat(reducer.getInput().getShipStrategy())
+                    .isEqualTo(ShipStrategyType.PARTITION_CUSTOM);
+            assertThat(combiner.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

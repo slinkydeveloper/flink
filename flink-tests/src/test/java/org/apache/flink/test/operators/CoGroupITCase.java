@@ -42,7 +42,6 @@ import org.apache.flink.test.operators.util.CollectionDataSets.POJO;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +50,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link CoGroupFunction} and {@link RichCoGroupFunction}. */
 @RunWith(Parameterized.class)
@@ -514,7 +515,7 @@ public class CoGroupITCase extends MultipleProgramsTestBase {
         } catch (InvalidProgramException ex) {
             correctExceptionTriggered = (ex.getCause() instanceof java.io.NotSerializableException);
         }
-        Assert.assertTrue(correctExceptionTriggered);
+        assertThat(correctExceptionTriggered).isTrue();
     }
 
     private static class KeySelector7
@@ -601,7 +602,7 @@ public class CoGroupITCase extends MultipleProgramsTestBase {
                 throws Exception {
             for (POJO p : first) {
                 for (Tuple7<Integer, String, Integer, Integer, Long, String, Long> t : second) {
-                    Assert.assertTrue(p.nestedPojo.longNumber == t.f6);
+                    assertThat(p.nestedPojo.longNumber == t.f6).isTrue();
                     out.collect(new CustomType(-1, p.nestedPojo.longNumber, "Flink"));
                 }
             }
@@ -654,7 +655,7 @@ public class CoGroupITCase extends MultipleProgramsTestBase {
                 throws Exception {
             for (POJO p : first) {
                 for (Tuple7<Integer, String, Integer, Integer, Long, String, Long> t : second) {
-                    Assert.assertTrue(p.nestedPojo.longNumber == t.f6);
+                    assertThat(p.nestedPojo.longNumber == t.f6).isTrue();
                     out.collect(new CustomType(-1, p.nestedPojo.longNumber, "Flink"));
                 }
             }
@@ -812,7 +813,7 @@ public class CoGroupITCase extends MultipleProgramsTestBase {
                 throws Exception {
             for (POJO p : first) {
                 for (Tuple7<Integer, String, Integer, Integer, Long, String, Long> t : second) {
-                    Assert.assertTrue(p.nestedPojo.longNumber == t.f6);
+                    assertThat(p.nestedPojo.longNumber == t.f6).isTrue();
                     out.collect(new CustomType(-1, p.nestedPojo.longNumber, "Flink"));
                 }
             }

@@ -37,12 +37,14 @@ import org.apache.flink.runtime.operators.testutils.TestData.TupleGenerator.KeyM
 import org.apache.flink.runtime.operators.testutils.TestData.TupleGenerator.ValueMode;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.EOFException;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** */
 public class ChannelViewsTest {
@@ -87,9 +89,9 @@ public class ChannelViewsTest {
         this.ioManager.close();
 
         if (memoryManager != null) {
-            Assert.assertTrue(
-                    "Memory leak: not all segments have been returned to the memory manager.",
-                    this.memoryManager.verifyEmpty());
+            assertThat(this.memoryManager.verifyEmpty())
+                    .as("Memory leak: not all segments have been returned to the memory manager.")
+                    .isTrue();
             this.memoryManager.shutdown();
             this.memoryManager = null;
         }
@@ -141,9 +143,9 @@ public class ChannelViewsTest {
             int k2 = readRec.f0;
             String v2 = readRec.f1;
 
-            Assert.assertTrue(
-                    "The re-generated and the read record do not match.",
-                    k1 == k2 && v1.equals(v2));
+            assertThat(k1 == k2 && v1.equals(v2))
+                    .as("The re-generated and the read record do not match.")
+                    .isTrue();
         }
 
         this.memoryManager.release(inView.close());
@@ -192,9 +194,9 @@ public class ChannelViewsTest {
             final String v1 = rec.f1;
             final int k2 = readRec.f0;
             final String v2 = readRec.f1;
-            Assert.assertTrue(
-                    "The re-generated and the read record do not match.",
-                    k1 == k2 && v1.equals(v2));
+            assertThat(k1 == k2 && v1.equals(v2))
+                    .as("The re-generated and the read record do not match.")
+                    .isTrue();
         }
 
         this.memoryManager.release(inView.close());
@@ -244,16 +246,16 @@ public class ChannelViewsTest {
                 final String v1 = rec.f1;
                 final int k2 = readRec.f0;
                 final String v2 = readRec.f1;
-                Assert.assertTrue(
-                        "The re-generated and the read record do not match.",
-                        k1 == k2 && v1.equals(v2));
+                assertThat(k1 == k2 && v1.equals(v2))
+                        .as("The re-generated and the read record do not match.")
+                        .isTrue();
             }
-            Assert.fail("Expected an EOFException which did not occur.");
+            fail("Expected an EOFException which did not occur.");
         } catch (EOFException eofex) {
             // expected
         } catch (Throwable t) {
             // unexpected
-            Assert.fail("Unexpected Exception: " + t.getMessage());
+            fail("Unexpected Exception: " + t.getMessage());
         }
 
         this.memoryManager.release(inView.close());
@@ -304,9 +306,9 @@ public class ChannelViewsTest {
             int k2 = readRec.f0;
             String v2 = readRec.f1;
 
-            Assert.assertTrue(
-                    "The re-generated and the read record do not match.",
-                    k1 == k2 && v1.equals(v2));
+            assertThat(k1 == k2 && v1.equals(v2))
+                    .as("The re-generated and the read record do not match.")
+                    .isTrue();
         }
 
         this.memoryManager.release(inView.close());
@@ -357,9 +359,9 @@ public class ChannelViewsTest {
             int k2 = readRec.f0;
             String v2 = readRec.f1;
 
-            Assert.assertTrue(
-                    "The re-generated and the read record do not match.",
-                    k1 == k2 && v1.equals(v2));
+            assertThat(k1 == k2 && v1.equals(v2))
+                    .as("The re-generated and the read record do not match.")
+                    .isTrue();
         }
 
         this.memoryManager.release(inView.close());
@@ -411,9 +413,9 @@ public class ChannelViewsTest {
             int k2 = readRec.f0;
             String v2 = readRec.f1;
 
-            Assert.assertTrue(
-                    "The re-generated and the read record do not match.",
-                    k1 == k2 && v1.equals(v2));
+            assertThat(k1 == k2 && v1.equals(v2))
+                    .as("The re-generated and the read record do not match.")
+                    .isTrue();
         }
 
         this.memoryManager.release(inView.close());

@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for validation of {@link BufferDebloatConfiguration}. */
 class BufferDebloatConfigurationTest extends TestLogger {
@@ -37,17 +37,15 @@ class BufferDebloatConfigurationTest extends TestLogger {
         final Configuration config = new Configuration();
         config.set(TaskManagerOptions.MIN_MEMORY_SEGMENT_SIZE, new MemorySize(50));
         config.set(TaskManagerOptions.MEMORY_SEGMENT_SIZE, new MemorySize(49));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> BufferDebloatConfiguration.fromConfiguration(config));
+        assertThatThrownBy(() -> BufferDebloatConfiguration.fromConfiguration(config))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void testNegativeConsumptionTime() {
         final Configuration config = new Configuration();
         config.set(TaskManagerOptions.BUFFER_DEBLOAT_TARGET, Duration.ofMillis(-1));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> BufferDebloatConfiguration.fromConfiguration(config));
+        assertThatThrownBy(() -> BufferDebloatConfiguration.fromConfiguration(config))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

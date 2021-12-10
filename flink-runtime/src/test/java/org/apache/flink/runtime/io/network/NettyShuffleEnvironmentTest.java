@@ -71,7 +71,7 @@ import java.util.concurrent.Executors;
 
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createDummyConnectionManager;
 import static org.apache.flink.runtime.io.network.partition.PartitionTestUtils.createPartition;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.spy;
@@ -184,22 +184,25 @@ public class NettyShuffleEnvironmentTest extends TestLogger {
                                     new NettyShuffleDescriptorBuilder().buildRemote()
                                 })));
         for (int i = 0; i < 2; i++) {
-            assertEquals(
-                    TaskManagerOptions.MEMORY_SEGMENT_SIZE.defaultValue().getBytes(),
-                    (long)
-                            ((Gauge<Integer>)
-                                            getDebloatingMetric(
-                                                    metrics, i, MetricNames.DEBLOATED_BUFFER_SIZE))
-                                    .getValue());
-            assertEquals(
-                    0L,
-                    (long)
-                            ((Gauge<Long>)
-                                            getDebloatingMetric(
-                                                    metrics,
-                                                    i,
-                                                    MetricNames.ESTIMATED_TIME_TO_CONSUME_BUFFERS))
-                                    .getValue());
+            assertThat(
+                            (long)
+                                    ((Gauge<Integer>)
+                                                    getDebloatingMetric(
+                                                            metrics,
+                                                            i,
+                                                            MetricNames.DEBLOATED_BUFFER_SIZE))
+                                            .getValue())
+                    .isEqualTo(TaskManagerOptions.MEMORY_SEGMENT_SIZE.defaultValue().getBytes());
+            assertThat(
+                            (long)
+                                    ((Gauge<Long>)
+                                                    getDebloatingMetric(
+                                                            metrics,
+                                                            i,
+                                                            MetricNames
+                                                                    .ESTIMATED_TIME_TO_CONSUME_BUFFERS))
+                                            .getValue())
+                    .isEqualTo(0L);
         }
     }
 
@@ -270,29 +273,30 @@ public class NettyShuffleEnvironmentTest extends TestLogger {
         Task.setupPartitionsAndGates(resultPartitions, inputGates);
 
         // verify buffer pools for the result partitions
-        assertEquals(Integer.MAX_VALUE, rp1.getBufferPool().getMaxNumberOfMemorySegments());
-        assertEquals(Integer.MAX_VALUE, rp2.getBufferPool().getMaxNumberOfMemorySegments());
-        assertEquals(expectedBuffers, rp3.getBufferPool().getMaxNumberOfMemorySegments());
-        assertEquals(expectedRp4Buffers, rp4.getBufferPool().getMaxNumberOfMemorySegments());
+        assertThat(rp1.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(rp2.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(Integer.MAX_VALUE);
+        assertThat(rp3.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(expectedBuffers);
+        assertThat(rp4.getBufferPool().getMaxNumberOfMemorySegments())
+                .isEqualTo(expectedRp4Buffers);
 
         for (ResultPartition rp : resultPartitions) {
-            assertEquals(
-                    rp.getNumberOfSubpartitions() + 1,
-                    rp.getBufferPool().getNumberOfRequiredMemorySegments());
-            assertEquals(rp.getNumberOfSubpartitions() + 1, rp.getBufferPool().getNumBuffers());
+            assertThat(rp.getBufferPool().getNumberOfRequiredMemorySegments())
+                    .isEqualTo(rp.getNumberOfSubpartitions() + 1);
+            assertThat(rp.getBufferPool().getNumBuffers())
+                    .isEqualTo(rp.getNumberOfSubpartitions() + 1);
         }
 
         // verify buffer pools for the input gates (NOTE: credit-based uses minimum required buffers
         // for exclusive buffers not managed by the buffer pool)
-        assertEquals(1, ig1.getBufferPool().getNumberOfRequiredMemorySegments());
-        assertEquals(1, ig2.getBufferPool().getNumberOfRequiredMemorySegments());
-        assertEquals(1, ig3.getBufferPool().getNumberOfRequiredMemorySegments());
-        assertEquals(1, ig4.getBufferPool().getNumberOfRequiredMemorySegments());
+        assertThat(ig1.getBufferPool().getNumberOfRequiredMemorySegments()).isEqualTo(1);
+        assertThat(ig2.getBufferPool().getNumberOfRequiredMemorySegments()).isEqualTo(1);
+        assertThat(ig3.getBufferPool().getNumberOfRequiredMemorySegments()).isEqualTo(1);
+        assertThat(ig4.getBufferPool().getNumberOfRequiredMemorySegments()).isEqualTo(1);
 
-        assertEquals(floatingBuffers, ig1.getBufferPool().getMaxNumberOfMemorySegments());
-        assertEquals(floatingBuffers, ig2.getBufferPool().getMaxNumberOfMemorySegments());
-        assertEquals(floatingBuffers, ig3.getBufferPool().getMaxNumberOfMemorySegments());
-        assertEquals(floatingBuffers, ig4.getBufferPool().getMaxNumberOfMemorySegments());
+        assertThat(ig1.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(floatingBuffers);
+        assertThat(ig2.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(floatingBuffers);
+        assertThat(ig3.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(floatingBuffers);
+        assertThat(ig4.getBufferPool().getMaxNumberOfMemorySegments()).isEqualTo(floatingBuffers);
 
         verify(ig1, times(1)).setupChannels();
         verify(ig2, times(1)).setupChannels();

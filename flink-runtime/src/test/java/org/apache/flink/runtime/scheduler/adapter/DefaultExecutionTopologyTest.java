@@ -46,14 +46,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.createNoOpVertex;
 import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.createSimpleTestGraph;
 import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.PIPELINED;
 import static org.apache.flink.runtime.jobgraph.DistributionPattern.ALL_TO_ALL;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Unit tests for {@link DefaultExecutionTopology}. */
 public class DefaultExecutionTopologyTest extends TestLogger {
@@ -104,10 +102,10 @@ public class DefaultExecutionTopologyTest extends TestLogger {
         final DefaultResultPartition schedulingResultPartition =
                 adapter.getResultPartition(intermediateResultPartition.getPartitionId());
 
-        assertEquals(ResultPartitionState.CREATED, schedulingResultPartition.getState());
+        assertThat(schedulingResultPartition.getState()).isEqualTo(ResultPartitionState.CREATED);
 
         intermediateResultPartition.markDataProduced();
-        assertEquals(ResultPartitionState.CONSUMABLE, schedulingResultPartition.getState());
+        assertThat(schedulingResultPartition.getState()).isEqualTo(ResultPartitionState.CONSUMABLE);
     }
 
     @Test
@@ -134,7 +132,7 @@ public class DefaultExecutionTopologyTest extends TestLogger {
     public void testGetAllPipelinedRegions() {
         final Iterable<DefaultSchedulingPipelinedRegion> allPipelinedRegions =
                 adapter.getAllPipelinedRegions();
-        assertEquals(1, Iterables.size(allPipelinedRegions));
+        assertThat(Iterables.size(allPipelinedRegions)).isEqualTo(1);
     }
 
     @Test
@@ -165,7 +163,7 @@ public class DefaultExecutionTopologyTest extends TestLogger {
             final DefaultSchedulingPipelinedRegion pipelinedRegionOfVertex) {
         final Set<DefaultExecutionVertex> allVertices =
                 Sets.newHashSet(pipelinedRegionOfVertex.getVertices());
-        assertEquals(Sets.newHashSet(adapter.getVertices()), allVertices);
+        assertThat(allVertices).isEqualTo(Sets.newHashSet(adapter.getVertices()));
     }
 
     private static void assertGraphEquals(
@@ -179,7 +177,7 @@ public class DefaultExecutionTopologyTest extends TestLogger {
             ExecutionVertex originalVertex = originalVertices.next();
             DefaultExecutionVertex adaptedVertex = adaptedVertices.next();
 
-            assertEquals(originalVertex.getID(), adaptedVertex.getId());
+            assertThat(adaptedVertex.getId()).isEqualTo(originalVertex.getID());
 
             List<IntermediateResultPartition> originalConsumedPartitions = new ArrayList<>();
             for (ConsumedPartitionGroup consumedPartitionGroup :
@@ -205,17 +203,17 @@ public class DefaultExecutionTopologyTest extends TestLogger {
             assertPartitionsEquals(originalProducedPartitions, adaptedProducedPartitions);
         }
 
-        assertFalse(
-                "Number of adapted vertices exceeds number of original vertices.",
-                adaptedVertices.hasNext());
+        assertThat(adaptedVertices.hasNext())
+                .as("Number of adapted vertices exceeds number of original vertices.")
+                .isFalse();
     }
 
     private static void assertPartitionsEquals(
             Iterable<IntermediateResultPartition> originalResultPartitions,
             Iterable<DefaultResultPartition> adaptedResultPartitions) {
 
-        assertEquals(
-                Iterables.size(originalResultPartitions), Iterables.size(adaptedResultPartitions));
+        assertThat(Iterables.size(adaptedResultPartitions))
+                .isEqualTo(Iterables.size(originalResultPartitions));
 
         for (IntermediateResultPartition originalPartition : originalResultPartitions) {
             DefaultResultPartition adaptedPartition =
@@ -248,11 +246,12 @@ public class DefaultExecutionTopologyTest extends TestLogger {
                 // this DOES rely on an implicit assumption that the vertices objects returned by
                 // the topology are
                 // identical to those stored in the partition
-                assertTrue(
-                        IterableUtils.toStream(adaptedConsumers)
-                                .anyMatch(
-                                        adaptedConsumer ->
-                                                adaptedConsumer.getId().equals(originalId)));
+                assertThat(
+                                IterableUtils.toStream(adaptedConsumers)
+                                        .anyMatch(
+                                                adaptedConsumer ->
+                                                        adaptedConsumer.getId().equals(originalId)))
+                        .isTrue();
             }
         }
     }
@@ -261,11 +260,11 @@ public class DefaultExecutionTopologyTest extends TestLogger {
             IntermediateResultPartition originalPartition,
             DefaultResultPartition adaptedPartition) {
 
-        assertEquals(originalPartition.getPartitionId(), adaptedPartition.getId());
-        assertEquals(
-                originalPartition.getIntermediateResult().getId(), adaptedPartition.getResultId());
-        assertEquals(originalPartition.getResultType(), adaptedPartition.getResultType());
-        assertEquals(
-                originalPartition.getProducer().getID(), adaptedPartition.getProducer().getId());
+        assertThat(adaptedPartition.getId()).isEqualTo(originalPartition.getPartitionId());
+        assertThat(adaptedPartition.getResultId())
+                .isEqualTo(originalPartition.getIntermediateResult().getId());
+        assertThat(adaptedPartition.getResultType()).isEqualTo(originalPartition.getResultType());
+        assertThat(adaptedPartition.getProducer().getId())
+                .isEqualTo(originalPartition.getProducer().getID());
     }
 }

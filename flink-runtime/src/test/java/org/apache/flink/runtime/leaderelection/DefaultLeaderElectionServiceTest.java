@@ -29,11 +29,11 @@ import org.junit.Test;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link DefaultLeaderElectionService}. */
 public class DefaultLeaderElectionServiceTest extends TestLogger {
@@ -49,29 +49,26 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                         () -> {
                             // grant leadership
                             testingLeaderElectionDriver.isLeader();
-
                             testingContender.waitForLeader(timeout);
-                            assertThat(testingContender.getDescription(), is(TEST_URL));
-                            assertThat(
-                                    testingContender.getLeaderSessionID(),
-                                    is(leaderElectionService.getLeaderSessionID()));
+                            assertThat(testingContender.getDescription()).isEqualTo(TEST_URL);
+                            assertThat(testingContender.getLeaderSessionID())
+                                    .isEqualTo(leaderElectionService.getLeaderSessionID());
                             // Check the external storage
-                            assertThat(
-                                    testingLeaderElectionDriver.getLeaderInformation(),
-                                    is(
+                            assertThat(testingLeaderElectionDriver.getLeaderInformation())
+                                    .isEqualTo(
                                             LeaderInformation.known(
                                                     leaderElectionService.getLeaderSessionID(),
-                                                    TEST_URL)));
-
+                                                    TEST_URL));
                             // revoke leadership
                             testingLeaderElectionDriver.notLeader();
                             testingContender.waitForRevokeLeader(timeout);
-                            assertThat(testingContender.getLeaderSessionID(), is(nullValue()));
-                            assertThat(leaderElectionService.getLeaderSessionID(), is(nullValue()));
+                            assertThat(testingContender.getLeaderSessionID())
+                                    .isEqualTo(nullValue());
+                            assertThat(leaderElectionService.getLeaderSessionID())
+                                    .isEqualTo(nullValue());
                             // External storage should be cleared
-                            assertThat(
-                                    testingLeaderElectionDriver.getLeaderInformation(),
-                                    is(LeaderInformation.empty()));
+                            assertThat(testingLeaderElectionDriver.getLeaderInformation())
+                                    .isEqualTo(LeaderInformation.empty());
                         });
             }
         };
@@ -84,24 +81,19 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                 runTest(
                         () -> {
                             testingLeaderElectionDriver.isLeader();
-
                             final LeaderInformation expectedLeader =
                                     LeaderInformation.known(
                                             leaderElectionService.getLeaderSessionID(), TEST_URL);
-
                             // Leader information changed on external storage. It should be
                             // corrected.
                             testingLeaderElectionDriver.leaderInformationChanged(
                                     LeaderInformation.empty());
-                            assertThat(
-                                    testingLeaderElectionDriver.getLeaderInformation(),
-                                    is(expectedLeader));
-
+                            assertThat(testingLeaderElectionDriver.getLeaderInformation())
+                                    .isEqualTo(expectedLeader);
                             testingLeaderElectionDriver.leaderInformationChanged(
                                     LeaderInformation.known(UUID.randomUUID(), "faulty-address"));
-                            assertThat(
-                                    testingLeaderElectionDriver.getLeaderInformation(),
-                                    is(expectedLeader));
+                            assertThat(testingLeaderElectionDriver.getLeaderInformation())
+                                    .isEqualTo(expectedLeader);
                         });
             }
         };
@@ -116,18 +108,14 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                             testingLeaderElectionDriver.isLeader();
                             final UUID currentLeaderSessionId =
                                     leaderElectionService.getLeaderSessionID();
-                            assertThat(currentLeaderSessionId, is(notNullValue()));
-                            assertThat(
-                                    leaderElectionService.hasLeadership(currentLeaderSessionId),
-                                    is(true));
-                            assertThat(
-                                    leaderElectionService.hasLeadership(UUID.randomUUID()),
-                                    is(false));
-
+                            assertThat(currentLeaderSessionId).isEqualTo(notNullValue());
+                            assertThat(leaderElectionService.hasLeadership(currentLeaderSessionId))
+                                    .isEqualTo(true);
+                            assertThat(leaderElectionService.hasLeadership(UUID.randomUUID()))
+                                    .isEqualTo(false);
                             leaderElectionService.stop();
-                            assertThat(
-                                    leaderElectionService.hasLeadership(currentLeaderSessionId),
-                                    is(false));
+                            assertThat(leaderElectionService.hasLeadership(currentLeaderSessionId))
+                                    .isEqualTo(false);
                         });
             }
         };
@@ -143,9 +131,8 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                                     LeaderInformation.known(UUID.randomUUID(), "faulty-address");
                             testingLeaderElectionDriver.leaderInformationChanged(faultyLeader);
                             // External storage should keep the wrong value.
-                            assertThat(
-                                    testingLeaderElectionDriver.getLeaderInformation(),
-                                    is(faultyLeader));
+                            assertThat(testingLeaderElectionDriver.getLeaderInformation())
+                                    .isEqualTo(faultyLeader);
                         });
             }
         };
@@ -160,7 +147,8 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                             leaderElectionService.stop();
                             testingLeaderElectionDriver.isLeader();
                             // leader contender is not granted leadership
-                            assertThat(testingContender.getLeaderSessionID(), is(nullValue()));
+                            assertThat(testingContender.getLeaderSessionID())
+                                    .isEqualTo(nullValue());
                         });
             }
         };
@@ -173,15 +161,12 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                 runTest(
                         () -> {
                             testingLeaderElectionDriver.isLeader();
-
                             leaderElectionService.stop();
                             testingLeaderElectionDriver.leaderInformationChanged(
                                     LeaderInformation.empty());
-
                             // External storage should not be corrected
-                            assertThat(
-                                    testingLeaderElectionDriver.getLeaderInformation(),
-                                    is(LeaderInformation.empty()));
+                            assertThat(testingLeaderElectionDriver.getLeaderInformation())
+                                    .isEqualTo(LeaderInformation.empty());
                         });
             }
         };
@@ -195,13 +180,13 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                         () -> {
                             testingLeaderElectionDriver.isLeader();
                             final UUID oldSessionId = leaderElectionService.getLeaderSessionID();
-                            assertThat(testingContender.getLeaderSessionID(), is(oldSessionId));
-
+                            assertThat(testingContender.getLeaderSessionID())
+                                    .isEqualTo(oldSessionId);
                             leaderElectionService.stop();
-
                             testingLeaderElectionDriver.notLeader();
                             // leader contender is not revoked leadership
-                            assertThat(testingContender.getLeaderSessionID(), is(oldSessionId));
+                            assertThat(testingContender.getLeaderSessionID())
+                                    .isEqualTo(oldSessionId);
                         });
             }
         };
@@ -216,13 +201,11 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                             testingLeaderElectionDriver.isLeader();
                             final UUID currentLeaderSessionId =
                                     leaderElectionService.getLeaderSessionID();
-                            assertThat(currentLeaderSessionId, is(notNullValue()));
-
+                            assertThat(currentLeaderSessionId).isEqualTo(notNullValue());
                             // Old confirm call should be ignored.
                             leaderElectionService.confirmLeadership(UUID.randomUUID(), TEST_URL);
-                            assertThat(
-                                    leaderElectionService.getLeaderSessionID(),
-                                    is(currentLeaderSessionId));
+                            assertThat(leaderElectionService.getLeaderSessionID())
+                                    .isEqualTo(currentLeaderSessionId);
                         });
             }
         };
@@ -235,14 +218,12 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                 runTest(
                         () -> {
                             final Exception testException = new Exception("test leader exception");
-
                             testingLeaderElectionDriver.onFatalError(testException);
-
                             testingContender.waitForError(timeout);
-                            assertThat(testingContender.getError(), is(notNullValue()));
-                            assertThat(
-                                    testingContender.getError(),
-                                    FlinkMatchers.containsCause(testException));
+                            assertThat(testingContender.getError()).isEqualTo(notNullValue());
+                            assertThat(testingContender.getError())
+                                    .satisfies(
+                                            matching(FlinkMatchers.containsCause(testException)));
                         });
             }
         };
@@ -255,10 +236,8 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                 runTest(
                         () -> {
                             final Exception testException = new Exception("test leader exception");
-
                             leaderElectionService.stop();
                             testingLeaderElectionDriver.onFatalError(testException);
-
                             try {
                                 testingContender.waitForError(timeout);
                                 fail(
@@ -266,8 +245,7 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
                             } catch (TimeoutException ex) {
                                 // noop
                             }
-
-                            assertThat(testingContender.getError(), is(nullValue()));
+                            assertThat(testingContender.getError()).isEqualTo(nullValue());
                         });
             }
         };
@@ -322,7 +300,7 @@ public class DefaultLeaderElectionServiceTest extends TestLogger {
 
             testingLeaderElectionDriver =
                     testingLeaderElectionDriverFactory.getCurrentLeaderDriver();
-            assertThat(testingLeaderElectionDriver, is(notNullValue()));
+            assertThat(testingLeaderElectionDriver).isEqualTo(notNullValue());
             testMethod.run();
 
             leaderElectionService.stop();

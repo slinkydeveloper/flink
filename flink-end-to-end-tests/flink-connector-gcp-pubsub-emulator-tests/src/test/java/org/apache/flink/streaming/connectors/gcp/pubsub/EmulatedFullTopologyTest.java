@@ -44,9 +44,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.streaming.connectors.gcp.pubsub.SimpleStringSchemaWithStopMarkerDetection.STOP_MARKER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This is a test using the emulator for a full topology that uses PubSub as both input and output.
@@ -68,7 +66,7 @@ public class EmulatedFullTopologyTest extends GCloudUnitTestBase {
     @BeforeClass
     public static void setUp() throws Exception {
         pubsubHelper = getPubsubHelper();
-        assertNotNull("Missing pubsubHelper.", pubsubHelper);
+        assertThat(pubsubHelper).as("Missing pubsubHelper.").isNotNull();
         pubsubHelper.createTopic(PROJECT_NAME, INPUT_TOPIC_NAME);
         pubsubHelper.createSubscription(
                 PROJECT_NAME, INPUT_SUBSCRIPTION_NAME, PROJECT_NAME, INPUT_TOPIC_NAME);
@@ -79,7 +77,7 @@ public class EmulatedFullTopologyTest extends GCloudUnitTestBase {
 
     @AfterClass
     public static void tearDown() throws Exception {
-        assertNotNull("Missing pubsubHelper.", pubsubHelper);
+        assertThat(pubsubHelper).as("Missing pubsubHelper.").isNotNull();
         pubsubHelper.deleteSubscription(PROJECT_NAME, INPUT_SUBSCRIPTION_NAME);
         pubsubHelper.deleteTopic(PROJECT_NAME, INPUT_TOPIC_NAME);
         pubsubHelper.deleteSubscription(PROJECT_NAME, OUTPUT_SUBSCRIPTION_NAME);
@@ -204,7 +202,7 @@ public class EmulatedFullTopologyTest extends GCloudUnitTestBase {
         List<ReceivedMessage> receivedMessages =
                 pubsubHelper.pullMessages(PROJECT_NAME, OUTPUT_SUBSCRIPTION_NAME, 100);
 
-        assertEquals("Wrong number of elements", input.size(), receivedMessages.size());
+        assertThat(receivedMessages.size()).as("Wrong number of elements").isEqualTo(input.size());
 
         // Check output strings
         List<String> output = new ArrayList<>();
@@ -215,7 +213,7 @@ public class EmulatedFullTopologyTest extends GCloudUnitTestBase {
         for (String test : input) {
             String reversedTest = org.apache.commons.lang3.StringUtils.reverse(test);
             LOG.info("Checking if \"{}\" --> \"{}\" exists", test, reversedTest);
-            assertTrue("Missing " + test, output.contains(reversedTest));
+            assertThat(output.contains(reversedTest)).as("Missing " + test).isTrue();
         }
         // ===============================================================================
     }

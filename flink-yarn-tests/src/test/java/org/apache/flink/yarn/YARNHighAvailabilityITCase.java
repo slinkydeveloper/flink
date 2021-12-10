@@ -92,13 +92,11 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests that verify correct HA behavior. */
@@ -148,7 +146,7 @@ public class YARNHighAvailabilityITCase extends YarnTestBase {
         final File testingJar =
                 TestUtils.findFile("..", new TestUtils.TestJarFinder("flink-yarn-tests"));
 
-        assertThat(testingJar, notNullValue());
+        assertThat(testingJar).isNotNull();
 
         job.addJar(new org.apache.flink.core.fs.Path(testingJar.toURI()));
     }
@@ -228,22 +226,17 @@ public class YARNHighAvailabilityITCase extends YarnTestBase {
                             setupYarnClusterDescriptor();
                     final RestClusterClient<ApplicationId> restClusterClient =
                             deploySessionCluster(yarnClusterDescriptor);
-
                     ClusterClient<ApplicationId> newClusterClient = null;
                     try {
                         final ApplicationId clusterId = restClusterClient.getClusterId();
-
                         final YarnClusterDescriptor newClusterDescriptor =
                                 setupYarnClusterDescriptor();
                         newClusterClient =
                                 newClusterDescriptor.retrieve(clusterId).getClusterClient();
-
-                        assertThat(newClusterClient.listJobs().join(), is(empty()));
-
+                        assertThat(newClusterClient.listJobs().join()).isEqualTo(empty());
                         newClusterClient.shutDownCluster();
                     } finally {
                         restClusterClient.close();
-
                         if (newClusterClient != null) {
                             newClusterClient.close();
                         }
@@ -294,8 +287,10 @@ public class YARNHighAvailabilityITCase extends YarnTestBase {
             }
         }
 
-        assertNotNull("Unable to find container with TaskManager", taskManagerContainer);
-        assertNotNull("Illegal state", nodeManager);
+        assertThat(taskManagerContainer)
+                .as("Unable to find container with TaskManager")
+                .isNotNull();
+        assertThat(nodeManager).as("Illegal state").isNotNull();
 
         StopContainersRequest scr =
                 StopContainersRequest.newInstance(Collections.singletonList(taskManagerContainer));
@@ -369,7 +364,7 @@ public class YARNHighAvailabilityITCase extends YarnTestBase {
                                         .createClusterSpecification())
                         .getClusterClient();
 
-        assertThat(yarnClusterClient, is(instanceOf(RestClusterClient.class)));
+        assertThat(yarnClusterClient).isEqualTo(instanceOf(RestClusterClient.class));
         return (RestClusterClient<ApplicationId>) yarnClusterClient;
     }
 
@@ -380,10 +375,10 @@ public class YARNHighAvailabilityITCase extends YarnTestBase {
 
     private void killApplicationMaster(final String processName) throws Exception {
         final Set<Integer> origPids = getApplicationMasterPids(processName);
-        assertThat(origPids, not(empty()));
+        assertThat(origPids).satisfies(matching(not(empty())));
 
         final Process exec = Runtime.getRuntime().exec("pkill -f " + processName);
-        assertThat(exec.waitFor(), is(0));
+        assertThat(exec.waitFor()).isEqualTo(0);
 
         CommonTestUtils.waitUntilCondition(
                 () -> {

@@ -38,7 +38,6 @@ import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.testutils.TestingUtils;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 
 import java.util.concurrent.TimeUnit;
@@ -46,7 +45,8 @@ import java.util.concurrent.TimeUnit;
 import scala.concurrent.duration.Deadline;
 import scala.concurrent.duration.FiniteDuration;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Base class for testing job cancellation. */
 public abstract class CancelingTestBase extends TestLogger {
@@ -72,13 +72,14 @@ public abstract class CancelingTestBase extends TestLogger {
 
     private static void verifyJvmOptions() {
         final long heap = Runtime.getRuntime().maxMemory() >> 20;
-        Assert.assertTrue(
-                "Insufficient java heap space "
-                        + heap
-                        + "mb - set JVM option: -Xmx"
-                        + MINIMUM_HEAP_SIZE_MB
-                        + "m",
-                heap > MINIMUM_HEAP_SIZE_MB - 50);
+        assertThat(heap > MINIMUM_HEAP_SIZE_MB - 50)
+                .as(
+                        "Insufficient java heap space "
+                                + heap
+                                + "mb - set JVM option: -Xmx"
+                                + MINIMUM_HEAP_SIZE_MB
+                                + "m")
+                .isTrue();
     }
 
     private static Configuration getConfiguration() {
@@ -112,7 +113,7 @@ public abstract class CancelingTestBase extends TestLogger {
             jobStatus = client.getJobStatus(jobID).get(rpcTimeout, TimeUnit.MILLISECONDS);
         }
         if (jobStatus != JobStatus.RUNNING) {
-            Assert.fail("Job not in state RUNNING.");
+            fail("Job not in state RUNNING.");
         }
 
         Thread.sleep(msecsTillCanceling);
@@ -129,7 +130,7 @@ public abstract class CancelingTestBase extends TestLogger {
             jobStatusAfterCancel =
                     client.getJobStatus(jobID).get(rpcTimeout, TimeUnit.MILLISECONDS);
         }
-        assertEquals(JobStatus.CANCELED, jobStatusAfterCancel);
+        assertThat(jobStatusAfterCancel).isEqualTo(JobStatus.CANCELED);
     }
 
     private JobGraph getJobGraph(final Plan plan) {

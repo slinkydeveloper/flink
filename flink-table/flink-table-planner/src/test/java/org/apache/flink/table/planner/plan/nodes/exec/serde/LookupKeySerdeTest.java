@@ -40,7 +40,7 @@ import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexNode;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test LookupKey json ser/de. */
 public class LookupKeySerdeTest {
@@ -90,7 +90,7 @@ public class LookupKeySerdeTest {
             LookupJoinUtil.LookupKey result =
                     mapper.readValue(
                             mapper.writeValueAsString(lookupKey), LookupJoinUtil.LookupKey.class);
-            assertEquals(lookupKey, result);
+            assertThat(result).isEqualTo(lookupKey);
         }
     }
 }

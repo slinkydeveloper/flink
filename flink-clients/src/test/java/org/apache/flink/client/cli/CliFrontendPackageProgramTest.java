@@ -32,7 +32,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.apache.commons.cli.CommandLine;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,10 +44,8 @@ import static org.apache.flink.client.cli.CliFrontendTestUtils.TEST_JAR_CLASSLOA
 import static org.apache.flink.client.cli.CliFrontendTestUtils.TEST_JAR_MAIN_CLASS;
 import static org.apache.flink.client.cli.CliFrontendTestUtils.getNonJarFilePath;
 import static org.apache.flink.client.cli.CliFrontendTestUtils.getTestJarPath;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
@@ -125,14 +122,14 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                 CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, arguments, true);
         ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-        assertEquals(getTestJarPath(), programOptions.getJarFilePath());
-        assertArrayEquals(classpath, programOptions.getClasspaths().toArray());
-        assertArrayEquals(reducedArguments, programOptions.getProgramArgs());
+        assertThat(programOptions.getJarFilePath()).isEqualTo(getTestJarPath());
+        assertThat(programOptions.getClasspaths().toArray()).isEqualTo(classpath);
+        assertThat(programOptions.getProgramArgs()).isEqualTo(reducedArguments);
 
         PackagedProgram prog = frontend.buildProgram(programOptions);
 
-        Assert.assertArrayEquals(reducedArguments, prog.getArguments());
-        Assert.assertEquals(TEST_JAR_MAIN_CLASS, prog.getMainClassName());
+        assertThat(prog.getArguments()).isEqualTo(reducedArguments);
+        assertThat(prog.getMainClassName()).isEqualTo(TEST_JAR_MAIN_CLASS);
     }
 
     @Test
@@ -156,14 +153,14 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                 CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, arguments, true);
         ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-        assertEquals(getTestJarPath(), programOptions.getJarFilePath());
-        assertArrayEquals(classpath, programOptions.getClasspaths().toArray());
-        assertArrayEquals(reducedArguments, programOptions.getProgramArgs());
+        assertThat(programOptions.getJarFilePath()).isEqualTo(getTestJarPath());
+        assertThat(programOptions.getClasspaths().toArray()).isEqualTo(classpath);
+        assertThat(programOptions.getProgramArgs()).isEqualTo(reducedArguments);
 
         PackagedProgram prog = frontend.buildProgram(programOptions);
 
-        Assert.assertArrayEquals(reducedArguments, prog.getArguments());
-        Assert.assertEquals(TEST_JAR_MAIN_CLASS, prog.getMainClassName());
+        assertThat(prog.getArguments()).isEqualTo(reducedArguments);
+        assertThat(prog.getMainClassName()).isEqualTo(TEST_JAR_MAIN_CLASS);
     }
 
     @Test
@@ -186,14 +183,14 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                 CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, arguments, true);
         ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-        assertEquals(getTestJarPath(), programOptions.getJarFilePath());
-        assertArrayEquals(classpath, programOptions.getClasspaths().toArray());
-        assertArrayEquals(reducedArguments, programOptions.getProgramArgs());
+        assertThat(programOptions.getJarFilePath()).isEqualTo(getTestJarPath());
+        assertThat(programOptions.getClasspaths().toArray()).isEqualTo(classpath);
+        assertThat(programOptions.getProgramArgs()).isEqualTo(reducedArguments);
 
         PackagedProgram prog = frontend.buildProgram(programOptions);
 
-        Assert.assertArrayEquals(reducedArguments, prog.getArguments());
-        Assert.assertEquals(TEST_JAR_MAIN_CLASS, prog.getMainClassName());
+        assertThat(prog.getArguments()).isEqualTo(reducedArguments);
+        assertThat(prog.getMainClassName()).isEqualTo(TEST_JAR_MAIN_CLASS);
     }
 
     @Test(expected = CliArgsException.class)
@@ -221,9 +218,9 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                 CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, arguments, true);
         ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-        assertEquals(arguments[4], programOptions.getJarFilePath());
-        assertArrayEquals(classpath, programOptions.getClasspaths().toArray());
-        assertArrayEquals(reducedArguments, programOptions.getProgramArgs());
+        assertThat(programOptions.getJarFilePath()).isEqualTo(arguments[4]);
+        assertThat(programOptions.getClasspaths().toArray()).isEqualTo(classpath);
+        assertThat(programOptions.getProgramArgs()).isEqualTo(reducedArguments);
 
         try {
             frontend.buildProgram(programOptions);
@@ -241,8 +238,8 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                 CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, arguments, true);
         ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-        assertEquals(arguments[0], programOptions.getJarFilePath());
-        assertArrayEquals(new String[0], programOptions.getProgramArgs());
+        assertThat(programOptions.getJarFilePath()).isEqualTo(arguments[0]);
+        assertThat(programOptions.getProgramArgs()).isEqualTo(new String[0]);
 
         try {
             frontend.buildProgram(programOptions);
@@ -311,10 +308,11 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                     CliFrontendParser.parse(CliFrontendParser.RUN_OPTIONS, arguments, true);
             ProgramOptions programOptions = ProgramOptions.create(commandLine);
 
-            assertEquals(getTestJarPath(), programOptions.getJarFilePath());
-            assertArrayEquals(classpath, programOptions.getClasspaths().toArray());
-            assertEquals(TEST_JAR_CLASSLOADERTEST_CLASS, programOptions.getEntryPointClassName());
-            assertArrayEquals(reducedArguments, programOptions.getProgramArgs());
+            assertThat(programOptions.getJarFilePath()).isEqualTo(getTestJarPath());
+            assertThat(programOptions.getClasspaths().toArray()).isEqualTo(classpath);
+            assertThat(programOptions.getEntryPointClassName())
+                    .isEqualTo(TEST_JAR_CLASSLOADERTEST_CLASS);
+            assertThat(programOptions.getProgramArgs()).isEqualTo(reducedArguments);
 
             PackagedProgram prog = spy(frontend.buildProgram(programOptions));
 
@@ -332,8 +330,8 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                     };
             when(prog.getUserCodeClassLoader()).thenReturn(testClassLoader);
 
-            assertEquals(TEST_JAR_CLASSLOADERTEST_CLASS, prog.getMainClassName());
-            assertArrayEquals(reducedArguments, prog.getArguments());
+            assertThat(prog.getMainClassName()).isEqualTo(TEST_JAR_CLASSLOADERTEST_CLASS);
+            assertThat(prog.getArguments()).isEqualTo(reducedArguments);
 
             Configuration c = new Configuration();
             Optimizer compiler = new Optimizer(new DataStatistics(), new DefaultCostEstimator(), c);
@@ -347,7 +345,7 @@ public class CliFrontendPackageProgramTest extends TestLogger {
                 e.printStackTrace();
                 fail("Program didn't throw ClassNotFoundException");
             }
-            assertTrue("Classloader was not called", callme[0]);
+            assertThat(callme[0]).as("Classloader was not called").isTrue();
         }
     }
 }

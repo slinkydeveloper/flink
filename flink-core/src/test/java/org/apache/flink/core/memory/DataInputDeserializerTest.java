@@ -18,10 +18,12 @@
 
 package org.apache.flink.core.memory;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test suite for the {@link DataInputDeserializer} class. */
 public class DataInputDeserializerTest {
@@ -33,25 +35,25 @@ public class DataInputDeserializerTest {
 
         bytes = new byte[] {};
         dis = new DataInputDeserializer(bytes, 0, bytes.length);
-        Assert.assertEquals(bytes.length, dis.available());
+        assertThat(dis.available()).isEqualTo(bytes.length);
 
         bytes = new byte[] {1, 2, 3};
         dis = new DataInputDeserializer(bytes, 0, bytes.length);
-        Assert.assertEquals(bytes.length, dis.available());
+        assertThat(dis.available()).isEqualTo(bytes.length);
 
         dis.readByte();
-        Assert.assertEquals(2, dis.available());
+        assertThat(dis.available()).isEqualTo(2);
         dis.readByte();
-        Assert.assertEquals(1, dis.available());
+        assertThat(dis.available()).isEqualTo(1);
         dis.readByte();
-        Assert.assertEquals(0, dis.available());
+        assertThat(dis.available()).isEqualTo(0);
 
         try {
             dis.readByte();
-            Assert.fail("Did not throw expected IOException");
+            fail("Did not throw expected IOException");
         } catch (IOException e) {
             // ignore
         }
-        Assert.assertEquals(0, dis.available());
+        assertThat(dis.available()).isEqualTo(0);
     }
 }

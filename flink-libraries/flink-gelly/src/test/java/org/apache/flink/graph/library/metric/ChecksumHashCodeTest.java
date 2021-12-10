@@ -25,7 +25,7 @@ import org.apache.flink.graph.test.TestGraphUtils;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ChecksumHashCode}. */
 public class ChecksumHashCodeTest extends AsmTestBase {
@@ -40,23 +40,23 @@ public class ChecksumHashCodeTest extends AsmTestBase {
 
         Checksum checksum = graph.run(new ChecksumHashCode<>()).execute();
 
-        assertEquals(12, checksum.getCount());
-        assertEquals(0x4cd1, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(12);
+        assertThat(checksum.getChecksum()).isEqualTo(0x4cd1);
     }
 
     @Test
     public void testEmptyGraphWithVertices() throws Exception {
         Checksum checksum = emptyGraphWithVertices.run(new ChecksumHashCode<>()).execute();
 
-        assertEquals(3, checksum.getCount());
-        assertEquals(0x109b, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(3);
+        assertThat(checksum.getChecksum()).isEqualTo(0x109b);
     }
 
     @Test
     public void testEmptyGraphWithoutVertices() throws Exception {
         Checksum checksum = emptyGraphWithoutVertices.run(new ChecksumHashCode<>()).execute();
 
-        assertEquals(0, checksum.getCount());
-        assertEquals(0, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(0);
+        assertThat(checksum.getChecksum()).isEqualTo(0);
     }
 }

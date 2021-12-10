@@ -24,14 +24,11 @@ import org.junit.Test;
 
 import java.util.LinkedHashMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Test {@link LinkedOptionalMap}. */
 public class LinkedOptionalMapTest {
@@ -44,8 +41,10 @@ public class LinkedOptionalMapTest {
         map.put("scala.Option", null, "a scala Option");
         map.put("java.lang.Boolean", Boolean.class, null);
 
-        assertThat(map.keyNames(), hasItems("java.lang.String", "scala.Option"));
-        assertThat(map.absentKeysOrValues(), hasItems("scala.Option", "java.lang.Boolean"));
+        assertThat(map.keyNames())
+                .satisfies(matching(hasItems("java.lang.String", "scala.Option")));
+        assertThat(map.absentKeysOrValues())
+                .satisfies(matching(hasItems("scala.Option", "java.lang.Boolean")));
     }
 
     @Test
@@ -55,7 +54,7 @@ public class LinkedOptionalMapTest {
         map.put("java.lang.String", null, "a string class");
         map.put("java.lang.String", String.class, "a string class");
 
-        assertThat(map.absentKeysOrValues(), is(empty()));
+        assertThat(map.absentKeysOrValues()).isEqualTo(empty());
     }
 
     @Test
@@ -65,7 +64,7 @@ public class LinkedOptionalMapTest {
         map.put("java.lang.String", null, null);
         map.put("java.lang.String", String.class, "a string class");
 
-        assertThat(map.absentKeysOrValues(), is(empty()));
+        assertThat(map.absentKeysOrValues()).isEqualTo(empty());
     }
 
     @Test
@@ -75,7 +74,7 @@ public class LinkedOptionalMapTest {
         map.put("java.lang.String", null, null);
         map.put("java.lang.String", null, "a string class");
 
-        assertThat(map.absentKeysOrValues(), hasItem("java.lang.String"));
+        assertThat(map.absentKeysOrValues()).contains("java.lang.String");
     }
 
     @Test
@@ -92,7 +91,7 @@ public class LinkedOptionalMapTest {
 
         first.putAll(second);
 
-        assertThat(first.absentKeysOrValues(), is(empty()));
+        assertThat(first.absentKeysOrValues()).isEqualTo(empty());
     }
 
     @Test
@@ -109,7 +108,7 @@ public class LinkedOptionalMapTest {
 
         first.putAll(second);
 
-        assertThat(first.keyNames(), contains("b", "c", "a", "d"));
+        assertThat(first.keyNames()).satisfies(matching(contains("b", "c", "a", "d")));
     }
 
     @Test
@@ -124,7 +123,7 @@ public class LinkedOptionalMapTest {
 
         first.putAll(second);
 
-        assertThat(first.keyNames(), contains("a", "b", "c", "d"));
+        assertThat(first.keyNames()).satisfies(matching(contains("a", "b", "c", "d")));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -154,8 +153,8 @@ public class LinkedOptionalMapTest {
 
         LinkedHashMap<Class<?>, String> m = map.unwrapOptionals();
 
-        assertThat(m.keySet(), contains(String.class, Boolean.class));
-        assertThat(m.values(), contains("aaa", "bbb"));
+        assertThat(m.keySet()).satisfies(matching(contains(String.class, Boolean.class)));
+        assertThat(m.values()).satisfies(matching(contains("aaa", "bbb")));
     }
 
     @Test
@@ -169,7 +168,7 @@ public class LinkedOptionalMapTest {
 
         right.put("c", Boolean.class, "bbb");
 
-        assertTrue(LinkedOptionalMap.isLeftPrefixOfRight(left, right));
+        assertThat(LinkedOptionalMap.isLeftPrefixOfRight(left, right)).isTrue();
     }
 
     @Test
@@ -184,7 +183,7 @@ public class LinkedOptionalMapTest {
         right.put("b", Boolean.class, "bbb");
         right.put("c", Boolean.class, "bbb");
 
-        assertFalse(LinkedOptionalMap.isLeftPrefixOfRight(left, right));
+        assertThat(LinkedOptionalMap.isLeftPrefixOfRight(left, right)).isFalse();
     }
 
     @Test
@@ -202,11 +201,12 @@ public class LinkedOptionalMapTest {
 
         MergeResult<Class<?>, String> result = LinkedOptionalMap.mergeRightIntoLeft(left, right);
 
-        assertThat(result.hasMissingKeys(), is(false));
-        assertThat(result.isOrderedSubset(), is(true));
-        assertThat(result.missingKeys(), is(empty()));
+        assertThat(result.hasMissingKeys()).isEqualTo(false);
+        assertThat(result.isOrderedSubset()).isEqualTo(true);
+        assertThat(result.missingKeys()).isEqualTo(empty());
 
         LinkedHashMap<Class<?>, String> merged = result.getMerged();
-        assertThat(merged.keySet(), contains(String.class, Void.class, Boolean.class, Long.class));
+        assertThat(merged.keySet())
+                .satisfies(matching(contains(String.class, Void.class, Boolean.class, Long.class)));
     }
 }

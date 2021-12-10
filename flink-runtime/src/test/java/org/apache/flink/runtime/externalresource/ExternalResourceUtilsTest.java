@@ -38,13 +38,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsInstanceOf.instanceOf;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link ExternalResourceUtils} class. */
 public class ExternalResourceUtilsTest extends TestLogger {
@@ -73,7 +70,7 @@ public class ExternalResourceUtilsTest extends TestLogger {
         final Map<String, String> configMap =
                 ExternalResourceUtils.getExternalResourceConfigurationKeys(config, SUFFIX);
 
-        assertThat(configMap.entrySet(), is(empty()));
+        assertThat(configMap.entrySet()).isEqualTo(empty());
     }
 
     @Test
@@ -94,8 +91,8 @@ public class ExternalResourceUtilsTest extends TestLogger {
                 ExternalResourceUtils.getExternalResourceConfigurationKeys(config, SUFFIX);
 
         // Only one of the resource name would be kept.
-        assertThat(configMap.size(), is(1));
-        assertThat(configMap.values(), contains(RESOURCE_CONFIG_KEY_1));
+        assertThat(configMap.size()).isEqualTo(1);
+        assertThat(configMap.values()).satisfies(matching(contains(RESOURCE_CONFIG_KEY_1)));
     }
 
     @Test
@@ -120,10 +117,9 @@ public class ExternalResourceUtilsTest extends TestLogger {
                 ExternalResourceUtils.externalResourceDriversFromConfig(
                         config, testingPluginManager);
 
-        assertThat(externalResourceDrivers.size(), is(1));
-        assertThat(
-                externalResourceDrivers.get(RESOURCE_NAME_1),
-                instanceOf(TestingExternalResourceDriver.class));
+        assertThat(externalResourceDrivers.size()).isEqualTo(1);
+        assertThat(externalResourceDrivers.get(RESOURCE_NAME_1))
+                .isInstanceOf(TestingExternalResourceDriver.class);
     }
 
     @Test
@@ -143,7 +139,7 @@ public class ExternalResourceUtilsTest extends TestLogger {
                 ExternalResourceUtils.externalResourceDriversFromConfig(
                         config, testingPluginManager);
 
-        assertThat(externalResourceDrivers.entrySet(), is(empty()));
+        assertThat(externalResourceDrivers.entrySet()).isEqualTo(empty());
     }
 
     @Test
@@ -164,7 +160,7 @@ public class ExternalResourceUtilsTest extends TestLogger {
                 ExternalResourceUtils.externalResourceDriversFromConfig(
                         config, testingPluginManager);
 
-        assertThat(externalResourceDrivers.entrySet(), is(empty()));
+        assertThat(externalResourceDrivers.entrySet()).isEqualTo(empty());
     }
 
     @Test
@@ -190,7 +186,7 @@ public class ExternalResourceUtilsTest extends TestLogger {
                 ExternalResourceUtils.externalResourceDriversFromConfig(
                         config, testingPluginManager);
 
-        assertThat(externalResourceDrivers.entrySet(), is(empty()));
+        assertThat(externalResourceDrivers.entrySet()).isEqualTo(empty());
     }
 
     @Test
@@ -205,7 +201,8 @@ public class ExternalResourceUtilsTest extends TestLogger {
                         ExternalResourceUtils.createStaticExternalResourceInfoProvider(
                                 externalResourceAmountMap, externalResourceDrivers);
 
-        assertNotNull(externalResourceInfoProvider.getExternalResources().get(RESOURCE_NAME_1));
+        assertThat(externalResourceInfoProvider.getExternalResources().get(RESOURCE_NAME_1))
+                .isNotNull();
     }
 
     @Test
@@ -219,7 +216,8 @@ public class ExternalResourceUtilsTest extends TestLogger {
                         ExternalResourceUtils.createStaticExternalResourceInfoProvider(
                                 externalResourceAmountMap, externalResourceDrivers);
 
-        assertThat(externalResourceInfoProvider.getExternalResources().entrySet(), is(empty()));
+        assertThat(externalResourceInfoProvider.getExternalResources().entrySet())
+                .isEqualTo(empty());
     }
 
     @Test
@@ -235,9 +233,9 @@ public class ExternalResourceUtilsTest extends TestLogger {
         final Map<String, Long> externalResourceAmountMap =
                 ExternalResourceUtils.getExternalResourceAmountMap(config);
 
-        assertThat(externalResourceAmountMap.size(), is(1));
-        assertTrue(externalResourceAmountMap.containsKey(RESOURCE_NAME_1));
-        assertThat(externalResourceAmountMap.get(RESOURCE_NAME_1), is(RESOURCE_AMOUNT_1));
+        assertThat(externalResourceAmountMap.size()).isEqualTo(1);
+        assertThat(externalResourceAmountMap.containsKey(RESOURCE_NAME_1)).isTrue();
+        assertThat(externalResourceAmountMap.get(RESOURCE_NAME_1)).isEqualTo(RESOURCE_AMOUNT_1);
     }
 
     @Test
@@ -252,7 +250,7 @@ public class ExternalResourceUtilsTest extends TestLogger {
         final Map<String, Long> externalResourceAmountMap =
                 ExternalResourceUtils.getExternalResourceAmountMap(config);
 
-        assertThat(externalResourceAmountMap.entrySet(), is(empty()));
+        assertThat(externalResourceAmountMap.entrySet()).isEqualTo(empty());
     }
 
     @Test
@@ -268,10 +266,12 @@ public class ExternalResourceUtilsTest extends TestLogger {
         final Collection<ExternalResource> externalResources =
                 ExternalResourceUtils.getExternalResourcesCollection(config);
 
-        assertThat(externalResources.size(), is(1));
-        assertThat(
-                externalResources,
-                contains(new ExternalResource(RESOURCE_NAME_1, RESOURCE_AMOUNT_1)));
+        assertThat(externalResources.size()).isEqualTo(1);
+        assertThat(externalResources)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new ExternalResource(RESOURCE_NAME_1, RESOURCE_AMOUNT_1))));
     }
 
     @Test
@@ -286,6 +286,6 @@ public class ExternalResourceUtilsTest extends TestLogger {
         final Collection<ExternalResource> externalResources =
                 ExternalResourceUtils.getExternalResourcesCollection(config);
 
-        assertThat(externalResources, is(empty()));
+        assertThat(externalResources).isEqualTo(empty());
     }
 }

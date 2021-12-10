@@ -20,7 +20,6 @@ package org.apache.flink.contrib.streaming.state;
 
 import org.apache.flink.api.java.tuple.Tuple2;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -34,7 +33,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.flink.contrib.streaming.state.RocksDBConfigurableOptions.WRITE_BATCH_SIZE;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests to guard {@link RocksDBWriteBatchWrapper}. */
 public class RocksDBWriteBatchWrapperTest {
@@ -65,7 +64,7 @@ public class RocksDBWriteBatchWrapperTest {
 
             // valid result
             for (Tuple2<byte[], byte[]> item : data) {
-                Assert.assertArrayEquals(item.f1, db.get(handle, item.f0));
+                assertThat(db.get(handle, item.f0)).isEqualTo(item.f1);
             }
         }
     }
@@ -90,12 +89,12 @@ public class RocksDBWriteBatchWrapperTest {
             // format is [handleType|kvType|keyLen|key|valueLen|value]
             // more information please ref write_batch.cc in RocksDB
             writeBatchWrapper.put(handle, dummy, dummy);
-            assertEquals(initBatchSize + 16, writeBatchWrapper.getDataSize());
+            assertThat(writeBatchWrapper.getDataSize()).isEqualTo(initBatchSize + 16);
             writeBatchWrapper.put(handle, dummy, dummy);
-            assertEquals(initBatchSize + 32, writeBatchWrapper.getDataSize());
+            assertThat(writeBatchWrapper.getDataSize()).isEqualTo(initBatchSize + 32);
             writeBatchWrapper.put(handle, dummy, dummy);
             // will flush all, then an empty write batch
-            assertEquals(initBatchSize, writeBatchWrapper.getDataSize());
+            assertThat(writeBatchWrapper.getDataSize()).isEqualTo(initBatchSize);
         }
     }
 
@@ -117,10 +116,10 @@ public class RocksDBWriteBatchWrapperTest {
             for (int i = 1; i < 100; ++i) {
                 writeBatchWrapper.put(handle, dummy, dummy);
                 // each kv consumes 8 bytes
-                assertEquals(initBatchSize + 8 * i, writeBatchWrapper.getDataSize());
+                assertThat(writeBatchWrapper.getDataSize()).isEqualTo(initBatchSize + 8 * i);
             }
             writeBatchWrapper.put(handle, dummy, dummy);
-            assertEquals(initBatchSize, writeBatchWrapper.getDataSize());
+            assertThat(writeBatchWrapper.getDataSize()).isEqualTo(initBatchSize);
         }
     }
 }

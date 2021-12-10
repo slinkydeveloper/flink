@@ -34,8 +34,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for actions of {@link CheckpointCoordinator} on task failures. */
@@ -99,18 +98,18 @@ public class FailoverStrategyCheckpointCoordinatorTest extends TestLogger {
                                         .transitionState(ExecutionState.RUNNING));
 
         checkpointCoordinator.startCheckpointScheduler();
-        assertTrue(checkpointCoordinator.isCurrentPeriodicTriggerAvailable());
+        assertThat(checkpointCoordinator.isCurrentPeriodicTriggerAvailable()).isTrue();
         // only trigger the periodic scheduling
         // we can't trigger all scheduled task, because there is also a cancellation scheduled
         manualThreadExecutor.triggerPeriodicScheduledTasks();
         manualThreadExecutor.triggerAll();
-        assertEquals(1, checkpointCoordinator.getNumberOfPendingCheckpoints());
+        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints()).isEqualTo(1);
 
         for (int i = 1; i < maxConcurrentCheckpoints; i++) {
             checkpointCoordinator.triggerCheckpoint(false);
             manualThreadExecutor.triggerAll();
-            assertEquals(i + 1, checkpointCoordinator.getNumberOfPendingCheckpoints());
-            assertTrue(checkpointCoordinator.isCurrentPeriodicTriggerAvailable());
+            assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints()).isEqualTo(i + 1);
+            assertThat(checkpointCoordinator.isCurrentPeriodicTriggerAvailable()).isTrue();
         }
 
         // as we only support limited concurrent checkpoints, after checkpoint triggered more than
@@ -118,13 +117,13 @@ public class FailoverStrategyCheckpointCoordinatorTest extends TestLogger {
         // the currentPeriodicTrigger would been assigned as null.
         checkpointCoordinator.triggerCheckpoint(false);
         manualThreadExecutor.triggerAll();
-        assertEquals(
-                maxConcurrentCheckpoints, checkpointCoordinator.getNumberOfPendingCheckpoints());
+        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints())
+                .isEqualTo(maxConcurrentCheckpoints);
 
         checkpointCoordinator.abortPendingCheckpoints(
                 new CheckpointException(CheckpointFailureReason.JOB_FAILOVER_REGION));
         // after aborting checkpoints, we ensure currentPeriodicTrigger still available.
-        assertTrue(checkpointCoordinator.isCurrentPeriodicTriggerAvailable());
-        assertEquals(0, checkpointCoordinator.getNumberOfPendingCheckpoints());
+        assertThat(checkpointCoordinator.isCurrentPeriodicTriggerAvailable()).isTrue();
+        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints()).isEqualTo(0);
     }
 }

@@ -34,8 +34,7 @@ import static org.apache.flink.client.cli.CliFrontendParser.PYREQUIREMENTS_OPTIO
 import static org.apache.flink.client.cli.CliFrontendParser.PY_OPTION;
 import static org.apache.flink.python.PythonOptions.PYTHON_EXECUTABLE;
 import static org.apache.flink.python.PythonOptions.PYTHON_REQUIREMENTS;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link PythonProgramOptions}. */
 public class PythonProgramOptionsTest {
@@ -68,14 +67,16 @@ public class PythonProgramOptionsTest {
         PythonProgramOptions programOptions = (PythonProgramOptions) ProgramOptions.create(line);
         Configuration config = new Configuration();
         programOptions.applyToConfiguration(config);
-        assertEquals(
-                "test1.py,test2.zip,test3.egg,test4_dir", config.get(PythonOptions.PYTHON_FILES));
-        assertEquals("a.txt#b_dir", config.get(PYTHON_REQUIREMENTS));
-        assertEquals("c.zip#venv,d.zip", config.get(PythonOptions.PYTHON_ARCHIVES));
-        assertEquals("bin/python", config.get(PYTHON_EXECUTABLE));
-        assertArrayEquals(
-                new String[] {"--python", "test.py", "--pyModule", "test", "userarg1", "userarg2"},
-                programOptions.getProgramArgs());
+        assertThat(config.get(PythonOptions.PYTHON_FILES))
+                .isEqualTo("test1.py,test2.zip,test3.egg,test4_dir");
+        assertThat(config.get(PYTHON_REQUIREMENTS)).isEqualTo("a.txt#b_dir");
+        assertThat(config.get(PythonOptions.PYTHON_ARCHIVES)).isEqualTo("c.zip#venv,d.zip");
+        assertThat(config.get(PYTHON_EXECUTABLE)).isEqualTo("bin/python");
+        assertThat(programOptions.getProgramArgs())
+                .isEqualTo(
+                        new String[] {
+                            "--python", "test.py", "--pyModule", "test", "userarg1", "userarg2"
+                        });
     }
 
     @Test
@@ -93,14 +94,16 @@ public class PythonProgramOptionsTest {
         PythonProgramOptions programOptions = (PythonProgramOptions) ProgramOptions.create(line);
         Configuration config = new Configuration();
         programOptions.applyToConfiguration(config);
-        assertEquals(
-                "/absolute/a.py,relative/b.py,relative/c.py",
-                config.get(PythonOptions.PYTHON_FILES));
-        assertEquals("d.txt#e_dir", config.get(PYTHON_REQUIREMENTS));
-        assertEquals("g.zip,h.zip#data,h.zip#data2", config.get(PythonOptions.PYTHON_ARCHIVES));
-        assertEquals("/usr/bin/python", config.get(PYTHON_EXECUTABLE));
-        assertArrayEquals(
-                new String[] {"--python", "xxx.py", "--pyModule", "xxx", "userarg1", "userarg2"},
-                programOptions.getProgramArgs());
+        assertThat(config.get(PythonOptions.PYTHON_FILES))
+                .isEqualTo("/absolute/a.py,relative/b.py,relative/c.py");
+        assertThat(config.get(PYTHON_REQUIREMENTS)).isEqualTo("d.txt#e_dir");
+        assertThat(config.get(PythonOptions.PYTHON_ARCHIVES))
+                .isEqualTo("g.zip,h.zip#data,h.zip#data2");
+        assertThat(config.get(PYTHON_EXECUTABLE)).isEqualTo("/usr/bin/python");
+        assertThat(programOptions.getProgramArgs())
+                .isEqualTo(
+                        new String[] {
+                            "--python", "xxx.py", "--pyModule", "xxx", "userarg1", "userarg2"
+                        });
     }
 }

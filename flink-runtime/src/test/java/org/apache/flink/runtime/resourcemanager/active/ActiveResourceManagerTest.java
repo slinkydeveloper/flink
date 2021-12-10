@@ -60,13 +60,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests for {@link ActiveResourceManager}. */
@@ -111,23 +106,20 @@ public class ActiveResourceManagerTest extends TestLogger {
                             TaskExecutorProcessSpec taskExecutorProcessSpec =
                                     requestWorkerFromDriverFuture.get(
                                             TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-                            assertThat(
-                                    taskExecutorProcessSpec,
-                                    is(
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
+                            assertThat(taskExecutorProcessSpec)
+                                    .isEqualTo(
                                             TaskExecutorProcessUtils
                                                     .processSpecFromWorkerResourceSpec(
-                                                            flinkConfig, WORKER_RESOURCE_SPEC)));
-
+                                                            flinkConfig, WORKER_RESOURCE_SPEC));
                             // worker registered, verify registration succeeded
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceId);
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -153,8 +145,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                 driverBuilder.setRequestResourceFunction(
                         taskExecutorProcessSpec -> {
                             int idx = requestCount.getAndIncrement();
-                            assertThat(idx, lessThan(2));
-
+                            assertThat(idx).isLessThan(2);
                             requestWorkerFromDriverFutures
                                     .get(idx)
                                     .complete(taskExecutorProcessSpec);
@@ -176,17 +167,13 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(0)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-                            assertThat(
-                                    taskExecutorProcessSpec1,
-                                    is(
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
+                            assertThat(taskExecutorProcessSpec1)
+                                    .isEqualTo(
                                             TaskExecutorProcessUtils
                                                     .processSpecFromWorkerResourceSpec(
-                                                            flinkConfig, WORKER_RESOURCE_SPEC)));
-
+                                                            flinkConfig, WORKER_RESOURCE_SPEC));
                             // first request failed, verify requesting another worker from driver
                             runInMainThread(
                                     () ->
@@ -198,16 +185,16 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(1)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(taskExecutorProcessSpec2, is(taskExecutorProcessSpec1));
-
+                            assertThat(taskExecutorProcessSpec2)
+                                    .isEqualTo(taskExecutorProcessSpec1);
                             // second request allocated, verify registration succeed
                             runInMainThread(() -> resourceIdFutures.get(1).complete(tmResourceId));
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceId);
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -232,8 +219,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                 driverBuilder.setRequestResourceFunction(
                         taskExecutorProcessSpec -> {
                             int idx = requestCount.getAndIncrement();
-                            assertThat(idx, lessThan(2));
-
+                            assertThat(idx).isLessThan(2);
                             requestWorkerFromDriverFutures
                                     .get(idx)
                                     .complete(taskExecutorProcessSpec);
@@ -255,17 +241,13 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(0)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-                            assertThat(
-                                    taskExecutorProcessSpec1,
-                                    is(
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
+                            assertThat(taskExecutorProcessSpec1)
+                                    .isEqualTo(
                                             TaskExecutorProcessUtils
                                                     .processSpecFromWorkerResourceSpec(
-                                                            flinkConfig, WORKER_RESOURCE_SPEC)));
-
+                                                            flinkConfig, WORKER_RESOURCE_SPEC));
                             // first worker failed before register, verify requesting another worker
                             // from driver
                             runInMainThread(
@@ -278,15 +260,15 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(1)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(taskExecutorProcessSpec2, is(taskExecutorProcessSpec1));
-
+                            assertThat(taskExecutorProcessSpec2)
+                                    .isEqualTo(taskExecutorProcessSpec1);
                             // second worker registered, verify registration succeed
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceIds.get(1));
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -311,8 +293,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                 driverBuilder.setRequestResourceFunction(
                         taskExecutorProcessSpec -> {
                             int idx = requestCount.getAndIncrement();
-                            assertThat(idx, lessThan(2));
-
+                            assertThat(idx).isLessThan(2);
                             requestWorkerFromDriverFutures
                                     .get(idx)
                                     .complete(taskExecutorProcessSpec);
@@ -334,24 +315,20 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(0)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-                            assertThat(
-                                    taskExecutorProcessSpec1,
-                                    is(
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
+                            assertThat(taskExecutorProcessSpec1)
+                                    .isEqualTo(
                                             TaskExecutorProcessUtils
                                                     .processSpecFromWorkerResourceSpec(
-                                                            flinkConfig, WORKER_RESOURCE_SPEC)));
-
+                                                            flinkConfig, WORKER_RESOURCE_SPEC));
                             // first worker registered, verify registration succeed
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture1 =
                                     registerTaskExecutor(tmResourceIds.get(0));
                             assertThat(
-                                    registerTaskExecutorFuture1.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
-
+                                            registerTaskExecutorFuture1.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                             // first worker terminated, verify requesting another worker from driver
                             runInMainThread(
                                     () ->
@@ -363,15 +340,15 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(1)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(taskExecutorProcessSpec2, is(taskExecutorProcessSpec1));
-
+                            assertThat(taskExecutorProcessSpec2)
+                                    .isEqualTo(taskExecutorProcessSpec1);
                             // second worker registered, verify registration succeed
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture2 =
                                     registerTaskExecutor(tmResourceIds.get(1));
                             assertThat(
-                                    registerTaskExecutorFuture2.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture2.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -393,8 +370,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                 driverBuilder.setRequestResourceFunction(
                         taskExecutorProcessSpec -> {
                             int idx = requestCount.getAndIncrement();
-                            assertThat(idx, lessThan(2));
-
+                            assertThat(idx).isLessThan(2);
                             requestWorkerFromDriverFutures
                                     .get(idx)
                                     .complete(taskExecutorProcessSpec);
@@ -413,24 +389,20 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(0)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-                            assertThat(
-                                    taskExecutorProcessSpec,
-                                    is(
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
+                            assertThat(taskExecutorProcessSpec)
+                                    .isEqualTo(
                                             TaskExecutorProcessUtils
                                                     .processSpecFromWorkerResourceSpec(
-                                                            flinkConfig, WORKER_RESOURCE_SPEC)));
-
+                                                            flinkConfig, WORKER_RESOURCE_SPEC));
                             // worker registered, verify registration succeed
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceId);
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
-
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                             // worker terminated, verify not requesting new worker
                             runInMainThread(
                                             () -> {
@@ -444,7 +416,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                                                 return null;
                                             })
                                     .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-                            assertFalse(requestWorkerFromDriverFutures.get(1).isDone());
+                            assertThat(requestWorkerFromDriverFutures.get(1).isDone()).isFalse();
                         });
             }
         };
@@ -521,8 +493,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                 driverBuilder.setRequestResourceFunction(
                         taskExecutorProcessSpec -> {
                             int idx = requestCount.getAndIncrement();
-                            assertThat(idx, lessThan(2));
-
+                            assertThat(idx).isLessThan(2);
                             requestWorkerFromDriverFutures
                                     .get(idx)
                                     .complete(System.currentTimeMillis());
@@ -544,10 +515,8 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(0)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
                             // first worker failed before register, verify requesting another worker
                             // from driver
                             runInMainThread(
@@ -560,18 +529,17 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(1)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
                             // validate trying creating worker twice, with proper interval
-                            assertThat(
-                                    (t2 - t1),
-                                    greaterThanOrEqualTo(
-                                            TESTING_START_WORKER_INTERVAL.toMilliseconds()));
+                            assertThat((t2 - t1))
+                                    .isGreaterThanOrEqualTo(
+                                            TESTING_START_WORKER_INTERVAL.toMilliseconds());
                             // second worker registered, verify registration succeed
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceIds.get(1));
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -601,8 +569,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                 driverBuilder.setRequestResourceFunction(
                         taskExecutorProcessSpec -> {
                             int idx = requestCount.getAndIncrement();
-                            assertThat(idx, lessThan(2));
-
+                            assertThat(idx).isLessThan(2);
                             requestWorkerFromDriverFutures
                                     .get(idx)
                                     .complete(System.currentTimeMillis());
@@ -620,10 +587,8 @@ public class ActiveResourceManagerTest extends TestLogger {
                                             () ->
                                                     getResourceManager()
                                                             .startNewWorker(WORKER_RESOURCE_SPEC));
-                            assertThat(
-                                    startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(true));
-
+                            assertThat(startNewWorkerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(true);
                             long t1 =
                                     requestWorkerFromDriverFutures
                                             .get(0)
@@ -639,20 +604,18 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     requestWorkerFromDriverFutures
                                             .get(1)
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-
                             // validate trying creating worker twice, with proper interval
-                            assertThat(
-                                    (t2 - t1),
-                                    greaterThanOrEqualTo(
-                                            TESTING_START_WORKER_INTERVAL.toMilliseconds()));
-
+                            assertThat((t2 - t1))
+                                    .isGreaterThanOrEqualTo(
+                                            TESTING_START_WORKER_INTERVAL.toMilliseconds());
                             // second worker registered, verify registration succeed
                             resourceIdFutures.get(1).complete(tmResourceId);
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceId);
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -675,8 +638,9 @@ public class ActiveResourceManagerTest extends TestLogger {
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(tmResourceId);
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Success.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Success.class);
                         });
             }
         };
@@ -692,8 +656,9 @@ public class ActiveResourceManagerTest extends TestLogger {
                             CompletableFuture<RegistrationResponse> registerTaskExecutorFuture =
                                     registerTaskExecutor(ResourceID.generate());
                             assertThat(
-                                    registerTaskExecutorFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    instanceOf(RegistrationResponse.Rejection.class));
+                                            registerTaskExecutorFuture.get(
+                                                    TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isInstanceOf(RegistrationResponse.Rejection.class);
                         });
             }
         };
@@ -711,7 +676,7 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     getFatalErrorHandler()
                                             .getErrorFuture()
                                             .get(TIMEOUT_SEC, TimeUnit.SECONDS);
-                            assertThat(reportedError, is(fatalError));
+                            assertThat(reportedError).isEqualTo(fatalError);
                         });
             }
         };
@@ -742,11 +707,9 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     () ->
                                             getResourceManager()
                                                     .startNewWorker(WORKER_RESOURCE_SPEC));
-
                             // verify worker is released due to not registered in time
-                            assertThat(
-                                    releaseResourceFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(tmResourceId));
+                            assertThat(releaseResourceFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(tmResourceId);
                         });
             }
         };
@@ -778,31 +741,24 @@ public class ActiveResourceManagerTest extends TestLogger {
                                     () ->
                                             getResourceManager()
                                                     .startNewWorker(WORKER_RESOURCE_SPEC));
-
                             // resource allocation takes longer than worker registration timeout
                             try {
                                 Thread.sleep(TESTING_START_WORKER_TIMEOUT_MS * 2);
                             } catch (InterruptedException e) {
-                                fail();
+                                fail("unknown failure");
                             }
-
                             final long start = System.nanoTime();
-
                             runInMainThread(() -> requestResourceFuture.complete(tmResourceId));
-
                             // worker registered, verify not released due to timeout
                             RegistrationResponse registrationResponse =
                                     registerTaskExecutor(tmResourceId).join();
-
                             final long registrationTime = (System.nanoTime() - start) / 1_000_000;
-
                             assumeTrue(
                                     "The registration must not take longer than the start worker timeout. If it does, then this indicates a very slow machine.",
                                     registrationTime < TESTING_START_WORKER_TIMEOUT_MS);
-                            assertThat(
-                                    registrationResponse,
-                                    instanceOf(RegistrationResponse.Success.class));
-                            assertFalse(releaseResourceFuture.isDone());
+                            assertThat(registrationResponse)
+                                    .isInstanceOf(RegistrationResponse.Success.class);
+                            assertThat(releaseResourceFuture.isDone()).isFalse();
                         });
             }
         };
@@ -830,11 +786,9 @@ public class ActiveResourceManagerTest extends TestLogger {
                                             getResourceManager()
                                                     .onPreviousAttemptWorkersRecovered(
                                                             Collections.singleton(tmResourceId)));
-
                             // verify worker is released due to not registered in time
-                            assertThat(
-                                    releaseResourceFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS),
-                                    is(tmResourceId));
+                            assertThat(releaseResourceFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS))
+                                    .isEqualTo(tmResourceId);
                         });
             }
         };

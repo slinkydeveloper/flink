@@ -36,7 +36,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** These check whether the object-reuse execution mode does really reuse objects. */
 @SuppressWarnings("serial")
@@ -93,7 +93,7 @@ public class ObjectReuseITCase extends MultipleProgramsTestBase {
                                 });
 
         Tuple2<String, Integer> res = result.collect().get(0);
-        assertEquals(new Tuple2<>("a", 60), res);
+        assertThat(res).isEqualTo(new Tuple2<>("a", 60));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class ObjectReuseITCase extends MultipleProgramsTestBase {
                         });
 
         Tuple2<String, Integer> res = result.collect().get(0);
-        assertEquals(new Tuple2<>("a", 60), res);
+        assertThat(res).isEqualTo(new Tuple2<>("a", 60));
     }
 
     @Test
@@ -182,7 +182,7 @@ public class ObjectReuseITCase extends MultipleProgramsTestBase {
                                 new Tuple2<>("a", 4),
                                 new Tuple2<>("a", 5));
 
-        assertEquals(expected, is);
+        assertThat(is).isEqualTo(expected);
     }
 
     @Test
@@ -235,7 +235,7 @@ public class ObjectReuseITCase extends MultipleProgramsTestBase {
                                 new Tuple2<>("a", 4),
                                 new Tuple2<>("a", 5));
 
-        assertEquals(expected, is);
+        assertThat(is).isEqualTo(expected);
     }
 
     @Parameterized.Parameters(name = "Execution mode = CLUSTER, Reuse = {0}")

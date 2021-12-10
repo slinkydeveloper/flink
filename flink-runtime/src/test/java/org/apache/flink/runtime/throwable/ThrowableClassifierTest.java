@@ -23,87 +23,89 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test {@link ThrowableClassifier}. */
 public class ThrowableClassifierTest extends TestLogger {
 
     @Test
     public void testThrowableType_NonRecoverable() {
-        assertEquals(
-                ThrowableType.NonRecoverableError,
-                ThrowableClassifier.getThrowableType(
-                        new SuppressRestartsException(new Exception(""))));
+        assertThat(
+                        ThrowableClassifier.getThrowableType(
+                                new SuppressRestartsException(new Exception(""))))
+                .isEqualTo(ThrowableType.NonRecoverableError);
     }
 
     @Test
     public void testThrowableType_Recoverable() {
-        assertEquals(
-                ThrowableType.RecoverableError,
-                ThrowableClassifier.getThrowableType(new Exception("")));
-        assertEquals(
-                ThrowableType.RecoverableError,
-                ThrowableClassifier.getThrowableType(new TestRecoverableErrorException()));
+        assertThat(ThrowableClassifier.getThrowableType(new Exception("")))
+                .isEqualTo(ThrowableType.RecoverableError);
+        assertThat(ThrowableClassifier.getThrowableType(new TestRecoverableErrorException()))
+                .isEqualTo(ThrowableType.RecoverableError);
     }
 
     @Test
     public void testThrowableType_EnvironmentError() {
-        assertEquals(
-                ThrowableType.EnvironmentError,
-                ThrowableClassifier.getThrowableType(new TestEnvironmentErrorException()));
+        assertThat(ThrowableClassifier.getThrowableType(new TestEnvironmentErrorException()))
+                .isEqualTo(ThrowableType.EnvironmentError);
     }
 
     @Test
     public void testThrowableType_PartitionDataMissingError() {
-        assertEquals(
-                ThrowableType.PartitionDataMissingError,
-                ThrowableClassifier.getThrowableType(new TestPartitionDataMissingErrorException()));
+        assertThat(
+                        ThrowableClassifier.getThrowableType(
+                                new TestPartitionDataMissingErrorException()))
+                .isEqualTo(ThrowableType.PartitionDataMissingError);
     }
 
     @Test
     public void testThrowableType_InheritError() {
-        assertEquals(
-                ThrowableType.PartitionDataMissingError,
-                ThrowableClassifier.getThrowableType(
-                        new TestPartitionDataMissingErrorSubException()));
+        assertThat(
+                        ThrowableClassifier.getThrowableType(
+                                new TestPartitionDataMissingErrorSubException()))
+                .isEqualTo(ThrowableType.PartitionDataMissingError);
     }
 
     @Test
     public void testFindThrowableOfThrowableType() {
         // no throwable type
-        assertFalse(
-                ThrowableClassifier.findThrowableOfThrowableType(
-                                new Exception(), ThrowableType.RecoverableError)
-                        .isPresent());
+        assertThat(
+                        ThrowableClassifier.findThrowableOfThrowableType(
+                                        new Exception(), ThrowableType.RecoverableError)
+                                .isPresent())
+                .isFalse();
 
         // no recoverable throwable type
-        assertFalse(
-                ThrowableClassifier.findThrowableOfThrowableType(
-                                new TestPartitionDataMissingErrorException(),
-                                ThrowableType.RecoverableError)
-                        .isPresent());
+        assertThat(
+                        ThrowableClassifier.findThrowableOfThrowableType(
+                                        new TestPartitionDataMissingErrorException(),
+                                        ThrowableType.RecoverableError)
+                                .isPresent())
+                .isFalse();
 
         // direct recoverable throwable
-        assertTrue(
-                ThrowableClassifier.findThrowableOfThrowableType(
-                                new TestRecoverableErrorException(), ThrowableType.RecoverableError)
-                        .isPresent());
+        assertThat(
+                        ThrowableClassifier.findThrowableOfThrowableType(
+                                        new TestRecoverableErrorException(),
+                                        ThrowableType.RecoverableError)
+                                .isPresent())
+                .isTrue();
 
         // nested recoverable throwable
-        assertTrue(
-                ThrowableClassifier.findThrowableOfThrowableType(
-                                new Exception(new TestRecoverableErrorException()),
-                                ThrowableType.RecoverableError)
-                        .isPresent());
+        assertThat(
+                        ThrowableClassifier.findThrowableOfThrowableType(
+                                        new Exception(new TestRecoverableErrorException()),
+                                        ThrowableType.RecoverableError)
+                                .isPresent())
+                .isTrue();
 
         // inherit recoverable throwable
-        assertTrue(
-                ThrowableClassifier.findThrowableOfThrowableType(
-                                new TestRecoverableFailureSubException(),
-                                ThrowableType.RecoverableError)
-                        .isPresent());
+        assertThat(
+                        ThrowableClassifier.findThrowableOfThrowableType(
+                                        new TestRecoverableFailureSubException(),
+                                        ThrowableType.RecoverableError)
+                                .isPresent())
+                .isTrue();
     }
 
     @ThrowableAnnotation(ThrowableType.PartitionDataMissingError)

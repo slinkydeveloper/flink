@@ -26,8 +26,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.ObjectMap
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the savepoint request bodies. */
 public class SavepointHandlerRequestBodyTest {
@@ -37,9 +36,9 @@ public class SavepointHandlerRequestBodyTest {
         final SavepointTriggerRequestBody defaultParseResult =
                 getDefaultParseResult(SavepointTriggerRequestBody.class);
 
-        assertThat(defaultParseResult.isCancelJob(), is(false));
+        assertThat(defaultParseResult.isCancelJob()).isEqualTo(false);
 
-        assertThat(defaultParseResult.getTargetDirectory().isPresent(), is(false));
+        assertThat(defaultParseResult.getTargetDirectory().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -48,9 +47,9 @@ public class SavepointHandlerRequestBodyTest {
         final StopWithSavepointRequestBody defaultParseResult =
                 getDefaultParseResult(StopWithSavepointRequestBody.class);
 
-        assertThat(defaultParseResult.shouldDrain(), is(false));
+        assertThat(defaultParseResult.shouldDrain()).isEqualTo(false);
 
-        assertThat(defaultParseResult.getTargetDirectory().isPresent(), is(false));
+        assertThat(defaultParseResult.getTargetDirectory().isPresent()).isEqualTo(false);
     }
 
     private static <T> T getDefaultParseResult(Class<T> clazz) throws JsonProcessingException {

@@ -42,13 +42,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link ExternalSorter}. */
 public class ExternalSorterTest extends TestLogger {
@@ -85,12 +81,12 @@ public class ExternalSorterTest extends TestLogger {
             final Collection<TestingInMemorySorter<?>> inMemorySorters =
                     inMemorySorterFactory.getInMemorySorters();
 
-            assertThat(inMemorySorters, is(not(empty())));
+            assertThat(inMemorySorters).isEqualTo(not(empty()));
 
             unilateralSortMerger.close();
 
             for (TestingInMemorySorter<?> inMemorySorter : inMemorySorters) {
-                assertThat(inMemorySorter.isDisposed(), is(true));
+                assertThat(inMemorySorter.isDisposed()).isEqualTo(true);
             }
         } finally {
             memoryManager.shutdown();
@@ -134,8 +130,8 @@ public class ExternalSorterTest extends TestLogger {
             // wait for the results
             unilateralSortMerger.getIterator();
             unilateralSortMerger.close();
-            assertTrue("Combiner was not opened", combiner.isOpen);
-            assertTrue("Combiner was not closed", combiner.isClosed);
+            assertThat(combiner.isOpen).as("Combiner was not opened").isTrue();
+            assertThat(combiner.isClosed).as("Combiner was not closed").isTrue();
         } finally {
             memoryManager.shutdown();
         }
@@ -152,9 +148,9 @@ public class ExternalSorterTest extends TestLogger {
 
         @Override
         public void open(Configuration parameters) throws Exception {
-            assertFalse("UDF was already opened", isOpen);
+            assertThat(isOpen).as("UDF was already opened").isFalse();
             isOpen = true;
-            assertThat(parameters.get(testOption), equalTo("TEST"));
+            assertThat(parameters.get(testOption)).isEqualTo("TEST");
         }
 
         @Override

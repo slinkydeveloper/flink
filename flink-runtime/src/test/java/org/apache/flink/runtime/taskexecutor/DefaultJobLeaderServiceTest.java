@@ -49,9 +49,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link DefaultJobLeaderService}. */
 public class DefaultJobLeaderServiceTest extends TestLogger {
@@ -184,7 +183,7 @@ public class DefaultJobLeaderServiceTest extends TestLogger {
             leaderRetrievalService.notifyListener(jobMasterGateway.getAddress(), leaderSessionId);
 
             // wait for the first leadership
-            assertThat(leadershipQueue.take(), is(jobId));
+            assertThat(leadershipQueue.take()).isEqualTo(jobId);
 
             // revoke the leadership
             leaderRetrievalService.notifyListener(null, null);
@@ -194,7 +193,7 @@ public class DefaultJobLeaderServiceTest extends TestLogger {
             leaderRetrievalService.notifyListener(jobMasterGateway.getAddress(), leaderSessionId);
 
             // check that we obtain the leadership a second time
-            assertThat(leadershipQueue.take(), is(jobId));
+            assertThat(leadershipQueue.take()).isEqualTo(jobId);
         } finally {
             jobLeaderService.stop();
         }
@@ -278,7 +277,7 @@ public class DefaultJobLeaderServiceTest extends TestLogger {
             leaderRetrievalService.notifyListener(
                     jobMasterGateway.getAddress(), jobMasterGateway.getFencingToken().toUUID());
 
-            assertThat(rejectedRegistrationFuture.get(), is(jobId));
+            assertThat(rejectedRegistrationFuture.get()).isEqualTo(jobId);
         } finally {
             jobLeaderService.stop();
         }

@@ -40,7 +40,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests {@link KeyedCoProcessOperator}. */
 public class KeyedCoProcessOperatorTest extends TestLogger {
@@ -442,7 +442,7 @@ public class KeyedCoProcessOperatorTest extends TestLogger {
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
 
-            assertEquals(TimeDomain.EVENT_TIME, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(TimeDomain.EVENT_TIME);
             out.collect(ctx.getCurrentKey() + ":" + 1777);
         }
     }
@@ -484,7 +484,7 @@ public class KeyedCoProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(TimeDomain.EVENT_TIME, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(TimeDomain.EVENT_TIME);
             out.collect("STATE:" + getRuntimeContext().getState(state).value());
         }
     }
@@ -512,7 +512,7 @@ public class KeyedCoProcessOperatorTest extends TestLogger {
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
 
-            assertEquals(TimeDomain.PROCESSING_TIME, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(TimeDomain.PROCESSING_TIME);
             out.collect("" + 1777);
         }
     }
@@ -586,7 +586,7 @@ public class KeyedCoProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(TimeDomain.PROCESSING_TIME, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(TimeDomain.PROCESSING_TIME);
             out.collect("STATE:" + getRuntimeContext().getState(state).value());
         }
     }

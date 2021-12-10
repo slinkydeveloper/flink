@@ -28,9 +28,9 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link Transformation}. */
 public class TransformationTest extends TestLogger {
@@ -48,13 +48,12 @@ public class TransformationTest extends TestLogger {
                 ManagedMemoryUseCase.OPERATOR, 123);
         transformation.declareManagedMemoryUseCaseAtSlotScope(ManagedMemoryUseCase.STATE_BACKEND);
         assertThat(
-                transformation
-                        .getManagedMemoryOperatorScopeUseCaseWeights()
-                        .get(ManagedMemoryUseCase.OPERATOR),
-                is(123));
-        assertThat(
-                transformation.getManagedMemorySlotScopeUseCases(),
-                contains(ManagedMemoryUseCase.STATE_BACKEND));
+                        transformation
+                                .getManagedMemoryOperatorScopeUseCaseWeights()
+                                .get(ManagedMemoryUseCase.OPERATOR))
+                .isEqualTo(123);
+        assertThat(transformation.getManagedMemorySlotScopeUseCases())
+                .satisfies(matching(contains(ManagedMemoryUseCase.STATE_BACKEND)));
     }
 
     @Test(expected = IllegalArgumentException.class)

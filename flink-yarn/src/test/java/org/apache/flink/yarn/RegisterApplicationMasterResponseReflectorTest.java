@@ -37,12 +37,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.flink.yarn.YarnTestUtils.isHadoopVersionGreaterThanOrEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests for {@link RegisterApplicationMasterResponseReflector}. */
@@ -68,7 +67,7 @@ public class RegisterApplicationMasterResponseReflectorTest extends TestLogger {
                 registerApplicationMasterResponseReflector.getContainersFromPreviousAttemptsUnsafe(
                         new HasMethod());
 
-        assertThat(containersFromPreviousAttemptsUnsafe, hasSize(1));
+        assertThat(containersFromPreviousAttemptsUnsafe).satisfies(matching(hasSize(1)));
     }
 
     @Test
@@ -81,7 +80,7 @@ public class RegisterApplicationMasterResponseReflectorTest extends TestLogger {
                 registerApplicationMasterResponseReflector.getContainersFromPreviousAttemptsUnsafe(
                         new Object());
 
-        assertThat(containersFromPreviousAttemptsUnsafe, empty());
+        assertThat(containersFromPreviousAttemptsUnsafe).satisfies(matching(empty()));
     }
 
     @Test
@@ -95,10 +94,11 @@ public class RegisterApplicationMasterResponseReflectorTest extends TestLogger {
                 registerApplicationMasterResponseReflector =
                         new RegisterApplicationMasterResponseReflector(LOG);
 
-        assertTrue(
-                registerApplicationMasterResponseReflector
-                        .getGetContainersFromPreviousAttemptsMethod()
-                        .isPresent());
+        assertThat(
+                        registerApplicationMasterResponseReflector
+                                .getGetContainersFromPreviousAttemptsMethod()
+                                .isPresent())
+                .isTrue();
     }
 
     @Test
@@ -111,8 +111,9 @@ public class RegisterApplicationMasterResponseReflectorTest extends TestLogger {
                 registerApplicationMasterResponseReflector.getSchedulerResourceTypeNamesUnsafe(
                         new HasMethod());
 
-        assertTrue(schedulerResourceTypeNames.isPresent());
-        assertThat(schedulerResourceTypeNames.get(), containsInAnyOrder("MEMORY", "CPU"));
+        assertThat(schedulerResourceTypeNames.isPresent()).isTrue();
+        assertThat(schedulerResourceTypeNames.get())
+                .satisfies(matching(containsInAnyOrder("MEMORY", "CPU")));
     }
 
     @Test
@@ -125,7 +126,7 @@ public class RegisterApplicationMasterResponseReflectorTest extends TestLogger {
                 registerApplicationMasterResponseReflector.getSchedulerResourceTypeNamesUnsafe(
                         new Object());
 
-        assertFalse(schedulerResourceTypeNames.isPresent());
+        assertThat(schedulerResourceTypeNames.isPresent()).isFalse();
     }
 
     @Test
@@ -139,10 +140,11 @@ public class RegisterApplicationMasterResponseReflectorTest extends TestLogger {
                 registerApplicationMasterResponseReflector =
                         new RegisterApplicationMasterResponseReflector(LOG);
 
-        assertTrue(
-                registerApplicationMasterResponseReflector
-                        .getGetSchedulerResourceTypesMethod()
-                        .isPresent());
+        assertThat(
+                        registerApplicationMasterResponseReflector
+                                .getGetSchedulerResourceTypesMethod()
+                                .isPresent())
+                .isTrue();
     }
 
     /**

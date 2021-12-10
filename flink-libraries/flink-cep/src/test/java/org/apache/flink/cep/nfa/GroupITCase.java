@@ -36,7 +36,7 @@ import java.util.List;
 import static org.apache.flink.cep.utils.NFATestUtilities.comparePatterns;
 import static org.apache.flink.cep.utils.NFATestUtilities.feedNFA;
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT tests covering {@link GroupPattern}. */
 @SuppressWarnings("unchecked")
@@ -1467,7 +1467,7 @@ public class GroupITCase extends TestLogger {
                         Lists.newArrayList(c, a1, b1, d),
                         Lists.newArrayList(c, a1, b1, a2, b2, d)));
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 }

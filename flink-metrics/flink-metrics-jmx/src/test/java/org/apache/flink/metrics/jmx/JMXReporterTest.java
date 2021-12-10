@@ -47,7 +47,7 @@ import java.util.Hashtable;
 import java.util.Map;
 
 import static org.apache.flink.metrics.jmx.JMXReporter.JMX_DOMAIN_PREFIX;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the JMXReporter. */
 public class JMXReporterTest extends TestLogger {
@@ -73,19 +73,19 @@ public class JMXReporterTest extends TestLogger {
 
     @Test
     public void testReplaceInvalidChars() {
-        assertEquals("", JMXReporter.replaceInvalidChars(""));
-        assertEquals("abc", JMXReporter.replaceInvalidChars("abc"));
-        assertEquals("abc", JMXReporter.replaceInvalidChars("abc\""));
-        assertEquals("abc", JMXReporter.replaceInvalidChars("\"abc"));
-        assertEquals("abc", JMXReporter.replaceInvalidChars("\"abc\""));
-        assertEquals("abc", JMXReporter.replaceInvalidChars("\"a\"b\"c\""));
-        assertEquals("", JMXReporter.replaceInvalidChars("\"\"\"\""));
-        assertEquals("____", JMXReporter.replaceInvalidChars("    "));
-        assertEquals("ab_-(c)-", JMXReporter.replaceInvalidChars("\"ab ;(c)'"));
-        assertEquals("a_b_c", JMXReporter.replaceInvalidChars("a b c"));
-        assertEquals("a_b_c_", JMXReporter.replaceInvalidChars("a b c "));
-        assertEquals("a-b-c-", JMXReporter.replaceInvalidChars("a;b'c*"));
-        assertEquals("a------b------c", JMXReporter.replaceInvalidChars("a,=;:?'b,=;:?'c"));
+        assertThat(JMXReporter.replaceInvalidChars("")).isEqualTo("");
+        assertThat(JMXReporter.replaceInvalidChars("abc")).isEqualTo("abc");
+        assertThat(JMXReporter.replaceInvalidChars("abc\"")).isEqualTo("abc");
+        assertThat(JMXReporter.replaceInvalidChars("\"abc")).isEqualTo("abc");
+        assertThat(JMXReporter.replaceInvalidChars("\"abc\"")).isEqualTo("abc");
+        assertThat(JMXReporter.replaceInvalidChars("\"a\"b\"c\"")).isEqualTo("abc");
+        assertThat(JMXReporter.replaceInvalidChars("\"\"\"\"")).isEqualTo("");
+        assertThat(JMXReporter.replaceInvalidChars("    ")).isEqualTo("____");
+        assertThat(JMXReporter.replaceInvalidChars("\"ab ;(c)'")).isEqualTo("ab_-(c)-");
+        assertThat(JMXReporter.replaceInvalidChars("a b c")).isEqualTo("a_b_c");
+        assertThat(JMXReporter.replaceInvalidChars("a b c ")).isEqualTo("a_b_c_");
+        assertThat(JMXReporter.replaceInvalidChars("a;b'c*")).isEqualTo("a-b-c-");
+        assertThat(JMXReporter.replaceInvalidChars("a,=;:?'b,=;:?'c")).isEqualTo("a------b------c");
     }
 
     /** Verifies that the JMXReporter properly generates the JMX table. */
@@ -98,9 +98,9 @@ public class JMXReporterTest extends TestLogger {
 
         Hashtable<String, String> jmxTable = JMXReporter.generateJmxTable(vars);
 
-        assertEquals("value0", jmxTable.get("key0"));
-        assertEquals("value1", jmxTable.get("key1"));
-        assertEquals("value2_(test)------", jmxTable.get("key2------"));
+        assertThat(jmxTable.get("key0")).isEqualTo("value0");
+        assertThat(jmxTable.get("key1")).isEqualTo("value1");
+        assertThat(jmxTable.get("key2------")).isEqualTo("value2_(test)------");
     }
 
     /**
@@ -131,8 +131,8 @@ public class JMXReporterTest extends TestLogger {
                         JMX_DOMAIN_PREFIX + "taskmanager.rep2",
                         JMXReporter.generateJmxTable(metricGroup.getAllVariables()));
 
-        assertEquals(1, mBeanServer.getAttribute(objectName1, "Value"));
-        assertEquals(2, mBeanServer.getAttribute(objectName2, "Value"));
+        assertThat(mBeanServer.getAttribute(objectName1, "Value")).isEqualTo(1);
+        assertThat(mBeanServer.getAttribute(objectName2, "Value")).isEqualTo(2);
 
         rep1.notifyOfRemovedMetric(g1, "rep1", null);
         rep1.notifyOfRemovedMetric(g2, "rep2", null);
@@ -169,8 +169,8 @@ public class JMXReporterTest extends TestLogger {
         JMXConnector jmxCon1 = JMXConnectorFactory.connect(url1);
         MBeanServerConnection mCon1 = jmxCon1.getMBeanServerConnection();
 
-        assertEquals(1, mCon1.getAttribute(objectName1, "Value"));
-        assertEquals(2, mCon1.getAttribute(objectName2, "Value"));
+        assertThat(mCon1.getAttribute(objectName1, "Value")).isEqualTo(1);
+        assertThat(mCon1.getAttribute(objectName2, "Value")).isEqualTo(2);
 
         jmxCon1.close();
 
@@ -184,11 +184,11 @@ public class JMXReporterTest extends TestLogger {
         JMXConnector jmxCon2 = JMXConnectorFactory.connect(url2);
         MBeanServerConnection mCon2 = jmxCon2.getMBeanServerConnection();
 
-        assertEquals(1, mCon2.getAttribute(objectName1, "Value"));
-        assertEquals(2, mCon2.getAttribute(objectName2, "Value"));
+        assertThat(mCon2.getAttribute(objectName1, "Value")).isEqualTo(1);
+        assertThat(mCon2.getAttribute(objectName2, "Value")).isEqualTo(2);
 
         // JMX Server URL should be identical since we made it static.
-        assertEquals(url1, url2);
+        assertThat(url2).isEqualTo(url1);
 
         rep1.notifyOfRemovedMetric(g1, "rep1", null);
         rep1.notifyOfRemovedMetric(g2, "rep2", null);
@@ -221,30 +221,27 @@ public class JMXReporterTest extends TestLogger {
 
         MBeanAttributeInfo[] attributeInfos = info.getAttributes();
 
-        assertEquals(11, attributeInfos.length);
+        assertThat(attributeInfos.length).isEqualTo(11);
 
-        assertEquals(histogram.getCount(), mBeanServer.getAttribute(objectName, "Count"));
+        assertThat(mBeanServer.getAttribute(objectName, "Count")).isEqualTo(histogram.getCount());
         HistogramStatistics statistics = histogram.getStatistics();
-        assertEquals(statistics.getMean(), mBeanServer.getAttribute(objectName, "Mean"));
-        assertEquals(statistics.getStdDev(), mBeanServer.getAttribute(objectName, "StdDev"));
-        assertEquals(statistics.getMax(), mBeanServer.getAttribute(objectName, "Max"));
-        assertEquals(statistics.getMin(), mBeanServer.getAttribute(objectName, "Min"));
-        assertEquals(statistics.getQuantile(0.5), mBeanServer.getAttribute(objectName, "Median"));
-        assertEquals(
-                statistics.getQuantile(0.75),
-                mBeanServer.getAttribute(objectName, "75thPercentile"));
-        assertEquals(
-                statistics.getQuantile(0.95),
-                mBeanServer.getAttribute(objectName, "95thPercentile"));
-        assertEquals(
-                statistics.getQuantile(0.98),
-                mBeanServer.getAttribute(objectName, "98thPercentile"));
-        assertEquals(
-                statistics.getQuantile(0.99),
-                mBeanServer.getAttribute(objectName, "99thPercentile"));
-        assertEquals(
-                statistics.getQuantile(0.999),
-                mBeanServer.getAttribute(objectName, "999thPercentile"));
+        assertThat(mBeanServer.getAttribute(objectName, "Mean")).isEqualTo(statistics.getMean());
+        assertThat(mBeanServer.getAttribute(objectName, "StdDev"))
+                .isEqualTo(statistics.getStdDev());
+        assertThat(mBeanServer.getAttribute(objectName, "Max")).isEqualTo(statistics.getMax());
+        assertThat(mBeanServer.getAttribute(objectName, "Min")).isEqualTo(statistics.getMin());
+        assertThat(mBeanServer.getAttribute(objectName, "Median"))
+                .isEqualTo(statistics.getQuantile(0.5));
+        assertThat(mBeanServer.getAttribute(objectName, "75thPercentile"))
+                .isEqualTo(statistics.getQuantile(0.75));
+        assertThat(mBeanServer.getAttribute(objectName, "95thPercentile"))
+                .isEqualTo(statistics.getQuantile(0.95));
+        assertThat(mBeanServer.getAttribute(objectName, "98thPercentile"))
+                .isEqualTo(statistics.getQuantile(0.98));
+        assertThat(mBeanServer.getAttribute(objectName, "99thPercentile"))
+                .isEqualTo(statistics.getQuantile(0.99));
+        assertThat(mBeanServer.getAttribute(objectName, "999thPercentile"))
+                .isEqualTo(statistics.getQuantile(0.999));
     }
 
     /** Tests that meters are properly reported via the JMXReporter. */
@@ -268,9 +265,9 @@ public class JMXReporterTest extends TestLogger {
 
         MBeanAttributeInfo[] attributeInfos = info.getAttributes();
 
-        assertEquals(2, attributeInfos.length);
+        assertThat(attributeInfos.length).isEqualTo(2);
 
-        assertEquals(meter.getRate(), mBeanServer.getAttribute(objectName, "Rate"));
-        assertEquals(meter.getCount(), mBeanServer.getAttribute(objectName, "Count"));
+        assertThat(mBeanServer.getAttribute(objectName, "Rate")).isEqualTo(meter.getRate());
+        assertThat(mBeanServer.getAttribute(objectName, "Count")).isEqualTo(meter.getCount());
     }
 }

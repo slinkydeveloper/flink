@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.flink.configuration.MetricOptions.REPORTERS_LIST;
 import static org.apache.flink.configuration.MetricOptions.SYSTEM_RESOURCE_METRICS;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for proper initialization of the system resource metrics. */
 public class SystemResourcesMetricsITCase extends TestLogger {
@@ -71,7 +71,7 @@ public class SystemResourcesMetricsITCase extends TestLogger {
 
     @Test
     public void startTaskManagerAndCheckForRegisteredSystemMetrics() throws Exception {
-        assertEquals(1, TestReporter.OPENED_REPORTERS.size());
+        assertThat(TestReporter.OPENED_REPORTERS.size()).isEqualTo(1);
         TestReporter reporter = TestReporter.OPENED_REPORTERS.iterator().next();
 
         reporter.patternsExhaustedFuture.get(10, TimeUnit.SECONDS);

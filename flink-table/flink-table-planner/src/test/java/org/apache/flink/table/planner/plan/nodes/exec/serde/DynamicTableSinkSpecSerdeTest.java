@@ -58,9 +58,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link DynamicTableSinkSpec} serialization and deserialization. */
 @RunWith(Parameterized.class)
@@ -90,15 +88,16 @@ public class DynamicTableSinkSpecSerdeTest {
         }
         String json = writer.toString();
         DynamicTableSinkSpec actual = mapper.readValue(json, DynamicTableSinkSpec.class);
-        assertEquals(spec, actual);
-        assertNull(actual.getClassLoader());
+        assertThat(actual).isEqualTo(spec);
+        assertThat(actual.getClassLoader()).isNull();
         actual.setClassLoader(classLoader);
-        assertNull(actual.getReadableConfig());
+        assertThat(actual.getReadableConfig()).isNull();
         actual.setReadableConfig(serdeCtx.getConfiguration());
         TableEnvironmentImpl tableEnv =
                 (TableEnvironmentImpl)
                         TableEnvironment.create(EnvironmentSettings.inStreamingMode());
-        assertNotNull(actual.getTableSink(((PlannerBase) tableEnv.getPlanner()).getFlinkContext()));
+        assertThat(actual.getTableSink(((PlannerBase) tableEnv.getPlanner()).getFlinkContext()))
+                .isNotNull();
     }
 
     @Parameterized.Parameters(name = "{0}")

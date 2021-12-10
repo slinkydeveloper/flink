@@ -55,10 +55,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.function.Consumer;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests the restart behaviour of the {@link ExecutionGraph}. */
 public class ExecutionGraphRestartTest extends TestLogger {
@@ -108,11 +106,11 @@ public class ExecutionGraphRestartTest extends TestLogger {
             startScheduling(scheduler);
             offerSlots(slotPool, NUM_TASKS);
 
-            assertEquals(numTasksExceedSlotPool, slotPool.getNumPendingRequests());
+            assertThat(slotPool.getNumPendingRequests()).isEqualTo(numTasksExceedSlotPool);
 
             scheduler.cancel();
-            assertEquals(JobStatus.CANCELLING, executionGraph.getState());
-            assertEquals(0, slotPool.getNumPendingRequests());
+            assertThat(executionGraph.getState()).isEqualTo(JobStatus.CANCELLING);
+            assertThat(slotPool.getNumPendingRequests()).isEqualTo(0);
         }
     }
 
@@ -136,11 +134,11 @@ public class ExecutionGraphRestartTest extends TestLogger {
             startScheduling(scheduler);
             offerSlots(slotPool, NUM_TASKS);
 
-            assertEquals(numTasksExceedSlotPool, slotPool.getNumPendingRequests());
+            assertThat(slotPool.getNumPendingRequests()).isEqualTo(numTasksExceedSlotPool);
 
             scheduler.handleGlobalFailure(new Exception("test"));
-            assertEquals(JobStatus.FAILING, executionGraph.getState());
-            assertEquals(0, slotPool.getNumPendingRequests());
+            assertThat(executionGraph.getState()).isEqualTo(JobStatus.FAILING);
+            assertThat(slotPool.getNumPendingRequests()).isEqualTo(0);
         }
     }
 
@@ -164,18 +162,18 @@ public class ExecutionGraphRestartTest extends TestLogger {
 
             // Release the TaskManager and wait for the job to restart
             slotPool.releaseTaskManager(taskManagerResourceId, new Exception("Test Exception"));
-            assertEquals(JobStatus.RESTARTING, executionGraph.getState());
+            assertThat(executionGraph.getState()).isEqualTo(JobStatus.RESTARTING);
 
             // Canceling needs to abort the restart
             scheduler.cancel();
 
-            assertEquals(JobStatus.CANCELED, executionGraph.getState());
+            assertThat(executionGraph.getState()).isEqualTo(JobStatus.CANCELED);
 
             taskRestartExecutor.triggerScheduledTasks();
 
-            assertEquals(JobStatus.CANCELED, executionGraph.getState());
+            assertThat(executionGraph.getState()).isEqualTo(JobStatus.CANCELED);
             for (ExecutionVertex vertex : executionGraph.getAllExecutionVertices()) {
-                assertEquals(ExecutionState.FAILED, vertex.getExecutionState());
+                assertThat(vertex.getExecutionState()).isEqualTo(ExecutionState.FAILED);
             }
         }
     }
@@ -201,22 +199,22 @@ public class ExecutionGraphRestartTest extends TestLogger {
 
             offerSlots(slotPool, NUM_TASKS);
 
-            assertEquals(JobStatus.RUNNING, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.RUNNING);
 
             switchAllTasksToRunning(graph);
 
             scheduler.handleGlobalFailure(new Exception("test"));
 
-            assertEquals(JobStatus.FAILING, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.FAILING);
 
             scheduler.cancel();
 
-            assertEquals(JobStatus.CANCELLING, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.CANCELLING);
 
             // let all tasks finish cancelling
             completeCanceling(graph);
 
-            assertEquals(JobStatus.CANCELED, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.CANCELED);
         }
     }
 
@@ -236,21 +234,21 @@ public class ExecutionGraphRestartTest extends TestLogger {
 
             offerSlots(slotPool, NUM_TASKS);
 
-            assertEquals(JobStatus.RUNNING, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.RUNNING);
             switchAllTasksToRunning(graph);
 
             scheduler.cancel();
 
-            assertEquals(JobStatus.CANCELLING, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.CANCELLING);
 
             scheduler.handleGlobalFailure(new Exception("test"));
 
-            assertEquals(JobStatus.FAILING, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.FAILING);
 
             // let all tasks finish cancelling
             completeCanceling(graph);
 
-            assertEquals(JobStatus.FAILED, graph.getState());
+            assertThat(graph.getState()).isEqualTo(JobStatus.FAILED);
         }
     }
 
@@ -292,33 +290,33 @@ public class ExecutionGraphRestartTest extends TestLogger {
 
             finishedExecution.markFinished();
 
-            failedExecution.fail(new Exception("Test Exception"));
+            fail("unknown failure", new Exception("Test Exception"));
             failedExecution.completeCancelling();
 
             taskRestartExecutor.triggerScheduledTasks();
 
-            assertEquals(JobStatus.RUNNING, eg.getState());
+            assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
 
             // At this point all resources have been assigned
             for (ExecutionVertex vertex : eg.getAllExecutionVertices()) {
-                assertNotNull(
-                        "No assigned resource (test instability).",
-                        vertex.getCurrentAssignedResource());
+                assertThat(vertex.getCurrentAssignedResource())
+                        .as("No assigned resource (test instability).")
+                        .isNotNull();
                 vertex.getCurrentExecutionAttempt().switchToRecovering();
                 vertex.getCurrentExecutionAttempt().switchToRunning();
             }
 
             // fail old finished execution, this should not affect the execution
-            finishedExecution.fail(new Exception("This should have no effect"));
+            fail("unknown failure", new Exception("This should have no effect"));
 
             for (ExecutionVertex vertex : eg.getAllExecutionVertices()) {
                 vertex.getCurrentExecutionAttempt().markFinished();
             }
 
             // the state of the finished execution should have not changed since it is terminal
-            assertEquals(ExecutionState.FINISHED, finishedExecution.getState());
+            assertThat(finishedExecution.getState()).isEqualTo(ExecutionState.FINISHED);
 
-            assertEquals(JobStatus.FINISHED, eg.getState());
+            assertThat(eg.getState()).isEqualTo(JobStatus.FINISHED);
         }
     }
 
@@ -349,16 +347,16 @@ public class ExecutionGraphRestartTest extends TestLogger {
             scheduler.cancel();
 
             for (ExecutionVertex v : eg.getAllExecutionVertices()) {
-                v.getCurrentExecutionAttempt().fail(new Exception("Test Exception"));
+                fail("unknown failure", new Exception("Test Exception"));
             }
 
-            assertEquals(JobStatus.CANCELED, eg.getTerminationFuture().get());
+            assertThat(eg.getTerminationFuture().get()).isEqualTo(JobStatus.CANCELED);
 
             Execution execution =
                     eg.getAllExecutionVertices().iterator().next().getCurrentExecutionAttempt();
 
             execution.completeCancelling();
-            assertEquals(JobStatus.CANCELED, eg.getState());
+            assertThat(eg.getState()).isEqualTo(JobStatus.CANCELED);
         }
     }
 
@@ -367,9 +365,9 @@ public class ExecutionGraphRestartTest extends TestLogger {
     // ------------------------------------------------------------------------
 
     private static void startScheduling(SchedulerBase scheduler) {
-        assertThat(scheduler.getExecutionGraph().getState(), is(JobStatus.CREATED));
+        assertThat(scheduler.getExecutionGraph().getState()).isEqualTo(JobStatus.CREATED);
         scheduler.startScheduling();
-        assertThat(scheduler.getExecutionGraph().getState(), is(JobStatus.RUNNING));
+        assertThat(scheduler.getExecutionGraph().getState()).isEqualTo(JobStatus.RUNNING);
     }
 
     private static ExecutionSlotAllocatorFactory createExecutionSlotAllocatorFactory(

@@ -29,7 +29,6 @@ import org.apache.flink.streaming.util.AbstractStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -37,6 +36,8 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.time.Duration;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link StreamingFileSink}. */
 public class LocalStreamingFileSinkTest extends TestLogger {
@@ -94,13 +95,13 @@ public class LocalStreamingFileSinkTest extends TestLogger {
             for (Map.Entry<File, String> fileContents : contents.entrySet()) {
                 if (fileContents.getKey().getName().contains(".part-0-0.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@1\ntest1@2\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\ntest1@2\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-1.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@3\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@3\n");
                 }
             }
-            Assert.assertEquals(2L, fileCounter);
+            assertThat(fileCounter).isEqualTo(2L);
         }
 
         try (OneInputStreamOperatorTestHarness<Tuple2<String, Integer>, Object> testHarness =
@@ -121,14 +122,14 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                 if (fileContents.getKey().getName().contains(".part-0-0.inprogress")) {
                     // truncated
                     fileCounter++;
-                    Assert.assertEquals("test1@1\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-1.inprogress")) {
                     // ignored for now as we do not clean up. This will be overwritten.
                     fileCounter++;
-                    Assert.assertEquals("test1@3\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@3\n");
                 }
             }
-            Assert.assertEquals(2L, fileCounter);
+            assertThat(fileCounter).isEqualTo(2L);
 
             // the first closes part-0-0 and the second will open part-0-1
             testHarness.processElement(new StreamRecord<>(Tuple2.of("test1", 4), 4L));
@@ -138,14 +139,14 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getName().contains(".part-0-0.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@1\ntest1@4\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\ntest1@4\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-1.inprogress")) {
                     // ignored for now as we do not clean up. This will be overwritten.
                     fileCounter++;
-                    Assert.assertEquals("test1@3\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@3\n");
                 }
             }
-            Assert.assertEquals(2L, fileCounter);
+            assertThat(fileCounter).isEqualTo(2L);
 
             testHarness.processElement(new StreamRecord<>(Tuple2.of("test1", 5), 5L));
             TestUtils.checkLocalFs(
@@ -163,7 +164,7 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getName().contains(".part-0-0.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@1\ntest1@4\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\ntest1@4\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-1.inprogress")) {
                     if (fileContents.getValue().equals("test1@5\ntest1@6\n")
                             || fileContents.getValue().equals("test1@3\n")) {
@@ -171,7 +172,7 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     }
                 }
             }
-            Assert.assertEquals(3L, fileCounter);
+            assertThat(fileCounter).isEqualTo(3L);
 
             // this will publish part-0-0
             testHarness.notifyOfCompletedCheckpoint(2L);
@@ -182,7 +183,7 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getName().equals("part-0-0")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@1\ntest1@4\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\ntest1@4\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-1.inprogress")) {
                     if (fileContents.getValue().equals("test1@5\ntest1@6\n")
                             || fileContents.getValue().equals("test1@3\n")) {
@@ -190,7 +191,7 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     }
                 }
             }
-            Assert.assertEquals(3L, fileCounter);
+            assertThat(fileCounter).isEqualTo(3L);
         }
     }
 
@@ -247,19 +248,19 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getName().equals("part-0-0")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@1\ntest1@2\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\ntest1@2\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-1.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@3\ntest1@4\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@3\ntest1@4\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-2.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@5\ntest1@6\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@5\ntest1@6\n");
                 } else if (fileContents.getKey().getName().contains(".part-0-3.inprogress")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@7\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@7\n");
                 }
             }
-            Assert.assertEquals(4L, fileCounter);
+            assertThat(fileCounter).isEqualTo(4L);
 
             testHarness.notifyOfCompletedCheckpoint(
                     3L); // all the pending for checkpoint 2 and 3 are committed
@@ -270,19 +271,19 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getName().equals("part-0-0")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@1\ntest1@2\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\ntest1@2\n");
                 } else if (fileContents.getKey().getName().equals("part-0-1")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@3\ntest1@4\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@3\ntest1@4\n");
                 } else if (fileContents.getKey().getName().equals("part-0-2")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@5\ntest1@6\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@5\ntest1@6\n");
                 } else if (fileContents.getKey().getName().equals("part-0-3")) {
                     fileCounter++;
-                    Assert.assertEquals("test1@7\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@7\n");
                 }
             }
-            Assert.assertEquals(4L, fileCounter);
+            assertThat(fileCounter).isEqualTo(4L);
         }
     }
 
@@ -312,8 +313,9 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     bucketCounter++;
                 }
             }
-            Assert.assertEquals(
-                    2L, bucketCounter); // verifies that we have 2 buckets, "test1" and "test2"
+            assertThat( // verifies that we have 2 buckets, "test1" and "test2"
+                            bucketCounter)
+                    .isEqualTo(2L); // verifies that we have 2 buckets, "test1" and "test2"
 
             testHarness.setProcessingTime(101L); // put them in pending
             TestUtils.checkLocalFs(outDir, 2, 0);
@@ -339,19 +341,19 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getParentFile().getName().equals("test1")) {
                     bucketCounter++;
-                    Assert.assertEquals("part-0-0", fileContents.getKey().getName());
-                    Assert.assertEquals("test1@1\n", fileContents.getValue());
+                    assertThat(fileContents.getKey().getName()).isEqualTo("part-0-0");
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\n");
                 } else if (fileContents.getKey().getParentFile().getName().equals("test2")) {
                     bucketCounter++;
-                    Assert.assertEquals("part-0-1", fileContents.getKey().getName());
-                    Assert.assertEquals("test2@1\n", fileContents.getValue());
+                    assertThat(fileContents.getKey().getName()).isEqualTo("part-0-1");
+                    assertThat(fileContents.getValue()).isEqualTo("test2@1\n");
                 } else if (fileContents.getKey().getParentFile().getName().equals("test3")) {
                     bucketCounter++;
                 } else if (fileContents.getKey().getParentFile().getName().equals("test4")) {
                     bucketCounter++;
                 }
             }
-            Assert.assertEquals(4L, bucketCounter);
+            assertThat(bucketCounter).isEqualTo(4L);
 
             testHarness.notifyOfCompletedCheckpoint(
                     1L); // put the pending for 1 to the "committed" state
@@ -362,21 +364,21 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     TestUtils.getFileContentByPath(outDir).entrySet()) {
                 if (fileContents.getKey().getParentFile().getName().equals("test1")) {
                     bucketCounter++;
-                    Assert.assertEquals("test1@1\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test1@1\n");
                 } else if (fileContents.getKey().getParentFile().getName().equals("test2")) {
                     bucketCounter++;
-                    Assert.assertEquals("test2@1\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test2@1\n");
                 } else if (fileContents.getKey().getParentFile().getName().equals("test3")) {
                     bucketCounter++;
-                    Assert.assertEquals("part-0-2", fileContents.getKey().getName());
-                    Assert.assertEquals("test3@1\n", fileContents.getValue());
+                    assertThat(fileContents.getKey().getName()).isEqualTo("part-0-2");
+                    assertThat(fileContents.getValue()).isEqualTo("test3@1\n");
                 } else if (fileContents.getKey().getParentFile().getName().equals("test4")) {
                     bucketCounter++;
-                    Assert.assertEquals("part-0-3", fileContents.getKey().getName());
-                    Assert.assertEquals("test4@1\n", fileContents.getValue());
+                    assertThat(fileContents.getKey().getName()).isEqualTo("part-0-3");
+                    assertThat(fileContents.getValue()).isEqualTo("test4@1\n");
                 }
             }
-            Assert.assertEquals(4L, bucketCounter);
+            assertThat(bucketCounter).isEqualTo(4L);
         }
     }
 
@@ -477,9 +479,9 @@ public class LocalStreamingFileSinkTest extends TestLogger {
         for (Map.Entry<File, String> fileContents : contents.entrySet()) {
             Integer bucketId = Integer.parseInt(fileContents.getKey().getParentFile().getName());
 
-            Assert.assertTrue(bucketId >= 1 && bucketId <= 4);
-            Assert.assertEquals(
-                    String.format("test%d@%d\n", bucketId, bucketId), fileContents.getValue());
+            assertThat(bucketId >= 1 && bucketId <= 4).isTrue();
+            assertThat(fileContents.getValue())
+                    .isEqualTo(String.format("test%d@%d\n", bucketId, bucketId));
         }
     }
 
@@ -524,7 +526,7 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     counter++;
                 }
             }
-            Assert.assertEquals(3L, counter);
+            assertThat(counter).isEqualTo(3L);
 
             // intentionally we snapshot them in the reverse order so that the states are shuffled
             mergedSnapshot =
@@ -560,17 +562,18 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     // consumed in the initialize state.
                     if (filename.contains("-0.inprogress") || filename.endsWith("-0")) {
                         counter++;
-                        Assert.assertTrue(
-                                fileContents.getValue().equals("test1@1\n")
-                                        || fileContents.getValue().equals("test1@0\n"));
+                        assertThat(
+                                        fileContents.getValue().equals("test1@1\n")
+                                                || fileContents.getValue().equals("test1@0\n"))
+                                .isTrue();
                     }
                 } else if (parentFilename.equals("test2")
                         && filename.contains(".part-1-1.inprogress")) {
                     counter++;
-                    Assert.assertEquals("test2@1\n", fileContents.getValue());
+                    assertThat(fileContents.getValue()).isEqualTo("test2@1\n");
                 }
             }
-            Assert.assertEquals(3L, counter);
+            assertThat(counter).isEqualTo(3L);
         }
     }
 }

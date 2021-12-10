@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** ITCase for the {@link org.apache.flink.api.common.state.BroadcastState}. */
 public class BroadcastStateITCase extends AbstractTestBase {
@@ -192,7 +192,7 @@ public class BroadcastStateITCase extends AbstractTestBase {
             super.close();
 
             // make sure that all the timers fired
-            assertEquals(expectedOutputCounter, outputCounter);
+            assertThat(outputCounter).isEqualTo(expectedOutputCounter);
         }
     }
 
@@ -262,7 +262,7 @@ public class BroadcastStateITCase extends AbstractTestBase {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(timerToExpectedKey.get(timestamp), ctx.getCurrentKey());
+            assertThat(ctx.getCurrentKey()).isEqualTo(timerToExpectedKey.get(timestamp));
 
             Map<Long, String> map = new HashMap<>();
             for (Map.Entry<Long, String> entry :
@@ -270,7 +270,7 @@ public class BroadcastStateITCase extends AbstractTestBase {
                 map.put(entry.getKey(), entry.getValue());
             }
 
-            assertEquals(expectedState, map);
+            assertThat(map).isEqualTo(expectedState);
 
             out.collect(Long.toString(timestamp));
         }

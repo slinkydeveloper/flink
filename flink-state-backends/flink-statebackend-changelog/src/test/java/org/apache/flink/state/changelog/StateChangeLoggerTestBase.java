@@ -33,7 +33,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.state.changelog.AbstractStateChangeLogger.COMMON_KEY_GROUP;
 import static org.apache.flink.state.changelog.StateChangeOperation.METADATA;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 abstract class StateChangeLoggerTestBase<Namespace> {
     /** A basic test for appending the metadata on first state access. */
@@ -55,7 +55,7 @@ abstract class StateChangeLoggerTestBase<Namespace> {
                         StateChangeOperation.byCode((byte) (i % numOpTypes));
                 log(operation, element, logger, keyContext).ifPresent(expectedAppends::add);
             }
-            assertEquals(expectedAppends, writer.appends);
+            assertThat(writer.appends).isEqualTo(expectedAppends);
         }
     }
 

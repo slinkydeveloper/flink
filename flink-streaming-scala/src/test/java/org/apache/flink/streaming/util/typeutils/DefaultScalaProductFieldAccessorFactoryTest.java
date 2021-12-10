@@ -21,8 +21,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultScalaProductFieldAccessorFactory}. */
 public class DefaultScalaProductFieldAccessorFactoryTest extends TestLogger {
@@ -30,6 +29,6 @@ public class DefaultScalaProductFieldAccessorFactoryTest extends TestLogger {
     public void testLoad() {
         final ScalaProductFieldAccessorFactory factory = ScalaProductFieldAccessorFactory.load(log);
 
-        assertThat(factory, notNullValue());
+        assertThat(factory).isNotNull();
     }
 }

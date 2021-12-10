@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Validate memory release under concurrent modification exceptions. */
 public class MemoryManagerConcurrentModReleaseTest {

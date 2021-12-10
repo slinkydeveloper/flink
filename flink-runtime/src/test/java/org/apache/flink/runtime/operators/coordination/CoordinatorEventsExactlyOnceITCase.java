@@ -84,9 +84,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Integration Test case that validates the exactly-once mechanism for coordinator events around
@@ -348,10 +347,10 @@ public class CoordinatorEventsExactlyOnceITCase extends TestLogger {
         @Override
         public void close() throws Exception {
             scheduledExecutor.shutdownNow();
-            assertTrue(scheduledExecutor.awaitTermination(10, TimeUnit.MINUTES));
+            assertThat(scheduledExecutor.awaitTermination(10, TimeUnit.MINUTES)).isTrue();
 
             mailboxExecutor.shutdownNow();
-            assertTrue(mailboxExecutor.awaitTermination(10, TimeUnit.MINUTES));
+            assertThat(mailboxExecutor.awaitTermination(10, TimeUnit.MINUTES)).isTrue();
         }
 
         @Override
@@ -694,7 +693,7 @@ public class CoordinatorEventsExactlyOnceITCase extends TestLogger {
     }
 
     static int bytesToInt(byte[] bytes) {
-        assertEquals(4, bytes.length);
+        assertThat(bytes.length).isEqualTo(4);
         return ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).getInt(0);
     }
 

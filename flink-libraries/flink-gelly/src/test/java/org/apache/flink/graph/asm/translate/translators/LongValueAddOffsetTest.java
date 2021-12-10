@@ -22,7 +22,7 @@ import org.apache.flink.types.LongValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LongValueAddOffset}. */
 public class LongValueAddOffsetTest {
@@ -31,38 +31,36 @@ public class LongValueAddOffsetTest {
     public void testTranslation() throws Exception {
         LongValue reuse = new LongValue();
 
-        assertEquals(
-                new LongValue(0), new LongValueAddOffset(0).translate(new LongValue(0), reuse));
-        assertEquals(
-                new LongValue(3), new LongValueAddOffset(1).translate(new LongValue(2), reuse));
-        assertEquals(
-                new LongValue(1), new LongValueAddOffset(-1).translate(new LongValue(2), reuse));
+        assertThat(new LongValueAddOffset(0).translate(new LongValue(0), reuse))
+                .isEqualTo(new LongValue(0));
+        assertThat(new LongValueAddOffset(1).translate(new LongValue(2), reuse))
+                .isEqualTo(new LongValue(3));
+        assertThat(new LongValueAddOffset(-1).translate(new LongValue(2), reuse))
+                .isEqualTo(new LongValue(1));
 
-        assertEquals(
-                new LongValue(-1),
-                new LongValueAddOffset(Long.MIN_VALUE)
-                        .translate(new LongValue(Long.MAX_VALUE), reuse));
-        assertEquals(
-                new LongValue(-1),
-                new LongValueAddOffset(Long.MAX_VALUE)
-                        .translate(new LongValue(Long.MIN_VALUE), reuse));
+        assertThat(
+                        new LongValueAddOffset(Long.MIN_VALUE)
+                                .translate(new LongValue(Long.MAX_VALUE), reuse))
+                .isEqualTo(new LongValue(-1));
+        assertThat(
+                        new LongValueAddOffset(Long.MAX_VALUE)
+                                .translate(new LongValue(Long.MIN_VALUE), reuse))
+                .isEqualTo(new LongValue(-1));
 
         // underflow wraps to positive values
-        assertEquals(
-                new LongValue(Long.MAX_VALUE),
-                new LongValueAddOffset(-1).translate(new LongValue(Long.MIN_VALUE), reuse));
-        assertEquals(
-                new LongValue(0),
-                new LongValueAddOffset(Long.MIN_VALUE)
-                        .translate(new LongValue(Long.MIN_VALUE), reuse));
+        assertThat(new LongValueAddOffset(-1).translate(new LongValue(Long.MIN_VALUE), reuse))
+                .isEqualTo(new LongValue(Long.MAX_VALUE));
+        assertThat(
+                        new LongValueAddOffset(Long.MIN_VALUE)
+                                .translate(new LongValue(Long.MIN_VALUE), reuse))
+                .isEqualTo(new LongValue(0));
 
         // overflow wraps to negative values
-        assertEquals(
-                new LongValue(Long.MIN_VALUE),
-                new LongValueAddOffset(1).translate(new LongValue(Long.MAX_VALUE), reuse));
-        assertEquals(
-                new LongValue(-2),
-                new LongValueAddOffset(Long.MAX_VALUE)
-                        .translate(new LongValue(Long.MAX_VALUE), reuse));
+        assertThat(new LongValueAddOffset(1).translate(new LongValue(Long.MAX_VALUE), reuse))
+                .isEqualTo(new LongValue(Long.MIN_VALUE));
+        assertThat(
+                        new LongValueAddOffset(Long.MAX_VALUE)
+                                .translate(new LongValue(Long.MAX_VALUE), reuse))
+                .isEqualTo(new LongValue(-2));
     }
 }

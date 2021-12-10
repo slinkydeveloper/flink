@@ -44,9 +44,7 @@ import java.util.stream.Stream;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link InMemoryStateChangelogStorage} test. */
 public class StateChangelogStorageTest<T extends ChangelogStateHandle> {
@@ -89,16 +87,16 @@ public class StateChangelogStorageTest<T extends ChangelogStateHandle> {
 
     private void assertByteMapsEqual(
             Map<Integer, List<byte[]>> expected, Map<Integer, List<byte[]>> actual) {
-        assertEquals(expected.size(), actual.size());
+        assertThat(actual.size()).isEqualTo(expected.size());
         for (Map.Entry<Integer, List<byte[]>> e : expected.entrySet()) {
             List<byte[]> expectedList = e.getValue();
             List<byte[]> actualList = actual.get(e.getKey());
             Iterator<byte[]> ite = expectedList.iterator(), ale = actualList.iterator();
             while (ite.hasNext() && ale.hasNext()) {
-                assertArrayEquals(ite.next(), ale.next());
+                assertThat(ale.next()).isEqualTo(ite.next());
             }
-            assertFalse(ite.hasNext());
-            assertFalse(ale.hasNext());
+            assertThat(ite.hasNext()).isFalse();
+            assertThat(ale.hasNext()).isFalse();
         }
     }
 

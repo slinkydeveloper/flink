@@ -51,8 +51,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test the election of a new JobManager leader. */
 public class ZooKeeperLeaderElectionITCase extends TestLogger {
@@ -149,7 +148,7 @@ public class ZooKeeperLeaderElectionITCase extends TestLogger {
                     leaderDispatcherGateway.requestJobResult(jobGraph.getJobID(), RPC_TIMEOUT);
             BlockingOperator.unblock();
 
-            assertThat(jobResultFuture.get().isSuccess(), is(true));
+            assertThat(jobResultFuture.get().isSuccess()).isEqualTo(true);
         }
     }
 

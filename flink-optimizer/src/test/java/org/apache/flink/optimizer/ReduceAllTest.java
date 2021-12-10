@@ -29,7 +29,7 @@ import org.apache.flink.optimizer.util.CompilerTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test case has been created to validate a bug that occurred when the ReduceOperator was used

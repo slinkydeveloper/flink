@@ -30,9 +30,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TableEnvironment}. */
 public class TableEnvironmentTest {
@@ -48,20 +46,21 @@ public class TableEnvironmentTest {
                 "T",
                 TableDescriptor.forConnector("fake").schema(schema).option("a", "Test").build());
 
-        assertFalse(
-                tEnv.getCatalog(catalog)
-                        .orElseThrow(AssertionError::new)
-                        .tableExists(new ObjectPath(database, "T")));
+        assertThat(
+                        tEnv.getCatalog(catalog)
+                                .orElseThrow(AssertionError::new)
+                                .tableExists(new ObjectPath(database, "T")))
+                .isFalse();
 
         final Optional<CatalogManager.TableLookupResult> lookupResult =
                 tEnv.getCatalogManager().getTable(ObjectIdentifier.of(catalog, database, "T"));
-        assertTrue(lookupResult.isPresent());
+        assertThat(lookupResult.isPresent()).isTrue();
 
         final CatalogBaseTable catalogTable = lookupResult.get().getTable();
-        assertTrue(catalogTable instanceof CatalogTable);
-        assertEquals(schema, catalogTable.getUnresolvedSchema());
-        assertEquals("fake", catalogTable.getOptions().get("connector"));
-        assertEquals("Test", catalogTable.getOptions().get("a"));
+        assertThat(catalogTable).isInstanceOf(CatalogTable.class);
+        assertThat(catalogTable.getUnresolvedSchema()).isEqualTo(schema);
+        assertThat(catalogTable.getOptions().get("connector")).isEqualTo("fake");
+        assertThat(catalogTable.getOptions().get("a")).isEqualTo("Test");
     }
 
     @Test
@@ -76,15 +75,18 @@ public class TableEnvironmentTest {
                 TableDescriptor.forConnector("fake").schema(schema).option("a", "Test").build());
 
         final ObjectPath objectPath = new ObjectPath(database, "T");
-        assertTrue(
-                tEnv.getCatalog(catalog).orElseThrow(AssertionError::new).tableExists(objectPath));
+        assertThat(
+                        tEnv.getCatalog(catalog)
+                                .orElseThrow(AssertionError::new)
+                                .tableExists(objectPath))
+                .isTrue();
 
         final CatalogBaseTable catalogTable =
                 tEnv.getCatalog(catalog).orElseThrow(AssertionError::new).getTable(objectPath);
-        assertTrue(catalogTable instanceof CatalogTable);
-        assertEquals(schema, catalogTable.getUnresolvedSchema());
-        assertEquals("fake", catalogTable.getOptions().get("connector"));
-        assertEquals("Test", catalogTable.getOptions().get("a"));
+        assertThat(catalogTable).isInstanceOf(CatalogTable.class);
+        assertThat(catalogTable.getUnresolvedSchema()).isEqualTo(schema);
+        assertThat(catalogTable.getOptions().get("connector")).isEqualTo("fake");
+        assertThat(catalogTable.getOptions().get("a")).isEqualTo("Test");
     }
 
     @Test
@@ -97,17 +99,17 @@ public class TableEnvironmentTest {
 
         final Table table = tEnv.from(descriptor);
 
-        assertEquals(
-                schema, Schema.newBuilder().fromResolvedSchema(table.getResolvedSchema()).build());
+        assertThat(Schema.newBuilder().fromResolvedSchema(table.getResolvedSchema()).build())
+                .isEqualTo(schema);
 
-        assertTrue(table.getQueryOperation() instanceof CatalogQueryOperation);
+        assertThat(table.getQueryOperation()).isInstanceOf(CatalogQueryOperation.class);
         final ObjectIdentifier tableIdentifier =
                 ((CatalogQueryOperation) table.getQueryOperation()).getTableIdentifier();
 
         final Optional<CatalogManager.TableLookupResult> lookupResult =
                 tEnv.getCatalogManager().getTable(tableIdentifier);
-        assertTrue(lookupResult.isPresent());
+        assertThat(lookupResult.isPresent()).isTrue();
 
-        assertEquals("fake", lookupResult.get().getTable().getOptions().get("connector"));
+        assertThat(lookupResult.get().getTable().getOptions().get("connector")).isEqualTo("fake");
     }
 }

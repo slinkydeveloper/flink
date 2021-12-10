@@ -31,7 +31,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link VertexDegrees}. */
 public class VertexDegreesTest extends AsmTestBase {
@@ -74,7 +74,7 @@ public class VertexDegreesTest extends AsmTestBase {
                         new VertexDegrees<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(false));
 
-        assertEquals(0, degreesWithoutZeroDegreeVertices.collect().size());
+        assertThat(degreesWithoutZeroDegreeVertices.collect().size()).isEqualTo(0);
 
         DataSet<Vertex<LongValue, Degrees>> degreesWithZeroDegreeVertices =
                 emptyGraphWithVertices.run(
@@ -93,14 +93,14 @@ public class VertexDegreesTest extends AsmTestBase {
                         new VertexDegrees<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(false));
 
-        assertEquals(0, degreesWithoutZeroDegreeVertices.collect().size());
+        assertThat(degreesWithoutZeroDegreeVertices.collect().size()).isEqualTo(0);
 
         DataSet<Vertex<LongValue, Degrees>> degreesWithZeroDegreeVertices =
                 emptyGraphWithoutVertices.run(
                         new VertexDegrees<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(true));
 
-        assertEquals(0, degreesWithZeroDegreeVertices.collect().size());
+        assertThat(degreesWithZeroDegreeVertices.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class VertexDegreesTest extends AsmTestBase {
         Checksum checksum =
                 new ChecksumHashCode<Vertex<LongValue, Degrees>>().run(degrees).execute();
 
-        assertEquals(902, checksum.getCount());
-        assertEquals(0x000001a3305dd86aL, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(902);
+        assertThat(checksum.getChecksum()).isEqualTo(0x000001a3305dd86aL);
     }
 }

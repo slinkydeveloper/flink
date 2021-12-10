@@ -30,7 +30,6 @@ import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.util.FileUtils;
 import org.apache.flink.util.function.ThrowingConsumer;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
@@ -39,6 +38,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link CompactOperator}. */
 public class CompactOperatorTest extends AbstractCompactTestBase {
@@ -58,7 +59,6 @@ public class CompactOperatorTest extends AbstractCompactTestBase {
                 harness -> {
                     harness.setup();
                     harness.open();
-
                     harness.processElement(
                             new CompactionUnit(0, "p0", Arrays.asList(f0, f1, f4)), 0);
                     harness.processElement(
@@ -66,29 +66,24 @@ public class CompactOperatorTest extends AbstractCompactTestBase {
                     harness.processElement(new CompactionUnit(2, "p1", Arrays.asList(f2, f5)), 0);
                     harness.processElement(
                             new CompactionUnit(3, "p0", Collections.singletonList(f6)), 0);
-
                     harness.processElement(new EndCompaction(1), 0);
-
                     state.set(harness.snapshot(2, 0));
-
                     // check output commit info
                     List<PartitionCommitInfo> outputs = harness.extractOutputValues();
-                    Assert.assertEquals(1, outputs.size());
-                    Assert.assertEquals(1, outputs.get(0).getCheckpointId());
-                    Assert.assertEquals(Arrays.asList("p0", "p1"), outputs.get(0).getPartitions());
-
+                    assertThat(outputs.size()).isEqualTo(1);
+                    assertThat(outputs.get(0).getCheckpointId()).isEqualTo(1);
+                    assertThat(outputs.get(0).getPartitions()).isEqualTo(Arrays.asList("p0", "p1"));
                     // check all compacted file generated
-                    Assert.assertTrue(fs.exists(new Path(folder, "compacted-f0")));
-                    Assert.assertTrue(fs.exists(new Path(folder, "compacted-f2")));
-                    Assert.assertTrue(fs.exists(new Path(folder, "compacted-f3")));
-                    Assert.assertTrue(fs.exists(new Path(folder, "compacted-f6")));
-
+                    assertThat(fs.exists(new Path(folder, "compacted-f0"))).isTrue();
+                    assertThat(fs.exists(new Path(folder, "compacted-f2"))).isTrue();
+                    assertThat(fs.exists(new Path(folder, "compacted-f3"))).isTrue();
+                    assertThat(fs.exists(new Path(folder, "compacted-f6"))).isTrue();
                     // check one compacted file
                     byte[] bytes =
                             FileUtils.readAllBytes(
                                     new File(folder.getPath(), "compacted-f0").toPath());
                     Arrays.sort(bytes);
-                    Assert.assertArrayEquals(new byte[] {0, 0, 0, 1, 1, 2}, bytes);
+                    assertThat(bytes).isEqualTo(new byte[] {0, 0, 0, 1, 1, 2});
                 });
 
         runCompact(
@@ -96,17 +91,15 @@ public class CompactOperatorTest extends AbstractCompactTestBase {
                     harness.setup();
                     harness.initializeState(state.get());
                     harness.open();
-
                     harness.notifyOfCompletedCheckpoint(2);
-
                     // check all temp files have been deleted
-                    Assert.assertFalse(fs.exists(f0));
-                    Assert.assertFalse(fs.exists(f1));
-                    Assert.assertFalse(fs.exists(f2));
-                    Assert.assertFalse(fs.exists(f3));
-                    Assert.assertFalse(fs.exists(f4));
-                    Assert.assertFalse(fs.exists(f5));
-                    Assert.assertFalse(fs.exists(f6));
+                    assertThat(fs.exists(f0)).isFalse();
+                    assertThat(fs.exists(f1)).isFalse();
+                    assertThat(fs.exists(f2)).isFalse();
+                    assertThat(fs.exists(f3)).isFalse();
+                    assertThat(fs.exists(f4)).isFalse();
+                    assertThat(fs.exists(f5)).isFalse();
+                    assertThat(fs.exists(f6)).isFalse();
                 });
     }
 
@@ -122,22 +115,18 @@ public class CompactOperatorTest extends AbstractCompactTestBase {
                 harness -> {
                     harness.setup();
                     harness.open();
-
                     harness.processElement(new CompactionUnit(0, "p0", Arrays.asList(f0, f1)), 0);
                     harness.processElement(
                             new CompactionUnit(1, "p0", Collections.singletonList(f2)), 0);
-
                     // test without snapshot
                     harness.endInput();
-
                     // check all compacted file generated
-                    Assert.assertTrue(fs.exists(new Path(folder, "compacted-f0")));
-                    Assert.assertTrue(fs.exists(new Path(folder, "compacted-f2")));
-
+                    assertThat(fs.exists(new Path(folder, "compacted-f0"))).isTrue();
+                    assertThat(fs.exists(new Path(folder, "compacted-f2"))).isTrue();
                     // check all temp files have been deleted
-                    Assert.assertFalse(fs.exists(f0));
-                    Assert.assertFalse(fs.exists(f1));
-                    Assert.assertFalse(fs.exists(f2));
+                    assertThat(fs.exists(f0)).isFalse();
+                    assertThat(fs.exists(f1)).isFalse();
+                    assertThat(fs.exists(f2)).isFalse();
                 });
     }
 
@@ -171,12 +160,12 @@ public class CompactOperatorTest extends AbstractCompactTestBase {
         harness0.processElement(new EndCompaction(1), 0);
 
         // check compacted file generated
-        Assert.assertTrue(fs.exists(new Path(folder, "compacted-f0")));
-        Assert.assertTrue(fs.exists(new Path(folder, "compacted-f2")));
+        assertThat(fs.exists(new Path(folder, "compacted-f0"))).isTrue();
+        assertThat(fs.exists(new Path(folder, "compacted-f2"))).isTrue();
 
         // f3 and f6 are in the charge of another task
-        Assert.assertFalse(fs.exists(new Path(folder, "compacted-f3")));
-        Assert.assertFalse(fs.exists(new Path(folder, "compacted-f6")));
+        assertThat(fs.exists(new Path(folder, "compacted-f3"))).isFalse();
+        assertThat(fs.exists(new Path(folder, "compacted-f6"))).isFalse();
 
         harness1.processElement(new CompactionUnit(0, "p0", Arrays.asList(f0, f1, f4)), 0);
         harness1.processElement(new CompactionUnit(1, "p0", Collections.singletonList(f3)), 0);
@@ -186,8 +175,8 @@ public class CompactOperatorTest extends AbstractCompactTestBase {
         harness1.processElement(new EndCompaction(1), 0);
 
         // check compacted file generated
-        Assert.assertTrue(fs.exists(new Path(folder, "compacted-f3")));
-        Assert.assertTrue(fs.exists(new Path(folder, "compacted-f6")));
+        assertThat(fs.exists(new Path(folder, "compacted-f3"))).isTrue();
+        assertThat(fs.exists(new Path(folder, "compacted-f6"))).isTrue();
 
         harness0.close();
         harness1.close();

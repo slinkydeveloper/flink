@@ -30,10 +30,7 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link AnyMatchingSlotMatchingStrategy}. */
 public class AnyMatchingSlotMatchingStrategyTest extends TestLogger {
@@ -71,10 +68,9 @@ public class AnyMatchingSlotMatchingStrategyTest extends TestLogger {
                         freeSlots,
                         countSlotsPerInstance(freeSlots));
 
-        assertTrue(optionalMatchingSlot.isPresent());
-        assertThat(
-                optionalMatchingSlot.get().getSlotId(),
-                is(largeTaskManagerSlotInformation.getSlotId()));
+        assertThat(optionalMatchingSlot.isPresent()).isTrue();
+        assertThat(optionalMatchingSlot.get().getSlotId())
+                .isEqualTo(largeTaskManagerSlotInformation.getSlotId());
     }
 
     @Test
@@ -85,7 +81,7 @@ public class AnyMatchingSlotMatchingStrategyTest extends TestLogger {
                         freeSlots,
                         countSlotsPerInstance(freeSlots));
 
-        assertFalse(optionalMatchingSlot.isPresent());
+        assertThat(optionalMatchingSlot.isPresent()).isFalse();
     }
 
     private Function<InstanceID, Integer> countSlotsPerInstance(

@@ -36,9 +36,7 @@ import org.apache.flink.table.planner.utils.TableTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Various tests to check {@link Transformation}s that have been generated from {@link ExecNode}s.
@@ -61,7 +59,7 @@ public class TransformationsTest extends TableTestBase {
                 toLegacySourceTransformation(env, table);
 
         assertBoundedness(Boundedness.BOUNDED, sourceTransform);
-        assertFalse(sourceTransform.getOperator().emitsProgressiveWatermarks());
+        assertThat(sourceTransform.getOperator().emitsProgressiveWatermarks()).isFalse();
     }
 
     @Test
@@ -80,7 +78,7 @@ public class TransformationsTest extends TableTestBase {
                 toLegacySourceTransformation(env, table);
 
         assertBoundedness(Boundedness.CONTINUOUS_UNBOUNDED, sourceTransform);
-        assertTrue(sourceTransform.getOperator().emitsProgressiveWatermarks());
+        assertThat(sourceTransform.getOperator().emitsProgressiveWatermarks()).isTrue();
     }
 
     @Test
@@ -100,7 +98,7 @@ public class TransformationsTest extends TableTestBase {
                         .<RowData>map(r -> new GenericRowData(0))
                         .getTransformation();
 
-        assertFalse(TransformationScanProvider.of(transformation).isBounded());
+        assertThat(TransformationScanProvider.of(transformation).isBounded()).isFalse();
     }
 
     @Test
@@ -120,7 +118,7 @@ public class TransformationsTest extends TableTestBase {
                         .<RowData>map(r -> new GenericRowData(0))
                         .getTransformation();
 
-        assertTrue(TransformationScanProvider.of(transformation).isBounded());
+        assertThat(TransformationScanProvider.of(transformation).isBounded()).isTrue();
     }
 
     @Test
@@ -146,13 +144,13 @@ public class TransformationsTest extends TableTestBase {
         while (transform.getInputs().size() == 1) {
             transform = transform.getInputs().get(0);
         }
-        assertTrue(transform instanceof LegacySourceTransformation);
+        assertThat(transform).isInstanceOf(LegacySourceTransformation.class);
         return (LegacySourceTransformation<?>) transform;
     }
 
     private static void assertBoundedness(Boundedness boundedness, Transformation<?> transform) {
-        assertTrue(transform instanceof WithBoundedness);
-        assertEquals(boundedness, ((WithBoundedness) transform).getBoundedness());
+        assertThat(transform).isInstanceOf(WithBoundedness.class);
+        assertThat(((WithBoundedness) transform).getBoundedness()).isEqualTo(boundedness);
     }
 
     private static Schema dummySchema() {

@@ -23,9 +23,9 @@ import org.apache.flink.types.DoubleValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
+import static org.assertj.core.api.Assertions.within;
 
 /** Tests for {@link DoubleValueArray}. */
 public class DoubleValueArrayTest {
@@ -41,39 +41,39 @@ public class DoubleValueArrayTest {
 
         // fill the array
         for (int i = 0; i < count; i++) {
-            assertFalse(lva.isFull());
-            assertEquals(i, lva.size());
+            assertThat(lva.isFull()).isFalse();
+            assertThat(lva.size()).isEqualTo(i);
 
-            assertTrue(lva.add(new DoubleValue(i)));
+            assertThat(lva.add(new DoubleValue(i))).isTrue();
 
-            assertEquals(i + 1, lva.size());
+            assertThat(lva.size()).isEqualTo(i + 1);
         }
 
         // array is now full
-        assertTrue(lva.isFull());
-        assertEquals(count, lva.size());
+        assertThat(lva.isFull()).isTrue();
+        assertThat(lva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (DoubleValue lv : lva) {
-            assertEquals(idx++, lv.getValue(), 0.000001);
+            assertThat(lv.getValue()).isCloseTo(idx++, within(0.000001));
         }
 
         // add element past end of array
-        assertFalse(lva.add(new DoubleValue(count)));
-        assertFalse(lva.addAll(lva));
+        assertThat(lva.add(new DoubleValue(count))).isFalse();
+        assertThat(lva.addAll(lva)).isFalse();
 
         // test copy
-        assertEquals(lva, lva.copy());
+        assertThatObject(lva.copy()).isEqualTo(lva);
 
         // test copyTo
         DoubleValueArray lvaTo = new DoubleValueArray();
         lva.copyTo(lvaTo);
-        assertEquals(lva, lvaTo);
+        assertThatObject(lvaTo).isEqualTo(lva);
 
         // test clear
         lva.clear();
-        assertEquals(0, lva.size());
+        assertThat(lva.size()).isEqualTo(0);
     }
 
     @Test
@@ -84,46 +84,46 @@ public class DoubleValueArrayTest {
 
         // add several elements
         for (int i = 0; i < count; i++) {
-            assertFalse(lva.isFull());
-            assertEquals(i, lva.size());
+            assertThat(lva.isFull()).isFalse();
+            assertThat(lva.size()).isEqualTo(i);
 
-            assertTrue(lva.add(new DoubleValue(i)));
+            assertThat(lva.add(new DoubleValue(i))).isTrue();
 
-            assertEquals(i + 1, lva.size());
+            assertThat(lva.size()).isEqualTo(i + 1);
         }
 
         // array never fills
-        assertFalse(lva.isFull());
-        assertEquals(count, lva.size());
+        assertThat(lva.isFull()).isFalse();
+        assertThat(lva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (DoubleValue lv : lva) {
-            assertEquals(idx++, lv.getValue(), 0.000001);
+            assertThat(lv.getValue()).isCloseTo(idx++, within(0.000001));
         }
 
         // add element past end of array
-        assertTrue(lva.add(new DoubleValue(count)));
-        assertTrue(lva.addAll(lva));
+        assertThat(lva.add(new DoubleValue(count))).isTrue();
+        assertThat(lva.addAll(lva)).isTrue();
 
         // test copy
-        assertEquals(lva, lva.copy());
+        assertThatObject(lva.copy()).isEqualTo(lva);
 
         // test copyTo
         DoubleValueArray lvaTo = new DoubleValueArray();
         lva.copyTo(lvaTo);
-        assertEquals(lva, lvaTo);
+        assertThatObject(lvaTo).isEqualTo(lva);
 
         // test mark/reset
         int size = lva.size();
         lva.mark();
-        assertTrue(lva.add(new DoubleValue()));
-        assertEquals(size + 1, lva.size());
+        assertThat(lva.add(new DoubleValue())).isTrue();
+        assertThat(lva.size()).isEqualTo(size + 1);
         lva.reset();
-        assertEquals(size, lva.size());
+        assertThat(lva.size()).isEqualTo(size);
 
         // test clear
         lva.clear();
-        assertEquals(0, lva.size());
+        assertThat(lva.size()).isEqualTo(0);
     }
 }

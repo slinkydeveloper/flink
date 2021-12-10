@@ -34,8 +34,8 @@ import org.apache.flink.runtime.io.network.DataExchangeMode;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test verifies that the optimizer assigns the correct data exchange mode to a simple forward
@@ -143,12 +143,12 @@ public class DataExchangeModeForwardTest extends CompilerTestBase {
                     (SingleInputPlanNode) keyExtractorNode.getPredecessor();
             SingleInputPlanNode mapNode = (SingleInputPlanNode) filterNode.getPredecessor();
 
-            assertEquals(toMap, mapNode.getInput().getDataExchangeMode());
-            assertEquals(toFilter, filterNode.getInput().getDataExchangeMode());
-            assertEquals(toKeyExtractor, keyExtractorNode.getInput().getDataExchangeMode());
-            assertEquals(toCombiner, combineNode.getInput().getDataExchangeMode());
-            assertEquals(toReduce, reduceNode.getInput().getDataExchangeMode());
-            assertEquals(toSink, sinkNode.getInput().getDataExchangeMode());
+            assertThat(mapNode.getInput().getDataExchangeMode()).isEqualTo(toMap);
+            assertThat(filterNode.getInput().getDataExchangeMode()).isEqualTo(toFilter);
+            assertThat(keyExtractorNode.getInput().getDataExchangeMode()).isEqualTo(toKeyExtractor);
+            assertThat(combineNode.getInput().getDataExchangeMode()).isEqualTo(toCombiner);
+            assertThat(reduceNode.getInput().getDataExchangeMode()).isEqualTo(toReduce);
+            assertThat(sinkNode.getInput().getDataExchangeMode()).isEqualTo(toSink);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

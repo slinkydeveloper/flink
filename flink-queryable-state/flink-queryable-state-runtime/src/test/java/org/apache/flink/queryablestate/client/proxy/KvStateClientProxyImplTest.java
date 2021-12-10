@@ -33,9 +33,7 @@ import java.net.InetAddress;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link KvStateClientProxyImpl}. */
 public class KvStateClientProxyImplTest extends TestLogger {
@@ -70,17 +68,15 @@ public class KvStateClientProxyImplTest extends TestLogger {
                 new TestingKvStateLocationOracle();
         kvStateClientProxy.updateKvStateLocationOracle(jobId2, kvStateLocationOracle2);
 
-        assertThat(kvStateClientProxy.getKvStateLocationOracle(new JobID()), nullValue());
+        assertThat(kvStateClientProxy.getKvStateLocationOracle(new JobID())).isNull();
 
-        assertThat(
-                kvStateClientProxy.getKvStateLocationOracle(jobId1),
-                equalTo(kvStateLocationOracle1));
-        assertThat(
-                kvStateClientProxy.getKvStateLocationOracle(jobId2),
-                equalTo(kvStateLocationOracle2));
+        assertThat(kvStateClientProxy.getKvStateLocationOracle(jobId1))
+                .isEqualTo(kvStateLocationOracle1);
+        assertThat(kvStateClientProxy.getKvStateLocationOracle(jobId2))
+                .isEqualTo(kvStateLocationOracle2);
 
         kvStateClientProxy.updateKvStateLocationOracle(jobId1, null);
-        assertThat(kvStateClientProxy.getKvStateLocationOracle(jobId1), nullValue());
+        assertThat(kvStateClientProxy.getKvStateLocationOracle(jobId1)).isNull();
     }
 
     /**
@@ -96,8 +92,8 @@ public class KvStateClientProxyImplTest extends TestLogger {
         final JobID jobId = new JobID();
         kvStateClientProxy.updateKvStateLocationOracle(jobId, new TestingKvStateLocationOracle());
 
-        assertThat(
-                kvStateClientProxy.getKvStateLocationOracle(jobId), equalTo(kvStateLocationOracle));
+        assertThat(kvStateClientProxy.getKvStateLocationOracle(jobId))
+                .isEqualTo(kvStateLocationOracle);
     }
 
     /** Testing implementation of {@link KvStateLocationOracle}. */

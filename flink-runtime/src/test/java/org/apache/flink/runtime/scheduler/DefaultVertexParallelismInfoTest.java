@@ -23,13 +23,13 @@ import org.apache.flink.runtime.jobgraph.JobVertex;
 import org.apache.flink.runtime.state.KeyGroupRangeAssignment;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Optional;
 import java.util.function.Function;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for the {@link DefaultVertexParallelismInfo}. */
 public class DefaultVertexParallelismInfoTest extends TestLogger {
@@ -38,18 +38,16 @@ public class DefaultVertexParallelismInfoTest extends TestLogger {
 
     @Test
     public void parallelismInvalid() {
-        assertThrows(
-                "parallelism is not in valid bounds",
-                IllegalArgumentException.class,
-                () -> new DefaultVertexParallelismInfo(-1, 1, ALWAYS_VALID));
+        assertThatThrownBy(() -> new DefaultVertexParallelismInfo(-1, 1, ALWAYS_VALID))
+                .as("parallelism is not in valid bounds")
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void maxParallelismInvalid() {
-        assertThrows(
-                "max parallelism is not in valid bounds",
-                IllegalArgumentException.class,
-                () -> new DefaultVertexParallelismInfo(1, -1, ALWAYS_VALID));
+        assertThatThrownBy(() -> new DefaultVertexParallelismInfo(1, -1, ALWAYS_VALID))
+                .as("max parallelism is not in valid bounds")
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -58,52 +56,50 @@ public class DefaultVertexParallelismInfoTest extends TestLogger {
                 new DefaultVertexParallelismInfo(
                         1, ExecutionConfig.PARALLELISM_AUTO_MAX, ALWAYS_VALID);
 
-        Assert.assertEquals(
-                KeyGroupRangeAssignment.UPPER_BOUND_MAX_PARALLELISM, info.getMaxParallelism());
+        assertThat(info.getMaxParallelism())
+                .isEqualTo(KeyGroupRangeAssignment.UPPER_BOUND_MAX_PARALLELISM);
     }
 
     @Test
     public void canRescaleMaxOutOfBounds() {
         DefaultVertexParallelismInfo info = new DefaultVertexParallelismInfo(1, 1, ALWAYS_VALID);
 
-        assertThrows(
-                "not in valid bounds",
-                IllegalArgumentException.class,
-                () -> info.canRescaleMaxParallelism(-4));
+        assertThatThrownBy(() -> info.canRescaleMaxParallelism(-4))
+                .as("not in valid bounds")
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void canRescaleMaxAuto() {
         DefaultVertexParallelismInfo info = new DefaultVertexParallelismInfo(1, 1, ALWAYS_VALID);
 
-        Assert.assertTrue(info.canRescaleMaxParallelism(ExecutionConfig.PARALLELISM_AUTO_MAX));
+        assertThat(info.canRescaleMaxParallelism(ExecutionConfig.PARALLELISM_AUTO_MAX)).isTrue();
     }
 
     @Test
     public void canRescaleMax() {
         DefaultVertexParallelismInfo info = new DefaultVertexParallelismInfo(1, 1, ALWAYS_VALID);
 
-        Assert.assertTrue(info.canRescaleMaxParallelism(3));
+        assertThat(info.canRescaleMaxParallelism(3)).isTrue();
     }
 
     @Test
     public void canRescaleMaxDefault() {
         DefaultVertexParallelismInfo info = new DefaultVertexParallelismInfo(1, 1, ALWAYS_VALID);
 
-        Assert.assertFalse(info.canRescaleMaxParallelism(JobVertex.MAX_PARALLELISM_DEFAULT));
+        assertThat(info.canRescaleMaxParallelism(JobVertex.MAX_PARALLELISM_DEFAULT)).isFalse();
     }
 
     @Test
     public void setMaxOutOfBounds() {
         DefaultVertexParallelismInfo info = new DefaultVertexParallelismInfo(1, 1, ALWAYS_VALID);
 
-        assertThrows(
-                "not in valid bounds",
-                IllegalArgumentException.class,
-                () -> {
-                    info.setMaxParallelism(-4);
-                    return null;
-                });
+        assertThatThrownBy(
+                        () -> {
+                            info.setMaxParallelism(-4);
+                        })
+                .as("not in valid bounds")
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -111,13 +107,12 @@ public class DefaultVertexParallelismInfoTest extends TestLogger {
         DefaultVertexParallelismInfo info =
                 new DefaultVertexParallelismInfo(1, 1, (max) -> Optional.of("not valid"));
 
-        assertThrows(
-                "not valid",
-                IllegalArgumentException.class,
-                () -> {
-                    info.setMaxParallelism(4);
-                    return null;
-                });
+        assertThatThrownBy(
+                        () -> {
+                            info.setMaxParallelism(4);
+                        })
+                .as("not valid")
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -126,6 +121,6 @@ public class DefaultVertexParallelismInfoTest extends TestLogger {
 
         info.setMaxParallelism(40);
 
-        Assert.assertEquals(40, info.getMaxParallelism());
+        assertThat(info.getMaxParallelism()).isEqualTo(40);
     }
 }

@@ -27,8 +27,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 
 import static org.apache.flink.client.program.PackagedProgramUtils.resolveURI;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests {@link PackagedProgramUtils}.
@@ -41,21 +40,21 @@ public class PackagedProgramUtilsTest {
     @Test
     public void testResolveURI() throws URISyntaxException {
         final String relativeFile = "path/of/user.jar";
-        assertThat(resolveURI(relativeFile).getScheme(), is("file"));
-        assertThat(
-                resolveURI(relativeFile).getPath(),
-                is(new File(System.getProperty("user.dir"), relativeFile).getAbsolutePath()));
+        assertThat(resolveURI(relativeFile).getScheme()).isEqualTo("file");
+        assertThat(resolveURI(relativeFile).getPath())
+                .isEqualTo(
+                        new File(System.getProperty("user.dir"), relativeFile).getAbsolutePath());
 
         final String absoluteFile = "/path/of/user.jar";
-        assertThat(resolveURI(relativeFile).getScheme(), is("file"));
-        assertThat(resolveURI(absoluteFile).getPath(), is(absoluteFile));
+        assertThat(resolveURI(relativeFile).getScheme()).isEqualTo("file");
+        assertThat(resolveURI(absoluteFile).getPath()).isEqualTo(absoluteFile);
 
         final String fileSchemaFile = "file:///path/of/user.jar";
-        assertThat(resolveURI(fileSchemaFile).getScheme(), is("file"));
-        assertThat(resolveURI(fileSchemaFile).toString(), is(fileSchemaFile));
+        assertThat(resolveURI(fileSchemaFile).getScheme()).isEqualTo("file");
+        assertThat(resolveURI(fileSchemaFile).toString()).isEqualTo(fileSchemaFile);
 
         final String localSchemaFile = "local:///path/of/user.jar";
-        assertThat(resolveURI(localSchemaFile).getScheme(), is("local"));
-        assertThat(resolveURI(localSchemaFile).toString(), is(localSchemaFile));
+        assertThat(resolveURI(localSchemaFile).getScheme()).isEqualTo("local");
+        assertThat(resolveURI(localSchemaFile).toString()).isEqualTo(localSchemaFile);
     }
 }

@@ -27,11 +27,12 @@ import org.apache.flink.core.memory.DataOutputViewStreamWrapper;
 import org.apache.flink.runtime.state.RegisteredKeyValueStateBackendMetaInfo;
 import org.apache.flink.runtime.state.StateSnapshot;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link CopyOnWriteStateTable}. */
 public class CopyOnWriteStateTableTest {
@@ -87,7 +88,7 @@ public class CopyOnWriteStateTableTest {
         for (int group = 0; group < numberOfKeyGroups; group++) {
             snapshot.writeStateInKeyGroup(dataOutputView, group);
             // resource used by one key group should be released after the snapshot is successful
-            Assert.assertTrue(isResourceReleasedForKeyGroup(table, group));
+            assertThat(isResourceReleasedForKeyGroup(table, group)).isTrue();
         }
         snapshot.release();
         verifyResourceIsReleasedForAllKeyGroup(table, 1);
@@ -109,10 +110,10 @@ public class CopyOnWriteStateTableTest {
         // only snapshot part of key groups to simulate a failed snapshot
         for (int group = 0; group < numberOfKeyGroups / 2; group++) {
             snapshot.writeStateInKeyGroup(dataOutputView, group);
-            Assert.assertTrue(isResourceReleasedForKeyGroup(table, group));
+            assertThat(isResourceReleasedForKeyGroup(table, group)).isTrue();
         }
         for (int group = numberOfKeyGroups / 2; group < numberOfKeyGroups; group++) {
-            Assert.assertFalse(isResourceReleasedForKeyGroup(table, group));
+            assertThat(isResourceReleasedForKeyGroup(table, group)).isFalse();
         }
         snapshot.release();
         verifyResourceIsReleasedForAllKeyGroup(table, 2);
@@ -145,8 +146,8 @@ public class CopyOnWriteStateTableTest {
             CopyOnWriteStateTable table, int snapshotVersion) {
         StateMap[] stateMaps = table.getState();
         for (StateMap map : stateMaps) {
-            Assert.assertFalse(
-                    ((CopyOnWriteStateMap) map).getSnapshotVersions().contains(snapshotVersion));
+            assertThat(((CopyOnWriteStateMap) map).getSnapshotVersions().contains(snapshotVersion))
+                    .isFalse();
         }
     }
 

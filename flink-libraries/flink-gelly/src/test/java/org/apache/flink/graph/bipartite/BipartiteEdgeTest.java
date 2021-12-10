@@ -20,7 +20,7 @@ package org.apache.flink.graph.bipartite;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BipartiteEdge}. */
 public class BipartiteEdgeTest {
@@ -33,35 +33,35 @@ public class BipartiteEdgeTest {
 
     @Test
     public void testGetBottomId() {
-        assertEquals(BOTTOM_ID, (long) edge.getBottomId());
+        assertThat((long) edge.getBottomId()).isEqualTo(BOTTOM_ID);
     }
 
     @Test
     public void testGetTopId() {
-        assertEquals(TOP_ID, (long) edge.getTopId());
+        assertThat((long) edge.getTopId()).isEqualTo(TOP_ID);
     }
 
     @Test
     public void testGetValue() {
-        assertEquals(VALUE, edge.getValue());
+        assertThat(edge.getValue()).isEqualTo(VALUE);
     }
 
     @Test
     public void testSetBottomId() {
         edge.setBottomId(100);
-        assertEquals(100, (long) edge.getBottomId());
+        assertThat((long) edge.getBottomId()).isEqualTo(100);
     }
 
     @Test
     public void testSetTopId() {
         edge.setTopId(100);
-        assertEquals(100, (long) edge.getTopId());
+        assertThat((long) edge.getTopId()).isEqualTo(100);
     }
 
     @Test
     public void testSetValue() {
         edge.setValue("newVal");
-        assertEquals("newVal", edge.getValue());
+        assertThat(edge.getValue()).isEqualTo("newVal");
     }
 
     private BipartiteEdge<Integer, Integer, String> createEdge() {

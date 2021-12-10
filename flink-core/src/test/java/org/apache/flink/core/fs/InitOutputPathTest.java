@@ -39,7 +39,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
 /** A test validating that the initialization of local output paths is properly synchronized. */

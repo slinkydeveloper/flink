@@ -33,13 +33,10 @@ import org.apache.flink.runtime.metrics.util.DummyCharacterFilter;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link TaskMetricGroup}. */
 public class TaskMetricGroupTest extends TestLogger {
@@ -74,15 +71,19 @@ public class TaskMetricGroupTest extends TestLogger {
                 tmGroup.addJob(new JobID(), "myJobName")
                         .addTask(new JobVertexID(), new ExecutionAttemptID(), "aTaskName", 13, 2);
 
-        assertArrayEquals(
-                new String[] {
-                    "theHostName", "taskmanager", "test-tm-id", "myJobName", "aTaskName", "13"
-                },
-                taskGroup.getScopeComponents());
+        assertThat(taskGroup.getScopeComponents())
+                .isEqualTo(
+                        new String[] {
+                            "theHostName",
+                            "taskmanager",
+                            "test-tm-id",
+                            "myJobName",
+                            "aTaskName",
+                            "13"
+                        });
 
-        assertEquals(
-                "theHostName.taskmanager.test-tm-id.myJobName.aTaskName.13.name",
-                taskGroup.getMetricIdentifier("name"));
+        assertThat(taskGroup.getMetricIdentifier("name"))
+                .isEqualTo("theHostName.taskmanager.test-tm-id.myJobName.aTaskName.13.name");
     }
 
     @Test
@@ -106,15 +107,17 @@ public class TaskMetricGroupTest extends TestLogger {
         TaskMetricGroup taskGroup =
                 tmGroup.addJob(jid, "myJobName").addTask(vertexId, executionId, "aTaskName", 13, 2);
 
-        assertArrayEquals(
-                new String[] {
-                    "test-tm-id", jid.toString(), vertexId.toString(), executionId.toString()
-                },
-                taskGroup.getScopeComponents());
+        assertThat(taskGroup.getScopeComponents())
+                .isEqualTo(
+                        new String[] {
+                            "test-tm-id",
+                            jid.toString(),
+                            vertexId.toString(),
+                            executionId.toString()
+                        });
 
-        assertEquals(
-                String.format("test-tm-id.%s.%s.%s.name", jid, vertexId, executionId),
-                taskGroup.getMetricIdentifier("name"));
+        assertThat(taskGroup.getMetricIdentifier("name"))
+                .isEqualTo(String.format("test-tm-id.%s.%s.%s.name", jid, vertexId, executionId));
         registry.shutdown().get();
     }
 
@@ -135,20 +138,20 @@ public class TaskMetricGroupTest extends TestLogger {
                 tmGroup.addJob(new JobID(), "myJobName")
                         .addTask(new JobVertexID(), executionId, "aTaskName", 13, 1);
 
-        assertArrayEquals(
-                new String[] {
-                    "theHostName",
-                    "taskmanager",
-                    "test-tm-id",
-                    "myJobName",
-                    executionId.toString(),
-                    "13"
-                },
-                taskGroup.getScopeComponents());
+        assertThat(taskGroup.getScopeComponents())
+                .isEqualTo(
+                        new String[] {
+                            "theHostName",
+                            "taskmanager",
+                            "test-tm-id",
+                            "myJobName",
+                            executionId.toString(),
+                            "13"
+                        });
 
-        assertEquals(
-                "theHostName.taskmanager.test-tm-id.myJobName." + executionId + ".13.name",
-                taskGroup.getMetricIdentifier("name"));
+        assertThat(taskGroup.getMetricIdentifier("name"))
+                .isEqualTo(
+                        "theHostName.taskmanager.test-tm-id.myJobName." + executionId + ".13.name");
         registry.shutdown().get();
     }
 
@@ -165,10 +168,10 @@ public class TaskMetricGroupTest extends TestLogger {
 
         QueryScopeInfo.TaskQueryScopeInfo info =
                 task.createQueryServiceMetricInfo(new DummyCharacterFilter());
-        assertEquals("", info.scope);
-        assertEquals(jid.toString(), info.jobID);
-        assertEquals(vid.toString(), info.vertexID);
-        assertEquals(4, info.subtaskIndex);
+        assertThat(info.scope).isEqualTo("");
+        assertThat(info.jobID).isEqualTo(jid.toString());
+        assertThat(info.vertexID).isEqualTo(vid.toString());
+        assertThat(info.subtaskIndex).isEqualTo(4);
     }
 
     @Test
@@ -185,12 +188,12 @@ public class TaskMetricGroupTest extends TestLogger {
                         .addTask(new JobVertexID(), new ExecutionAttemptID(), "task", 0, 0);
 
         // the io metric should have registered predefined metrics
-        assertTrue(registry.getNumberRegisteredMetrics() > initialMetricsCount);
+        assertThat(registry.getNumberRegisteredMetrics() > initialMetricsCount).isTrue();
 
         taskMetricGroup.close();
 
         // now all registered metrics should have been unregistered
-        assertEquals(initialMetricsCount, registry.getNumberRegisteredMetrics());
+        assertThat(registry.getNumberRegisteredMetrics()).isEqualTo(initialMetricsCount);
 
         registry.shutdown().get();
     }
@@ -214,10 +217,11 @@ public class TaskMetricGroupTest extends TestLogger {
                 taskMetricGroup.getOrAddOperator(originalName);
 
         String storedName = operatorMetricGroup.getScopeComponents()[0];
-        Assert.assertEquals(TaskMetricGroup.METRICS_OPERATOR_NAME_MAX_LENGTH, storedName.length());
-        Assert.assertEquals(
-                originalName.substring(0, TaskMetricGroup.METRICS_OPERATOR_NAME_MAX_LENGTH),
-                storedName);
+        assertThat(storedName.length()).isEqualTo(TaskMetricGroup.METRICS_OPERATOR_NAME_MAX_LENGTH);
+        assertThat(storedName)
+                .isEqualTo(
+                        originalName.substring(
+                                0, TaskMetricGroup.METRICS_OPERATOR_NAME_MAX_LENGTH));
         registry.shutdown().get();
     }
 

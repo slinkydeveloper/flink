@@ -27,7 +27,6 @@ import org.apache.flink.util.OperatingSystem;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
@@ -54,6 +53,7 @@ import static org.apache.flink.python.PythonOptions.PYTHON_ARCHIVES;
 import static org.apache.flink.python.PythonOptions.PYTHON_CLIENT_EXECUTABLE;
 import static org.apache.flink.python.PythonOptions.PYTHON_FILES;
 import static org.apache.flink.python.util.PythonDependencyUtils.FILE_DELIMITER;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PythonEnvUtils}. */
 public class PythonEnvUtilsTest {
@@ -131,7 +131,7 @@ public class PythonEnvUtilsTest {
                 Arrays.stream(env.pythonPath.split(File.pathSeparator))
                         .map(PythonEnvUtilsTest::replaceUUID)
                         .collect(Collectors.toSet());
-        Assert.assertEquals(expectedPythonPaths, actualPaths);
+        assertThat(actualPaths).isEqualTo(expectedPythonPaths);
     }
 
     @Test
@@ -167,7 +167,7 @@ public class PythonEnvUtilsTest {
             }
             String cmdResult = new String(Files.readAllBytes(new File(result).toPath()));
             // Check if the working directory of python process is the same as java process.
-            Assert.assertEquals(cmdResult, System.getProperty("user.dir"));
+            assertThat(System.getProperty("user.dir")).isEqualTo(cmdResult);
             pythonProcess.destroyForcibly();
             pyFile.delete();
             new File(result).delete();
@@ -190,9 +190,9 @@ public class PythonEnvUtilsTest {
         }
         PythonEnvUtils.PythonEnvironment env = preparePythonEnvironment(config, null, tmpDirPath);
         if (OperatingSystem.isWindows()) {
-            Assert.assertEquals("python.exe", env.pythonExec);
+            assertThat(env.pythonExec).isEqualTo("python.exe");
         } else {
-            Assert.assertEquals("python", env.pythonExec);
+            assertThat(env.pythonExec).isEqualTo("python");
         }
 
         Map<String, String> systemEnv = new HashMap<>(System.getenv());
@@ -200,7 +200,7 @@ public class PythonEnvUtilsTest {
         CommonTestUtils.setEnv(systemEnv);
         try {
             env = preparePythonEnvironment(config, null, tmpDirPath);
-            Assert.assertEquals("python3", env.pythonExec);
+            assertThat(env.pythonExec).isEqualTo("python3");
         } finally {
             systemEnv.remove(PYFLINK_CLIENT_EXECUTABLE);
             CommonTestUtils.setEnv(systemEnv);
@@ -212,21 +212,21 @@ public class PythonEnvUtilsTest {
         CommonTestUtils.setEnv(systemEnv);
         try {
             env = preparePythonEnvironment(config, null, tmpDirPath);
-            Assert.assertEquals("venv.zip/venv/bin/python", env.pythonExec);
+            assertThat(env.pythonExec).isEqualTo("venv.zip/venv/bin/python");
         } finally {
             systemEnv.remove(PYFLINK_CLIENT_EXECUTABLE);
             CommonTestUtils.setEnv(systemEnv);
         }
         java.nio.file.Path[] files =
                 FileUtils.listDirectory(new File(env.archivesDirectory).toPath());
-        Assert.assertEquals(files.length, 1);
-        Assert.assertEquals(files[0].getFileName().toString(), zipFile.getName());
+        assertThat(1).isEqualTo(files.length);
+        assertThat(zipFile.getName()).isEqualTo(files[0].getFileName().toString());
 
         config.removeConfig(PYTHON_ARCHIVES);
 
         config.set(PYTHON_CLIENT_EXECUTABLE, "/usr/bin/python");
         env = preparePythonEnvironment(config, null, tmpDirPath);
-        Assert.assertEquals("/usr/bin/python", env.pythonExec);
+        assertThat(env.pythonExec).isEqualTo("/usr/bin/python");
     }
 
     @Test
@@ -249,7 +249,7 @@ public class PythonEnvUtilsTest {
                 Arrays.stream(env.pythonPath.split(File.pathSeparator))
                         .map(PythonEnvUtilsTest::replaceUUID)
                         .collect(Collectors.toSet());
-        Assert.assertEquals(expectedPythonPaths, actualPaths);
+        assertThat(actualPaths).isEqualTo(expectedPythonPaths);
     }
 
     @After

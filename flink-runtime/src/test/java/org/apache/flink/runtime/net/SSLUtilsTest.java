@@ -48,13 +48,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link SSLUtils}. */
 @RunWith(Parameterized.class)
@@ -73,9 +70,10 @@ public class SSLUtilsTest extends TestLogger {
 
     static {
         if (System.getProperty("flink.tests.with-openssl") != null) {
-            assertTrue(
-                    "openSSL not available but required (property 'flink.tests.with-openssl' is set)",
-                    OpenSsl.isAvailable());
+            assertThat(OpenSsl.isAvailable())
+                    .as(
+                            "openSSL not available but required (property 'flink.tests.with-openssl' is set)")
+                    .isTrue();
             AVAILABLE_SSL_PROVIDERS = Arrays.asList("JDK", "OPENSSL");
         } else {
             AVAILABLE_SSL_PROVIDERS = Collections.singletonList("JDK");
@@ -114,7 +112,7 @@ public class SSLUtilsTest extends TestLogger {
         Configuration clientConfig = createRestSslConfigWithTrustStore();
 
         SSLHandlerFactory ssl = SSLUtils.createRestClientSSLEngineFactory(clientConfig);
-        assertNotNull(ssl);
+        assertThat(ssl).isNotNull();
     }
 
     /** Tests that REST Client SSL Client is not created if SSL is not configured. */
@@ -179,7 +177,7 @@ public class SSLUtilsTest extends TestLogger {
         Configuration serverConfig = createRestSslConfigWithKeyStore();
 
         SSLHandlerFactory ssl = SSLUtils.createRestServerSSLEngineFactory(serverConfig);
-        assertNotNull(ssl);
+        assertThat(ssl).isNotNull();
     }
 
     /** Tests that REST Server SSL Engine is not created if SSL is disabled. */
@@ -226,8 +224,8 @@ public class SSLUtilsTest extends TestLogger {
     @Test
     public void testInternalSSL() throws Exception {
         final Configuration config = createInternalSslConfigWithKeyAndTrustStores();
-        assertNotNull(SSLUtils.createInternalServerSSLEngineFactory(config));
-        assertNotNull(SSLUtils.createInternalClientSSLEngineFactory(config));
+        assertThat(SSLUtils.createInternalServerSSLEngineFactory(config)).isNotNull();
+        assertThat(SSLUtils.createInternalClientSSLEngineFactory(config)).isNotNull();
     }
 
     @Test
@@ -237,8 +235,8 @@ public class SSLUtilsTest extends TestLogger {
                 SecurityOptions.SSL_INTERNAL_CERT_FINGERPRINT,
                 getCertificateFingerprint(config, "flink.test"));
 
-        assertNotNull(SSLUtils.createInternalServerSSLEngineFactory(config));
-        assertNotNull(SSLUtils.createInternalClientSSLEngineFactory(config));
+        assertThat(SSLUtils.createInternalServerSSLEngineFactory(config)).isNotNull();
+        assertThat(SSLUtils.createInternalClientSSLEngineFactory(config)).isNotNull();
     }
 
     @Test
@@ -362,19 +360,21 @@ public class SSLUtilsTest extends TestLogger {
 
         try (ServerSocket socket =
                 SSLUtils.createSSLServerSocketFactory(serverConfig).createServerSocket(0)) {
-            assertTrue(socket instanceof SSLServerSocket);
+            assertThat(socket).isInstanceOf(SSLServerSocket.class);
             final SSLServerSocket sslSocket = (SSLServerSocket) socket;
 
             String[] protocols = sslSocket.getEnabledProtocols();
             String[] algorithms = sslSocket.getEnabledCipherSuites();
 
-            assertEquals(1, protocols.length);
-            assertEquals("TLSv1.1", protocols[0]);
-            assertEquals(2, algorithms.length);
-            assertThat(
-                    algorithms,
-                    arrayContainingInAnyOrder(
-                            "TLS_RSA_WITH_AES_128_CBC_SHA", "TLS_RSA_WITH_AES_128_CBC_SHA256"));
+            assertThat(protocols.length).isEqualTo(1);
+            assertThat(protocols[0]).isEqualTo("TLSv1.1");
+            assertThat(algorithms.length).isEqualTo(2);
+            assertThat(algorithms)
+                    .satisfies(
+                            matching(
+                                    arrayContainingInAnyOrder(
+                                            "TLS_RSA_WITH_AES_128_CBC_SHA",
+                                            "TLS_RSA_WITH_AES_128_CBC_SHA256")));
         }
     }
 
@@ -408,15 +408,15 @@ public class SSLUtilsTest extends TestLogger {
         final SslHandler sslHandler =
                 serverSSLHandlerFactory.createNettySSLHandler(UnpooledByteBufAllocator.DEFAULT);
 
-        assertEquals(expectedSslProtocols.length, sslHandler.engine().getEnabledProtocols().length);
-        assertThat(
-                sslHandler.engine().getEnabledProtocols(),
-                arrayContainingInAnyOrder(expectedSslProtocols));
+        assertThat(sslHandler.engine().getEnabledProtocols().length)
+                .isEqualTo(expectedSslProtocols.length);
+        assertThat(sslHandler.engine().getEnabledProtocols())
+                .satisfies(matching(arrayContainingInAnyOrder(expectedSslProtocols)));
 
-        assertEquals(sslAlgorithms.length, sslHandler.engine().getEnabledCipherSuites().length);
-        assertThat(
-                sslHandler.engine().getEnabledCipherSuites(),
-                arrayContainingInAnyOrder(sslAlgorithms));
+        assertThat(sslHandler.engine().getEnabledCipherSuites().length)
+                .isEqualTo(sslAlgorithms.length);
+        assertThat(sslHandler.engine().getEnabledCipherSuites())
+                .satisfies(matching(arrayContainingInAnyOrder(sslAlgorithms)));
     }
 
     @Test
@@ -432,7 +432,7 @@ public class SSLUtilsTest extends TestLogger {
             SSLUtils.createInternalServerSSLEngineFactory(config);
             fail("expected exception");
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("malformed fingerprint"));
+            assertThat(e.getMessage()).contains("malformed fingerprint");
         }
     }
 

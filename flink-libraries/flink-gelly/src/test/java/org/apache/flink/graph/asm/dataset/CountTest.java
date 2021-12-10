@@ -30,7 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Count}. */
 public class CountTest {
@@ -52,7 +52,7 @@ public class CountTest {
 
         long count = new Count<Long>().run(dataset).execute();
 
-        assertEquals(list.size(), count);
+        assertThat(count).isEqualTo(list.size());
     }
 
     @Test
@@ -61,6 +61,6 @@ public class CountTest {
 
         long count = new Count<Long>().run(dataset).execute();
 
-        assertEquals(0, count);
+        assertThat(count).isEqualTo(0);
     }
 }

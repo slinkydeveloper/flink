@@ -22,8 +22,7 @@ import org.apache.flink.table.examples.utils.ExampleOutputTestBase;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for Java {@link AdvancedFunctionsExample}. */
 public class AdvancedFunctionsExampleITCase extends ExampleOutputTestBase {
@@ -38,44 +37,26 @@ public class AdvancedFunctionsExampleITCase extends ExampleOutputTestBase {
     }
 
     private void testExecuteLastDatedValueFunction(String consoleOutput) {
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                Guillermo Smith |                 (5,2020-12-05) |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                    John Turner |                (12,2020-10-02) |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                 Brandy Sanders |                 (1,2020-10-14) |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                Valeria Mendoza |                (10,2020-06-02) |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                   Ellen Ortega |               (100,2020-06-18) |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                 Leann Holloway |                 (9,2020-05-26) |"));
+        assertThat(consoleOutput)
+                .contains("|                Guillermo Smith |                 (5,2020-12-05) |");
+        assertThat(consoleOutput)
+                .contains("|                    John Turner |                (12,2020-10-02) |");
+        assertThat(consoleOutput)
+                .contains("|                 Brandy Sanders |                 (1,2020-10-14) |");
+        assertThat(consoleOutput)
+                .contains("|                Valeria Mendoza |                (10,2020-06-02) |");
+        assertThat(consoleOutput)
+                .contains("|                   Ellen Ortega |               (100,2020-06-18) |");
+        assertThat(consoleOutput)
+                .contains("|                 Leann Holloway |                 (9,2020-05-26) |");
     }
 
     private void testExecuteInternalRowMergerFunction(String consoleOutput) {
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                Guillermo Smith | (1992-12-12,New Jersey,816-... |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                Valeria Mendoza | (1970-03-28,Los Angeles,928... |"));
-        assertThat(
-                consoleOutput,
-                containsString(
-                        "|                 Leann Holloway | (1989-05-21,Eugene,614-889-... |"));
+        assertThat(consoleOutput)
+                .contains("|                Guillermo Smith | (1992-12-12,New Jersey,816-... |");
+        assertThat(consoleOutput)
+                .contains("|                Valeria Mendoza | (1970-03-28,Los Angeles,928... |");
+        assertThat(consoleOutput)
+                .contains("|                 Leann Holloway | (1989-05-21,Eugene,614-889-... |");
     }
 }

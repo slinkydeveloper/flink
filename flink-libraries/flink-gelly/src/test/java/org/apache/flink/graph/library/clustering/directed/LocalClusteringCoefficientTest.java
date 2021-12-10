@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LocalClusteringCoefficient}. */
 public class LocalClusteringCoefficientTest extends AsmTestBase {
@@ -66,11 +66,11 @@ public class LocalClusteringCoefficientTest extends AsmTestBase {
 
         List<Result<T>> results = cc.collect();
 
-        assertEquals(count, results.size());
+        assertThat(results.size()).isEqualTo(count);
 
         for (Result<T> result : results) {
-            assertEquals(degree, result.getDegree().getValue());
-            assertEquals(triangleCount, result.getTriangleCount().getValue());
+            assertThat(result.getDegree().getValue()).isEqualTo(degree);
+            assertThat(result.getTriangleCount().getValue()).isEqualTo(triangleCount);
         }
     }
 
@@ -102,7 +102,7 @@ public class LocalClusteringCoefficientTest extends AsmTestBase {
                         .run(cc)
                         .execute();
 
-        assertEquals(902, checksum.getCount());
-        assertEquals(0x000001bf83866775L, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(902);
+        assertThat(checksum.getChecksum()).isEqualTo(0x000001bf83866775L);
     }
 }

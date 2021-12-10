@@ -38,9 +38,7 @@ import org.rocksdb.RocksDBException;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Base test suite for rocksdb state TTL. */
 public abstract class RocksDBTtlStateTestBase extends TtlStateTestBase {
@@ -128,14 +126,14 @@ public abstract class RocksDBTtlStateTestBase extends TtlStateTestBase {
 
         sbetc.setCurrentKey("k1");
         checkUnexpiredOriginalAvailable();
-        assertEquals(UNEXPIRED_AVAIL, ctx().getUpdateEmpty, ctx().get());
+        assertThat(ctx().get()).as(UNEXPIRED_AVAIL).isEqualTo(ctx().getUpdateEmpty);
 
         ctx().update(ctx().updateUnexpired);
         checkUnexpiredOriginalAvailable();
 
         sbetc.setCurrentKey("k2");
         checkUnexpiredOriginalAvailable();
-        assertEquals(UNEXPIRED_AVAIL, ctx().getUpdateEmpty, ctx().get());
+        assertThat(ctx().get()).as(UNEXPIRED_AVAIL).isEqualTo(ctx().getUpdateEmpty);
 
         ctx().update(ctx().updateUnexpired);
         checkUnexpiredOriginalAvailable();
@@ -152,11 +150,11 @@ public abstract class RocksDBTtlStateTestBase extends TtlStateTestBase {
 
         sbetc.setCurrentKey("k1");
         checkUnexpiredOriginalAvailable();
-        assertEquals(UPDATED_UNEXPIRED_AVAIL, ctx().getUnexpired, ctx().get());
+        assertThat(ctx().get()).as(UPDATED_UNEXPIRED_AVAIL).isEqualTo(ctx().getUnexpired);
 
         sbetc.setCurrentKey("k2");
         checkUnexpiredOriginalAvailable();
-        assertEquals(UPDATED_UNEXPIRED_AVAIL, ctx().getUnexpired, ctx().get());
+        assertThat(ctx().get()).as(UPDATED_UNEXPIRED_AVAIL).isEqualTo(ctx().getUnexpired);
 
         if (takeSnapshot) {
             takeAndRestoreSnapshot(numberOfKeyGroupsAfterRestore);
@@ -164,19 +162,24 @@ public abstract class RocksDBTtlStateTestBase extends TtlStateTestBase {
 
         setTimeAndCompact(stateDesc, 170L);
         sbetc.setCurrentKey("k1");
-        assertTrue("Expired original state should be unavailable", ctx().isOriginalEmptyValue());
-        assertEquals(EXPIRED_UNAVAIL, ctx().emptyValue, ctx().get());
+        assertThat(ctx().isOriginalEmptyValue())
+                .as("Expired original state should be unavailable")
+                .isTrue();
+        assertThat(ctx().get()).as(EXPIRED_UNAVAIL).isEqualTo(ctx().emptyValue);
 
         sbetc.setCurrentKey("k2");
-        assertTrue("Expired original state should be unavailable", ctx().isOriginalEmptyValue());
-        assertEquals("Expired state should be unavailable", ctx().emptyValue, ctx().get());
+        assertThat(ctx().isOriginalEmptyValue())
+                .as("Expired original state should be unavailable")
+                .isTrue();
+        assertThat(ctx().get())
+                .as("Expired state should be unavailable")
+                .isEqualTo(ctx().emptyValue);
     }
 
     private void checkUnexpiredOriginalAvailable() throws Exception {
-        assertNotEquals(
-                "Unexpired original state should be available",
-                ctx().emptyValue,
-                ctx().getOriginal());
+        assertThat(ctx().getOriginal())
+                .as("Unexpired original state should be available")
+                .isEqualTo(ctx().emptyValue);
     }
 
     private void setTimeAndCompact(StateDescriptor<?, ?> stateDesc, long ts)

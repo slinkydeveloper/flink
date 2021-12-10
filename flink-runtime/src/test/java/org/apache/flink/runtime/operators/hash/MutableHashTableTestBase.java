@@ -52,7 +52,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public abstract class MutableHashTableTestBase {
 
@@ -122,10 +122,10 @@ public abstract class MutableHashTableTestBase {
         AbstractHashTableProber<IntPair, IntPair> prober2 =
                 table.getProber(intPairComparator, pairComparator);
 
-        assertFalse(prober1 == prober2);
+        assertThat(prober1 == prober2).isFalse();
 
         table.close(); // (This also tests calling close without calling open first.)
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -148,12 +148,12 @@ public abstract class MutableHashTableTestBase {
         IntPair target = new IntPair();
 
         for (int i = 0; i < NUM_PAIRS; i++) {
-            assertNotNull(prober.getMatchFor(pairs[i], target));
-            assertEquals(pairs[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(pairs[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -181,8 +181,8 @@ public abstract class MutableHashTableTestBase {
         }
         table.close();
 
-        assertTrue(sum == result);
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(sum == result).isTrue();
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -208,12 +208,12 @@ public abstract class MutableHashTableTestBase {
 
         IntList target = new IntList();
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull(pairProber.getMatchFor(pairs[i], target));
-            assertNotNull(listProber.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(pairProber.getMatchFor(pairs[i], target)).isNotNull();
+            assertThat(listProber.getMatchFor(lists[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -240,8 +240,8 @@ public abstract class MutableHashTableTestBase {
         IntList target = new IntList();
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull(prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
 
         final IntList[] overwriteLists = getRandomizedIntLists(NUM_LISTS, rnd);
@@ -252,12 +252,12 @@ public abstract class MutableHashTableTestBase {
         }
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull("" + i, prober.getMatchFor(overwriteLists[i], target));
-            assertArrayEquals(overwriteLists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(overwriteLists[i], target)).as("" + i).isNotNull();
+            assertThat(target.getValue()).isEqualTo(overwriteLists[i].getValue());
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -280,8 +280,8 @@ public abstract class MutableHashTableTestBase {
         IntList target = new IntList();
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull(prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
 
         final IntList[] overwriteLists = getRandomizedIntLists(NUM_LISTS, rnd);
@@ -295,12 +295,12 @@ public abstract class MutableHashTableTestBase {
         }
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull("" + i, prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).as("" + i).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -326,8 +326,8 @@ public abstract class MutableHashTableTestBase {
         IntList target = new IntList();
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull(prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
 
         final IntList[] overwriteLists = getRandomizedIntLists(NUM_LISTS / STEP_SIZE, rnd);
@@ -341,12 +341,12 @@ public abstract class MutableHashTableTestBase {
         }
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull(prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -373,8 +373,8 @@ public abstract class MutableHashTableTestBase {
         IntList target = new IntList();
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull(prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
         }
 
         IntList[] overwriteLists;
@@ -387,13 +387,13 @@ public abstract class MutableHashTableTestBase {
             }
 
             for (int i = 0; i < NUM_LISTS; i++) {
-                assertNotNull("" + i, prober.getMatchFor(overwriteLists[i], target));
-                assertArrayEquals(overwriteLists[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(overwriteLists[i], target)).as("" + i).isNotNull();
+                assertThat(target.getValue()).isEqualTo(overwriteLists[i].getValue());
             }
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -418,18 +418,18 @@ public abstract class MutableHashTableTestBase {
         IntList target = new IntList();
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull("" + i, prober.getMatchFor(lists[i], target));
-            assertArrayEquals(lists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(lists[i], target)).as("" + i).isNotNull();
+            assertThat(target.getValue()).isEqualTo(lists[i].getValue());
             prober.updateMatch(overwriteLists[i]);
         }
 
         for (int i = 0; i < NUM_LISTS; i++) {
-            assertNotNull("" + i, prober.getMatchFor(overwriteLists[i], target));
-            assertArrayEquals(overwriteLists[i].getValue(), target.getValue());
+            assertThat(prober.getMatchFor(overwriteLists[i], target)).as("" + i).isNotNull();
+            assertThat(target.getValue()).isEqualTo(overwriteLists[i].getValue());
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     @Test
@@ -461,8 +461,8 @@ public abstract class MutableHashTableTestBase {
                 table.getProber(comparatorS, pairComparatorS);
         StringPair temp = new StringPair();
         while (probeTester.next(target) != null) {
-            assertNotNull("" + target.getKey(), prober.getMatchFor(target, temp));
-            assertEquals(temp.getValue(), target.getValue());
+            assertThat(prober.getMatchFor(target, temp)).as("" + target.getKey()).isNotNull();
+            assertThat(target.getValue()).isEqualTo(temp.getValue());
         }
 
         while (updater.next(target) != null) {
@@ -471,12 +471,12 @@ public abstract class MutableHashTableTestBase {
         }
 
         while (updateTester.next(target) != null) {
-            assertNotNull(prober.getMatchFor(target, temp));
-            assertEquals(target.getValue(), temp.getValue());
+            assertThat(prober.getMatchFor(target, temp)).isNotNull();
+            assertThat(temp.getValue()).isEqualTo(target.getValue());
         }
 
         table.close();
-        assertEquals("Memory lost", NUM_MEM_PAGES, table.getFreeMemory().size());
+        assertThat(table.getFreeMemory().size()).as("Memory lost").isEqualTo(NUM_MEM_PAGES);
     }
 
     protected static IntPair[] getRandomizedIntPairs(int num, Random rnd) {

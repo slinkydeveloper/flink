@@ -22,9 +22,8 @@ import org.apache.flink.types.IntValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for {@link IntValueArray}. */
 public class IntValueArrayTest {
@@ -37,39 +36,39 @@ public class IntValueArrayTest {
 
         // fill the array
         for (int i = 0; i < count; i++) {
-            assertFalse(iva.isFull());
-            assertEquals(i, iva.size());
+            assertThat(iva.isFull()).isFalse();
+            assertThat(iva.size()).isEqualTo(i);
 
-            assertTrue(iva.add(new IntValue(i)));
+            assertThat(iva.add(new IntValue(i))).isTrue();
 
-            assertEquals(i + 1, iva.size());
+            assertThat(iva.size()).isEqualTo(i + 1);
         }
 
         // array is now full
-        assertTrue(iva.isFull());
-        assertEquals(count, iva.size());
+        assertThat(iva.isFull()).isTrue();
+        assertThat(iva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (IntValue lv : iva) {
-            assertEquals(idx++, lv.getValue());
+            assertThat(lv.getValue()).isEqualTo(idx++);
         }
 
         // add element past end of array
-        assertFalse(iva.add(new IntValue(count)));
-        assertFalse(iva.addAll(iva));
+        assertThat(iva.add(new IntValue(count))).isFalse();
+        assertThat(iva.addAll(iva)).isFalse();
 
         // test copy
-        assertEquals(iva, iva.copy());
+        assertThatObject(iva.copy()).isEqualTo(iva);
 
         // test copyTo
         IntValueArray ivaTo = new IntValueArray();
         iva.copyTo(ivaTo);
-        assertEquals(iva, ivaTo);
+        assertThatObject(ivaTo).isEqualTo(iva);
 
         // test clear
         iva.clear();
-        assertEquals(0, iva.size());
+        assertThat(iva.size()).isEqualTo(0);
     }
 
     @Test
@@ -80,46 +79,46 @@ public class IntValueArrayTest {
 
         // add several elements
         for (int i = 0; i < count; i++) {
-            assertFalse(iva.isFull());
-            assertEquals(i, iva.size());
+            assertThat(iva.isFull()).isFalse();
+            assertThat(iva.size()).isEqualTo(i);
 
-            assertTrue(iva.add(new IntValue(i)));
+            assertThat(iva.add(new IntValue(i))).isTrue();
 
-            assertEquals(i + 1, iva.size());
+            assertThat(iva.size()).isEqualTo(i + 1);
         }
 
         // array never fills
-        assertFalse(iva.isFull());
-        assertEquals(count, iva.size());
+        assertThat(iva.isFull()).isFalse();
+        assertThat(iva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (IntValue lv : iva) {
-            assertEquals(idx++, lv.getValue());
+            assertThat(lv.getValue()).isEqualTo(idx++);
         }
 
         // add element past end of array
-        assertTrue(iva.add(new IntValue(count)));
-        assertTrue(iva.addAll(iva));
+        assertThat(iva.add(new IntValue(count))).isTrue();
+        assertThat(iva.addAll(iva)).isTrue();
 
         // test copy
-        assertEquals(iva, iva.copy());
+        assertThatObject(iva.copy()).isEqualTo(iva);
 
         // test copyTo
         IntValueArray ivaTo = new IntValueArray();
         iva.copyTo(ivaTo);
-        assertEquals(iva, ivaTo);
+        assertThatObject(ivaTo).isEqualTo(iva);
 
         // test mark/reset
         int size = iva.size();
         iva.mark();
-        assertTrue(iva.add(new IntValue()));
-        assertEquals(size + 1, iva.size());
+        assertThat(iva.add(new IntValue())).isTrue();
+        assertThat(iva.size()).isEqualTo(size + 1);
         iva.reset();
-        assertEquals(size, iva.size());
+        assertThat(iva.size()).isEqualTo(size);
 
         // test clear
         iva.clear();
-        assertEquals(0, iva.size());
+        assertThat(iva.size()).isEqualTo(0);
     }
 }

@@ -34,9 +34,7 @@ import java.util.Collections;
 
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils.buildSomeBuffer;
 import static org.apache.flink.runtime.state.CheckpointStorageLocationReference.getDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link ChannelStatePersister} test. */
 public class ChannelStatePersisterTest {
@@ -53,10 +51,10 @@ public class ChannelStatePersisterTest {
 
         persister.checkForBarrier(barrier(checkpointId));
         persister.startPersisting(checkpointId, Arrays.asList(buildSomeBuffer()));
-        assertEquals(1, channelStateWriter.getAddedInput().get(channelInfo).size());
+        assertThat(channelStateWriter.getAddedInput().get(channelInfo).size()).isEqualTo(1);
 
         persister.maybePersist(buildSomeBuffer());
-        assertEquals(1, channelStateWriter.getAddedInput().get(channelInfo).size());
+        assertThat(channelStateWriter.getAddedInput().get(channelInfo).size()).isEqualTo(1);
 
         // meanwhile, checkpoint coordinator timed out the 1st checkpoint and started the 2nd
         // now task thread is picking up the barrier and aborts the 1st:
@@ -64,9 +62,9 @@ public class ChannelStatePersisterTest {
         persister.maybePersist(buildSomeBuffer());
         persister.stopPersisting(checkpointId);
         persister.maybePersist(buildSomeBuffer());
-        assertEquals(1, channelStateWriter.getAddedInput().get(channelInfo).size());
+        assertThat(channelStateWriter.getAddedInput().get(channelInfo).size()).isEqualTo(1);
 
-        assertTrue(persister.hasBarrierReceived());
+        assertThat(persister.hasBarrierReceived()).isTrue();
     }
 
     @Test
@@ -77,9 +75,9 @@ public class ChannelStatePersisterTest {
         persister.startPersisting(1L, Collections.emptyList());
         persister.startPersisting(2L, Collections.emptyList());
 
-        assertFalse(persister.checkForBarrier(barrier(1L)).isPresent());
+        assertThat(persister.checkForBarrier(barrier(1L)).isPresent()).isFalse();
 
-        assertFalse(persister.hasBarrierReceived());
+        assertThat(persister.hasBarrierReceived()).isFalse();
     }
 
     @Test
@@ -121,8 +119,8 @@ public class ChannelStatePersisterTest {
         persister.checkForBarrier(barrier(checkpointId));
         persister.maybePersist(buildSomeBuffer());
 
-        assertTrue(persister.hasBarrierReceived());
-        assertEquals(2, channelStateWriter.getAddedInput().get(channelInfo).size());
+        assertThat(persister.hasBarrierReceived()).isTrue();
+        assertThat(channelStateWriter.getAddedInput().get(channelInfo).size()).isEqualTo(2);
     }
 
     @Test(expected = CheckpointException.class)

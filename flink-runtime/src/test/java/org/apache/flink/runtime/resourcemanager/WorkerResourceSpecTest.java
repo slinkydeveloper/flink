@@ -29,8 +29,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link WorkerResourceSpec}. */
 public class WorkerResourceSpecTest extends TestLogger {
@@ -138,16 +137,16 @@ public class WorkerResourceSpecTest extends TestLogger {
                         .setNumSlots(1)
                         .build();
 
-        assertEquals(spec1, spec1);
-        assertEquals(spec1, spec2);
-        assertNotEquals(spec1, spec3);
-        assertNotEquals(spec1, spec4);
-        assertNotEquals(spec1, spec5);
-        assertNotEquals(spec1, spec6);
-        assertNotEquals(spec1, spec7);
-        assertNotEquals(spec1, spec8);
-        assertNotEquals(spec1, spec9);
-        assertNotEquals(spec1, spec10);
+        assertThat(spec1).isEqualTo(spec1);
+        assertThat(spec2).isEqualTo(spec1);
+        assertThat(spec3).isEqualTo(spec1);
+        assertThat(spec4).isEqualTo(spec1);
+        assertThat(spec5).isEqualTo(spec1);
+        assertThat(spec6).isEqualTo(spec1);
+        assertThat(spec7).isEqualTo(spec1);
+        assertThat(spec8).isEqualTo(spec1);
+        assertThat(spec9).isEqualTo(spec1);
+        assertThat(spec10).isEqualTo(spec1);
     }
 
     @Test
@@ -252,16 +251,16 @@ public class WorkerResourceSpecTest extends TestLogger {
                         .setNumSlots(1)
                         .build();
 
-        assertEquals(spec1.hashCode(), spec1.hashCode());
-        assertEquals(spec1.hashCode(), spec2.hashCode());
-        assertNotEquals(spec1.hashCode(), spec3.hashCode());
-        assertNotEquals(spec1.hashCode(), spec4.hashCode());
-        assertNotEquals(spec1.hashCode(), spec5.hashCode());
-        assertNotEquals(spec1.hashCode(), spec6.hashCode());
-        assertNotEquals(spec1.hashCode(), spec7.hashCode());
-        assertNotEquals(spec1.hashCode(), spec8.hashCode());
-        assertNotEquals(spec1.hashCode(), spec9.hashCode());
-        assertNotEquals(spec1.hashCode(), spec10.hashCode());
+        assertThat(spec1.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec2.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec3.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec4.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec5.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec6.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec7.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec8.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec9.hashCode()).isEqualTo(spec1.hashCode());
+        assertThat(spec10.hashCode()).isEqualTo(spec1.hashCode());
     }
 
     @Test
@@ -279,22 +278,20 @@ public class WorkerResourceSpecTest extends TestLogger {
                         .build();
         final WorkerResourceSpec workerResourceSpec =
                 WorkerResourceSpec.fromTaskExecutorProcessSpec(taskExecutorProcessSpec);
-        assertEquals(workerResourceSpec.getCpuCores(), taskExecutorProcessSpec.getCpuCores());
-        assertEquals(
-                workerResourceSpec.getTaskHeapSize(), taskExecutorProcessSpec.getTaskHeapSize());
-        assertEquals(
-                workerResourceSpec.getTaskOffHeapSize(),
-                taskExecutorProcessSpec.getTaskOffHeapSize());
-        assertEquals(
-                workerResourceSpec.getNetworkMemSize(),
-                taskExecutorProcessSpec.getNetworkMemSize());
-        assertEquals(
-                workerResourceSpec.getManagedMemSize(),
-                taskExecutorProcessSpec.getManagedMemorySize());
-        assertEquals(workerResourceSpec.getNumSlots(), taskExecutorProcessSpec.getNumSlots());
-        assertEquals(
-                workerResourceSpec.getExtendedResources(),
-                taskExecutorProcessSpec.getExtendedResources());
+        assertThat(taskExecutorProcessSpec.getCpuCores())
+                .isEqualTo(workerResourceSpec.getCpuCores());
+        assertThat(taskExecutorProcessSpec.getTaskHeapSize())
+                .isEqualTo(workerResourceSpec.getTaskHeapSize());
+        assertThat(taskExecutorProcessSpec.getTaskOffHeapSize())
+                .isEqualTo(workerResourceSpec.getTaskOffHeapSize());
+        assertThat(taskExecutorProcessSpec.getNetworkMemSize())
+                .isEqualTo(workerResourceSpec.getNetworkMemSize());
+        assertThat(taskExecutorProcessSpec.getManagedMemorySize())
+                .isEqualTo(workerResourceSpec.getManagedMemSize());
+        assertThat(taskExecutorProcessSpec.getNumSlots())
+                .isEqualTo(workerResourceSpec.getNumSlots());
+        assertThat(taskExecutorProcessSpec.getExtendedResources())
+                .isEqualTo(workerResourceSpec.getExtendedResources());
     }
 
     @Test
@@ -311,14 +308,17 @@ public class WorkerResourceSpecTest extends TestLogger {
                         .build();
         final WorkerResourceSpec workerResourceSpec =
                 WorkerResourceSpec.fromTotalResourceProfile(resourceProfile, numSlots);
-        assertEquals(workerResourceSpec.getCpuCores(), resourceProfile.getCpuCores());
-        assertEquals(workerResourceSpec.getTaskHeapSize(), resourceProfile.getTaskHeapMemory());
-        assertEquals(
-                workerResourceSpec.getTaskOffHeapSize(), resourceProfile.getTaskOffHeapMemory());
-        assertEquals(workerResourceSpec.getNetworkMemSize(), resourceProfile.getNetworkMemory());
-        assertEquals(workerResourceSpec.getManagedMemSize(), resourceProfile.getManagedMemory());
-        assertEquals(workerResourceSpec.getNumSlots(), numSlots);
-        assertEquals(
-                workerResourceSpec.getExtendedResources(), resourceProfile.getExtendedResources());
+        assertThat(resourceProfile.getCpuCores()).isEqualTo(workerResourceSpec.getCpuCores());
+        assertThat(resourceProfile.getTaskHeapMemory())
+                .isEqualTo(workerResourceSpec.getTaskHeapSize());
+        assertThat(resourceProfile.getTaskOffHeapMemory())
+                .isEqualTo(workerResourceSpec.getTaskOffHeapSize());
+        assertThat(resourceProfile.getNetworkMemory())
+                .isEqualTo(workerResourceSpec.getNetworkMemSize());
+        assertThat(resourceProfile.getManagedMemory())
+                .isEqualTo(workerResourceSpec.getManagedMemSize());
+        assertThat(numSlots).isEqualTo(workerResourceSpec.getNumSlots());
+        assertThat(resourceProfile.getExtendedResources())
+                .isEqualTo(workerResourceSpec.getExtendedResources());
     }
 }

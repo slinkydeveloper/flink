@@ -69,9 +69,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.runtime.testutils.CommonTestUtils.getJavaCommandPath;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test makes sure that jobs are canceled properly in cases where the task manager went down
@@ -205,12 +203,12 @@ public class ProcessFailureCancelingITCase extends TestLogger {
 
             programThread.join(TIMEOUT.toMillis());
 
-            assertFalse("The program did not cancel in time", programThread.isAlive());
+            assertThat(programThread.isAlive()).as("The program did not cancel in time").isFalse();
 
             Throwable error = programException.get();
-            assertNotNull("The program did not fail properly", error);
+            assertThat(error).as("The program did not fail properly").isNotNull();
 
-            assertTrue(error instanceof ProgramInvocationException);
+            assertThat(error).isInstanceOf(ProgramInvocationException.class);
             // all seems well :-)
         } catch (Exception | Error e) {
             if (taskManagerProcess != null) {

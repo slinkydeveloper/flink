@@ -24,9 +24,8 @@ import org.apache.flink.shaded.netty4.io.netty.buffer.ByteBuf;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link ExecutionAttemptID}. */
 public class ExecutionAttemptIDTest {
@@ -39,7 +38,7 @@ public class ExecutionAttemptIDTest {
         final ByteBuf byteBuf = ALLOCATOR.directBuffer(byteBufLen, byteBufLen);
         executionAttemptID.writeTo(byteBuf);
 
-        assertThat(byteBuf.writerIndex(), is(equalTo(ExecutionAttemptID.getByteBufLength())));
-        assertThat(ExecutionAttemptID.fromByteBuf(byteBuf), is(equalTo(executionAttemptID)));
+        assertThat(byteBuf.writerIndex()).isEqualTo(equalTo(ExecutionAttemptID.getByteBufLength()));
+        assertThat(ExecutionAttemptID.fromByteBuf(byteBuf)).isEqualTo(equalTo(executionAttemptID));
     }
 }

@@ -49,11 +49,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the updating of consumers depending on the producers result. */
 public class UpdatePartitionConsumersTest extends TestLogger {
@@ -150,10 +148,10 @@ public class UpdatePartitionConsumersTest extends TestLogger {
 
         scheduler.startScheduling();
 
-        assertThat(ev1.getExecutionState(), is(ExecutionState.DEPLOYING));
-        assertThat(ev2.getExecutionState(), is(ExecutionState.DEPLOYING));
-        assertThat(ev3.getExecutionState(), is(ExecutionState.DEPLOYING));
-        assertThat(ev4.getExecutionState(), is(ExecutionState.DEPLOYING));
+        assertThat(ev1.getExecutionState()).isEqualTo(ExecutionState.DEPLOYING);
+        assertThat(ev2.getExecutionState()).isEqualTo(ExecutionState.DEPLOYING);
+        assertThat(ev3.getExecutionState()).isEqualTo(ExecutionState.DEPLOYING);
+        assertThat(ev4.getExecutionState()).isEqualTo(ExecutionState.DEPLOYING);
 
         updateState(scheduler, ev1, ExecutionState.INITIALIZING);
         updateState(scheduler, ev1, ExecutionState.RUNNING);
@@ -166,22 +164,22 @@ public class UpdatePartitionConsumersTest extends TestLogger {
 
         final InputGateDeploymentDescriptor ev4Igdd2 =
                 ev4TddFuture.get(TIMEOUT, TimeUnit.MILLISECONDS).getInputGates().get(1);
-        assertThat(ev4Igdd2.getShuffleDescriptors()[0], instanceOf(UnknownShuffleDescriptor.class));
+        assertThat(ev4Igdd2.getShuffleDescriptors()[0])
+                .isInstanceOf(UnknownShuffleDescriptor.class);
 
         final CompletableFuture<Void> updatePartitionFuture = new CompletableFuture<>();
         taskManagerGateway.setUpdatePartitionsConsumer(
                 (attemptId, partitionInfos, time) -> {
-                    assertThat(attemptId, equalTo(ev4.getCurrentExecutionAttempt().getAttemptId()));
+                    assertThat(attemptId)
+                            .isEqualTo(ev4.getCurrentExecutionAttempt().getAttemptId());
                     final List<PartitionInfo> partitionInfoList =
                             IterableUtils.toStream(partitionInfos).collect(Collectors.toList());
-                    assertThat(partitionInfoList, hasSize(1));
+                    assertThat(partitionInfoList).satisfies(matching(hasSize(1)));
                     final PartitionInfo partitionInfo = partitionInfoList.get(0);
-                    assertThat(
-                            partitionInfo.getIntermediateDataSetID(),
-                            equalTo(v3.getProducedDataSets().get(0).getId()));
-                    assertThat(
-                            partitionInfo.getShuffleDescriptor(),
-                            instanceOf(NettyShuffleDescriptor.class));
+                    assertThat(partitionInfo.getIntermediateDataSetID())
+                            .isEqualTo(v3.getProducedDataSets().get(0).getId());
+                    assertThat(partitionInfo.getShuffleDescriptor())
+                            .isInstanceOf(NettyShuffleDescriptor.class);
                     updatePartitionFuture.complete(null);
                 });
 

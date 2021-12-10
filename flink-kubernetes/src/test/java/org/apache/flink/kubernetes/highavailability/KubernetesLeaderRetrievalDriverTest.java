@@ -27,8 +27,8 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.nullValue;
 
 /** Tests for the {@link KubernetesLeaderRetrievalDriver}. */
@@ -41,7 +41,6 @@ public class KubernetesLeaderRetrievalDriverTest extends KubernetesHighAvailabil
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final FlinkKubeClient.WatchCallbackHandler<KubernetesConfigMap>
                                     callbackHandler = getLeaderRetrievalConfigMapCallback();
                             callbackHandler.onError(
@@ -49,9 +48,8 @@ public class KubernetesLeaderRetrievalDriverTest extends KubernetesHighAvailabil
                             final String errMsg =
                                     "Error while watching the ConfigMap " + LEADER_CONFIGMAP_NAME;
                             retrievalEventHandler.waitForError(TIMEOUT);
-                            assertThat(
-                                    retrievalEventHandler.getError(),
-                                    FlinkMatchers.containsMessage(errMsg));
+                            assertThat(retrievalEventHandler.getError())
+                                    .satisfies(matching(FlinkMatchers.containsMessage(errMsg)));
                         });
             }
         };
@@ -64,10 +62,8 @@ public class KubernetesLeaderRetrievalDriverTest extends KubernetesHighAvailabil
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final FlinkKubeClient.WatchCallbackHandler<KubernetesConfigMap>
                                     callbackHandler = getLeaderRetrievalConfigMapCallback();
-
                             // Leader changed
                             final String newLeader = LEADER_URL + "_" + 2;
                             getLeaderConfigMap()
@@ -75,9 +71,8 @@ public class KubernetesLeaderRetrievalDriverTest extends KubernetesHighAvailabil
                                     .put(Constants.LEADER_ADDRESS_KEY, newLeader);
                             callbackHandler.onModified(
                                     Collections.singletonList(getLeaderConfigMap()));
-
-                            assertThat(
-                                    retrievalEventHandler.waitForNewLeader(TIMEOUT), is(newLeader));
+                            assertThat(retrievalEventHandler.waitForNewLeader(TIMEOUT))
+                                    .isEqualTo(newLeader);
                         });
             }
         };
@@ -90,15 +85,13 @@ public class KubernetesLeaderRetrievalDriverTest extends KubernetesHighAvailabil
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final FlinkKubeClient.WatchCallbackHandler<KubernetesConfigMap>
                                     callbackHandler = getLeaderRetrievalConfigMapCallback();
-
                             // Leader information is cleared
                             getLeaderConfigMap().getData().clear();
                             callbackHandler.onModified(
                                     Collections.singletonList(getLeaderConfigMap()));
-                            assertThat(retrievalEventHandler.getAddress(), is(nullValue()));
+                            assertThat(retrievalEventHandler.getAddress()).isEqualTo(nullValue());
                         });
             }
         };

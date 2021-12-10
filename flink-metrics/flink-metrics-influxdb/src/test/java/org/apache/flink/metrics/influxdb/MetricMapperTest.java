@@ -34,7 +34,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link MetricMapper} checking that metrics are converted to InfluxDB client objects as
@@ -97,18 +97,18 @@ public class MetricMapperTest extends TestLogger {
         // are as expected.
         // An alternative can be to call lineProtocol() method, which additionally escapes values
         // for InfluxDB format.
-        assertEquals(
-                "Point [name="
-                        + NAME
-                        + ", time="
-                        + TIMESTAMP.toEpochMilli()
-                        + ", tags={tag-1=42, tag-2=green}"
-                        + ", precision=MILLISECONDS"
-                        + ", fields={"
-                        + String.join(", ", expectedFields)
-                        + "}"
-                        + "]",
-                point.toString());
+        assertThat(point.toString())
+                .isEqualTo(
+                        "Point [name="
+                                + NAME
+                                + ", time="
+                                + TIMESTAMP.toEpochMilli()
+                                + ", tags={tag-1=42, tag-2=green}"
+                                + ", precision=MILLISECONDS"
+                                + ", fields={"
+                                + String.join(", ", expectedFields)
+                                + "}"
+                                + "]");
     }
 
     private static MeasurementInfo getMeasurementInfo(String name) {

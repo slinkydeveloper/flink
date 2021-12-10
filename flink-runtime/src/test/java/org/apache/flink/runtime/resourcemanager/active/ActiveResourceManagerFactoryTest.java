@@ -31,10 +31,7 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ActiveResourceManagerFactory}. */
 public class ActiveResourceManagerFactoryTest extends TestLogger {
@@ -52,13 +49,12 @@ public class ActiveResourceManagerFactoryTest extends TestLogger {
         final Configuration effectiveConfig =
                 getFactory().getEffectiveConfigurationForResourceManager(config);
 
-        assertTrue(effectiveConfig.contains(TaskManagerOptions.TOTAL_FLINK_MEMORY));
-        assertTrue(effectiveConfig.contains(TaskManagerOptions.TOTAL_PROCESS_MEMORY));
-        assertThat(
-                effectiveConfig.get(TaskManagerOptions.TOTAL_FLINK_MEMORY), is(TOTAL_FLINK_SIZE));
-        assertThat(
-                effectiveConfig.get(TaskManagerOptions.TOTAL_PROCESS_MEMORY),
-                is(TOTAL_PROCESS_SIZE));
+        assertThat(effectiveConfig.contains(TaskManagerOptions.TOTAL_FLINK_MEMORY)).isTrue();
+        assertThat(effectiveConfig.contains(TaskManagerOptions.TOTAL_PROCESS_MEMORY)).isTrue();
+        assertThat(effectiveConfig.get(TaskManagerOptions.TOTAL_FLINK_MEMORY))
+                .isEqualTo(TOTAL_FLINK_SIZE);
+        assertThat(effectiveConfig.get(TaskManagerOptions.TOTAL_PROCESS_MEMORY))
+                .isEqualTo(TOTAL_PROCESS_SIZE);
     }
 
     @Test
@@ -71,8 +67,8 @@ public class ActiveResourceManagerFactoryTest extends TestLogger {
         final Configuration effectiveConfig =
                 getFactory().getEffectiveConfigurationForResourceManager(config);
 
-        assertFalse(effectiveConfig.contains(TaskManagerOptions.TOTAL_FLINK_MEMORY));
-        assertFalse(effectiveConfig.contains(TaskManagerOptions.TOTAL_PROCESS_MEMORY));
+        assertThat(effectiveConfig.contains(TaskManagerOptions.TOTAL_FLINK_MEMORY)).isFalse();
+        assertThat(effectiveConfig.contains(TaskManagerOptions.TOTAL_PROCESS_MEMORY)).isFalse();
     }
 
     private static ActiveResourceManagerFactory<ResourceID> getFactory() {

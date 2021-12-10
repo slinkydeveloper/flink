@@ -61,9 +61,7 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils.buildSomeBuffer;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link CheckpointedInputGate} test. */
 public class CheckpointedInputGateTest {
@@ -82,7 +80,7 @@ public class CheckpointedInputGateTest {
             ResumeCountingConnectionManager resumeCounter = new ResumeCountingConnectionManager();
             CheckpointedInputGate gate =
                     setupInputGate(numberOfChannels, bufferPool, resumeCounter);
-            assertFalse(gate.pollNext().isPresent());
+            assertThat(gate.pollNext().isPresent()).isFalse();
             for (int channelIndex = 0; channelIndex < numberOfChannels - 1; channelIndex++) {
                 enqueueEndOfState(gate, channelIndex);
                 Optional<BufferOrEvent> bufferOrEvent = gate.pollNext();
@@ -91,18 +89,20 @@ public class CheckpointedInputGateTest {
                         && !gate.allChannelsRecovered()) {
                     bufferOrEvent = gate.pollNext();
                 }
-                assertFalse("should align (block all channels)", bufferOrEvent.isPresent());
+                assertThat(bufferOrEvent.isPresent())
+                        .as("should align (block all channels)")
+                        .isFalse();
             }
 
             enqueueEndOfState(gate, numberOfChannels - 1);
             Optional<BufferOrEvent> polled = gate.pollNext();
-            assertTrue(polled.isPresent());
-            assertTrue(polled.get().isEvent());
-            assertEquals(EndOfChannelStateEvent.INSTANCE, polled.get().getEvent());
-            assertEquals(numberOfChannels, resumeCounter.getNumResumed());
-            assertFalse(
-                    "should only be a single event no matter of what is the number of channels",
-                    gate.pollNext().isPresent());
+            assertThat(polled.isPresent()).isTrue();
+            assertThat(polled.get().isEvent()).isTrue();
+            assertThat(polled.get().getEvent()).isEqualTo(EndOfChannelStateEvent.INSTANCE);
+            assertThat(resumeCounter.getNumResumed()).isEqualTo(numberOfChannels);
+            assertThat(gate.pollNext().isPresent())
+                    .as("should only be a single event no matter of what is the number of channels")
+                    .isFalse();
         } finally {
             bufferPool.destroy();
         }
@@ -150,10 +150,10 @@ public class CheckpointedInputGateTest {
             enqueue(gate, 1, buildSomeBuffer());
             enqueue(gate, 2, buildSomeBuffer());
 
-            assertEquals(0, validatingHandler.getTriggeredCheckpointCounter());
+            assertThat(validatingHandler.getTriggeredCheckpointCounter()).isEqualTo(0);
             // trigger checkpoint
             gate.pollNext();
-            assertEquals(1, validatingHandler.getTriggeredCheckpointCounter());
+            assertThat(validatingHandler.getTriggeredCheckpointCounter()).isEqualTo(1);
 
             assertAddedInputSize(stateWriter, 0, 1);
             assertAddedInputSize(stateWriter, 1, 2);
@@ -258,7 +258,7 @@ public class CheckpointedInputGateTest {
                 beforeLatch.countDown();
                 try {
                     while (mailboxExecutor.tryYield()) {}
-                    assertEquals(1L, validatingHandler.triggeredCheckpointCounter);
+                    assertThat(validatingHandler.triggeredCheckpointCounter).isEqualTo(1L);
                 } catch (CancelTaskException e) {
                 }
                 canceler.join();
@@ -275,9 +275,8 @@ public class CheckpointedInputGateTest {
 
     private void assertAddedInputSize(
             RecordingChannelStateWriter stateWriter, int channelIndex, int size) {
-        assertEquals(
-                size,
-                stateWriter.getAddedInput().get(new InputChannelInfo(0, channelIndex)).size());
+        assertThat(stateWriter.getAddedInput().get(new InputChannelInfo(0, channelIndex)).size())
+                .isEqualTo(size);
     }
 
     private void enqueueEndOfState(CheckpointedInputGate checkpointedInputGate, int channelIndex)

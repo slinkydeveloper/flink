@@ -46,11 +46,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for the detection of the {@link RuntimeExecutionMode runtime execution mode} during stream
@@ -73,13 +71,14 @@ public class StreamGraphGeneratorExecutionModeDetectionTest extends TestLogger {
                         "bounded-source")
                 .print();
 
-        assertThat(
-                environment.getStreamGraph(),
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
-                        JobType.STREAMING,
-                        true,
-                        true));
+        assertThat(environment.getStreamGraph())
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
+                                        JobType.STREAMING,
+                                        true,
+                                        true)));
     }
 
     @Test
@@ -94,13 +93,14 @@ public class StreamGraphGeneratorExecutionModeDetectionTest extends TestLogger {
                         "unbounded-source")
                 .print();
 
-        assertThat(
-                environment.getStreamGraph(),
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
-                        JobType.STREAMING,
-                        false,
-                        true));
+        assertThat(environment.getStreamGraph())
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
+                                        JobType.STREAMING,
+                                        false,
+                                        true)));
     }
 
     @Test
@@ -120,14 +120,18 @@ public class StreamGraphGeneratorExecutionModeDetectionTest extends TestLogger {
                         "bounded-source")
                 .print();
 
-        assertTrue(environment.isChainingEnabled());
-        assertThat(environment.getCheckpointInterval(), is(equalTo(100L)));
+        assertThat(environment.isChainingEnabled()).isTrue();
+        assertThat(environment.getCheckpointInterval()).isEqualTo(equalTo(100L));
 
         final StreamGraph streamGraph = environment.getStreamGraph();
-        assertThat(
-                streamGraph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_BLOCKING, JobType.BATCH, false, false));
+        assertThat(streamGraph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_BLOCKING,
+                                        JobType.BATCH,
+                                        false,
+                                        false)));
     }
 
     @Test
@@ -155,11 +159,11 @@ public class StreamGraphGeneratorExecutionModeDetectionTest extends TestLogger {
     public void testDetectionThroughTransitivePredecessors() {
         final SourceTransformation<Integer, ?, ?> bounded =
                 getSourceTransformation("Bounded Source", Boundedness.BOUNDED);
-        assertEquals(Boundedness.BOUNDED, bounded.getBoundedness());
+        assertThat(bounded.getBoundedness()).isEqualTo(Boundedness.BOUNDED);
 
         final SourceTransformation<Integer, ?, ?> unbounded =
                 getSourceTransformation("Unbounded Source", Boundedness.CONTINUOUS_UNBOUNDED);
-        assertEquals(Boundedness.CONTINUOUS_UNBOUNDED, unbounded.getBoundedness());
+        assertThat(unbounded.getBoundedness()).isEqualTo(Boundedness.CONTINUOUS_UNBOUNDED);
 
         final TwoInputTransformation<Integer, Integer, Integer> resultTransform =
                 new TwoInputTransformation<>(
@@ -174,85 +178,97 @@ public class StreamGraphGeneratorExecutionModeDetectionTest extends TestLogger {
 
         final StreamGraph graph =
                 generateStreamGraph(RuntimeExecutionMode.AUTOMATIC, resultTransform);
-        assertThat(
-                graph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
-                        JobType.STREAMING,
-                        false,
-                        true));
+        assertThat(graph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
+                                        JobType.STREAMING,
+                                        false,
+                                        true)));
     }
 
     @Test
     public void testBoundedDetection() {
         final SourceTransformation<Integer, ?, ?> bounded =
                 getSourceTransformation("Bounded Source", Boundedness.BOUNDED);
-        assertEquals(Boundedness.BOUNDED, bounded.getBoundedness());
+        assertThat(bounded.getBoundedness()).isEqualTo(Boundedness.BOUNDED);
 
         final StreamGraph graph = generateStreamGraph(RuntimeExecutionMode.AUTOMATIC, bounded);
-        assertThat(
-                graph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_BLOCKING, JobType.BATCH, false, false));
+        assertThat(graph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_BLOCKING,
+                                        JobType.BATCH,
+                                        false,
+                                        false)));
     }
 
     @Test
     public void testUnboundedDetection() {
         final SourceTransformation<Integer, ?, ?> unbounded =
                 getSourceTransformation("Unbounded Source", Boundedness.CONTINUOUS_UNBOUNDED);
-        assertEquals(Boundedness.CONTINUOUS_UNBOUNDED, unbounded.getBoundedness());
+        assertThat(unbounded.getBoundedness()).isEqualTo(Boundedness.CONTINUOUS_UNBOUNDED);
 
         final StreamGraph graph = generateStreamGraph(RuntimeExecutionMode.AUTOMATIC, unbounded);
-        assertThat(
-                graph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
-                        JobType.STREAMING,
-                        false,
-                        true));
+        assertThat(graph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
+                                        JobType.STREAMING,
+                                        false,
+                                        true)));
     }
 
     @Test
     public void testMixedDetection() {
         final SourceTransformation<Integer, ?, ?> unbounded =
                 getSourceTransformation("Unbounded Source", Boundedness.CONTINUOUS_UNBOUNDED);
-        assertEquals(Boundedness.CONTINUOUS_UNBOUNDED, unbounded.getBoundedness());
+        assertThat(unbounded.getBoundedness()).isEqualTo(Boundedness.CONTINUOUS_UNBOUNDED);
 
         final SourceTransformation<Integer, ?, ?> bounded =
                 getSourceTransformation("Bounded Source", Boundedness.BOUNDED);
-        assertEquals(Boundedness.BOUNDED, bounded.getBoundedness());
+        assertThat(bounded.getBoundedness()).isEqualTo(Boundedness.BOUNDED);
 
         final StreamGraph graph = generateStreamGraph(RuntimeExecutionMode.AUTOMATIC, unbounded);
-        assertThat(
-                graph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
-                        JobType.STREAMING,
-                        false,
-                        true));
+        assertThat(graph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
+                                        JobType.STREAMING,
+                                        false,
+                                        true)));
     }
 
     @Test
     public void testExplicitOverridesDetectedMode() {
         final SourceTransformation<Integer, ?, ?> bounded =
                 getSourceTransformation("Bounded Source", Boundedness.BOUNDED);
-        assertEquals(Boundedness.BOUNDED, bounded.getBoundedness());
+        assertThat(bounded.getBoundedness()).isEqualTo(Boundedness.BOUNDED);
 
         final StreamGraph graph = generateStreamGraph(RuntimeExecutionMode.AUTOMATIC, bounded);
-        assertThat(
-                graph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_BLOCKING, JobType.BATCH, false, false));
+        assertThat(graph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_BLOCKING,
+                                        JobType.BATCH,
+                                        false,
+                                        false)));
 
         final StreamGraph streamingGraph =
                 generateStreamGraph(RuntimeExecutionMode.STREAMING, bounded);
-        assertThat(
-                streamingGraph,
-                hasProperties(
-                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
-                        JobType.STREAMING,
-                        false,
-                        true));
+        assertThat(streamingGraph)
+                .satisfies(
+                        matching(
+                                hasProperties(
+                                        GlobalStreamExchangeMode.ALL_EDGES_PIPELINED,
+                                        JobType.STREAMING,
+                                        false,
+                                        true)));
     }
 
     private StreamGraph generateStreamGraph(

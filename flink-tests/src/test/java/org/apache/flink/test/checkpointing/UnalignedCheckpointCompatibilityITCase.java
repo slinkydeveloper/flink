@@ -61,7 +61,7 @@ import static org.apache.flink.runtime.checkpoint.CheckpointType.SAVEPOINT;
 import static org.apache.flink.runtime.testutils.CommonTestUtils.waitForAllTaskRunning;
 import static org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests recovery from a snapshot created in different UC mode (i.e. unaligned checkpoints
@@ -134,9 +134,8 @@ public class UnalignedCheckpointCompatibilityITCase extends TestLogger {
                 runFromSavepoint(savepointPath, !startAligned, TOTAL_ELEMENTS);
         if (type.isSavepoint()) { // consistency can only be checked for savepoints because output
             // is lost for ext. checkpoints
-            assertEquals(
-                    intRange(0, TOTAL_ELEMENTS),
-                    extractAndConcat(accumulatorsBeforeBarrier, accumulatorsAfterBarrier));
+            assertThat(extractAndConcat(accumulatorsBeforeBarrier, accumulatorsAfterBarrier))
+                    .isEqualTo(intRange(0, TOTAL_ELEMENTS));
         }
     }
 

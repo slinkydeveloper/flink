@@ -23,8 +23,9 @@ import org.apache.flink.streaming.runtime.watermarkstatus.WatermarkStatus;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertThat;
 
 /** Unit tests for the {@link WatermarkToDataOutput}. */
 public class WatermarkToDataOutputTest {
@@ -36,7 +37,7 @@ public class WatermarkToDataOutputTest {
 
         wmOutput.emitWatermark(new org.apache.flink.api.common.eventtime.Watermark(0L));
 
-        assertThat(testingOutput.events, contains(new Watermark(0L)));
+        assertThat(testingOutput.events).satisfies(matching(contains(new Watermark(0L))));
     }
 
     @Test
@@ -51,9 +52,13 @@ public class WatermarkToDataOutputTest {
         wmOutput.emitWatermark(new org.apache.flink.api.common.eventtime.Watermark(17L));
         wmOutput.emitWatermark(new org.apache.flink.api.common.eventtime.Watermark(18L));
 
-        assertThat(
-                testingOutput.events,
-                contains(new Watermark(12L), new Watermark(17L), new Watermark(18L)));
+        assertThat(testingOutput.events)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new Watermark(12L),
+                                        new Watermark(17L),
+                                        new Watermark(18L))));
     }
 
     @Test
@@ -64,8 +69,12 @@ public class WatermarkToDataOutputTest {
         wmOutput.markIdle();
         wmOutput.emitWatermark(new org.apache.flink.api.common.eventtime.Watermark(100L));
 
-        assertThat(
-                testingOutput.events,
-                contains(WatermarkStatus.IDLE, WatermarkStatus.ACTIVE, new Watermark(100L)));
+        assertThat(testingOutput.events)
+                .satisfies(
+                        matching(
+                                contains(
+                                        WatermarkStatus.IDLE,
+                                        WatermarkStatus.ACTIVE,
+                                        new Watermark(100L))));
     }
 }

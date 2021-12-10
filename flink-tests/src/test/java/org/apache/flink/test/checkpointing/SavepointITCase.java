@@ -95,7 +95,6 @@ import org.apache.flink.util.concurrent.FutureUtils;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -136,12 +135,9 @@ import static org.apache.flink.test.util.TestUtils.submitJobAndWaitForResult;
 import static org.apache.flink.util.ExceptionUtils.assertThrowable;
 import static org.apache.flink.util.ExceptionUtils.assertThrowableWithMessage;
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Integration test for triggering and resuming from savepoints. */
 @SuppressWarnings("serial")
@@ -213,9 +209,9 @@ public class SavepointITCase extends TestLogger {
             client.stopWithSavepoint(jobId, drain, null).get();
 
             if (drain) {
-                Assert.assertTrue(BoundedPassThroughOperator.inputEnded);
+                assertThat(BoundedPassThroughOperator.inputEnded).isTrue();
             } else {
-                Assert.assertFalse(BoundedPassThroughOperator.inputEnded);
+                assertThat(BoundedPassThroughOperator.inputEnded).isFalse();
             }
         } finally {
             cluster.after();
@@ -327,10 +323,9 @@ public class SavepointITCase extends TestLogger {
                 SavepointRestoreSettings.forPath(savepointPath, false, RestoreMode.CLAIM),
                 cluster -> {
                     cluster.after();
-
-                    assertFalse(
-                            "Savepoint not properly cleaned up.",
-                            new File(new URI(savepointPath)).exists());
+                    assertThat(new File(new URI(savepointPath)).exists())
+                            .as("Savepoint not properly cleaned up.")
+                            .isFalse();
                 });
     }
 
@@ -352,10 +347,9 @@ public class SavepointITCase extends TestLogger {
                 SavepointRestoreSettings.forPath(savepointPath, false, RestoreMode.LEGACY),
                 cluster -> {
                     cluster.after();
-
-                    assertTrue(
-                            "Savepoint unexpectedly cleaned up.",
-                            new File(new URI(savepointPath)).exists());
+                    assertThat(new File(new URI(savepointPath)).exists())
+                            .as("Savepoint unexpectedly cleaned up.")
+                            .isTrue();
                 });
     }
 
@@ -394,7 +388,7 @@ public class SavepointITCase extends TestLogger {
                         getCheckpointingWithEntropyConfig());
 
         final String savepointPath = submitJobAndTakeSavepoint(clusterFactory, parallelism);
-        assertThat(savepointDir, hasEntropyInFileStateHandlePaths());
+        assertThat(savepointDir).satisfies(matching(hasEntropyInFileStateHandlePaths()));
 
         restoreJobAndVerifyState(
                 clusterFactory,
@@ -402,9 +396,13 @@ public class SavepointITCase extends TestLogger {
                 SavepointRestoreSettings.forPath(savepointPath),
                 cluster -> {
                     final URI localURI = new URI(savepointPath.replace("test-entropy:/", "file:/"));
-                    assertTrue("Savepoint has not been created", new File(localURI).exists());
+                    assertThat(new File(localURI).exists())
+                            .as("Savepoint has not been created")
+                            .isTrue();
                     cluster.getClusterClient().disposeSavepoint(savepointPath).get();
-                    assertFalse("Savepoint not properly cleaned up.", new File(localURI).exists());
+                    assertThat(new File(localURI).exists())
+                            .as("Savepoint not properly cleaned up.")
+                            .isFalse();
                 });
     }
 
@@ -446,9 +444,10 @@ public class SavepointITCase extends TestLogger {
             throws URISyntaxException {
         // Only one savepoint should exist
         File savepointDir = new File(new URI(savepointPath));
-        assertTrue("Savepoint directory does not exist.", savepointDir.exists());
-        assertTrue(
-                "Savepoint did not create self-contained directory.", savepointDir.isDirectory());
+        assertThat(savepointDir.exists()).as("Savepoint directory does not exist.").isTrue();
+        assertThat(savepointDir.isDirectory())
+                .as("Savepoint did not create self-contained directory.")
+                .isTrue();
 
         File[] savepointFiles = savepointDir.listFiles();
 
@@ -458,7 +457,7 @@ public class SavepointITCase extends TestLogger {
             String errMsg =
                     "Did not write expected number of savepoint/checkpoint files to directory: "
                             + Arrays.toString(savepointFiles);
-            assertEquals(errMsg, 1 + parallelism, savepointFiles.length);
+            assertThat(savepointFiles.length).as(errMsg).isEqualTo(1 + parallelism);
         } else {
             fail(String.format("Returned savepoint path (%s) is not valid.", savepointPath));
         }
@@ -473,9 +472,9 @@ public class SavepointITCase extends TestLogger {
                 SavepointRestoreSettings.forPath(savepointPath, false),
                 cluster -> {
                     cluster.getClusterClient().disposeSavepoint(savepointPath).get();
-                    assertFalse(
-                            "Savepoint not properly cleaned up.",
-                            new File(new URI(savepointPath)).exists());
+                    assertThat(new File(new URI(savepointPath)).exists())
+                            .as("Savepoint not properly cleaned up.")
+                            .isFalse();
                 });
     }
 
@@ -548,7 +547,7 @@ public class SavepointITCase extends TestLogger {
         try {
             client.triggerSavepoint(jobID, null).get();
 
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
             assertThrowable(e, FlinkJobNotFoundException.class);
             assertThrowableWithMessage(e, jobID.toString());
@@ -588,7 +587,7 @@ public class SavepointITCase extends TestLogger {
 
             client.triggerSavepoint(graph.getJobID(), null).get();
 
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
             assertThrowable(e, IllegalStateException.class);
             assertThrowableWithMessage(e, graph.getJobID().toString());
@@ -629,11 +628,11 @@ public class SavepointITCase extends TestLogger {
 
             savepointPath = client.triggerSavepoint(jobGraph.getJobID(), null).get();
 
-            assertNotNull(savepointPath);
+            assertThat(savepointPath).isNotNull();
 
             client.cancel(jobGraph.getJobID()).get();
             // checkpoint directory should not be initialized
-            assertEquals(0, Objects.requireNonNull(checkpointDir.listFiles()).length);
+            assertThat(Objects.requireNonNull(checkpointDir.listFiles()).length).isEqualTo(0);
         } finally {
             if (null != savepointPath) {
                 client.disposeSavepoint(savepointPath);
@@ -738,9 +737,9 @@ public class SavepointITCase extends TestLogger {
 
                 client.stopWithSavepoint(jobId, false, null).get();
 
-                Assert.assertFalse(
-                        "input ended with chainingStrategy " + chainingStrategy,
-                        BoundedPassThroughOperator.inputEnded);
+                assertThat(BoundedPassThroughOperator.inputEnded)
+                        .as("input ended with chainingStrategy " + chainingStrategy)
+                        .isFalse();
             } finally {
                 cluster.after();
             }
@@ -778,7 +777,8 @@ public class SavepointITCase extends TestLogger {
 
             // Set non-existing savepoint path
             jobGraph.setSavepointRestoreSettings(SavepointRestoreSettings.forPath("unknown path"));
-            assertEquals("unknown path", jobGraph.getSavepointRestoreSettings().getRestorePath());
+            assertThat(jobGraph.getSavepointRestoreSettings().getRestorePath())
+                    .isEqualTo("unknown path");
 
             LOG.info("Submitting job " + jobGraph.getJobID() + " in detached mode.");
 
@@ -1115,9 +1115,10 @@ public class SavepointITCase extends TestLogger {
 
             // wait for the Tasks to be ready
             waitForAllTaskRunning(cluster.getMiniCluster(), jobID, false);
-            assertTrue(
-                    StatefulCounter.getProgressLatch()
-                            .await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            StatefulCounter.getProgressLatch()
+                                    .await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isTrue();
 
             savepointPath = client.triggerSavepoint(jobID, null).get();
             LOG.info("Retrieved savepoint: " + savepointPath + ".");
@@ -1173,14 +1174,16 @@ public class SavepointITCase extends TestLogger {
             // Submit the job
             client.submitJob(modifiedJobGraph).get();
             // Await state is restored
-            assertTrue(
-                    StatefulCounter.getRestoreLatch()
-                            .await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            StatefulCounter.getRestoreLatch()
+                                    .await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isTrue();
 
             // Await some progress after restore
-            assertTrue(
-                    StatefulCounter.getProgressLatch()
-                            .await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(
+                            StatefulCounter.getProgressLatch()
+                                    .await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isTrue();
         } finally {
             cluster.after();
         }
@@ -1535,9 +1538,9 @@ public class SavepointITCase extends TestLogger {
             if (!state.isEmpty()) {
                 this.emittedCount = state.get(0);
             }
-            Assert.assertEquals(
-                    iterTestCheckpointVerify[getRuntimeContext().getIndexOfThisSubtask()],
-                    emittedCount);
+            assertThat(emittedCount)
+                    .isEqualTo(
+                            iterTestCheckpointVerify[getRuntimeContext().getIndexOfThisSubtask()]);
             iterTestRestoreWait[getRuntimeContext().getIndexOfThisSubtask()].trigger();
         }
     }

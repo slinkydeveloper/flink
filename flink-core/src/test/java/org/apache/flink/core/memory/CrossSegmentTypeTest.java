@@ -23,10 +23,8 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Verifies interoperability between heap and off-heap modes of {@link MemorySegment}. */
 public class CrossSegmentTypeTest {
@@ -53,8 +51,8 @@ public class CrossSegmentTypeTest {
     }
 
     private void testCompare(MemorySegment seg1, MemorySegment seg2, Random random) {
-        assertEquals(pageSize, seg1.size());
-        assertEquals(pageSize, seg2.size());
+        assertThat(seg1.size()).isEqualTo(pageSize);
+        assertThat(seg2.size()).isEqualTo(pageSize);
 
         final byte[] bytes1 = new byte[pageSize];
         final byte[] bytes2 = new byte[pageSize];
@@ -86,9 +84,9 @@ public class CrossSegmentTypeTest {
             int cmp = seg1.compare(seg2, pos1, pos2, len);
 
             if (pos1 < pos2 - shift) {
-                assertTrue(cmp <= 0);
+                assertThat(cmp <= 0).isTrue();
             } else {
-                assertTrue(cmp >= 0);
+                assertThat(cmp >= 0).isTrue();
             }
         }
     }
@@ -109,8 +107,8 @@ public class CrossSegmentTypeTest {
     }
 
     private void testSwap(MemorySegment seg1, MemorySegment seg2, Random random, int smallerSize) {
-        assertEquals(pageSize, seg1.size());
-        assertEquals(smallerSize, seg2.size());
+        assertThat(seg1.size()).isEqualTo(pageSize);
+        assertThat(seg2.size()).isEqualTo(smallerSize);
 
         final byte[] bytes1 = new byte[pageSize];
         final byte[] bytes2 = new byte[smallerSize];
@@ -134,9 +132,9 @@ public class CrossSegmentTypeTest {
         // second half
 
         for (int i = 0; i < smallerSize; i++) {
-            assertEquals((byte) 0, seg1.get(i));
-            assertEquals((byte) 0, seg2.get(i));
-            assertEquals((byte) 1, seg1.get(i + smallerSize));
+            assertThat(seg1.get(i)).isEqualTo((byte) 0);
+            assertThat(seg2.get(i)).isEqualTo((byte) 0);
+            assertThat(seg1.get(i + smallerSize)).isEqualTo((byte) 1);
         }
     }
 
@@ -164,8 +162,8 @@ public class CrossSegmentTypeTest {
     }
 
     private void testCopy(MemorySegment seg1, MemorySegment seg2, Random random) {
-        assertEquals(pageSize, seg1.size());
-        assertEquals(pageSize, seg2.size());
+        assertThat(seg1.size()).isEqualTo(pageSize);
+        assertThat(seg2.size()).isEqualTo(pageSize);
 
         byte[] expected = new byte[pageSize];
         byte[] actual = new byte[pageSize];
@@ -195,11 +193,11 @@ public class CrossSegmentTypeTest {
             int otherPos2 = random.nextInt(pageSize - numBytes);
             unsafeCopySeg.copyFromUnsafe(
                     otherPos2, unsafeCopy, (int) (otherPos + BYTE_ARRAY_BASE_OFFSET), numBytes);
-            assertTrue(unsafeCopySeg.equalTo(seg2, otherPos2, otherPos, numBytes));
+            assertThat(unsafeCopySeg.equalTo(seg2, otherPos2, otherPos, numBytes)).isTrue();
         }
 
         seg2.get(0, actual);
-        assertArrayEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
 
         // test out of bound conditions
 

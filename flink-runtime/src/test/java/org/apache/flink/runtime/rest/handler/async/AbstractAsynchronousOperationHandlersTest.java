@@ -57,10 +57,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiFunction;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link AbstractAsynchronousOperationHandlers}. */
 public class AbstractAsynchronousOperationHandlersTest extends TestLogger {
@@ -114,7 +112,8 @@ public class AbstractAsynchronousOperationHandlersTest extends TestLogger {
                         .handleRequest(statusOperationRequest(triggerId), DUMMY_GATEWAY)
                         .get();
 
-        assertThat(operationResult.queueStatus().getId(), is(QueueStatus.inProgress().getId()));
+        assertThat(operationResult.queueStatus().getId())
+                .isEqualTo(QueueStatus.inProgress().getId());
 
         // complete the operation
         acknowledgeFuture.complete(Acknowledge.get());
@@ -124,9 +123,10 @@ public class AbstractAsynchronousOperationHandlersTest extends TestLogger {
                         .handleRequest(statusOperationRequest(triggerId), DUMMY_GATEWAY)
                         .get();
 
-        assertThat(operationResult.queueStatus().getId(), is(QueueStatus.completed().getId()));
+        assertThat(operationResult.queueStatus().getId())
+                .isEqualTo(QueueStatus.completed().getId());
 
-        assertThat(operationResult.resource().value, is(Acknowledge.get()));
+        assertThat(operationResult.resource().value).isEqualTo(Acknowledge.get());
     }
 
     /** Tests the triggering and exceptional completion of an asynchronous operation. */
@@ -148,10 +148,11 @@ public class AbstractAsynchronousOperationHandlersTest extends TestLogger {
                         .handleRequest(statusOperationRequest(triggerId), DUMMY_GATEWAY)
                         .get();
 
-        assertThat(operationResult.queueStatus().getId(), is(QueueStatus.completed().getId()));
+        assertThat(operationResult.queueStatus().getId())
+                .isEqualTo(QueueStatus.completed().getId());
 
         final OperationResult resource = operationResult.resource();
-        assertThat(resource.throwable, is(testException));
+        assertThat(resource.throwable).isEqualTo(testException);
     }
 
     /**
@@ -169,13 +170,13 @@ public class AbstractAsynchronousOperationHandlersTest extends TestLogger {
             final Optional<RestHandlerException> optionalRestHandlerException =
                     ExceptionUtils.findThrowable(ee, RestHandlerException.class);
 
-            assertThat(optionalRestHandlerException.isPresent(), is(true));
+            assertThat(optionalRestHandlerException.isPresent()).isEqualTo(true);
 
             final RestHandlerException restHandlerException = optionalRestHandlerException.get();
 
-            assertThat(restHandlerException.getMessage(), containsString("Operation not found"));
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(), is(HttpResponseStatus.NOT_FOUND));
+            assertThat(restHandlerException.getMessage()).contains("Operation not found");
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.NOT_FOUND);
         }
     }
 
@@ -198,12 +199,12 @@ public class AbstractAsynchronousOperationHandlersTest extends TestLogger {
 
         testingStatusHandler.handleRequest(statusOperationRequest(triggerId), DUMMY_GATEWAY).get();
 
-        assertThat(closeFuture.isDone(), is(false));
+        assertThat(closeFuture.isDone()).isEqualTo(false);
 
         acknowledgeFuture.complete(Acknowledge.get());
         testingStatusHandler.handleRequest(statusOperationRequest(triggerId), DUMMY_GATEWAY).get();
 
-        assertThat(closeFuture.isDone(), is(true));
+        assertThat(closeFuture.isDone()).isEqualTo(true);
     }
 
     private static HandlerRequest<EmptyRequestBody> triggerOperationRequest() {

@@ -36,9 +36,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link HighAvailabilityServicesUtils} class. */
 public class HighAvailabilityServicesUtilsTest extends TestLogger {
@@ -62,7 +60,7 @@ public class HighAvailabilityServicesUtilsTest extends TestLogger {
                         config, executor, NoOpFatalErrorHandler.INSTANCE);
 
         // then
-        assertSame(haServices, actualHaServices);
+        assertThat(actualHaServices).isSameAs(haServices);
 
         // when
         actualHaServices =
@@ -74,7 +72,7 @@ public class HighAvailabilityServicesUtilsTest extends TestLogger {
                         NoOpFatalErrorHandler.INSTANCE);
 
         // then
-        assertSame(haServices, actualHaServices);
+        assertThat(actualHaServices).isSameAs(haServices);
     }
 
     @Test
@@ -93,7 +91,7 @@ public class HighAvailabilityServicesUtilsTest extends TestLogger {
                         config, NoOpFatalErrorHandler.INSTANCE);
 
         // then
-        assertSame(clientHAServices, actualClientHAServices);
+        assertThat(actualClientHAServices).isSameAs(clientHAServices);
     }
 
     @Test(expected = Exception.class)
@@ -124,7 +122,7 @@ public class HighAvailabilityServicesUtilsTest extends TestLogger {
                 HighAvailabilityServicesUtils.getClusterHighAvailableStoragePath(configuration);
 
         final Path expectedPath = new Path(haStorageRootDirectory, clusterId);
-        assertThat(clusterHighAvailableStoragePath, is(expectedPath));
+        assertThat(clusterHighAvailableStoragePath).isEqualTo(expectedPath);
     }
 
     /** Testing class which needs to be public in order to be instantiatable. */

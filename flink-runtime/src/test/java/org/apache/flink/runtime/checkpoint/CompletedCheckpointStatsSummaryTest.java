@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,10 +42,10 @@ public class CompletedCheckpointStatsSummaryTest {
         long persistedData = Integer.MAX_VALUE + 42L;
 
         CompletedCheckpointStatsSummary summary = new CompletedCheckpointStatsSummary();
-        assertEquals(0, summary.getStateSizeStats().getCount());
-        assertEquals(0, summary.getEndToEndDurationStats().getCount());
-        assertEquals(0, summary.getProcessedDataStats().getCount());
-        assertEquals(0, summary.getPersistedDataStats().getCount());
+        assertThat(summary.getStateSizeStats().getCount()).isEqualTo(0);
+        assertThat(summary.getEndToEndDurationStats().getCount()).isEqualTo(0);
+        assertThat(summary.getProcessedDataStats().getCount()).isEqualTo(0);
+        assertThat(summary.getPersistedDataStats().getCount()).isEqualTo(0);
 
         int numCheckpoints = 10;
 
@@ -61,28 +61,28 @@ public class CompletedCheckpointStatsSummaryTest {
 
             summary.updateSummary(completed);
 
-            assertEquals(i + 1, summary.getStateSizeStats().getCount());
-            assertEquals(i + 1, summary.getEndToEndDurationStats().getCount());
-            assertEquals(i + 1, summary.getProcessedDataStats().getCount());
-            assertEquals(i + 1, summary.getPersistedDataStats().getCount());
+            assertThat(summary.getStateSizeStats().getCount()).isEqualTo(i + 1);
+            assertThat(summary.getEndToEndDurationStats().getCount()).isEqualTo(i + 1);
+            assertThat(summary.getProcessedDataStats().getCount()).isEqualTo(i + 1);
+            assertThat(summary.getPersistedDataStats().getCount()).isEqualTo(i + 1);
         }
 
         StatsSummary stateSizeStats = summary.getStateSizeStats();
-        assertEquals(stateSize, stateSizeStats.getMinimum());
-        assertEquals(stateSize + numCheckpoints - 1, stateSizeStats.getMaximum());
+        assertThat(stateSizeStats.getMinimum()).isEqualTo(stateSize);
+        assertThat(stateSizeStats.getMaximum()).isEqualTo(stateSize + numCheckpoints - 1);
 
         StatsSummary durationStats = summary.getEndToEndDurationStats();
-        assertEquals(ackTimestamp - triggerTimestamp, durationStats.getMinimum());
-        assertEquals(
-                ackTimestamp - triggerTimestamp + numCheckpoints - 1, durationStats.getMaximum());
+        assertThat(durationStats.getMinimum()).isEqualTo(ackTimestamp - triggerTimestamp);
+        assertThat(durationStats.getMaximum())
+                .isEqualTo(ackTimestamp - triggerTimestamp + numCheckpoints - 1);
 
         StatsSummary processedDataStats = summary.getProcessedDataStats();
-        assertEquals(processedData, processedDataStats.getMinimum());
-        assertEquals(processedData + numCheckpoints - 1, processedDataStats.getMaximum());
+        assertThat(processedDataStats.getMinimum()).isEqualTo(processedData);
+        assertThat(processedDataStats.getMaximum()).isEqualTo(processedData + numCheckpoints - 1);
 
         StatsSummary persistedDataStats = summary.getPersistedDataStats();
-        assertEquals(persistedData, persistedDataStats.getMinimum());
-        assertEquals(persistedData + numCheckpoints - 1, persistedDataStats.getMaximum());
+        assertThat(persistedDataStats.getMinimum()).isEqualTo(persistedData);
+        assertThat(persistedDataStats.getMaximum()).isEqualTo(persistedData + numCheckpoints - 1);
     }
 
     private CompletedCheckpointStats createCompletedCheckpoint(
@@ -139,10 +139,10 @@ public class CompletedCheckpointStatsSummaryTest {
                         new SubtaskStateStats(0, lastAck),
                         ""));
         CompletedCheckpointStatsSummarySnapshot snapshot = summary.createSnapshot();
-        assertEquals(stateSize, snapshot.getStateSizeStats().getQuantile(1), 0);
-        assertEquals(processedData, snapshot.getProcessedDataStats().getQuantile(1), 0);
-        assertEquals(persistedData, snapshot.getPersistedDataStats().getQuantile(1), 0);
-        assertEquals(
-                lastAck - triggerTimestamp, snapshot.getEndToEndDurationStats().getQuantile(1), 0);
+        assertThat(snapshot.getStateSizeStats().getQuantile(1)).isEqualTo(stateSize);
+        assertThat(snapshot.getProcessedDataStats().getQuantile(1)).isEqualTo(processedData);
+        assertThat(snapshot.getPersistedDataStats().getQuantile(1)).isEqualTo(persistedData);
+        assertThat(snapshot.getEndToEndDurationStats().getQuantile(1))
+                .isEqualTo(lastAck - triggerTimestamp);
     }
 }

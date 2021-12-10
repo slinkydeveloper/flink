@@ -58,9 +58,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.yarn.util.TestUtils.getTestJarPath;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.closeTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Test cases which ensure that the Yarn containers are started with the correct settings. */
 public class YarnConfigurationITCase extends YarnTestBase {
@@ -76,19 +75,16 @@ public class YarnConfigurationITCase extends YarnTestBase {
                 () -> {
                     final YarnClient yarnClient = getYarnClient();
                     final Configuration configuration = new Configuration(flinkConfiguration);
-
                     final int slotsPerTaskManager = 3;
                     configuration.set(TaskManagerOptions.NUM_TASK_SLOTS, slotsPerTaskManager);
                     final int masterMemory = 768;
                     configuration.set(
                             JobManagerOptions.TOTAL_PROCESS_MEMORY,
                             MemorySize.ofMebiBytes(masterMemory));
-
                     final TaskExecutorProcessSpec tmResourceSpec =
                             TaskExecutorProcessUtils.processSpecFromConfig(configuration);
                     final int taskManagerMemory =
                             tmResourceSpec.getTotalProcessMemorySize().getMebiBytes();
-
                     final YarnConfiguration yarnConfiguration = getYarnConfiguration();
                     final YarnClusterDescriptor clusterDescriptor =
                             YarnTestUtils.createClusterDescriptorWithLogging(
@@ -97,18 +93,14 @@ public class YarnConfigurationITCase extends YarnTestBase {
                                     yarnConfiguration,
                                     yarnClient,
                                     true);
-
                     clusterDescriptor.setLocalJarPath(new Path(flinkUberjar.getAbsolutePath()));
                     clusterDescriptor.addShipFiles(Arrays.asList(flinkLibFolder.listFiles()));
-
                     final File streamingWordCountFile = getTestJarPath("WindowJoin.jar");
-
                     final PackagedProgram packagedProgram =
                             PackagedProgram.newBuilder().setJarFile(streamingWordCountFile).build();
                     final JobGraph jobGraph =
                             PackagedProgramUtils.createJobGraph(
                                     packagedProgram, configuration, 1, false);
-
                     try {
                         final ClusterSpecification clusterSpecification =
                                 new ClusterSpecification.ClusterSpecificationBuilder()
@@ -116,52 +108,39 @@ public class YarnConfigurationITCase extends YarnTestBase {
                                         .setTaskManagerMemoryMB(taskManagerMemory)
                                         .setSlotsPerTaskManager(slotsPerTaskManager)
                                         .createClusterSpecification();
-
                         final ClusterClient<ApplicationId> clusterClient =
                                 clusterDescriptor
                                         .deployJobCluster(clusterSpecification, jobGraph, true)
                                         .getClusterClient();
-
                         final ApplicationId clusterId = clusterClient.getClusterId();
-
                         final RestClient restClient =
                                 new RestClient(configuration, TestingUtils.defaultExecutor());
-
                         try {
                             final ApplicationReport applicationReport =
                                     yarnClient.getApplicationReport(clusterId);
-
                             final ApplicationAttemptId currentApplicationAttemptId =
                                     applicationReport.getCurrentApplicationAttemptId();
-
                             // wait until we have second container allocated
                             List<ContainerReport> containers =
                                     yarnClient.getContainers(currentApplicationAttemptId);
-
                             while (containers.size() < 2) {
                                 // this is nasty but Yarn does not offer a better way to wait
                                 Thread.sleep(50L);
                                 containers = yarnClient.getContainers(currentApplicationAttemptId);
                             }
-
                             for (ContainerReport container : containers) {
                                 if (container.getContainerId().getId() == 1) {
                                     // this should be the application master
-                                    assertThat(
-                                            container.getAllocatedResource().getMemory(),
-                                            is(masterMemory));
+                                    assertThat(container.getAllocatedResource().getMemory())
+                                            .isEqualTo(masterMemory);
                                 } else {
-                                    assertThat(
-                                            container.getAllocatedResource().getMemory(),
-                                            is(taskManagerMemory));
+                                    assertThat(container.getAllocatedResource().getMemory())
+                                            .isEqualTo(taskManagerMemory);
                                 }
                             }
-
                             final URI webURI = new URI(clusterClient.getWebInterfaceURL());
-
                             CompletableFuture<TaskManagersInfo> taskManagersInfoCompletableFuture;
                             Collection<TaskManagerInfo> taskManagerInfos;
-
                             while (true) {
                                 taskManagersInfoCompletableFuture =
                                         restClient.sendRequest(
@@ -170,12 +149,9 @@ public class YarnConfigurationITCase extends YarnTestBase {
                                                 TaskManagersHeaders.getInstance(),
                                                 EmptyMessageParameters.getInstance(),
                                                 EmptyRequestBody.getInstance());
-
                                 final TaskManagersInfo taskManagersInfo =
                                         taskManagersInfoCompletableFuture.get();
-
                                 taskManagerInfos = taskManagersInfo.getTaskManagerInfos();
-
                                 // wait until the task manager has registered and reported its slots
                                 if (hasTaskManagerConnectedAndReportedSlots(taskManagerInfos)) {
                                     break;
@@ -183,46 +159,39 @@ public class YarnConfigurationITCase extends YarnTestBase {
                                     Thread.sleep(100L);
                                 }
                             }
-
                             // there should be at least one TaskManagerInfo
                             final TaskManagerInfo taskManagerInfo =
                                     taskManagerInfos.iterator().next();
-
-                            assertThat(taskManagerInfo.getNumberSlots(), is(slotsPerTaskManager));
-
+                            assertThat(taskManagerInfo.getNumberSlots())
+                                    .isEqualTo(slotsPerTaskManager);
                             final long expectedHeapSizeBytes =
                                     tmResourceSpec.getJvmHeapMemorySize().getBytes();
-
                             // We compare here physical memory assigned to a container with the heap
                             // memory that we should pass to
                             // jvm as Xmx parameter. Those value might differ significantly due to
                             // system page size or jvm
                             // implementation therefore we use 15% threshold here.
                             assertThat(
-                                    (double)
-                                                    taskManagerInfo
-                                                            .getHardwareDescription()
-                                                            .getSizeOfJvmHeap()
-                                            / (double) expectedHeapSizeBytes,
-                                    is(closeTo(1.0, 0.15)));
-
+                                            (double)
+                                                            taskManagerInfo
+                                                                    .getHardwareDescription()
+                                                                    .getSizeOfJvmHeap()
+                                                    / (double) expectedHeapSizeBytes)
+                                    .isEqualTo(closeTo(1.0, 0.15));
                             final int expectedManagedMemoryMB =
                                     tmResourceSpec.getManagedMemorySize().getMebiBytes();
-
                             assertThat(
-                                    (int)
-                                            (taskManagerInfo
-                                                            .getHardwareDescription()
-                                                            .getSizeOfManagedMemory()
-                                                    >> 20),
-                                    is(expectedManagedMemoryMB));
+                                            (int)
+                                                    (taskManagerInfo
+                                                                    .getHardwareDescription()
+                                                                    .getSizeOfManagedMemory()
+                                                            >> 20))
+                                    .isEqualTo(expectedManagedMemoryMB);
                         } finally {
                             restClient.shutdown(TIMEOUT);
                             clusterClient.close();
                         }
-
                         clusterDescriptor.killCluster(clusterId);
-
                     } finally {
                         clusterDescriptor.close();
                     }

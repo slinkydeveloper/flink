@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This tests that the {@link AvroSerializer} properly fails when accessed by two threads

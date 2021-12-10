@@ -42,8 +42,7 @@ import static org.apache.flink.changelog.fs.ChangelogStorageMetricGroup.CHANGELO
 import static org.apache.flink.runtime.metrics.groups.UnregisteredMetricGroups.createUnregisteredTaskManagerJobMetricGroup;
 import static org.apache.flink.runtime.metrics.groups.UnregisteredMetricGroups.createUnregisteredTaskManagerMetricGroup;
 import static org.apache.flink.runtime.state.KeyGroupRange.EMPTY_KEY_GROUP_RANGE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link ChangelogStorageMetricGroup} test. */
 public class ChangelogStorageMetricsTest {
@@ -64,8 +63,8 @@ public class ChangelogStorageMetricsTest {
                 writer.append(0, new byte[] {0, 1, 2, 3});
                 writer.persist(writer.lastAppendedSequenceNumber()).get();
             }
-            assertEquals(numUploads, metrics.getUploadsCounter().getCount());
-            assertTrue(metrics.getUploadLatenciesNanos().getStatistics().getMin() > 0);
+            assertThat(metrics.getUploadsCounter().getCount()).isEqualTo(numUploads);
+            assertThat(metrics.getUploadLatenciesNanos().getStatistics().getMin() > 0).isTrue();
         }
     }
 
@@ -90,7 +89,7 @@ public class ChangelogStorageMetricsTest {
                 writer.persist(writer.lastAppendedSequenceNumber()).get();
             }
             long expected = upload.length + headerSize;
-            assertEquals(expected, metrics.getUploadSizes().getStatistics().getMax());
+            assertThat(metrics.getUploadSizes().getStatistics().getMax()).isEqualTo(expected);
         }
     }
 
@@ -112,7 +111,7 @@ public class ChangelogStorageMetricsTest {
                     // ignore
                 }
             }
-            assertEquals(numUploads, metrics.getUploadFailuresCounter().getCount());
+            assertThat(metrics.getUploadFailuresCounter().getCount()).isEqualTo(numUploads);
         }
     }
 
@@ -156,8 +155,10 @@ public class ChangelogStorageMetricsTest {
                 // now the uploads should be grouped and executed at once
                 scheduler.triggerScheduledTasks();
             }
-            assertEquals(numWriters, metrics.getUploadBatchSizes().getStatistics().getMin());
-            assertEquals(numWriters, metrics.getUploadBatchSizes().getStatistics().getMax());
+            assertThat(metrics.getUploadBatchSizes().getStatistics().getMin())
+                    .isEqualTo(numWriters);
+            assertThat(metrics.getUploadBatchSizes().getStatistics().getMax())
+                    .isEqualTo(numWriters);
         } finally {
             storage.close();
         }
@@ -190,8 +191,8 @@ public class ChangelogStorageMetricsTest {
                 writer.persist(writer.lastAppendedSequenceNumber()).get();
             }
             HistogramStatistics histogram = metrics.getAttemptsPerUpload().getStatistics();
-            assertEquals(maxAttempts, histogram.getMin());
-            assertEquals(maxAttempts, histogram.getMax());
+            assertThat(histogram.getMin()).isEqualTo(maxAttempts);
+            assertThat(histogram.getMax()).isEqualTo(maxAttempts);
         } finally {
             storage.close();
         }
@@ -239,9 +240,9 @@ public class ChangelogStorageMetricsTest {
                 writer.append(0, new byte[] {0});
                 writer.persist(writer.lastAppendedSequenceNumber());
             }
-            assertEquals(numUploads, (int) queueSizeGauge.get().getValue());
+            assertThat((int) queueSizeGauge.get().getValue()).isEqualTo(numUploads);
             scheduler.triggerScheduledTasks();
-            assertEquals(0, (int) queueSizeGauge.get().getValue());
+            assertThat((int) queueSizeGauge.get().getValue()).isEqualTo(0);
         }
     }
 

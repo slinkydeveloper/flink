@@ -32,7 +32,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Duration} serialization and deserialization. */
 @RunWith(Parameterized.class)
@@ -53,7 +53,7 @@ public class DurationJsonSerdeTest {
         }
         String json = writer.toString();
         Duration actual = mapper.readValue(json, Duration.class);
-        assertEquals(duration, actual);
+        assertThat(actual).isEqualTo(duration);
     }
 
     @Parameterized.Parameters(name = "{0}")

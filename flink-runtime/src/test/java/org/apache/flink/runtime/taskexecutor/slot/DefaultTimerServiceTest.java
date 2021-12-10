@@ -29,9 +29,7 @@ import java.util.UUID;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultTimerService}. */
 public class DefaultTimerServiceTest extends TestLogger {
@@ -50,10 +48,10 @@ public class DefaultTimerServiceTest extends TestLogger {
         timerService.unregisterAllTimeouts();
 
         Map<?, ?> timeouts = timerService.getTimeouts();
-        assertTrue(timeouts.isEmpty());
+        assertThat(timeouts.isEmpty()).isTrue();
 
         for (ScheduledFuture<?> scheduledTask : scheduledExecutorService.getAllScheduledTasks()) {
-            assertThat(scheduledTask.isCancelled(), is(true));
+            assertThat(scheduledTask.isCancelled()).isEqualTo(true);
         }
     }
 
@@ -61,7 +59,7 @@ public class DefaultTimerServiceTest extends TestLogger {
     public void testIsValidInitiallyReturnsFalse() {
         final DefaultTimerService<AllocationID> timerService = createAndStartTimerService();
 
-        assertThat(timerService.isValid(new AllocationID(), UUID.randomUUID()), is(false));
+        assertThat(timerService.isValid(new AllocationID(), UUID.randomUUID())).isEqualTo(false);
     }
 
     @Test
@@ -75,7 +73,7 @@ public class DefaultTimerServiceTest extends TestLogger {
                 timerService.getTimeouts().get(allocationId);
         final UUID ticket = timeout.getTicket();
 
-        assertThat(timerService.isValid(allocationId, ticket), is(true));
+        assertThat(timerService.isValid(allocationId, ticket)).isEqualTo(true);
     }
 
     @Test
@@ -89,8 +87,8 @@ public class DefaultTimerServiceTest extends TestLogger {
                 timerService.getTimeouts().get(allocationId);
         final UUID ticket = timeout.getTicket();
 
-        assertThat(timerService.isValid(new AllocationID(), ticket), is(false));
-        assertThat(timerService.isValid(allocationId, UUID.randomUUID()), is(false));
+        assertThat(timerService.isValid(new AllocationID(), ticket)).isEqualTo(false);
+        assertThat(timerService.isValid(allocationId, UUID.randomUUID())).isEqualTo(false);
     }
 
     private static DefaultTimerService<AllocationID> createAndStartTimerService() {

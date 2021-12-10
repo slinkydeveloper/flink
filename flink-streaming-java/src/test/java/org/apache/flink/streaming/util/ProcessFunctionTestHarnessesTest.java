@@ -35,7 +35,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ProcessFunctionTestHarnesses}. */
 public class ProcessFunctionTestHarnessesTest extends TestLogger {
@@ -56,7 +56,7 @@ public class ProcessFunctionTestHarnessesTest extends TestLogger {
 
         harness.processElement(1, 10);
 
-        assertEquals(harness.extractOutputValues(), Collections.singletonList(1));
+        assertThat(Collections.singletonList(1)).isEqualTo(harness.extractOutputValues());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class ProcessFunctionTestHarnessesTest extends TestLogger {
 
         harness.processElement(1, 10);
 
-        assertEquals(harness.extractOutputValues(), Collections.singletonList(1));
+        assertThat(Collections.singletonList(1)).isEqualTo(harness.extractOutputValues());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class ProcessFunctionTestHarnessesTest extends TestLogger {
         harness.processElement2("0", 1);
         harness.processElement1(1, 10);
 
-        assertEquals(harness.extractOutputValues(), Arrays.asList(0, 1));
+        assertThat(Arrays.asList(0, 1)).isEqualTo(harness.extractOutputValues());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class ProcessFunctionTestHarnessesTest extends TestLogger {
         harness.processElement1(0, 1);
         harness.processElement2(1, 10);
 
-        assertEquals(harness.extractOutputValues(), Arrays.asList(0, 1));
+        assertThat(Arrays.asList(0, 1)).isEqualTo(harness.extractOutputValues());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class ProcessFunctionTestHarnessesTest extends TestLogger {
         harness.processBroadcastElement("0", 1);
         harness.processElement(1, 10);
 
-        assertEquals(harness.extractOutputValues(), Arrays.asList(0, 1));
+        assertThat(Arrays.asList(0, 1)).isEqualTo(harness.extractOutputValues());
     }
 
     @Test
@@ -189,6 +189,6 @@ public class ProcessFunctionTestHarnessesTest extends TestLogger {
         harness.processBroadcastElement("0", 1);
         harness.processElement(1, 10);
 
-        assertEquals(harness.extractOutputValues(), Arrays.asList(0, 1));
+        assertThat(Arrays.asList(0, 1)).isEqualTo(harness.extractOutputValues());
     }
 }

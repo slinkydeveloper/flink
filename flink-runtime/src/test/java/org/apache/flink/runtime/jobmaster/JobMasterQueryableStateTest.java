@@ -55,12 +55,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the queryable-state logic of the {@link JobMaster}. */
 public class JobMasterQueryableStateTest extends TestLogger {
@@ -129,8 +128,10 @@ public class JobMasterQueryableStateTest extends TestLogger {
                 jobMasterGateway.requestKvStateLocation(JOB_GRAPH.getJobID(), "unknown").get();
                 fail("Expected to fail with UnknownKvStateLocation");
             } catch (Exception e) {
-                assertTrue(
-                        ExceptionUtils.findThrowable(e, UnknownKvStateLocation.class).isPresent());
+                assertThat(
+                                ExceptionUtils.findThrowable(e, UnknownKvStateLocation.class)
+                                        .isPresent())
+                        .isTrue();
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(jobMaster, testingTimeout);
@@ -153,7 +154,7 @@ public class JobMasterQueryableStateTest extends TestLogger {
                 jobMasterGateway.requestKvStateLocation(new JobID(), "unknown").get();
                 fail("Expected to fail with FlinkJobNotFoundException");
             } catch (Exception e) {
-                assertThat(e, containsCause(FlinkJobNotFoundException.class));
+                assertThat(e).satisfies(matching(containsCause(FlinkJobNotFoundException.class)));
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(jobMaster, testingTimeout);
@@ -176,7 +177,7 @@ public class JobMasterQueryableStateTest extends TestLogger {
                 registerKvState(jobMasterGateway, new JobID(), new JobVertexID(), "any-name");
                 fail("Expected to fail with FlinkJobNotFoundException.");
             } catch (Exception e) {
-                assertThat(e, containsCause(FlinkJobNotFoundException.class));
+                assertThat(e).satisfies(matching(containsCause(FlinkJobNotFoundException.class)));
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(jobMaster, testingTimeout);
@@ -215,14 +216,15 @@ public class JobMasterQueryableStateTest extends TestLogger {
                             .requestKvStateLocation(JOB_GRAPH.getJobID(), registrationName)
                             .get();
 
-            assertEquals(JOB_GRAPH.getJobID(), location.getJobId());
-            assertEquals(JOB_VERTEX_1.getID(), location.getJobVertexId());
-            assertEquals(JOB_VERTEX_1.getMaxParallelism(), location.getNumKeyGroups());
-            assertEquals(1, location.getNumRegisteredKeyGroups());
-            assertEquals(1, keyGroupRange.getNumberOfKeyGroups());
-            assertEquals(kvStateID, location.getKvStateID(keyGroupRange.getStartKeyGroup()));
-            assertEquals(
-                    address, location.getKvStateServerAddress(keyGroupRange.getStartKeyGroup()));
+            assertThat(location.getJobId()).isEqualTo(JOB_GRAPH.getJobID());
+            assertThat(location.getJobVertexId()).isEqualTo(JOB_VERTEX_1.getID());
+            assertThat(location.getNumKeyGroups()).isEqualTo(JOB_VERTEX_1.getMaxParallelism());
+            assertThat(location.getNumRegisteredKeyGroups()).isEqualTo(1);
+            assertThat(keyGroupRange.getNumberOfKeyGroups()).isEqualTo(1);
+            assertThat(location.getKvStateID(keyGroupRange.getStartKeyGroup()))
+                    .isEqualTo(kvStateID);
+            assertThat(location.getKvStateServerAddress(keyGroupRange.getStartKeyGroup()))
+                    .isEqualTo(address);
         } finally {
             RpcUtils.terminateRpcEndpoint(jobMaster, testingTimeout);
         }
@@ -269,7 +271,7 @@ public class JobMasterQueryableStateTest extends TestLogger {
                         .get();
                 fail("Expected to fail with an UnknownKvStateLocation.");
             } catch (Exception e) {
-                assertThat(e, containsCause(UnknownKvStateLocation.class));
+                assertThat(e).satisfies(matching(containsCause(UnknownKvStateLocation.class)));
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(jobMaster, testingTimeout);
@@ -301,13 +303,15 @@ public class JobMasterQueryableStateTest extends TestLogger {
                         registrationName);
                 fail("Expected to fail because of clashing registration message.");
             } catch (Exception e) {
-                assertTrue(
-                        ExceptionUtils.findThrowableWithMessage(e, "Registration name clash")
-                                .isPresent());
-
                 assertThat(
-                        jobMasterGateway.requestJobStatus(testingTimeout).get(),
-                        either(is(JobStatus.FAILED)).or(is(JobStatus.FAILING)));
+                                ExceptionUtils.findThrowableWithMessage(
+                                                e, "Registration name clash")
+                                        .isPresent())
+                        .isTrue();
+
+                assertThat(jobMasterGateway.requestJobStatus(testingTimeout).get())
+                        .satisfies(
+                                matching(either(is(JobStatus.FAILED)).or(is(JobStatus.FAILING))));
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(jobMaster, testingTimeout);

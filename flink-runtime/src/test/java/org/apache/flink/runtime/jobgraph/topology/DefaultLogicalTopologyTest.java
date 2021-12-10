@@ -41,7 +41,7 @@ import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.
 import static org.apache.flink.runtime.jobgraph.DistributionPattern.ALL_TO_ALL;
 import static org.apache.flink.runtime.jobgraph.topology.DefaultLogicalResultTest.assertResultsEquals;
 import static org.apache.flink.runtime.jobgraph.topology.DefaultLogicalVertexTest.assertVertexInfoEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link DefaultLogicalTopology}. */
 public class DefaultLogicalTopologyTest extends TestLogger {
@@ -63,7 +63,7 @@ public class DefaultLogicalTopologyTest extends TestLogger {
                 jobGraph.getVerticesSortedTopologicallyFromSources();
         final Iterable<DefaultLogicalVertex> logicalVertices = logicalTopology.getVertices();
 
-        assertEquals(Iterables.size(jobVertices), Iterables.size(logicalVertices));
+        assertThat(Iterables.size(logicalVertices)).isEqualTo(Iterables.size(jobVertices));
 
         final Iterator<JobVertex> jobVertexIterator = jobVertices.iterator();
         final Iterator<DefaultLogicalVertex> logicalVertexIterator = logicalVertices.iterator();
@@ -75,7 +75,8 @@ public class DefaultLogicalTopologyTest extends TestLogger {
 
     @Test
     public void testGetLogicalPipelinedRegions() {
-        assertEquals(2, IterableUtils.toStream(logicalTopology.getAllPipelinedRegions()).count());
+        assertThat(IterableUtils.toStream(logicalTopology.getAllPipelinedRegions()).count())
+                .isEqualTo(2);
     }
 
     private JobGraph createJobGraph() {

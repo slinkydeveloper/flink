@@ -38,11 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.getSplitsAssignment;
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.verifyAssignment;
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.verifyException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Unit test for {@link SourceCoordinatorContext}. */
 public class SourceCoordinatorContextTest extends SourceCoordinatorTestBase {
@@ -52,13 +49,14 @@ public class SourceCoordinatorContextTest extends SourceCoordinatorTestBase {
         sourceReady();
         List<ReaderInfo> readerInfo = registerReaders();
 
-        assertTrue(context.registeredReaders().containsKey(0));
-        assertTrue(context.registeredReaders().containsKey(1));
-        assertEquals(readerInfo.get(0), context.registeredReaders().get(0));
-        assertEquals(readerInfo.get(1), context.registeredReaders().get(1));
+        assertThat(context.registeredReaders().containsKey(0)).isTrue();
+        assertThat(context.registeredReaders().containsKey(1)).isTrue();
+        assertThat(context.registeredReaders().get(0)).isEqualTo(readerInfo.get(0));
+        assertThat(context.registeredReaders().get(1)).isEqualTo(readerInfo.get(1));
 
         final TestingSplitEnumerator<?> enumerator = getEnumerator();
-        assertThat(enumerator.getRegisteredReaders(), Matchers.containsInAnyOrder(0, 1, 2));
+        assertThat(enumerator.getRegisteredReaders())
+                .satisfies(matching(Matchers.containsInAnyOrder(0, 1, 2)));
     }
 
     @Test
@@ -69,10 +67,12 @@ public class SourceCoordinatorContextTest extends SourceCoordinatorTestBase {
         sourceCoordinator.subtaskFailed(0, null);
         waitForCoordinatorToProcessActions();
 
-        assertEquals("Only reader 2 should be registered.", 2, context.registeredReaders().size());
-        assertNull(context.registeredReaders().get(0));
-        assertEquals(readerInfo.get(1), context.registeredReaders().get(1));
-        assertEquals(readerInfo.get(2), context.registeredReaders().get(2));
+        assertThat(context.registeredReaders().size())
+                .as("Only reader 2 should be registered.")
+                .isEqualTo(2);
+        assertThat(context.registeredReaders().get(0)).isNull();
+        assertThat(context.registeredReaders().get(1)).isEqualTo(readerInfo.get(1));
+        assertThat(context.registeredReaders().get(2)).isEqualTo(readerInfo.get(2));
     }
 
     @Test
@@ -111,16 +111,15 @@ public class SourceCoordinatorContextTest extends SourceCoordinatorTestBase {
                 Arrays.asList("1", "2"),
                 splitSplitAssignmentTracker.uncheckpointedAssignments().get(1));
         // The OperatorCoordinatorContext should have received the event sending call.
-        assertEquals(
-                "There should be two events sent to the subtasks.",
-                2,
-                receivingTasks.getNumberOfSentEvents());
+        assertThat(receivingTasks.getNumberOfSentEvents())
+                .as("There should be two events sent to the subtasks.")
+                .isEqualTo(2);
 
         // Assert the events to subtask0.
         List<OperatorEvent> eventsToSubtask0 = receivingTasks.getSentEventsForSubtask(0);
-        assertEquals(1, eventsToSubtask0.size());
+        assertThat(eventsToSubtask0.size()).isEqualTo(1);
         OperatorEvent event = eventsToSubtask0.get(0);
-        assertTrue(event instanceof AddSplitEvent);
+        assertThat(event).isInstanceOf(AddSplitEvent.class);
         verifyAssignment(
                 Collections.singletonList("0"),
                 ((AddSplitEvent<MockSourceSplit>) event).splits(new MockSourceSplitSerializer()));
@@ -189,8 +188,8 @@ public class SourceCoordinatorContextTest extends SourceCoordinatorTestBase {
         testingContext.close();
         manualCoordinatorExecutor.triggerAll();
 
-        assertTrue(expectedError.get() instanceof InterruptedException);
-        assertFalse(operatorCoordinatorContext.isJobFailed());
+        assertThat(expectedError.get()).isInstanceOf(InterruptedException.class);
+        assertThat(operatorCoordinatorContext.isJobFailed()).isFalse();
     }
 
     // ------------------------

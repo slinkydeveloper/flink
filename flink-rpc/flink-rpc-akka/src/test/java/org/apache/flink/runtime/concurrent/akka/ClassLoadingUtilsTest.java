@@ -29,8 +29,7 @@ import java.net.URLClassLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link ClassLoadingUtils}. */
 public class ClassLoadingUtilsTest extends TestLogger {
@@ -48,10 +47,10 @@ public class ClassLoadingUtilsTest extends TestLogger {
                 ClassLoadingUtils.withContextClassLoader(runnable, TEST_CLASS_LOADER);
 
         // the runnable should only be wrapped, not run immediately
-        assertThat(contextClassLoader.isDone(), is(false));
+        assertThat(contextClassLoader.isDone()).isEqualTo(false);
 
         wrappedRunnable.run();
-        assertThat(contextClassLoader.get(), is(TEST_CLASS_LOADER));
+        assertThat(contextClassLoader.get()).isEqualTo(TEST_CLASS_LOADER);
     }
 
     @Test
@@ -65,7 +64,7 @@ public class ClassLoadingUtilsTest extends TestLogger {
                 () -> contextClassLoader.complete(Thread.currentThread().getContextClassLoader());
 
         wrappedExecutor.execute(runnable);
-        assertThat(contextClassLoader.get(), is(TEST_CLASS_LOADER));
+        assertThat(contextClassLoader.get()).isEqualTo(TEST_CLASS_LOADER);
     }
 
     @Test
@@ -75,7 +74,7 @@ public class ClassLoadingUtilsTest extends TestLogger {
                 () -> contextClassLoader.complete(Thread.currentThread().getContextClassLoader());
 
         ClassLoadingUtils.runWithContextClassLoader(runnable, TEST_CLASS_LOADER);
-        assertThat(contextClassLoader.get(), is(TEST_CLASS_LOADER));
+        assertThat(contextClassLoader.get()).isEqualTo(TEST_CLASS_LOADER);
     }
 
     @Test
@@ -85,7 +84,7 @@ public class ClassLoadingUtilsTest extends TestLogger {
 
         final ClassLoader contextClassLoader =
                 ClassLoadingUtils.runWithContextClassLoader(runnable, TEST_CLASS_LOADER);
-        assertThat(contextClassLoader, is(TEST_CLASS_LOADER));
+        assertThat(contextClassLoader).isEqualTo(TEST_CLASS_LOADER);
     }
 
     @Test
@@ -100,6 +99,6 @@ public class ClassLoadingUtilsTest extends TestLogger {
                 guardedFuture.thenApply(ignored -> Thread.currentThread().getContextClassLoader());
 
         originalFuture.complete(null);
-        assertThat(contextClassLoader.get(), is(TEST_CLASS_LOADER));
+        assertThat(contextClassLoader.get()).isEqualTo(TEST_CLASS_LOADER);
     }
 }

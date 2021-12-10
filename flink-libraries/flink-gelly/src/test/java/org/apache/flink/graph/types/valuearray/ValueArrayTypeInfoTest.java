@@ -28,7 +28,7 @@ import static org.apache.flink.graph.types.valuearray.ValueArrayTypeInfo.INT_VAL
 import static org.apache.flink.graph.types.valuearray.ValueArrayTypeInfo.LONG_VALUE_ARRAY_TYPE_INFO;
 import static org.apache.flink.graph.types.valuearray.ValueArrayTypeInfo.NULL_VALUE_ARRAY_TYPE_INFO;
 import static org.apache.flink.graph.types.valuearray.ValueArrayTypeInfo.STRING_VALUE_ARRAY_TYPE_INFO;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ValueArrayTypeInfo}. */
 public class ValueArrayTypeInfoTest {
@@ -37,45 +37,37 @@ public class ValueArrayTypeInfoTest {
 
     @Test
     public void testIntValueArray() {
-        assertEquals(INT_VALUE_ARRAY_TYPE_INFO.getTypeClass(), ValueArray.class);
-        assertEquals(
-                INT_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass(),
-                IntValueArraySerializer.class);
-        assertEquals(
-                INT_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass(),
-                IntValueArrayComparator.class);
+        assertThat(ValueArray.class).isEqualTo(INT_VALUE_ARRAY_TYPE_INFO.getTypeClass());
+        assertThat(IntValueArraySerializer.class)
+                .isEqualTo(INT_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass());
+        assertThat(IntValueArrayComparator.class)
+                .isEqualTo(INT_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass());
     }
 
     @Test
     public void testLongValueArray() {
-        assertEquals(LONG_VALUE_ARRAY_TYPE_INFO.getTypeClass(), ValueArray.class);
-        assertEquals(
-                LONG_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass(),
-                LongValueArraySerializer.class);
-        assertEquals(
-                LONG_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass(),
-                LongValueArrayComparator.class);
+        assertThat(ValueArray.class).isEqualTo(LONG_VALUE_ARRAY_TYPE_INFO.getTypeClass());
+        assertThat(LongValueArraySerializer.class)
+                .isEqualTo(LONG_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass());
+        assertThat(LongValueArrayComparator.class)
+                .isEqualTo(LONG_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass());
     }
 
     @Test
     public void testNullValueArray() {
-        assertEquals(NULL_VALUE_ARRAY_TYPE_INFO.getTypeClass(), ValueArray.class);
-        assertEquals(
-                NULL_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass(),
-                NullValueArraySerializer.class);
-        assertEquals(
-                NULL_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass(),
-                NullValueArrayComparator.class);
+        assertThat(ValueArray.class).isEqualTo(NULL_VALUE_ARRAY_TYPE_INFO.getTypeClass());
+        assertThat(NullValueArraySerializer.class)
+                .isEqualTo(NULL_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass());
+        assertThat(NullValueArrayComparator.class)
+                .isEqualTo(NULL_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass());
     }
 
     @Test
     public void testStringValueArray() {
-        assertEquals(STRING_VALUE_ARRAY_TYPE_INFO.getTypeClass(), ValueArray.class);
-        assertEquals(
-                STRING_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass(),
-                StringValueArraySerializer.class);
-        assertEquals(
-                STRING_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass(),
-                StringValueArrayComparator.class);
+        assertThat(ValueArray.class).isEqualTo(STRING_VALUE_ARRAY_TYPE_INFO.getTypeClass());
+        assertThat(StringValueArraySerializer.class)
+                .isEqualTo(STRING_VALUE_ARRAY_TYPE_INFO.createSerializer(config).getClass());
+        assertThat(StringValueArrayComparator.class)
+                .isEqualTo(STRING_VALUE_ARRAY_TYPE_INFO.createComparator(true, config).getClass());
     }
 }

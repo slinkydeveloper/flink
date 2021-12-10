@@ -67,8 +67,8 @@ import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for checking whether {@link WindowOperator} can restore from snapshots that were done using
@@ -980,7 +980,7 @@ public class WindowOperatorMigrationTest {
 
         TypeSerializer<NonPojoType> keySerializer =
                 TypeInformation.of(NonPojoType.class).createSerializer(new ExecutionConfig());
-        assertTrue(keySerializer instanceof KryoSerializer);
+        assertThat(keySerializer).isInstanceOf(KryoSerializer.class);
 
         WindowOperator<
                         NonPojoType,
@@ -1075,7 +1075,7 @@ public class WindowOperatorMigrationTest {
 
         TypeSerializer<NonPojoType> keySerializer =
                 TypeInformation.of(NonPojoType.class).createSerializer(new ExecutionConfig());
-        assertTrue(keySerializer instanceof KryoSerializer);
+        assertThat(keySerializer).isInstanceOf(KryoSerializer.class);
 
         WindowOperator<
                         NonPojoType,

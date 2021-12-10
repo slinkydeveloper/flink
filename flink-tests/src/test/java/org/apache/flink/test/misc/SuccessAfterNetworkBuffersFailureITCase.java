@@ -41,8 +41,8 @@ import org.junit.ClassRule;
 import org.junit.Test;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowableWithMessage;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test that runs an iterative job after a failure in another iterative job. This test validates
@@ -79,9 +79,10 @@ public class SuccessAfterNetworkBuffersFailureITCase extends TestLogger {
             runKMeans(env);
             fail("This program execution should have failed.");
         } catch (JobExecutionException e) {
-            assertTrue(
-                    findThrowableWithMessage(e, "Insufficient number of network buffers")
-                            .isPresent());
+            assertThat(
+                            findThrowableWithMessage(e, "Insufficient number of network buffers")
+                                    .isPresent())
+                    .isTrue();
         }
 
         runConnectedComponents(env);

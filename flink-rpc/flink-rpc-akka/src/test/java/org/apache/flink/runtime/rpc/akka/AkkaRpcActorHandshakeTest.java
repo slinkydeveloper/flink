@@ -37,10 +37,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the handshake between rpc endpoints. */
 public class AkkaRpcActorHandshakeTest extends TestLogger {
@@ -96,7 +94,7 @@ public class AkkaRpcActorHandshakeTest extends TestLogger {
                                     AkkaRpcActorTest.DummyRpcGateway.class)
                             .get();
 
-            assertThat(dummyRpcGateway.foobar().get(), equalTo(value));
+            assertThat(dummyRpcGateway.foobar().get()).isEqualTo(value);
         } finally {
             RpcUtils.terminateRpcEndpoint(rpcEndpoint, timeout);
         }
@@ -116,9 +114,8 @@ public class AkkaRpcActorHandshakeTest extends TestLogger {
                         .get();
                 fail("Expected HandshakeException.");
             } catch (ExecutionException ee) {
-                assertThat(
-                        ExceptionUtils.stripExecutionException(ee),
-                        instanceOf(HandshakeException.class));
+                assertThat(ExceptionUtils.stripExecutionException(ee))
+                        .isInstanceOf(HandshakeException.class);
             }
         } finally {
             RpcUtils.terminateRpcEndpoint(rpcEndpoint, timeout);
@@ -143,9 +140,8 @@ public class AkkaRpcActorHandshakeTest extends TestLogger {
             futureGateway.get(timeout.getSize(), timeout.getUnit());
             fail("We expected a HandshakeException.");
         } catch (ExecutionException executionException) {
-            assertThat(
-                    ExceptionUtils.stripExecutionException(executionException),
-                    instanceOf(HandshakeException.class));
+            assertThat(ExceptionUtils.stripExecutionException(executionException))
+                    .isInstanceOf(HandshakeException.class);
         } finally {
             RpcUtils.terminateRpcEndpoint(rpcEndpoint, timeout);
         }

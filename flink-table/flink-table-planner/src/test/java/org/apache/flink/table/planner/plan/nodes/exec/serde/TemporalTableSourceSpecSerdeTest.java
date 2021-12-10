@@ -55,7 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TemporalTableSourceSpec} serialization and deserialization. */
 public class TemporalTableSourceSpecSerdeTest {
@@ -95,8 +95,8 @@ public class TemporalTableSourceSpecSerdeTest {
             }
             String json = writer.toString();
             TemporalTableSourceSpec actual = mapper.readValue(json, TemporalTableSourceSpec.class);
-            assertEquals(spec.getTableSourceSpec(), actual.getTableSourceSpec());
-            assertEquals(spec.getOutputType(), actual.getOutputType());
+            assertThat(actual.getTableSourceSpec()).isEqualTo(spec.getTableSourceSpec());
+            assertThat(actual.getOutputType()).isEqualTo(spec.getOutputType());
         }
     }
 

@@ -24,9 +24,8 @@ import org.apache.flink.shaded.netty4.io.netty.buffer.ByteBuf;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link InputChannelID}. */
 public class InputChannelIDTest {
@@ -39,7 +38,7 @@ public class InputChannelIDTest {
         final ByteBuf byteBuf = ALLOCATOR.directBuffer(byteBufLen, byteBufLen);
         inputChannelID.writeTo(byteBuf);
 
-        assertThat(byteBuf.writerIndex(), is(equalTo(InputChannelID.getByteBufLength())));
-        assertThat(InputChannelID.fromByteBuf(byteBuf), is(equalTo(inputChannelID)));
+        assertThat(byteBuf.writerIndex()).isEqualTo(equalTo(InputChannelID.getByteBufLength()));
+        assertThat(InputChannelID.fromByteBuf(byteBuf)).isEqualTo(equalTo(inputChannelID));
     }
 }

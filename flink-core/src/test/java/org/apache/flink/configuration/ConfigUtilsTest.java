@@ -25,11 +25,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.flink.configuration.ConfigOptions.key;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
 
 /** Tests the {@link ConfigUtils} methods. */
 public class ConfigUtilsTest {
@@ -49,7 +47,7 @@ public class ConfigUtilsTest {
         final List<Integer> recovered =
                 ConfigUtils.decodeListFromConfig(
                         configurationUnderTest, TEST_OPTION, Integer::valueOf);
-        assertThat(recovered, equalTo(intList));
+        assertThat(recovered).isEqualTo(intList);
     }
 
     @Test
@@ -61,7 +59,7 @@ public class ConfigUtilsTest {
         final List<Integer> recovered =
                 ConfigUtils.decodeListFromConfig(
                         configurationUnderTest, TEST_OPTION, Integer::valueOf);
-        assertThat(recovered, equalTo(intList));
+        assertThat(recovered).isEqualTo(intList);
     }
 
     @Test
@@ -70,15 +68,15 @@ public class ConfigUtilsTest {
         ConfigUtils.encodeCollectionToConfig(
                 configurationUnderTest, TEST_OPTION, null, Object::toString);
 
-        assertThat(configurationUnderTest.keySet(), is(empty()));
+        assertThat(configurationUnderTest.keySet()).isEqualTo(empty());
 
         final Object recovered = configurationUnderTest.get(TEST_OPTION);
-        assertThat(recovered, is(nullValue()));
+        assertThat(recovered).isEqualTo(nullValue());
 
         final List<Integer> recoveredList =
                 ConfigUtils.decodeListFromConfig(
                         configurationUnderTest, TEST_OPTION, Integer::valueOf);
-        assertThat(recoveredList, is(empty()));
+        assertThat(recoveredList).isEqualTo(empty());
     }
 
     @Test
@@ -87,15 +85,15 @@ public class ConfigUtilsTest {
         ConfigUtils.encodeArrayToConfig(
                 configurationUnderTest, TEST_OPTION, null, Object::toString);
 
-        assertThat(configurationUnderTest.keySet(), is(empty()));
+        assertThat(configurationUnderTest.keySet()).isEqualTo(empty());
 
         final Object recovered = configurationUnderTest.get(TEST_OPTION);
-        assertThat(recovered, is(nullValue()));
+        assertThat(recovered).isEqualTo(nullValue());
 
         final List<Integer> recoveredList =
                 ConfigUtils.decodeListFromConfig(
                         configurationUnderTest, TEST_OPTION, Integer::valueOf);
-        assertThat(recoveredList, is(empty()));
+        assertThat(recoveredList).isEqualTo(empty());
     }
 
     @Test
@@ -105,12 +103,12 @@ public class ConfigUtilsTest {
                 configurationUnderTest, TEST_OPTION, Collections.emptyList(), Object::toString);
 
         final List<String> recovered = configurationUnderTest.get(TEST_OPTION);
-        assertThat(recovered, is(empty()));
+        assertThat(recovered).isEqualTo(empty());
 
         final List<Integer> recoveredList =
                 ConfigUtils.decodeListFromConfig(
                         configurationUnderTest, TEST_OPTION, Integer::valueOf);
-        assertThat(recoveredList, is(empty()));
+        assertThat(recoveredList).isEqualTo(empty());
     }
 
     @Test
@@ -120,11 +118,11 @@ public class ConfigUtilsTest {
                 configurationUnderTest, TEST_OPTION, new Integer[5], Object::toString);
 
         final List<String> recovered = configurationUnderTest.get(TEST_OPTION);
-        assertThat(recovered, is(empty()));
+        assertThat(recovered).isEqualTo(empty());
 
         final List<Integer> recoveredList =
                 ConfigUtils.decodeListFromConfig(
                         configurationUnderTest, TEST_OPTION, Integer::valueOf);
-        assertThat(recoveredList, is(empty()));
+        assertThat(recoveredList).isEqualTo(empty());
     }
 }

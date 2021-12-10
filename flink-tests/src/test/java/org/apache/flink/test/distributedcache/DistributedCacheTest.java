@@ -35,7 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test the distributed cache. */
 public class DistributedCacheTest extends AbstractTestBase {
@@ -80,12 +80,13 @@ public class DistributedCacheTest extends AbstractTestBase {
 
         @Override
         public void flatMap(String word, Collector<Tuple1<String>> out) throws Exception {
-            assertTrue(
-                    "Unexpected word in stream! wordFromStream: "
-                            + word
-                            + ", shouldBeOneOf: "
-                            + wordList.toString(),
-                    wordList.contains(word));
+            assertThat(wordList.contains(word))
+                    .as(
+                            "Unexpected word in stream! wordFromStream: "
+                                    + word
+                                    + ", shouldBeOneOf: "
+                                    + wordList.toString())
+                    .isTrue();
 
             out.collect(new Tuple1<>(word));
         }

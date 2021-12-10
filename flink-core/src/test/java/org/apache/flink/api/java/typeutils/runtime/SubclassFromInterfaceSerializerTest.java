@@ -30,6 +30,8 @@ import org.junit.Test;
 import java.util.Objects;
 import java.util.Random;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Testing the serialization of classes which are subclasses of a class that implements an
  * interface.
@@ -45,7 +47,7 @@ public class SubclassFromInterfaceSerializerTest
         ExecutionConfig conf = new ExecutionConfig();
         conf.registerPojoType(TestUserClass2.class);
         TypeSerializer<TestUserInterface> serializer = type.createSerializer(conf);
-        assert (serializer instanceof KryoSerializer);
+        assertThat((serializer instanceof KryoSerializer)).isTrue();
         return serializer;
     }
 

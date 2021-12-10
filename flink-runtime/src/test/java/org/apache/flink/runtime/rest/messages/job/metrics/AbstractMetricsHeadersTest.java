@@ -28,8 +28,7 @@ import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseSt
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link AbstractMetricsHeaders}. */
 public class AbstractMetricsHeadersTest extends TestLogger {
@@ -59,23 +58,22 @@ public class AbstractMetricsHeadersTest extends TestLogger {
 
     @Test
     public void testHttpMethod() {
-        assertThat(metricsHandlerHeaders.getHttpMethod(), equalTo(HttpMethodWrapper.GET));
+        assertThat(metricsHandlerHeaders.getHttpMethod()).isEqualTo(HttpMethodWrapper.GET);
     }
 
     @Test
     public void testResponseStatus() {
-        assertThat(metricsHandlerHeaders.getResponseStatusCode(), equalTo(HttpResponseStatus.OK));
+        assertThat(metricsHandlerHeaders.getResponseStatusCode()).isEqualTo(HttpResponseStatus.OK);
     }
 
     @Test
     public void testRequestClass() {
-        assertThat(metricsHandlerHeaders.getRequestClass(), equalTo(EmptyRequestBody.class));
+        assertThat(metricsHandlerHeaders.getRequestClass()).isEqualTo(EmptyRequestBody.class);
     }
 
     @Test
     public void testResponseClass() {
-        assertThat(
-                metricsHandlerHeaders.getResponseClass(),
-                equalTo(MetricCollectionResponseBody.class));
+        assertThat(metricsHandlerHeaders.getResponseClass())
+                .isEqualTo(MetricCollectionResponseBody.class);
     }
 }

@@ -49,7 +49,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Base class for the tests of {@link FineGrainedSlotManager}. */
 public abstract class FineGrainedSlotManagerTestBase extends TestLogger {

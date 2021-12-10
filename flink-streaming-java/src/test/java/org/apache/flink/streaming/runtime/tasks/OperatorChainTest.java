@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class test the {@link OperatorChain}.
@@ -63,7 +63,7 @@ public class OperatorChainTest {
         final OperatorChain<?, ?> chain = setupOperatorChain(one, two, three);
         chain.prepareSnapshotPreBarrier(ValidatingOperator.CHECKPOINT_ID);
 
-        assertEquals(3, intRef.get());
+        assertThat(intRef.get()).isEqualTo(3);
     }
 
     // ------------------------------------------------------------------------
@@ -147,8 +147,8 @@ public class OperatorChainTest {
 
         @Override
         public void prepareSnapshotPreBarrier(long checkpointId) throws Exception {
-            assertEquals("wrong checkpointId", CHECKPOINT_ID, checkpointId);
-            assertEquals("wrong order", expected, toUpdate.getAndIncrement());
+            assertThat(checkpointId).as("wrong checkpointId").isEqualTo(CHECKPOINT_ID);
+            assertThat(toUpdate.getAndIncrement()).as("wrong order").isEqualTo(expected);
         }
 
         @Override

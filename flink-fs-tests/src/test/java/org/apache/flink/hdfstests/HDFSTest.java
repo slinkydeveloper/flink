@@ -48,7 +48,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -63,8 +62,8 @@ import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test should logically be located in the 'flink-runtime' tests. However, this project has
@@ -116,7 +115,7 @@ public class HDFSTest {
 
         } catch (Throwable e) {
             e.printStackTrace();
-            Assert.fail("Test failed " + e.getMessage());
+            fail("Test failed " + e.getMessage());
         }
     }
 
@@ -137,7 +136,7 @@ public class HDFSTest {
         org.apache.hadoop.fs.Path result = new org.apache.hadoop.fs.Path(hdfsURI + "/result");
         try {
             FileSystem fs = file.getFileSystem();
-            assertTrue("Must be HadoopFileSystem", fs instanceof HadoopFileSystem);
+            assertThat(fs).as("Must be HadoopFileSystem").isInstanceOf(HadoopFileSystem.class);
 
             DopOneTestEnvironment.setAsContext();
             try {
@@ -148,12 +147,12 @@ public class HDFSTest {
                         });
             } catch (Throwable t) {
                 t.printStackTrace();
-                Assert.fail("Test failed with " + t.getMessage());
+                fail("Test failed with " + t.getMessage());
             } finally {
                 DopOneTestEnvironment.unsetAsContext();
             }
 
-            assertTrue("No result file present", hdfs.exists(result));
+            assertThat(hdfs.exists(result)).as("No result file present").isTrue();
 
             // validate output:
             org.apache.hadoop.fs.FSDataInputStream inStream = hdfs.open(result);
@@ -161,12 +160,12 @@ public class HDFSTest {
             IOUtils.copy(inStream, writer);
             String resultString = writer.toString();
 
-            Assert.assertEquals("hdfs 10\n" + "hello 10\n", resultString);
+            assertThat(resultString).isEqualTo("hdfs 10\n" + "hello 10\n");
             inStream.close();
 
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail("Error in test: " + e.getMessage());
+            fail("Error in test: " + e.getMessage());
         }
     }
 
@@ -190,18 +189,19 @@ public class HDFSTest {
             outputFormat.writeRecord(type);
             outputFormat.close();
 
-            assertTrue("No result file present", hdfs.exists(hdfsPath));
+            assertThat(hdfs.exists(hdfsPath)).as("No result file present").isTrue();
             FileStatus[] files = hdfs.listStatus(hdfsPath);
-            Assert.assertEquals(2, files.length);
+            assertThat(files.length).isEqualTo(2);
             for (FileStatus file : files) {
-                assertTrue(
-                        "1".equals(file.getPath().getName())
-                                || "2".equals(file.getPath().getName()));
+                assertThat(
+                                "1".equals(file.getPath().getName())
+                                        || "2".equals(file.getPath().getName()))
+                        .isTrue();
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -231,23 +231,23 @@ public class HDFSTest {
         }
 
         // verify that the files have been created
-        assertTrue(fs.exists(singleFile));
-        assertTrue(fs.exists(directoryFile));
+        assertThat(fs.exists(singleFile)).isTrue();
+        assertThat(fs.exists(directoryFile)).isTrue();
 
         // delete the single file
-        assertFalse(FileUtils.deletePathIfEmpty(fs, singleFile));
-        assertTrue(fs.exists(singleFile));
+        assertThat(FileUtils.deletePathIfEmpty(fs, singleFile)).isFalse();
+        assertThat(fs.exists(singleFile)).isTrue();
 
         // try to delete the non-empty directory
-        assertFalse(FileUtils.deletePathIfEmpty(fs, directory));
-        assertTrue(fs.exists(directory));
+        assertThat(FileUtils.deletePathIfEmpty(fs, directory)).isFalse();
+        assertThat(fs.exists(directory)).isTrue();
 
         // delete the file contained in the directory
-        assertTrue(fs.delete(directoryFile, false));
+        assertThat(fs.delete(directoryFile, false)).isTrue();
 
         // now the deletion should work
-        assertTrue(FileUtils.deletePathIfEmpty(fs, directory));
-        assertFalse(fs.exists(directory));
+        assertThat(FileUtils.deletePathIfEmpty(fs, directory)).isTrue();
+        assertThat(fs.exists(directory)).isFalse();
     }
 
     /**

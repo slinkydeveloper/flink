@@ -46,11 +46,8 @@ import java.util.HashSet;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Unit tests for {@link JarDeleteHandler}. */
 public class JarDeleteHandlerTest extends TestLogger {
@@ -83,12 +80,12 @@ public class JarDeleteHandlerTest extends TestLogger {
 
     @Test
     public void testDeleteJarById() throws Exception {
-        assertThat(Files.exists(jarDir.resolve(TEST_JAR_NAME)), equalTo(true));
+        assertThat(Files.exists(jarDir.resolve(TEST_JAR_NAME))).isEqualTo(true);
 
         final HandlerRequest<EmptyRequestBody> request = createRequest(TEST_JAR_NAME);
         jarDeleteHandler.handleRequest(request, restfulGateway).get();
 
-        assertThat(Files.exists(jarDir.resolve(TEST_JAR_NAME)), equalTo(false));
+        assertThat(Files.exists(jarDir.resolve(TEST_JAR_NAME))).isEqualTo(false);
     }
 
     @Test
@@ -98,15 +95,13 @@ public class JarDeleteHandlerTest extends TestLogger {
             jarDeleteHandler.handleRequest(request, restfulGateway).get();
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripCompletionException(e.getCause());
-            assertThat(throwable, instanceOf(RestHandlerException.class));
+            assertThat(throwable).isInstanceOf(RestHandlerException.class);
 
             final RestHandlerException restHandlerException = (RestHandlerException) throwable;
-            assertThat(
-                    restHandlerException.getMessage(),
-                    containsString("File doesnotexist.jar does not exist in"));
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(),
-                    equalTo(HttpResponseStatus.BAD_REQUEST));
+            assertThat(restHandlerException.getMessage())
+                    .contains("File doesnotexist.jar does not exist in");
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.BAD_REQUEST);
             return;
         }
         fail("The test should have failed by now.");
@@ -121,13 +116,12 @@ public class JarDeleteHandlerTest extends TestLogger {
             jarDeleteHandler.handleRequest(request, restfulGateway).get();
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripCompletionException(e.getCause());
-            assertThat(throwable, instanceOf(RestHandlerException.class));
+            assertThat(throwable).isInstanceOf(RestHandlerException.class);
 
             final RestHandlerException restHandlerException = (RestHandlerException) throwable;
-            assertThat(restHandlerException.getMessage(), containsString("Failed to delete jar"));
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(),
-                    equalTo(HttpResponseStatus.INTERNAL_SERVER_ERROR));
+            assertThat(restHandlerException.getMessage()).contains("Failed to delete jar");
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

@@ -28,8 +28,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Integration tests for the {@link FlinkSecurityManager}. */
@@ -50,7 +49,7 @@ public class FlinkSecurityManagerITCase extends TestLogger {
         testProcess.startProcess();
         try {
             testProcess.waitFor();
-            assertThat(testProcess.exitCode(), is(222));
+            assertThat(testProcess.exitCode()).isEqualTo(222);
         } finally {
             testProcess.destroy();
         }
@@ -64,7 +63,7 @@ public class FlinkSecurityManagerITCase extends TestLogger {
         testProcess.startProcess();
         try {
             testProcess.waitFor();
-            assertThat(testProcess.exitCode(), is(0));
+            assertThat(testProcess.exitCode()).isEqualTo(0);
         } finally {
             testProcess.destroy();
         }

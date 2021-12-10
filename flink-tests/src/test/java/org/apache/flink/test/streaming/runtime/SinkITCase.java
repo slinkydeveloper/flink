@@ -40,7 +40,8 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.joining;
 import static org.apache.flink.streaming.runtime.operators.sink.TestSink.END_OF_INPUT_STR;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /**
@@ -139,13 +140,18 @@ public class SinkITCase extends AbstractTestBase {
         // the verification of "end of input" would be restored.
         GLOBAL_COMMIT_QUEUE.remove(END_OF_INPUT_STR);
 
-        assertThat(
-                COMMIT_QUEUE,
-                containsInAnyOrder(EXPECTED_COMMITTED_DATA_IN_STREAMING_MODE.toArray()));
+        assertThat(COMMIT_QUEUE)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_COMMITTED_DATA_IN_STREAMING_MODE.toArray())));
 
-        assertThat(
-                getSplittedGlobalCommittedData(),
-                containsInAnyOrder(EXPECTED_GLOBAL_COMMITTED_DATA_IN_STREAMING_MODE.toArray()));
+        assertThat(getSplittedGlobalCommittedData())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_GLOBAL_COMMITTED_DATA_IN_STREAMING_MODE
+                                                .toArray())));
     }
 
     @Test
@@ -164,12 +170,17 @@ public class SinkITCase extends AbstractTestBase {
 
         env.execute();
 
-        assertThat(
-                COMMIT_QUEUE, containsInAnyOrder(EXPECTED_COMMITTED_DATA_IN_BATCH_MODE.toArray()));
+        assertThat(COMMIT_QUEUE)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_COMMITTED_DATA_IN_BATCH_MODE.toArray())));
 
-        assertThat(
-                GLOBAL_COMMIT_QUEUE,
-                containsInAnyOrder(EXPECTED_GLOBAL_COMMITTED_DATA_IN_BATCH_MODE.toArray()));
+        assertThat(GLOBAL_COMMIT_QUEUE)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_GLOBAL_COMMITTED_DATA_IN_BATCH_MODE.toArray())));
     }
 
     @Test
@@ -185,9 +196,11 @@ public class SinkITCase extends AbstractTestBase {
                                         (Supplier<Queue<String>> & Serializable) () -> COMMIT_QUEUE)
                                 .build());
         env.execute();
-        assertThat(
-                COMMIT_QUEUE,
-                containsInAnyOrder(EXPECTED_COMMITTED_DATA_IN_STREAMING_MODE.toArray()));
+        assertThat(COMMIT_QUEUE)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_COMMITTED_DATA_IN_STREAMING_MODE.toArray())));
     }
 
     @Test
@@ -201,8 +214,11 @@ public class SinkITCase extends AbstractTestBase {
                                         (Supplier<Queue<String>> & Serializable) () -> COMMIT_QUEUE)
                                 .build());
         env.execute();
-        assertThat(
-                COMMIT_QUEUE, containsInAnyOrder(EXPECTED_COMMITTED_DATA_IN_BATCH_MODE.toArray()));
+        assertThat(COMMIT_QUEUE)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_COMMITTED_DATA_IN_BATCH_MODE.toArray())));
     }
 
     @Test
@@ -230,9 +246,12 @@ public class SinkITCase extends AbstractTestBase {
         // the verification of "end of input" would be restored.
         GLOBAL_COMMIT_QUEUE.remove(END_OF_INPUT_STR);
 
-        assertThat(
-                getSplittedGlobalCommittedData(),
-                containsInAnyOrder(EXPECTED_GLOBAL_COMMITTED_DATA_IN_STREAMING_MODE.toArray()));
+        assertThat(getSplittedGlobalCommittedData())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_GLOBAL_COMMITTED_DATA_IN_STREAMING_MODE
+                                                .toArray())));
     }
 
     @Test
@@ -250,9 +269,11 @@ public class SinkITCase extends AbstractTestBase {
                                 .build());
         env.execute();
 
-        assertThat(
-                GLOBAL_COMMIT_QUEUE,
-                containsInAnyOrder(EXPECTED_GLOBAL_COMMITTED_DATA_IN_BATCH_MODE.toArray()));
+        assertThat(GLOBAL_COMMIT_QUEUE)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        EXPECTED_GLOBAL_COMMITTED_DATA_IN_BATCH_MODE.toArray())));
     }
 
     private static List<String> getSplittedGlobalCommittedData() {

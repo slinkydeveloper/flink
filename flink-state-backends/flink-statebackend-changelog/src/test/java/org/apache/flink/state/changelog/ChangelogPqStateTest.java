@@ -40,9 +40,7 @@ import java.util.function.Consumer;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** ChangelogKeyGroupedPriorityQueue Test. */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -58,7 +56,7 @@ public class ChangelogPqStateTest {
         testRecorded(
                 emptyList(),
                 state -> state.add("x"),
-                logger -> assertTrue(logger.stateElementAdded));
+                logger -> assertThat(logger.stateElementAdded).isTrue());
     }
 
     @Test
@@ -66,7 +64,7 @@ public class ChangelogPqStateTest {
         testRecorded(
                 emptyList(),
                 state -> state.addAll(singletonList("x")),
-                logger -> assertTrue(logger.stateElementAdded));
+                logger -> assertThat(logger.stateElementAdded).isTrue());
     }
 
     @Test
@@ -74,7 +72,7 @@ public class ChangelogPqStateTest {
         testRecorded(
                 singletonList("x"),
                 ChangelogKeyGroupedPriorityQueue::peek,
-                logger -> assertFalse(logger.anythingChanged()));
+                logger -> assertThat(logger.anythingChanged()).isFalse());
     }
 
     private <T> void testIterator(
@@ -90,14 +88,14 @@ public class ChangelogPqStateTest {
 
         Iterator iterator = iteratorSupplier.apply(state);
         for (T el : elements) {
-            assertTrue(iterator.hasNext());
-            assertEquals(el, iterator.next());
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.next()).isEqualTo(el);
             iterator.remove();
         }
 
-        assertFalse(iterator.hasNext());
-        assertTrue(state.isEmpty());
-        assertTrue(logger.stateElementRemoved);
+        assertThat(iterator.hasNext()).isFalse();
+        assertThat(state.isEmpty()).isTrue();
+        assertThat(logger.stateElementRemoved).isTrue();
     }
 
     private void testRecorded(

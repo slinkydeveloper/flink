@@ -55,7 +55,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Migration ITCases for a stateful job. The tests are parameterized to cover migrating for multiple
@@ -393,7 +393,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
 
             getRuntimeContext().getState(stateDescriptor).update(value.f1);
 
-            assertEquals(value.f1, getRuntimeContext().getState(stateDescriptor).value());
+            assertThat(getRuntimeContext().getState(stateDescriptor).value()).isEqualTo(value.f1);
         }
     }
 
@@ -428,7 +428,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
                 throw new RuntimeException("Missing key value state for " + value);
             }
 
-            assertEquals(value.f1, state.value());
+            assertThat(state.value()).isEqualTo(value.f1);
             getRuntimeContext().getAccumulator(SUCCESSFUL_RESTORE_CHECK_ACCUMULATOR).add(1);
         }
     }
@@ -464,7 +464,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
                 throw new RuntimeException("Missing key value state for " + value);
             }
 
-            assertEquals(value.f1, state.value());
+            assertThat(state.value()).isEqualTo(value.f1);
             getRuntimeContext().getAccumulator(SUCCESSFUL_RESTORE_CHECK_ACCUMULATOR).add(1);
         }
     }
@@ -515,7 +515,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
                 throw new RuntimeException("Missing key value state for " + value);
             }
 
-            assertEquals(value.f1, state.value());
+            assertThat(state.value()).isEqualTo(value.f1);
             getRuntimeContext().getAccumulator(SUCCESSFUL_RESTORE_CHECK_ACCUMULATOR).add(1);
         }
     }
@@ -670,7 +670,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
                                     LongSerializer.INSTANCE,
                                     stateDescriptor);
 
-            assertEquals(state.value(), element.getValue().f1);
+            assertThat(element.getValue().f1).isEqualTo(state.value());
             getRuntimeContext().getAccumulator(SUCCESSFUL_PROCESS_CHECK_ACCUMULATOR).add(1);
 
             output.collect(element);
@@ -683,7 +683,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
                             .getPartitionedState(
                                     timer.getNamespace(), LongSerializer.INSTANCE, stateDescriptor);
 
-            assertEquals(state.value(), timer.getNamespace());
+            assertThat(timer.getNamespace()).isEqualTo(state.value());
             getRuntimeContext().getAccumulator(SUCCESSFUL_EVENT_TIME_CHECK_ACCUMULATOR).add(1);
         }
 
@@ -694,7 +694,7 @@ public class LegacyStatefulJobSavepointMigrationITCase extends SavepointMigratio
                             .getPartitionedState(
                                     timer.getNamespace(), LongSerializer.INSTANCE, stateDescriptor);
 
-            assertEquals(state.value(), timer.getNamespace());
+            assertThat(timer.getNamespace()).isEqualTo(state.value());
             getRuntimeContext().getAccumulator(SUCCESSFUL_PROCESSING_TIME_CHECK_ACCUMULATOR).add(1);
         }
     }

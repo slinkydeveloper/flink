@@ -26,7 +26,6 @@ import org.apache.flink.runtime.state.testutils.TestCompletedCheckpointStorageLo
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collection;
@@ -37,9 +36,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for basic {@link CompletedCheckpointStore} contract. */
 public abstract class CompletedCheckpointStoreTest extends TestLogger {
@@ -69,8 +66,8 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
         CompletedCheckpointStore checkpoints = createRecoveredCompletedCheckpointStore(4);
 
         // Empty state
-        assertEquals(0, checkpoints.getNumberOfRetainedCheckpoints());
-        assertEquals(0, checkpoints.getAllCheckpoints().size());
+        assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(0);
+        assertThat(checkpoints.getAllCheckpoints().size()).isEqualTo(0);
 
         TestCompletedCheckpoint[] expected =
                 new TestCompletedCheckpoint[] {
@@ -81,12 +78,12 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
         // Add and get latest
         checkpoints.addCheckpointAndSubsumeOldestOne(
                 expected[0], new CheckpointsCleaner(), () -> {});
-        assertEquals(1, checkpoints.getNumberOfRetainedCheckpoints());
+        assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(1);
         verifyCheckpoint(expected[0], checkpoints.getLatestCheckpoint());
 
         checkpoints.addCheckpointAndSubsumeOldestOne(
                 expected[1], new CheckpointsCleaner(), () -> {});
-        assertEquals(2, checkpoints.getNumberOfRetainedCheckpoints());
+        assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(2);
         verifyCheckpoint(expected[1], checkpoints.getLatestCheckpoint());
     }
 
@@ -110,7 +107,7 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
         // Add checkpoints
         checkpoints.addCheckpointAndSubsumeOldestOne(
                 expected[0], new CheckpointsCleaner(), () -> {});
-        assertEquals(1, checkpoints.getNumberOfRetainedCheckpoints());
+        assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(1);
 
         for (int i = 1; i < expected.length; i++) {
             checkpoints.addCheckpointAndSubsumeOldestOne(
@@ -118,8 +115,8 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
 
             // The ZooKeeper implementation discards asynchronously
             expected[i - 1].awaitDiscard();
-            assertTrue(expected[i - 1].isDiscarded());
-            assertEquals(1, checkpoints.getNumberOfRetainedCheckpoints());
+            assertThat(expected[i - 1].isDiscarded()).isTrue();
+            assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(1);
         }
     }
 
@@ -136,9 +133,9 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
     public void testEmptyState() throws Exception {
         CompletedCheckpointStore checkpoints = createRecoveredCompletedCheckpointStore(1);
 
-        assertNull(checkpoints.getLatestCheckpoint());
-        assertEquals(0, checkpoints.getAllCheckpoints().size());
-        assertEquals(0, checkpoints.getNumberOfRetainedCheckpoints());
+        assertThat(checkpoints.getLatestCheckpoint()).isNull();
+        assertThat(checkpoints.getAllCheckpoints().size()).isEqualTo(0);
+        assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(0);
     }
 
     /** Tests that all added checkpoints are returned. */
@@ -162,10 +159,10 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
 
         List<CompletedCheckpoint> actual = checkpoints.getAllCheckpoints();
 
-        assertEquals(expected.length, actual.size());
+        assertThat(actual.size()).isEqualTo(expected.length);
 
         for (int i = 0; i < expected.length; i++) {
-            assertEquals(expected[i], actual.get(i));
+            assertThat(actual.get(i)).isEqualTo(expected[i]);
         }
     }
 
@@ -191,15 +188,15 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
         checkpoints.shutdown(JobStatus.FINISHED, new CheckpointsCleaner());
 
         // Empty state
-        assertNull(checkpoints.getLatestCheckpoint());
-        assertEquals(0, checkpoints.getAllCheckpoints().size());
-        assertEquals(0, checkpoints.getNumberOfRetainedCheckpoints());
+        assertThat(checkpoints.getLatestCheckpoint()).isNull();
+        assertThat(checkpoints.getAllCheckpoints().size()).isEqualTo(0);
+        assertThat(checkpoints.getNumberOfRetainedCheckpoints()).isEqualTo(0);
 
         // All have been discarded
         for (TestCompletedCheckpoint checkpoint : expected) {
             // The ZooKeeper implementation discards asynchronously
             checkpoint.awaitDiscard();
-            assertTrue(checkpoint.isDiscarded());
+            assertThat(checkpoint.isDiscarded()).isTrue();
         }
     }
 
@@ -207,15 +204,15 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
     public void testAcquireLatestCompletedCheckpointId() throws Exception {
         SharedStateRegistry sharedStateRegistry = new SharedStateRegistry();
         CompletedCheckpointStore checkpoints = createRecoveredCompletedCheckpointStore(1);
-        assertEquals(0, checkpoints.getLatestCheckpointId());
+        assertThat(checkpoints.getLatestCheckpointId()).isEqualTo(0);
 
         checkpoints.addCheckpointAndSubsumeOldestOne(
                 createCheckpoint(2, sharedStateRegistry), new CheckpointsCleaner(), () -> {});
-        assertEquals(2, checkpoints.getLatestCheckpointId());
+        assertThat(checkpoints.getLatestCheckpointId()).isEqualTo(2);
 
         checkpoints.addCheckpointAndSubsumeOldestOne(
                 createCheckpoint(4, sharedStateRegistry), new CheckpointsCleaner(), () -> {});
-        assertEquals(4, checkpoints.getLatestCheckpointId());
+        assertThat(checkpoints.getLatestCheckpointId()).isEqualTo(4);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -249,26 +246,26 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
             Collection<OperatorState> operatorStates, SharedStateRegistry registry) {
         for (OperatorState operatorState : operatorStates) {
             for (OperatorSubtaskState subtaskState : operatorState.getStates()) {
-                Assert.assertTrue(((TestOperatorSubtaskState) subtaskState).registered);
+                assertThat(((TestOperatorSubtaskState) subtaskState).registered).isTrue();
             }
         }
     }
 
     public static void verifyCheckpointDiscarded(TestCompletedCheckpoint completedCheckpoint) {
-        assertTrue(completedCheckpoint.isDiscarded());
+        assertThat(completedCheckpoint.isDiscarded()).isTrue();
         verifyCheckpointDiscarded(completedCheckpoint.getOperatorStates().values());
     }
 
     protected static void verifyCheckpointDiscarded(Collection<OperatorState> operatorStates) {
         for (OperatorState operatorState : operatorStates) {
             for (OperatorSubtaskState subtaskState : operatorState.getStates()) {
-                Assert.assertTrue(((TestOperatorSubtaskState) subtaskState).discarded);
+                assertThat(((TestOperatorSubtaskState) subtaskState).discarded).isTrue();
             }
         }
     }
 
     private void verifyCheckpoint(CompletedCheckpoint expected, CompletedCheckpoint actual) {
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     /**
@@ -385,7 +382,7 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
         @Override
         public void discardState() {
             super.discardState();
-            Assert.assertFalse(discarded);
+            assertThat(discarded).isFalse();
             discarded = true;
             registered = false;
         }
@@ -393,7 +390,7 @@ public abstract class CompletedCheckpointStoreTest extends TestLogger {
         @Override
         public void registerSharedStates(SharedStateRegistry sharedStateRegistry) {
             super.registerSharedStates(sharedStateRegistry);
-            Assert.assertFalse(discarded);
+            assertThat(discarded).isFalse();
             registered = true;
         }
 

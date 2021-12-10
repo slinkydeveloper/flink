@@ -24,7 +24,6 @@ import org.apache.flink.streaming.runtime.streamrecord.StreamElement;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -33,6 +32,7 @@ import java.util.List;
 
 import static org.apache.flink.streaming.api.operators.async.queue.QueueUtil.popCompleted;
 import static org.apache.flink.streaming.api.operators.async.queue.QueueUtil.putSuccessfully;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link OrderedStreamElementQueue} specific tests. */
 public class OrderedStreamElementQueueTest extends TestLogger {
@@ -48,16 +48,16 @@ public class OrderedStreamElementQueueTest extends TestLogger {
         putSuccessfully(queue, new Watermark(2L));
         ResultFuture<Integer> entry4 = putSuccessfully(queue, new StreamRecord<>(3, 3L));
 
-        Assert.assertEquals(Collections.emptyList(), popCompleted(queue));
-        Assert.assertEquals(4, queue.size());
-        Assert.assertFalse(queue.isEmpty());
+        assertThat(popCompleted(queue)).isEqualTo(Collections.emptyList());
+        assertThat(queue.size()).isEqualTo(4);
+        assertThat(queue.isEmpty()).isFalse();
 
         entry2.complete(Collections.singleton(11));
         entry4.complete(Collections.singleton(13));
 
-        Assert.assertEquals(Collections.emptyList(), popCompleted(queue));
-        Assert.assertEquals(4, queue.size());
-        Assert.assertFalse(queue.isEmpty());
+        assertThat(popCompleted(queue)).isEqualTo(Collections.emptyList());
+        assertThat(queue.size()).isEqualTo(4);
+        assertThat(queue.isEmpty()).isFalse();
 
         entry1.complete(Collections.singleton(10));
 
@@ -67,8 +67,8 @@ public class OrderedStreamElementQueueTest extends TestLogger {
                         new StreamRecord<>(11, 1L),
                         new Watermark(2L),
                         new StreamRecord<>(13, 3L));
-        Assert.assertEquals(expected, popCompleted(queue));
-        Assert.assertEquals(0, queue.size());
-        Assert.assertTrue(queue.isEmpty());
+        assertThat(popCompleted(queue)).isEqualTo(expected);
+        assertThat(queue.size()).isEqualTo(0);
+        assertThat(queue.isEmpty()).isTrue();
     }
 }

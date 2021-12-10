@@ -33,7 +33,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the finish behaviour of the {@link ExecutionGraph}. */
 public class ExecutionGraphFinishTest extends TestLogger {
@@ -66,17 +66,17 @@ public class ExecutionGraphFinishTest extends TestLogger {
 
         // test getNumExecutionVertexFinished
         senderVertices.get(0).getCurrentExecutionAttempt().markFinished();
-        assertEquals(1, sender.getNumExecutionVertexFinished());
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(sender.getNumExecutionVertexFinished()).isEqualTo(1);
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
 
         senderVertices.get(1).getCurrentExecutionAttempt().markFinished();
-        assertEquals(2, sender.getNumExecutionVertexFinished());
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(sender.getNumExecutionVertexFinished()).isEqualTo(2);
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
 
         // test job finishes
         receiverVertices.get(0).getCurrentExecutionAttempt().markFinished();
         receiverVertices.get(1).getCurrentExecutionAttempt().markFinished();
-        assertEquals(4, eg.getNumFinishedVertices());
-        assertEquals(JobStatus.FINISHED, eg.getState());
+        assertThat(eg.getNumFinishedVertices()).isEqualTo(4);
+        assertThat(eg.getState()).isEqualTo(JobStatus.FINISHED);
     }
 }

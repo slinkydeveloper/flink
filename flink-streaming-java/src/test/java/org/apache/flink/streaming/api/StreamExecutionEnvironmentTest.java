@@ -44,7 +44,6 @@ import org.apache.flink.types.Row;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.SplittableIterator;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -52,13 +51,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link StreamExecutionEnvironment}. */
 public class StreamExecutionEnvironmentTest {
@@ -82,9 +76,8 @@ public class StreamExecutionEnvironmentTest {
 
         FromElementsFunction<String> elementsFunction =
                 (FromElementsFunction<String>) getFunctionFromDataSource(source);
-        assertEquals(
-                BasicTypeInfo.STRING_TYPE_INFO.createSerializer(env.getConfig()),
-                elementsFunction.getSerializer());
+        assertThat(elementsFunction.getSerializer())
+                .isEqualTo(BasicTypeInfo.STRING_TYPE_INFO.createSerializer(env.getConfig()));
     }
 
     @Test
@@ -97,11 +90,10 @@ public class StreamExecutionEnvironmentTest {
 
         FromElementsFunction<String> elementsFunction =
                 (FromElementsFunction<String>) getFunctionFromDataSource(source);
-        assertNotEquals(
-                BasicTypeInfo.STRING_TYPE_INFO.createSerializer(env.getConfig()),
-                elementsFunction.getSerializer());
-        assertEquals(
-                customType.createSerializer(env.getConfig()), elementsFunction.getSerializer());
+        assertThat(elementsFunction.getSerializer())
+                .isEqualTo(BasicTypeInfo.STRING_TYPE_INFO.createSerializer(env.getConfig()));
+        assertThat(elementsFunction.getSerializer())
+                .isEqualTo(customType.createSerializer(env.getConfig()));
     }
 
     @Test
@@ -132,14 +124,12 @@ public class StreamExecutionEnvironmentTest {
             final StreamGraph streamGraph = env.getStreamGraph();
             streamGraph.getStreamingPlanAsJSON();
 
-            assertEquals(
-                    "Parallelism of collection source must be 1.",
-                    1,
-                    streamGraph.getStreamNode(dataStream1.getId()).getParallelism());
-            assertEquals(
-                    "Parallelism of parallel collection source must be 4.",
-                    4,
-                    streamGraph.getStreamNode(dataStream2.getId()).getParallelism());
+            assertThat(streamGraph.getStreamNode(dataStream1.getId()).getParallelism())
+                    .as("Parallelism of collection source must be 1.")
+                    .isEqualTo(1);
+            assertThat(streamGraph.getStreamNode(dataStream2.getId()).getParallelism())
+                    .as("Parallelism of parallel collection source must be 4.")
+                    .isEqualTo(4);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -162,18 +152,18 @@ public class StreamExecutionEnvironmentTest {
                 };
         DataStreamSource<Integer> src1 = env.addSource(srcFun);
         src1.addSink(new DiscardingSink<Integer>());
-        assertEquals(srcFun, getFunctionFromDataSource(src1));
+        assertThat(getFunctionFromDataSource(src1)).isEqualTo(srcFun);
 
         List<Long> list = Arrays.asList(0L, 1L, 2L);
 
         DataStreamSource<Long> src2 = env.generateSequence(0, 2);
-        assertTrue(getFunctionFromDataSource(src2) instanceof StatefulSequenceSource);
+        assertThat(getFunctionFromDataSource(src2)).isInstanceOf(StatefulSequenceSource.class);
 
         DataStreamSource<Long> src3 = env.fromElements(0L, 1L, 2L);
-        assertTrue(getFunctionFromDataSource(src3) instanceof FromElementsFunction);
+        assertThat(getFunctionFromDataSource(src3)).isInstanceOf(FromElementsFunction.class);
 
         DataStreamSource<Long> src4 = env.fromCollection(list);
-        assertTrue(getFunctionFromDataSource(src4) instanceof FromElementsFunction);
+        assertThat(getFunctionFromDataSource(src4)).isInstanceOf(FromElementsFunction.class);
     }
 
     /** Verifies that the API method doesn't throw and creates a source of the expected type. */
@@ -183,7 +173,7 @@ public class StreamExecutionEnvironmentTest {
 
         DataStreamSource<Long> src = env.fromSequence(0, 2);
 
-        assertEquals(BasicTypeInfo.LONG_TYPE_INFO, src.getType());
+        assertThat(src.getType()).isEqualTo(BasicTypeInfo.LONG_TYPE_INFO);
     }
 
     @Test
@@ -214,71 +204,71 @@ public class StreamExecutionEnvironmentTest {
                                 });
 
         // default value for max parallelism
-        Assert.assertEquals(-1, operator.getTransformation().getMaxParallelism());
+        assertThat(operator.getTransformation().getMaxParallelism()).isEqualTo(-1);
 
         // bounds for parallelism 1
         try {
             operator.setParallelism(0);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException expected) {
         }
 
         // bounds for parallelism 2
         operator.setParallelism(1);
-        Assert.assertEquals(1, operator.getParallelism());
+        assertThat(operator.getParallelism()).isEqualTo(1);
 
         // bounds for parallelism 3
         operator.setParallelism(1 << 15);
-        Assert.assertEquals(1 << 15, operator.getParallelism());
+        assertThat(operator.getParallelism()).isEqualTo(1 << 15);
 
         // default value after generating
         env.getStreamGraph(false).getJobGraph();
-        Assert.assertEquals(-1, operator.getTransformation().getMaxParallelism());
+        assertThat(operator.getTransformation().getMaxParallelism()).isEqualTo(-1);
 
         // configured value after generating
         env.setMaxParallelism(42);
         env.getStreamGraph(false).getJobGraph();
-        Assert.assertEquals(42, operator.getTransformation().getMaxParallelism());
+        assertThat(operator.getTransformation().getMaxParallelism()).isEqualTo(42);
 
         // bounds configured parallelism 1
         try {
             env.setMaxParallelism(0);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException expected) {
         }
 
         // bounds configured parallelism 2
         try {
             env.setMaxParallelism(1 + (1 << 15));
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException expected) {
         }
 
         // bounds for max parallelism 1
         try {
             operator.setMaxParallelism(0);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException expected) {
         }
 
         // bounds for max parallelism 2
         try {
             operator.setMaxParallelism(1 + (1 << 15));
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException expected) {
         }
 
         // bounds for max parallelism 3
         operator.setMaxParallelism(1);
-        Assert.assertEquals(1, operator.getTransformation().getMaxParallelism());
+        assertThat(operator.getTransformation().getMaxParallelism()).isEqualTo(1);
 
         // bounds for max parallelism 4
         operator.setMaxParallelism(1 << 15);
-        Assert.assertEquals(1 << 15, operator.getTransformation().getMaxParallelism());
+        assertThat(operator.getTransformation().getMaxParallelism()).isEqualTo(1 << 15);
 
         // override config
         env.getStreamGraph(false).getJobGraph();
-        Assert.assertEquals(1 << 15, operator.getTransformation().getMaxParallelism());
+        assertThat(operator.getTransformation().getMaxParallelism()).isEqualTo(1 << 15);
     }
 
     @Test
@@ -296,13 +286,11 @@ public class StreamExecutionEnvironmentTest {
         source.map(value -> value).slotSharingGroup(ssg2).addSink(new DiscardingSink<>());
 
         final StreamGraph streamGraph = env.getStreamGraph();
-        assertThat(
-                streamGraph.getSlotSharingGroupResource("ssg1").get(),
-                is(ResourceProfile.fromResources(1, 100)));
-        assertThat(
-                streamGraph.getSlotSharingGroupResource("ssg2").get(),
-                is(ResourceProfile.fromResources(2, 200)));
-        assertFalse(streamGraph.getSlotSharingGroupResource("ssg3").isPresent());
+        assertThat(streamGraph.getSlotSharingGroupResource("ssg1").get())
+                .isEqualTo(ResourceProfile.fromResources(1, 100));
+        assertThat(streamGraph.getSlotSharingGroupResource("ssg2").get())
+                .isEqualTo(ResourceProfile.fromResources(2, 200));
+        assertThat(streamGraph.getSlotSharingGroupResource("ssg3").isPresent()).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -329,12 +317,12 @@ public class StreamExecutionEnvironmentTest {
             DataStreamSource<Integer> dataStream1 =
                     env.fromCollection(new DummySplittableIterator<Integer>(), typeInfo);
             dataStream1.addSink(new DiscardingSink<Integer>());
-            assertEquals(2, env.getStreamGraph().getStreamNodes().size());
+            assertThat(env.getStreamGraph().getStreamNodes().size()).isEqualTo(2);
 
             DataStreamSource<Integer> dataStream2 =
                     env.fromCollection(new DummySplittableIterator<Integer>(), typeInfo);
             dataStream2.addSink(new DiscardingSink<Integer>());
-            assertEquals(2, env.getStreamGraph().getStreamNodes().size());
+            assertThat(env.getStreamGraph().getStreamNodes().size()).isEqualTo(2);
 
             DataStreamSource<Integer> dataStream3 =
                     env.fromCollection(new DummySplittableIterator<Integer>(), typeInfo);
@@ -344,7 +332,7 @@ public class StreamExecutionEnvironmentTest {
             DataStreamSource<Integer> dataStream4 =
                     env.fromCollection(new DummySplittableIterator<Integer>(), typeInfo);
             dataStream4.addSink(new DiscardingSink<Integer>());
-            assertEquals(4, env.getStreamGraph().getStreamNodes().size());
+            assertThat(env.getStreamGraph().getStreamNodes().size()).isEqualTo(4);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -383,7 +371,7 @@ public class StreamExecutionEnvironmentTest {
     private void testJobName(String expectedJobName, StreamExecutionEnvironment env) {
         env.fromElements(1, 2, 3).print();
         StreamGraph streamGraph = env.getStreamGraph();
-        assertEquals(expectedJobName, streamGraph.getJobName());
+        assertThat(streamGraph.getJobName()).isEqualTo(expectedJobName);
     }
 
     @Test
@@ -392,11 +380,11 @@ public class StreamExecutionEnvironmentTest {
         DataStreamSource<Row> source1 =
                 env.addSource(new RowSourceFunction(), Types.ROW(Types.STRING));
         // the source type information should be the user defined type
-        assertEquals(Types.ROW(Types.STRING), source1.getType());
+        assertThat(source1.getType()).isEqualTo(Types.ROW(Types.STRING));
 
         DataStreamSource<Row> source2 = env.addSource(new RowSourceFunction());
         // the source type information should be derived from RowSourceFunction#getProducedType
-        assertEquals(new GenericTypeInfo<>(Row.class), source2.getType());
+        assertThat(source2.getType()).isEqualTo(new GenericTypeInfo<>(Row.class));
     }
 
     /////////////////////////////////////////////////////////////

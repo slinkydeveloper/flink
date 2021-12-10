@@ -31,12 +31,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link SharedSlot}. */
 public class SharedSlotTest extends TestLogger {
@@ -47,7 +43,7 @@ public class SharedSlotTest extends TestLogger {
 
         new SharedSlot(new SlotRequestId(), physicalSlot, false, () -> {});
 
-        assertThat(physicalSlot.getPayload(), not(nullValue()));
+        assertThat(physicalSlot.getPayload()).isNotNull();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -66,14 +62,13 @@ public class SharedSlotTest extends TestLogger {
 
         final LogicalSlot logicalSlot = sharedSlot.allocateLogicalSlot();
 
-        assertThat(logicalSlot.getAllocationId(), equalTo(physicalSlot.getAllocationId()));
-        assertThat(logicalSlot.getLocality(), is(Locality.UNKNOWN));
-        assertThat(logicalSlot.getPayload(), nullValue());
-        assertThat(
-                logicalSlot.getTaskManagerLocation(),
-                equalTo(physicalSlot.getTaskManagerLocation()));
-        assertThat(
-                logicalSlot.getTaskManagerGateway(), equalTo(physicalSlot.getTaskManagerGateway()));
+        assertThat(logicalSlot.getAllocationId()).isEqualTo(physicalSlot.getAllocationId());
+        assertThat(logicalSlot.getLocality()).isEqualTo(Locality.UNKNOWN);
+        assertThat(logicalSlot.getPayload()).isNull();
+        assertThat(logicalSlot.getTaskManagerLocation())
+                .isEqualTo(physicalSlot.getTaskManagerLocation());
+        assertThat(logicalSlot.getTaskManagerGateway())
+                .isEqualTo(physicalSlot.getTaskManagerGateway());
     }
 
     @Test
@@ -85,7 +80,7 @@ public class SharedSlotTest extends TestLogger {
         final LogicalSlot logicalSlot1 = sharedSlot.allocateLogicalSlot();
         final LogicalSlot logicalSlot2 = sharedSlot.allocateLogicalSlot();
 
-        assertThat(logicalSlot1.getSlotRequestId(), not(equalTo(logicalSlot2.getSlotRequestId())));
+        assertThat(logicalSlot1.getSlotRequestId()).isNotEqualTo(logicalSlot2.getSlotRequestId());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -124,10 +119,10 @@ public class SharedSlotTest extends TestLogger {
 
         // this implicitly returns the slot
         logicalSlot1.releaseSlot(new Exception("test"));
-        assertThat(externalReleaseInitiated.get(), is(false));
+        assertThat(externalReleaseInitiated.get()).isEqualTo(false);
 
         logicalSlot2.releaseSlot(new Exception("test"));
-        assertThat(externalReleaseInitiated.get(), is(true));
+        assertThat(externalReleaseInitiated.get()).isEqualTo(true);
     }
 
     @Test
@@ -143,7 +138,7 @@ public class SharedSlotTest extends TestLogger {
 
         sharedSlot.release(new Exception("test"));
 
-        assertThat(externalReleaseInitiated.get(), is(false));
+        assertThat(externalReleaseInitiated.get()).isEqualTo(false);
     }
 
     @Test
@@ -155,7 +150,7 @@ public class SharedSlotTest extends TestLogger {
 
         sharedSlot.release(new Exception("test"));
 
-        assertThat(logicalSlot.isAlive(), is(false));
+        assertThat(logicalSlot.isAlive()).isEqualTo(false);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -198,8 +193,8 @@ public class SharedSlotTest extends TestLogger {
 
         // if all logical slots were released, and the sharedSlot no longer allows the allocation of
         // logical slots, then the slot release was completed
-        assertThat(logicalSlot1.isAlive(), is(false));
-        assertThat(logicalSlot2.isAlive(), is(false));
+        assertThat(logicalSlot1.isAlive()).isEqualTo(false);
+        assertThat(logicalSlot2.isAlive()).isEqualTo(false);
         try {
             sharedSlot.allocateLogicalSlot();
             fail("Allocation of logical slot should have failed because the slot was released.");

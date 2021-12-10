@@ -34,12 +34,10 @@ import org.junit.Test;
 
 import java.io.File;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link KubernetesUtils}. */
 public class KubernetesUtilsTest extends KubernetesTestBase {
@@ -54,11 +52,10 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
             KubernetesUtils.parsePort(cfg, BlobServerOptions.PORT);
             fail("Should fail with an exception.");
         } catch (FlinkRuntimeException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString(
+            assertThat(e.getMessage())
+                    .contains(
                             BlobServerOptions.PORT.key()
-                                    + " should be specified to a fixed port. Do not support a range of ports."));
+                                    + " should be specified to a fixed port. Do not support a range of ports.");
         }
     }
 
@@ -71,7 +68,7 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
             KubernetesUtils.parsePort(cfg, testingPort);
             fail("Should fail with an exception.");
         } catch (NullPointerException e) {
-            assertThat(e.getMessage(), containsString(testingPort.key() + " should not be null."));
+            assertThat(e.getMessage()).contains(testingPort.key() + " should not be null.");
         }
     }
 
@@ -96,7 +93,7 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
             fail("Kubernetes client should fail when the pod template file does not exist.");
         } catch (Exception ex) {
             final String msg = String.format("Pod template file %s does not exist.", nonExistFile);
-            assertThat(ex, FlinkMatchers.containsMessage(msg));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsMessage(msg)));
         }
     }
 
@@ -107,8 +104,9 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         flinkKubeClient,
                         KubernetesPodTemplateTestUtils.getPodTemplateFile(),
                         "nonExistMainContainer");
-        assertThat(flinkPod.getMainContainer(), is(EMPTY_POD.getMainContainer()));
-        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getContainers().size(), is(2));
+        assertThat(flinkPod.getMainContainer()).isEqualTo(EMPTY_POD.getMainContainer());
+        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getContainers().size())
+                .isEqualTo(2);
     }
 
     @Test
@@ -120,8 +118,8 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME);
         // The pod name is defined in the test/resources/testing-pod-template.yaml.
         final String expectedPodName = "pod-template";
-        assertThat(
-                flinkPod.getPodWithoutMainContainer().getMetadata().getName(), is(expectedPodName));
+        assertThat(flinkPod.getPodWithoutMainContainer().getMetadata().getName())
+                .isEqualTo(expectedPodName);
     }
 
     @Test
@@ -131,11 +129,10 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         flinkKubeClient,
                         KubernetesPodTemplateTestUtils.getPodTemplateFile(),
                         KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME);
-        assertThat(
-                flinkPod.getPodWithoutMainContainer().getSpec().getInitContainers().size(), is(1));
-        assertThat(
-                flinkPod.getPodWithoutMainContainer().getSpec().getInitContainers().get(0),
-                is(KubernetesPodTemplateTestUtils.createInitContainer()));
+        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getInitContainers().size())
+                .isEqualTo(1);
+        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getInitContainers().get(0))
+                .isEqualTo(KubernetesPodTemplateTestUtils.createInitContainer());
     }
 
     @Test
@@ -145,12 +142,13 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         flinkKubeClient,
                         KubernetesPodTemplateTestUtils.getPodTemplateFile(),
                         KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME);
-        assertThat(
-                flinkPod.getMainContainer().getName(),
-                is(KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME));
-        assertThat(
-                flinkPod.getMainContainer().getVolumeMounts(),
-                containsInAnyOrder(KubernetesPodTemplateTestUtils.createVolumeMount()));
+        assertThat(flinkPod.getMainContainer().getName())
+                .isEqualTo(KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME);
+        assertThat(flinkPod.getMainContainer().getVolumeMounts())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        KubernetesPodTemplateTestUtils.createVolumeMount())));
     }
 
     @Test
@@ -160,10 +158,10 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         flinkKubeClient,
                         KubernetesPodTemplateTestUtils.getPodTemplateFile(),
                         KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME);
-        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getContainers().size(), is(1));
-        assertThat(
-                flinkPod.getPodWithoutMainContainer().getSpec().getContainers().get(0),
-                is(KubernetesPodTemplateTestUtils.createSideCarContainer()));
+        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getContainers().size())
+                .isEqualTo(1);
+        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getContainers().get(0))
+                .isEqualTo(KubernetesPodTemplateTestUtils.createSideCarContainer());
     }
 
     @Test
@@ -173,9 +171,11 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         flinkKubeClient,
                         KubernetesPodTemplateTestUtils.getPodTemplateFile(),
                         KubernetesPodTemplateTestUtils.TESTING_MAIN_CONTAINER_NAME);
-        assertThat(
-                flinkPod.getPodWithoutMainContainer().getSpec().getVolumes(),
-                containsInAnyOrder(KubernetesPodTemplateTestUtils.createVolumes()));
+        assertThat(flinkPod.getPodWithoutMainContainer().getSpec().getVolumes())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        KubernetesPodTemplateTestUtils.createVolumes())));
     }
 
     @Test
@@ -187,7 +187,7 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         CONTAINER_IMAGE,
                         null,
                         "container image");
-        assertThat(resolvedImage, is(CONTAINER_IMAGE));
+        assertThat(resolvedImage).isEqualTo(CONTAINER_IMAGE);
     }
 
     @Test
@@ -200,7 +200,7 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         CONTAINER_IMAGE,
                         imageInPodTemplate,
                         "container image");
-        assertThat(resolvedImage, is(CONTAINER_IMAGE));
+        assertThat(resolvedImage).isEqualTo(CONTAINER_IMAGE);
     }
 
     @Test
@@ -213,7 +213,7 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                         CONTAINER_IMAGE,
                         imageInPodTemplate,
                         "container image");
-        assertThat(resolvedImage, is(imageInPodTemplate));
+        assertThat(resolvedImage).isEqualTo(imageInPodTemplate);
     }
 
     private void testCheckAndUpdatePortConfigOption(
@@ -224,6 +224,7 @@ public class KubernetesUtilsTest extends KubernetesTestBase {
                 cfg,
                 HighAvailabilityOptions.HA_JOB_MANAGER_PORT_RANGE,
                 Integer.valueOf(fallbackPort));
-        assertEquals(expectedPort, cfg.get(HighAvailabilityOptions.HA_JOB_MANAGER_PORT_RANGE));
+        assertThat(cfg.get(HighAvailabilityOptions.HA_JOB_MANAGER_PORT_RANGE))
+                .isEqualTo(expectedPort);
     }
 }

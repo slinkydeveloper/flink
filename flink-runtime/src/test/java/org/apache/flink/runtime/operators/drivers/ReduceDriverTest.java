@@ -33,10 +33,12 @@ import org.apache.flink.types.IntValue;
 import org.apache.flink.types.StringValue;
 import org.apache.flink.util.MutableObjectIterator;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class ReduceDriverTest {
@@ -74,11 +76,11 @@ public class ReduceDriverTest {
             driver.prepare();
             driver.run();
 
-            Assert.assertEquals(0, result.getList().size());
+            assertThat(result.getList().size()).isEqualTo(0);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -169,7 +171,7 @@ public class ReduceDriverTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -261,7 +263,7 @@ public class ReduceDriverTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
     // --------------------------------------------------------------------------------------------

@@ -21,8 +21,7 @@ import org.apache.flink.api.java.tuple.Tuple;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ShufflePartitioner}. */
 public class ShufflePartitionerTest extends StreamPartitionerTest {
@@ -30,7 +29,7 @@ public class ShufflePartitionerTest extends StreamPartitionerTest {
     @Override
     public StreamPartitioner<Tuple> createPartitioner() {
         StreamPartitioner<Tuple> partitioner = new ShufflePartitioner<>();
-        assertFalse(partitioner.isBroadcast());
+        assertThat(partitioner.isBroadcast()).isFalse();
         return partitioner;
     }
 
@@ -39,11 +38,11 @@ public class ShufflePartitionerTest extends StreamPartitionerTest {
         assertSelectedChannelWithSetup(0, 1);
 
         streamPartitioner.setup(2);
-        assertTrue(0 <= streamPartitioner.selectChannel(serializationDelegate));
-        assertTrue(2 > streamPartitioner.selectChannel(serializationDelegate));
+        assertThat(0 <= streamPartitioner.selectChannel(serializationDelegate)).isTrue();
+        assertThat(2 > streamPartitioner.selectChannel(serializationDelegate)).isTrue();
 
         streamPartitioner.setup(1024);
-        assertTrue(0 <= streamPartitioner.selectChannel(serializationDelegate));
-        assertTrue(1024 > streamPartitioner.selectChannel(serializationDelegate));
+        assertThat(0 <= streamPartitioner.selectChannel(serializationDelegate)).isTrue();
+        assertThat(1024 > streamPartitioner.selectChannel(serializationDelegate)).isTrue();
     }
 }

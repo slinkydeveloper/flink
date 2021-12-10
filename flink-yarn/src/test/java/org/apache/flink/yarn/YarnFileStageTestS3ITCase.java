@@ -46,8 +46,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeNoException;
 
@@ -91,12 +90,12 @@ public class YarnFileStageTestS3ITCase extends TestLogger {
     @AfterClass
     public static void checkAtLeastOneTestRun() {
         if (!skipTest) {
-            assertThat(
-                    "No S3 filesystem upload test executed. Please activate the "
-                            + "'include_hadoop_aws' build profile or set '-Dinclude_hadoop_aws' during build "
-                            + "(Hadoop >= 2.6 moved S3 filesystems out of hadoop-common).",
-                    numRecursiveUploadTests,
-                    greaterThan(0));
+            assertThat(numRecursiveUploadTests)
+                    .as(
+                            "No S3 filesystem upload test executed. Please activate the "
+                                    + "'include_hadoop_aws' build profile or set '-Dinclude_hadoop_aws' during build "
+                                    + "(Hadoop >= 2.6 moved S3 filesystems out of hadoop-common).")
+                    .isGreaterThan(0);
         }
     }
 

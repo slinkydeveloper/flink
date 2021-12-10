@@ -18,12 +18,13 @@
 
 package org.apache.flink.util;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link IOUtils}. */
 public class IOUtilsTest extends TestLogger {
@@ -35,7 +36,7 @@ public class IOUtilsTest extends TestLogger {
         byte[] out = new byte[4];
         int read = IOUtils.tryReadFully(inputStream, out);
 
-        Assert.assertArrayEquals("test".getBytes(), Arrays.copyOfRange(out, 0, read));
+        assertThat(Arrays.copyOfRange(out, 0, read)).isEqualTo("test".getBytes());
     }
 
     @Test
@@ -45,6 +46,6 @@ public class IOUtilsTest extends TestLogger {
         byte[] out = new byte[4];
         int read = IOUtils.tryReadFully(inputStream, out);
 
-        Assert.assertArrayEquals("t".getBytes(), Arrays.copyOfRange(out, 0, read));
+        assertThat(Arrays.copyOfRange(out, 0, read)).isEqualTo("t".getBytes());
     }
 }

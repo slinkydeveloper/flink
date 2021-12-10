@@ -25,7 +25,7 @@ import org.junit.runners.Parameterized;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link ReflectionsUtil}. */
 @RunWith(Parameterized.class)
@@ -54,7 +54,7 @@ public class ReflectionsUtilTest {
         if (includingAbstractClass) {
             expected.add(TestAbstractClass.class);
         }
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Parameterized.Parameters(name = "includingInterface={0}, includingAbstractClass={1}")

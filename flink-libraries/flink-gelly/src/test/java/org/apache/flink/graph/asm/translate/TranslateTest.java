@@ -34,7 +34,7 @@ import org.junit.Test;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for translation of {@link Graph} IDs and values. */
 public class TranslateTest {
@@ -83,14 +83,14 @@ public class TranslateTest {
                 graph.translateGraphIds(new LongValueToStringValue());
 
         for (Vertex<StringValue, LongValue> vertex : stringIdGraph.getVertices().collect()) {
-            assertEquals(StringValue.class, vertex.f0.getClass());
-            assertEquals(LongValue.class, vertex.f1.getClass());
+            assertThat(vertex.f0.getClass()).isEqualTo(StringValue.class);
+            assertThat(vertex.f1.getClass()).isEqualTo(LongValue.class);
         }
 
         for (Edge<StringValue, LongValue> edge : stringIdGraph.getEdges().collect()) {
-            assertEquals(StringValue.class, edge.f0.getClass());
-            assertEquals(StringValue.class, edge.f1.getClass());
-            assertEquals(LongValue.class, edge.f2.getClass());
+            assertThat(edge.f0.getClass()).isEqualTo(StringValue.class);
+            assertThat(edge.f1.getClass()).isEqualTo(StringValue.class);
+            assertThat(edge.f2.getClass()).isEqualTo(LongValue.class);
         }
 
         TestBaseUtils.compareResultAsText(
@@ -104,8 +104,8 @@ public class TranslateTest {
                 graph.translateVertexValues(new LongValueToStringValue()).getVertices();
 
         for (Vertex<LongValue, StringValue> vertex : vertexSet.collect()) {
-            assertEquals(LongValue.class, vertex.f0.getClass());
-            assertEquals(StringValue.class, vertex.f1.getClass());
+            assertThat(vertex.f0.getClass()).isEqualTo(LongValue.class);
+            assertThat(vertex.f1.getClass()).isEqualTo(StringValue.class);
         }
 
         TestBaseUtils.compareResultAsText(vertexSet.collect(), expectedVertexResult);
@@ -117,9 +117,9 @@ public class TranslateTest {
                 graph.translateEdgeValues(new LongValueToStringValue()).getEdges();
 
         for (Edge<LongValue, StringValue> edge : edgeSet.collect()) {
-            assertEquals(LongValue.class, edge.f0.getClass());
-            assertEquals(LongValue.class, edge.f1.getClass());
-            assertEquals(StringValue.class, edge.f2.getClass());
+            assertThat(edge.f0.getClass()).isEqualTo(LongValue.class);
+            assertThat(edge.f1.getClass()).isEqualTo(LongValue.class);
+            assertThat(edge.f2.getClass()).isEqualTo(StringValue.class);
         }
 
         TestBaseUtils.compareResultAsText(edgeSet.collect(), expectedEdgeResult);

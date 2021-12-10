@@ -31,12 +31,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Tests for {@link KafkaCommitter}. */
 @ExtendWith({TestLoggerExtension.class})
@@ -60,8 +58,8 @@ public class KafkaCommitterTest {
                             new KafkaCommittable(PRODUCER_ID, EPOCH, TRANSACTIONAL_ID, recyclable));
             producer.resumeTransaction(PRODUCER_ID, EPOCH);
             List<KafkaCommittable> recovered = committer.commit(committables);
-            assertThat(recovered, contains(committables.toArray()));
-            assertThat(recyclable.isRecycled(), equalTo(false));
+            assertThat(recovered).satisfies(matching(contains(committables.toArray())));
+            assertThat(recyclable.isRecycled()).isEqualTo(false);
         }
     }
 
@@ -77,13 +75,12 @@ public class KafkaCommitterTest {
                     Collections.singletonList(
                             new KafkaCommittable(PRODUCER_ID, EPOCH, TRANSACTIONAL_ID, recyclable));
             // will fail because transaction not started
-            final FlinkRuntimeException exception =
-                    assertThrows(FlinkRuntimeException.class, () -> committer.commit(committables));
-            assertThat(exception.getCause(), instanceOf(IllegalStateException.class));
-            assertThat(
-                    exception.getCause().getMessage(),
-                    containsString("Transaction was not started"));
-            assertThat(recyclable.isRecycled(), equalTo(true));
+            assertThatThrownBy(() -> committer.commit(committables))
+                    .isInstanceOf(FlinkRuntimeException.class)
+                    .getCause()
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("Transaction was not started");
+            assertThat(recyclable.isRecycled()).isEqualTo(true);
         }
     }
 

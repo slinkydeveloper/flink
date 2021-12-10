@@ -34,7 +34,6 @@ import org.apache.flink.formats.avro.generated.User;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -46,6 +45,9 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link AvroInputFormat} reading Pojos. */
 @RunWith(Parameterized.class)
@@ -277,7 +279,7 @@ public class AvroTypeExtractionTest extends MultipleProgramsTestBase {
 
         // test if automatic registration of the Types worked
         ExecutionConfig ec = env.getConfig();
-        Assert.assertTrue(ec.getRegisteredKryoTypes().contains(Fixed16.class));
+        assertThat(ec.getRegisteredKryoTypes().contains(Fixed16.class)).isTrue();
 
         switch (fieldName) {
             case "name":
@@ -290,7 +292,7 @@ public class AvroTypeExtractionTest extends MultipleProgramsTestBase {
                 expected = "123.45\n1.337\n";
                 break;
             default:
-                Assert.fail("Unknown field");
+                fail("Unknown field");
                 break;
         }
 

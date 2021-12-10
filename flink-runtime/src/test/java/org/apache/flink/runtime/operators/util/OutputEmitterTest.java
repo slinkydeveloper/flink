@@ -40,16 +40,14 @@ import org.apache.flink.types.Record;
 import org.apache.flink.types.StringValue;
 import org.apache.flink.types.Value;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class OutputEmitterTest {
@@ -110,13 +108,13 @@ public class OutputEmitterTest {
         int totalHitCount = 0;
         for (int i = 0; i < hits.length; i++) {
             if (toTaskIndex <= i || i < toTaskIndex + extraRecords - numberOfChannels) {
-                assertTrue(hits[i] == (numRecords / numberOfChannels) + 1);
+                assertThat(hits[i] == (numRecords / numberOfChannels) + 1).isTrue();
             } else {
-                assertTrue(hits[i] == numRecords / numberOfChannels);
+                assertThat(hits[i] == numRecords / numberOfChannels).isTrue();
             }
             totalHitCount += hits[i];
         }
-        assertTrue(totalHitCount == numRecords);
+        assertThat(totalHitCount == numRecords).isTrue();
 
         toTaskIndex = numberOfChannels / 5;
         fromTaskIndex = toTaskIndex + 2 * numberOfChannels;
@@ -133,13 +131,13 @@ public class OutputEmitterTest {
         totalHitCount = 0;
         for (int i = 0; i < hits.length; i++) {
             if (toTaskIndex <= i && i < toTaskIndex + extraRecords) {
-                assertTrue(hits[i] == (numRecords / numberOfChannels) + 1);
+                assertThat(hits[i] == (numRecords / numberOfChannels) + 1).isTrue();
             } else {
-                assertTrue(hits[i] == numRecords / numberOfChannels);
+                assertThat(hits[i] == numRecords / numberOfChannels).isTrue();
             }
             totalHitCount += hits[i];
         }
-        assertTrue(totalHitCount == numRecords);
+        assertThat(totalHitCount == numRecords).isTrue();
     }
 
     @Test
@@ -179,23 +177,23 @@ public class OutputEmitterTest {
 
         int totalHitCount = 0;
         for (int hit : hits) {
-            assertTrue(hit > 0);
+            assertThat(hit > 0).isTrue();
             totalHitCount += hit;
         }
-        assertTrue(totalHitCount == numRecords);
+        assertThat(totalHitCount == numRecords).isTrue();
     }
 
     @Test
     public void testMissingKey() {
         if (!verifyWrongPartitionHashKey(1, 0)) {
-            Assert.fail("Expected a KeyFieldOutOfBoundsException.");
+            fail("Expected a KeyFieldOutOfBoundsException.");
         }
     }
 
     @Test
     public void testNullKey() {
         if (!verifyWrongPartitionHashKey(0, 1)) {
-            Assert.fail("Expected a NullKeyFieldException.");
+            fail("Expected a NullKeyFieldException.");
         }
     }
 
@@ -226,7 +224,7 @@ public class OutputEmitterTest {
         } catch (DeserializationException re) {
             return;
         }
-        Assert.fail("Expected a NullKeyFieldException.");
+        fail("Expected a NullKeyFieldException.");
     }
 
     private void verifyPartitionHashSelectedChannels(
@@ -237,10 +235,10 @@ public class OutputEmitterTest {
 
         int totalHitCount = 0;
         for (int hit : hits) {
-            assertTrue(hit > 0);
+            assertThat(hit > 0).isTrue();
             totalHitCount += hit;
         }
-        assertTrue(totalHitCount == numRecords);
+        assertThat(totalHitCount == numRecords).isTrue();
     }
 
     private void verifyForwardSelectedChannels(
@@ -249,9 +247,9 @@ public class OutputEmitterTest {
                 getSelectedChannelsHitCount(
                         ShipStrategyType.FORWARD, numRecords, numberOfChannels, recordType);
 
-        assertTrue(hits[0] == numRecords);
+        assertThat(hits[0] == numRecords).isTrue();
         for (int i = 1; i < hits.length; i++) {
-            assertTrue(hits[i] == 0);
+            assertThat(hits[i] == 0).isTrue();
         }
     }
 
@@ -283,7 +281,7 @@ public class OutputEmitterTest {
         try {
             selector.selectChannel(delegate);
         } catch (NullKeyFieldException re) {
-            Assert.assertEquals(position, re.getFieldNumber());
+            assertThat(re.getFieldNumber()).isEqualTo(position);
             return true;
         }
         return false;
@@ -316,7 +314,8 @@ public class OutputEmitterTest {
             ShipStrategyType shipStrategyType, TypeComparator comparator, int numberOfChannels) {
         final ChannelSelector selector = new OutputEmitter<>(shipStrategyType, comparator);
         selector.setup(numberOfChannels);
-        assertEquals(shipStrategyType == ShipStrategyType.BROADCAST, selector.isBroadcast());
+        assertThat(selector.isBroadcast())
+                .isEqualTo(shipStrategyType == ShipStrategyType.BROADCAST);
         return selector;
     }
 
@@ -351,7 +350,7 @@ public class OutputEmitterTest {
         serializationDelegate.setInstance(record);
         int selectedChannel = selector.selectChannel(serializationDelegate);
 
-        assertTrue(selectedChannel >= 0 && selectedChannel <= numberOfChannels - 1);
+        assertThat(selectedChannel >= 0 && selectedChannel <= numberOfChannels - 1).isTrue();
     }
 
     private static class TestIntComparator extends TypeComparator<Integer> {

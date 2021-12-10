@@ -22,9 +22,8 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link DefaultDeclareResourceRequirementServiceConnectionManager}. */
 public class AbstractServiceConnectionManagerTest extends TestLogger {
@@ -34,16 +33,16 @@ public class AbstractServiceConnectionManagerTest extends TestLogger {
         AbstractServiceConnectionManager<Object> connectionManager =
                 new TestServiceConnectionManager();
 
-        assertThat(connectionManager.isConnected(), is(false));
+        assertThat(connectionManager.isConnected()).isEqualTo(false);
 
         connectionManager.connect(new Object());
-        assertThat(connectionManager.isConnected(), is(true));
+        assertThat(connectionManager.isConnected()).isEqualTo(true);
 
         connectionManager.disconnect();
-        assertThat(connectionManager.isConnected(), is(false));
+        assertThat(connectionManager.isConnected()).isEqualTo(false);
 
         connectionManager.close();
-        assertThat(connectionManager.isConnected(), is(false));
+        assertThat(connectionManager.isConnected()).isEqualTo(false);
     }
 
     @Test

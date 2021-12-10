@@ -23,9 +23,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link MetricsFilterParameter}. */
 public class MetricsFilterParameterTest extends TestLogger {
@@ -39,12 +37,12 @@ public class MetricsFilterParameterTest extends TestLogger {
 
     @Test
     public void testIsOptionalParameter() {
-        assertFalse(metricsFilterParameter.isMandatory());
+        assertThat(metricsFilterParameter.isMandatory()).isFalse();
     }
 
     @Test
     public void testConversions() {
-        assertThat(metricsFilterParameter.convertValueToString("test"), equalTo("test"));
-        assertThat(metricsFilterParameter.convertStringToValue("test"), equalTo("test"));
+        assertThat(metricsFilterParameter.convertValueToString("test")).isEqualTo("test");
+        assertThat(metricsFilterParameter.convertStringToValue("test")).isEqualTo("test");
     }
 }

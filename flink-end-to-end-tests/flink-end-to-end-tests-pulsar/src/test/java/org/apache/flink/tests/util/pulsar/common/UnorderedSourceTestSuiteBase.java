@@ -38,7 +38,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /** A source test template for testing the messages which could be consumed in a unordered way. */
@@ -67,6 +68,6 @@ public abstract class UnorderedSourceTestSuiteBase<T> {
                         .executeAndCollect(
                                 "Source single split with four readers.", testData.size());
 
-        assertThat(results, containsInAnyOrder(testData.toArray()));
+        assertThat(results).satisfies(matching(containsInAnyOrder(testData.toArray())));
     }
 }

@@ -55,9 +55,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ElasticsearchSink}. */
 @ExtendWith(TestLoggerExtension.class)
@@ -116,9 +114,9 @@ abstract class ElasticsearchSinkBaseITCase {
             runTest(index, false, TestEmitter::jsonEmitter, deliveryGuarantee, null);
         } catch (IllegalStateException e) {
             failure = true;
-            assertSame(deliveryGuarantee, DeliveryGuarantee.EXACTLY_ONCE);
+            assertThat(DeliveryGuarantee.EXACTLY_ONCE).isSameAs(deliveryGuarantee);
         } finally {
-            assertEquals(failure, deliveryGuarantee == DeliveryGuarantee.EXACTLY_ONCE);
+            assertThat(deliveryGuarantee == DeliveryGuarantee.EXACTLY_ONCE).isEqualTo(failure);
         }
     }
 
@@ -136,7 +134,7 @@ abstract class ElasticsearchSinkBaseITCase {
     void testRecovery() throws Exception {
         final String index = "test-recovery-elasticsearch-sink";
         runTest(index, true, TestEmitter::jsonEmitter, new FailingMapper());
-        assertTrue(failed);
+        assertThat(failed).isTrue();
     }
 
     private void runTest(

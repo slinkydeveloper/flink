@@ -52,8 +52,8 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Collection;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Integration tests for {@link OperatorStateBackend}. */
 public class StateBackendITCase extends AbstractTestBase {
@@ -91,9 +91,10 @@ public class StateBackendITCase extends AbstractTestBase {
 
         try {
             see.execute();
-            fail();
+            fail("unknown failure");
         } catch (JobExecutionException e) {
-            assertTrue(ExceptionUtils.findThrowable(e, SuccessException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, SuccessException.class).isPresent())
+                    .isTrue();
         }
     }
 

@@ -34,11 +34,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DefaultJobTable}. */
 public class DefaultJobTableTest extends TestLogger {
@@ -66,8 +62,8 @@ public class DefaultJobTableTest extends TestLogger {
     public void getOrCreateJob_NoRegisteredJob_WillCreateNewJob() {
         final JobTable.Job newJob = jobTable.getOrCreateJob(jobId, DEFAULT_JOB_SERVICES_SUPPLIER);
 
-        assertThat(newJob.getJobId(), is(jobId));
-        assertTrue(jobTable.getJob(jobId).isPresent());
+        assertThat(newJob.getJobId()).isEqualTo(jobId);
+        assertThat(jobTable.getJob(jobId).isPresent()).isTrue();
     }
 
     @Test
@@ -75,7 +71,7 @@ public class DefaultJobTableTest extends TestLogger {
         final JobTable.Job newJob = jobTable.getOrCreateJob(jobId, DEFAULT_JOB_SERVICES_SUPPLIER);
         final JobTable.Job otherJob = jobTable.getOrCreateJob(jobId, DEFAULT_JOB_SERVICES_SUPPLIER);
 
-        assertThat(otherJob, sameInstance(newJob));
+        assertThat(otherJob).isSameAs(newJob);
     }
 
     @Test
@@ -98,7 +94,7 @@ public class DefaultJobTableTest extends TestLogger {
 
         job.close();
 
-        assertFalse(jobTable.getJob(jobId).isPresent());
+        assertThat(jobTable.getJob(jobId).isPresent()).isFalse();
     }
 
     @Test
@@ -108,10 +104,10 @@ public class DefaultJobTableTest extends TestLogger {
         final ResourceID resourceId = ResourceID.generate();
         final JobTable.Connection connection = connectJob(job, resourceId);
 
-        assertThat(connection.getJobId(), is(jobId));
-        assertThat(connection.getResourceId(), is(resourceId));
-        assertTrue(jobTable.getConnection(jobId).isPresent());
-        assertTrue(jobTable.getConnection(resourceId).isPresent());
+        assertThat(connection.getJobId()).isEqualTo(jobId);
+        assertThat(connection.getResourceId()).isEqualTo(resourceId);
+        assertThat(jobTable.getConnection(jobId).isPresent()).isTrue();
+        assertThat(jobTable.getConnection(resourceId).isPresent()).isTrue();
     }
 
     private JobTable.Connection connectJob(JobTable.Job job, ResourceID resourceId) {
@@ -142,8 +138,8 @@ public class DefaultJobTableTest extends TestLogger {
 
         connection.disconnect();
 
-        assertFalse(jobTable.getConnection(jobId).isPresent());
-        assertFalse(jobTable.getConnection(resourceId).isPresent());
+        assertThat(jobTable.getConnection(jobId).isPresent()).isFalse();
+        assertThat(jobTable.getConnection(resourceId).isPresent()).isFalse();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -193,6 +189,6 @@ public class DefaultJobTableTest extends TestLogger {
         jobTable.close();
 
         shutdownLibraryCacheManagerLatch.await();
-        assertTrue(jobTable.isEmpty());
+        assertThat(jobTable.isEmpty()).isTrue();
     }
 }

@@ -28,7 +28,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SourceFunction}. */
 public class SourceFunctionTest {
@@ -41,7 +41,7 @@ public class SourceFunctionTest {
                         CommonTestUtils.createCopySerializable(
                                 new FromElementsFunction<Integer>(
                                         IntSerializer.INSTANCE, 1, 2, 3)));
-        assertEquals(expectedList, actualList);
+        assertThat(actualList).isEqualTo(expectedList);
     }
 
     @Test
@@ -52,6 +52,6 @@ public class SourceFunctionTest {
                         CommonTestUtils.createCopySerializable(
                                 new FromElementsFunction<Integer>(
                                         IntSerializer.INSTANCE, Arrays.asList(1, 2, 3))));
-        assertEquals(expectedList, actualList);
+        assertThat(actualList).isEqualTo(expectedList);
     }
 }

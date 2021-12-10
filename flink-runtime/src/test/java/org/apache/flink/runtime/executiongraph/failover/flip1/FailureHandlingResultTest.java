@@ -27,13 +27,8 @@ import org.junit.Test;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.IsSame.sameInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link FailureHandlingResult}. */
 public class FailureHandlingResultTest extends TestLogger {
@@ -52,13 +47,13 @@ public class FailureHandlingResultTest extends TestLogger {
                 FailureHandlingResult.restartable(
                         executionVertexID, error, timestamp, tasks, delay, false);
 
-        assertTrue(result.canRestart());
-        assertEquals(delay, result.getRestartDelayMS());
-        assertEquals(tasks, result.getVerticesToRestart());
-        assertThat(result.getError(), sameInstance(error));
-        assertThat(result.getTimestamp(), is(timestamp));
-        assertTrue(result.getExecutionVertexIdOfFailedTask().isPresent());
-        assertThat(result.getExecutionVertexIdOfFailedTask().get(), is(executionVertexID));
+        assertThat(result.canRestart()).isTrue();
+        assertThat(result.getRestartDelayMS()).isEqualTo(delay);
+        assertThat(result.getVerticesToRestart()).isEqualTo(tasks);
+        assertThat(result.getError()).isSameAs(error);
+        assertThat(result.getTimestamp()).isEqualTo(timestamp);
+        assertThat(result.getExecutionVertexIdOfFailedTask().isPresent()).isTrue();
+        assertThat(result.getExecutionVertexIdOfFailedTask().get()).isEqualTo(executionVertexID);
     }
 
     /** Tests FailureHandlingResult which suppresses restarts. */
@@ -70,10 +65,10 @@ public class FailureHandlingResultTest extends TestLogger {
         FailureHandlingResult result =
                 FailureHandlingResult.unrecoverable(null, error, timestamp, false);
 
-        assertFalse(result.canRestart());
-        assertThat(result.getError(), sameInstance(error));
-        assertThat(result.getTimestamp(), is(timestamp));
-        assertFalse(result.getExecutionVertexIdOfFailedTask().isPresent());
+        assertThat(result.canRestart()).isFalse();
+        assertThat(result.getError()).isSameAs(error);
+        assertThat(result.getTimestamp()).isEqualTo(timestamp);
+        assertThat(result.getExecutionVertexIdOfFailedTask().isPresent()).isFalse();
         try {
             result.getVerticesToRestart();
             fail("get tasks to restart is not allowed when restarting is suppressed");

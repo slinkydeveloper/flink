@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.Random;
 
 import static org.apache.flink.runtime.io.network.netty.NettyTestUtil.encodeAndDecode;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the serialization and deserialization of the various {@link NettyMessage} sub-classes
@@ -70,10 +70,10 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
 
         NettyMessage.PartitionRequest actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.partitionId, actual.partitionId);
-        assertEquals(expected.queueIndex, actual.queueIndex);
-        assertEquals(expected.receiverId, actual.receiverId);
-        assertEquals(expected.credit, actual.credit);
+        assertThat(actual.partitionId).isEqualTo(expected.partitionId);
+        assertThat(actual.queueIndex).isEqualTo(expected.queueIndex);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
+        assertThat(actual.credit).isEqualTo(expected.credit);
     }
 
     @Test
@@ -85,9 +85,9 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
                         new InputChannelID());
         NettyMessage.TaskEventRequest actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.event, actual.event);
-        assertEquals(expected.partitionId, actual.partitionId);
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.event).isEqualTo(expected.event);
+        assertThat(actual.partitionId).isEqualTo(expected.partitionId);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
                 new NettyMessage.CancelPartitionRequest(new InputChannelID());
         NettyMessage.CancelPartitionRequest actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
         NettyMessage.CloseRequest expected = new NettyMessage.CloseRequest();
         NettyMessage.CloseRequest actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.getClass(), actual.getClass());
+        assertThat(actual.getClass()).isEqualTo(expected.getClass());
     }
 
     @Test
@@ -114,8 +114,8 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
                         random.nextInt(Integer.MAX_VALUE) + 1, new InputChannelID());
         NettyMessage.AddCredit actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.credit, actual.credit);
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.credit).isEqualTo(expected.credit);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
                 new NettyMessage.ResumeConsumption(new InputChannelID());
         NettyMessage.ResumeConsumption actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
                 new NettyMessage.AckAllUserRecordsProcessed(new InputChannelID());
         NettyMessage.AckAllUserRecordsProcessed actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 
     @Test
@@ -143,7 +143,7 @@ public class NettyMessageServerSideSerializationTest extends TestLogger {
                         random.nextInt(Integer.MAX_VALUE), new InputChannelID());
         NettyMessage.NewBufferSize actual = encodeAndDecode(expected, channel);
 
-        assertEquals(expected.bufferSize, actual.bufferSize);
-        assertEquals(expected.receiverId, actual.receiverId);
+        assertThat(actual.bufferSize).isEqualTo(expected.bufferSize);
+        assertThat(actual.receiverId).isEqualTo(expected.receiverId);
     }
 }

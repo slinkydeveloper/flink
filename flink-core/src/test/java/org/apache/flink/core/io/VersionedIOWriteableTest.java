@@ -25,10 +25,12 @@ import org.apache.flink.core.memory.DataInputViewStreamWrapper;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.DataOutputViewStreamWrapper;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class VersionedIOWriteableTest {
 
@@ -49,7 +51,7 @@ public class VersionedIOWriteableTest {
             testWriteable.read(new DataInputViewStreamWrapper(in));
         }
 
-        Assert.assertEquals(payload, testWriteable.getData());
+        assertThat(testWriteable.getData()).isEqualTo(payload);
     }
 
     @Test
@@ -75,7 +77,7 @@ public class VersionedIOWriteableTest {
             testWriteable.read(new DataInputViewStreamWrapper(in));
         }
 
-        Assert.assertEquals(payload, testWriteable.getData());
+        assertThat(testWriteable.getData()).isEqualTo(payload);
     }
 
     @Test
@@ -93,12 +95,12 @@ public class VersionedIOWriteableTest {
         testWriteable = new TestWriteable(2);
         try (ByteArrayInputStreamWithPos in = new ByteArrayInputStreamWithPos(serialized)) {
             testWriteable.read(new DataInputViewStreamWrapper(in));
-            Assert.fail("Version mismatch expected.");
+            fail("Version mismatch expected.");
         } catch (VersionMismatchException ignored) {
 
         }
 
-        Assert.assertEquals(null, testWriteable.getData());
+        assertThat(testWriteable.getData()).isEqualTo(null);
     }
 
     static class TestWriteable extends VersionedIOReadableWritable {

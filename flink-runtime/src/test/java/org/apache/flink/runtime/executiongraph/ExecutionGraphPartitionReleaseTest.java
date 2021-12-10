@@ -41,10 +41,10 @@ import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * Tests for the interactions of the {@link ExecutionGraph} and {@link
@@ -91,7 +91,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     sourceExecution.getAttemptId(), ExecutionState.FINISHED));
-                    assertThat(releasedPartitions, empty());
+                    assertThat(releasedPartitions).satisfies(matching(empty()));
                 });
 
         mainThreadExecutor.execute(
@@ -103,10 +103,9 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     operatorExecution.getAttemptId(), ExecutionState.FINISHED));
-                    assertThat(releasedPartitions, hasSize(1));
-                    assertThat(
-                            releasedPartitions.remove(),
-                            equalTo(
+                    assertThat(releasedPartitions).satisfies(matching(hasSize(1)));
+                    assertThat(releasedPartitions.remove())
+                            .isEqualTo(
                                     new ResultPartitionID(
                                             sourceExecution
                                                     .getVertex()
@@ -114,7 +113,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                                                     .keySet()
                                                     .iterator()
                                                     .next(),
-                                            sourceExecution.getAttemptId())));
+                                            sourceExecution.getAttemptId()));
                 });
 
         mainThreadExecutor.execute(
@@ -125,11 +124,9 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     sinkExecution.getAttemptId(), ExecutionState.FINISHED));
-
-                    assertThat(releasedPartitions, hasSize(1));
-                    assertThat(
-                            releasedPartitions.remove(),
-                            equalTo(
+                    assertThat(releasedPartitions).satisfies(matching(hasSize(1)));
+                    assertThat(releasedPartitions.remove())
+                            .isEqualTo(
                                     new ResultPartitionID(
                                             operatorExecution
                                                     .getVertex()
@@ -137,7 +134,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                                                     .keySet()
                                                     .iterator()
                                                     .next(),
-                                            operatorExecution.getAttemptId())));
+                                            operatorExecution.getAttemptId()));
                 });
     }
 
@@ -183,7 +180,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     sourceExecution.getAttemptId(), ExecutionState.FINISHED));
-                    assertThat(releasedPartitions, empty());
+                    assertThat(releasedPartitions).satisfies(matching(empty()));
                 });
 
         mainThreadExecutor.execute(
@@ -201,7 +198,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     operator1Execution.getAttemptId(), ExecutionState.FINISHED));
-                    assertThat(releasedPartitions, empty());
+                    assertThat(releasedPartitions).satisfies(matching(empty()));
                 });
 
         mainThreadExecutor.execute(
@@ -213,7 +210,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     operator2Execution.getAttemptId(), ExecutionState.FINISHED));
-                    assertThat(releasedPartitions, empty());
+                    assertThat(releasedPartitions).satisfies(matching(empty()));
                 });
 
         mainThreadExecutor.execute(
@@ -222,7 +219,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                             getCurrentExecution(operator2Vertex, executionGraph);
                     // reset o2
                     operator2Execution.getVertex().resetForNewExecution();
-                    assertThat(releasedPartitions, empty());
+                    assertThat(releasedPartitions).satisfies(matching(empty()));
                 });
 
         mainThreadExecutor.execute(
@@ -233,7 +230,7 @@ public class ExecutionGraphPartitionReleaseTest extends TestLogger {
                     scheduler.updateTaskExecutionState(
                             new TaskExecutionState(
                                     operator3Execution.getAttemptId(), ExecutionState.FINISHED));
-                    assertThat(releasedPartitions, empty());
+                    assertThat(releasedPartitions).satisfies(matching(empty()));
                 });
     }
 

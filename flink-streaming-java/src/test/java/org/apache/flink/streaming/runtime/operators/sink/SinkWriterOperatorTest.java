@@ -50,11 +50,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.fromOutput;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /** Test stateful and stateless {@link SinkWriterStateHandler} in {@link SinkOperator}. */
 @RunWith(Parameterized.class)
@@ -82,12 +81,17 @@ public class SinkWriterOperatorTest extends TestLogger {
         testHarness.prepareSnapshotPreBarrier(1L);
         testHarness.snapshot(1L, 1L);
 
-        assertThat(
-                fromOutput(testHarness.getOutput()),
-                contains(
-                        new Watermark(initialTime),
-                        new StreamRecord<>(Tuple3.of(1, initialTime + 1, initialTime).toString()),
-                        new StreamRecord<>(Tuple3.of(2, initialTime + 2, initialTime).toString())));
+        assertThat(fromOutput(testHarness.getOutput()))
+                .satisfies(
+                        matching(
+                                contains(
+                                        new Watermark(initialTime),
+                                        new StreamRecord<>(
+                                                Tuple3.of(1, initialTime + 1, initialTime)
+                                                        .toString()),
+                                        new StreamRecord<>(
+                                                Tuple3.of(2, initialTime + 2, initialTime)
+                                                        .toString()))));
     }
 
     @Test
@@ -104,12 +108,17 @@ public class SinkWriterOperatorTest extends TestLogger {
 
         testHarness.endInput();
 
-        assertThat(
-                fromOutput(testHarness.getOutput()),
-                contains(
-                        new Watermark(initialTime),
-                        new StreamRecord<>(Tuple3.of(1, initialTime + 1, initialTime).toString()),
-                        new StreamRecord<>(Tuple3.of(2, initialTime + 2, initialTime).toString())));
+        assertThat(fromOutput(testHarness.getOutput()))
+                .satisfies(
+                        matching(
+                                contains(
+                                        new Watermark(initialTime),
+                                        new StreamRecord<>(
+                                                Tuple3.of(1, initialTime + 1, initialTime)
+                                                        .toString()),
+                                        new StreamRecord<>(
+                                                Tuple3.of(2, initialTime + 2, initialTime)
+                                                        .toString()))));
     }
 
     @Test
@@ -127,7 +136,8 @@ public class SinkWriterOperatorTest extends TestLogger {
         testHarness.prepareSnapshotPreBarrier(1L);
         testHarness.snapshot(1L, 1L);
 
-        assertThat(fromOutput(testHarness.getOutput()), contains(new Watermark(initialTime)));
+        assertThat(fromOutput(testHarness.getOutput()))
+                .satisfies(matching(contains(new Watermark(initialTime))));
     }
 
     @Test
@@ -144,12 +154,17 @@ public class SinkWriterOperatorTest extends TestLogger {
 
         testHarness.endInput();
 
-        assertThat(
-                fromOutput(testHarness.getOutput()),
-                contains(
-                        new Watermark(initialTime),
-                        new StreamRecord<>(Tuple3.of(1, initialTime + 1, initialTime).toString()),
-                        new StreamRecord<>(Tuple3.of(2, initialTime + 2, initialTime).toString())));
+        assertThat(fromOutput(testHarness.getOutput()))
+                .satisfies(
+                        matching(
+                                contains(
+                                        new Watermark(initialTime),
+                                        new StreamRecord<>(
+                                                Tuple3.of(1, initialTime + 1, initialTime)
+                                                        .toString()),
+                                        new StreamRecord<>(
+                                                Tuple3.of(2, initialTime + 2, initialTime)
+                                                        .toString()))));
     }
 
     @Test
@@ -167,20 +182,23 @@ public class SinkWriterOperatorTest extends TestLogger {
 
         testHarness.prepareSnapshotPreBarrier(1L);
 
-        assertThat(testHarness.getOutput().size(), equalTo(0));
+        assertThat(testHarness.getOutput().size()).isEqualTo(0);
 
         testHarness.getProcessingTimeService().setCurrentTime(2001);
 
         testHarness.prepareSnapshotPreBarrier(2L);
         testHarness.endInput();
 
-        assertThat(
-                fromOutput(testHarness.getOutput()),
-                contains(
-                        new StreamRecord<>(
-                                Tuple3.of(1, initialTime + 1, Long.MIN_VALUE).toString()),
-                        new StreamRecord<>(
-                                Tuple3.of(2, initialTime + 2, Long.MIN_VALUE).toString())));
+        assertThat(fromOutput(testHarness.getOutput()))
+                .satisfies(
+                        matching(
+                                contains(
+                                        new StreamRecord<>(
+                                                Tuple3.of(1, initialTime + 1, Long.MIN_VALUE)
+                                                        .toString()),
+                                        new StreamRecord<>(
+                                                Tuple3.of(2, initialTime + 2, Long.MIN_VALUE)
+                                                        .toString()))));
     }
 
     @Test
@@ -195,14 +213,20 @@ public class SinkWriterOperatorTest extends TestLogger {
         testHarness.processWatermark(initialTime);
         testHarness.processWatermark(initialTime + 1);
 
-        assertThat(
-                fromOutput(testHarness.getOutput()),
-                contains(new Watermark(initialTime), new Watermark(initialTime + 1)));
-        assertThat(
-                writer.watermarks,
-                contains(
-                        new org.apache.flink.api.common.eventtime.Watermark(initialTime),
-                        new org.apache.flink.api.common.eventtime.Watermark(initialTime + 1)));
+        assertThat(fromOutput(testHarness.getOutput()))
+                .satisfies(
+                        matching(
+                                contains(
+                                        new Watermark(initialTime),
+                                        new Watermark(initialTime + 1))));
+        assertThat(writer.watermarks)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new org.apache.flink.api.common.eventtime.Watermark(
+                                                initialTime),
+                                        new org.apache.flink.api.common.eventtime.Watermark(
+                                                initialTime + 1))));
     }
 
     @Test
@@ -223,10 +247,10 @@ public class SinkWriterOperatorTest extends TestLogger {
         OperatorSubtaskState snapshot = testHarness.snapshot(1L, 1L);
 
         // we only see the watermark, so the committables must be stored in state
-        assertThat(testHarness.getOutput(), contains(new Watermark(initialTime)));
-        assertThat(
-                snapshottingWriter.lastCheckpointId,
-                equalTo(stateful ? 1L : SnapshottingBufferingSinkWriter.NOT_SNAPSHOTTED));
+        assertThat(testHarness.getOutput())
+                .satisfies(matching(contains(new Watermark(initialTime))));
+        assertThat(snapshottingWriter.lastCheckpointId)
+                .isEqualTo(stateful ? 1L : SnapshottingBufferingSinkWriter.NOT_SNAPSHOTTED);
 
         testHarness.close();
 
@@ -247,7 +271,7 @@ public class SinkWriterOperatorTest extends TestLogger {
             expectedOutput.add(
                     new StreamRecord<>(Tuple3.of(2, initialTime + 2, initialTime).toString()));
         }
-        assertThat(fromOutput(restoredTestHarness.getOutput()), equalTo(expectedOutput));
+        assertThat(fromOutput(restoredTestHarness.getOutput())).isEqualTo(expectedOutput);
     }
 
     @Test
@@ -292,9 +316,8 @@ public class SinkWriterOperatorTest extends TestLogger {
 
         compatibleWriterOperator.close();
 
-        assertThat(
-                fromOutput(compatibleWriterOperator.getOutput()),
-                containsInAnyOrder(expectedOutput1.toArray()));
+        assertThat(fromOutput(compatibleWriterOperator.getOutput()))
+                .satisfies(matching(containsInAnyOrder(expectedOutput1.toArray())));
 
         // 3. Restore the sink without previous sink's state
         final OneInputStreamOperatorTestHarness<Integer, byte[]> restoredSinkOperator =
@@ -314,9 +337,8 @@ public class SinkWriterOperatorTest extends TestLogger {
         // this will flush out the committables that were restored
         restoredSinkOperator.endInput();
 
-        assertThat(
-                fromOutput(restoredSinkOperator.getOutput()),
-                containsInAnyOrder(expectedOutput2.toArray()));
+        assertThat(fromOutput(restoredSinkOperator.getOutput()))
+                .satisfies(matching(containsInAnyOrder(expectedOutput2.toArray())));
     }
 
     @Test
@@ -334,18 +356,22 @@ public class SinkWriterOperatorTest extends TestLogger {
 
         testHarness.prepareSnapshotPreBarrier(1L);
         // Expect that preCommit was called
-        assertTrue(writer.hasReceivedPreCommit());
+        assertThat(writer.hasReceivedPreCommit()).isTrue();
         testHarness.snapshot(1L, 1L);
 
-        assertThat(
-                writer.getElements(),
-                contains(
-                        Tuple3.of(1, initialTime + 1, initialTime).toString(),
-                        Tuple3.of(2, initialTime + 2, initialTime).toString()));
+        assertThat(writer.getElements())
+                .satisfies(
+                        matching(
+                                contains(
+                                        Tuple3.of(1, initialTime + 1, initialTime).toString(),
+                                        Tuple3.of(2, initialTime + 2, initialTime).toString())));
 
-        assertThat(
-                writer.getWatermarks(),
-                contains(new org.apache.flink.api.common.eventtime.Watermark(initialTime)));
+        assertThat(writer.getWatermarks())
+                .satisfies(
+                        matching(
+                                contains(
+                                        new org.apache.flink.api.common.eventtime.Watermark(
+                                                initialTime))));
     }
 
     private static class PreBarrierSinkWriter extends TestSink.DefaultSinkWriter<Integer> {

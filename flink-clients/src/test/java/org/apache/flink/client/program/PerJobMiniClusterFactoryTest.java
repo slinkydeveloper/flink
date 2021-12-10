@@ -35,10 +35,9 @@ import org.junit.Test;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /** Tests for {@link PerJobMiniClusterFactory}. */
 public class PerJobMiniClusterFactoryTest extends TestLogger {
@@ -62,10 +61,10 @@ public class PerJobMiniClusterFactoryTest extends TestLogger {
                         .get();
 
         JobExecutionResult jobExecutionResult = jobClient.getJobExecutionResult().get();
-        assertThat(jobExecutionResult, is(notNullValue()));
+        assertThat(jobExecutionResult).isEqualTo(notNullValue());
 
         Map<String, Object> actual = jobClient.getAccumulators().get();
-        assertThat(actual, is(notNullValue()));
+        assertThat(actual).isEqualTo(notNullValue());
 
         assertThatMiniClusterIsShutdown();
     }
@@ -80,15 +79,14 @@ public class PerJobMiniClusterFactoryTest extends TestLogger {
                         .submitJob(cancellableJobGraph, ClassLoader.getSystemClassLoader())
                         .get();
 
-        assertThat(jobClient.getJobID(), is(cancellableJobGraph.getJobID()));
-        assertThat(jobClient.getJobStatus().get(), is(JobStatus.RUNNING));
+        assertThat(jobClient.getJobID()).isEqualTo(cancellableJobGraph.getJobID());
+        assertThat(jobClient.getJobStatus().get()).isEqualTo(JobStatus.RUNNING);
 
         jobClient.cancel().get();
 
-        assertThrows(
-                "Job was cancelled.",
-                ExecutionException.class,
-                () -> jobClient.getJobExecutionResult().get());
+        assertThatThrownBy(() -> jobClient.getJobExecutionResult().get())
+                .as("Job was cancelled.")
+                .isInstanceOf(ExecutionException.class);
 
         assertThatMiniClusterIsShutdown();
     }
@@ -101,15 +99,13 @@ public class PerJobMiniClusterFactoryTest extends TestLogger {
                         .submitJob(getCancellableJobGraph(), ClassLoader.getSystemClassLoader())
                         .get();
 
-        assertThrows(
-                "is not a streaming job.",
-                ExecutionException.class,
-                () -> jobClient.triggerSavepoint(null).get());
+        assertThatThrownBy(() -> jobClient.triggerSavepoint(null).get())
+                .as("is not a streaming job.")
+                .isInstanceOf(ExecutionException.class);
 
-        assertThrows(
-                "is not a streaming job.",
-                ExecutionException.class,
-                () -> jobClient.stopWithSavepoint(true, null).get());
+        assertThatThrownBy(() -> jobClient.stopWithSavepoint(true, null).get())
+                .as("is not a streaming job.")
+                .isInstanceOf(ExecutionException.class);
     }
 
     @Test
@@ -143,10 +139,9 @@ public class PerJobMiniClusterFactoryTest extends TestLogger {
         jobClient.getJobExecutionResult().get();
         assertThatMiniClusterIsShutdown();
 
-        assertThrows(
-                "MiniCluster is not yet running or has already been shut down.",
-                IllegalStateException.class,
-                jobClient::cancel);
+        assertThatThrownBy(jobClient::cancel)
+                .as("MiniCluster is not yet running or has already been shut down.")
+                .isInstanceOf(IllegalStateException.class);
     }
 
     private PerJobMiniClusterFactory initializeMiniCluster() {
@@ -159,7 +154,7 @@ public class PerJobMiniClusterFactoryTest extends TestLogger {
     }
 
     private void assertThatMiniClusterIsShutdown() {
-        assertThat(miniCluster.isRunning(), is(false));
+        assertThat(miniCluster.isRunning()).isEqualTo(false);
     }
 
     private static JobGraph getNoopJobGraph() {

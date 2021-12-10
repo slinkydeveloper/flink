@@ -28,9 +28,7 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the SocketStreamIterator.
@@ -81,14 +79,14 @@ public class SocketStreamIteratorTest {
 
         final Random validator = new Random(seed);
         for (int i = 0; i < numElements; i++) {
-            assertTrue(iterator.hasNext());
-            assertTrue(iterator.hasNext());
-            assertEquals(validator.nextLong(), iterator.next().longValue());
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.hasNext()).isTrue();
+            assertThat(iterator.next().longValue()).isEqualTo(validator.nextLong());
         }
 
-        assertFalse(iterator.hasNext());
+        assertThat(iterator.hasNext()).isFalse();
         writer.join();
-        assertFalse(iterator.hasNext());
+        assertThat(iterator.hasNext()).isFalse();
     }
 
     @Test
@@ -112,7 +110,7 @@ public class SocketStreamIteratorTest {
         try {
             iterator.hasNext();
         } catch (Exception e) {
-            assertTrue(e.getCause().getMessage().contains("test"));
+            assertThat(e.getCause().getMessage().contains("test")).isTrue();
         }
     }
 }

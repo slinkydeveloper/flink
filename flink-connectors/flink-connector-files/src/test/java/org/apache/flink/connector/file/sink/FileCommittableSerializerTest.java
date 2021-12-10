@@ -26,7 +26,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the serialization and deserialization for {@link FileSinkCommittable}. */
 public class FileCommittableSerializerTest {
@@ -38,10 +38,9 @@ public class FileCommittableSerializerTest {
         FileSinkCommittable committable =
                 new FileSinkCommittable(new FileSinkTestUtils.TestPendingFileRecoverable());
         FileSinkCommittable deserialized = serializeAndDeserialize(committable);
-        assertEquals(committable.getPendingFile(), deserialized.getPendingFile());
-        assertEquals(
-                committable.getInProgressFileToCleanup(),
-                deserialized.getInProgressFileToCleanup());
+        assertThat(deserialized.getPendingFile()).isEqualTo(committable.getPendingFile());
+        assertThat(deserialized.getInProgressFileToCleanup())
+                .isEqualTo(committable.getInProgressFileToCleanup());
     }
 
     @Test
@@ -49,10 +48,9 @@ public class FileCommittableSerializerTest {
         FileSinkCommittable committable =
                 new FileSinkCommittable(new FileSinkTestUtils.TestInProgressFileRecoverable());
         FileSinkCommittable deserialized = serializeAndDeserialize(committable);
-        assertEquals(committable.getPendingFile(), deserialized.getPendingFile());
-        assertEquals(
-                committable.getInProgressFileToCleanup(),
-                deserialized.getInProgressFileToCleanup());
+        assertThat(deserialized.getPendingFile()).isEqualTo(committable.getPendingFile());
+        assertThat(deserialized.getInProgressFileToCleanup())
+                .isEqualTo(committable.getInProgressFileToCleanup());
     }
 
     private FileSinkCommittable serializeAndDeserialize(FileSinkCommittable committable)

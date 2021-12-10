@@ -44,7 +44,7 @@ import java.util.List;
 import static org.apache.flink.table.runtime.util.StreamRecordUtils.deleteRecord;
 import static org.apache.flink.table.runtime.util.StreamRecordUtils.insertRecord;
 import static org.apache.flink.table.runtime.util.StreamRecordUtils.rowOfKind;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link SinkUpsertMaterializer}. */
 public class SinkUpsertMaterializerTest {
@@ -105,12 +105,12 @@ public class SinkUpsertMaterializerTest {
     }
 
     private void shouldEmitNothing(OneInputStreamOperatorTestHarness<RowData, RowData> harness) {
-        assertEquals(Collections.emptyList(), getEmittedRows(harness));
+        assertThat(getEmittedRows(harness)).isEqualTo(Collections.emptyList());
     }
 
     private void shouldEmit(
             OneInputStreamOperatorTestHarness<RowData, RowData> harness, RowData expected) {
-        assertEquals(Collections.singletonList(expected), getEmittedRows(harness));
+        assertThat(getEmittedRows(harness)).isEqualTo(Collections.singletonList(expected));
     }
 
     private static List<RowData> getEmittedRows(

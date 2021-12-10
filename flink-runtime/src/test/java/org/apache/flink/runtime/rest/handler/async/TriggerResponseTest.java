@@ -21,9 +21,8 @@ package org.apache.flink.runtime.rest.handler.async;
 import org.apache.flink.runtime.rest.messages.RestResponseMarshallingTestBase;
 import org.apache.flink.runtime.rest.messages.TriggerId;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Marshalling test for {@link TriggerResponse}. */
 public class TriggerResponseTest extends RestResponseMarshallingTestBase<TriggerResponse> {
@@ -41,6 +40,6 @@ public class TriggerResponseTest extends RestResponseMarshallingTestBase<Trigger
     @Override
     protected void assertOriginalEqualsToUnmarshalled(
             TriggerResponse expected, TriggerResponse actual) {
-        assertThat(actual.getTriggerId(), is(equalTo(expected.getTriggerId())));
+        assertThat(actual.getTriggerId()).isEqualTo(equalTo(expected.getTriggerId()));
     }
 }

@@ -42,14 +42,10 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link DefaultSlotStatusSyncer}. */
 public class DefaultSlotStatusSyncerTest extends TestLogger {
@@ -102,19 +98,16 @@ public class DefaultSlotStatusSyncerTest extends TestLogger {
                         "address",
                         ResourceProfile.ANY);
         final AllocationID allocationId = requestFuture.get().f2;
-        assertThat(
-                resourceTracker.getAcquiredResources(jobId),
-                contains(ResourceRequirement.create(ResourceProfile.ANY, 1)));
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId).isPresent());
-        assertThat(
-                taskManagerTracker.getAllocatedOrPendingSlot(allocationId).get().getJobId(),
-                is(jobId));
-        assertThat(
-                taskManagerTracker.getAllocatedOrPendingSlot(allocationId).get().getState(),
-                is(SlotState.PENDING));
+        assertThat(resourceTracker.getAcquiredResources(jobId))
+                .satisfies(matching(contains(ResourceRequirement.create(ResourceProfile.ANY, 1))));
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId).isPresent()).isTrue();
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId).get().getJobId())
+                .isEqualTo(jobId);
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId).get().getState())
+                .isEqualTo(SlotState.PENDING);
 
         responseFuture.complete(Acknowledge.get());
-        assertFalse(allocatedFuture.isCompletedExceptionally());
+        assertThat(allocatedFuture.isCompletedExceptionally()).isFalse();
     }
 
     @Test
@@ -151,16 +144,16 @@ public class DefaultSlotStatusSyncerTest extends TestLogger {
         try {
             allocatedFuture.get();
         } catch (Exception e) {
-            assertThat(e.getCause(), instanceOf(TimeoutException.class));
+            assertThat(e.getCause()).isInstanceOf(TimeoutException.class);
         }
-        assertThat(resourceTracker.getAcquiredResources(jobId), is(empty()));
+        assertThat(resourceTracker.getAcquiredResources(jobId)).isEqualTo(empty());
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
-                        .get()
-                        .getAllocatedSlots()
-                        .keySet(),
-                is(empty()));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
+                                .get()
+                                .getAllocatedSlots()
+                                .keySet())
+                .isEqualTo(empty());
     }
 
     @Test
@@ -188,14 +181,14 @@ public class DefaultSlotStatusSyncerTest extends TestLogger {
         resourceTracker.notifyAcquiredResource(jobId, ResourceProfile.ANY);
 
         slotStatusSyncer.freeSlot(allocationId);
-        assertThat(resourceTracker.getAcquiredResources(jobId), is(empty()));
+        assertThat(resourceTracker.getAcquiredResources(jobId)).isEqualTo(empty());
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .get()
-                        .getAllocatedSlots()
-                        .keySet(),
-                is(empty()));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .get()
+                                .getAllocatedSlots()
+                                .keySet())
+                .isEqualTo(empty());
     }
 
     @Test
@@ -238,29 +231,29 @@ public class DefaultSlotStatusSyncerTest extends TestLogger {
         taskManagerTracker.addTaskManager(taskExecutorConnection, totalResource, totalResource);
 
         slotStatusSyncer.reportSlotStatus(taskExecutorConnection.getInstanceID(), slotReport1);
+        assertThat(resourceTracker.getAcquiredResources(jobId))
+                .satisfies(matching(contains(ResourceRequirement.create(resource, 2))));
         assertThat(
-                resourceTracker.getAcquiredResources(jobId),
-                contains(ResourceRequirement.create(resource, 2)));
-        assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                equalTo(ResourceProfile.fromResources(3, 12)));
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent());
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent());
+                        taskManagerTracker
+                                .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(3, 12));
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent())
+                .isTrue();
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent())
+                .isTrue();
 
         slotStatusSyncer.allocateSlot(
                 taskExecutorConnection.getInstanceID(), jobId, "address", resource);
+        assertThat(resourceTracker.getAcquiredResources(jobId))
+                .satisfies(matching(contains(ResourceRequirement.create(resource, 3))));
         assertThat(
-                resourceTracker.getAcquiredResources(jobId),
-                contains(ResourceRequirement.create(resource, 3)));
-        assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                equalTo(ResourceProfile.fromResources(2, 8)));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(2, 8));
         final AllocationID allocationId3 =
                 taskManagerTracker.getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
                         .get().getAllocatedSlots().keySet().stream()
@@ -274,23 +267,23 @@ public class DefaultSlotStatusSyncerTest extends TestLogger {
         // allocationId1 should still be allocated; allocationId2 should be freed; allocationId3
         // should continue to be in a pending state;
         slotStatusSyncer.reportSlotStatus(taskExecutorConnection.getInstanceID(), slotReport2);
+        assertThat(resourceTracker.getAcquiredResources(jobId))
+                .satisfies(matching(contains(ResourceRequirement.create(resource, 2))));
         assertThat(
-                resourceTracker.getAcquiredResources(jobId),
-                contains(ResourceRequirement.create(resource, 2)));
-        assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                equalTo(ResourceProfile.fromResources(3, 12)));
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent());
-        assertFalse(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent());
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId3).isPresent());
-        assertThat(
-                taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).get().getState(),
-                is(SlotState.ALLOCATED));
-        assertThat(
-                taskManagerTracker.getAllocatedOrPendingSlot(allocationId3).get().getState(),
-                is(SlotState.PENDING));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(taskExecutorConnection.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(3, 12));
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent())
+                .isTrue();
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent())
+                .isFalse();
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId3).isPresent())
+                .isTrue();
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).get().getState())
+                .isEqualTo(SlotState.ALLOCATED);
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId3).get().getState())
+                .isEqualTo(SlotState.PENDING);
     }
 }

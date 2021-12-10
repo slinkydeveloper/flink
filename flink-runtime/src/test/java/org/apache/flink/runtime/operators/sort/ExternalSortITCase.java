@@ -38,11 +38,13 @@ import org.apache.flink.util.MutableObjectIterator;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ExternalSortITCase extends TestLogger {
 
@@ -90,9 +92,9 @@ public class ExternalSortITCase extends TestLogger {
         this.ioManager.close();
 
         if (this.memoryManager != null && testSuccess) {
-            Assert.assertTrue(
-                    "Memory leak: not all segments have been returned to the memory manager.",
-                    this.memoryManager.verifyEmpty());
+            assertThat(this.memoryManager.verifyEmpty())
+                    .as("Memory leak: not all segments have been returned to the memory manager.")
+                    .isTrue();
             this.memoryManager.shutdown();
             this.memoryManager = null;
         }
@@ -140,23 +142,23 @@ public class ExternalSortITCase extends TestLogger {
             Tuple2<Integer, String> rec1 = new Tuple2<>();
             Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-            Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+            assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
             while ((rec2 = iterator.next(rec2)) != null) {
                 pairsEmitted++;
 
-                Assert.assertTrue(keyComparator.compare(rec1.f0, rec2.f0) <= 0);
+                assertThat(keyComparator.compare(rec1.f0, rec2.f0) <= 0).isTrue();
 
                 Tuple2<Integer, String> tmp = rec1;
                 rec1 = rec2;
                 rec2 = tmp;
             }
-            Assert.assertTrue(NUM_PAIRS == pairsEmitted);
+            assertThat(NUM_PAIRS == pairsEmitted).isTrue();
 
             merger.close();
             testSuccess = true;
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -201,23 +203,23 @@ public class ExternalSortITCase extends TestLogger {
             Tuple2<Integer, String> rec1 = new Tuple2<>();
             Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-            Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+            assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
             while ((rec2 = iterator.next(rec2)) != null) {
                 pairsEmitted++;
 
-                Assert.assertTrue(keyComparator.compare(rec1.f0, rec2.f0) <= 0);
+                assertThat(keyComparator.compare(rec1.f0, rec2.f0) <= 0).isTrue();
 
                 Tuple2<Integer, String> tmp = rec1;
                 rec1 = rec2;
                 rec2 = tmp;
             }
-            Assert.assertTrue(NUM_PAIRS == pairsEmitted);
+            assertThat(NUM_PAIRS == pairsEmitted).isTrue();
 
             merger.close();
             testSuccess = true;
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -261,23 +263,23 @@ public class ExternalSortITCase extends TestLogger {
             Tuple2<Integer, String> rec1 = new Tuple2<>();
             Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-            Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+            assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
             while ((rec2 = iterator.next(rec2)) != null) {
                 pairsEmitted++;
 
-                Assert.assertTrue(keyComparator.compare(rec1.f0, rec2.f0) <= 0);
+                assertThat(keyComparator.compare(rec1.f0, rec2.f0) <= 0).isTrue();
 
                 Tuple2<Integer, String> tmp = rec1;
                 rec1 = rec2;
                 rec2 = tmp;
             }
-            Assert.assertTrue(NUM_PAIRS == pairsEmitted);
+            assertThat(NUM_PAIRS == pairsEmitted).isTrue();
 
             merger.close();
             testSuccess = true;
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -325,11 +327,11 @@ public class ExternalSortITCase extends TestLogger {
             Tuple2<Integer, String> rec1 = new Tuple2<>();
             Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-            Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+            assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
             while ((rec2 = iterator.next(rec2)) != null) {
                 pairsRead++;
 
-                Assert.assertTrue(keyComparator.compare(rec1.f0, rec2.f0) <= 0);
+                assertThat(keyComparator.compare(rec1.f0, rec2.f0) <= 0).isTrue();
 
                 Tuple2<Integer, String> tmp = rec1;
                 rec1 = rec2;
@@ -340,12 +342,12 @@ public class ExternalSortITCase extends TestLogger {
                     nextStep += PAIRS / 20;
                 }
             }
-            Assert.assertEquals("Not all pairs were read back in.", PAIRS, pairsRead);
+            assertThat(pairsRead).as("Not all pairs were read back in.").isEqualTo(PAIRS);
             merger.close();
             testSuccess = true;
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -391,14 +393,14 @@ public class ExternalSortITCase extends TestLogger {
             IntPair rec1 = new IntPair();
             IntPair rec2 = new IntPair();
 
-            Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+            assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
 
             while ((rec2 = iterator.next(rec2)) != null) {
                 final int k1 = rec1.getKey();
                 final int k2 = rec2.getKey();
                 pairsRead++;
 
-                Assert.assertTrue(k1 - k2 <= 0);
+                assertThat(k1 - k2 <= 0).isTrue();
 
                 IntPair tmp = rec1;
                 rec1 = rec2;
@@ -409,12 +411,12 @@ public class ExternalSortITCase extends TestLogger {
                     nextStep += PAIRS / 20;
                 }
             }
-            Assert.assertEquals("Not all pairs were read back in.", PAIRS, pairsRead);
+            assertThat(pairsRead).as("Not all pairs were read back in.").isEqualTo(PAIRS);
             merger.close();
             testSuccess = true;
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 }

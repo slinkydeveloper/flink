@@ -40,10 +40,9 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /** Unit test base class for subclasses of {@link AbstractMetricsHandler}. */
@@ -109,13 +108,13 @@ public abstract class MetricsHandlerTestBase<T extends AbstractMetricsHandler> e
                                 Collections.emptyList()),
                         mockDispatcherGateway);
 
-        assertTrue(completableFuture.isDone());
+        assertThat(completableFuture.isDone()).isTrue();
 
         final MetricCollectionResponseBody metricCollectionResponseBody = completableFuture.get();
-        assertThat(metricCollectionResponseBody.getMetrics(), hasSize(1));
+        assertThat(metricCollectionResponseBody.getMetrics()).satisfies(matching(hasSize(1)));
 
         final Metric metric = metricCollectionResponseBody.getMetrics().iterator().next();
-        assertThat(metric.getId(), equalTo(getExpectedIdForMetricName(TEST_METRIC_NAME)));
+        assertThat(metric.getId()).isEqualTo(getExpectedIdForMetricName(TEST_METRIC_NAME));
     }
 
     /** Returns instance under test. */

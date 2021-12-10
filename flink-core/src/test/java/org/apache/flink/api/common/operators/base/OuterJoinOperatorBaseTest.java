@@ -43,8 +43,7 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("serial")
 public class OuterJoinOperatorBaseTest implements Serializable {
@@ -247,11 +246,11 @@ public class OuterJoinOperatorBaseTest implements Serializable {
                 baseOperator.executeOnCollections(
                         leftInput, rightInput, runtimeContext, executionConfig);
 
-        assertEquals(expected, resultSafe);
-        assertEquals(expected, resultRegular);
+        assertThat(resultSafe).isEqualTo(expected);
+        assertThat(resultRegular).isEqualTo(expected);
 
-        assertTrue(joiner.opened.get());
-        assertTrue(joiner.closed.get());
+        assertThat(joiner.opened.get()).isTrue();
+        assertThat(joiner.closed.get()).isTrue();
     }
 
     private static class MockRichFlatJoinFunction
@@ -262,8 +261,8 @@ public class OuterJoinOperatorBaseTest implements Serializable {
         @Override
         public void open(Configuration parameters) throws Exception {
             opened.compareAndSet(false, true);
-            assertEquals(0, getRuntimeContext().getIndexOfThisSubtask());
-            assertEquals(1, getRuntimeContext().getNumberOfParallelSubtasks());
+            assertThat(getRuntimeContext().getIndexOfThisSubtask()).isEqualTo(0);
+            assertThat(getRuntimeContext().getNumberOfParallelSubtasks()).isEqualTo(1);
         }
 
         @Override

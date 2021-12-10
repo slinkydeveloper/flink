@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.util.Random;
 
 import static org.apache.flink.formats.avro.utils.AvroTestUtils.writeRecord;
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link AvroDeserializationSchema}. */
 public class AvroSerializationSchemaTest {
@@ -44,7 +44,7 @@ public class AvroSerializationSchemaTest {
 
         byte[] encodedAddress = writeRecord(address, Address.getClassSchema());
         byte[] dataSerialized = serializationSchema.serialize(address);
-        assertArrayEquals(encodedAddress, dataSerialized);
+        assertThat(dataSerialized).isEqualTo(encodedAddress);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class AvroSerializationSchemaTest {
 
         byte[] encodedAddress = writeRecord(address, Address.getClassSchema());
         byte[] serializedAddress = serializer.serialize(address);
-        assertArrayEquals(encodedAddress, serializedAddress);
+        assertThat(serializedAddress).isEqualTo(encodedAddress);
     }
 
     @Test
@@ -66,6 +66,6 @@ public class AvroSerializationSchemaTest {
 
         byte[] encodedData = writeRecord(data);
         byte[] serializedData = serializer.serialize(data);
-        assertArrayEquals(encodedData, serializedData);
+        assertThat(serializedData).isEqualTo(encodedData);
     }
 }

@@ -23,8 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link ScaleUpController}. */
 public class ScaleUpControllerTest extends TestLogger {
@@ -37,12 +36,12 @@ public class ScaleUpControllerTest extends TestLogger {
     @Test
     public void testScaleUp() {
         ScaleUpController suc = new ReactiveScaleUpController(TEST_CONFIG);
-        assertThat(suc.canScaleUp(1, 4), is(true));
+        assertThat(suc.canScaleUp(1, 4)).isEqualTo(true);
     }
 
     @Test
     public void testNoScaleUp() {
         ScaleUpController suc = new ReactiveScaleUpController(TEST_CONFIG);
-        assertThat(suc.canScaleUp(2, 3), is(false));
+        assertThat(suc.canScaleUp(2, 3)).isEqualTo(false);
     }
 }

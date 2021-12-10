@@ -43,15 +43,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link MetricGroup}. */
 public class MetricGroupTest extends TestLogger {
@@ -84,9 +77,9 @@ public class MetricGroupTest extends TestLogger {
         MetricGroup subgroup1 = group.addGroup(groupName);
         MetricGroup subgroup2 = group.addGroup(groupName);
 
-        assertNotNull(subgroup1);
-        assertNotNull(subgroup2);
-        assertTrue(subgroup1 == subgroup2);
+        assertThat(subgroup1).isNotNull();
+        assertThat(subgroup2).isNotNull();
+        assertThat(subgroup1 == subgroup2).isTrue();
     }
 
     /** Verifies the basic behavior when defining user-defined variables. */
@@ -101,16 +94,20 @@ public class MetricGroupTest extends TestLogger {
         MetricGroup group = root.addGroup(key, value);
 
         String variableValue = group.getAllVariables().get(ScopeFormat.asVariable("key"));
-        assertEquals(value, variableValue);
+        assertThat(variableValue).isEqualTo(value);
 
         String identifier = group.getMetricIdentifier("metric");
-        assertTrue("Key is missing from metric identifier.", identifier.contains("key"));
-        assertTrue("Value is missing from metric identifier.", identifier.contains("value"));
+        assertThat(identifier.contains("key"))
+                .as("Key is missing from metric identifier.")
+                .isTrue();
+        assertThat(identifier.contains("value"))
+                .as("Value is missing from metric identifier.")
+                .isTrue();
 
         String logicalScope =
                 ((AbstractMetricGroup) group).getLogicalScope(new DummyCharacterFilter());
-        assertTrue("Key is missing from logical scope.", logicalScope.contains(key));
-        assertFalse("Value is present in logical scope.", logicalScope.contains(value));
+        assertThat(logicalScope.contains(key)).as("Key is missing from logical scope.").isTrue();
+        assertThat(logicalScope.contains(value)).as("Value is present in logical scope.").isFalse();
     }
 
     /**
@@ -132,18 +129,26 @@ public class MetricGroupTest extends TestLogger {
         MetricGroup group = root.addGroup(key1).addGroup(key2, value2);
 
         String variableValue = group.getAllVariables().get("value2");
-        assertNull(variableValue);
+        assertThat(variableValue).isNull();
 
         String identifier = group.getMetricIdentifier("metric");
-        assertTrue("Key1 is missing from metric identifier.", identifier.contains("key1"));
-        assertTrue("Key2 is missing from metric identifier.", identifier.contains("key2"));
-        assertTrue("Value2 is missing from metric identifier.", identifier.contains("value2"));
+        assertThat(identifier.contains("key1"))
+                .as("Key1 is missing from metric identifier.")
+                .isTrue();
+        assertThat(identifier.contains("key2"))
+                .as("Key2 is missing from metric identifier.")
+                .isTrue();
+        assertThat(identifier.contains("value2"))
+                .as("Value2 is missing from metric identifier.")
+                .isTrue();
 
         String logicalScope =
                 ((AbstractMetricGroup) group).getLogicalScope(new DummyCharacterFilter());
-        assertTrue("Key1 is missing from logical scope.", logicalScope.contains(key1));
-        assertTrue("Key2 is missing from logical scope.", logicalScope.contains(key2));
-        assertTrue("Value2 is missing from logical scope.", logicalScope.contains(value2));
+        assertThat(logicalScope.contains(key1)).as("Key1 is missing from logical scope.").isTrue();
+        assertThat(logicalScope.contains(key2)).as("Key2 is missing from logical scope.").isTrue();
+        assertThat(logicalScope.contains(value2))
+                .as("Value2 is missing from logical scope.")
+                .isTrue();
     }
 
     /**
@@ -163,16 +168,22 @@ public class MetricGroupTest extends TestLogger {
         MetricGroup group = root.addGroup(key, value);
 
         String variableValue = group.getAllVariables().get(ScopeFormat.asVariable("key"));
-        assertNull(variableValue);
+        assertThat(variableValue).isNull();
 
         String identifier = group.getMetricIdentifier("metric");
-        assertTrue("Key is missing from metric identifier.", identifier.contains("key"));
-        assertTrue("Value is missing from metric identifier.", identifier.contains("value"));
+        assertThat(identifier.contains("key"))
+                .as("Key is missing from metric identifier.")
+                .isTrue();
+        assertThat(identifier.contains("value"))
+                .as("Value is missing from metric identifier.")
+                .isTrue();
 
         String logicalScope =
                 ((AbstractMetricGroup) group).getLogicalScope(new DummyCharacterFilter());
-        assertTrue("Key is missing from logical scope.", logicalScope.contains(key));
-        assertTrue("Value is missing from logical scope.", logicalScope.contains(value));
+        assertThat(logicalScope.contains(key)).as("Key is missing from logical scope.").isTrue();
+        assertThat(logicalScope.contains(value))
+                .as("Value is missing from logical scope.")
+                .isTrue();
     }
 
     /**
@@ -192,16 +203,22 @@ public class MetricGroupTest extends TestLogger {
         MetricGroup group = root.addGroup(key, value);
 
         String variableValue = group.getAllVariables().get(ScopeFormat.asVariable("key"));
-        assertNull(variableValue);
+        assertThat(variableValue).isNull();
 
         String identifier = group.getMetricIdentifier("metric");
-        assertTrue("Key is missing from metric identifier.", identifier.contains("key"));
-        assertTrue("Value is missing from metric identifier.", identifier.contains("value"));
+        assertThat(identifier.contains("key"))
+                .as("Key is missing from metric identifier.")
+                .isTrue();
+        assertThat(identifier.contains("value"))
+                .as("Value is missing from metric identifier.")
+                .isTrue();
 
         String logicalScope =
                 ((AbstractMetricGroup) group).getLogicalScope(new DummyCharacterFilter());
-        assertTrue("Key is missing from logical scope.", logicalScope.contains(key));
-        assertTrue("Value is missing from logical scope.", logicalScope.contains(value));
+        assertThat(logicalScope.contains(key)).as("Key is missing from logical scope.").isTrue();
+        assertThat(logicalScope.contains(value))
+                .as("Value is missing from logical scope.")
+                .isTrue();
     }
 
     /**
@@ -221,16 +238,20 @@ public class MetricGroupTest extends TestLogger {
         MetricGroup group = root.addGroup(key).addGroup(value);
 
         String variableValue = group.getAllVariables().get(ScopeFormat.asVariable("key"));
-        assertEquals(value, variableValue);
+        assertThat(variableValue).isEqualTo(value);
 
         String identifier = group.getMetricIdentifier("metric");
-        assertTrue("Key is missing from metric identifier.", identifier.contains("key"));
-        assertTrue("Value is missing from metric identifier.", identifier.contains("value"));
+        assertThat(identifier.contains("key"))
+                .as("Key is missing from metric identifier.")
+                .isTrue();
+        assertThat(identifier.contains("value"))
+                .as("Value is missing from metric identifier.")
+                .isTrue();
 
         String logicalScope =
                 ((AbstractMetricGroup) group).getLogicalScope(new DummyCharacterFilter());
-        assertTrue("Key is missing from logical scope.", logicalScope.contains(key));
-        assertFalse("Value is present in logical scope.", logicalScope.contains(value));
+        assertThat(logicalScope.contains(key)).as("Key is missing from logical scope.").isTrue();
+        assertThat(logicalScope.contains(value)).as("Value is present in logical scope.").isFalse();
     }
 
     /**
@@ -262,9 +283,8 @@ public class MetricGroupTest extends TestLogger {
                     ((AbstractMetricGroup) group)
                             .getLogicalScope(
                                     new DummyCharacterFilter(), registry.getDelimiter(), 0);
-            assertThat("Key is missing from logical scope.", logicalScope, containsString(key));
-            assertThat(
-                    "Value is present in logical scope.", logicalScope, not(containsString(value)));
+            assertThat(logicalScope).as("Key is missing from logical scope.").contains(key);
+            assertThat(logicalScope).as("Value is present in logical scope.").doesNotContain(value);
         } finally {
             registry.shutdown().get();
         }
@@ -277,10 +297,10 @@ public class MetricGroupTest extends TestLogger {
                         exceptionOnRegister,
                         new DummyAbstractMetricGroup(exceptionOnRegister),
                         "testgroup");
-        assertFalse(group.isClosed());
+        assertThat(group.isClosed()).isFalse();
 
         group.close();
-        assertTrue(group.isClosed());
+        assertThat(group.isClosed()).isTrue();
 
         // these will fail is the registration is propagated
         group.counter("testcounter");
@@ -301,13 +321,13 @@ public class MetricGroupTest extends TestLogger {
                         exceptionOnRegister,
                         new DummyAbstractMetricGroup(exceptionOnRegister),
                         "testgroup");
-        assertFalse(group.isClosed());
+        assertThat(group.isClosed()).isFalse();
 
         group.close();
-        assertTrue(group.isClosed());
+        assertThat(group.isClosed()).isTrue();
 
         AbstractMetricGroup subgroup = (AbstractMetricGroup) group.addGroup("test subgroup");
-        assertTrue(subgroup.isClosed());
+        assertThat(subgroup.isClosed()).isTrue();
     }
 
     @Test
@@ -317,8 +337,8 @@ public class MetricGroupTest extends TestLogger {
                 new GenericMetricGroup(
                         registry, new DummyAbstractMetricGroup(registry), "testgroup");
 
-        assertNotNull(group.counter(name));
-        assertNotNull(group.counter(name));
+        assertThat(group.counter(name)).isNotNull();
+        assertThat(group.counter(name)).isNotNull();
     }
 
     @Test
@@ -328,8 +348,8 @@ public class MetricGroupTest extends TestLogger {
                 new GenericMetricGroup(
                         registry, new DummyAbstractMetricGroup(registry), "testgroup");
 
-        assertNotNull(group.addGroup(name));
-        assertNotNull(group.counter(name));
+        assertThat(group.addGroup(name)).isNotNull();
+        assertThat(group.counter(name)).isNotNull();
     }
 
     @Test
@@ -349,18 +369,18 @@ public class MetricGroupTest extends TestLogger {
         QueryScopeInfo.TaskQueryScopeInfo info1 =
                 (QueryScopeInfo.TaskQueryScopeInfo)
                         userGroup1.createQueryServiceMetricInfo(new DummyCharacterFilter());
-        assertEquals("hello", info1.scope);
-        assertEquals(jid.toString(), info1.jobID);
-        assertEquals(vid.toString(), info1.vertexID);
-        assertEquals(4, info1.subtaskIndex);
+        assertThat(info1.scope).isEqualTo("hello");
+        assertThat(info1.jobID).isEqualTo(jid.toString());
+        assertThat(info1.vertexID).isEqualTo(vid.toString());
+        assertThat(info1.subtaskIndex).isEqualTo(4);
 
         QueryScopeInfo.TaskQueryScopeInfo info2 =
                 (QueryScopeInfo.TaskQueryScopeInfo)
                         userGroup2.createQueryServiceMetricInfo(new DummyCharacterFilter());
-        assertEquals("hello.world", info2.scope);
-        assertEquals(jid.toString(), info2.jobID);
-        assertEquals(vid.toString(), info2.vertexID);
-        assertEquals(4, info2.subtaskIndex);
+        assertThat(info2.scope).isEqualTo("hello.world");
+        assertThat(info2.jobID).isEqualTo(jid.toString());
+        assertThat(info2.vertexID).isEqualTo(vid.toString());
+        assertThat(info2.subtaskIndex).isEqualTo(4);
     }
 
     // ------------------------------------------------------------------------

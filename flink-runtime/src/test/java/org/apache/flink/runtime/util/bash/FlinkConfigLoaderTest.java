@@ -30,8 +30,7 @@ import java.io.File;
 import java.io.FileWriter;
 
 import static org.apache.flink.configuration.ConfigOptions.key;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FlinkConfigLoader}. */
 public class FlinkConfigLoaderTest extends TestLogger {
@@ -97,6 +96,6 @@ public class FlinkConfigLoaderTest extends TestLogger {
 
     private void verifyConfiguration(Configuration config, String key, String expectedValue) {
         ConfigOption<String> option = key(key).stringType().noDefaultValue();
-        assertThat(config.get(option), is(expectedValue));
+        assertThat(config.get(option)).isEqualTo(expectedValue);
     }
 }

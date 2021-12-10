@@ -53,8 +53,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.futureWillCompleteExceptionally;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Test for the (failure handling of the) delivery of Operator Events. */
 public class TaskExecutorOperatorEventHandlingTest extends TestLogger {
@@ -95,11 +95,13 @@ public class TaskExecutorOperatorEventHandlingTest extends TestLogger {
                     tmGateway.sendOperatorEventToTask(
                             eid, new OperatorID(), new SerializedValue<>(new TestOperatorEvent()));
 
-            assertThat(
-                    resultFuture,
-                    futureWillCompleteExceptionally(FlinkException.class, Duration.ofSeconds(10)));
-            assertEquals(
-                    ExecutionState.FAILED, env.getTaskSlotTable().getTask(eid).getExecutionState());
+            assertThat(resultFuture)
+                    .satisfies(
+                            matching(
+                                    futureWillCompleteExceptionally(
+                                            FlinkException.class, Duration.ofSeconds(10))));
+            assertThat(env.getTaskSlotTable().getTask(eid).getExecutionState())
+                    .isEqualTo(ExecutionState.FAILED);
         }
     }
 
@@ -113,7 +115,7 @@ public class TaskExecutorOperatorEventHandlingTest extends TestLogger {
             final Task task = env.getTaskSlotTable().getTask(eid);
 
             task.getExecutingThread().join(10_000);
-            assertEquals(ExecutionState.FAILED, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
         }
     }
 

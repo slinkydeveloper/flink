@@ -37,7 +37,7 @@ import java.util.List;
 import static org.apache.flink.cep.utils.NFATestUtilities.comparePatterns;
 import static org.apache.flink.cep.utils.NFATestUtilities.feedNFA;
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for handling Events that are equal in case of {@link Object#equals(Object)} and have same
@@ -198,8 +198,8 @@ public class SameElementITCase extends TestLogger {
         comparePatterns(
                 resultingPatterns,
                 Lists.<List<Event>>newArrayList(Lists.newArrayList(a1, b1, c1, d)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("a", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("a");
     }
 
     @Test
@@ -259,8 +259,8 @@ public class SameElementITCase extends TestLogger {
                         Lists.newArrayList(a1, d1, d2, d3),
                         Lists.newArrayList(a1, d1, d2),
                         Lists.newArrayList(a1, d1)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("a", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("a");
     }
 
     @Test

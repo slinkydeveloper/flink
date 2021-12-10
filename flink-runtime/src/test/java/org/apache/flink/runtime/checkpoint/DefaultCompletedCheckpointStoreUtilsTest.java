@@ -38,8 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests related to {@link DefaultCompletedCheckpointStoreUtils}. */
 public class DefaultCompletedCheckpointStoreUtilsTest extends TestLogger {
@@ -108,11 +108,11 @@ public class DefaultCompletedCheckpointStoreUtilsTest extends TestLogger {
                 DefaultCompletedCheckpointStoreUtils.retrieveCompletedCheckpoints(
                         stateHandleStore, new SimpleCheckpointStoreUtil());
         // Make sure checkpoints are ordered from earliest to latest.
-        assertEquals(
-                Arrays.asList(0L, 1L, 2L),
-                completedCheckpoints.stream()
-                        .map(CompletedCheckpoint::getCheckpointID)
-                        .collect(Collectors.toList()));
+        assertThat(
+                        completedCheckpoints.stream()
+                                .map(CompletedCheckpoint::getCheckpointID)
+                                .collect(Collectors.toList()))
+                .isEqualTo(Arrays.asList(0L, 1L, 2L));
     }
 
     @Test
@@ -129,10 +129,10 @@ public class DefaultCompletedCheckpointStoreUtilsTest extends TestLogger {
                 TestingStateHandleStore.<CompletedCheckpoint>newBuilder()
                         .setGetAllSupplier(() -> handles)
                         .build();
-        assertThrows(
-                FlinkException.class,
-                () ->
-                        DefaultCompletedCheckpointStoreUtils.retrieveCompletedCheckpoints(
-                                stateHandleStore, new SimpleCheckpointStoreUtil()));
+        assertThatThrownBy(
+                        () ->
+                                DefaultCompletedCheckpointStoreUtils.retrieveCompletedCheckpoints(
+                                        stateHandleStore, new SimpleCheckpointStoreUtil()))
+                .isInstanceOf(FlinkException.class);
     }
 }

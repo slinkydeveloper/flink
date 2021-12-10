@@ -44,10 +44,7 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link AvroSchemaConverter}. */
 public class AvroSchemaConverterTest {
@@ -104,14 +101,13 @@ public class AvroSchemaConverterTest {
                         null,
                         DecoderFactory.get()
                                 .binaryDecoder(serializedRecord, 0, serializedRecord.length, null));
-        assertThat(
-                newRecord,
-                equalTo(
+        assertThat(newRecord)
+                .isEqualTo(
                         new GenericRecordBuilder(newSchema)
                                 .set("category_id", 1L)
                                 .set("name", "test")
                                 .set("description", null)
-                                .build()));
+                                .build());
     }
 
     @Test
@@ -185,57 +181,57 @@ public class AvroSchemaConverterTest {
                                 .toRowDataType()
                                 .getLogicalType();
         Schema schema = AvroSchemaConverter.convertToSchema(rowType);
-        assertEquals(
-                "{\n"
-                        + "  \"type\" : \"record\",\n"
-                        + "  \"name\" : \"record\",\n"
-                        + "  \"fields\" : [ {\n"
-                        + "    \"name\" : \"row1\",\n"
-                        + "    \"type\" : [ \"null\", {\n"
-                        + "      \"type\" : \"record\",\n"
-                        + "      \"name\" : \"record_row1\",\n"
-                        + "      \"fields\" : [ {\n"
-                        + "        \"name\" : \"a\",\n"
-                        + "        \"type\" : [ \"null\", \"string\" ],\n"
-                        + "        \"default\" : null\n"
-                        + "      } ]\n"
-                        + "    } ],\n"
-                        + "    \"default\" : null\n"
-                        + "  }, {\n"
-                        + "    \"name\" : \"row2\",\n"
-                        + "    \"type\" : [ \"null\", {\n"
-                        + "      \"type\" : \"record\",\n"
-                        + "      \"name\" : \"record_row2\",\n"
-                        + "      \"fields\" : [ {\n"
-                        + "        \"name\" : \"b\",\n"
-                        + "        \"type\" : [ \"null\", \"string\" ],\n"
-                        + "        \"default\" : null\n"
-                        + "      } ]\n"
-                        + "    } ],\n"
-                        + "    \"default\" : null\n"
-                        + "  }, {\n"
-                        + "    \"name\" : \"row3\",\n"
-                        + "    \"type\" : [ \"null\", {\n"
-                        + "      \"type\" : \"record\",\n"
-                        + "      \"name\" : \"record_row3\",\n"
-                        + "      \"fields\" : [ {\n"
-                        + "        \"name\" : \"row3\",\n"
-                        + "        \"type\" : [ \"null\", {\n"
-                        + "          \"type\" : \"record\",\n"
-                        + "          \"name\" : \"record_row3_row3\",\n"
-                        + "          \"fields\" : [ {\n"
-                        + "            \"name\" : \"c\",\n"
-                        + "            \"type\" : [ \"null\", \"string\" ],\n"
-                        + "            \"default\" : null\n"
-                        + "          } ]\n"
-                        + "        } ],\n"
-                        + "        \"default\" : null\n"
-                        + "      } ]\n"
-                        + "    } ],\n"
-                        + "    \"default\" : null\n"
-                        + "  } ]\n"
-                        + "}",
-                schema.toString(true));
+        assertThat(schema.toString(true))
+                .isEqualTo(
+                        "{\n"
+                                + "  \"type\" : \"record\",\n"
+                                + "  \"name\" : \"record\",\n"
+                                + "  \"fields\" : [ {\n"
+                                + "    \"name\" : \"row1\",\n"
+                                + "    \"type\" : [ \"null\", {\n"
+                                + "      \"type\" : \"record\",\n"
+                                + "      \"name\" : \"record_row1\",\n"
+                                + "      \"fields\" : [ {\n"
+                                + "        \"name\" : \"a\",\n"
+                                + "        \"type\" : [ \"null\", \"string\" ],\n"
+                                + "        \"default\" : null\n"
+                                + "      } ]\n"
+                                + "    } ],\n"
+                                + "    \"default\" : null\n"
+                                + "  }, {\n"
+                                + "    \"name\" : \"row2\",\n"
+                                + "    \"type\" : [ \"null\", {\n"
+                                + "      \"type\" : \"record\",\n"
+                                + "      \"name\" : \"record_row2\",\n"
+                                + "      \"fields\" : [ {\n"
+                                + "        \"name\" : \"b\",\n"
+                                + "        \"type\" : [ \"null\", \"string\" ],\n"
+                                + "        \"default\" : null\n"
+                                + "      } ]\n"
+                                + "    } ],\n"
+                                + "    \"default\" : null\n"
+                                + "  }, {\n"
+                                + "    \"name\" : \"row3\",\n"
+                                + "    \"type\" : [ \"null\", {\n"
+                                + "      \"type\" : \"record\",\n"
+                                + "      \"name\" : \"record_row3\",\n"
+                                + "      \"fields\" : [ {\n"
+                                + "        \"name\" : \"row3\",\n"
+                                + "        \"type\" : [ \"null\", {\n"
+                                + "          \"type\" : \"record\",\n"
+                                + "          \"name\" : \"record_row3_row3\",\n"
+                                + "          \"fields\" : [ {\n"
+                                + "            \"name\" : \"c\",\n"
+                                + "            \"type\" : [ \"null\", \"string\" ],\n"
+                                + "            \"default\" : null\n"
+                                + "          } ]\n"
+                                + "        } ],\n"
+                                + "        \"default\" : null\n"
+                                + "      } ]\n"
+                                + "    } ],\n"
+                                + "    \"default\" : null\n"
+                                + "  } ]\n"
+                                + "}");
     }
 
     /** Test convert nullable data type to Avro schema then converts back. */
@@ -271,7 +267,7 @@ public class AvroSchemaConverterTest {
                         DataTypes.FIELD("f_array", DataTypes.ARRAY(DataTypes.INT())));
         Schema schema = AvroSchemaConverter.convertToSchema(dataType.getLogicalType());
         DataType converted = AvroSchemaConverter.convertToDataType(schema.toString());
-        assertEquals(dataType, converted);
+        assertThat(converted).isEqualTo(dataType);
     }
 
     /** Test convert non-nullable data type to Avro schema then converts back. */
@@ -316,7 +312,7 @@ public class AvroSchemaConverterTest {
                         .notNull();
         Schema schema = AvroSchemaConverter.convertToSchema(dataType.getLogicalType());
         DataType converted = AvroSchemaConverter.convertToDataType(schema.toString());
-        assertEquals(dataType, converted);
+        assertThat(converted).isEqualTo(dataType);
     }
 
     /** Test convert nullable Avro schema to data type then converts back. */
@@ -425,7 +421,7 @@ public class AvroSchemaConverterTest {
                         + "}";
         DataType dataType = AvroSchemaConverter.convertToDataType(schemaStr);
         Schema schema = AvroSchemaConverter.convertToSchema(dataType.getLogicalType());
-        assertEquals(new Schema.Parser().parse(schemaStr), schema);
+        assertThat(schema).isEqualTo(new Schema.Parser().parse(schemaStr));
     }
 
     /** Test convert non-nullable Avro schema to data type then converts back. */
@@ -514,7 +510,7 @@ public class AvroSchemaConverterTest {
                         + "}";
         DataType dataType = AvroSchemaConverter.convertToDataType(schemaStr);
         Schema schema = AvroSchemaConverter.convertToSchema(dataType.getLogicalType());
-        assertEquals(new Schema.Parser().parse(schemaStr), schema);
+        assertThat(schema).isEqualTo(new Schema.Parser().parse(schemaStr));
     }
 
     private void validateUserSchema(TypeInformation<?> actual) {
@@ -578,10 +574,10 @@ public class AvroSchemaConverterTest {
                         Types.BIG_DEC,
                         Types.BIG_DEC);
 
-        assertEquals(user, actual);
+        assertThat(actual).isEqualTo(user);
 
         final RowTypeInfo userRowInfo = (RowTypeInfo) user;
-        assertTrue(userRowInfo.schemaEquals(actual));
+        assertThat(userRowInfo.schemaEquals(actual)).isTrue();
     }
 
     private void validateUserSchema(DataType actual) {
@@ -640,6 +636,6 @@ public class AvroSchemaConverterTest {
                                         "type_decimal_fixed", DataTypes.DECIMAL(4, 2).notNull()))
                         .notNull();
 
-        assertEquals(user, actual);
+        assertThat(actual).isEqualTo(user);
     }
 }

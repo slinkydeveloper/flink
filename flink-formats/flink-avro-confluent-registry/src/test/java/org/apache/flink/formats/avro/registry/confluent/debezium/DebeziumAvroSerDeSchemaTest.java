@@ -58,7 +58,7 @@ import static org.apache.flink.table.api.DataTypes.FIELD;
 import static org.apache.flink.table.api.DataTypes.ROW;
 import static org.apache.flink.table.api.DataTypes.STRING;
 import static org.apache.flink.table.types.utils.TypeConversions.fromLogicalToDataType;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link DebeziumAvroDeserializationSchema}. */
@@ -110,7 +110,7 @@ public class DebeziumAvroSerDeSchemaTest {
 
         List<String> expected =
                 Collections.singletonList("+I(107,rocks,box of assorted rocks,5.3)");
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class DebeziumAvroSerDeSchemaTest {
 
         List<String> expected =
                 Collections.singletonList("+I(1,lisi,test debezium avro data,21.799999237060547)");
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class DebeziumAvroSerDeSchemaTest {
                 Arrays.asList(
                         "-U(1,lisi,test debezium avro data,21.799999237060547)",
                         "+U(1,zhangsan,test debezium avro data,21.799999237060547)");
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class DebeziumAvroSerDeSchemaTest {
         List<String> expected =
                 Collections.singletonList(
                         "-D(1,zhangsan,test debezium avro data,21.799999237060547)");
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     public List<String> testDeserialization(String dataPath) throws Exception {
@@ -200,7 +200,7 @@ public class DebeziumAvroSerDeSchemaTest {
     private static byte[] readBytesFromFile(String filePath) {
         try {
             URL url = DebeziumAvroSerDeSchemaTest.class.getClassLoader().getResource(filePath);
-            assert url != null;
+            assertThat(url != null).isTrue();
             Path path = new File(url.getFile()).toPath();
             return FileUtils.readAllBytes(path);
         } catch (IOException e) {

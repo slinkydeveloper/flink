@@ -22,9 +22,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JobManagerMetricsHeaders}. */
 public class JobManagerMetricsHeadersTest extends TestLogger {
@@ -34,15 +32,13 @@ public class JobManagerMetricsHeadersTest extends TestLogger {
 
     @Test
     public void testUrl() {
-        assertThat(
-                jobManagerMetricsHeaders.getTargetRestEndpointURL(),
-                equalTo("/jobmanager/metrics"));
+        assertThat(jobManagerMetricsHeaders.getTargetRestEndpointURL())
+                .isEqualTo("/jobmanager/metrics");
     }
 
     @Test
     public void testMessageParameters() {
-        assertThat(
-                jobManagerMetricsHeaders.getUnresolvedMessageParameters(),
-                instanceOf(JobManagerMetricsMessageParameters.class));
+        assertThat(jobManagerMetricsHeaders.getUnresolvedMessageParameters())
+                .isInstanceOf(JobManagerMetricsMessageParameters.class);
     }
 }

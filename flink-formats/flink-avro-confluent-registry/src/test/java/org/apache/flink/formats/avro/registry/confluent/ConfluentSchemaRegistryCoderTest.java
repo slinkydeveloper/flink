@@ -28,7 +28,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ConfluentSchemaRegistryCoder}. */
 public class ConfluentSchemaRegistryCoderTest {
@@ -51,8 +51,8 @@ public class ConfluentSchemaRegistryCoderTest {
         ByteArrayInputStream byteInStream = new ByteArrayInputStream(byteOutStream.toByteArray());
         Schema readSchema = registryCoder.readSchema(byteInStream);
 
-        assertEquals(schema, readSchema);
-        assertEquals(0, byteInStream.available());
+        assertThat(readSchema).isEqualTo(schema);
+        assertThat(byteInStream.available()).isEqualTo(0);
     }
 
     @Test(expected = IOException.class)

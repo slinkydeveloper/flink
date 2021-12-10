@@ -26,8 +26,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 
 import static org.apache.flink.yarn.YarnTestUtils.isHadoopVersionGreaterThanOrEquals;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests to Yarn's priority scheduling. */
@@ -87,6 +86,6 @@ public class YarnPrioritySchedulingITCase extends YarnTestBase {
         final Class<?> priorityClass = priorityResult.getClass();
         final Method getPriorityPriorityMethod = priorityClass.getMethod(getPriorityMethodName);
 
-        assertThat(getPriorityPriorityMethod.invoke(priorityResult), is(priority));
+        assertThat(getPriorityPriorityMethod.invoke(priorityResult)).isEqualTo(priority);
     }
 }

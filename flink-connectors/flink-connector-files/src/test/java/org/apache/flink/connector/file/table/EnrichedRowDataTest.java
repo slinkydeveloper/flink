@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JoinedRowData}. */
 public class EnrichedRowDataTest {
@@ -54,23 +54,23 @@ public class EnrichedRowDataTest {
         final RowData mutableRowData = GenericRowData.of(3L, 4L, 5L, 6L);
         enrichedRowData.replaceMutableRow(mutableRowData);
 
-        assertEquals(RowKind.INSERT, enrichedRowData.getRowKind());
-        assertEquals(6, enrichedRowData.getArity());
-        assertEquals(1L, enrichedRowData.getLong(0));
-        assertEquals(3L, enrichedRowData.getLong(1));
-        assertEquals(5L, enrichedRowData.getLong(2));
-        assertEquals(4L, enrichedRowData.getLong(3));
-        assertEquals(2L, enrichedRowData.getLong(4));
-        assertEquals(6L, enrichedRowData.getLong(5));
+        assertThat(enrichedRowData.getRowKind()).isEqualTo(RowKind.INSERT);
+        assertThat(enrichedRowData.getArity()).isEqualTo(6);
+        assertThat(enrichedRowData.getLong(0)).isEqualTo(1L);
+        assertThat(enrichedRowData.getLong(1)).isEqualTo(3L);
+        assertThat(enrichedRowData.getLong(2)).isEqualTo(5L);
+        assertThat(enrichedRowData.getLong(3)).isEqualTo(4L);
+        assertThat(enrichedRowData.getLong(4)).isEqualTo(2L);
+        assertThat(enrichedRowData.getLong(5)).isEqualTo(6L);
 
         final RowData newMutableRowData = GenericRowData.of(7L, 8L, 9L, 10L);
         enrichedRowData.replaceMutableRow(newMutableRowData);
 
-        assertEquals(1L, enrichedRowData.getLong(0));
-        assertEquals(7L, enrichedRowData.getLong(1));
-        assertEquals(9L, enrichedRowData.getLong(2));
-        assertEquals(8L, enrichedRowData.getLong(3));
-        assertEquals(2L, enrichedRowData.getLong(4));
-        assertEquals(10L, enrichedRowData.getLong(5));
+        assertThat(enrichedRowData.getLong(0)).isEqualTo(1L);
+        assertThat(enrichedRowData.getLong(1)).isEqualTo(7L);
+        assertThat(enrichedRowData.getLong(2)).isEqualTo(9L);
+        assertThat(enrichedRowData.getLong(3)).isEqualTo(8L);
+        assertThat(enrichedRowData.getLong(4)).isEqualTo(2L);
+        assertThat(enrichedRowData.getLong(5)).isEqualTo(10L);
     }
 }

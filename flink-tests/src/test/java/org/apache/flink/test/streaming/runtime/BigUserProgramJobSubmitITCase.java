@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.apache.flink.test.util.TestUtils.submitJobAndWaitForResult;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test that verifies that a user program with a big(ger) payload is successfully
@@ -102,7 +102,7 @@ public class BigUserProgramJobSubmitITCase extends TestLogger {
             Collections.sort(expected);
             Collections.sort(result);
 
-            assertEquals(expected, result);
+            assertThat(result).isEqualTo(expected);
         } finally {
             restClusterClient.close();
         }

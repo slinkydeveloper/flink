@@ -43,9 +43,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Integration test case for writing bulk encoded files with the {@link StreamingFileSink} and
@@ -102,18 +100,18 @@ public class CompressionFactoryITCase extends AbstractTestBase {
     private void validateResults(File folder, List<String> expected, CompressionCodec codec)
             throws Exception {
         File[] buckets = folder.listFiles();
-        assertNotNull(buckets);
-        assertEquals(1, buckets.length);
+        assertThat(buckets).isNotNull();
+        assertThat(buckets.length).isEqualTo(1);
 
         final File[] partFiles = buckets[0].listFiles();
-        assertNotNull(partFiles);
-        assertEquals(2, partFiles.length);
+        assertThat(partFiles).isNotNull();
+        assertThat(partFiles.length).isEqualTo(2);
 
         for (File partFile : partFiles) {
-            assertTrue(partFile.length() > 0);
+            assertThat(partFile.length() > 0).isTrue();
 
             final List<String> fileContent = readFile(partFile, codec);
-            assertEquals(expected, fileContent);
+            assertThat(fileContent).isEqualTo(expected);
         }
     }
 }

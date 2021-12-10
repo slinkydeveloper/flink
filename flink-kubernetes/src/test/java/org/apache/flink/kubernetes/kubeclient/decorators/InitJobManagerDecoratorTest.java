@@ -41,11 +41,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /** General tests for the {@link InitJobManagerDecorator}. */
 public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
@@ -97,19 +95,19 @@ public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
 
     @Test
     public void testApiVersion() {
-        assertEquals(Constants.API_VERSION, this.resultPod.getApiVersion());
+        assertThat(this.resultPod.getApiVersion()).isEqualTo(Constants.API_VERSION);
     }
 
     @Test
     public void testMainContainerName() {
-        assertEquals(Constants.MAIN_CONTAINER_NAME, this.resultMainContainer.getName());
+        assertThat(this.resultMainContainer.getName()).isEqualTo(Constants.MAIN_CONTAINER_NAME);
     }
 
     @Test
     public void testMainContainerImage() {
-        assertEquals(CONTAINER_IMAGE, this.resultMainContainer.getImage());
-        assertEquals(
-                CONTAINER_IMAGE_PULL_POLICY.name(), this.resultMainContainer.getImagePullPolicy());
+        assertThat(this.resultMainContainer.getImage()).isEqualTo(CONTAINER_IMAGE);
+        assertThat(this.resultMainContainer.getImagePullPolicy())
+                .isEqualTo(CONTAINER_IMAGE_PULL_POLICY.name());
     }
 
     @Test
@@ -117,12 +115,13 @@ public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
         final ResourceRequirements resourceRequirements = this.resultMainContainer.getResources();
 
         final Map<String, Quantity> requests = resourceRequirements.getRequests();
-        assertEquals(Double.toString(JOB_MANAGER_CPU), requests.get("cpu").getAmount());
-        assertEquals(String.valueOf(JOB_MANAGER_MEMORY), requests.get("memory").getAmount());
+        assertThat(requests.get("cpu").getAmount()).isEqualTo(Double.toString(JOB_MANAGER_CPU));
+        assertThat(requests.get("memory").getAmount())
+                .isEqualTo(String.valueOf(JOB_MANAGER_MEMORY));
 
         final Map<String, Quantity> limits = resourceRequirements.getLimits();
-        assertEquals(Double.toString(JOB_MANAGER_CPU), limits.get("cpu").getAmount());
-        assertEquals(String.valueOf(JOB_MANAGER_MEMORY), limits.get("memory").getAmount());
+        assertThat(limits.get("cpu").getAmount()).isEqualTo(Double.toString(JOB_MANAGER_CPU));
+        assertThat(limits.get("memory").getAmount()).isEqualTo(String.valueOf(JOB_MANAGER_MEMORY));
     }
 
     @Test
@@ -142,7 +141,7 @@ public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
                                 .withContainerPort(BLOB_SERVER_PORT)
                                 .build());
 
-        assertEquals(expectedContainerPorts, this.resultMainContainer.getPorts());
+        assertThat(this.resultMainContainer.getPorts()).isEqualTo(expectedContainerPorts);
     }
 
     @Test
@@ -151,21 +150,27 @@ public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
 
         final Map<String, String> envs = new HashMap<>();
         envVars.forEach(env -> envs.put(env.getName(), env.getValue()));
-        this.customizedEnvs.forEach((k, v) -> assertEquals(envs.get(k), v));
+        this.customizedEnvs.forEach((k, v) -> assertThat(v).isEqualTo(envs.get(k)));
 
-        assertTrue(
-                envVars.stream()
-                        .anyMatch(
-                                env ->
-                                        env.getName().equals(Constants.ENV_FLINK_POD_IP_ADDRESS)
-                                                && env.getValueFrom()
-                                                        .getFieldRef()
-                                                        .getApiVersion()
-                                                        .equals(Constants.API_VERSION)
-                                                && env.getValueFrom()
-                                                        .getFieldRef()
-                                                        .getFieldPath()
-                                                        .equals(Constants.POD_IP_FIELD_PATH)));
+        assertThat(
+                        envVars.stream()
+                                .anyMatch(
+                                        env ->
+                                                env.getName()
+                                                                .equals(
+                                                                        Constants
+                                                                                .ENV_FLINK_POD_IP_ADDRESS)
+                                                        && env.getValueFrom()
+                                                                .getFieldRef()
+                                                                .getApiVersion()
+                                                                .equals(Constants.API_VERSION)
+                                                        && env.getValueFrom()
+                                                                .getFieldRef()
+                                                                .getFieldPath()
+                                                                .equals(
+                                                                        Constants
+                                                                                .POD_IP_FIELD_PATH)))
+                .isTrue();
     }
 
     @Test
@@ -174,19 +179,20 @@ public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
         expectedLabels.put(Constants.LABEL_COMPONENT_KEY, Constants.LABEL_COMPONENT_JOB_MANAGER);
         expectedLabels.putAll(userLabels);
 
-        assertEquals(expectedLabels, this.resultPod.getMetadata().getLabels());
+        assertThat(this.resultPod.getMetadata().getLabels()).isEqualTo(expectedLabels);
     }
 
     @Test
     public void testPodAnnotations() {
         final Map<String, String> resultAnnotations =
                 kubernetesJobManagerParameters.getAnnotations();
-        assertThat(resultAnnotations, is(equalTo(ANNOTATIONS)));
+        assertThat(resultAnnotations).isEqualTo(equalTo(ANNOTATIONS));
     }
 
     @Test
     public void testPodServiceAccountName() {
-        assertEquals(SERVICE_ACCOUNT_NAME, this.resultPod.getSpec().getServiceAccountName());
+        assertThat(this.resultPod.getSpec().getServiceAccountName())
+                .isEqualTo(SERVICE_ACCOUNT_NAME);
     }
 
     @Test
@@ -196,18 +202,17 @@ public class InitJobManagerDecoratorTest extends KubernetesJobManagerTestBase {
                         .map(LocalObjectReference::getName)
                         .collect(Collectors.toList());
 
-        assertEquals(IMAGE_PULL_SECRETS, resultSecrets);
+        assertThat(resultSecrets).isEqualTo(IMAGE_PULL_SECRETS);
     }
 
     @Test
     public void testNodeSelector() {
-        assertThat(this.resultPod.getSpec().getNodeSelector(), is(equalTo(nodeSelector)));
+        assertThat(this.resultPod.getSpec().getNodeSelector()).isEqualTo(equalTo(nodeSelector));
     }
 
     @Test
     public void testPodTolerations() {
-        assertThat(
-                this.resultPod.getSpec().getTolerations(),
-                Matchers.containsInAnyOrder(TOLERATION.toArray()));
+        assertThat(this.resultPod.getSpec().getTolerations())
+                .satisfies(matching(Matchers.containsInAnyOrder(TOLERATION.toArray())));
     }
 }

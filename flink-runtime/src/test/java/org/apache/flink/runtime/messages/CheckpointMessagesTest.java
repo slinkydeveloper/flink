@@ -44,9 +44,8 @@ import static org.apache.flink.runtime.checkpoint.CheckpointCoordinatorTestingUt
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNewInputChannelStateHandle;
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNewResultSubpartitionStateHandle;
 import static org.apache.flink.runtime.checkpoint.StateObjectCollection.singleton;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for checkpoint messages. */
 public class CheckpointMessagesTest {
@@ -95,10 +94,10 @@ public class CheckpointMessagesTest {
 
     private static void testSerializabilityEqualsHashCode(Serializable o) throws IOException {
         Object copy = CommonTestUtils.createCopySerializable(o);
-        assertEquals(o, copy);
-        assertEquals(o.hashCode(), copy.hashCode());
-        assertNotNull(o.toString());
-        assertNotNull(copy.toString());
+        assertThat(copy).isEqualTo(o);
+        assertThat(copy.hashCode()).isEqualTo(o.hashCode());
+        assertThat(o.toString()).isNotNull();
+        assertThat(copy.toString()).isNotNull();
     }
 
     private static class MyHandle implements StreamStateHandle {

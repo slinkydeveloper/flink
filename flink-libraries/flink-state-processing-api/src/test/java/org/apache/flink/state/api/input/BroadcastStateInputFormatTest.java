@@ -32,12 +32,13 @@ import org.apache.flink.streaming.util.MockStreamingRuntimeContext;
 import org.apache.flink.streaming.util.TwoInputStreamOperatorTestHarness;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for operator broadcast state input format. */
 public class BroadcastStateInputFormatTest {
@@ -79,8 +80,9 @@ public class BroadcastStateInputFormatTest {
             expected.put(2, 2);
             expected.put(3, 3);
 
-            Assert.assertEquals(
-                    "Failed to read correct list state from state backend", expected, results);
+            assertThat(results)
+                    .as("Failed to read correct list state from state backend")
+                    .isEqualTo(expected);
         }
     }
 

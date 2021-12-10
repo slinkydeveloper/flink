@@ -47,12 +47,11 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Test for the {@link TaskManagerLogListHandler}. */
 public class TaskManagerLogListHandlerTest extends TestLogger {
@@ -88,7 +87,7 @@ public class TaskManagerLogListHandlerTest extends TestLogger {
                 taskManagerLogListHandler
                         .handleRequest(handlerRequest, resourceManagerGateway)
                         .get();
-        assertThat(logListInfo.getLogInfos(), hasSize(logsList.size()));
+        assertThat(logListInfo.getLogInfos()).satisfies(matching(hasSize(logsList.size())));
     }
 
     @Test
@@ -101,15 +100,13 @@ public class TaskManagerLogListHandlerTest extends TestLogger {
             taskManagerLogListHandler.handleRequest(handlerRequest, resourceManagerGateway).get();
         } catch (ExecutionException e) {
             final Throwable cause = e.getCause();
-            assertThat(cause, is(instanceOf(RestHandlerException.class)));
+            assertThat(cause).isEqualTo(instanceOf(RestHandlerException.class));
 
             final RestHandlerException restHandlerException = (RestHandlerException) cause;
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(),
-                    is(equalTo(HttpResponseStatus.NOT_FOUND)));
-            assertThat(
-                    restHandlerException.getMessage(),
-                    containsString("Could not find TaskExecutor " + EXPECTED_TASK_MANAGER_ID));
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(equalTo(HttpResponseStatus.NOT_FOUND));
+            assertThat(restHandlerException.getMessage())
+                    .contains("Could not find TaskExecutor " + EXPECTED_TASK_MANAGER_ID);
         }
     }
 

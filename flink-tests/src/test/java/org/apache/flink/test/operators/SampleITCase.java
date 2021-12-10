@@ -37,7 +37,7 @@ import org.junit.runners.Parameterized;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link DataSetUtils#sample}. */
 @SuppressWarnings("serial")
@@ -137,7 +137,7 @@ public class SampleITCase extends MultipleProgramsTestBase {
         DataSet<String> sampled =
                 DataSetUtils.sampleWithSize(ds, withReplacement, numSamples, seed);
         List<String> result = sampled.collect();
-        assertEquals(numSamples, result.size());
+        assertThat(result.size()).isEqualTo(numSamples);
         containsResultAsText(result, getSourceStrings());
     }
 

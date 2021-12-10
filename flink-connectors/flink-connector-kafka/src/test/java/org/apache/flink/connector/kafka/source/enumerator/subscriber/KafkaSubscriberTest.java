@@ -35,9 +35,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link KafkaSubscriber}. */
 public class KafkaSubscriberTest {
@@ -71,7 +70,7 @@ public class KafkaSubscriberTest {
         final Set<TopicPartition> expectedSubscribedPartitions =
                 new HashSet<>(KafkaSourceTestEnv.getPartitionsForTopics(topics));
 
-        assertEquals(expectedSubscribedPartitions, subscribedPartitions);
+        assertThat(subscribedPartitions).isEqualTo(expectedSubscribedPartitions);
     }
 
     @Test
@@ -80,15 +79,16 @@ public class KafkaSubscriberTest {
                 KafkaSubscriber.getTopicListSubscriber(
                         Collections.singletonList(NON_EXISTING_TOPIC.topic()));
 
-        Throwable t =
-                assertThrows(
-                        RuntimeException.class,
-                        () -> subscriber.getSubscribedTopicPartitions(adminClient));
-
-        assertTrue(
-                "Exception should be caused by UnknownTopicOrPartitionException",
-                ExceptionUtils.findThrowable(t, UnknownTopicOrPartitionException.class)
-                        .isPresent());
+        assertThatThrownBy(() -> subscriber.getSubscribedTopicPartitions(adminClient))
+                .isInstanceOf(RuntimeException.class)
+                .satisfies(
+                        t ->
+                                assertThat(
+                                                ExceptionUtils.findThrowable(
+                                                        t, UnknownTopicOrPartitionException.class))
+                                        .as(
+                                                "Exception should be caused by UnknownTopicOrPartitionException")
+                                        .isPresent());
     }
 
     @Test
@@ -102,7 +102,7 @@ public class KafkaSubscriberTest {
                 new HashSet<>(
                         KafkaSourceTestEnv.getPartitionsForTopics(Collections.singleton(TOPIC2)));
 
-        assertEquals(expectedSubscribedPartitions, subscribedPartitions);
+        assertThat(subscribedPartitions).isEqualTo(expectedSubscribedPartitions);
     }
 
     @Test
@@ -117,7 +117,7 @@ public class KafkaSubscriberTest {
         final Set<TopicPartition> subscribedPartitions =
                 subscriber.getSubscribedTopicPartitions(adminClient);
 
-        assertEquals(partitions, subscribedPartitions);
+        assertThat(subscribedPartitions).isEqualTo(partitions);
     }
 
     @Test
@@ -127,14 +127,11 @@ public class KafkaSubscriberTest {
                 KafkaSubscriber.getPartitionSetSubscriber(
                         Collections.singleton(nonExistingPartition));
 
-        Throwable t =
-                assertThrows(
-                        RuntimeException.class,
-                        () -> subscriber.getSubscribedTopicPartitions(adminClient));
-
-        assertEquals(
-                String.format(
-                        "Partition '%s' does not exist on Kafka brokers", nonExistingPartition),
-                t.getMessage());
+        assertThatThrownBy(() -> subscriber.getSubscribedTopicPartitions(adminClient))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage(
+                        String.format(
+                                "Partition '%s' does not exist on Kafka brokers",
+                                nonExistingPartition));
     }
 }

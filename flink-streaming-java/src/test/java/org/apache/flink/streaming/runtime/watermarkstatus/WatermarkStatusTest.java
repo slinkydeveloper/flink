@@ -20,10 +20,8 @@ package org.apache.flink.streaming.runtime.watermarkstatus;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link WatermarkStatus}. */
 public class WatermarkStatusTest {
@@ -38,23 +36,23 @@ public class WatermarkStatusTest {
         WatermarkStatus idleStatus = new WatermarkStatus(WatermarkStatus.IDLE_STATUS);
         WatermarkStatus activeStatus = new WatermarkStatus(WatermarkStatus.ACTIVE_STATUS);
 
-        assertEquals(WatermarkStatus.IDLE, idleStatus);
-        assertTrue(idleStatus.isIdle());
-        assertFalse(idleStatus.isActive());
+        assertThat(idleStatus).isEqualTo(WatermarkStatus.IDLE);
+        assertThat(idleStatus.isIdle()).isTrue();
+        assertThat(idleStatus.isActive()).isFalse();
 
-        assertEquals(WatermarkStatus.ACTIVE, activeStatus);
-        assertTrue(activeStatus.isActive());
-        assertFalse(activeStatus.isIdle());
+        assertThat(activeStatus).isEqualTo(WatermarkStatus.ACTIVE);
+        assertThat(activeStatus.isActive()).isTrue();
+        assertThat(activeStatus.isIdle()).isFalse();
     }
 
     @Test
     public void testTypeCasting() {
         WatermarkStatus status = WatermarkStatus.ACTIVE;
 
-        assertTrue(status.isWatermarkStatus());
-        assertFalse(status.isRecord());
-        assertFalse(status.isWatermark());
-        assertFalse(status.isLatencyMarker());
+        assertThat(status.isWatermarkStatus()).isTrue();
+        assertThat(status.isRecord()).isFalse();
+        assertThat(status.isWatermark()).isFalse();
+        assertThat(status.isLatencyMarker()).isFalse();
 
         try {
             status.asWatermark();

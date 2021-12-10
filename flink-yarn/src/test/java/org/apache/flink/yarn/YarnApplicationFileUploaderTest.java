@@ -39,9 +39,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
 import static org.apache.flink.yarn.YarnTestUtils.generateFilesInDirectory;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link YarnApplicationFileUploader}. */
 public class YarnApplicationFileUploaderTest extends TestLogger {
@@ -68,8 +69,8 @@ public class YarnApplicationFileUploaderTest extends TestLogger {
             final Set<String> registeredResources =
                     yarnApplicationFileUploader.getRegisteredLocalResources().keySet();
 
-            assertThat(
-                    registeredResources, Matchers.containsInAnyOrder(libJars.keySet().toArray()));
+            assertThat(registeredResources)
+                    .satisfies(matching(Matchers.containsInAnyOrder(libJars.keySet().toArray())));
         }
     }
 
@@ -83,18 +84,18 @@ public class YarnApplicationFileUploaderTest extends TestLogger {
 
         final FileSystem fileSystem = FileSystem.get(new YarnConfiguration());
         try {
-            assertThrows(
-                    "Two files with the same filename exist in the shared libs",
-                    RuntimeException.class,
-                    () ->
-                            YarnApplicationFileUploader.from(
-                                    fileSystem,
-                                    new Path(temporaryFolder.getRoot().toURI()),
-                                    Arrays.asList(
-                                            new Path(flinkLibDir1.toURI()),
-                                            new Path(flinkLibDir2.toURI())),
-                                    ApplicationId.newInstance(0, 0),
-                                    DFSConfigKeys.DFS_REPLICATION_DEFAULT));
+            assertThatThrownBy(
+                            () ->
+                                    YarnApplicationFileUploader.from(
+                                            fileSystem,
+                                            new Path(temporaryFolder.getRoot().toURI()),
+                                            Arrays.asList(
+                                                    new Path(flinkLibDir1.toURI()),
+                                                    new Path(flinkLibDir2.toURI())),
+                                            ApplicationId.newInstance(0, 0),
+                                            DFSConfigKeys.DFS_REPLICATION_DEFAULT))
+                    .as("Two files with the same filename exist in the shared libs")
+                    .isInstanceOf(RuntimeException.class);
         } finally {
             IOUtils.closeQuietly(fileSystem);
         }

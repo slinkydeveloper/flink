@@ -49,8 +49,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that read the BoundedBlockingSubpartition with multiple threads in parallel. */
 @RunWith(Parameterized.class)
@@ -197,8 +196,8 @@ public class BoundedBlockingSubpartitionWriteReadTest {
         int nextExpectedBacklog = numBuffers - 1;
 
         while ((next = reader.getNextBuffer()) != null && next.buffer().isBuffer()) {
-            assertTrue(next.isDataAvailable());
-            assertEquals(nextExpectedBacklog, next.buffersInBacklog());
+            assertThat(next.isDataAvailable()).isTrue();
+            assertThat(next.buffersInBacklog()).isEqualTo(nextExpectedBacklog);
 
             ByteBuffer buffer = next.buffer().getNioBufferReadable();
             if (compressionEnabled && next.buffer().isCompressed()) {
@@ -208,15 +207,15 @@ public class BoundedBlockingSubpartitionWriteReadTest {
                 uncompressedBuffer.recycleBuffer();
             }
             while (buffer.hasRemaining()) {
-                assertEquals(expectedNextLong++, buffer.getLong());
+                assertThat(buffer.getLong()).isEqualTo(expectedNextLong++);
             }
 
             next.buffer().recycleBuffer();
             nextExpectedBacklog--;
         }
 
-        assertEquals(numLongs, expectedNextLong);
-        assertEquals(-1, nextExpectedBacklog);
+        assertThat(expectedNextLong).isEqualTo(numLongs);
+        assertThat(nextExpectedBacklog).isEqualTo(-1);
     }
 
     // ------------------------------------------------------------------------

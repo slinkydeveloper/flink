@@ -32,8 +32,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link SchedulingPipelinedRegionComputeUtil}. */
 public class SchedulingPipelinedRegionComputeUtilTest extends TestLogger {
@@ -528,7 +527,7 @@ public class SchedulingPipelinedRegionComputeUtilTest extends TestLogger {
         checkNotNull(regions);
         for (int i = 0; i < regions.length; i++) {
             for (int j = i + 1; i < regions.length; i++) {
-                assertSame(regions[i], regions[j]);
+                assertThat(regions[j]).isSameAs(regions[i]);
             }
         }
     }
@@ -538,7 +537,7 @@ public class SchedulingPipelinedRegionComputeUtilTest extends TestLogger {
         checkNotNull(regions);
         for (int i = 0; i < regions.length; i++) {
             for (int j = i + 1; j < regions.length; j++) {
-                assertNotSame(regions[i], regions[j]);
+                assertThat(regions[j]).isNotSameAs(regions[i]);
             }
         }
     }

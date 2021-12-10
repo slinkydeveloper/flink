@@ -35,13 +35,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for RegisteredRpcConnection, validating the successful, failure and close behavior. */
 public class RegisteredRpcConnectionTest extends TestLogger {
@@ -86,16 +81,16 @@ public class RegisteredRpcConnectionTest extends TestLogger {
             final Either<TestRegistrationSuccess, TestRegistrationRejection> connectionResult =
                     connection.getConnectionFuture().get();
 
-            assertTrue(connectionResult.isLeft());
+            assertThat(connectionResult.isLeft()).isTrue();
 
             final String actualConnectionId = connectionResult.left().getCorrelationId();
 
             // validate correct invocation and result
-            assertTrue(connection.isConnected());
-            assertEquals(testRpcConnectionEndpointAddress, connection.getTargetAddress());
-            assertEquals(leaderId, connection.getTargetLeaderId());
-            assertEquals(testGateway, connection.getTargetGateway());
-            assertEquals(connectionID, actualConnectionId);
+            assertThat(connection.isConnected()).isTrue();
+            assertThat(connection.getTargetAddress()).isEqualTo(testRpcConnectionEndpointAddress);
+            assertThat(connection.getTargetLeaderId()).isEqualTo(leaderId);
+            assertThat(connection.getTargetGateway()).isEqualTo(testGateway);
+            assertThat(actualConnectionId).isEqualTo(connectionID);
         } finally {
             testGateway.stop();
         }
@@ -134,14 +129,14 @@ public class RegisteredRpcConnectionTest extends TestLogger {
             connection.getConnectionFuture().get();
             fail("expected failure.");
         } catch (ExecutionException ee) {
-            assertEquals(registrationException, ee.getCause());
+            assertThat(ee.getCause()).isEqualTo(registrationException);
         }
 
         // validate correct invocation and result
-        assertFalse(connection.isConnected());
-        assertEquals(testRpcConnectionEndpointAddress, connection.getTargetAddress());
-        assertEquals(leaderId, connection.getTargetLeaderId());
-        assertNull(connection.getTargetGateway());
+        assertThat(connection.isConnected()).isFalse();
+        assertThat(connection.getTargetAddress()).isEqualTo(testRpcConnectionEndpointAddress);
+        assertThat(connection.getTargetLeaderId()).isEqualTo(leaderId);
+        assertThat(connection.getTargetGateway()).isNull();
     }
 
     @Test
@@ -169,12 +164,11 @@ public class RegisteredRpcConnectionTest extends TestLogger {
         final Either<TestRegistrationSuccess, TestRegistrationRejection> connectionResult =
                 connection.getConnectionFuture().join();
 
-        assertTrue(connectionResult.isRight());
+        assertThat(connectionResult.isRight()).isTrue();
         final TestRegistrationRejection registrationRejection = connectionResult.right();
 
-        assertThat(
-                registrationRejection.getRejectionReason(),
-                is(TestRegistrationRejection.RejectionReason.REJECTED));
+        assertThat(registrationRejection.getRejectionReason())
+                .isEqualTo(TestRegistrationRejection.RejectionReason.REJECTED);
     }
 
     @Test
@@ -201,9 +195,9 @@ public class RegisteredRpcConnectionTest extends TestLogger {
             connection.close();
 
             // validate connection is closed
-            assertEquals(testRpcConnectionEndpointAddress, connection.getTargetAddress());
-            assertEquals(leaderId, connection.getTargetLeaderId());
-            assertTrue(connection.isClosed());
+            assertThat(connection.getTargetAddress()).isEqualTo(testRpcConnectionEndpointAddress);
+            assertThat(connection.getTargetLeaderId()).isEqualTo(leaderId);
+            assertThat(connection.isClosed()).isTrue();
         } finally {
             testGateway.stop();
         }
@@ -233,22 +227,22 @@ public class RegisteredRpcConnectionTest extends TestLogger {
         final Either<TestRegistrationSuccess, TestRegistrationRejection> firstConnectionResult =
                 connection.getConnectionFuture().get();
 
-        assertTrue(firstConnectionResult.isLeft());
+        assertThat(firstConnectionResult.isLeft()).isTrue();
 
         final String actualConnectionId1 = firstConnectionResult.left().getCorrelationId();
 
-        assertEquals(actualConnectionId1, connectionId1);
+        assertThat(connectionId1).isEqualTo(actualConnectionId1);
 
-        assertTrue(connection.tryReconnect());
+        assertThat(connection.tryReconnect()).isTrue();
 
         final Either<TestRegistrationSuccess, TestRegistrationRejection> secondConnectionResult =
                 connection.getConnectionFuture().get();
 
-        assertTrue(secondConnectionResult.isLeft());
+        assertThat(secondConnectionResult.isLeft()).isTrue();
 
         final String actualConnectionId2 = secondConnectionResult.left().getCorrelationId();
 
-        assertEquals(actualConnectionId2, connectionId2);
+        assertThat(connectionId2).isEqualTo(actualConnectionId2);
     }
 
     // ------------------------------------------------------------------------

@@ -71,7 +71,6 @@ import org.apache.flink.util.concurrent.ScheduledExecutor;
 import org.apache.flink.util.concurrent.ScheduledExecutorServiceAdapter;
 
 import com.esotericsoftware.kryo.Serializer;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -100,11 +99,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicLongArray;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Base class for queryable state integration tests with a configurable state backend. */
 public abstract class AbstractQueryableStateTestBase extends TestLogger {
@@ -132,7 +128,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
         // NOTE: do not use a shared instance for all tests as the tests may break
         this.stateBackend = createStateBackend();
 
-        Assert.assertNotNull(clusterClient);
+        assertThat(clusterClient).isNotNull();
 
         maxParallelism = 4;
     }
@@ -229,9 +225,9 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                                 try {
                                     Tuple2<Integer, Long> res = response.get();
                                     counts.set(key, res.f1);
-                                    assertEquals("Key mismatch", key, res.f0.intValue());
+                                    assertThat(res.f0.intValue()).as("Key mismatch").isEqualTo(key);
                                 } catch (Exception e) {
-                                    Assert.fail(e.getMessage());
+                                    fail(e.getMessage());
                                 }
                             });
 
@@ -243,12 +239,12 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                         .get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS);
             }
 
-            assertTrue("Not all keys are non-zero", allNonZero);
+            assertThat(allNonZero).as("Not all keys are non-zero").isTrue();
 
             // All should be non-zero
             for (int i = 0; i < numKeys; i++) {
                 long count = counts.get(i);
-                assertTrue("Count at position " + i + " is " + count, count > 0);
+                assertThat(count > 0).as("Count at position " + i + " is " + count).isTrue();
             }
         }
     }
@@ -309,18 +305,17 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                 .thenApply(JobResult::getSerializedThrowable)
                 .thenAccept(
                         serializedThrowable -> {
-                            assertTrue(serializedThrowable.isPresent());
+                            assertThat(serializedThrowable.isPresent()).isTrue();
                             final Throwable t =
                                     serializedThrowable
                                             .get()
                                             .deserializeError(getClass().getClassLoader());
                             final String failureCause = ExceptionUtils.stringifyException(t);
-                            assertThat(
-                                    failureCause,
-                                    containsString(
+                            assertThat(failureCause)
+                                    .contains(
                                             "KvState with name '"
                                                     + queryName
-                                                    + "' has already been registered by another operator"));
+                                                    + "' has already been registered by another operator");
                         })
                 .get();
     }
@@ -489,9 +484,8 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                 jobStatusFuture = clusterClient.getJobStatus(closableJobGraph.getJobId());
             }
 
-            assertEquals(
-                    JobStatus.RUNNING,
-                    jobStatusFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(jobStatusFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(JobStatus.RUNNING);
 
             final JobID wrongJobId = new JobID();
 
@@ -505,19 +499,20 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
 
             try {
                 unknownJobFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS);
-                fail(); // by now the request must have failed.
+                fail("unknown failure"); // by now the request must have failed.
             } catch (ExecutionException e) {
-                Assert.assertTrue(
-                        "GOT: " + e.getCause().getMessage(),
-                        e.getCause() instanceof RuntimeException);
-                Assert.assertTrue(
-                        "GOT: " + e.getCause().getMessage(),
-                        e.getCause()
-                                .getMessage()
-                                .contains(
-                                        "FlinkJobNotFoundException: Could not find Flink job ("
-                                                + wrongJobId
-                                                + ")"));
+                assertThat(e.getCause())
+                        .as("GOT: " + e.getCause().getMessage())
+                        .isInstanceOf(RuntimeException.class);
+                assertThat(
+                                e.getCause()
+                                        .getMessage()
+                                        .contains(
+                                                "FlinkJobNotFoundException: Could not find Flink job ("
+                                                        + wrongJobId
+                                                        + ")"))
+                        .as("GOT: " + e.getCause().getMessage())
+                        .isTrue();
             } catch (Exception f) {
                 fail("Unexpected type of exception: " + f.getMessage());
             }
@@ -532,17 +527,18 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
 
             try {
                 unknownQSName.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS);
-                fail(); // by now the request must have failed.
+                fail("unknown failure"); // by now the request must have failed.
             } catch (ExecutionException e) {
-                Assert.assertTrue(
-                        "GOT: " + e.getCause().getMessage(),
-                        e.getCause() instanceof RuntimeException);
-                Assert.assertTrue(
-                        "GOT: " + e.getCause().getMessage(),
-                        e.getCause()
-                                .getMessage()
-                                .contains(
-                                        "UnknownKvStateLocation: No KvStateLocation found for KvState instance with name 'wrong-hakuna'."));
+                assertThat(e.getCause())
+                        .as("GOT: " + e.getCause().getMessage())
+                        .isInstanceOf(RuntimeException.class);
+                assertThat(
+                                e.getCause()
+                                        .getMessage()
+                                        .contains(
+                                                "UnknownKvStateLocation: No KvStateLocation found for KvState instance with name 'wrong-hakuna'."))
+                        .as("GOT: " + e.getCause().getMessage())
+                        .isTrue();
             } catch (Exception f) {
                 fail("Unexpected type of exception: " + f.getMessage());
             }
@@ -794,7 +790,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                     Tuple2<Integer, Long> value =
                             future.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS).get();
 
-                    assertEquals("Key mismatch", key, value.f0.intValue());
+                    assertThat(value.f0.intValue()).as("Key mismatch").isEqualTo(key);
                     if (expected == value.f1) {
                         success = true;
                     } else {
@@ -803,7 +799,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                     }
                 }
 
-                assertTrue("Did not succeed query", success);
+                assertThat(success).as("Did not succeed query").isTrue();
             }
         }
     }
@@ -896,7 +892,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                                     .get(key);
 
                     if (value != null && value.f0 != null && expected == value.f1) {
-                        assertEquals("Key mismatch", key, value.f0.intValue());
+                        assertThat(value.f0.intValue()).as("Key mismatch").isEqualTo(key);
                         success = true;
                     } else {
                         // Retry
@@ -904,7 +900,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                     }
                 }
 
-                assertTrue("Did not succeed query", success);
+                assertThat(success).as("Did not succeed query").isTrue();
             }
         }
     }
@@ -1007,13 +1003,13 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                     }
                 }
 
-                assertTrue("Did not succeed query", success);
+                assertThat(success).as("Did not succeed query").isTrue();
             }
 
             for (int key = 0; key < maxParallelism; key++) {
                 Set<Long> values = results.get(key);
                 for (long i = 0L; i <= numElements; i++) {
-                    assertTrue(values.contains(i));
+                    assertThat(values.contains(i)).isTrue();
                 }
             }
         }
@@ -1088,7 +1084,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                     }
                 }
 
-                assertTrue("Did not succeed query", success);
+                assertThat(success).as("Did not succeed query").isTrue();
             }
         }
     }
@@ -1343,9 +1339,8 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                             deadline,
                             (jobStatus) -> jobStatus.equals(JobStatus.CANCELED),
                             TestingUtils.defaultScheduledExecutor());
-            assertEquals(
-                    JobStatus.CANCELED,
-                    jobStatusFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+            assertThat(jobStatusFuture.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(JobStatus.CANCELED);
         }
     }
 
@@ -1453,7 +1448,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                 Tuple2<Integer, Long> value =
                         future.get(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS).value();
 
-                assertEquals("Key mismatch", key, value.f0.intValue());
+                assertThat(value.f0.intValue()).as("Key mismatch").isEqualTo(key);
                 if (expected == value.f1) {
                     success = true;
                 } else {
@@ -1462,7 +1457,7 @@ public abstract class AbstractQueryableStateTestBase extends TestLogger {
                 }
             }
 
-            assertTrue("Did not succeed query", success);
+            assertThat(success).as("Did not succeed query").isTrue();
         }
     }
 

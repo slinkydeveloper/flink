@@ -47,7 +47,7 @@ import org.apache.flink.api.java.tuple.Tuple9;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Tuple} to {@code Array}. */
 public class ArrayFromTupleTest {
@@ -131,9 +131,11 @@ public class ArrayFromTupleTest {
     }
 
     private void arrayEqualityCheck(Object[] array1, Object[] array2) {
-        assertEquals("The result arrays must have the same length", array1.length, array2.length);
+        assertThat(array2.length)
+                .as("The result arrays must have the same length")
+                .isEqualTo(array1.length);
         for (int i = 0; i < array1.length; i++) {
-            assertEquals("Unequal fields at position " + i, array1[i], array2[i]);
+            assertThat(array2[i]).as("Unequal fields at position " + i).isEqualTo(array1[i]);
         }
     }
 

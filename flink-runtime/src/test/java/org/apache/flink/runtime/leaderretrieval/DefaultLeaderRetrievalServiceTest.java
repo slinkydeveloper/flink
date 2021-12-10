@@ -30,11 +30,11 @@ import org.junit.Test;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link DefaultLeaderElectionService}. */
 public class DefaultLeaderRetrievalServiceTest extends TestLogger {
@@ -52,11 +52,10 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
                                     LeaderInformation.known(UUID.randomUUID(), TEST_URL);
                             testingLeaderRetrievalDriver.onUpdate(newLeader);
                             testingListener.waitForNewLeader(timeout);
-                            assertThat(
-                                    testingListener.getLeaderSessionID(),
-                                    is(newLeader.getLeaderSessionID()));
-                            assertThat(
-                                    testingListener.getAddress(), is(newLeader.getLeaderAddress()));
+                            assertThat(testingListener.getLeaderSessionID())
+                                    .isEqualTo(newLeader.getLeaderSessionID());
+                            assertThat(testingListener.getAddress())
+                                    .isEqualTo(newLeader.getLeaderAddress());
                         });
             }
         };
@@ -72,11 +71,10 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
                                     LeaderInformation.known(UUID.randomUUID(), TEST_URL);
                             testingLeaderRetrievalDriver.onUpdate(newLeader);
                             testingListener.waitForNewLeader(timeout);
-
                             testingLeaderRetrievalDriver.onUpdate(LeaderInformation.empty());
                             testingListener.waitForEmptyLeaderInformation(timeout);
-                            assertThat(testingListener.getLeaderSessionID(), is(nullValue()));
-                            assertThat(testingListener.getAddress(), is(nullValue()));
+                            assertThat(testingListener.getLeaderSessionID()).isEqualTo(nullValue());
+                            assertThat(testingListener.getAddress()).isEqualTo(nullValue());
                         });
             }
         };
@@ -89,13 +87,11 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
                 runTest(
                         () -> {
                             final Exception testException = new Exception("test exception");
-
                             testingLeaderRetrievalDriver.onFatalError(testException);
-
                             testingListener.waitForError(timeout);
-                            assertThat(
-                                    testingListener.getError(),
-                                    FlinkMatchers.containsCause(testException));
+                            assertThat(testingListener.getError())
+                                    .satisfies(
+                                            matching(FlinkMatchers.containsCause(testException)));
                         });
             }
         };
@@ -108,10 +104,8 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
                 runTest(
                         () -> {
                             final Exception testException = new Exception("test exception");
-
                             leaderRetrievalService.stop();
                             testingLeaderRetrievalDriver.onFatalError(testException);
-
                             try {
                                 testingListener.waitForError(timeout);
                                 fail(
@@ -119,7 +113,7 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
                             } catch (TimeoutException ex) {
                                 // noop
                             }
-                            assertThat(testingListener.getError(), is(nullValue()));
+                            assertThat(testingListener.getError()).isEqualTo(nullValue());
                         });
             }
         };
@@ -134,16 +128,14 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
                             final LeaderInformation newLeader =
                                     LeaderInformation.known(UUID.randomUUID(), TEST_URL);
                             testingLeaderRetrievalDriver.onUpdate(newLeader);
-                            assertThat(testingListener.getLeaderEventQueueSize(), is(1));
-
+                            assertThat(testingListener.getLeaderEventQueueSize()).isEqualTo(1);
                             // Same leader information should not be notified twice.
                             testingLeaderRetrievalDriver.onUpdate(newLeader);
-                            assertThat(testingListener.getLeaderEventQueueSize(), is(1));
-
+                            assertThat(testingListener.getLeaderEventQueueSize()).isEqualTo(1);
                             // Leader truly changed.
                             testingLeaderRetrievalDriver.onUpdate(
                                     LeaderInformation.known(UUID.randomUUID(), TEST_URL + 1));
-                            assertThat(testingListener.getLeaderEventQueueSize(), is(2));
+                            assertThat(testingListener.getLeaderEventQueueSize()).isEqualTo(2);
                         });
             }
         };
@@ -163,7 +155,7 @@ public class DefaultLeaderRetrievalServiceTest extends TestLogger {
             leaderRetrievalService.start(testingListener);
 
             testingLeaderRetrievalDriver = leaderRetrievalDriverFactory.getCurrentRetrievalDriver();
-            assertThat(testingLeaderRetrievalDriver, is(notNullValue()));
+            assertThat(testingLeaderRetrievalDriver).isEqualTo(notNullValue());
             testMethod.run();
 
             leaderRetrievalService.stop();

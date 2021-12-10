@@ -67,7 +67,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for serialization/deserialization of {@link RexNode}. */
 @RunWith(Parameterized.class)
@@ -384,7 +384,7 @@ public class RexNodeSerdeTest {
         }
         String json = writer.toString();
         RexNode actual = mapper.readValue(json, RexNode.class);
-        assertEquals(rexNode, actual);
+        assertThat(actual).isEqualTo(rexNode);
     }
 
     /** Testing ScalarFunction. */

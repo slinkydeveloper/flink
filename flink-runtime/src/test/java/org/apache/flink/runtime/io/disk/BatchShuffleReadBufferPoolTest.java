@@ -30,10 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BatchShuffleReadBufferPool}. */
 public class BatchShuffleReadBufferPoolTest {
@@ -53,7 +50,7 @@ public class BatchShuffleReadBufferPoolTest {
     @Test
     public void testLargeTotalBytes() {
         BatchShuffleReadBufferPool bufferPool = createBufferPool(Long.MAX_VALUE, 1024);
-        assertEquals(Integer.MAX_VALUE, bufferPool.getNumTotalBuffers());
+        assertThat(bufferPool.getNumTotalBuffers()).isEqualTo(Integer.MAX_VALUE);
         bufferPool.destroy();
     }
 
@@ -68,10 +65,11 @@ public class BatchShuffleReadBufferPoolTest {
         for (int bufferSize = 4 * 1024; bufferSize <= totalBytes; bufferSize += 1024) {
             BatchShuffleReadBufferPool bufferPool = createBufferPool(totalBytes, bufferSize);
 
-            assertEquals(totalBytes, bufferPool.getTotalBytes());
-            assertEquals(totalBytes / bufferSize, bufferPool.getNumTotalBuffers());
-            assertTrue(bufferPool.getNumBuffersPerRequest() <= bufferPool.getNumTotalBuffers());
-            assertTrue(bufferPool.getNumBuffersPerRequest() > 0);
+            assertThat(bufferPool.getTotalBytes()).isEqualTo(totalBytes);
+            assertThat(bufferPool.getNumTotalBuffers()).isEqualTo(totalBytes / bufferSize);
+            assertThat(bufferPool.getNumBuffersPerRequest() <= bufferPool.getNumTotalBuffers())
+                    .isTrue();
+            assertThat(bufferPool.getNumBuffersPerRequest() > 0).isTrue();
         }
     }
 
@@ -82,7 +80,7 @@ public class BatchShuffleReadBufferPoolTest {
 
         try {
             buffers.addAll(bufferPool.requestBuffers());
-            assertEquals(bufferPool.getNumBuffersPerRequest(), buffers.size());
+            assertThat(buffers.size()).isEqualTo(bufferPool.getNumBuffersPerRequest());
         } finally {
             bufferPool.recycle(buffers);
             bufferPool.destroy();
@@ -95,7 +93,7 @@ public class BatchShuffleReadBufferPoolTest {
         List<MemorySegment> buffers = bufferPool.requestBuffers();
 
         bufferPool.recycle(buffers);
-        assertEquals(bufferPool.getNumTotalBuffers(), bufferPool.getAvailableBuffers());
+        assertThat(bufferPool.getAvailableBuffers()).isEqualTo(bufferPool.getNumTotalBuffers());
     }
 
     @Test
@@ -110,7 +108,7 @@ public class BatchShuffleReadBufferPoolTest {
             for (int i = 0; i < 4; ++i) {
                 buffers.put(owners[i], bufferPool.requestBuffers());
             }
-            assertEquals(0, bufferPool.getAvailableBuffers());
+            assertThat(bufferPool.getAvailableBuffers()).isEqualTo(0);
 
             Thread[] requestThreads = new Thread[numRequestThreads];
             for (int i = 0; i < numRequestThreads; ++i) {
@@ -143,14 +141,14 @@ public class BatchShuffleReadBufferPoolTest {
                 requestThread.join();
             }
 
-            assertNull(exception.get());
-            assertEquals(0, bufferPool.getAvailableBuffers());
-            assertEquals(4, buffers.size());
+            assertThat(exception.get()).isNull();
+            assertThat(bufferPool.getAvailableBuffers()).isEqualTo(0);
+            assertThat(buffers.size()).isEqualTo(4);
         } finally {
             for (Object owner : buffers.keySet()) {
                 bufferPool.recycle(buffers.remove(owner));
             }
-            assertEquals(bufferPool.getNumTotalBuffers(), bufferPool.getAvailableBuffers());
+            assertThat(bufferPool.getAvailableBuffers()).isEqualTo(bufferPool.getNumTotalBuffers());
             bufferPool.destroy();
         }
     }
@@ -191,8 +189,8 @@ public class BatchShuffleReadBufferPoolTest {
                 requestThread.join();
             }
 
-            assertNull(exception.get());
-            assertEquals(bufferPool.getNumTotalBuffers(), bufferPool.getAvailableBuffers());
+            assertThat(exception.get()).isNull();
+            assertThat(bufferPool.getAvailableBuffers()).isEqualTo(bufferPool.getNumTotalBuffers());
         } finally {
             bufferPool.destroy();
         }
@@ -204,16 +202,16 @@ public class BatchShuffleReadBufferPoolTest {
         List<MemorySegment> buffers = bufferPool.requestBuffers();
         bufferPool.recycle(buffers);
 
-        assertFalse(bufferPool.isDestroyed());
-        assertEquals(bufferPool.getNumTotalBuffers(), bufferPool.getAvailableBuffers());
+        assertThat(bufferPool.isDestroyed()).isFalse();
+        assertThat(bufferPool.getAvailableBuffers()).isEqualTo(bufferPool.getNumTotalBuffers());
 
         buffers = bufferPool.requestBuffers();
-        assertEquals(
-                bufferPool.getNumTotalBuffers() - buffers.size(), bufferPool.getAvailableBuffers());
+        assertThat(bufferPool.getAvailableBuffers())
+                .isEqualTo(bufferPool.getNumTotalBuffers() - buffers.size());
 
         bufferPool.destroy();
-        assertTrue(bufferPool.isDestroyed());
-        assertEquals(0, bufferPool.getAvailableBuffers());
+        assertThat(bufferPool.isDestroyed()).isTrue();
+        assertThat(bufferPool.getAvailableBuffers()).isEqualTo(0);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -232,7 +230,7 @@ public class BatchShuffleReadBufferPoolTest {
         bufferPool.destroy();
 
         bufferPool.recycle(buffers);
-        assertEquals(0, bufferPool.getAvailableBuffers());
+        assertThat(bufferPool.getAvailableBuffers()).isEqualTo(0);
     }
 
     @Test
@@ -257,7 +255,7 @@ public class BatchShuffleReadBufferPoolTest {
         bufferPool.destroy();
         requestThread.join();
 
-        assertTrue(exception.get() instanceof IllegalStateException);
+        assertThat(exception.get()).isInstanceOf(IllegalStateException.class);
     }
 
     private BatchShuffleReadBufferPool createBufferPool(long totalBytes, int bufferSize) {

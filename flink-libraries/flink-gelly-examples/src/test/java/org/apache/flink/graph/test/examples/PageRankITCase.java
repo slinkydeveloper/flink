@@ -27,13 +27,14 @@ import org.apache.flink.graph.examples.PageRank;
 import org.apache.flink.graph.examples.data.PageRankData;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PageRank}. */
 @RunWith(Parameterized.class)
@@ -113,9 +114,9 @@ public class PageRankITCase extends MultipleProgramsTestBase {
             double expectedPayLoad = Double.parseDouble(expectedFields[1]);
             double resultPayLoad = Double.parseDouble(resultFields[1]);
 
-            Assert.assertTrue(
-                    "Values differ by more than the permissible delta",
-                    Math.abs(expectedPayLoad - resultPayLoad) < delta);
+            assertThat(Math.abs(expectedPayLoad - resultPayLoad) < delta)
+                    .as("Values differ by more than the permissible delta")
+                    .isTrue();
         }
     }
 

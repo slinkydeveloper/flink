@@ -22,7 +22,7 @@ import org.apache.flink.optimizer.dag.EstimateProvider;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the cost formulas in the {@link DefaultCostEstimator}. Most of the tests establish
@@ -85,21 +85,21 @@ public class DefaultCostEstimatorTest {
         int rangeVsBroadcast = range.compareTo(broadcast);
 
         // repartition random is at most as expensive as hash partitioning
-        assertTrue(randomVsHash <= 0);
+        assertThat(randomVsHash <= 0).isTrue();
 
         // range partitioning is always more expensive than hash partitioning
-        assertTrue(hashVsRange < 0);
+        assertThat(hashVsRange < 0).isTrue();
 
         // broadcasting is always more expensive than hash partitioning
         if (targetParallelism > 1) {
-            assertTrue(hashVsBroadcast < 0);
+            assertThat(hashVsBroadcast < 0).isTrue();
         } else {
-            assertTrue(hashVsBroadcast <= 0);
+            assertThat(hashVsBroadcast <= 0).isTrue();
         }
 
         // range partitioning is not more expensive than broadcasting
         if (targetParallelism > 1) {
-            assertTrue(rangeVsBroadcast < 0);
+            assertThat(rangeVsBroadcast < 0).isTrue();
         }
     }
 
@@ -153,33 +153,33 @@ public class DefaultCostEstimatorTest {
         costEstimator.addBroadcastCost(MEDIUM_ESTIMATES, 1000, forwardLargeBcSmall1000);
 
         // hash cost is roughly monotonous
-        assertTrue(hashBothSmall.compareTo(hashSmallAndLarge) < 0);
-        assertTrue(hashSmallAndLarge.compareTo(hashBothLarge) < 0);
+        assertThat(hashBothSmall.compareTo(hashSmallAndLarge) < 0).isTrue();
+        assertThat(hashSmallAndLarge.compareTo(hashBothLarge) < 0).isTrue();
 
         // broadcast the smaller is better
-        assertTrue(hashLargeBcSmall10.compareTo(hashSmallBcLarge10) < 0);
-        assertTrue(forwardLargeBcSmall10.compareTo(forwardSmallBcLarge10) < 0);
-        assertTrue(hashLargeBcSmall1000.compareTo(hashSmallBcLarge1000) < 0);
-        assertTrue(forwardLargeBcSmall1000.compareTo(forwardSmallBcLarge1000) < 0);
+        assertThat(hashLargeBcSmall10.compareTo(hashSmallBcLarge10) < 0).isTrue();
+        assertThat(forwardLargeBcSmall10.compareTo(forwardSmallBcLarge10) < 0).isTrue();
+        assertThat(hashLargeBcSmall1000.compareTo(hashSmallBcLarge1000) < 0).isTrue();
+        assertThat(forwardLargeBcSmall1000.compareTo(forwardSmallBcLarge1000) < 0).isTrue();
 
         // broadcasting small and forwarding large is better than partition both, given size
         // difference
-        assertTrue(forwardLargeBcSmall10.compareTo(hashSmallAndLarge) < 0);
+        assertThat(forwardLargeBcSmall10.compareTo(hashSmallAndLarge) < 0).isTrue();
 
         // broadcasting too far is expensive again
-        assertTrue(forwardLargeBcSmall1000.compareTo(hashSmallAndLarge) > 0);
+        assertThat(forwardLargeBcSmall1000.compareTo(hashSmallAndLarge) > 0).isTrue();
 
         // assert weight is respected
-        assertTrue(hashSmallBcLarge10.compareTo(hashSmallBcLarge1000) < 0);
-        assertTrue(hashLargeBcSmall10.compareTo(hashLargeBcSmall1000) < 0);
-        assertTrue(forwardSmallBcLarge10.compareTo(forwardSmallBcLarge1000) < 0);
-        assertTrue(forwardLargeBcSmall10.compareTo(forwardLargeBcSmall1000) < 0);
+        assertThat(hashSmallBcLarge10.compareTo(hashSmallBcLarge1000) < 0).isTrue();
+        assertThat(hashLargeBcSmall10.compareTo(hashLargeBcSmall1000) < 0).isTrue();
+        assertThat(forwardSmallBcLarge10.compareTo(forwardSmallBcLarge1000) < 0).isTrue();
+        assertThat(forwardLargeBcSmall10.compareTo(forwardLargeBcSmall1000) < 0).isTrue();
 
         // forward versus hash
-        assertTrue(forwardSmallBcLarge10.compareTo(hashSmallBcLarge10) < 0);
-        assertTrue(forwardSmallBcLarge1000.compareTo(hashSmallBcLarge1000) < 0);
-        assertTrue(forwardLargeBcSmall10.compareTo(hashLargeBcSmall10) < 0);
-        assertTrue(forwardLargeBcSmall1000.compareTo(hashLargeBcSmall1000) < 0);
+        assertThat(forwardSmallBcLarge10.compareTo(hashSmallBcLarge10) < 0).isTrue();
+        assertThat(forwardSmallBcLarge1000.compareTo(hashSmallBcLarge1000) < 0).isTrue();
+        assertThat(forwardLargeBcSmall10.compareTo(hashLargeBcSmall10) < 0).isTrue();
+        assertThat(forwardLargeBcSmall1000.compareTo(hashLargeBcSmall1000) < 0).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -212,18 +212,18 @@ public class DefaultCostEstimatorTest {
         costEstimator.addBroadcastCost(UNKNOWN_ESTIMATES, 1000, bcUnknown1000);
 
         // if we do not know one of them, hashing both should be cheaper than anything
-        assertTrue(hashBoth.compareTo(bcKnown10) < 0);
-        assertTrue(hashBoth.compareTo(bcUnknown10) < 0);
-        assertTrue(hashBoth.compareTo(bcKnown1000) < 0);
-        assertTrue(hashBoth.compareTo(bcUnknown1000) < 0);
+        assertThat(hashBoth.compareTo(bcKnown10) < 0).isTrue();
+        assertThat(hashBoth.compareTo(bcUnknown10) < 0).isTrue();
+        assertThat(hashBoth.compareTo(bcKnown1000) < 0).isTrue();
+        assertThat(hashBoth.compareTo(bcUnknown1000) < 0).isTrue();
 
         // there should be no bias in broadcasting a known or unknown size input
-        assertTrue(bcKnown10.compareTo(bcUnknown10) == 0);
-        assertTrue(bcKnown1000.compareTo(bcUnknown1000) == 0);
+        assertThat(bcKnown10.compareTo(bcUnknown10) == 0).isTrue();
+        assertThat(bcKnown1000.compareTo(bcUnknown1000) == 0).isTrue();
 
         // replication factor does matter
-        assertTrue(bcKnown10.compareTo(bcKnown1000) < 0);
-        assertTrue(bcUnknown10.compareTo(bcUnknown1000) < 0);
+        assertThat(bcKnown10.compareTo(bcKnown1000) < 0).isTrue();
+        assertThat(bcUnknown10.compareTo(bcUnknown1000) < 0).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -243,9 +243,9 @@ public class DefaultCostEstimatorTest {
         costEstimator.addHybridHashCosts(SMALL_ESTIMATES, SMALL_ESTIMATES, hashBothSmall, 1);
         costEstimator.addHybridHashCosts(BIG_ESTIMATES, BIG_ESTIMATES, hashBothLarge, 1);
 
-        assertTrue(hashBothSmall.compareTo(hashSmallBuild) < 0);
-        assertTrue(hashSmallBuild.compareTo(hashLargeBuild) < 0);
-        assertTrue(hashLargeBuild.compareTo(hashBothLarge) < 0);
+        assertThat(hashBothSmall.compareTo(hashSmallBuild) < 0).isTrue();
+        assertThat(hashSmallBuild.compareTo(hashLargeBuild) < 0).isTrue();
+        assertThat(hashLargeBuild.compareTo(hashBothLarge) < 0).isTrue();
 
         // merge join costs
 
@@ -270,20 +270,20 @@ public class DefaultCostEstimatorTest {
         costEstimator.addLocalSortCost(BIG_ESTIMATES, mergeBothLarge);
         costEstimator.addLocalMergeCost(BIG_ESTIMATES, BIG_ESTIMATES, mergeBothLarge, 1);
 
-        assertTrue(mergeBothSmall.compareTo(mergeSmallFirst) < 0);
-        assertTrue(mergeBothSmall.compareTo(mergeSmallSecond) < 0);
-        assertTrue(mergeSmallFirst.compareTo(mergeSmallSecond) == 0);
-        assertTrue(mergeSmallFirst.compareTo(mergeBothLarge) < 0);
-        assertTrue(mergeSmallSecond.compareTo(mergeBothLarge) < 0);
+        assertThat(mergeBothSmall.compareTo(mergeSmallFirst) < 0).isTrue();
+        assertThat(mergeBothSmall.compareTo(mergeSmallSecond) < 0).isTrue();
+        assertThat(mergeSmallFirst.compareTo(mergeSmallSecond) == 0).isTrue();
+        assertThat(mergeSmallFirst.compareTo(mergeBothLarge) < 0).isTrue();
+        assertThat(mergeSmallSecond.compareTo(mergeBothLarge) < 0).isTrue();
 
         // compare merge join and hash join costs
 
-        assertTrue(hashBothSmall.compareTo(mergeBothSmall) < 0);
-        assertTrue(hashBothLarge.compareTo(mergeBothLarge) < 0);
-        assertTrue(hashSmallBuild.compareTo(mergeSmallFirst) < 0);
-        assertTrue(hashSmallBuild.compareTo(mergeSmallSecond) < 0);
-        assertTrue(hashLargeBuild.compareTo(mergeSmallFirst) < 0);
-        assertTrue(hashLargeBuild.compareTo(mergeSmallSecond) < 0);
+        assertThat(hashBothSmall.compareTo(mergeBothSmall) < 0).isTrue();
+        assertThat(hashBothLarge.compareTo(mergeBothLarge) < 0).isTrue();
+        assertThat(hashSmallBuild.compareTo(mergeSmallFirst) < 0).isTrue();
+        assertThat(hashSmallBuild.compareTo(mergeSmallSecond) < 0).isTrue();
+        assertThat(hashLargeBuild.compareTo(mergeSmallFirst) < 0).isTrue();
+        assertThat(hashLargeBuild.compareTo(mergeSmallSecond) < 0).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -321,15 +321,15 @@ public class DefaultCostEstimatorTest {
         costEstimator.addLocalMergeCost(e1, e2, mm5, 5);
 
         // weight 1 versus weight 5
-        assertTrue(hf1.compareTo(hf5) < 0);
-        assertTrue(hs1.compareTo(hs5) < 0);
-        assertTrue(mm1.compareTo(mm5) < 0);
+        assertThat(hf1.compareTo(hf5) < 0).isTrue();
+        assertThat(hs1.compareTo(hs5) < 0).isTrue();
+        assertThat(mm1.compareTo(mm5) < 0).isTrue();
 
         // hash versus merge
-        assertTrue(hf1.compareTo(mm1) < 0);
-        assertTrue(hs1.compareTo(mm1) < 0);
-        assertTrue(hf5.compareTo(mm5) < 0);
-        assertTrue(hs5.compareTo(mm5) < 0);
+        assertThat(hf1.compareTo(mm1) < 0).isTrue();
+        assertThat(hs1.compareTo(mm1) < 0).isTrue();
+        assertThat(hf5.compareTo(mm5) < 0).isTrue();
+        assertThat(hs5.compareTo(mm5) < 0).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -374,17 +374,17 @@ public class DefaultCostEstimatorTest {
                 BIG_ESTIMATES, MEDIUM_ESTIMATES, hashLargeSmallCached1, 1);
 
         // cached variant is always cheaper
-        assertTrue(hashBothUnknown10.compareTo(hashBothUnknownCached10) > 0);
-        assertTrue(hashBothSmall10.compareTo(hashBothSmallCached10) > 0);
-        assertTrue(hashSmallLarge10.compareTo(hashSmallLargeCached10) > 0);
-        assertTrue(hashLargeSmall10.compareTo(hashLargeSmallCached10) > 0);
+        assertThat(hashBothUnknown10.compareTo(hashBothUnknownCached10) > 0).isTrue();
+        assertThat(hashBothSmall10.compareTo(hashBothSmallCached10) > 0).isTrue();
+        assertThat(hashSmallLarge10.compareTo(hashSmallLargeCached10) > 0).isTrue();
+        assertThat(hashLargeSmall10.compareTo(hashLargeSmallCached10) > 0).isTrue();
 
         // caching the large side is better, because then the small one is the one with additional
         // I/O
-        assertTrue(hashLargeSmallCached10.compareTo(hashSmallLargeCached10) < 0);
+        assertThat(hashLargeSmallCached10.compareTo(hashSmallLargeCached10) < 0).isTrue();
 
         // a weight of one makes the caching the same as the non-cached variant
-        assertTrue(hashLargeSmall1.compareTo(hashLargeSmallCached1) == 0);
+        assertThat(hashLargeSmall1.compareTo(hashLargeSmallCached1) == 0).isTrue();
     }
 
     // --------------------------------------------------------------------------------------------

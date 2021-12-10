@@ -56,7 +56,7 @@ import static org.apache.flink.connector.file.table.FileSystemConnectorOptions.S
 import static org.apache.flink.connector.file.table.FileSystemConnectorOptions.STREAMING_SOURCE_MONITOR_INTERVAL;
 import static org.apache.flink.connector.file.table.FileSystemConnectorOptions.STREAMING_SOURCE_PARTITION_INCLUDE;
 import static org.apache.flink.connector.file.table.FileSystemConnectorOptions.STREAMING_SOURCE_PARTITION_ORDER;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test lookup join of hive tables. */
 public class HiveLookupJoinITCase {
@@ -163,8 +163,8 @@ public class HiveLookupJoinITCase {
         lookupFunction2.open(null);
 
         // verify lookup cache TTL option is properly configured
-        assertEquals(Duration.ofMinutes(5), lookupFunction1.getReloadInterval());
-        assertEquals(Duration.ofMinutes(120), lookupFunction2.getReloadInterval());
+        assertThat(lookupFunction1.getReloadInterval()).isEqualTo(Duration.ofMinutes(5));
+        assertThat(lookupFunction2.getReloadInterval()).isEqualTo(Duration.ofMinutes(120));
     }
 
     @Test
@@ -189,7 +189,7 @@ public class HiveLookupJoinITCase {
         PartitionFetcher.Context<HiveTablePartition> context = lookupFunction.getFetcherContext();
         List<HiveTablePartition> partitions = fetcher.fetch(context);
         // fetch latest partition by partition-name
-        assertEquals(1, partitions.size());
+        assertThat(partitions.size()).isEqualTo(1);
 
         PartitionReader<HiveTablePartition, RowData> reader = lookupFunction.getPartitionReader();
         reader.open(partitions);
@@ -209,7 +209,7 @@ public class HiveLookupJoinITCase {
             res.add(serializer.copy(row));
         }
         res.sort(Comparator.comparingInt(o -> o.getInt(0)));
-        assertEquals("[+I(3,c,33,2020,09,31)]", res.toString());
+        assertThat(res.toString()).isEqualTo("[+I(3,c,33,2020,09,31)]");
     }
 
     @Test
@@ -225,7 +225,7 @@ public class HiveLookupJoinITCase {
                                         + " default_catalog.default_database.probe as p "
                                         + " join bounded_table for system_time as of p.p as b on p.x=b.x and p.y=b.y");
         List<Row> results = CollectionUtil.iteratorToList(flinkTable.execute().collect());
-        assertEquals("[+I[1, a, 10], +I[2, b, 22], +I[3, c, 33]]", results.toString());
+        assertThat(results.toString()).isEqualTo("[+I[1, a, 10], +I[2, b, 22], +I[3, c, 33]]");
     }
 
     @Test
@@ -249,9 +249,9 @@ public class HiveLookupJoinITCase {
                                         + " default_catalog.default_database.probe as p"
                                         + " join bounded_partition_table for system_time as of p.p as b on p.x=b.x and p.y=b.y");
         List<Row> results = CollectionUtil.iteratorToList(flinkTable.execute().collect());
-        assertEquals(
-                "[+I[1, a, 8, 2019, 08, 01], +I[1, a, 10, 2020, 08, 31], +I[2, b, 22, 2020, 08, 31]]",
-                results.toString());
+        assertThat(results.toString())
+                .isEqualTo(
+                        "[+I[1, a, 8, 2019, 08, 01], +I[1, a, 10, 2020, 08, 31], +I[2, b, 22, 2020, 08, 31]]");
     }
 
     @Test
@@ -279,9 +279,9 @@ public class HiveLookupJoinITCase {
                                         + " default_catalog.default_database.probe as p"
                                         + " join partition_table_1 for system_time as of p.p as b on p.x=b.x and p.y=b.y");
         List<Row> results = CollectionUtil.iteratorToList(flinkTable.execute().collect());
-        assertEquals(
-                "[+I[1, a, 10, 2020, 09, 31], +I[2, b, 22, 2020, 09, 31], +I[3, c, 33, 2020, 09, 31]]",
-                results.toString());
+        assertThat(results.toString())
+                .isEqualTo(
+                        "[+I[1, a, 10, 2020, 09, 31], +I[2, b, 22, 2020, 09, 31], +I[3, c, 33, 2020, 09, 31]]");
     }
 
     @Test
@@ -309,8 +309,8 @@ public class HiveLookupJoinITCase {
                                         + " default_catalog.default_database.probe as p"
                                         + " join partition_table_2 for system_time as of p.p as b on p.x=b.x and p.y=b.y");
         List<Row> results = CollectionUtil.iteratorToList(flinkTable.execute().collect());
-        assertEquals(
-                "[+I[1, a, 10, 2020, 08, 31], +I[2, b, 22, 2020, 08, 31]]", results.toString());
+        assertThat(results.toString())
+                .isEqualTo("[+I[1, a, 10, 2020, 08, 31], +I[2, b, 22, 2020, 08, 31]]");
     }
 
     @Test
@@ -347,8 +347,8 @@ public class HiveLookupJoinITCase {
                                         + " default_catalog.default_database.probe as p"
                                         + " join partition_table_3 for system_time as of p.p as b on p.x=b.x and p.y=b.y");
         List<Row> results = CollectionUtil.iteratorToList(flinkTable.execute().collect());
-        assertEquals(
-                "[+I[1, a, 101, 2020, 08, 01], +I[2, b, 122, 2020, 08, 01]]", results.toString());
+        assertThat(results.toString())
+                .isEqualTo("[+I[1, a, 101, 2020, 08, 01], +I[2, b, 122, 2020, 08, 01]]");
     }
 
     private FileSystemLookupFunction<HiveTablePartition> getLookupFunction(String tableName)

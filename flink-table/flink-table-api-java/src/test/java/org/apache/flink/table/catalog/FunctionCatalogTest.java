@@ -40,12 +40,11 @@ import java.util.Set;
 
 import static org.apache.flink.table.utils.CatalogManagerMocks.DEFAULT_CATALOG;
 import static org.apache.flink.table.utils.CatalogManagerMocks.DEFAULT_DATABASE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.internal.matchers.ThrowableMessageMatcher.hasMessage;
 
 /** Tests for {@link FunctionCatalog}. */
@@ -104,13 +103,14 @@ public class FunctionCatalogTest {
 
         Set<String> expected = new ModuleManager().listFunctions();
 
-        assertTrue(actual.containsAll(expected));
+        assertThat(actual.containsAll(expected)).isTrue();
     }
 
     @Test
     public void testPreciseFunctionReference() throws Exception {
         // test no function is found
-        assertFalse(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER).isPresent());
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER).isPresent())
+                .isFalse();
 
         // test catalog function is found
         catalog.createFunction(
@@ -118,23 +118,24 @@ public class FunctionCatalogTest {
                 new CatalogFunctionImpl(FUNCTION_1.getClass().getName()),
                 false);
 
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // test temp catalog function is found
         functionCatalog.registerTemporaryCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2, false);
 
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2)));
     }
 
     @Test
     public void testAmbiguousFunctionReference() throws Exception {
         // test no function is found
-        assertFalse(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER).isPresent());
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER).isPresent())
+                .isFalse();
 
         // test catalog function is found
         catalog.createFunction(
@@ -142,88 +143,94 @@ public class FunctionCatalogTest {
                 new CatalogFunctionImpl(FUNCTION_1.getClass().getName()),
                 false);
 
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // test temporary catalog function is found
         functionCatalog.registerTemporaryCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2, false);
 
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2)));
 
         // test system function is found
         moduleManager.loadModule("test_module", new TestModule());
 
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_3));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_3)));
 
         // test temporary system function is found
         functionCatalog.registerTemporarySystemFunction(NAME, FUNCTION_4, false);
 
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_4));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_4)));
     }
 
     @Test
     public void testTemporarySystemFunction() {
         // register first time
         functionCatalog.registerTemporarySystemFunction(NAME, FUNCTION_1, false);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1)));
 
         // register second time lenient
         functionCatalog.registerTemporarySystemFunction(NAME, FUNCTION_2, true);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1)));
 
         // register second time not lenient
         try {
             functionCatalog.registerTemporarySystemFunction(NAME, FUNCTION_2, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString("A function named '" + NAME + "' does already exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function named '"
+                                                            + NAME
+                                                            + "' does already exist."))));
         }
 
         // drop first time
-        assertThat(functionCatalog.dropTemporarySystemFunction(NAME, false), equalTo(true));
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER), returnsNoFunction());
+        assertThat(functionCatalog.dropTemporarySystemFunction(NAME, false)).isEqualTo(true);
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsNoFunction()));
 
         // drop second time lenient
-        assertThat(functionCatalog.dropTemporarySystemFunction(NAME, true), equalTo(false));
+        assertThat(functionCatalog.dropTemporarySystemFunction(NAME, true)).isEqualTo(false);
 
         // drop second time not lenient
         try {
             functionCatalog.dropTemporarySystemFunction(NAME, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(containsString("A function named '" + NAME + "' doesn't exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function named '"
+                                                            + NAME
+                                                            + "' doesn't exist."))));
         }
 
         // register invalid
         try {
             functionCatalog.registerTemporarySystemFunction(NAME, FUNCTION_INVALID, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "Could not register temporary system function '"
-                                            + NAME
-                                            + "' due to implementation errors.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "Could not register temporary system function '"
+                                                            + NAME
+                                                            + "' due to implementation errors."))));
         }
     }
 
@@ -232,42 +239,45 @@ public class FunctionCatalogTest {
         // register first time
         functionCatalog.registerTemporarySystemFunction(
                 NAME, FUNCTION_1.getClass().getName(), FunctionLanguage.JAVA, false);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1)));
 
         // register second time lenient
         functionCatalog.registerTemporarySystemFunction(
                 NAME, FUNCTION_2.getClass().getName(), FunctionLanguage.JAVA, true);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), FUNCTION_1)));
 
         // register second time not lenient
         try {
             functionCatalog.registerTemporarySystemFunction(
                     NAME, FUNCTION_2.getClass().getName(), FunctionLanguage.JAVA, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString("A function named '" + NAME + "' does already exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function named '"
+                                                            + NAME
+                                                            + "' does already exist."))));
         }
 
         // register invalid
         try {
             functionCatalog.registerTemporarySystemFunction(
                     NAME, FUNCTION_INVALID.getClass().getName(), FunctionLanguage.JAVA, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "Could not register temporary system function '"
-                                            + NAME
-                                            + "' due to implementation errors.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "Could not register temporary system function '"
+                                                            + NAME
+                                                            + "' due to implementation errors."))));
         }
 
         functionCatalog.dropTemporarySystemFunction(NAME, true);
@@ -275,18 +285,17 @@ public class FunctionCatalogTest {
         // test register uninstantiated table function
         functionCatalog.registerTemporarySystemFunction(
                 NAME, TABLE_FUNCTION.getClass().getName(), FunctionLanguage.JAVA, false);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), TABLE_FUNCTION));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsFunction(FunctionIdentifier.of(NAME), TABLE_FUNCTION)));
 
         functionCatalog.dropTemporarySystemFunction(NAME, true);
 
         // test register uninstantiated aggregate function
         functionCatalog.registerTemporarySystemFunction(
                 NAME, AGGREGATE_FUNCTION.getClass().getName(), FunctionLanguage.JAVA, false);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(NAME), AGGREGATE_FUNCTION));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(NAME), AGGREGATE_FUNCTION)));
     }
 
     @Test
@@ -294,70 +303,72 @@ public class FunctionCatalogTest {
         // register first time
         functionCatalog.registerCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_1.getClass(), false);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // register second time lenient
         functionCatalog.registerCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2.getClass(), true);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // register second time not lenient
         try {
             functionCatalog.registerCatalogFunction(
                     PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2.getClass(), false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "A function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' does already exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' does already exist."))));
         }
 
         // drop first time
-        assertThat(
-                functionCatalog.dropCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, false),
-                equalTo(true));
-        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER), returnsNoFunction());
+        assertThat(functionCatalog.dropCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, false))
+                .isEqualTo(true);
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(matching(returnsNoFunction()));
 
         // drop second time lenient
-        assertThat(
-                functionCatalog.dropCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, true),
-                equalTo(false));
+        assertThat(functionCatalog.dropCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, true))
+                .isEqualTo(false);
 
         // drop second time not lenient
         try {
             functionCatalog.dropCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "A function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' doesn't exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' doesn't exist."))));
         }
 
         // register invalid
         try {
             functionCatalog.registerCatalogFunction(
                     PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_INVALID.getClass(), false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "Could not register catalog function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' due to implementation errors.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "Could not register catalog function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' due to implementation errors."))));
         }
     }
 
@@ -366,114 +377,126 @@ public class FunctionCatalogTest {
         // register permanent function
         functionCatalog.registerCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2.getClass(), false);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2)));
 
         // register temporary first time
         functionCatalog.registerTemporaryCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_1, false);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(
-                        FunctionIdentifier.of(IDENTIFIER),
-                        FUNCTION_1)); // temporary function hides catalog function
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(
+                                returnsFunction(
+                                        FunctionIdentifier.of(
+                                                IDENTIFIER), // temporary function hides catalog
+                                                             // function
+                                        FUNCTION_1))); // temporary function hides catalog function
 
         // dropping catalog functions is not possible in this state
         try {
             functionCatalog.dropCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, true);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "A temporary function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' does already exist. "
-                                            + "Please drop the temporary function first.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A temporary function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' does already exist. "
+                                                            + "Please drop the temporary function first."))));
         }
 
         // registering catalog functions is not possible in this state
         try {
             functionCatalog.registerCatalogFunction(
                     PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2.getClass(), false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "A temporary function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' does already exist. "
-                                            + "Please drop the temporary function first.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A temporary function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' does already exist. "
+                                                            + "Please drop the temporary function first."))));
         }
 
         // register temporary second time lenient
         functionCatalog.registerTemporaryCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_1, true);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // register temporary second time not lenient
         try {
             functionCatalog.registerTemporaryCatalogFunction(
                     PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "A function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' does already exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' does already exist."))));
         }
 
         // drop temporary first time
         assertThat(
-                functionCatalog.dropTemporaryCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, false),
-                equalTo(true));
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(
-                        FunctionIdentifier.of(IDENTIFIER),
-                        FUNCTION_2)); // permanent function is visible again
+                        functionCatalog.dropTemporaryCatalogFunction(
+                                PARTIAL_UNRESOLVED_IDENTIFIER, false))
+                .isEqualTo(true);
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(
+                                returnsFunction(
+                                        FunctionIdentifier.of(
+                                                IDENTIFIER), // permanent function is visible again
+                                        FUNCTION_2))); // permanent function is visible again
 
         // drop temporary second time lenient
         assertThat(
-                functionCatalog.dropTemporaryCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, true),
-                equalTo(false));
+                        functionCatalog.dropTemporaryCatalogFunction(
+                                PARTIAL_UNRESOLVED_IDENTIFIER, true))
+                .isEqualTo(false);
 
         // drop temporary second time not lenient
         try {
             functionCatalog.dropTemporaryCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "Temporary catalog function "
-                                            + IDENTIFIER.toString()
-                                            + " doesn't exist")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "Temporary catalog function "
+                                                            + IDENTIFIER.toString()
+                                                            + " doesn't exist"))));
         }
 
         // register invalid
         try {
             functionCatalog.registerTemporaryCatalogFunction(
                     PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_INVALID, false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "Could not register temporary catalog function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' due to implementation errors.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "Could not register temporary catalog function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' due to implementation errors."))));
         }
     }
 
@@ -482,9 +505,9 @@ public class FunctionCatalogTest {
         // register permanent function
         functionCatalog.registerCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER, FUNCTION_2.getClass(), false);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_2)));
 
         // register temporary first time
         functionCatalog.registerTemporaryCatalogFunction(
@@ -492,18 +515,18 @@ public class FunctionCatalogTest {
                 new CatalogFunctionImpl(FUNCTION_1.getClass().getName()),
                 false);
         // temporary function hides catalog function
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // register temporary second time lenient
         functionCatalog.registerTemporaryCatalogFunction(
                 PARTIAL_UNRESOLVED_IDENTIFIER,
                 new CatalogFunctionImpl(FUNCTION_1.getClass().getName()),
                 true);
-        assertThat(
-                functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1));
+        assertThat(functionCatalog.lookupFunction(FULL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(returnsFunction(FunctionIdentifier.of(IDENTIFIER), FUNCTION_1)));
 
         // register temporary second time not lenient
         try {
@@ -511,15 +534,16 @@ public class FunctionCatalogTest {
                     PARTIAL_UNRESOLVED_IDENTIFIER,
                     new CatalogFunctionImpl(FUNCTION_2.getClass().getName()),
                     false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "A function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' does already exist.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "A function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' does already exist."))));
         }
 
         // register invalid
@@ -530,15 +554,16 @@ public class FunctionCatalogTest {
                     PARTIAL_UNRESOLVED_IDENTIFIER,
                     new CatalogFunctionImpl(FUNCTION_INVALID.getClass().getName()),
                     false);
-            fail();
+            fail("unknown failure");
         } catch (ValidationException e) {
-            assertThat(
-                    e,
-                    hasMessage(
-                            containsString(
-                                    "Could not register temporary catalog function '"
-                                            + IDENTIFIER.asSummaryString()
-                                            + "' due to implementation errors.")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    hasMessage(
+                                            containsString(
+                                                    "Could not register temporary catalog function '"
+                                                            + IDENTIFIER.asSummaryString()
+                                                            + "' due to implementation errors."))));
         }
 
         functionCatalog.dropTemporaryCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, true);
@@ -548,9 +573,11 @@ public class FunctionCatalogTest {
                 PARTIAL_UNRESOLVED_IDENTIFIER,
                 new CatalogFunctionImpl(TABLE_FUNCTION.getClass().getName()),
                 false);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), TABLE_FUNCTION));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(
+                                returnsFunction(
+                                        FunctionIdentifier.of(IDENTIFIER), TABLE_FUNCTION)));
 
         functionCatalog.dropTemporaryCatalogFunction(PARTIAL_UNRESOLVED_IDENTIFIER, true);
 
@@ -559,9 +586,11 @@ public class FunctionCatalogTest {
                 PARTIAL_UNRESOLVED_IDENTIFIER,
                 new CatalogFunctionImpl(AGGREGATE_FUNCTION.getClass().getName()),
                 false);
-        assertThat(
-                functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER),
-                returnsFunction(FunctionIdentifier.of(IDENTIFIER), AGGREGATE_FUNCTION));
+        assertThat(functionCatalog.lookupFunction(PARTIAL_UNRESOLVED_IDENTIFIER))
+                .satisfies(
+                        matching(
+                                returnsFunction(
+                                        FunctionIdentifier.of(IDENTIFIER), AGGREGATE_FUNCTION)));
     }
 
     // --------------------------------------------------------------------------------------------

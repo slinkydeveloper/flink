@@ -27,9 +27,7 @@ import java.util.Set;
 
 import static org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpMethod.GET;
 import static org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpMethod.POST;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Router}. */
 public class RouterTest {
@@ -42,94 +40,94 @@ public class RouterTest {
 
     @Test
     public void testIgnoreSlashesAtBothEnds() {
-        assertEquals("index", router.route(GET, "articles").target());
-        assertEquals("index", router.route(GET, "/articles").target());
-        assertEquals("index", router.route(GET, "//articles").target());
-        assertEquals("index", router.route(GET, "articles/").target());
-        assertEquals("index", router.route(GET, "articles//").target());
-        assertEquals("index", router.route(GET, "/articles/").target());
-        assertEquals("index", router.route(GET, "//articles//").target());
+        assertThat(router.route(GET, "articles").target()).isEqualTo("index");
+        assertThat(router.route(GET, "/articles").target()).isEqualTo("index");
+        assertThat(router.route(GET, "//articles").target()).isEqualTo("index");
+        assertThat(router.route(GET, "articles/").target()).isEqualTo("index");
+        assertThat(router.route(GET, "articles//").target()).isEqualTo("index");
+        assertThat(router.route(GET, "/articles/").target()).isEqualTo("index");
+        assertThat(router.route(GET, "//articles//").target()).isEqualTo("index");
     }
 
     @Test
     public void testEmptyParams() {
         RouteResult<String> routed = router.route(GET, "/articles");
-        assertEquals("index", routed.target());
-        assertEquals(0, routed.pathParams().size());
+        assertThat(routed.target()).isEqualTo("index");
+        assertThat(routed.pathParams().size()).isEqualTo(0);
     }
 
     @Test
     public void testParams() {
         RouteResult<String> routed = router.route(GET, "/articles/123");
-        assertEquals("show", routed.target());
-        assertEquals(1, routed.pathParams().size());
-        assertEquals("123", routed.pathParams().get("id"));
+        assertThat(routed.target()).isEqualTo("show");
+        assertThat(routed.pathParams().size()).isEqualTo(1);
+        assertThat(routed.pathParams().get("id")).isEqualTo("123");
     }
 
     @Test
     public void testNone() {
         RouteResult<String> routed = router.route(GET, "/noexist");
-        assertEquals("404", routed.target());
+        assertThat(routed.target()).isEqualTo("404");
     }
 
     @Test
     public void testSplatWildcard() {
         RouteResult<String> routed = router.route(GET, "/download/foo/bar.png");
-        assertEquals("download", routed.target());
-        assertEquals(1, routed.pathParams().size());
-        assertEquals("foo/bar.png", routed.pathParams().get("*"));
+        assertThat(routed.target()).isEqualTo("download");
+        assertThat(routed.pathParams().size()).isEqualTo(1);
+        assertThat(routed.pathParams().get("*")).isEqualTo("foo/bar.png");
     }
 
     @Test
     public void testOrder() {
         RouteResult<String> routed1 = router.route(GET, "/articles/new");
-        assertEquals("new", routed1.target());
-        assertEquals(0, routed1.pathParams().size());
+        assertThat(routed1.target()).isEqualTo("new");
+        assertThat(routed1.pathParams().size()).isEqualTo(0);
 
         RouteResult<String> routed2 = router.route(GET, "/articles/123");
-        assertEquals("show", routed2.target());
-        assertEquals(1, routed2.pathParams().size());
-        assertEquals("123", routed2.pathParams().get("id"));
+        assertThat(routed2.target()).isEqualTo("show");
+        assertThat(routed2.pathParams().size()).isEqualTo(1);
+        assertThat(routed2.pathParams().get("id")).isEqualTo("123");
 
         RouteResult<String> routed3 = router.route(GET, "/notfound");
-        assertEquals("404", routed3.target());
-        assertEquals(0, routed3.pathParams().size());
+        assertThat(routed3.target()).isEqualTo("404");
+        assertThat(routed3.pathParams().size()).isEqualTo(0);
 
         RouteResult<String> routed4 = router.route(GET, "/articles/overview");
-        assertEquals("overview", routed4.target());
-        assertEquals(0, routed4.pathParams().size());
+        assertThat(routed4.target()).isEqualTo("overview");
+        assertThat(routed4.pathParams().size()).isEqualTo(0);
 
         RouteResult<String> routed5 = router.route(GET, "/articles/overview/detailed");
-        assertEquals("detailed", routed5.target());
-        assertEquals(0, routed5.pathParams().size());
+        assertThat(routed5.target()).isEqualTo("detailed");
+        assertThat(routed5.pathParams().size()).isEqualTo(0);
     }
 
     @Test
     public void testAnyMethod() {
         RouteResult<String> routed1 = router.route(GET, "/anyMethod");
-        assertEquals("anyMethod", routed1.target());
-        assertEquals(0, routed1.pathParams().size());
+        assertThat(routed1.target()).isEqualTo("anyMethod");
+        assertThat(routed1.pathParams().size()).isEqualTo(0);
 
         RouteResult<String> routed2 = router.route(POST, "/anyMethod");
-        assertEquals("anyMethod", routed2.target());
-        assertEquals(0, routed2.pathParams().size());
+        assertThat(routed2.target()).isEqualTo("anyMethod");
+        assertThat(routed2.pathParams().size()).isEqualTo(0);
     }
 
     @Test
     public void testRemoveByPathPattern() {
         router.removePathPattern("/articles");
         RouteResult<String> routed = router.route(GET, "/articles");
-        assertEquals("404", routed.target());
+        assertThat(routed.target()).isEqualTo("404");
     }
 
     @Test
     public void testAllowedMethods() {
-        assertEquals(9, router.allAllowedMethods().size());
+        assertThat(router.allAllowedMethods().size()).isEqualTo(9);
 
         Set<HttpMethod> methods = router.allowedMethods("/articles");
-        assertEquals(2, methods.size());
-        assertTrue(methods.contains(GET));
-        assertTrue(methods.contains(POST));
+        assertThat(methods.size()).isEqualTo(2);
+        assertThat(methods.contains(GET)).isTrue();
+        assertThat(methods.contains(POST)).isTrue();
     }
 
     @Test
@@ -141,10 +139,10 @@ public class RouterTest {
 
         RouteResult<Class<? extends Action>> routed1 = router.route(GET, "/articles");
         RouteResult<Class<? extends Action>> routed2 = router.route(GET, "/articles/123");
-        assertNotNull(routed1);
-        assertNotNull(routed2);
-        assertEquals(Index.class, routed1.target());
-        assertEquals(Show.class, routed2.target());
+        assertThat(routed1).isNotNull();
+        assertThat(routed2).isNotNull();
+        assertThat(routed1.target()).isEqualTo(Index.class);
+        assertThat(routed2.target()).isEqualTo(Show.class);
     }
 
     private static final class StringRouter {

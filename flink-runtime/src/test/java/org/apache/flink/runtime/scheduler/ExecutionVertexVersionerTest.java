@@ -31,14 +31,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link ExecutionVertexVersioner}. */
 public class ExecutionVertexVersionerTest extends TestLogger {
@@ -61,7 +58,7 @@ public class ExecutionVertexVersionerTest extends TestLogger {
     public void isModifiedReturnsFalseIfVertexUnmodified() {
         final ExecutionVertexVersion executionVertexVersion =
                 executionVertexVersioner.recordModification(TEST_EXECUTION_VERTEX_ID1);
-        assertFalse(executionVertexVersioner.isModified(executionVertexVersion));
+        assertThat(executionVertexVersioner.isModified(executionVertexVersion)).isFalse();
     }
 
     @Test
@@ -69,7 +66,7 @@ public class ExecutionVertexVersionerTest extends TestLogger {
         final ExecutionVertexVersion executionVertexVersion =
                 executionVertexVersioner.recordModification(TEST_EXECUTION_VERTEX_ID1);
         executionVertexVersioner.recordModification(TEST_EXECUTION_VERTEX_ID1);
-        assertTrue(executionVertexVersioner.isModified(executionVertexVersion));
+        assertThat(executionVertexVersioner.isModified(executionVertexVersion)).isTrue();
     }
 
     @Test
@@ -79,12 +76,11 @@ public class ExecutionVertexVersionerTest extends TestLogger {
                     new ExecutionVertexVersion(TEST_EXECUTION_VERTEX_ID1, 0));
             fail("Expected exception not thrown");
         } catch (final IllegalStateException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString(
+            assertThat(e.getMessage())
+                    .contains(
                             "Execution vertex "
                                     + TEST_EXECUTION_VERTEX_ID1
-                                    + " does not have a recorded version"));
+                                    + " does not have a recorded version");
         }
     }
 
@@ -100,7 +96,7 @@ public class ExecutionVertexVersionerTest extends TestLogger {
         final Set<ExecutionVertexID> unmodifiedExecutionVertices =
                 executionVertexVersioner.getUnmodifiedExecutionVertices(executionVertexVersions);
 
-        assertThat(unmodifiedExecutionVertices, is(empty()));
+        assertThat(unmodifiedExecutionVertices).isEqualTo(empty());
     }
 
     @Test
@@ -114,9 +110,11 @@ public class ExecutionVertexVersionerTest extends TestLogger {
         final Set<ExecutionVertexID> unmodifiedExecutionVertices =
                 executionVertexVersioner.getUnmodifiedExecutionVertices(executionVertexVersions);
 
-        assertThat(
-                unmodifiedExecutionVertices,
-                containsInAnyOrder(TEST_EXECUTION_VERTEX_ID1, TEST_EXECUTION_VERTEX_ID2));
+        assertThat(unmodifiedExecutionVertices)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        TEST_EXECUTION_VERTEX_ID1, TEST_EXECUTION_VERTEX_ID2)));
     }
 
     @Test
@@ -131,6 +129,7 @@ public class ExecutionVertexVersionerTest extends TestLogger {
         final Set<ExecutionVertexID> unmodifiedExecutionVertices =
                 executionVertexVersioner.getUnmodifiedExecutionVertices(executionVertexVersions);
 
-        assertThat(unmodifiedExecutionVertices, containsInAnyOrder(TEST_EXECUTION_VERTEX_ID2));
+        assertThat(unmodifiedExecutionVertices)
+                .satisfies(matching(containsInAnyOrder(TEST_EXECUTION_VERTEX_ID2)));
     }
 }

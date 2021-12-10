@@ -20,7 +20,8 @@ package org.apache.flink.dropwizard.metrics;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,8 +37,8 @@ public class DropwizardMeterWrapperTest {
 
         DropwizardMeterWrapper wrapper = new DropwizardMeterWrapper(dropwizardMeter);
 
-        assertEquals(1.0, wrapper.getRate(), 0.00001);
-        assertEquals(100L, wrapper.getCount());
+        assertThat(wrapper.getRate()).isCloseTo(1.0, within(0.00001));
+        assertThat(wrapper.getCount()).isEqualTo(100L);
     }
 
     @Test

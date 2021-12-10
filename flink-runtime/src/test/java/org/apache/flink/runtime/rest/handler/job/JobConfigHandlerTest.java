@@ -41,9 +41,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /** Test for the {@link JobConfigHandler}. */
 public class JobConfigHandlerTest extends TestLogger {
@@ -82,9 +81,8 @@ public class JobConfigHandlerTest extends TestLogger {
         final Map<String, String> filteredGlobalJobParameters =
                 filterSecretValues(globalJobParameters);
 
-        assertThat(
-                jobConfigInfoResponse.getExecutionConfigInfo().getGlobalJobParameters(),
-                is(equalTo(filteredGlobalJobParameters)));
+        assertThat(jobConfigInfoResponse.getExecutionConfigInfo().getGlobalJobParameters())
+                .isEqualTo(equalTo(filteredGlobalJobParameters));
     }
 
     private Map<String, String> filterSecretValues(Map<String, String> globalJobParameters) {

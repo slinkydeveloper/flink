@@ -89,15 +89,9 @@ import static org.apache.flink.runtime.io.network.util.TestBufferFactory.createB
 import static org.apache.flink.runtime.state.CheckpointStorageLocationReference.getDefault;
 import static org.apache.flink.runtime.util.NettyShuffleDescriptorBuilder.createRemoteWithIdAndLocation;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link SingleInputGate}. */
 public class SingleInputGateTest extends InputGateTestBase {
@@ -133,45 +127,46 @@ public class SingleInputGateTest extends InputGateTestBase {
             closer.register(inputGate::close);
 
             // before setup
-            assertNull(inputGate.getBufferPool());
+            assertThat(inputGate.getBufferPool()).isNull();
             for (InputChannel inputChannel : inputGate.getInputChannels().values()) {
-                assertTrue(
-                        inputChannel instanceof RecoveredInputChannel
-                                || inputChannel instanceof UnknownInputChannel);
+                assertThat(
+                                inputChannel instanceof RecoveredInputChannel
+                                        || inputChannel instanceof UnknownInputChannel)
+                        .isTrue();
                 if (inputChannel instanceof RecoveredInputChannel) {
-                    assertEquals(
-                            0,
-                            ((RecoveredInputChannel) inputChannel)
-                                    .bufferManager.getNumberOfAvailableBuffers());
+                    assertThat(
+                                    ((RecoveredInputChannel) inputChannel)
+                                            .bufferManager.getNumberOfAvailableBuffers())
+                            .isEqualTo(0);
                 }
             }
 
             inputGate.setup();
 
             // after setup
-            assertNotNull(inputGate.getBufferPool());
-            assertEquals(1, inputGate.getBufferPool().getNumberOfRequiredMemorySegments());
+            assertThat(inputGate.getBufferPool()).isNotNull();
+            assertThat(inputGate.getBufferPool().getNumberOfRequiredMemorySegments()).isEqualTo(1);
             for (InputChannel inputChannel : inputGate.getInputChannels().values()) {
                 if (inputChannel instanceof RemoteRecoveredInputChannel) {
-                    assertEquals(
-                            0,
-                            ((RemoteRecoveredInputChannel) inputChannel)
-                                    .bufferManager.getNumberOfAvailableBuffers());
+                    assertThat(
+                                    ((RemoteRecoveredInputChannel) inputChannel)
+                                            .bufferManager.getNumberOfAvailableBuffers())
+                            .isEqualTo(0);
                 } else if (inputChannel instanceof LocalRecoveredInputChannel) {
-                    assertEquals(
-                            0,
-                            ((LocalRecoveredInputChannel) inputChannel)
-                                    .bufferManager.getNumberOfAvailableBuffers());
+                    assertThat(
+                                    ((LocalRecoveredInputChannel) inputChannel)
+                                            .bufferManager.getNumberOfAvailableBuffers())
+                            .isEqualTo(0);
                 }
             }
 
             inputGate.convertRecoveredInputChannels();
-            assertNotNull(inputGate.getBufferPool());
-            assertEquals(1, inputGate.getBufferPool().getNumberOfRequiredMemorySegments());
+            assertThat(inputGate.getBufferPool()).isNotNull();
+            assertThat(inputGate.getBufferPool().getNumberOfRequiredMemorySegments()).isEqualTo(1);
             for (InputChannel inputChannel : inputGate.getInputChannels().values()) {
                 if (inputChannel instanceof RemoteInputChannel) {
-                    assertEquals(
-                            2, ((RemoteInputChannel) inputChannel).getNumberOfAvailableBuffers());
+                    assertThat(((RemoteInputChannel) inputChannel).getNumberOfAvailableBuffers())
+                            .isEqualTo(2);
                 }
             }
         }
@@ -195,15 +190,16 @@ public class SingleInputGateTest extends InputGateTestBase {
             gate.pollNext();
 
             final InputChannel remoteChannel = gate.getChannel(0);
-            assertThat(remoteChannel, instanceOf(RemoteInputChannel.class));
-            assertNotNull(((RemoteInputChannel) remoteChannel).getPartitionRequestClient());
-            assertEquals(2, ((RemoteInputChannel) remoteChannel).getInitialCredit());
+            assertThat(remoteChannel).isInstanceOf(RemoteInputChannel.class);
+            assertThat(((RemoteInputChannel) remoteChannel).getPartitionRequestClient())
+                    .isNotNull();
+            assertThat(((RemoteInputChannel) remoteChannel).getInitialCredit()).isEqualTo(2);
 
             final InputChannel localChannel = gate.getChannel(1);
-            assertThat(localChannel, instanceOf(LocalInputChannel.class));
-            assertNotNull(((LocalInputChannel) localChannel).getSubpartitionView());
+            assertThat(localChannel).isInstanceOf(LocalInputChannel.class);
+            assertThat(((LocalInputChannel) localChannel).getSubpartitionView()).isNotNull();
 
-            assertThat(gate.getChannel(2), instanceOf(UnknownInputChannel.class));
+            assertThat(gate.getChannel(2)).isInstanceOf(UnknownInputChannel.class);
         }
     }
 
@@ -240,20 +236,19 @@ public class SingleInputGateTest extends InputGateTestBase {
         verifyBufferOrEvent(inputGate, true, 0, true);
         verifyBufferOrEvent(inputGate, false, 1, true);
         // we have received EndOfData on a single channel only
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.NOT_END_OF_DATA,
-                inputGate.hasReceivedEndOfData());
+        assertThat(inputGate.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.NOT_END_OF_DATA);
         verifyBufferOrEvent(inputGate, false, 0, true);
-        assertFalse(inputGate.isFinished());
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.DRAINED, inputGate.hasReceivedEndOfData());
+        assertThat(inputGate.isFinished()).isFalse();
+        assertThat(inputGate.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.DRAINED);
         verifyBufferOrEvent(inputGate, false, 1, true);
         verifyBufferOrEvent(inputGate, false, 0, false);
 
         // Return null when the input gate has received all end-of-partition events
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.DRAINED, inputGate.hasReceivedEndOfData());
-        assertTrue(inputGate.isFinished());
+        assertThat(inputGate.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.DRAINED);
+        assertThat(inputGate.isFinished()).isTrue();
 
         for (TestInputChannel ic : inputChannels) {
             ic.assertReturnedEventsAreRecycled();
@@ -291,23 +286,21 @@ public class SingleInputGateTest extends InputGateTestBase {
 
         verifyBufferOrEvent(inputGate1, false, 0, true);
         // we have received EndOfData on a single channel only
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.NOT_END_OF_DATA,
-                inputGate1.hasReceivedEndOfData());
+        assertThat(inputGate1.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.NOT_END_OF_DATA);
         verifyBufferOrEvent(inputGate1, false, 1, true);
         // one of the channels said we should not drain
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.STOPPED, inputGate1.hasReceivedEndOfData());
+        assertThat(inputGate1.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.STOPPED);
 
         verifyBufferOrEvent(inputGate2, false, 0, true);
         // we have received EndOfData on a single channel only
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.NOT_END_OF_DATA,
-                inputGate2.hasReceivedEndOfData());
+        assertThat(inputGate2.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.NOT_END_OF_DATA);
         verifyBufferOrEvent(inputGate2, false, 1, true);
         // both channels said we should drain
-        assertEquals(
-                PullingAsyncDataInput.EndOfDataStatus.DRAINED, inputGate2.hasReceivedEndOfData());
+        assertThat(inputGate2.hasReceivedEndOfData())
+                .isEqualTo(PullingAsyncDataInput.EndOfDataStatus.DRAINED);
     }
 
     /**
@@ -332,15 +325,15 @@ public class SingleInputGateTest extends InputGateTestBase {
             Buffer uncompressedBuffer = new NetworkBuffer(segment, FreeingBufferRecycler.INSTANCE);
             uncompressedBuffer.setSize(bufferSize);
             Buffer compressedBuffer = compressor.compressToOriginalBuffer(uncompressedBuffer);
-            assertTrue(compressedBuffer.isCompressed());
+            assertThat(compressedBuffer.isCompressed()).isTrue();
 
             inputChannel.read(compressedBuffer);
             inputGate.setInputChannels(inputChannel);
             inputGate.notifyChannelNonEmpty(inputChannel);
 
             Optional<BufferOrEvent> bufferOrEvent = inputGate.getNext();
-            assertTrue(bufferOrEvent.isPresent());
-            assertTrue(bufferOrEvent.get().isBuffer());
+            assertThat(bufferOrEvent.isPresent()).isTrue();
+            assertThat(bufferOrEvent.get().isBuffer()).isTrue();
             ByteBuffer buffer =
                     bufferOrEvent
                             .get()
@@ -348,7 +341,7 @@ public class SingleInputGateTest extends InputGateTestBase {
                             .getNioBufferReadable()
                             .order(ByteOrder.LITTLE_ENDIAN);
             for (int i = 0; i < bufferSize; i += 8) {
-                assertEquals(i, buffer.getLong());
+                assertThat(buffer.getLong()).isEqualTo(i);
             }
         }
     }
@@ -361,12 +354,12 @@ public class SingleInputGateTest extends InputGateTestBase {
 
         inputChannel.readEndOfPartitionEvent();
         inputChannel.notifyChannelNonEmpty();
-        assertEquals(EndOfPartitionEvent.INSTANCE, inputGate.pollNext().get().getEvent());
+        assertThat(inputGate.pollNext().get().getEvent()).isEqualTo(EndOfPartitionEvent.INSTANCE);
 
         // gate is still active because of secondary channel
         // test if released channel is enqueued
         inputChannel.notifyChannelNonEmpty();
-        assertFalse(inputGate.pollNext().isPresent());
+        assertThat(inputGate.pollNext().isPresent()).isFalse();
     }
 
     @Test
@@ -456,14 +449,14 @@ public class SingleInputGateTest extends InputGateTestBase {
             setupInputGate(inputGate, inputChannels);
 
             // Only the local channel can request
-            assertEquals(1, partitionManager.counter);
+            assertThat(partitionManager.counter).isEqualTo(1);
 
             // Send event backwards and initialize unknown channel afterwards
             final TaskEvent event = new TestTaskEvent();
             inputGate.sendTaskEvent(event);
 
             // Only the local channel can send out the event
-            assertEquals(1, taskEventPublisher.counter);
+            assertThat(taskEventPublisher.counter).isEqualTo(1);
 
             // After the update, the pending event should be send to local channel
 
@@ -472,8 +465,8 @@ public class SingleInputGateTest extends InputGateTestBase {
                     location,
                     createRemoteWithIdAndLocation(unknownPartitionId.getPartitionId(), location));
 
-            assertEquals(2, partitionManager.counter);
-            assertEquals(2, taskEventPublisher.counter);
+            assertThat(partitionManager.counter).isEqualTo(2);
+            assertThat(taskEventPublisher.counter).isEqualTo(2);
         }
     }
 
@@ -503,7 +496,7 @@ public class SingleInputGateTest extends InputGateTestBase {
                 location,
                 createRemoteWithIdAndLocation(resultPartitionID.getPartitionId(), location));
 
-        assertEquals(0, partitionManager.counter);
+        assertThat(partitionManager.counter).isEqualTo(0);
     }
 
     /**
@@ -550,7 +543,7 @@ public class SingleInputGateTest extends InputGateTestBase {
         }
 
         // Verify that async consumer is in blocking request
-        assertTrue("Did not trigger blocking buffer request.", success);
+        assertThat(success).as("Did not trigger blocking buffer request.").isTrue();
 
         // Release the input gate
         inputGate.close();
@@ -560,8 +553,8 @@ public class SingleInputGateTest extends InputGateTestBase {
         // call will never return.
         asyncConsumer.join();
 
-        assertNotNull(asyncException.get());
-        assertEquals(IllegalStateException.class, asyncException.get().getClass());
+        assertThat(asyncException.get()).isNotNull();
+        assertThat(asyncException.get().getClass()).isEqualTo(IllegalStateException.class);
     }
 
     /** Tests request back off configuration is correctly forwarded to the channels. */
@@ -630,11 +623,12 @@ public class SingleInputGateTest extends InputGateTestBase {
             closer.register(netEnv::close);
             closer.register(gate::close);
 
-            assertEquals(gateDesc.getConsumedPartitionType(), gate.getConsumedPartitionType());
+            assertThat(gate.getConsumedPartitionType())
+                    .isEqualTo(gateDesc.getConsumedPartitionType());
 
             Map<IntermediateResultPartitionID, InputChannel> channelMap = gate.getInputChannels();
 
-            assertEquals(3, channelMap.size());
+            assertThat(channelMap.size()).isEqualTo(3);
             channelMap
                     .values()
                     .forEach(
@@ -646,32 +640,32 @@ public class SingleInputGateTest extends InputGateTestBase {
                                 }
                             });
             InputChannel localChannel = channelMap.get(partitionIds[0]);
-            assertEquals(LocalInputChannel.class, localChannel.getClass());
+            assertThat(localChannel.getClass()).isEqualTo(LocalInputChannel.class);
 
             InputChannel remoteChannel = channelMap.get(partitionIds[1]);
-            assertEquals(RemoteInputChannel.class, remoteChannel.getClass());
+            assertThat(remoteChannel.getClass()).isEqualTo(RemoteInputChannel.class);
 
             InputChannel unknownChannel = channelMap.get(partitionIds[2]);
-            assertEquals(UnknownInputChannel.class, unknownChannel.getClass());
+            assertThat(unknownChannel.getClass()).isEqualTo(UnknownInputChannel.class);
 
             InputChannel[] channels =
                     new InputChannel[] {localChannel, remoteChannel, unknownChannel};
             for (InputChannel ch : channels) {
-                assertEquals(0, ch.getCurrentBackoff());
+                assertThat(ch.getCurrentBackoff()).isEqualTo(0);
 
-                assertTrue(ch.increaseBackoff());
-                assertEquals(initialBackoff, ch.getCurrentBackoff());
+                assertThat(ch.increaseBackoff()).isTrue();
+                assertThat(ch.getCurrentBackoff()).isEqualTo(initialBackoff);
 
-                assertTrue(ch.increaseBackoff());
-                assertEquals(initialBackoff * 2, ch.getCurrentBackoff());
+                assertThat(ch.increaseBackoff()).isTrue();
+                assertThat(ch.getCurrentBackoff()).isEqualTo(initialBackoff * 2);
 
-                assertTrue(ch.increaseBackoff());
-                assertEquals(initialBackoff * 2 * 2, ch.getCurrentBackoff());
+                assertThat(ch.increaseBackoff()).isTrue();
+                assertThat(ch.getCurrentBackoff()).isEqualTo(initialBackoff * 2 * 2);
 
-                assertTrue(ch.increaseBackoff());
-                assertEquals(maxBackoff, ch.getCurrentBackoff());
+                assertThat(ch.increaseBackoff()).isTrue();
+                assertThat(ch.getCurrentBackoff()).isEqualTo(maxBackoff);
 
-                assertFalse(ch.increaseBackoff());
+                assertThat(ch.increaseBackoff()).isFalse();
             }
         }
     }
@@ -699,14 +693,13 @@ public class SingleInputGateTest extends InputGateTestBase {
 
             NetworkBufferPool bufferPool = network.getNetworkBufferPool();
             // only the exclusive buffers should be assigned/available now
-            assertEquals(buffersPerChannel, remote.getNumberOfAvailableBuffers());
+            assertThat(remote.getNumberOfAvailableBuffers()).isEqualTo(buffersPerChannel);
 
-            assertEquals(
-                    bufferPool.getTotalNumberOfMemorySegments() - buffersPerChannel - 1,
-                    bufferPool.getNumberOfAvailableMemorySegments());
+            assertThat(bufferPool.getNumberOfAvailableMemorySegments())
+                    .isEqualTo(bufferPool.getTotalNumberOfMemorySegments() - buffersPerChannel - 1);
             // note: exclusive buffers are not handed out into LocalBufferPool and are thus not
             // counted
-            assertEquals(extraNetworkBuffersPerGate, bufferPool.countBuffers());
+            assertThat(bufferPool.countBuffers()).isEqualTo(extraNetworkBuffersPerGate);
         }
     }
 
@@ -734,12 +727,11 @@ public class SingleInputGateTest extends InputGateTestBase {
             inputGate.setup();
             NetworkBufferPool bufferPool = network.getNetworkBufferPool();
 
-            assertEquals(
-                    bufferPool.getTotalNumberOfMemorySegments() - 1,
-                    bufferPool.getNumberOfAvailableMemorySegments());
+            assertThat(bufferPool.getNumberOfAvailableMemorySegments())
+                    .isEqualTo(bufferPool.getTotalNumberOfMemorySegments() - 1);
             // note: exclusive buffers are not handed out into LocalBufferPool and are thus not
             // counted
-            assertEquals(extraNetworkBuffersPerGate, bufferPool.countBuffers());
+            assertThat(bufferPool.countBuffers()).isEqualTo(extraNetworkBuffersPerGate);
 
             // Trigger updates to remote input channel from unknown input channel
             inputGate.updateInputChannel(
@@ -751,14 +743,13 @@ public class SingleInputGateTest extends InputGateTestBase {
                     (RemoteInputChannel)
                             inputGate.getInputChannels().get(resultPartitionId.getPartitionId());
             // only the exclusive buffers should be assigned/available now
-            assertEquals(buffersPerChannel, remote.getNumberOfAvailableBuffers());
+            assertThat(remote.getNumberOfAvailableBuffers()).isEqualTo(buffersPerChannel);
 
-            assertEquals(
-                    bufferPool.getTotalNumberOfMemorySegments() - buffersPerChannel - 1,
-                    bufferPool.getNumberOfAvailableMemorySegments());
+            assertThat(bufferPool.getNumberOfAvailableMemorySegments())
+                    .isEqualTo(bufferPool.getTotalNumberOfMemorySegments() - buffersPerChannel - 1);
             // note: exclusive buffers are not handed out into LocalBufferPool and are thus not
             // counted
-            assertEquals(extraNetworkBuffersPerGate, bufferPool.countBuffers());
+            assertThat(bufferPool.countBuffers()).isEqualTo(extraNetworkBuffersPerGate);
         }
     }
 
@@ -805,12 +796,10 @@ public class SingleInputGateTest extends InputGateTestBase {
             inputGate.setInputChannels(inputChannels);
             inputGate.setup();
 
-            assertThat(
-                    inputGate.getInputChannels().get(remoteResultPartitionId.getPartitionId()),
-                    is(instanceOf((UnknownInputChannel.class))));
-            assertThat(
-                    inputGate.getInputChannels().get(localResultPartitionId.getPartitionId()),
-                    is(instanceOf((UnknownInputChannel.class))));
+            assertThat(inputGate.getInputChannels().get(remoteResultPartitionId.getPartitionId()))
+                    .isEqualTo(instanceOf((UnknownInputChannel.class)));
+            assertThat(inputGate.getInputChannels().get(localResultPartitionId.getPartitionId()))
+                    .isEqualTo(instanceOf((UnknownInputChannel.class)));
 
             ResourceID localLocation = ResourceID.generate();
 
@@ -820,12 +809,10 @@ public class SingleInputGateTest extends InputGateTestBase {
                     createRemoteWithIdAndLocation(
                             remoteResultPartitionId.getPartitionId(), ResourceID.generate()));
 
-            assertThat(
-                    inputGate.getInputChannels().get(remoteResultPartitionId.getPartitionId()),
-                    is(instanceOf((RemoteInputChannel.class))));
-            assertThat(
-                    inputGate.getInputChannels().get(localResultPartitionId.getPartitionId()),
-                    is(instanceOf((UnknownInputChannel.class))));
+            assertThat(inputGate.getInputChannels().get(remoteResultPartitionId.getPartitionId()))
+                    .isEqualTo(instanceOf((RemoteInputChannel.class)));
+            assertThat(inputGate.getInputChannels().get(localResultPartitionId.getPartitionId()))
+                    .isEqualTo(instanceOf((UnknownInputChannel.class)));
 
             // Trigger updates to local input channel from unknown input channel
             inputGate.updateInputChannel(
@@ -833,12 +820,10 @@ public class SingleInputGateTest extends InputGateTestBase {
                     createRemoteWithIdAndLocation(
                             localResultPartitionId.getPartitionId(), localLocation));
 
-            assertThat(
-                    inputGate.getInputChannels().get(remoteResultPartitionId.getPartitionId()),
-                    is(instanceOf((RemoteInputChannel.class))));
-            assertThat(
-                    inputGate.getInputChannels().get(localResultPartitionId.getPartitionId()),
-                    is(instanceOf((LocalInputChannel.class))));
+            assertThat(inputGate.getInputChannels().get(remoteResultPartitionId.getPartitionId()))
+                    .isEqualTo(instanceOf((RemoteInputChannel.class)));
+            assertThat(inputGate.getInputChannels().get(localResultPartitionId.getPartitionId()))
+                    .isEqualTo(instanceOf((LocalInputChannel.class)));
         }
     }
 
@@ -884,10 +869,10 @@ public class SingleInputGateTest extends InputGateTestBase {
             setupInputGate(inputGate, inputChannels);
 
             remoteInputChannel.onBuffer(createBuffer(1), 0, 0);
-            assertEquals(1, inputGate.getNumberOfQueuedBuffers());
+            assertThat(inputGate.getNumberOfQueuedBuffers()).isEqualTo(1);
 
             resultPartition.emitRecord(ByteBuffer.allocate(1), 0);
-            assertEquals(2, inputGate.getNumberOfQueuedBuffers());
+            assertThat(inputGate.getNumberOfQueuedBuffers()).isEqualTo(2);
         }
     }
 
@@ -910,7 +895,7 @@ public class SingleInputGateTest extends InputGateTestBase {
 
             fail("Should throw a PartitionNotFoundException.");
         } catch (PartitionNotFoundException notFound) {
-            assertThat(partitionId, is(notFound.getPartitionId()));
+            assertThat(partitionId).isEqualTo(notFound.getPartitionId());
         }
     }
 
@@ -956,12 +941,12 @@ public class SingleInputGateTest extends InputGateTestBase {
             Map<InputGateID, SingleInputGate> createdInputGatesById =
                     createInputGateWithLocalChannels(network, numberOfGates, 1);
 
-            assertEquals(numberOfGates, createdInputGatesById.size());
+            assertThat(createdInputGatesById.size()).isEqualTo(numberOfGates);
 
             for (InputGateID id : createdInputGatesById.keySet()) {
-                assertThat(network.getInputGate(id).isPresent(), is(true));
+                assertThat(network.getInputGate(id).isPresent()).isEqualTo(true);
                 createdInputGatesById.get(id).close();
-                assertThat(network.getInputGate(id).isPresent(), is(false));
+                assertThat(network.getInputGate(id).isPresent()).isEqualTo(false);
             }
         }
     }
@@ -982,8 +967,8 @@ public class SingleInputGateTest extends InputGateTestBase {
             for (InputChannel inputChannel : gate.getInputChannels().values()) {
                 InputChannelInfo channelInfo = inputChannel.getChannelInfo();
 
-                assertEquals(i, channelInfo.getGateIdx());
-                assertEquals(channelCounter++, channelInfo.getInputChannelIdx());
+                assertThat(channelInfo.getGateIdx()).isEqualTo(i);
+                assertThat(channelInfo.getInputChannelIdx()).isEqualTo(channelCounter++);
             }
         }
     }
@@ -1003,31 +988,32 @@ public class SingleInputGateTest extends InputGateTestBase {
                 };
         inputGate.setInputChannels(inputChannels);
 
-        assertEquals(
-                Arrays.asList(
-                        inputChannels[0].getChannelInfo(),
-                        inputChannels[1].getChannelInfo(),
-                        inputChannels[2].getChannelInfo()),
-                inputGate.getUnfinishedChannels());
+        assertThat(inputGate.getUnfinishedChannels())
+                .isEqualTo(
+                        Arrays.asList(
+                                inputChannels[0].getChannelInfo(),
+                                inputChannels[1].getChannelInfo(),
+                                inputChannels[2].getChannelInfo()));
 
         inputChannels[1].readEndOfPartitionEvent();
         inputGate.notifyChannelNonEmpty(inputChannels[1]);
         inputGate.getNext();
-        assertEquals(
-                Arrays.asList(inputChannels[0].getChannelInfo(), inputChannels[2].getChannelInfo()),
-                inputGate.getUnfinishedChannels());
+        assertThat(inputGate.getUnfinishedChannels())
+                .isEqualTo(
+                        Arrays.asList(
+                                inputChannels[0].getChannelInfo(),
+                                inputChannels[2].getChannelInfo()));
 
         inputChannels[0].readEndOfPartitionEvent();
         inputGate.notifyChannelNonEmpty(inputChannels[0]);
         inputGate.getNext();
-        assertEquals(
-                Collections.singletonList(inputChannels[2].getChannelInfo()),
-                inputGate.getUnfinishedChannels());
+        assertThat(inputGate.getUnfinishedChannels())
+                .isEqualTo(Collections.singletonList(inputChannels[2].getChannelInfo()));
 
         inputChannels[2].readEndOfPartitionEvent();
         inputGate.notifyChannelNonEmpty(inputChannels[2]);
         inputGate.getNext();
-        assertEquals(Collections.emptyList(), inputGate.getUnfinishedChannels());
+        assertThat(inputGate.getUnfinishedChannels()).isEqualTo(Collections.emptyList());
     }
 
     @Test
@@ -1043,17 +1029,17 @@ public class SingleInputGateTest extends InputGateTestBase {
         inputGate.setInputChannels(inputChannels);
 
         // It should be no buffers when all channels are empty.
-        assertThat(inputGate.getBuffersInUseCount(), is(0));
+        assertThat(inputGate.getBuffersInUseCount()).isEqualTo(0);
 
         // Add buffers into channels.
         inputChannels[0].readBuffer();
-        assertThat(inputGate.getBuffersInUseCount(), is(1));
+        assertThat(inputGate.getBuffersInUseCount()).isEqualTo(1);
 
         inputChannels[0].readBuffer();
-        assertThat(inputGate.getBuffersInUseCount(), is(2));
+        assertThat(inputGate.getBuffersInUseCount()).isEqualTo(2);
 
         inputChannels[1].readBuffer();
-        assertThat(inputGate.getBuffersInUseCount(), is(3));
+        assertThat(inputGate.getBuffersInUseCount()).isEqualTo(3);
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -1121,14 +1107,13 @@ public class SingleInputGateTest extends InputGateTestBase {
             throws IOException, InterruptedException {
 
         final Optional<BufferOrEvent> bufferOrEvent = inputGate.getNext();
-        assertTrue(bufferOrEvent.isPresent());
-        assertEquals(expectedIsBuffer, bufferOrEvent.get().isBuffer());
-        assertEquals(
-                inputGate.getChannel(expectedChannelIndex).getChannelInfo(),
-                bufferOrEvent.get().getChannelInfo());
-        assertEquals(expectedMoreAvailable, bufferOrEvent.get().moreAvailable());
+        assertThat(bufferOrEvent.isPresent()).isTrue();
+        assertThat(bufferOrEvent.get().isBuffer()).isEqualTo(expectedIsBuffer);
+        assertThat(bufferOrEvent.get().getChannelInfo())
+                .isEqualTo(inputGate.getChannel(expectedChannelIndex).getChannelInfo());
+        assertThat(bufferOrEvent.get().moreAvailable()).isEqualTo(expectedMoreAvailable);
         if (!expectedMoreAvailable) {
-            assertFalse(inputGate.pollNext().isPresent());
+            assertThat(inputGate.pollNext().isPresent()).isFalse();
         }
     }
 

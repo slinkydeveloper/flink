@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static java.util.stream.Collectors.toList;
+import static org.assertj.core.api.Assertions.fail;
 
 class TestingStateChangeUploader implements StateChangeUploader {
     private final Collection<StateChangeSet> uploaded = new CopyOnWriteArrayList<>();
@@ -58,7 +59,7 @@ class TestingStateChangeUploader implements StateChangeUploader {
     }
 
     public void failUpload(RuntimeException exception) {
-        tasks.forEach(t -> t.fail(exception));
+        tasks.forEach(t -> fail("unknown failure", exception));
     }
 
     public void completeUpload() {

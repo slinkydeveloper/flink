@@ -28,11 +28,11 @@ import org.apache.flink.configuration.Configuration;
 import org.apache.flink.test.util.JavaProgramTestBase;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test {@link BroadcastVariableInitializer}. */
 @SuppressWarnings("serial")
@@ -56,7 +56,7 @@ public class BroadcastVarInitializationITCase extends JavaProgramTestBase {
 
         env.execute();
 
-        Assert.assertEquals(8, resultList.get(0).intValue());
+        assertThat(resultList.get(0).intValue()).isEqualTo(8);
     }
 
     private static class PickOneAllReduce extends RichGroupReduceFunction<Integer, Integer> {

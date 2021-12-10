@@ -18,12 +18,12 @@
 
 package org.apache.flink.util;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URL;
 
 import static org.apache.flink.util.FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link TemporaryClassLoaderContext}. */
 public class TemporaryClassLoaderContextTest {
@@ -38,10 +38,10 @@ public class TemporaryClassLoaderContextTest {
 
         try (TemporaryClassLoaderContext ignored =
                 TemporaryClassLoaderContext.of(temporaryClassLoader)) {
-            Assert.assertEquals(
-                    temporaryClassLoader, Thread.currentThread().getContextClassLoader());
+            assertThat(Thread.currentThread().getContextClassLoader())
+                    .isEqualTo(temporaryClassLoader);
         }
 
-        Assert.assertEquals(contextClassLoader, Thread.currentThread().getContextClassLoader());
+        assertThat(Thread.currentThread().getContextClassLoader()).isEqualTo(contextClassLoader);
     }
 }

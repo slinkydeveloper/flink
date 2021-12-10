@@ -42,11 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for using {@link BlobCacheSizeTracker} to track the size of BLOBs in {@link
@@ -95,13 +91,13 @@ public class PermanentBlobCacheSizeLimitTest {
 
                 // Retrieve the location of BLOBs from the blob cache
                 blobs[i].blobFile = getFile(cache, blobs[i].jobId, blobs[i].blobKey);
-                assertTrue(blobs[i].blobFile.exists());
+                assertThat(blobs[i].blobFile.exists()).isTrue();
             }
 
             // Since the size limit of the blob cache is the size of 2 BLOBs,
             // the first BLOB is removed and the second BLOB remains
-            assertFalse(blobs[0].blobFile.exists());
-            assertTrue(blobs[1].blobFile.exists());
+            assertThat(blobs[0].blobFile.exists()).isFalse();
+            assertThat(blobs[1].blobFile.exists()).isTrue();
 
             // Retrieve the second BLOB once again,
             // make the third BLOB to be the least recently used
@@ -112,9 +108,9 @@ public class PermanentBlobCacheSizeLimitTest {
             readFileAndVerifyContent(cache, blobs[0].jobId, blobs[0].blobKey, blobs[0].data);
             blobs[0].blobFile = getFile(cache, blobs[0].jobId, blobs[0].blobKey);
 
-            assertTrue(blobs[0].blobFile.exists());
-            assertTrue(blobs[1].blobFile.exists());
-            assertFalse(blobs[2].blobFile.exists());
+            assertThat(blobs[0].blobFile.exists()).isTrue();
+            assertThat(blobs[1].blobFile.exists()).isTrue();
+            assertThat(blobs[2].blobFile.exists()).isFalse();
         }
     }
 
@@ -178,8 +174,8 @@ public class PermanentBlobCacheSizeLimitTest {
                     nonExists++;
                 }
             }
-            assertEquals(MAX_NUM_OF_ACCEPTED_BLOBS, exists);
-            assertEquals(TOTAL_NUM_OF_BLOBS - MAX_NUM_OF_ACCEPTED_BLOBS, nonExists);
+            assertThat(exists).isEqualTo(MAX_NUM_OF_ACCEPTED_BLOBS);
+            assertThat(nonExists).isEqualTo(TOTAL_NUM_OF_BLOBS - MAX_NUM_OF_ACCEPTED_BLOBS);
 
         } finally {
             executor.shutdownNow();
@@ -213,7 +209,7 @@ public class PermanentBlobCacheSizeLimitTest {
 
             // Put the BLOB into the blob server
             blobs[i].blobKey = put(server, blobs[i].jobId, blobs[i].data, BLOB_TYPE);
-            assertNotNull(blobs[i].blobKey);
+            assertThat(blobs[i].blobKey).isNotNull();
         }
 
         return blobs;
@@ -239,13 +235,13 @@ public class PermanentBlobCacheSizeLimitTest {
             BlobService blobService, JobID jobId, BlobKey blobKey, byte[] expected)
             throws IOException {
 
-        assertNotNull(jobId);
-        assertNotNull(blobKey);
-        assertTrue(blobKey instanceof PermanentBlobKey);
+        assertThat(jobId).isNotNull();
+        assertThat(blobKey).isNotNull();
+        assertThat(blobKey).isInstanceOf(PermanentBlobKey.class);
 
         byte[] target =
                 blobService.getPermanentBlobService().readFile(jobId, (PermanentBlobKey) blobKey);
-        assertArrayEquals(expected, target);
+        assertThat(target).isEqualTo(expected);
     }
 
     private static File getFile(BlobCacheService blobCacheService, JobID jobId, BlobKey blobKey)

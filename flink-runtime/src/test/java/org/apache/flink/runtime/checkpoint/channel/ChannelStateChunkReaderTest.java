@@ -35,8 +35,8 @@ import java.util.List;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
 import static org.apache.flink.util.Preconditions.checkState;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link ChannelStateChunkReader} test. */
 public class ChannelStateChunkReaderTest {
@@ -52,9 +52,10 @@ public class ChannelStateChunkReaderTest {
         } finally {
             checkState(serializer.failed);
             checkState(!handler.requestedBuffers.isEmpty());
-            assertTrue(
-                    handler.requestedBuffers.stream()
-                            .allMatch(TestChannelStateByteBuffer::isRecycled));
+            assertThat(
+                            handler.requestedBuffers.stream()
+                                    .allMatch(TestChannelStateByteBuffer::isRecycled))
+                    .isTrue();
         }
     }
 
@@ -68,9 +69,10 @@ public class ChannelStateChunkReaderTest {
                     .readChunk(stream, serializer.getHeaderLength(), handler, "channelInfo", 0);
         } finally {
             checkState(!handler.requestedBuffers.isEmpty());
-            assertTrue(
-                    handler.requestedBuffers.stream()
-                            .allMatch(TestChannelStateByteBuffer::isRecycled));
+            assertThat(
+                            handler.requestedBuffers.stream()
+                                    .allMatch(TestChannelStateByteBuffer::isRecycled))
+                    .isTrue();
         }
     }
 
@@ -83,7 +85,7 @@ public class ChannelStateChunkReaderTest {
             new ChannelStateChunkReader(serializer)
                     .readChunk(stream, serializer.getHeaderLength(), handler, "channelInfo", 0);
         } finally {
-            assertTrue(handler.requestedBuffers.isEmpty());
+            assertThat(handler.requestedBuffers.isEmpty()).isTrue();
         }
     }
 
@@ -99,7 +101,7 @@ public class ChannelStateChunkReaderTest {
 
                     @Override
                     public void seek(long ignored) {
-                        fail();
+                        fail("unknown failure");
                     }
 
                     @Override

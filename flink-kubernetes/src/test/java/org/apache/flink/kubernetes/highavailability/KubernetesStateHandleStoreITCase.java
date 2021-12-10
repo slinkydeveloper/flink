@@ -34,8 +34,7 @@ import org.junit.Test;
 import java.util.UUID;
 
 import static org.apache.flink.kubernetes.highavailability.KubernetesHighAvailabilityTestBase.LEADER_CONFIGMAP_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
 
 /**
@@ -108,12 +107,11 @@ public class KubernetesStateHandleStoreITCase extends TestLogger {
             }
 
             // Only the leader could add successfully
-            assertThat(expectedState, is(notNullValue()));
-            assertThat(stateHandleStores[0].getAllAndLock().size(), is(1));
-            assertThat(
-                    stateHandleStores[0].getAllAndLock().get(0).f0.retrieveState().getValue(),
-                    is(expectedState));
-            assertThat(stateHandleStores[0].getAllAndLock().get(0).f1, is(KEY));
+            assertThat(expectedState).isEqualTo(notNullValue());
+            assertThat(stateHandleStores[0].getAllAndLock().size()).isEqualTo(1);
+            assertThat(stateHandleStores[0].getAllAndLock().get(0).f0.retrieveState().getValue())
+                    .isEqualTo(expectedState);
+            assertThat(stateHandleStores[0].getAllAndLock().get(0).f1).isEqualTo(KEY);
         } finally {
             TestingLongStateHandleHelper.clearGlobalState();
             // Cleanup the resources

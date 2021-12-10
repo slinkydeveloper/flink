@@ -59,9 +59,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPOutputStream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** MiniCluster-based integration test for the {@link FileSource}. */
 public class FileSourceTextLinesITCase extends TestLogger {
@@ -284,7 +282,7 @@ public class FileSourceTextLinesITCase extends TestLogger {
         Arrays.sort(expected);
         Arrays.sort(actual);
 
-        assertThat(actual, equalTo(expected));
+        assertThat(actual).isEqualTo(expected);
     }
 
     // ------------------------------------------------------------------------
@@ -437,9 +435,9 @@ public class FileSourceTextLinesITCase extends TestLogger {
         }
 
         final File parent = file.getParentFile();
-        assertTrue(parent.mkdirs() || parent.exists());
+        assertThat(parent.mkdirs() || parent.exists()).isTrue();
 
-        assertTrue(stagingFile.renameTo(file));
+        assertThat(stagingFile.renameTo(file)).isTrue();
     }
 
     // ------------------------------------------------------------------------

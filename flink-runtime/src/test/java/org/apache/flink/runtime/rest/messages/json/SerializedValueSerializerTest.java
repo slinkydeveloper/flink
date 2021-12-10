@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SerializedValueSerializer} and {@link SerializedValueDeserializer}. */
 public class SerializedValueSerializerTest extends TestLogger {
@@ -62,8 +62,8 @@ public class SerializedValueSerializerTest extends TestLogger {
         final TestClass deserializedValue =
                 serializedValue.deserializeValue(ClassLoader.getSystemClassLoader());
 
-        assertEquals("baz", deserializedValue.foo);
-        assertEquals(1, deserializedValue.bar);
+        assertThat(deserializedValue.foo).isEqualTo("baz");
+        assertThat(deserializedValue.bar).isEqualTo(1);
     }
 
     private static class TestClass implements Serializable {

@@ -23,9 +23,9 @@ import org.apache.flink.kubernetes.kubeclient.resources.KubernetesLeaderElector;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for {@link KubernetesCheckpointIDCounter} operations. */
 public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilityTestBase {
@@ -37,14 +37,13 @@ public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesCheckpointIDCounter checkpointIDCounter =
                                     new KubernetesCheckpointIDCounter(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
                             checkpointIDCounter.setCount(100L);
                             final long counter = checkpointIDCounter.getAndIncrement();
-                            assertThat(counter, is(100L));
-                            assertThat(checkpointIDCounter.get(), is(101L));
+                            assertThat(counter).isEqualTo(100L);
+                            assertThat(checkpointIDCounter.get()).isEqualTo(101L);
                         });
             }
         };
@@ -57,19 +56,16 @@ public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesCheckpointIDCounter checkpointIDCounter =
                                     new KubernetesCheckpointIDCounter(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
                             checkpointIDCounter.setCount(100L);
-
                             // lost leadership
                             getLeaderCallback().notLeader();
                             electionEventHandler.waitForRevokeLeader(TIMEOUT);
                             getLeaderConfigMap()
                                     .getAnnotations()
                                     .remove(KubernetesLeaderElector.LEADER_ANNOTATION_KEY);
-
                             try {
                                 checkpointIDCounter.getAndIncrement();
                                 fail(
@@ -80,7 +76,8 @@ public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilit
                                                 + LEADER_CONFIGMAP_NAME
                                                 + " since "
                                                 + "current KubernetesCheckpointIDCounter does not have the leadership.";
-                                assertThat(ex, FlinkMatchers.containsMessage(errMsg));
+                                assertThat(ex)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(errMsg)));
                             }
                         });
             }
@@ -94,13 +91,12 @@ public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesCheckpointIDCounter checkpointIDCounter =
                                     new KubernetesCheckpointIDCounter(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
                             checkpointIDCounter.setCount(100L);
                             final long counter = checkpointIDCounter.get();
-                            assertThat(counter, is(100L));
+                            assertThat(counter).isEqualTo(100L);
                         });
             }
         };
@@ -123,7 +119,8 @@ public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilit
                             } catch (Exception ex) {
                                 final String errMsg =
                                         "ConfigMap " + LEADER_CONFIGMAP_NAME + " does not exist.";
-                                assertThat(ex, FlinkMatchers.containsMessage(errMsg));
+                                assertThat(ex)
+                                        .satisfies(matching(FlinkMatchers.containsMessage(errMsg)));
                             }
                         });
             }
@@ -137,22 +134,18 @@ public class KubernetesCheckpointIDCounterTest extends KubernetesHighAvailabilit
                 runTest(
                         () -> {
                             leaderCallbackGrantLeadership();
-
                             final KubernetesCheckpointIDCounter checkpointIDCounter =
                                     new KubernetesCheckpointIDCounter(
                                             flinkKubeClient, LEADER_CONFIGMAP_NAME, LOCK_IDENTITY);
-
                             checkpointIDCounter.setCount(2L);
-
                             // lost leadership
                             getLeaderCallback().notLeader();
                             electionEventHandler.waitForRevokeLeader(TIMEOUT);
                             getLeaderConfigMap()
                                     .getAnnotations()
                                     .remove(KubernetesLeaderElector.LEADER_ANNOTATION_KEY);
-
                             checkpointIDCounter.setCount(100L);
-                            assertThat(checkpointIDCounter.get(), is(2L));
+                            assertThat(checkpointIDCounter.get()).isEqualTo(2L);
                         });
             }
         };

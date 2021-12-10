@@ -38,9 +38,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link InternalOperatorMetricGroup}. */
 public class InternalOperatorGroupTest extends TestLogger {
@@ -73,15 +71,19 @@ public class InternalOperatorGroupTest extends TestLogger {
         InternalOperatorMetricGroup opGroup =
                 taskGroup.getOrAddOperator(new OperatorID(), "myOpName");
 
-        assertArrayEquals(
-                new String[] {
-                    "theHostName", "taskmanager", "test-tm-id", "myJobName", "myOpName", "11"
-                },
-                opGroup.getScopeComponents());
+        assertThat(opGroup.getScopeComponents())
+                .isEqualTo(
+                        new String[] {
+                            "theHostName",
+                            "taskmanager",
+                            "test-tm-id",
+                            "myJobName",
+                            "myOpName",
+                            "11"
+                        });
 
-        assertEquals(
-                "theHostName.taskmanager.test-tm-id.myJobName.myOpName.11.name",
-                opGroup.getMetricIdentifier("name"));
+        assertThat(opGroup.getMetricIdentifier("name"))
+                .isEqualTo("theHostName.taskmanager.test-tm-id.myJobName.myOpName.11.name");
     }
 
     @Test
@@ -106,20 +108,21 @@ public class InternalOperatorGroupTest extends TestLogger {
                             .addTask(vertexId, new ExecutionAttemptID(), "aTaskname", 13, 2)
                             .getOrAddOperator(operatorID, operatorName);
 
-            assertArrayEquals(
-                    new String[] {
-                        tmID,
-                        jid.toString(),
-                        vertexId.toString(),
-                        operatorName,
-                        operatorID.toString()
-                    },
-                    operatorGroup.getScopeComponents());
+            assertThat(operatorGroup.getScopeComponents())
+                    .isEqualTo(
+                            new String[] {
+                                tmID,
+                                jid.toString(),
+                                vertexId.toString(),
+                                operatorName,
+                                operatorID.toString()
+                            });
 
-            assertEquals(
-                    String.format(
-                            "%s.%s.%s.%s.%s.name", tmID, jid, vertexId, operatorName, operatorID),
-                    operatorGroup.getMetricIdentifier("name"));
+            assertThat(operatorGroup.getMetricIdentifier("name"))
+                    .isEqualTo(
+                            String.format(
+                                    "%s.%s.%s.%s.%s.name",
+                                    tmID, jid, vertexId, operatorName, operatorID));
         } finally {
             registry.shutdown().get();
         }
@@ -137,9 +140,9 @@ public class InternalOperatorGroupTest extends TestLogger {
         InternalOperatorMetricGroup opGroup =
                 taskGroup.getOrAddOperator(new OperatorID(), "myOpName");
 
-        assertNotNull(opGroup.getIOMetricGroup());
-        assertNotNull(opGroup.getIOMetricGroup().getNumRecordsInCounter());
-        assertNotNull(opGroup.getIOMetricGroup().getNumRecordsOutCounter());
+        assertThat(opGroup.getIOMetricGroup()).isNotNull();
+        assertThat(opGroup.getIOMetricGroup().getNumRecordsInCounter()).isNotNull();
+        assertThat(opGroup.getIOMetricGroup().getNumRecordsOutCounter()).isNotNull();
     }
 
     @Test
@@ -175,8 +178,8 @@ public class InternalOperatorGroupTest extends TestLogger {
     private static void testVariable(
             Map<String, String> variables, String key, String expectedValue) {
         String actualValue = variables.get(key);
-        assertNotNull(actualValue);
-        assertEquals(expectedValue, actualValue);
+        assertThat(actualValue).isNotNull();
+        assertThat(actualValue).isEqualTo(expectedValue);
     }
 
     @Test
@@ -194,10 +197,10 @@ public class InternalOperatorGroupTest extends TestLogger {
 
         QueryScopeInfo.OperatorQueryScopeInfo info =
                 operator.createQueryServiceMetricInfo(new DummyCharacterFilter());
-        assertEquals("", info.scope);
-        assertEquals(jid.toString(), info.jobID);
-        assertEquals(vid.toString(), info.vertexID);
-        assertEquals(4, info.subtaskIndex);
-        assertEquals("operator", info.operatorName);
+        assertThat(info.scope).isEqualTo("");
+        assertThat(info.jobID).isEqualTo(jid.toString());
+        assertThat(info.vertexID).isEqualTo(vid.toString());
+        assertThat(info.subtaskIndex).isEqualTo(4);
+        assertThat(info.operatorName).isEqualTo("operator");
     }
 }

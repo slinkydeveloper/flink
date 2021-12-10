@@ -30,30 +30,26 @@ import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.common.schema.SchemaInfo;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link PulsarSchemaUtils}. */
 class PulsarSchemaUtilsTest {
 
     @Test
     void haveProtobufShouldReturnTrueIfWeProvidedIt() {
-        assertTrue(PulsarSchemaUtils.haveProtobuf());
+        assertThat(PulsarSchemaUtils.haveProtobuf()).isTrue();
     }
 
     @Test
     void protobufClassValidation() {
-        assertTrue(PulsarSchemaUtils.isProtobufTypeClass(TestMessage.class));
-        assertTrue(PulsarSchemaUtils.isProtobufTypeClass(SubMessage.class));
-        assertTrue(PulsarSchemaUtils.isProtobufTypeClass(NestedMessage.class));
+        assertThat(PulsarSchemaUtils.isProtobufTypeClass(TestMessage.class)).isTrue();
+        assertThat(PulsarSchemaUtils.isProtobufTypeClass(SubMessage.class)).isTrue();
+        assertThat(PulsarSchemaUtils.isProtobufTypeClass(NestedMessage.class)).isTrue();
 
-        assertFalse(PulsarSchemaUtils.isProtobufTypeClass(Bar.class));
-        assertFalse(PulsarSchemaUtils.isProtobufTypeClass(FL.class));
-        assertFalse(PulsarSchemaUtils.isProtobufTypeClass(Foo.class));
+        assertThat(PulsarSchemaUtils.isProtobufTypeClass(Bar.class)).isFalse();
+        assertThat(PulsarSchemaUtils.isProtobufTypeClass(FL.class)).isFalse();
+        assertThat(PulsarSchemaUtils.isProtobufTypeClass(Foo.class)).isFalse();
     }
 
     @Test
@@ -62,27 +58,26 @@ class PulsarSchemaUtilsTest {
         // Avro
         Schema<Foo> avro1 = Schema.AVRO(Foo.class);
         PulsarSchema<Foo> avro2 = new PulsarSchema<>(avro1, Foo.class);
-        assertThrows(
-                NullPointerException.class,
-                () -> PulsarSchemaUtils.createSchema(avro1.getSchemaInfo()));
+        assertThatThrownBy(() -> PulsarSchemaUtils.createSchema(avro1.getSchemaInfo()))
+                .isInstanceOf(NullPointerException.class);
 
         Schema<Foo> schema = PulsarSchemaUtils.createSchema(avro2.getSchemaInfo());
-        assertNotEquals(schema.getSchemaInfo(), avro1.getSchemaInfo());
-        assertEquals(schema.getSchemaInfo(), avro2.getSchemaInfo());
+        assertThat(avro1.getSchemaInfo()).isEqualTo(schema.getSchemaInfo());
+        assertThat(avro2.getSchemaInfo()).isEqualTo(schema.getSchemaInfo());
 
         // JSON
         Schema<FL> json1 = Schema.JSON(FL.class);
         PulsarSchema<FL> json2 = new PulsarSchema<>(json1, FL.class);
         Schema<FL> json3 = PulsarSchemaUtils.createSchema(json2.getSchemaInfo());
-        assertNotEquals(json3.getSchemaInfo(), json1.getSchemaInfo());
-        assertEquals(json3.getSchemaInfo(), json2.getSchemaInfo());
+        assertThat(json1.getSchemaInfo()).isEqualTo(json3.getSchemaInfo());
+        assertThat(json2.getSchemaInfo()).isEqualTo(json3.getSchemaInfo());
 
         // Protobuf Native
         Schema<TestMessage> proto1 = Schema.PROTOBUF_NATIVE(TestMessage.class);
         PulsarSchema<TestMessage> proto2 = new PulsarSchema<>(proto1, TestMessage.class);
         Schema<TestMessage> proto3 = PulsarSchemaUtils.createSchema(proto2.getSchemaInfo());
-        assertNotEquals(proto3.getSchemaInfo(), proto1.getSchemaInfo());
-        assertEquals(proto3.getSchemaInfo(), proto2.getSchemaInfo());
+        assertThat(proto1.getSchemaInfo()).isEqualTo(proto3.getSchemaInfo());
+        assertThat(proto2.getSchemaInfo()).isEqualTo(proto3.getSchemaInfo());
 
         // KeyValue
         Schema<KeyValue<byte[], byte[]>> kvBytes1 = Schema.KV_BYTES();
@@ -90,7 +85,7 @@ class PulsarSchemaUtilsTest {
                 new PulsarSchema<>(kvBytes1, byte[].class, byte[].class);
         Schema<KeyValue<byte[], byte[]>> kvBytes3 =
                 PulsarSchemaUtils.createSchema(kvBytes2.getSchemaInfo());
-        assertNotEquals(kvBytes3.getSchemaInfo(), kvBytes1.getSchemaInfo());
+        assertThat(kvBytes1.getSchemaInfo()).isEqualTo(kvBytes3.getSchemaInfo());
     }
 
     @Test
@@ -98,9 +93,9 @@ class PulsarSchemaUtilsTest {
         Schema<Foo> schema = Schema.AVRO(Foo.class);
         SchemaInfo info = schema.getSchemaInfo();
         SchemaInfo newInfo = PulsarSchemaUtils.encodeClassInfo(info, Foo.class);
-        assertDoesNotThrow(() -> PulsarSchemaUtils.decodeClassInfo(newInfo));
+        assertThatThrownBy(() -> PulsarSchemaUtils.decodeClassInfo(newInfo)).isNull();
 
         Class<Foo> clazz = PulsarSchemaUtils.decodeClassInfo(newInfo);
-        assertEquals(clazz, Foo.class);
+        assertThat(Foo.class).isEqualTo(clazz);
     }
 }

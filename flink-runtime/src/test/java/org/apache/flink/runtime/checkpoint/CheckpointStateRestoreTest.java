@@ -47,11 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -152,20 +149,24 @@ public class CheckpointStateRestoreTest {
                             graph.getJobID(), statelessExec2.getAttemptId(), checkpointId),
                     TASK_MANAGER_LOCATION_INFO);
 
-            assertEquals(1, coord.getNumberOfRetainedSuccessfulCheckpoints());
-            assertEquals(0, coord.getNumberOfPendingCheckpoints());
+            assertThat(coord.getNumberOfRetainedSuccessfulCheckpoints()).isEqualTo(1);
+            assertThat(coord.getNumberOfPendingCheckpoints()).isEqualTo(0);
 
             // let the coordinator inject the state
-            assertTrue(
-                    coord.restoreLatestCheckpointedStateToAll(
-                            new HashSet<>(Arrays.asList(stateful, stateless)), false));
+            assertThat(
+                            coord.restoreLatestCheckpointedStateToAll(
+                                    new HashSet<>(Arrays.asList(stateful, stateless)), false))
+                    .isTrue();
 
             // verify that each stateful vertex got the state
-            assertEquals(subtaskStates, statefulExec1.getTaskRestore().getTaskStateSnapshot());
-            assertEquals(subtaskStates, statefulExec2.getTaskRestore().getTaskStateSnapshot());
-            assertEquals(subtaskStates, statefulExec3.getTaskRestore().getTaskStateSnapshot());
-            assertNull(statelessExec1.getTaskRestore());
-            assertNull(statelessExec2.getTaskRestore());
+            assertThat(statefulExec1.getTaskRestore().getTaskStateSnapshot())
+                    .isEqualTo(subtaskStates);
+            assertThat(statefulExec2.getTaskRestore().getTaskStateSnapshot())
+                    .isEqualTo(subtaskStates);
+            assertThat(statefulExec3.getTaskRestore().getTaskStateSnapshot())
+                    .isEqualTo(subtaskStates);
+            assertThat(statelessExec1.getTaskRestore()).isNull();
+            assertThat(statelessExec2.getTaskRestore()).isNull();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -179,7 +180,7 @@ public class CheckpointStateRestoreTest {
 
             final boolean restored =
                     coord.restoreLatestCheckpointedStateToAll(Collections.emptySet(), false);
-            assertFalse(restored);
+            assertThat(restored).isFalse();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -244,8 +245,8 @@ public class CheckpointStateRestoreTest {
         coord.getCheckpointStore()
                 .addCheckpointAndSubsumeOldestOne(checkpoint, new CheckpointsCleaner(), () -> {});
 
-        assertTrue(coord.restoreLatestCheckpointedStateToAll(tasks, false));
-        assertTrue(coord.restoreLatestCheckpointedStateToAll(tasks, true));
+        assertThat(coord.restoreLatestCheckpointedStateToAll(tasks, false)).isTrue();
+        assertThat(coord.restoreLatestCheckpointedStateToAll(tasks, true)).isTrue();
 
         // --- (3) JobVertex missing for task state that is part of the checkpoint ---
         JobVertexID newJobVertexID = new JobVertexID();
@@ -276,7 +277,7 @@ public class CheckpointStateRestoreTest {
 
         // (i) Allow non restored state (should succeed)
         final boolean restored = coord.restoreLatestCheckpointedStateToAll(tasks, true);
-        assertTrue(restored);
+        assertThat(restored).isTrue();
 
         // (ii) Don't allow non restored state (should fail)
         try {

@@ -27,7 +27,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for NetworkFailuresProxy. */
 public class NetworkFailuresProxyTest {
@@ -42,8 +42,8 @@ public class NetworkFailuresProxyTest {
                         new EchoClient("localhost", proxy.getLocalPort(), SOCKET_TIMEOUT)) {
             echoServer.start();
 
-            assertEquals("42", echoClient.write("42"));
-            assertEquals("Ala ma kota!", echoClient.write("Ala ma kota!"));
+            assertThat(echoClient.write("42")).isEqualTo("42");
+            assertThat(echoClient.write("Ala ma kota!")).isEqualTo("Ala ma kota!");
         }
     }
 
@@ -58,9 +58,9 @@ public class NetworkFailuresProxyTest {
                         new EchoClient("localhost", proxy.getLocalPort(), SOCKET_TIMEOUT)) {
             echoServer.start();
 
-            assertEquals("42", echoClient1.write("42"));
-            assertEquals("Ala ma kota!", echoClient2.write("Ala ma kota!"));
-            assertEquals("Ala hat eine Katze!", echoClient1.write("Ala hat eine Katze!"));
+            assertThat(echoClient1.write("42")).isEqualTo("42");
+            assertThat(echoClient2.write("Ala ma kota!")).isEqualTo("Ala ma kota!");
+            assertThat(echoClient1.write("Ala hat eine Katze!")).isEqualTo("Ala hat eine Katze!");
         }
     }
 
@@ -73,27 +73,27 @@ public class NetworkFailuresProxyTest {
 
             try (EchoClient echoClient =
                     new EchoClient("localhost", proxy.getLocalPort(), SOCKET_TIMEOUT)) {
-                assertEquals("42", echoClient.write("42"));
+                assertThat(echoClient.write("42")).isEqualTo("42");
                 proxy.blockTraffic();
                 try {
                     echoClient.write("Ala ma kota!");
                 } catch (SocketException ex) {
-                    assertEquals("Connection reset", ex.getMessage());
+                    assertThat(ex.getMessage()).isEqualTo("Connection reset");
                 }
             }
 
             try (EchoClient echoClient =
                     new EchoClient("localhost", proxy.getLocalPort(), SOCKET_TIMEOUT)) {
-                assertEquals(null, echoClient.write("42"));
+                assertThat(echoClient.write("42")).isEqualTo(null);
             } catch (SocketException ex) {
-                assertEquals("Connection reset", ex.getMessage());
+                assertThat(ex.getMessage()).isEqualTo("Connection reset");
             }
 
             proxy.unblockTraffic();
             try (EchoClient echoClient =
                     new EchoClient("localhost", proxy.getLocalPort(), SOCKET_TIMEOUT)) {
-                assertEquals("42", echoClient.write("42"));
-                assertEquals("Ala ma kota!", echoClient.write("Ala ma kota!"));
+                assertThat(echoClient.write("42")).isEqualTo("42");
+                assertThat(echoClient.write("Ala ma kota!")).isEqualTo("Ala ma kota!");
             }
         }
     }

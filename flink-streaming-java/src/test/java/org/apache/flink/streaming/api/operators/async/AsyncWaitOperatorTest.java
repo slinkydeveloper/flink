@@ -63,8 +63,6 @@ import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TestLogger;
 
-import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
@@ -91,10 +89,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link AsyncWaitOperator}. These test that:
@@ -341,14 +336,12 @@ public class AsyncWaitOperatorTest extends TestLogger {
         } else {
             Object[] jobOutputQueue = testHarness.getOutput().toArray();
 
-            Assert.assertEquals(
-                    "Watermark should be at index 2",
-                    new Watermark(initialTime + 2),
-                    jobOutputQueue[2]);
-            Assert.assertEquals(
-                    "StreamRecord 3 should be at the end",
-                    new StreamRecord<>(6, initialTime + 3),
-                    jobOutputQueue[3]);
+            assertThat(jobOutputQueue[2])
+                    .as("Watermark should be at index 2")
+                    .isEqualTo(new Watermark(initialTime + 2));
+            assertThat(jobOutputQueue[3])
+                    .as("StreamRecord 3 should be at the end")
+                    .isEqualTo(new StreamRecord<>(6, initialTime + 3));
 
             TestHarnessUtil.assertOutputEqualsSorted(
                     "Output for StreamRecords does not match",
@@ -530,7 +523,7 @@ public class AsyncWaitOperatorTest extends TestLogger {
         // be build our own OperatorChain
         final JobGraph jobGraph = chainEnv.getStreamGraph().getJobGraph();
 
-        Assert.assertEquals(3, jobGraph.getVerticesSortedTopologicallyFromSources().size());
+        assertThat(jobGraph.getVerticesSortedTopologicallyFromSources().size()).isEqualTo(3);
 
         return jobGraph.getVerticesSortedTopologicallyFromSources().get(1);
     }
@@ -583,7 +576,7 @@ public class AsyncWaitOperatorTest extends TestLogger {
 
         taskStateManagerMock.getWaitForReportLatch().await();
 
-        assertEquals(checkpointId, taskStateManagerMock.getReportedCheckpointId());
+        assertThat(taskStateManagerMock.getReportedCheckpointId()).isEqualTo(checkpointId);
 
         LazyAsyncFunction.countDown();
 
@@ -772,12 +765,13 @@ public class AsyncWaitOperatorTest extends TestLogger {
                 "Output with watermark was not correct.", expectedOutput, testHarness.getOutput());
 
         if (expectedException.isPresent()) {
-            assertTrue(mockEnvironment.getActualExternalFailureCause().isPresent());
-            assertTrue(
-                    ExceptionUtils.findThrowable(
-                                    mockEnvironment.getActualExternalFailureCause().get(),
-                                    expectedException.get())
-                            .isPresent());
+            assertThat(mockEnvironment.getActualExternalFailureCause().isPresent()).isTrue();
+            assertThat(
+                            ExceptionUtils.findThrowable(
+                                            mockEnvironment.getActualExternalFailureCause().get(),
+                                            expectedException.get())
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -804,11 +798,11 @@ public class AsyncWaitOperatorTest extends TestLogger {
         }
 
         // check that we actually outputted the result of the single input
-        assertEquals(
-                Arrays.asList(new StreamRecord(42 * 2, 1L)), new ArrayList<>(harness.getOutput()));
+        assertThat(new ArrayList<>(harness.getOutput()))
+                .isEqualTo(Arrays.asList(new StreamRecord(42 * 2, 1L)));
 
         // check that we have cancelled our registered timeout
-        assertEquals(0, harness.getProcessingTimeService().getNumActiveTimers());
+        assertThat(harness.getProcessingTimeService().getNumActiveTimers()).isEqualTo(0);
     }
 
     /**
@@ -843,10 +837,11 @@ public class AsyncWaitOperatorTest extends TestLogger {
             testTimer.get();
             // handle normal completion call outputting the element in mailbox thread
             harness.processAll();
-            assertEquals(
-                    Collections.singleton(new StreamRecord<>(1)),
-                    new HashSet<>(harness.getOutput()));
-            assertFalse("no timeout expected", TimeoutAfterCompletionTestFunction.TIMED_OUT.get());
+            assertThat(new HashSet<>(harness.getOutput()))
+                    .isEqualTo(Collections.singleton(new StreamRecord<>(1)));
+            assertThat(TimeoutAfterCompletionTestFunction.TIMED_OUT.get())
+                    .as("no timeout expected")
+                    .isFalse();
         }
     }
 
@@ -889,7 +884,7 @@ public class AsyncWaitOperatorTest extends TestLogger {
             harness.close();
         }
 
-        assertTrue(harness.getEnvironment().getActualExternalFailureCause().isPresent());
+        assertThat(harness.getEnvironment().getActualExternalFailureCause().isPresent()).isTrue();
     }
 
     /** AsyncFunction which completes the result with an {@link Exception}. */
@@ -1019,7 +1014,7 @@ public class AsyncWaitOperatorTest extends TestLogger {
                         .map(r -> ((StreamRecord<Integer>) r).getValue())
                         .collect(Collectors.toList());
 
-        assertThat(outputElements, Matchers.equalTo(expectedOutput));
+        assertThat(outputElements).isEqualTo(expectedOutput);
     }
 
     private static class ControllableAsyncFunction<IN> implements AsyncFunction<IN, IN> {

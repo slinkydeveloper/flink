@@ -34,9 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PluginConfig} utility class. */
 public class PluginConfigTest extends TestLogger {
@@ -65,7 +63,7 @@ public class PluginConfigTest extends TestLogger {
                         ConfigConstants.ENV_FLINK_PLUGINS_DIR, pluginsDirectory.getAbsolutePath());
         CommonTestUtils.setEnv(envVariables);
 
-        assertThat(PluginConfig.getPluginsDir().get(), is(pluginsDirectory));
+        assertThat(PluginConfig.getPluginsDir().get()).isEqualTo(pluginsDirectory);
     }
 
     @Test
@@ -77,6 +75,6 @@ public class PluginConfigTest extends TestLogger {
                                 .getAbsolutePath());
         CommonTestUtils.setEnv(envVariables);
 
-        assertFalse(PluginConfig.getPluginsDir().isPresent());
+        assertThat(PluginConfig.getPluginsDir().isPresent()).isFalse();
     }
 }

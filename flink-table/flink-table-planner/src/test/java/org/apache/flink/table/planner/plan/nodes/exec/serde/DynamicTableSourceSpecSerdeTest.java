@@ -74,9 +74,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link DynamicTableSourceSpec} serialization and deserialization. */
 @RunWith(Parameterized.class)
@@ -113,16 +111,18 @@ public class DynamicTableSourceSpecSerdeTest {
         }
         String json = writer.toString();
         DynamicTableSourceSpec actual = mapper.readValue(json, DynamicTableSourceSpec.class);
-        assertEquals(spec, actual);
-        assertNull(actual.getClassLoader());
+        assertThat(actual).isEqualTo(spec);
+        assertThat(actual.getClassLoader()).isNull();
         actual.setClassLoader(classLoader);
-        assertNull(actual.getReadableConfig());
+        assertThat(actual.getReadableConfig()).isNull();
         actual.setReadableConfig(serdeCtx.getConfiguration());
         TableEnvironmentImpl tableEnv =
                 (TableEnvironmentImpl)
                         TableEnvironment.create(EnvironmentSettings.inStreamingMode());
-        assertNotNull(
-                actual.getScanTableSource(((PlannerBase) tableEnv.getPlanner()).getFlinkContext()));
+        assertThat(
+                        actual.getScanTableSource(
+                                ((PlannerBase) tableEnv.getPlanner()).getFlinkContext()))
+                .isNotNull();
     }
 
     @Parameterized.Parameters(name = "{0}")

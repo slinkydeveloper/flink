@@ -33,11 +33,13 @@ import org.apache.flink.types.IntValue;
 import org.apache.flink.types.StringValue;
 import org.apache.flink.util.MutableObjectIterator;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class AllReduceDriverTest {
@@ -68,7 +70,7 @@ public class AllReduceDriverTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -112,8 +114,8 @@ public class AllReduceDriverTest {
                 char[] expectedString = "abcddeeeffff".toCharArray();
                 Arrays.sort(expectedString);
 
-                Assert.assertArrayEquals(expectedString, foundString);
-                Assert.assertEquals(78, res.f1.intValue());
+                assertThat(foundString).isEqualTo(expectedString);
+                assertThat(res.f1.intValue()).isEqualTo(78);
             }
 
             {
@@ -153,13 +155,13 @@ public class AllReduceDriverTest {
                 char[] expectedString = "abcddeeeffff".toCharArray();
                 Arrays.sort(expectedString);
 
-                Assert.assertArrayEquals(expectedString, foundString);
-                Assert.assertEquals(78, res.f1.intValue());
+                assertThat(foundString).isEqualTo(expectedString);
+                assertThat(res.f1.intValue()).isEqualTo(78);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -205,8 +207,8 @@ public class AllReduceDriverTest {
                 char[] expectedString = "abcddeeeffff".toCharArray();
                 Arrays.sort(expectedString);
 
-                Assert.assertArrayEquals(expectedString, foundString);
-                Assert.assertEquals(78, res.f1.getValue());
+                assertThat(foundString).isEqualTo(expectedString);
+                assertThat(res.f1.getValue()).isEqualTo(78);
             }
             {
                 TestTaskContext<
@@ -247,13 +249,13 @@ public class AllReduceDriverTest {
                 char[] expectedString = "abcddeeeffff".toCharArray();
                 Arrays.sort(expectedString);
 
-                Assert.assertArrayEquals(expectedString, foundString);
-                Assert.assertEquals(78, res.f1.getValue());
+                assertThat(foundString).isEqualTo(expectedString);
+                assertThat(res.f1.getValue()).isEqualTo(78);
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
     // --------------------------------------------------------------------------------------------

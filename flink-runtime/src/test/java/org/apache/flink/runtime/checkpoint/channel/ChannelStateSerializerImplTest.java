@@ -35,9 +35,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static org.apache.flink.runtime.checkpoint.channel.ChannelStateByteBuffer.wrap;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link ChannelStateSerializerImpl} test. */
 public class ChannelStateSerializerImplTest {
@@ -75,12 +73,12 @@ public class ChannelStateSerializerImplTest {
         d.readHeader(is);
         for (int count : numBuffersToWriteAtOnce) {
             int expected = bufSize * count;
-            assertEquals(expected, d.readLength(is));
+            assertThat(d.readLength(is)).isEqualTo(expected);
             byte[] readBuf = new byte[expected];
-            assertEquals(expected, d.readData(is, wrap(readBuf), Integer.MAX_VALUE));
+            assertThat(d.readData(is, wrap(readBuf), Integer.MAX_VALUE)).isEqualTo(expected);
             for (int i = 0; i < count; i++) {
-                assertArrayEquals(
-                        data, Arrays.copyOfRange(readBuf, i * bufSize, (i + 1) * bufSize));
+                assertThat(Arrays.copyOfRange(readBuf, i * bufSize, (i + 1) * bufSize))
+                        .isEqualTo(data);
             }
         }
     }
@@ -97,15 +95,15 @@ public class ChannelStateSerializerImplTest {
         new ChannelStateSerializerImpl()
                 .readData(new ByteArrayInputStream(data), wrap(bufferBuilder), Integer.MAX_VALUE);
 
-        assertFalse(bufferBuilder.isFinished());
+        assertThat(bufferBuilder.isFinished()).isFalse();
 
         bufferBuilder.finish();
         Buffer buffer = bufferConsumer.build();
 
-        assertEquals(data.length, buffer.readableBytes());
+        assertThat(buffer.readableBytes()).isEqualTo(data.length);
         byte[] actual = new byte[buffer.readableBytes()];
         buffer.asByteBuf().readBytes(actual);
-        assertArrayEquals(data, actual);
+        assertThat(actual).isEqualTo(data);
     }
 
     private NetworkBuffer getBuffer(byte[] data) {
@@ -145,15 +143,15 @@ public class ChannelStateSerializerImplTest {
             throws IOException {
         serializer.readHeader(is);
         int size = serializer.readLength(is);
-        assertEquals(data.length, size);
+        assertThat(size).isEqualTo(data.length);
         NetworkBuffer buffer =
                 new NetworkBuffer(
                         MemorySegmentFactory.allocateUnpooledSegment(data.length),
                         FreeingBufferRecycler.INSTANCE);
         try {
             int read = serializer.readData(is, wrap(buffer), size);
-            assertEquals(size, read);
-            assertArrayEquals(data, readBytes(buffer));
+            assertThat(read).isEqualTo(size);
+            assertThat(readBytes(buffer)).isEqualTo(data);
         } finally {
             buffer.release();
         }

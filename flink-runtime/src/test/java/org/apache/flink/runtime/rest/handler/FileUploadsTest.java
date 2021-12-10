@@ -20,7 +20,6 @@ package org.apache.flink.runtime.rest.handler;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -33,6 +32,9 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 /** Tests for {@link FileUploads}. */
 public class FileUploadsTest extends TestLogger {
 
@@ -43,7 +45,7 @@ public class FileUploadsTest extends TestLogger {
         Path relative = Paths.get("root");
         try {
             new FileUploads(relative);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException iae) {
             // expected
         }
@@ -68,9 +70,9 @@ public class FileUploadsTest extends TestLogger {
                             .map(File::toPath)
                             .collect(Collectors.toList());
 
-            Assert.assertEquals(2, detectedFiles.size());
-            Assert.assertTrue(detectedFiles.contains(tmp.resolve(rootFile)));
-            Assert.assertTrue(detectedFiles.contains(tmp.resolve(subFile)));
+            assertThat(detectedFiles.size()).isEqualTo(2);
+            assertThat(detectedFiles.contains(tmp.resolve(rootFile))).isTrue();
+            assertThat(detectedFiles.contains(tmp.resolve(subFile))).isTrue();
         }
     }
 
@@ -83,7 +85,7 @@ public class FileUploadsTest extends TestLogger {
 
         try (FileUploads fileUploads = new FileUploads(tmp.resolve(rootDir))) {
             Collection<File> detectedFiles = fileUploads.getUploadedFiles();
-            Assert.assertEquals(0, detectedFiles.size());
+            assertThat(detectedFiles.size()).isEqualTo(0);
         }
     }
 
@@ -101,14 +103,14 @@ public class FileUploadsTest extends TestLogger {
         Files.createFile(tmp.resolve(subFile));
 
         try (FileUploads fileUploads = new FileUploads(tmp.resolve(rootDir))) {
-            Assert.assertTrue(Files.exists(tmp.resolve(rootDir)));
-            Assert.assertTrue(Files.exists(tmp.resolve(subDir)));
-            Assert.assertTrue(Files.exists(tmp.resolve(rootFile)));
-            Assert.assertTrue(Files.exists(tmp.resolve(subFile)));
+            assertThat(Files.exists(tmp.resolve(rootDir))).isTrue();
+            assertThat(Files.exists(tmp.resolve(subDir))).isTrue();
+            assertThat(Files.exists(tmp.resolve(rootFile))).isTrue();
+            assertThat(Files.exists(tmp.resolve(subFile))).isTrue();
         }
-        Assert.assertFalse(Files.exists(tmp.resolve(rootDir)));
-        Assert.assertFalse(Files.exists(tmp.resolve(subDir)));
-        Assert.assertFalse(Files.exists(tmp.resolve(rootFile)));
-        Assert.assertFalse(Files.exists(tmp.resolve(subFile)));
+        assertThat(Files.exists(tmp.resolve(rootDir))).isFalse();
+        assertThat(Files.exists(tmp.resolve(subDir))).isFalse();
+        assertThat(Files.exists(tmp.resolve(rootFile))).isFalse();
+        assertThat(Files.exists(tmp.resolve(subFile))).isFalse();
     }
 }

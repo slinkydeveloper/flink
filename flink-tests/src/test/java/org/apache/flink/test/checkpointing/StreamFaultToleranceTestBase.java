@@ -31,7 +31,6 @@ import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -44,6 +43,8 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.apache.flink.test.util.TestUtils.submitJobAndWaitForResult;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test base for fault tolerant streaming programs. */
 @RunWith(Parameterized.class)
@@ -134,14 +135,14 @@ public abstract class StreamFaultToleranceTestBase extends TestLogger {
                 submitJobAndWaitForResult(
                         cluster.getClusterClient(), jobGraph, getClass().getClassLoader());
             } catch (Exception e) {
-                Assert.assertTrue(
-                        ExceptionUtils.findThrowable(e, SuccessException.class).isPresent());
+                assertThat(ExceptionUtils.findThrowable(e, SuccessException.class).isPresent())
+                        .isTrue();
             }
 
             postSubmit();
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 

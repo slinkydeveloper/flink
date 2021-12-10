@@ -42,8 +42,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test to verify that timer triggers are run according to operator precedence (combined with
@@ -79,8 +78,8 @@ public class StreamTaskOperatorTimerTest extends TestLogger {
         testHarness
                 .getOutput()
                 .forEach(element -> events.add(((StreamRecord<String>) element).getValue()));
-        assertThat(
-                events, is(Arrays.asList(trigger, RESULT_PREFIX + "1:0", RESULT_PREFIX + "0:0")));
+        assertThat(events)
+                .isEqualTo(Arrays.asList(trigger, RESULT_PREFIX + "1:0", RESULT_PREFIX + "0:0"));
     }
 
     private static class TestOperatorFactory extends AbstractStreamOperatorFactory<String>

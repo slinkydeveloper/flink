@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the {@link ImmutableListState}. */
 public class ImmutableListStateTest {
@@ -59,10 +59,10 @@ public class ImmutableListStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testUpdate() throws Exception {
         List<Long> list = getStateContents();
-        assertEquals(1L, list.size());
+        assertThat(list.size()).isEqualTo(1L);
 
         long element = list.get(0);
-        assertEquals(42L, element);
+        assertThat(element).isEqualTo(42L);
 
         listState.add(54L);
     }
@@ -70,10 +70,10 @@ public class ImmutableListStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testClear() throws Exception {
         List<Long> list = getStateContents();
-        assertEquals(1L, list.size());
+        assertThat(list.size()).isEqualTo(1L);
 
         long element = list.get(0);
-        assertEquals(42L, element);
+        assertThat(element).isEqualTo(42L);
 
         listState.clear();
     }

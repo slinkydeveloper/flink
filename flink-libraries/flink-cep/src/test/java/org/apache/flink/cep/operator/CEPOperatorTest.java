@@ -56,7 +56,6 @@ import org.apache.flink.util.TestLogger;
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -72,9 +71,7 @@ import java.util.Queue;
 
 import static org.apache.flink.cep.utils.CepOperatorBuilder.createOperatorForNFA;
 import static org.apache.flink.cep.utils.EventBuilder.event;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
@@ -191,7 +188,7 @@ public class CEPOperatorTest extends TestLogger {
 
             Queue<Object> result = harness.getOutput();
 
-            assertEquals(2, result.size());
+            assertThat(result.size()).isEqualTo(2);
 
             verifyPattern(result.poll(), startEvent, middleEvent, endEvent);
             verifyWatermark(result.poll(), Long.MAX_VALUE);
@@ -269,7 +266,7 @@ public class CEPOperatorTest extends TestLogger {
 
             Queue<Object> result = harness.getOutput();
 
-            assertEquals(2, result.size());
+            assertThat(result.size()).isEqualTo(2);
 
             verifyPattern(result.poll(), startEvent, middleEvent, endEvent);
             verifyWatermark(result.poll(), Long.MAX_VALUE);
@@ -335,25 +332,25 @@ public class CEPOperatorTest extends TestLogger {
             Queue<StreamRecord<Tuple2<Map<String, List<Event>>, Long>>> sideOutput =
                     harness.getSideOutput(timedOut);
 
-            assertEquals(2L, result.size());
-            assertEquals(1L, sideOutput.size());
+            assertThat(result.size()).isEqualTo(2L);
+            assertThat(sideOutput.size()).isEqualTo(1L);
 
             Object watermark1 = result.poll();
 
-            assertTrue(watermark1 instanceof Watermark);
+            assertThat(watermark1).isInstanceOf(Watermark.class);
 
-            assertEquals(watermarkTimestamp1, ((Watermark) watermark1).getTimestamp());
+            assertThat(((Watermark) watermark1).getTimestamp()).isEqualTo(watermarkTimestamp1);
 
             Tuple2<Map<String, List<Event>>, Long> leftResult = sideOutput.poll().getValue();
 
-            assertEquals(watermarkTimestamp2, (long) leftResult.f1);
-            assertEquals(expectedSequence, leftResult.f0);
+            assertThat((long) leftResult.f1).isEqualTo(watermarkTimestamp2);
+            assertThat(leftResult.f0).isEqualTo(expectedSequence);
 
             Object watermark2 = result.poll();
 
-            assertTrue(watermark2 instanceof Watermark);
+            assertThat(watermark2).isInstanceOf(Watermark.class);
 
-            assertEquals(watermarkTimestamp2, ((Watermark) watermark2).getTimestamp());
+            assertThat(((Watermark) watermark2).getTimestamp()).isEqualTo(watermarkTimestamp2);
         } finally {
             harness.close();
         }
@@ -405,7 +402,7 @@ public class CEPOperatorTest extends TestLogger {
 
             Queue<Object> result = harness.getOutput();
 
-            assertEquals(1, result.size());
+            assertThat(result.size()).isEqualTo(1);
 
             verifyPattern(result.poll(), startEvent, middleEvent, endEvent);
         } finally {
@@ -472,7 +469,7 @@ public class CEPOperatorTest extends TestLogger {
 
             Queue<Object> result = harness.getOutput();
 
-            assertEquals(1, result.size());
+            assertThat(result.size()).isEqualTo(1);
 
             verifyPattern(result.poll(), startEvent, middleEvent, endEvent);
         } finally {
@@ -511,7 +508,7 @@ public class CEPOperatorTest extends TestLogger {
             // get and verify the output
             Queue<Object> result = harness.getOutput();
 
-            assertEquals(1, result.size());
+            assertThat(result.size()).isEqualTo(1);
 
             verifyPattern(result.poll(), startEvent, middleEvent, endEvent);
         } finally {
@@ -557,7 +554,7 @@ public class CEPOperatorTest extends TestLogger {
             // get and verify the output
             Queue<Object> result = harness.getOutput();
 
-            assertEquals(1, result.size());
+            assertThat(result.size()).isEqualTo(1);
 
             verifyPattern(result.poll(), startEvent, middleEvent, endEvent);
         } finally {
@@ -597,11 +594,11 @@ public class CEPOperatorTest extends TestLogger {
             // there must be 2 keys 42, 43 registered for the watermark callback
             // all the seen elements must be in the priority queues but no NFA yet.
 
-            assertEquals(2L, harness.numEventTimeTimers());
-            assertEquals(4L, operator.getPQSize(42));
-            assertEquals(1L, operator.getPQSize(43));
-            assertTrue(!operator.hasNonEmptySharedBuffer(42));
-            assertTrue(!operator.hasNonEmptySharedBuffer(43));
+            assertThat(harness.numEventTimeTimers()).isEqualTo(2L);
+            assertThat(operator.getPQSize(42)).isEqualTo(4L);
+            assertThat(operator.getPQSize(43)).isEqualTo(1L);
+            assertThat(!operator.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(!operator.hasNonEmptySharedBuffer(43)).isTrue();
 
             harness.processWatermark(new Watermark(2L));
 
@@ -612,11 +609,11 @@ public class CEPOperatorTest extends TestLogger {
             // one element in PQ for 42 (the barfoo) as it arrived early
             // for 43 the element entered the NFA and the PQ is empty
 
-            assertEquals(2L, harness.numEventTimeTimers());
-            assertTrue(operator.hasNonEmptySharedBuffer(42));
-            assertEquals(1L, operator.getPQSize(42));
-            assertTrue(operator.hasNonEmptySharedBuffer(43));
-            assertTrue(!operator.hasNonEmptyPQ(43));
+            assertThat(harness.numEventTimeTimers()).isEqualTo(2L);
+            assertThat(operator.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(operator.getPQSize(42)).isEqualTo(1L);
+            assertThat(operator.hasNonEmptySharedBuffer(43)).isTrue();
+            assertThat(!operator.hasNonEmptyPQ(43)).isTrue();
 
             harness.processElement(new StreamRecord<>(startEvent2, 4L));
             harness.processElement(new StreamRecord<Event>(middleEvent2, 5L));
@@ -637,11 +634,11 @@ public class CEPOperatorTest extends TestLogger {
 
             // now we have 1 key because the 43 expired and was removed.
             // 42 is still there due to startEvent2
-            assertEquals(1L, harness.numEventTimeTimers());
-            assertTrue(operator2.hasNonEmptySharedBuffer(42));
-            assertTrue(!operator2.hasNonEmptyPQ(42));
-            assertTrue(!operator2.hasNonEmptySharedBuffer(43));
-            assertTrue(!operator2.hasNonEmptyPQ(43));
+            assertThat(harness.numEventTimeTimers()).isEqualTo(1L);
+            assertThat(operator2.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(!operator2.hasNonEmptyPQ(42)).isTrue();
+            assertThat(!operator2.hasNonEmptySharedBuffer(43)).isTrue();
+            assertThat(!operator2.hasNonEmptyPQ(43)).isTrue();
 
             verifyPattern(harness.getOutput().poll(), startEvent1, middleEvent1, endEvent1);
             verifyPattern(harness.getOutput().poll(), startEvent1, middleEvent2, endEvent1);
@@ -655,11 +652,11 @@ public class CEPOperatorTest extends TestLogger {
             harness.processWatermark(20L);
             harness.processWatermark(21L);
 
-            assertTrue(!operator2.hasNonEmptySharedBuffer(42));
-            assertTrue(!operator2.hasNonEmptyPQ(42));
-            assertEquals(0L, harness.numEventTimeTimers());
+            assertThat(!operator2.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(!operator2.hasNonEmptyPQ(42)).isTrue();
+            assertThat(harness.numEventTimeTimers()).isEqualTo(0L);
 
-            assertEquals(3, harness.getOutput().size());
+            assertThat(harness.getOutput().size()).isEqualTo(3);
             verifyPattern(harness.getOutput().poll(), startEvent2, middleEvent2, endEvent2);
 
             verifyWatermark(harness.getOutput().poll(), 20L);
@@ -696,18 +693,19 @@ public class CEPOperatorTest extends TestLogger {
             harness.processElement(new StreamRecord<>(middle1Event1, 3));
             harness.processElement(new StreamRecord<>(new Event(41, "d", 6.0), 5));
 
-            assertEquals(1L, harness.numEventTimeTimers());
-            assertEquals(7L, operator.getPQSize(41));
-            assertTrue(!operator.hasNonEmptySharedBuffer(41));
+            assertThat(harness.numEventTimeTimers()).isEqualTo(1L);
+            assertThat(operator.getPQSize(41)).isEqualTo(7L);
+            assertThat(!operator.hasNonEmptySharedBuffer(41)).isTrue();
 
             harness.processWatermark(new Watermark(2L));
 
             verifyWatermark(harness.getOutput().poll(), Long.MIN_VALUE);
             verifyWatermark(harness.getOutput().poll(), 2L);
 
-            assertEquals(1L, harness.numEventTimeTimers());
-            assertEquals(6L, operator.getPQSize(41));
-            assertTrue(operator.hasNonEmptySharedBuffer(41)); // processed the first element
+            assertThat(harness.numEventTimeTimers()).isEqualTo(1L);
+            assertThat(operator.getPQSize(41)).isEqualTo(6L);
+            assertThat(operator.hasNonEmptySharedBuffer(41))
+                    .isTrue(); // processed the first element
 
             harness.processWatermark(new Watermark(8L));
 
@@ -757,16 +755,16 @@ public class CEPOperatorTest extends TestLogger {
                                     middle2Event1,
                                     middle1Event3)));
 
-            assertEquals(1L, harness.numEventTimeTimers());
-            assertEquals(0L, operator.getPQSize(41));
-            assertTrue(operator.hasNonEmptySharedBuffer(41));
+            assertThat(harness.numEventTimeTimers()).isEqualTo(1L);
+            assertThat(operator.getPQSize(41)).isEqualTo(0L);
+            assertThat(operator.hasNonEmptySharedBuffer(41)).isTrue();
 
             harness.processWatermark(new Watermark(17L));
             verifyWatermark(harness.getOutput().poll(), 17L);
 
-            assertTrue(!operator.hasNonEmptySharedBuffer(41));
-            assertTrue(!operator.hasNonEmptyPQ(41));
-            assertEquals(0L, harness.numEventTimeTimers());
+            assertThat(!operator.hasNonEmptySharedBuffer(41)).isTrue();
+            assertThat(!operator.hasNonEmptyPQ(41)).isTrue();
+            assertThat(harness.numEventTimeTimers()).isEqualTo(0L);
         } finally {
             harness.close();
         }
@@ -810,7 +808,7 @@ public class CEPOperatorTest extends TestLogger {
             }
 
             List<Event> expected = Lists.newArrayList(middle1Event1, middle1Event2);
-            Assert.assertArrayEquals(expected.toArray(), late.toArray());
+            assertThat(late.toArray()).isEqualTo(expected.toArray());
         }
     }
 
@@ -834,7 +832,7 @@ public class CEPOperatorTest extends TestLogger {
             harness.processWatermark(4L);
             harness.processElement(middle1Event3, 3L);
 
-            assertEquals(2L, operator.getLateRecordsNumber());
+            assertThat(operator.getLateRecordsNumber()).isEqualTo(2L);
         } finally {
             harness.close();
         }
@@ -869,10 +867,10 @@ public class CEPOperatorTest extends TestLogger {
             harness.processElement(
                     new StreamRecord<Event>(new SubEvent(42, "barfoo", 1.0, 5.0), 3L));
 
-            assertTrue(!operator.hasNonEmptyPQ(42));
-            assertTrue(!operator.hasNonEmptyPQ(43));
-            assertTrue(operator.hasNonEmptySharedBuffer(42));
-            assertTrue(operator.hasNonEmptySharedBuffer(43));
+            assertThat(!operator.hasNonEmptyPQ(42)).isTrue();
+            assertThat(!operator.hasNonEmptyPQ(43)).isTrue();
+            assertThat(operator.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(operator.hasNonEmptySharedBuffer(43)).isTrue();
 
             harness.setProcessingTime(3L);
 
@@ -906,10 +904,10 @@ public class CEPOperatorTest extends TestLogger {
 
             harness.setProcessingTime(21L);
 
-            assertTrue(operator2.hasNonEmptySharedBuffer(42));
+            assertThat(operator2.hasNonEmptySharedBuffer(42)).isTrue();
 
             harness.processElement(new StreamRecord<>(startEvent1, 21L));
-            assertTrue(operator2.hasNonEmptySharedBuffer(42));
+            assertThat(operator2.hasNonEmptySharedBuffer(42)).isTrue();
 
             harness.setProcessingTime(49L);
 
@@ -917,11 +915,11 @@ public class CEPOperatorTest extends TestLogger {
             harness.processElement(new StreamRecord<>(new Event(42, "foobar", 1.0), 2L));
 
             // the pattern expired
-            assertTrue(!operator2.hasNonEmptySharedBuffer(42));
+            assertThat(!operator2.hasNonEmptySharedBuffer(42)).isTrue();
 
-            assertEquals(0L, harness.numEventTimeTimers());
-            assertTrue(!operator2.hasNonEmptyPQ(42));
-            assertTrue(!operator2.hasNonEmptyPQ(43));
+            assertThat(harness.numEventTimeTimers()).isEqualTo(0L);
+            assertThat(!operator2.hasNonEmptyPQ(42)).isTrue();
+            assertThat(!operator2.hasNonEmptyPQ(43)).isTrue();
         } finally {
             harness.close();
         }
@@ -1082,12 +1080,12 @@ public class CEPOperatorTest extends TestLogger {
             harness.processElement(new StreamRecord<>(new Event(42, "foobar", 1.0), 0L));
             harness.processElement(new StreamRecord<>(new SubEvent(42, "barfoo", 1.0, 5.0), 0L));
 
-            assertTrue(!operator.hasNonEmptySharedBuffer(42));
-            assertTrue(!operator.hasNonEmptySharedBuffer(43));
+            assertThat(!operator.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(!operator.hasNonEmptySharedBuffer(43)).isTrue();
 
             harness.setProcessingTime(3L);
-            assertTrue(operator.hasNonEmptySharedBuffer(42));
-            assertTrue(operator.hasNonEmptySharedBuffer(43));
+            assertThat(operator.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(operator.hasNonEmptySharedBuffer(43)).isTrue();
 
             harness.processElement(new StreamRecord<>(middleEvent2, 3L));
             harness.processElement(new StreamRecord<>(middleEvent1, 3L));
@@ -1142,16 +1140,16 @@ public class CEPOperatorTest extends TestLogger {
             harness.processElement(
                     new StreamRecord<Event>(new SubEvent(42, "barfoo", 1.0, 5.0), 3L));
 
-            assertTrue(operator.hasNonEmptyPQ(42));
-            assertTrue(operator.hasNonEmptyPQ(43));
-            assertFalse(operator.hasNonEmptySharedBuffer(42));
-            assertFalse(operator.hasNonEmptySharedBuffer(43));
+            assertThat(operator.hasNonEmptyPQ(42)).isTrue();
+            assertThat(operator.hasNonEmptyPQ(43)).isTrue();
+            assertThat(operator.hasNonEmptySharedBuffer(42)).isFalse();
+            assertThat(operator.hasNonEmptySharedBuffer(43)).isFalse();
 
             harness.processWatermark(3L);
-            assertFalse(operator.hasNonEmptyPQ(42));
-            assertFalse(operator.hasNonEmptyPQ(43));
-            assertTrue(operator.hasNonEmptySharedBuffer(42));
-            assertTrue(operator.hasNonEmptySharedBuffer(43));
+            assertThat(operator.hasNonEmptyPQ(42)).isFalse();
+            assertThat(operator.hasNonEmptyPQ(43)).isFalse();
+            assertThat(operator.hasNonEmptySharedBuffer(42)).isTrue();
+            assertThat(operator.hasNonEmptySharedBuffer(43)).isTrue();
 
             harness.processElement(new StreamRecord<>(startEvent2, 4L));
             harness.processElement(new StreamRecord<Event>(middleEvent2, 5L));
@@ -1181,21 +1179,21 @@ public class CEPOperatorTest extends TestLogger {
     }
 
     private void verifyWatermark(Object outputObject, long timestamp) {
-        assertTrue(outputObject instanceof Watermark);
-        assertEquals(timestamp, ((Watermark) outputObject).getTimestamp());
+        assertThat(outputObject).isInstanceOf(Watermark.class);
+        assertThat(((Watermark) outputObject).getTimestamp()).isEqualTo(timestamp);
     }
 
     private void verifyPattern(Object outputObject, Event start, SubEvent middle, Event end) {
-        assertTrue(outputObject instanceof StreamRecord);
+        assertThat(outputObject).isInstanceOf(StreamRecord.class);
 
         StreamRecord<?> resultRecord = (StreamRecord<?>) outputObject;
-        assertTrue(resultRecord.getValue() instanceof Map);
+        assertThat(resultRecord.getValue()).isInstanceOf(Map.class);
 
         @SuppressWarnings("unchecked")
         Map<String, List<Event>> patternMap = (Map<String, List<Event>>) resultRecord.getValue();
-        assertEquals(start, patternMap.get("start").get(0));
-        assertEquals(middle, patternMap.get("middle").get(0));
-        assertEquals(end, patternMap.get("end").get(0));
+        assertThat(patternMap.get("start").get(0)).isEqualTo(start);
+        assertThat(patternMap.get("middle").get(0)).isEqualTo(middle);
+        assertThat(patternMap.get("end").get(0)).isEqualTo(end);
     }
 
     private CepOperator<Event, Integer, Map<String, List<Event>>> getKeyedCepOperator(
@@ -1218,7 +1216,7 @@ public class CEPOperatorTest extends TestLogger {
     }
 
     private void compareMaps(List<List<Event>> actual, List<List<Event>> expected) {
-        Assert.assertEquals(expected.size(), actual.size());
+        assertThat(actual.size()).isEqualTo(expected.size());
 
         for (List<Event> p : actual) {
             Collections.sort(p, new EventComparator());
@@ -1230,7 +1228,7 @@ public class CEPOperatorTest extends TestLogger {
 
         Collections.sort(actual, new ListEventComparator());
         Collections.sort(expected, new ListEventComparator());
-        Assert.assertArrayEquals(expected.toArray(), actual.toArray());
+        assertThat(actual.toArray()).isEqualTo(expected.toArray());
     }
 
     private class ListEventComparator implements Comparator<List<Event>> {

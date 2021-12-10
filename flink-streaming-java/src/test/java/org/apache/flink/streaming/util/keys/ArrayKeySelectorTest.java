@@ -25,8 +25,8 @@ import org.apache.flink.api.java.tuple.Tuple2;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests key selectors on arrays. */
 public class ArrayKeySelectorTest {
@@ -41,15 +41,15 @@ public class ArrayKeySelectorTest {
                     KeySelectorUtil.getSelectorForArray(
                             new int[] {1}, BasicArrayTypeInfo.STRING_ARRAY_TYPE_INFO);
 
-            assertEquals(new Tuple1<>("b"), singleFieldSelector.getKey(array1));
-            assertEquals(new Tuple1<>("w"), singleFieldSelector.getKey(array2));
+            assertThat(singleFieldSelector.getKey(array1)).isEqualTo(new Tuple1<>("b"));
+            assertThat(singleFieldSelector.getKey(array2)).isEqualTo(new Tuple1<>("w"));
 
             KeySelectorUtil.ArrayKeySelector<String[]> twoFieldsSelector =
                     KeySelectorUtil.getSelectorForArray(
                             new int[] {3, 0}, BasicArrayTypeInfo.STRING_ARRAY_TYPE_INFO);
 
-            assertEquals(new Tuple2<>("d", "a"), twoFieldsSelector.getKey(array1));
-            assertEquals(new Tuple2<>("y", "v"), twoFieldsSelector.getKey(array2));
+            assertThat(twoFieldsSelector.getKey(array1)).isEqualTo(new Tuple2<>("d", "a"));
+            assertThat(twoFieldsSelector.getKey(array2)).isEqualTo(new Tuple2<>("y", "v"));
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -67,15 +67,15 @@ public class ArrayKeySelectorTest {
                     KeySelectorUtil.getSelectorForArray(
                             new int[] {1}, PrimitiveArrayTypeInfo.INT_PRIMITIVE_ARRAY_TYPE_INFO);
 
-            assertEquals(new Tuple1<>(2), singleFieldSelector.getKey(array1));
-            assertEquals(new Tuple1<>(-4), singleFieldSelector.getKey(array2));
+            assertThat(singleFieldSelector.getKey(array1)).isEqualTo(new Tuple1<>(2));
+            assertThat(singleFieldSelector.getKey(array2)).isEqualTo(new Tuple1<>(-4));
 
             KeySelectorUtil.ArrayKeySelector<int[]> twoFieldsSelector =
                     KeySelectorUtil.getSelectorForArray(
                             new int[] {3, 0}, PrimitiveArrayTypeInfo.INT_PRIMITIVE_ARRAY_TYPE_INFO);
 
-            assertEquals(new Tuple2<>(4, 1), twoFieldsSelector.getKey(array1));
-            assertEquals(new Tuple2<>(-2, -5), twoFieldsSelector.getKey(array2));
+            assertThat(twoFieldsSelector.getKey(array1)).isEqualTo(new Tuple2<>(4, 1));
+            assertThat(twoFieldsSelector.getKey(array2)).isEqualTo(new Tuple2<>(-2, -5));
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -48,10 +48,8 @@ import static org.apache.flink.core.fs.Path.fromLocalFile;
 import static org.apache.flink.core.fs.local.LocalFileSystem.getSharedInstance;
 import static org.apache.flink.core.memory.MemorySegmentFactory.wrap;
 import static org.apache.flink.runtime.state.CheckpointedStateScope.EXCLUSIVE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link ChannelStateCheckpointWriter} test. */
 public class ChannelStateCheckpointWriterTest {
@@ -90,9 +88,8 @@ public class ChannelStateCheckpointWriterTest {
         writer.completeOutput();
 
         for (InputChannelStateHandle handle : result.inputChannelStateHandles.get()) {
-            assertEquals(
-                    (Integer.BYTES + numBytesPerWrite) * numWritesPerChannel,
-                    handle.getStateSize());
+            assertThat(handle.getStateSize())
+                    .isEqualTo((Integer.BYTES + numBytesPerWrite) * numWritesPerChannel);
         }
     }
 
@@ -121,9 +118,9 @@ public class ChannelStateCheckpointWriterTest {
         writer.writeInput(new InputChannelInfo(1, 2), buffer);
         writer.completeOutput();
         writer.completeInput();
-        assertTrue(result.isDone());
-        assertEquals(0, checkpointsDir.list().length);
-        assertEquals(0, sharedStateDir.list().length);
+        assertThat(result.isDone()).isTrue();
+        assertThat(checkpointsDir.list().length).isEqualTo(0);
+        assertThat(sharedStateDir.list().length).isEqualTo(0);
     }
 
     @Test
@@ -139,7 +136,7 @@ public class ChannelStateCheckpointWriterTest {
         ChannelStateCheckpointWriter writer = createWriter(new ChannelStateWriteResult(), stream);
         writer.completeOutput();
         writer.completeInput();
-        assertTrue(stream.isClosed());
+        assertThat(stream.isClosed()).isTrue();
     }
 
     @Test
@@ -150,7 +147,7 @@ public class ChannelStateCheckpointWriterTest {
                         MemorySegmentFactory.allocateUnpooledSegment(10, null),
                         FreeingBufferRecycler.INSTANCE);
         writer.writeInput(new InputChannelInfo(1, 2), buffer);
-        assertTrue(buffer.isRecycled());
+        assertThat(buffer.isRecycled()).isTrue();
     }
 
     @Test
@@ -184,7 +181,7 @@ public class ChannelStateCheckpointWriterTest {
         writer.completeInput();
         writer.completeOutput();
 
-        assertTrue(dataStream.flushed);
+        assertThat(dataStream.flushed).isTrue();
     }
 
     @Test
@@ -192,9 +189,9 @@ public class ChannelStateCheckpointWriterTest {
         ChannelStateWriteResult result = new ChannelStateWriteResult();
         ChannelStateCheckpointWriter writer = createWriter(result);
         writer.completeInput();
-        assertFalse(result.isDone());
+        assertThat(result.isDone()).isFalse();
         writer.completeOutput();
-        assertTrue(result.isDone());
+        assertThat(result.isDone()).isTrue();
     }
 
     @Test
@@ -218,12 +215,14 @@ public class ChannelStateCheckpointWriterTest {
         for (InputChannelStateHandle handle : result.inputChannelStateHandles.get()) {
             int headerSize = Integer.BYTES;
             int lengthSize = Integer.BYTES;
-            assertEquals(singletonList((long) headerSize), handle.getOffsets());
-            assertEquals(
-                    headerSize + lengthSize + numBytes * offsetCounts.remove(handle.getInfo()),
-                    handle.getDelegate().getStateSize());
+            assertThat(handle.getOffsets()).isEqualTo(singletonList((long) headerSize));
+            assertThat(handle.getDelegate().getStateSize())
+                    .isEqualTo(
+                            headerSize
+                                    + lengthSize
+                                    + numBytes * offsetCounts.remove(handle.getInfo()));
         }
-        assertTrue(offsetCounts.isEmpty());
+        assertThat(offsetCounts.isEmpty()).isTrue();
     }
 
     private byte[] getData(int len) {

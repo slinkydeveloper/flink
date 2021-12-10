@@ -28,7 +28,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RestartAllFailoverStrategy}. */
 public class RestartAllFailoverStrategyTest extends TestLogger {
@@ -46,8 +46,7 @@ public class RestartAllFailoverStrategyTest extends TestLogger {
 
         final RestartAllFailoverStrategy strategy = new RestartAllFailoverStrategy(topology);
 
-        assertEquals(
-                new HashSet<>(Arrays.asList(v1.getId(), v2.getId(), v3.getId())),
-                strategy.getTasksNeedingRestart(v1.getId(), new Exception("Test failure")));
+        assertThat(strategy.getTasksNeedingRestart(v1.getId(), new Exception("Test failure")))
+                .isEqualTo(new HashSet<>(Arrays.asList(v1.getId(), v2.getId(), v3.getId())));
     }
 }

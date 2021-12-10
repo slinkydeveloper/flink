@@ -27,23 +27,21 @@ import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.apache.flink.runtime.state.StateUtil.discardStateFuture;
 import static org.apache.flink.util.concurrent.FutureUtils.completedExceptionally;
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link StateUtil}. */
 public class StateUtilTest {
 
     @Test
     public void testDiscardStateSize() throws Exception {
-        assertEquals(1234, discardStateFuture(completedFuture(new TestStateObject(1234))));
-        assertEquals(0, discardStateFuture(null));
-        assertEquals(0, discardStateFuture(new CompletableFuture<>()));
-        assertEquals(0, discardStateFuture(completedExceptionally(new RuntimeException())));
-        assertEquals(0, discardStateFuture(emptyFuture(false, true)));
-        assertEquals(0, discardStateFuture(emptyFuture(false, false)));
-        assertEquals(0, discardStateFuture(emptyFuture(true, true)));
-        assertEquals(0, discardStateFuture(emptyFuture(true, false)));
+        assertThat(discardStateFuture(completedFuture(new TestStateObject(1234)))).isEqualTo(1234);
+        assertThat(discardStateFuture(null)).isEqualTo(0);
+        assertThat(discardStateFuture(new CompletableFuture<>())).isEqualTo(0);
+        assertThat(discardStateFuture(completedExceptionally(new RuntimeException()))).isEqualTo(0);
+        assertThat(discardStateFuture(emptyFuture(false, true))).isEqualTo(0);
+        assertThat(discardStateFuture(emptyFuture(false, false))).isEqualTo(0);
+        assertThat(discardStateFuture(emptyFuture(true, true))).isEqualTo(0);
+        assertThat(discardStateFuture(emptyFuture(true, false))).isEqualTo(0);
     }
 
     @Test
@@ -52,10 +50,9 @@ public class StateUtilTest {
                 StateUtil.unexpectedStateHandleException(
                         KeyGroupsStateHandle.class, KeyGroupsStateHandle.class);
 
-        assertThat(
-                exception.getMessage(),
-                containsString(
-                        "Unexpected state handle type, expected one of: class org.apache.flink.runtime.state.KeyGroupsStateHandle, but found: class org.apache.flink.runtime.state.KeyGroupsStateHandle. This can mostly happen when a different StateBackend from the one that was used for taking a checkpoint/savepoint is used when restoring."));
+        assertThat(exception.getMessage())
+                .contains(
+                        "Unexpected state handle type, expected one of: class org.apache.flink.runtime.state.KeyGroupsStateHandle, but found: class org.apache.flink.runtime.state.KeyGroupsStateHandle. This can mostly happen when a different StateBackend from the one that was used for taking a checkpoint/savepoint is used when restoring.");
     }
 
     @Test
@@ -66,10 +63,9 @@ public class StateUtilTest {
                         new Class[] {KeyGroupsStateHandle.class, KeyGroupsStateHandle.class},
                         KeyGroupsStateHandle.class);
 
-        assertThat(
-                exception.getMessage(),
-                containsString(
-                        "Unexpected state handle type, expected one of: class org.apache.flink.runtime.state.KeyGroupsStateHandle, class org.apache.flink.runtime.state.KeyGroupsStateHandle, but found: class org.apache.flink.runtime.state.KeyGroupsStateHandle. This can mostly happen when a different StateBackend from the one that was used for taking a checkpoint/savepoint is used when restoring."));
+        assertThat(exception.getMessage())
+                .contains(
+                        "Unexpected state handle type, expected one of: class org.apache.flink.runtime.state.KeyGroupsStateHandle, class org.apache.flink.runtime.state.KeyGroupsStateHandle, but found: class org.apache.flink.runtime.state.KeyGroupsStateHandle. This can mostly happen when a different StateBackend from the one that was used for taking a checkpoint/savepoint is used when restoring.");
     }
 
     private static <T> Future<T> emptyFuture(boolean done, boolean canBeCancelled) {

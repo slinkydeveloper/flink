@@ -26,7 +26,7 @@ import org.apache.flink.test.util.JavaProgramTestBase;
 
 import java.util.ArrayList;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test union between static and dynamic path in an iteration. */
 public class UnionStaticDynamicIterationITCase extends JavaProgramTestBase {
@@ -53,6 +53,6 @@ public class UnionStaticDynamicIterationITCase extends JavaProgramTestBase {
 
     @Override
     protected void postSubmit() throws Exception {
-        assertEquals(88, result.size());
+        assertThat(result.size()).isEqualTo(88);
     }
 }

@@ -26,8 +26,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class CommitRetrierTest {
     @Test
@@ -35,22 +34,22 @@ class CommitRetrierTest {
         TestProcessingTimeService processingTimeService = new TestProcessingTimeService();
         CommitterHandlerWithRetries committerHandler = new CommitterHandlerWithRetries();
         CommitRetrier retryer = new CommitRetrier(processingTimeService, committerHandler);
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
 
         committerHandler.addRetries(2);
-        assertThat(committerHandler.needsRetry(), equalTo(true));
-        assertThat(committerHandler.getPendingRetries(), equalTo(2));
+        assertThat(committerHandler.needsRetry()).isEqualTo(true);
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(2);
 
-        assertThat(retryer.retry(0), equalTo(true));
-        assertThat(committerHandler.getPendingRetries(), equalTo(2));
+        assertThat(retryer.retry(0)).isEqualTo(true);
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(2);
 
-        assertThat(retryer.retry(1), equalTo(true));
-        assertThat(committerHandler.getPendingRetries(), equalTo(1));
+        assertThat(retryer.retry(1)).isEqualTo(true);
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(1);
 
-        assertThat(retryer.retry(1), equalTo(false));
-        assertThat(committerHandler.getPendingRetries(), equalTo(0));
+        assertThat(retryer.retry(1)).isEqualTo(false);
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(0);
 
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
     }
 
     @Test
@@ -58,15 +57,15 @@ class CommitRetrierTest {
         TestProcessingTimeService processingTimeService = new TestProcessingTimeService();
         CommitterHandlerWithRetries committerHandler = new CommitterHandlerWithRetries();
         CommitRetrier retryer = new CommitRetrier(processingTimeService, committerHandler);
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
 
         committerHandler.addRetries(2);
-        assertThat(committerHandler.needsRetry(), equalTo(true));
-        assertThat(committerHandler.getPendingRetries(), equalTo(2));
+        assertThat(committerHandler.needsRetry()).isEqualTo(true);
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(2);
 
         retryer.retryIndefinitely();
-        assertThat(committerHandler.getPendingRetries(), equalTo(0));
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(0);
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
     }
 
     @Test
@@ -78,24 +77,24 @@ class CommitRetrierTest {
         CommitterHandlerWithRetries committerHandler = new CommitterHandlerWithRetries();
         CommitRetrier retryer =
                 new CommitRetrier(processingTimeService, committerHandler, manualClock);
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
 
         committerHandler.addRetries(2);
         retryer.retryWithDelay();
 
-        assertThat(committerHandler.needsRetry(), equalTo(true));
-        assertThat(committerHandler.getPendingRetries(), equalTo(2));
+        assertThat(committerHandler.needsRetry()).isEqualTo(true);
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(2);
 
         processingTimeService.advance(CommitRetrier.RETRY_DELAY);
-        assertThat(committerHandler.getPendingRetries(), equalTo(1));
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(1);
 
         processingTimeService.advance(CommitRetrier.RETRY_DELAY);
-        assertThat(committerHandler.getPendingRetries(), equalTo(0));
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(0);
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
 
         processingTimeService.advance(CommitRetrier.RETRY_DELAY);
-        assertThat(committerHandler.getPendingRetries(), equalTo(0));
-        assertThat(committerHandler.needsRetry(), equalTo(false));
+        assertThat(committerHandler.getPendingRetries()).isEqualTo(0);
+        assertThat(committerHandler.needsRetry()).isEqualTo(false);
     }
 
     private static class CommitterHandlerWithRetries extends ForwardCommittingHandler<String> {

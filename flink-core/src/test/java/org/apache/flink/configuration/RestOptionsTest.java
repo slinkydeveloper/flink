@@ -22,9 +22,8 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link RestOptions}. */
 public class RestOptionsTest extends TestLogger {
@@ -37,7 +36,7 @@ public class RestOptionsTest extends TestLogger {
 
         final String actualAddress = configuration.getString(RestOptions.BIND_ADDRESS);
 
-        assertThat(actualAddress, is(equalTo(expectedAddress)));
+        assertThat(actualAddress).isEqualTo(equalTo(expectedAddress));
     }
 
     @Test
@@ -48,6 +47,6 @@ public class RestOptionsTest extends TestLogger {
 
         final String actualAddress = configuration.getString(RestOptions.BIND_ADDRESS);
 
-        assertThat(actualAddress, is(equalTo(expectedAddress)));
+        assertThat(actualAddress).isEqualTo(equalTo(expectedAddress));
     }
 }

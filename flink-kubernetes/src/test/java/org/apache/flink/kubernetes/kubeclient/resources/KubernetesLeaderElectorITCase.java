@@ -30,8 +30,7 @@ import org.junit.Test;
 
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.not;
 
 /**
@@ -87,21 +86,21 @@ public class KubernetesLeaderElectorITCase extends TestLogger {
                 if (leaderCallbackHandlers[i].getLockIdentity().equals(firstLockIdentity)) {
                     // Check the callback isLeader is called.
                     leaderCallbackHandlers[i].waitForNewLeader(TIMEOUT);
-                    assertThat(leaderCallbackHandlers[i].hasLeadership(), is(true));
+                    assertThat(leaderCallbackHandlers[i].hasLeadership()).isEqualTo(true);
                     // Current leader died
                     leaderElectors[i].stop();
                     // Check the callback notLeader is called.
                     leaderCallbackHandlers[i].waitForRevokeLeader(TIMEOUT);
-                    assertThat(leaderCallbackHandlers[i].hasLeadership(), is(false));
+                    assertThat(leaderCallbackHandlers[i].hasLeadership()).isEqualTo(false);
                 } else {
-                    assertThat(leaderCallbackHandlers[i].hasLeadership(), is(false));
+                    assertThat(leaderCallbackHandlers[i].hasLeadership()).isEqualTo(false);
                 }
             }
 
             // Another leader should be elected successfully and update the lock identity
             final String anotherLockIdentity =
                     TestingLeaderCallbackHandler.waitUntilNewLeaderAppears(TIMEOUT);
-            assertThat(anotherLockIdentity, is(not(firstLockIdentity)));
+            assertThat(anotherLockIdentity).isEqualTo(not(firstLockIdentity));
         } finally {
             // Cleanup the resources
             for (int i = 0; i < leaderNum; i++) {

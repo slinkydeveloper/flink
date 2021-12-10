@@ -27,8 +27,6 @@ import org.apache.flink.runtime.operators.testutils.TestData;
 import org.apache.flink.runtime.operators.testutils.TestData.TupleGenerator;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -37,6 +35,7 @@ import java.util.Map.Entry;
 
 import static org.apache.flink.runtime.operators.hash.NonReusingHashJoinIteratorITCase.collectTupleData;
 import static org.apache.flink.runtime.operators.hash.NonReusingHashJoinIteratorITCase.joinTuples;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test specialized hash join that keeps the build side data (in memory and on hard disk) This is
@@ -100,7 +99,7 @@ public class ReusingReOpenableHashTableITCase extends ReOpenableHashTableTestBas
         // assert that each expected match was seen for the first input
         for (Entry<Integer, Collection<TupleMatch>> entry : expectedFirstMatchesMap.entrySet()) {
             if (!entry.getValue().isEmpty()) {
-                Assert.fail("Collection for key " + entry.getKey() + " is not empty");
+                fail("Collection for key " + entry.getKey() + " is not empty");
             }
         }
 
@@ -116,7 +115,7 @@ public class ReusingReOpenableHashTableITCase extends ReOpenableHashTableTestBas
             for (Entry<Integer, Collection<TupleMatch>> entry :
                     expectedNMatchesMapList.get(i).entrySet()) {
                 if (!entry.getValue().isEmpty()) {
-                    Assert.fail("Collection for key " + entry.getKey() + " is not empty");
+                    fail("Collection for key " + entry.getKey() + " is not empty");
                 }
             }
         }

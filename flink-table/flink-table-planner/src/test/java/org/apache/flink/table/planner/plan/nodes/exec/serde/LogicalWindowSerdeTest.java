@@ -49,7 +49,7 @@ import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LogicalWindow} serialization and deserialization. */
 @RunWith(Parameterized.class)
@@ -139,7 +139,8 @@ public class LogicalWindowSerdeTest {
         module.addDeserializer(LogicalWindow.class, new LogicalWindowJsonDeserializer());
         mapper.registerModule(module);
 
-        assertEquals(
-                mapper.readValue(mapper.writeValueAsString(window), LogicalWindow.class), window);
+        assertThat(window)
+                .isEqualTo(
+                        mapper.readValue(mapper.writeValueAsString(window), LogicalWindow.class));
     }
 }

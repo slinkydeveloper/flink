@@ -31,7 +31,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link FileSourceReader}. */
 public class FileSourceReaderTest {
@@ -46,7 +46,7 @@ public class FileSourceReaderTest {
         reader.start();
         reader.close();
 
-        assertEquals(1, context.getNumSplitRequests());
+        assertThat(context.getNumSplitRequests()).isEqualTo(1);
     }
 
     @Test
@@ -58,7 +58,7 @@ public class FileSourceReaderTest {
         reader.start();
         reader.close();
 
-        assertEquals(0, context.getNumSplitRequests());
+        assertThat(context.getNumSplitRequests()).isEqualTo(0);
     }
 
     private static FileSourceReader<String, FileSourceSplit> createReader(

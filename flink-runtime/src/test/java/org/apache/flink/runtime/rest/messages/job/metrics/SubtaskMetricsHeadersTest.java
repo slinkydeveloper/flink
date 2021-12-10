@@ -25,9 +25,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SubtaskMetricsHeaders}. */
 public class SubtaskMetricsHeadersTest extends TestLogger {
@@ -36,22 +34,20 @@ public class SubtaskMetricsHeadersTest extends TestLogger {
 
     @Test
     public void testUrl() {
-        assertThat(
-                subtaskMetricsHeaders.getTargetRestEndpointURL(),
-                equalTo(
+        assertThat(subtaskMetricsHeaders.getTargetRestEndpointURL())
+                .isEqualTo(
                         "/jobs/:"
                                 + JobIDPathParameter.KEY
                                 + "/vertices/:"
                                 + JobVertexIdPathParameter.KEY
                                 + "/subtasks/:"
                                 + SubtaskIndexPathParameter.KEY
-                                + "/metrics"));
+                                + "/metrics");
     }
 
     @Test
     public void testMessageParameters() {
-        assertThat(
-                subtaskMetricsHeaders.getUnresolvedMessageParameters(),
-                instanceOf(SubtaskMetricsMessageParameters.class));
+        assertThat(subtaskMetricsHeaders.getUnresolvedMessageParameters())
+                .isInstanceOf(SubtaskMetricsMessageParameters.class);
     }
 }

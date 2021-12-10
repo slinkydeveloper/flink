@@ -24,11 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link KeyMap}. */
 public class KeyMapTest {
@@ -39,52 +36,52 @@ public class KeyMapTest {
             KeyMap<String, String> map;
 
             map = new KeyMap<>();
-            assertEquals(64, map.getCurrentTableCapacity());
-            assertEquals(6, map.getLog2TableCapacity());
-            assertEquals(24, map.getShift());
-            assertEquals(48, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(64);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(6);
+            assertThat(map.getShift()).isEqualTo(24);
+            assertThat(map.getRehashThreshold()).isEqualTo(48);
 
             map = new KeyMap<>(0);
-            assertEquals(64, map.getCurrentTableCapacity());
-            assertEquals(6, map.getLog2TableCapacity());
-            assertEquals(24, map.getShift());
-            assertEquals(48, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(64);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(6);
+            assertThat(map.getShift()).isEqualTo(24);
+            assertThat(map.getRehashThreshold()).isEqualTo(48);
 
             map = new KeyMap<>(1);
-            assertEquals(64, map.getCurrentTableCapacity());
-            assertEquals(6, map.getLog2TableCapacity());
-            assertEquals(24, map.getShift());
-            assertEquals(48, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(64);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(6);
+            assertThat(map.getShift()).isEqualTo(24);
+            assertThat(map.getRehashThreshold()).isEqualTo(48);
 
             map = new KeyMap<>(9);
-            assertEquals(64, map.getCurrentTableCapacity());
-            assertEquals(6, map.getLog2TableCapacity());
-            assertEquals(24, map.getShift());
-            assertEquals(48, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(64);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(6);
+            assertThat(map.getShift()).isEqualTo(24);
+            assertThat(map.getRehashThreshold()).isEqualTo(48);
 
             map = new KeyMap<>(63);
-            assertEquals(64, map.getCurrentTableCapacity());
-            assertEquals(6, map.getLog2TableCapacity());
-            assertEquals(24, map.getShift());
-            assertEquals(48, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(64);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(6);
+            assertThat(map.getShift()).isEqualTo(24);
+            assertThat(map.getRehashThreshold()).isEqualTo(48);
 
             map = new KeyMap<>(64);
-            assertEquals(128, map.getCurrentTableCapacity());
-            assertEquals(7, map.getLog2TableCapacity());
-            assertEquals(23, map.getShift());
-            assertEquals(96, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(128);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(7);
+            assertThat(map.getShift()).isEqualTo(23);
+            assertThat(map.getRehashThreshold()).isEqualTo(96);
 
             map = new KeyMap<>(500);
-            assertEquals(512, map.getCurrentTableCapacity());
-            assertEquals(9, map.getLog2TableCapacity());
-            assertEquals(21, map.getShift());
-            assertEquals(384, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(512);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(9);
+            assertThat(map.getShift()).isEqualTo(21);
+            assertThat(map.getRehashThreshold()).isEqualTo(384);
 
             map = new KeyMap<>(127);
-            assertEquals(128, map.getCurrentTableCapacity());
-            assertEquals(7, map.getLog2TableCapacity());
-            assertEquals(23, map.getShift());
-            assertEquals(96, map.getRehashThreshold());
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(128);
+            assertThat(map.getLog2TableCapacity()).isEqualTo(7);
+            assertThat(map.getShift()).isEqualTo(23);
+            assertThat(map.getRehashThreshold()).isEqualTo(96);
 
             // no negative number of elements
             try {
@@ -99,11 +96,11 @@ public class KeyMapTest {
                 map = new KeyMap<>(0x65715522);
 
                 final int maxCap = Integer.highestOneBit(Integer.MAX_VALUE);
-                assertEquals(
-                        Integer.highestOneBit(Integer.MAX_VALUE), map.getCurrentTableCapacity());
-                assertEquals(30, map.getLog2TableCapacity());
-                assertEquals(0, map.getShift());
-                assertEquals(maxCap / 4 * 3, map.getRehashThreshold());
+                assertThat(map.getCurrentTableCapacity())
+                        .isEqualTo(Integer.highestOneBit(Integer.MAX_VALUE));
+                assertThat(map.getLog2TableCapacity()).isEqualTo(30);
+                assertThat(map.getShift()).isEqualTo(0);
+                assertThat(map.getRehashThreshold()).isEqualTo(maxCap / 4 * 3);
             } catch (OutOfMemoryError e) {
                 // this may indeed happen in small test setups. we tolerate this in this test
             }
@@ -145,11 +142,11 @@ public class KeyMapTest {
 
                 Integer expected = groundTruth.get(key);
                 if (expected == null) {
-                    assertNull(map.get(key));
+                    assertThat(map.get(key)).isNull();
                 } else {
                     Integer contained = map.get(key);
-                    assertNotNull(contained);
-                    assertEquals(expected, contained);
+                    assertThat(contained).isNotNull();
+                    assertThat(contained).isEqualTo(expected);
                 }
             }
         } catch (Exception e) {
@@ -213,7 +210,9 @@ public class KeyMapTest {
 
                     Integer boxed = nextKeyValue;
                     Integer previous = maps[pos].put(boxed, boxed);
-                    assertNull("Test problem - test does not assign unique maps", previous);
+                    assertThat(previous)
+                            .as("Test problem - test does not assign unique maps")
+                            .isNull();
                 }
 
                 totalNumElements += numCopies;
@@ -225,7 +224,7 @@ public class KeyMapTest {
             for (KeyMap<?, ?> map : maps) {
                 numContained += map.size();
             }
-            assertEquals(totalNumElements, numContained);
+            assertThat(numContained).isEqualTo(totalNumElements);
 
             // ------ check that all elements can be found in the maps ------
             keyRnd.setSeed(keySeed);
@@ -239,17 +238,17 @@ public class KeyMapTest {
                 for (KeyMap<Integer, Integer> map : maps) {
                     Integer val = map.get(nextKeyValue);
                     if (val != null) {
-                        assertEquals(nextKeyValue, val.intValue());
+                        assertThat(val.intValue()).isEqualTo(nextKeyValue);
                         numCopiesContained++;
                     }
                 }
 
-                assertEquals(numCopiesExpected, numCopiesContained);
+                assertThat(numCopiesContained).isEqualTo(numCopiesExpected);
                 numContained += numCopiesContained;
 
                 nextKeyValue += keyRnd.nextInt(maxStride) + 1;
             }
-            assertEquals(totalNumElements, numContained);
+            assertThat(numContained).isEqualTo(totalNumElements);
 
             // ------ make a traversal over all keys and validate the keys in the traversal ------
             final int[] keysStartedAndFinished = {0, 0};
@@ -269,7 +268,7 @@ public class KeyMapTest {
 
                         @Override
                         public void nextValue(Integer value) {
-                            assertEquals(this.key, value.intValue());
+                            assertThat(value.intValue()).isEqualTo(this.key);
                             this.valueCount++;
                         }
 
@@ -292,8 +291,8 @@ public class KeyMapTest {
 
             KeyMap.traverseMaps(shuffleArray(maps, rootRnd), traversal, 17);
 
-            assertEquals(numKeys, keysStartedAndFinished[0]);
-            assertEquals(numKeys, keysStartedAndFinished[1]);
+            assertThat(keysStartedAndFinished[0]).isEqualTo(numKeys);
+            assertThat(keysStartedAndFinished[1]).isEqualTo(numKeys);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -306,12 +305,16 @@ public class KeyMapTest {
             KeyMap<String, String> map1 = new KeyMap<>(5);
             KeyMap<String, String> map2 = new KeyMap<>(80);
 
-            assertTrue(map1.getCurrentTableCapacity() < map2.getCurrentTableCapacity());
+            assertThat(map1.getCurrentTableCapacity() < map2.getCurrentTableCapacity()).isTrue();
 
-            assertTrue(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map1, map1) == 0);
-            assertTrue(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map2, map2) == 0);
-            assertTrue(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map1, map2) > 0);
-            assertTrue(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map2, map1) < 0);
+            assertThat(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map1, map1) == 0)
+                    .isTrue();
+            assertThat(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map2, map2) == 0)
+                    .isTrue();
+            assertThat(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map1, map2) > 0)
+                    .isTrue();
+            assertThat(KeyMap.CapacityDescendingComparator.INSTANCE.compare(map2, map1) < 0)
+                    .isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

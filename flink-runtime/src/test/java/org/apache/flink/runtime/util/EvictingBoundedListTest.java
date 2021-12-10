@@ -26,10 +26,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link EvictingBoundedList}. */
 public class EvictingBoundedListTest {
@@ -41,18 +39,18 @@ public class EvictingBoundedListTest {
         Integer defaultElement = 4711;
 
         EvictingBoundedList<Integer> list = new EvictingBoundedList<>(boundSize, defaultElement);
-        assertTrue(list.isEmpty());
+        assertThat(list.isEmpty()).isTrue();
 
         for (int i = 0; i < insertSize; ++i) {
             list.add(i);
         }
 
-        assertEquals(17, list.size());
+        assertThat(list.size()).isEqualTo(17);
 
         for (int i = 0; i < insertSize; ++i) {
             int exp = i < (insertSize - boundSize) ? defaultElement : i;
             int act = list.get(i);
-            assertEquals(exp, act);
+            assertThat(act).isEqualTo(exp);
         }
     }
 
@@ -68,7 +66,7 @@ public class EvictingBoundedListTest {
             list.add(i);
         }
 
-        assertEquals(reference.size(), list.size());
+        assertThat(list.size()).isEqualTo(reference.size());
 
         list.set(0, 123);
         list.set(insertSize - boundSize - 1, 123);
@@ -90,10 +88,10 @@ public class EvictingBoundedListTest {
         for (int i = 0; i < insertSize; ++i) {
             int exp = i < (insertSize - boundSize) ? defaultElement : reference.get(i);
             int act = list.get(i);
-            assertEquals(exp, act);
+            assertThat(act).isEqualTo(exp);
         }
 
-        assertEquals(reference.size(), list.size());
+        assertThat(list.size()).isEqualTo(reference.size());
     }
 
     @Test
@@ -109,12 +107,12 @@ public class EvictingBoundedListTest {
 
         list.clear();
 
-        assertEquals(0, list.size());
-        assertTrue(list.isEmpty());
+        assertThat(list.size()).isEqualTo(0);
+        assertThat(list.isEmpty()).isTrue();
 
         try {
             list.get(0);
-            fail();
+            fail("unknown failure");
         } catch (IndexOutOfBoundsException ignore) {
         }
     }
@@ -126,7 +124,7 @@ public class EvictingBoundedListTest {
         Integer defaultElement = 4711;
 
         EvictingBoundedList<Integer> list = new EvictingBoundedList<>(boundSize, defaultElement);
-        assertTrue(list.isEmpty());
+        assertThat(list.isEmpty()).isTrue();
 
         for (int i = 0; i < insertSize; ++i) {
             list.add(i);
@@ -135,13 +133,13 @@ public class EvictingBoundedListTest {
         Iterator<Integer> iterator = list.iterator();
 
         for (int i = 0; i < insertSize; ++i) {
-            assertTrue(iterator.hasNext());
+            assertThat(iterator.hasNext()).isTrue();
             int exp = i < (insertSize - boundSize) ? defaultElement : i;
             int act = iterator.next();
-            assertEquals(exp, act);
+            assertThat(act).isEqualTo(exp);
         }
 
-        assertFalse(iterator.hasNext());
+        assertThat(iterator.hasNext()).isFalse();
 
         try {
             iterator.next();
@@ -151,10 +149,10 @@ public class EvictingBoundedListTest {
         }
 
         iterator = list.iterator();
-        assertTrue(iterator.hasNext());
+        assertThat(iterator.hasNext()).isTrue();
         iterator.next();
         list.add(123);
-        assertTrue(iterator.hasNext());
+        assertThat(iterator.hasNext()).isTrue();
         try {
             iterator.next();
             fail("Concurrent modification not detected.");

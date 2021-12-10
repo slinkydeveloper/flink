@@ -27,9 +27,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RestartTimeGauge}. */
 public class RestartTimeGaugeTest extends TestLogger {
@@ -38,7 +36,7 @@ public class RestartTimeGaugeTest extends TestLogger {
     public void testNotRestarted() {
         final RestartTimeGauge gauge =
                 new RestartTimeGauge(new TestingJobStatusProvider(JobStatus.RUNNING, -1));
-        assertThat(gauge.getValue(), is(0L));
+        assertThat(gauge.getValue()).isEqualTo(0L);
     }
 
     @Test
@@ -51,7 +49,7 @@ public class RestartTimeGaugeTest extends TestLogger {
                         new TestingJobStatusProvider(
                                 JobStatus.RESTARTING,
                                 status -> statusTimestampMap.getOrDefault(status, -1L)));
-        assertThat(gauge.getValue(), greaterThan(0L));
+        assertThat(gauge.getValue()).isGreaterThan(0L);
     }
 
     @Test
@@ -65,7 +63,7 @@ public class RestartTimeGaugeTest extends TestLogger {
                         new TestingJobStatusProvider(
                                 JobStatus.RUNNING,
                                 status -> statusTimestampMap.getOrDefault(status, -1L)));
-        assertThat(gauge.getValue(), is(111L));
+        assertThat(gauge.getValue()).isEqualTo(111L);
     }
 
     @Test
@@ -79,6 +77,6 @@ public class RestartTimeGaugeTest extends TestLogger {
                         new TestingJobStatusProvider(
                                 JobStatus.FAILED,
                                 status -> statusTimestampMap.getOrDefault(status, -1L)));
-        assertThat(gauge.getValue(), is(333L));
+        assertThat(gauge.getValue()).isEqualTo(333L);
     }
 }

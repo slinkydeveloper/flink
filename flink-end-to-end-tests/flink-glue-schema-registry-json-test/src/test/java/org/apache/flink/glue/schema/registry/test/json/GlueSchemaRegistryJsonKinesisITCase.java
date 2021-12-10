@@ -32,7 +32,6 @@ import org.apache.flink.util.TestLogger;
 
 import com.amazonaws.services.schemaregistry.serializers.json.JsonDataWithSchema;
 import com.amazonaws.services.schemaregistry.utils.AWSSchemaRegistryConstants;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -52,6 +51,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.streaming.connectors.kinesis.config.ConsumerConfigConstants.STREAM_INITIAL_POSITION;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** End-to-end test for Glue Schema Registry Json format using Kinesalite. */
 @Category(value = {TravisGroup1.class})
@@ -116,11 +116,10 @@ public class GlueSchemaRegistryJsonKinesisITCase extends TestLogger {
         }
         log.info("results: {}", results);
 
-        Assert.assertEquals(
-                "Results received from '" + OUTPUT_STREAM + "': " + results,
-                messages.size(),
-                results.size());
-        Assert.assertTrue(messages.containsAll(results));
+        assertThat(results.size())
+                .as("Results received from '" + OUTPUT_STREAM + "': " + results)
+                .isEqualTo(messages.size());
+        assertThat(messages.containsAll(results)).isTrue();
     }
 
     private FlinkKinesisConsumer<JsonDataWithSchema> createSource() {

@@ -21,8 +21,8 @@ import org.apache.flink.api.java.tuple.Tuple;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link BroadcastPartitioner}. */
 public class BroadcastPartitionerTest extends StreamPartitionerTest {
@@ -30,7 +30,7 @@ public class BroadcastPartitionerTest extends StreamPartitionerTest {
     @Override
     public StreamPartitioner<Tuple> createPartitioner() {
         StreamPartitioner<Tuple> partitioner = new BroadcastPartitioner<>();
-        assertTrue(partitioner.isBroadcast());
+        assertThat(partitioner.isBroadcast()).isTrue();
         return partitioner;
     }
 

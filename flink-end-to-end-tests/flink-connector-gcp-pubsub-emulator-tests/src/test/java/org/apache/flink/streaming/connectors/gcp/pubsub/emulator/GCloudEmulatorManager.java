@@ -42,8 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** The class that handles the starting and stopping of the emulator docker image. */
 public class GCloudEmulatorManager {
@@ -151,8 +150,10 @@ public class GCloudEmulatorManager {
 
         Map<String, List<PortBinding>> ports = containerInfo.networkSettings().ports();
 
-        assertNotNull("Unable to retrieve the ports where to connect to the emulators", ports);
-        assertEquals("We expect 1 port to be mapped", 1, ports.size());
+        assertThat(ports)
+                .as("Unable to retrieve the ports where to connect to the emulators")
+                .isNotNull();
+        assertThat(ports.size()).as("We expect 1 port to be mapped").isEqualTo(1);
 
         pubsubPort = getPort(ports, INTERNAL_PUBSUB_PORT, "PubSub");
 
@@ -242,8 +243,9 @@ public class GCloudEmulatorManager {
             containerInfo = docker.inspectContainer(CONTAINER_NAME_JUNIT);
             // Already have this container running.
 
-            assertNotNull(
-                    "We should either get a containerInfo or we get an exception", containerInfo);
+            assertThat(containerInfo)
+                    .as("We should either get a containerInfo or we get an exception")
+                    .isNotNull();
 
             LOG.info("");
             LOG.info("/===========================================");

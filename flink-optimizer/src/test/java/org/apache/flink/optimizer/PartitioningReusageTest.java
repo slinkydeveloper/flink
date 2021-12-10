@@ -38,8 +38,8 @@ import org.apache.flink.util.Collector;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class PartitioningReusageTest extends CompilerTestBase {
@@ -842,12 +842,13 @@ public class PartitioningReusageTest extends CompilerTestBase {
             FieldList pFields1 = inProps1.getPartitioningFields();
             FieldList pFields2 = inProps2.getPartitioningFields();
 
-            assertTrue(
-                    "Inputs are not the same number of fields. Input 1: "
-                            + pFields1
-                            + ", Input 2: "
-                            + pFields2,
-                    pFields1.size() == pFields2.size());
+            assertThat(pFields1.size() == pFields2.size())
+                    .as(
+                            "Inputs are not the same number of fields. Input 1: "
+                                    + pFields1
+                                    + ", Input 2: "
+                                    + pFields2)
+                    .isTrue();
 
             FieldList reqPFields1 = join.getKeysForInput1();
             FieldList reqPFields2 = join.getKeysForInput2();
@@ -905,12 +906,13 @@ public class PartitioningReusageTest extends CompilerTestBase {
             FieldList pFields1 = inProps1.getPartitioningFields();
             FieldList pFields2 = inProps2.getPartitioningFields();
 
-            assertTrue(
-                    "Inputs are not the same number of fields. Input 1: "
-                            + pFields1
-                            + ", Input 2: "
-                            + pFields2,
-                    pFields1.size() == pFields2.size());
+            assertThat(pFields1.size() == pFields2.size())
+                    .as(
+                            "Inputs are not the same number of fields. Input 1: "
+                                    + pFields1
+                                    + ", Input 2: "
+                                    + pFields2)
+                    .isTrue();
 
             FieldList reqPFields1 = coGroup.getKeysForInput1();
             FieldList reqPFields2 = coGroup.getKeysForInput2();

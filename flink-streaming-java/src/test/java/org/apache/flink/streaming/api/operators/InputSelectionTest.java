@@ -21,39 +21,39 @@ import org.apache.flink.streaming.api.operators.InputSelection.Builder;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link InputSelection}. */
 public class InputSelectionTest {
     @Test
     public void testIsInputSelected() {
-        assertFalse(new Builder().build().isInputSelected(1));
-        assertFalse(new Builder().select(2).build().isInputSelected(1));
+        assertThat(new Builder().build().isInputSelected(1)).isFalse();
+        assertThat(new Builder().select(2).build().isInputSelected(1)).isFalse();
 
-        assertTrue(new Builder().select(1).build().isInputSelected(1));
-        assertTrue(new Builder().select(1).select(2).build().isInputSelected(1));
-        assertTrue(new Builder().select(-1).build().isInputSelected(1));
+        assertThat(new Builder().select(1).build().isInputSelected(1)).isTrue();
+        assertThat(new Builder().select(1).select(2).build().isInputSelected(1)).isTrue();
+        assertThat(new Builder().select(-1).build().isInputSelected(1)).isTrue();
 
-        assertTrue(new Builder().select(64).build().isInputSelected(64));
+        assertThat(new Builder().select(64).build().isInputSelected(64)).isTrue();
     }
 
     @Test
     public void testInputSelectionNormalization() {
-        assertTrue(InputSelection.ALL.areAllInputsSelected());
+        assertThat(InputSelection.ALL.areAllInputsSelected()).isTrue();
 
-        assertFalse(new Builder().select(1).select(2).build().areAllInputsSelected());
-        assertTrue(new Builder().select(1).select(2).build(2).areAllInputsSelected());
+        assertThat(new Builder().select(1).select(2).build().areAllInputsSelected()).isFalse();
+        assertThat(new Builder().select(1).select(2).build(2).areAllInputsSelected()).isTrue();
 
-        assertFalse(new Builder().select(1).select(2).select(3).build().areAllInputsSelected());
-        assertTrue(new Builder().select(1).select(2).select(3).build(3).areAllInputsSelected());
+        assertThat(new Builder().select(1).select(2).select(3).build().areAllInputsSelected())
+                .isFalse();
+        assertThat(new Builder().select(1).select(2).select(3).build(3).areAllInputsSelected())
+                .isTrue();
 
-        assertFalse(new Builder().select(1).select(3).build().areAllInputsSelected());
-        assertFalse(new Builder().select(1).select(3).build(3).areAllInputsSelected());
+        assertThat(new Builder().select(1).select(3).build().areAllInputsSelected()).isFalse();
+        assertThat(new Builder().select(1).select(3).build(3).areAllInputsSelected()).isFalse();
 
-        assertFalse(InputSelection.FIRST.areAllInputsSelected());
-        assertFalse(InputSelection.SECOND.areAllInputsSelected());
+        assertThat(InputSelection.FIRST.areAllInputsSelected()).isFalse();
+        assertThat(InputSelection.SECOND.areAllInputsSelected()).isFalse();
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -63,48 +63,46 @@ public class InputSelectionTest {
 
     @Test
     public void testFairSelectNextIndexOutOf2() {
-        assertEquals(1, InputSelection.ALL.fairSelectNextIndexOutOf2(3, 0));
-        assertEquals(0, new Builder().select(1).select(2).build().fairSelectNextIndexOutOf2(3, 1));
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(3, 0)).isEqualTo(1);
+        assertThat(new Builder().select(1).select(2).build().fairSelectNextIndexOutOf2(3, 1))
+                .isEqualTo(0);
 
-        assertEquals(1, InputSelection.ALL.fairSelectNextIndexOutOf2(2, 0));
-        assertEquals(1, InputSelection.ALL.fairSelectNextIndexOutOf2(2, 1));
-        assertEquals(0, InputSelection.ALL.fairSelectNextIndexOutOf2(1, 0));
-        assertEquals(0, InputSelection.ALL.fairSelectNextIndexOutOf2(1, 1));
-        assertEquals(
-                InputSelection.NONE_AVAILABLE, InputSelection.ALL.fairSelectNextIndexOutOf2(0, 0));
-        assertEquals(
-                InputSelection.NONE_AVAILABLE, InputSelection.ALL.fairSelectNextIndexOutOf2(0, 1));
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(2, 0)).isEqualTo(1);
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(2, 1)).isEqualTo(1);
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(1, 0)).isEqualTo(0);
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(1, 1)).isEqualTo(0);
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(0, 0))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
+        assertThat(InputSelection.ALL.fairSelectNextIndexOutOf2(0, 1))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
 
-        assertEquals(0, InputSelection.FIRST.fairSelectNextIndexOutOf2(1, 0));
-        assertEquals(0, InputSelection.FIRST.fairSelectNextIndexOutOf2(3, 0));
-        assertEquals(
-                InputSelection.NONE_AVAILABLE,
-                InputSelection.FIRST.fairSelectNextIndexOutOf2(2, 0));
-        assertEquals(
-                InputSelection.NONE_AVAILABLE,
-                InputSelection.FIRST.fairSelectNextIndexOutOf2(0, 0));
+        assertThat(InputSelection.FIRST.fairSelectNextIndexOutOf2(1, 0)).isEqualTo(0);
+        assertThat(InputSelection.FIRST.fairSelectNextIndexOutOf2(3, 0)).isEqualTo(0);
+        assertThat(InputSelection.FIRST.fairSelectNextIndexOutOf2(2, 0))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
+        assertThat(InputSelection.FIRST.fairSelectNextIndexOutOf2(0, 0))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
 
-        assertEquals(1, InputSelection.SECOND.fairSelectNextIndexOutOf2(2, 1));
-        assertEquals(1, InputSelection.SECOND.fairSelectNextIndexOutOf2(3, 1));
-        assertEquals(
-                InputSelection.NONE_AVAILABLE,
-                InputSelection.SECOND.fairSelectNextIndexOutOf2(1, 1));
-        assertEquals(
-                InputSelection.NONE_AVAILABLE,
-                InputSelection.SECOND.fairSelectNextIndexOutOf2(0, 1));
+        assertThat(InputSelection.SECOND.fairSelectNextIndexOutOf2(2, 1)).isEqualTo(1);
+        assertThat(InputSelection.SECOND.fairSelectNextIndexOutOf2(3, 1)).isEqualTo(1);
+        assertThat(InputSelection.SECOND.fairSelectNextIndexOutOf2(1, 1))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
+        assertThat(InputSelection.SECOND.fairSelectNextIndexOutOf2(0, 1))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
     }
 
     @Test
     public void testFairSelectNextIndexWithAllInputsSelected() {
-        assertEquals(1, InputSelection.ALL.fairSelectNextIndex(7, 0));
-        assertEquals(2, InputSelection.ALL.fairSelectNextIndex(7, 1));
-        assertEquals(0, InputSelection.ALL.fairSelectNextIndex(7, 2));
-        assertEquals(1, InputSelection.ALL.fairSelectNextIndex(7, 0));
-        assertEquals(InputSelection.NONE_AVAILABLE, InputSelection.ALL.fairSelectNextIndex(0, 2));
+        assertThat(InputSelection.ALL.fairSelectNextIndex(7, 0)).isEqualTo(1);
+        assertThat(InputSelection.ALL.fairSelectNextIndex(7, 1)).isEqualTo(2);
+        assertThat(InputSelection.ALL.fairSelectNextIndex(7, 2)).isEqualTo(0);
+        assertThat(InputSelection.ALL.fairSelectNextIndex(7, 0)).isEqualTo(1);
+        assertThat(InputSelection.ALL.fairSelectNextIndex(0, 2))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
 
-        assertEquals(11, InputSelection.ALL.fairSelectNextIndex(-1, 10));
-        assertEquals(0, InputSelection.ALL.fairSelectNextIndex(-1, 63));
-        assertEquals(0, InputSelection.ALL.fairSelectNextIndex(-1, 158));
+        assertThat(InputSelection.ALL.fairSelectNextIndex(-1, 10)).isEqualTo(11);
+        assertThat(InputSelection.ALL.fairSelectNextIndex(-1, 63)).isEqualTo(0);
+        assertThat(InputSelection.ALL.fairSelectNextIndex(-1, 158)).isEqualTo(0);
     }
 
     @Test
@@ -115,20 +113,20 @@ public class InputSelectionTest {
         int availableInputs =
                 (int) new Builder().select(3).select(5).select(6).select(8).build().getInputMask();
 
-        assertEquals(2, selection.fairSelectNextIndex(availableInputs, 0));
-        assertEquals(2, selection.fairSelectNextIndex(availableInputs, 1));
-        assertEquals(4, selection.fairSelectNextIndex(availableInputs, 2));
-        assertEquals(4, selection.fairSelectNextIndex(availableInputs, 3));
-        assertEquals(7, selection.fairSelectNextIndex(availableInputs, 4));
-        assertEquals(7, selection.fairSelectNextIndex(availableInputs, 5));
-        assertEquals(7, selection.fairSelectNextIndex(availableInputs, 6));
-        assertEquals(2, selection.fairSelectNextIndex(availableInputs, 7));
-        assertEquals(2, selection.fairSelectNextIndex(availableInputs, 8));
-        assertEquals(2, selection.fairSelectNextIndex(availableInputs, 158));
-        assertEquals(InputSelection.NONE_AVAILABLE, selection.fairSelectNextIndex(0, 5));
+        assertThat(selection.fairSelectNextIndex(availableInputs, 0)).isEqualTo(2);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 1)).isEqualTo(2);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 2)).isEqualTo(4);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 3)).isEqualTo(4);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 4)).isEqualTo(7);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 5)).isEqualTo(7);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 6)).isEqualTo(7);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 7)).isEqualTo(2);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 8)).isEqualTo(2);
+        assertThat(selection.fairSelectNextIndex(availableInputs, 158)).isEqualTo(2);
+        assertThat(selection.fairSelectNextIndex(0, 5)).isEqualTo(InputSelection.NONE_AVAILABLE);
 
-        assertEquals(
-                InputSelection.NONE_AVAILABLE, new Builder().build().fairSelectNextIndex(-1, 5));
+        assertThat(new Builder().build().fairSelectNextIndex(-1, 5))
+                .isEqualTo(InputSelection.NONE_AVAILABLE);
     }
 
     @Test(expected = UnsupportedOperationException.class)
@@ -141,11 +139,14 @@ public class InputSelectionTest {
 
         @Test
         public void testSelect() {
-            assertEquals(1L, new Builder().select(1).build().getInputMask());
-            assertEquals(7L, new Builder().select(1).select(2).select(3).build().getInputMask());
+            assertThat(new Builder().select(1).build().getInputMask()).isEqualTo(1L);
+            assertThat(new Builder().select(1).select(2).select(3).build().getInputMask())
+                    .isEqualTo(7L);
 
-            assertEquals(0x8000_0000_0000_0000L, new Builder().select(64).build().getInputMask());
-            assertEquals(0xffff_ffff_ffff_ffffL, new Builder().select(-1).build().getInputMask());
+            assertThat(new Builder().select(64).build().getInputMask())
+                    .isEqualTo(0x8000_0000_0000_0000L);
+            assertThat(new Builder().select(-1).build().getInputMask())
+                    .isEqualTo(0xffff_ffff_ffff_ffffL);
         }
 
         @Test(expected = IllegalArgumentException.class)

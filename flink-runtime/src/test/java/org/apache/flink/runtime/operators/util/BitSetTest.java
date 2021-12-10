@@ -25,9 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class BitSetTest {
@@ -76,9 +74,9 @@ public class BitSetTest {
     @Test
     public void testSetValues() {
         int bitSize = bitSet.bitSize();
-        assertEquals(bitSize, 8 * byteSize);
+        assertThat(8 * byteSize).isEqualTo(bitSize);
         for (int i = 0; i < bitSize; i++) {
-            assertFalse(bitSet.get(i));
+            assertThat(bitSet.get(i)).isFalse();
             if (i % 2 == 0) {
                 bitSet.set(i);
             }
@@ -86,9 +84,9 @@ public class BitSetTest {
 
         for (int i = 0; i < bitSize; i++) {
             if (i % 2 == 0) {
-                assertTrue(bitSet.get(i));
+                assertThat(bitSet.get(i)).isTrue();
             } else {
-                assertFalse(bitSet.get(i));
+                assertThat(bitSet.get(i)).isFalse();
             }
         }
     }

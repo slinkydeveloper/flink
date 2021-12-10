@@ -33,7 +33,7 @@ import org.apache.flink.streaming.api.graph.StreamingJobGraphGenerator;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for blocking shuffle. */
 public class BlockingShuffleITCase {
@@ -126,7 +126,7 @@ public class BlockingShuffleITCase {
 
         @Override
         public void invoke(String value) throws Exception {
-            assertEquals(RECORD, value);
+            assertThat(value).isEqualTo(RECORD);
         }
     }
 }

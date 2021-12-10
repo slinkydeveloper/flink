@@ -33,7 +33,6 @@ import org.apache.flink.core.fs.FSDataInputStream;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.util.FileUtils;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -44,6 +43,8 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link LimitableBulkFormat}. */
 public class LimitableBulkFormatTest {
@@ -83,7 +84,7 @@ public class LimitableBulkFormatTest {
 
         AtomicInteger i = new AtomicInteger(0);
         Utils.forEachRemaining(reader, s -> i.incrementAndGet());
-        Assert.assertEquals(22, i.get());
+        assertThat(i.get()).isEqualTo(22);
     }
 
     @Test
@@ -114,7 +115,7 @@ public class LimitableBulkFormatTest {
         // check
         AtomicInteger i = new AtomicInteger(0);
         Utils.forEachRemaining(reader, s -> i.incrementAndGet());
-        Assert.assertEquals(limit.intValue(), i.get());
+        assertThat(i.get()).isEqualTo(limit.intValue());
     }
 
     @Test

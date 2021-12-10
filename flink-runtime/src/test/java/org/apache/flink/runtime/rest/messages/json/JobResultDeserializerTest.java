@@ -29,9 +29,7 @@ import org.apache.flink.shaded.jackson2.com.fasterxml.jackson.databind.module.Si
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JobResultDeserializer}. */
 public class JobResultDeserializerTest extends TestLogger {
@@ -59,12 +57,11 @@ public class JobResultDeserializerTest extends TestLogger {
                                 + "}",
                         JobResult.class);
 
-        assertThat(
-                jobResult.getJobId(),
-                equalTo(JobID.fromHexString("1bb5e8c7df49938733b7c6a73678de6a")));
-        assertThat(jobResult.getNetRuntime(), equalTo(0L));
-        assertThat(jobResult.getAccumulatorResults().size(), equalTo(0));
-        assertThat(jobResult.getSerializedThrowable().isPresent(), equalTo(false));
+        assertThat(jobResult.getJobId())
+                .isEqualTo(JobID.fromHexString("1bb5e8c7df49938733b7c6a73678de6a"));
+        assertThat(jobResult.getNetRuntime()).isEqualTo(0L);
+        assertThat(jobResult.getAccumulatorResults().size()).isEqualTo(0);
+        assertThat(jobResult.getSerializedThrowable().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -77,9 +74,8 @@ public class JobResultDeserializerTest extends TestLogger {
                             + "}",
                     JobResult.class);
         } catch (final JsonMappingException e) {
-            assertThat(
-                    e.getMessage(),
-                    containsString("Expected token VALUE_NUMBER_INT (was VALUE_STRING)"));
+            assertThat(e.getMessage())
+                    .contains("Expected token VALUE_NUMBER_INT (was VALUE_STRING)");
         }
     }
 
@@ -90,7 +86,7 @@ public class JobResultDeserializerTest extends TestLogger {
                     "{\n" + "\t\"id\": \"1bb5e8c7df49938733b7c6a73678de6a\"\n" + "}",
                     JobResult.class);
         } catch (final JsonMappingException e) {
-            assertThat(e.getMessage(), containsString("Could not deserialize JobResult"));
+            assertThat(e.getMessage()).contains("Could not deserialize JobResult");
         }
     }
 }

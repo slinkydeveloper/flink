@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 
@@ -69,9 +69,7 @@ public class DefaultExecutionGraphDeploymentWithBlobServerTest
         doAnswer(
                         invocation -> {
                             PermanentBlobKey key = (PermanentBlobKey) invocation.callRealMethod();
-
-                            assertTrue(seenHashes.add(key.getHash()));
-
+                            assertThat(seenHashes.add(key.getHash())).isTrue();
                             return key;
                         })
                 .when(blobServer)
@@ -92,7 +90,7 @@ public class DefaultExecutionGraphDeploymentWithBlobServerTest
         Either<SerializedValue<JobInformation>, PermanentBlobKey> jobInformationOrBlobKey =
                 eg.getJobInformationOrBlobKey();
 
-        assertTrue(jobInformationOrBlobKey.isRight());
+        assertThat(jobInformationOrBlobKey.isRight()).isTrue();
 
         // must not throw:
         blobServer.getFile(eg.getJobID(), jobInformationOrBlobKey.right());
@@ -103,7 +101,7 @@ public class DefaultExecutionGraphDeploymentWithBlobServerTest
         Either<SerializedValue<TaskInformation>, PermanentBlobKey> taskInformationOrBlobKey =
                 eg.getJobVertex(jobVertexId).getTaskInformationOrBlobKey();
 
-        assertTrue(taskInformationOrBlobKey.isRight());
+        assertThat(taskInformationOrBlobKey.isRight()).isTrue();
 
         // must not throw:
         blobServer.getFile(eg.getJobID(), taskInformationOrBlobKey.right());

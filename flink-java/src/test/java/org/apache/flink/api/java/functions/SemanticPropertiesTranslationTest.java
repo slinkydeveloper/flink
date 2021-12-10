@@ -39,9 +39,7 @@ import org.apache.flink.api.java.tuple.Tuple3;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This is a minimal test to verify that semantic annotations are evaluated against the type
@@ -69,12 +67,12 @@ public class SemanticPropertiesTranslationTest {
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 1);
         FieldSet fw3 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertNotNull(fw3);
-        assertTrue(fw1.contains(0));
-        assertTrue(fw2.contains(1));
-        assertTrue(fw3.contains(2));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw3).isNotNull();
+        assertThat(fw1.contains(0)).isTrue();
+        assertThat(fw2.contains(1)).isTrue();
+        assertThat(fw3.contains(2)).isTrue();
     }
 
     @Test
@@ -95,10 +93,10 @@ public class SemanticPropertiesTranslationTest {
 
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertTrue(fw1.contains(0));
-        assertTrue(fw2.contains(2));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw1.contains(0)).isTrue();
+        assertThat(fw2.contains(2)).isTrue();
     }
 
     @Test
@@ -120,12 +118,12 @@ public class SemanticPropertiesTranslationTest {
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 1);
         FieldSet fw3 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertNotNull(fw3);
-        assertTrue(fw1.contains(2));
-        assertTrue(fw2.contains(0));
-        assertTrue(fw3.contains(1));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw3).isNotNull();
+        assertThat(fw1.contains(2)).isTrue();
+        assertThat(fw2.contains(0)).isTrue();
+        assertThat(fw3.contains(1)).isTrue();
     }
 
     @Test
@@ -147,10 +145,10 @@ public class SemanticPropertiesTranslationTest {
 
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertTrue(fw1.contains(1));
-        assertTrue(fw2.contains(2));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw1.contains(1)).isTrue();
+        assertThat(fw2.contains(2)).isTrue();
     }
 
     @Test
@@ -172,10 +170,10 @@ public class SemanticPropertiesTranslationTest {
 
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertTrue(fw1.contains(1));
-        assertTrue(fw2.contains(2));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw1.contains(1)).isTrue();
+        assertThat(fw2.contains(2)).isTrue();
     }
 
     @Test
@@ -197,10 +195,10 @@ public class SemanticPropertiesTranslationTest {
 
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertTrue(fw1.contains(1));
-        assertTrue(fw2.contains(2));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw1.contains(1)).isTrue();
+        assertThat(fw2.contains(2)).isTrue();
     }
 
     @Test
@@ -221,10 +219,10 @@ public class SemanticPropertiesTranslationTest {
 
         FieldSet fw1 = semantics.getForwardingTargetFields(0, 0);
         FieldSet fw2 = semantics.getForwardingTargetFields(0, 2);
-        assertNotNull(fw1);
-        assertNotNull(fw2);
-        assertTrue(fw1.contains(0));
-        assertTrue(fw2.contains(2));
+        assertThat(fw1).isNotNull();
+        assertThat(fw2).isNotNull();
+        assertThat(fw1.contains(0)).isTrue();
+        assertThat(fw2.contains(2)).isTrue();
     }
 
     @Test
@@ -244,10 +242,10 @@ public class SemanticPropertiesTranslationTest {
         SingleInputSemanticProperties semantics = mapper.getSemanticProperties();
 
         FieldSet read = semantics.getReadFields(0);
-        assertNotNull(read);
-        assertEquals(2, read.size());
-        assertTrue(read.contains(0));
-        assertTrue(read.contains(2));
+        assertThat(read).isNotNull();
+        assertThat(read.size()).isEqualTo(2);
+        assertThat(read.contains(0)).isTrue();
+        assertThat(read.contains(2)).isTrue();
     }
 
     @Test(expected = SemanticProperties.InvalidSemanticAnnotationException.class)
@@ -294,14 +292,14 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getForwardingTargetFields(0, 0));
-        assertNotNull(semantics.getForwardingTargetFields(1, 0));
-        assertEquals(1, semantics.getForwardingTargetFields(0, 1).size());
-        assertEquals(1, semantics.getForwardingTargetFields(1, 1).size());
-        assertTrue(semantics.getForwardingTargetFields(0, 1).contains(0));
-        assertTrue(semantics.getForwardingTargetFields(1, 1).contains(1));
-        assertEquals(0, semantics.getForwardingTargetFields(0, 0).size());
-        assertEquals(0, semantics.getForwardingTargetFields(1, 0).size());
+        assertThat(semantics.getForwardingTargetFields(0, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(1, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 1).contains(0)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(0, 0).size()).isEqualTo(0);
+        assertThat(semantics.getForwardingTargetFields(1, 0).size()).isEqualTo(0);
     }
 
     @Test
@@ -326,14 +324,14 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getForwardingTargetFields(1, 0));
-        assertEquals(1, semantics.getForwardingTargetFields(0, 0).size());
-        assertEquals(1, semantics.getForwardingTargetFields(0, 1).size());
-        assertEquals(1, semantics.getForwardingTargetFields(1, 1).size());
-        assertTrue(semantics.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(semantics.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(semantics.getForwardingTargetFields(1, 1).contains(0));
-        assertEquals(0, semantics.getForwardingTargetFields(1, 0).size());
+        assertThat(semantics.getForwardingTargetFields(1, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 0).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(1, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 1).contains(0)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 0).size()).isEqualTo(0);
     }
 
     @Test
@@ -358,20 +356,20 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getForwardingTargetFields(1, 0));
-        assertEquals(1, semantics.getForwardingTargetFields(0, 0).size());
-        assertEquals(1, semantics.getForwardingTargetFields(0, 1).size());
-        assertEquals(1, semantics.getForwardingTargetFields(1, 1).size());
-        assertTrue(semantics.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(semantics.getForwardingTargetFields(0, 1).contains(2));
-        assertTrue(semantics.getForwardingTargetFields(1, 1).contains(0));
-        assertNotNull(semantics.getReadFields(0));
-        assertNotNull(semantics.getReadFields(1));
-        assertEquals(1, semantics.getReadFields(0).size());
-        assertEquals(1, semantics.getReadFields(1).size());
-        assertTrue(semantics.getReadFields(0).contains(1));
-        assertTrue(semantics.getReadFields(1).contains(0));
-        assertEquals(0, semantics.getForwardingTargetFields(1, 0).size());
+        assertThat(semantics.getForwardingTargetFields(1, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 0).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(1, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(0, 1).contains(2)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 1).contains(0)).isTrue();
+        assertThat(semantics.getReadFields(0)).isNotNull();
+        assertThat(semantics.getReadFields(1)).isNotNull();
+        assertThat(semantics.getReadFields(0).size()).isEqualTo(1);
+        assertThat(semantics.getReadFields(1).size()).isEqualTo(1);
+        assertThat(semantics.getReadFields(0).contains(1)).isTrue();
+        assertThat(semantics.getReadFields(1).contains(0)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 0).size()).isEqualTo(0);
     }
 
     @Test
@@ -395,16 +393,16 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getForwardingTargetFields(0, 1));
-        assertNotNull(semantics.getForwardingTargetFields(1, 0));
-        assertNotNull(semantics.getForwardingTargetFields(0, 0));
-        assertNotNull(semantics.getForwardingTargetFields(1, 1));
-        assertEquals(1, semantics.getForwardingTargetFields(0, 0).size());
-        assertEquals(1, semantics.getForwardingTargetFields(1, 1).size());
-        assertTrue(semantics.getForwardingTargetFields(0, 0).contains(2));
-        assertTrue(semantics.getForwardingTargetFields(1, 1).contains(1));
-        assertEquals(0, semantics.getForwardingTargetFields(0, 1).size());
-        assertEquals(0, semantics.getForwardingTargetFields(1, 0).size());
+        assertThat(semantics.getForwardingTargetFields(0, 1)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 1)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 0).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(1, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 0).contains(2)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 1).contains(1)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(0, 1).size()).isEqualTo(0);
+        assertThat(semantics.getForwardingTargetFields(1, 0).size()).isEqualTo(0);
     }
 
     @Test
@@ -428,16 +426,16 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getForwardingTargetFields(0, 1));
-        assertNotNull(semantics.getForwardingTargetFields(1, 0));
-        assertNotNull(semantics.getForwardingTargetFields(0, 0));
-        assertNotNull(semantics.getForwardingTargetFields(1, 1));
-        assertEquals(1, semantics.getForwardingTargetFields(0, 0).size());
-        assertEquals(1, semantics.getForwardingTargetFields(1, 1).size());
-        assertTrue(semantics.getForwardingTargetFields(0, 0).contains(1));
-        assertTrue(semantics.getForwardingTargetFields(1, 1).contains(2));
-        assertEquals(0, semantics.getForwardingTargetFields(0, 1).size());
-        assertEquals(0, semantics.getForwardingTargetFields(1, 0).size());
+        assertThat(semantics.getForwardingTargetFields(0, 1)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 1)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 0).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(1, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 0).contains(1)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 1).contains(2)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(0, 1).size()).isEqualTo(0);
+        assertThat(semantics.getForwardingTargetFields(1, 0).size()).isEqualTo(0);
     }
 
     @Test
@@ -462,18 +460,18 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getForwardingTargetFields(0, 0));
-        assertNotNull(semantics.getForwardingTargetFields(0, 2));
-        assertNotNull(semantics.getForwardingTargetFields(1, 0));
-        assertNotNull(semantics.getForwardingTargetFields(1, 1));
-        assertEquals(1, semantics.getForwardingTargetFields(0, 1).size());
-        assertEquals(1, semantics.getForwardingTargetFields(1, 2).size());
-        assertTrue(semantics.getForwardingTargetFields(0, 1).contains(1));
-        assertTrue(semantics.getForwardingTargetFields(1, 2).contains(2));
-        assertEquals(0, semantics.getForwardingTargetFields(0, 0).size());
-        assertEquals(0, semantics.getForwardingTargetFields(0, 2).size());
-        assertEquals(0, semantics.getForwardingTargetFields(1, 0).size());
-        assertEquals(0, semantics.getForwardingTargetFields(1, 1).size());
+        assertThat(semantics.getForwardingTargetFields(0, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 2)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 0)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(1, 1)).isNotNull();
+        assertThat(semantics.getForwardingTargetFields(0, 1).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(1, 2).size()).isEqualTo(1);
+        assertThat(semantics.getForwardingTargetFields(0, 1).contains(1)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(1, 2).contains(2)).isTrue();
+        assertThat(semantics.getForwardingTargetFields(0, 0).size()).isEqualTo(0);
+        assertThat(semantics.getForwardingTargetFields(0, 2).size()).isEqualTo(0);
+        assertThat(semantics.getForwardingTargetFields(1, 0).size()).isEqualTo(0);
+        assertThat(semantics.getForwardingTargetFields(1, 1).size()).isEqualTo(0);
     }
 
     @Test
@@ -496,12 +494,12 @@ public class SemanticPropertiesTranslationTest {
                 (InnerJoinOperatorBase<?, ?, ?, ?>) sink.getInput();
 
         DualInputSemanticProperties semantics = join.getSemanticProperties();
-        assertNotNull(semantics.getReadFields(0));
-        assertNotNull(semantics.getReadFields(1));
-        assertEquals(1, semantics.getReadFields(0).size());
-        assertEquals(1, semantics.getReadFields(1).size());
-        assertTrue(semantics.getReadFields(0).contains(1));
-        assertTrue(semantics.getReadFields(1).contains(0));
+        assertThat(semantics.getReadFields(0)).isNotNull();
+        assertThat(semantics.getReadFields(1)).isNotNull();
+        assertThat(semantics.getReadFields(0).size()).isEqualTo(1);
+        assertThat(semantics.getReadFields(1).size()).isEqualTo(1);
+        assertThat(semantics.getReadFields(0).contains(1)).isTrue();
+        assertThat(semantics.getReadFields(1).contains(0)).isTrue();
     }
 
     @Test(expected = SemanticProperties.InvalidSemanticAnnotationException.class)

@@ -20,9 +20,8 @@ package org.apache.flink.streaming.runtime.operators.windowing;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link KeyMap}. */
 public class KeyMapPutIfAbsentTest {
@@ -39,28 +38,28 @@ public class KeyMapPutIfAbsentTest {
                 factory.set(2 * i + 1);
                 map.putIfAbsent(i, factory);
 
-                assertEquals(i + 1, map.size());
-                assertTrue(map.getCurrentTableCapacity() > map.size());
-                assertTrue(map.getCurrentTableCapacity() > map.getRehashThreshold());
-                assertTrue(map.size() <= map.getRehashThreshold());
+                assertThat(map.size()).isEqualTo(i + 1);
+                assertThat(map.getCurrentTableCapacity() > map.size()).isTrue();
+                assertThat(map.getCurrentTableCapacity() > map.getRehashThreshold()).isTrue();
+                assertThat(map.size() <= map.getRehashThreshold()).isTrue();
             }
 
-            assertEquals(numElements, map.size());
-            assertEquals(numElements, map.traverseAndCountElements());
-            assertEquals(1 << 21, map.getCurrentTableCapacity());
+            assertThat(map.size()).isEqualTo(numElements);
+            assertThat(map.traverseAndCountElements()).isEqualTo(numElements);
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(1 << 21);
 
             for (int i = 0; i < numElements; i++) {
-                assertEquals(2 * i + 1, map.get(i).intValue());
+                assertThat(map.get(i).intValue()).isEqualTo(2 * i + 1);
             }
 
             for (int i = numElements - 1; i >= 0; i--) {
-                assertEquals(2 * i + 1, map.get(i).intValue());
+                assertThat(map.get(i).intValue()).isEqualTo(2 * i + 1);
             }
 
-            assertEquals(numElements, map.size());
-            assertEquals(numElements, map.traverseAndCountElements());
-            assertEquals(1 << 21, map.getCurrentTableCapacity());
-            assertTrue(map.getLongestChainLength() <= 7);
+            assertThat(map.size()).isEqualTo(numElements);
+            assertThat(map.traverseAndCountElements()).isEqualTo(numElements);
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(1 << 21);
+            assertThat(map.getLongestChainLength() <= 7).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -79,23 +78,23 @@ public class KeyMapPutIfAbsentTest {
                 int val = 2 * i + 1;
                 factory.set(val);
                 Integer put = map.putIfAbsent(i, factory);
-                assertEquals(val, put.intValue());
+                assertThat(put.intValue()).isEqualTo(val);
             }
 
             for (int i = 0; i < numElements; i += 3) {
                 factory.set(2 * i);
                 Integer put = map.putIfAbsent(i, factory);
-                assertEquals(2 * i + 1, put.intValue());
+                assertThat(put.intValue()).isEqualTo(2 * i + 1);
             }
 
             for (int i = 0; i < numElements; i++) {
-                assertEquals(2 * i + 1, map.get(i).intValue());
+                assertThat(map.get(i).intValue()).isEqualTo(2 * i + 1);
             }
 
-            assertEquals(numElements, map.size());
-            assertEquals(numElements, map.traverseAndCountElements());
-            assertEquals(1 << 21, map.getCurrentTableCapacity());
-            assertTrue(map.getLongestChainLength() <= 7);
+            assertThat(map.size()).isEqualTo(numElements);
+            assertThat(map.traverseAndCountElements()).isEqualTo(numElements);
+            assertThat(map.getCurrentTableCapacity()).isEqualTo(1 << 21);
+            assertThat(map.getLongestChainLength() <= 7).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

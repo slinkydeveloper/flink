@@ -33,10 +33,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.time.Duration;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
 
 /** Tests for the {@link AkkaUtils}. */
@@ -59,7 +57,7 @@ public class AkkaUtilsTest extends TestLogger {
 
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(remoteAkkaUrl);
 
-        assertThat(result, equalTo(address));
+        assertThat(result).isEqualTo(address);
     }
 
     @Test(expected = Exception.class)
@@ -76,7 +74,7 @@ public class AkkaUtilsTest extends TestLogger {
 
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -86,7 +84,7 @@ public class AkkaUtilsTest extends TestLogger {
 
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -96,7 +94,7 @@ public class AkkaUtilsTest extends TestLogger {
 
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -108,7 +106,7 @@ public class AkkaUtilsTest extends TestLogger {
         final String url = "akka://flink@" + ipv4Address + ":" + port + "/user/jobmanager";
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(address));
+        assertThat(result).isEqualTo(address);
     }
 
     @Test
@@ -120,7 +118,7 @@ public class AkkaUtilsTest extends TestLogger {
         final String url = "akka://flink@[" + ipv6Address + "]:" + port + "/user/jobmanager";
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(address));
+        assertThat(result).isEqualTo(address);
     }
 
     @Test
@@ -132,7 +130,7 @@ public class AkkaUtilsTest extends TestLogger {
         final String url = "akka.tcp://flink@[" + ipv6Address + "]:" + port + "/user/jobmanager";
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(address));
+        assertThat(result).isEqualTo(address);
     }
 
     @Test
@@ -145,7 +143,7 @@ public class AkkaUtilsTest extends TestLogger {
                 "akka.ssl.tcp://flink@[" + ipv6Address + "]:" + port + "/user/jobmanager";
         final InetSocketAddress result = AkkaUtils.getInetSocketAddressFromAkkaURL(url);
 
-        assertThat(result, equalTo(address));
+        assertThat(result).isEqualTo(address);
     }
 
     @Test
@@ -157,9 +155,8 @@ public class AkkaUtilsTest extends TestLogger {
         final Config akkaConfig =
                 AkkaUtils.getAkkaConfig(configuration, new HostAndPort(hostname, port));
 
-        assertThat(
-                akkaConfig.getString("akka.remote.classic.netty.tcp.hostname"),
-                equalTo(NetUtils.unresolvedHostToNormalizedString(hostname)));
+        assertThat(akkaConfig.getString("akka.remote.classic.netty.tcp.hostname"))
+                .isEqualTo(NetUtils.unresolvedHostToNormalizedString(hostname));
     }
 
     @Test
@@ -169,16 +166,15 @@ public class AkkaUtilsTest extends TestLogger {
 
         final String hostname = akkaConfig.getString("akka.remote.classic.netty.tcp.hostname");
 
-        assertThat(InetAddress.getByName(hostname).isLoopbackAddress(), is(true));
+        assertThat(InetAddress.getByName(hostname).isLoopbackAddress()).isEqualTo(true);
     }
 
     @Test
     public void getAkkaConfigDefaultsToForkJoinExecutor() {
         final Config akkaConfig = AkkaUtils.getAkkaConfig(new Configuration(), null);
 
-        assertThat(
-                akkaConfig.getString("akka.actor.default-dispatcher.executor"),
-                is("fork-join-executor"));
+        assertThat(akkaConfig.getString("akka.actor.default-dispatcher.executor"))
+                .isEqualTo("fork-join-executor");
     }
 
     @Test
@@ -196,20 +192,18 @@ public class AkkaUtilsTest extends TestLogger {
                                 new RpcSystem.FixedThreadPoolExecutorConfiguration(
                                         minThreads, maxThreads, threadPriority)));
 
+        assertThat(akkaConfig.getString("akka.actor.default-dispatcher.executor"))
+                .isEqualTo("thread-pool-executor");
+        assertThat(akkaConfig.getInt("akka.actor.default-dispatcher.thread-priority"))
+                .isEqualTo(threadPriority);
         assertThat(
-                akkaConfig.getString("akka.actor.default-dispatcher.executor"),
-                is("thread-pool-executor"));
+                        akkaConfig.getInt(
+                                "akka.actor.default-dispatcher.thread-pool-executor.core-pool-size-min"))
+                .isEqualTo(minThreads);
         assertThat(
-                akkaConfig.getInt("akka.actor.default-dispatcher.thread-priority"),
-                is(threadPriority));
-        assertThat(
-                akkaConfig.getInt(
-                        "akka.actor.default-dispatcher.thread-pool-executor.core-pool-size-min"),
-                is(minThreads));
-        assertThat(
-                akkaConfig.getInt(
-                        "akka.actor.default-dispatcher.thread-pool-executor.core-pool-size-max"),
-                is(maxThreads));
+                        akkaConfig.getInt(
+                                "akka.actor.default-dispatcher.thread-pool-executor.core-pool-size-max"))
+                .isEqualTo(maxThreads);
     }
 
     @Test
@@ -219,9 +213,8 @@ public class AkkaUtilsTest extends TestLogger {
                 AkkaUtils.getAkkaConfig(
                         new Configuration(), new HostAndPort(ipv6AddressString, 1234));
 
-        assertThat(
-                akkaConfig.getString("akka.remote.classic.netty.tcp.hostname"),
-                is(NetUtils.unresolvedHostToNormalizedString(ipv6AddressString)));
+        assertThat(akkaConfig.getString("akka.remote.classic.netty.tcp.hostname"))
+                .isEqualTo(NetUtils.unresolvedHostToNormalizedString(ipv6AddressString));
     }
 
     @Test
@@ -232,7 +225,7 @@ public class AkkaUtilsTest extends TestLogger {
         final Config akkaConfig =
                 AkkaUtils.getAkkaConfig(configuration, new HostAndPort("localhost", 31337));
 
-        assertThat(akkaConfig.getString("akka.remote.startup-timeout"), is("1000ms"));
+        assertThat(akkaConfig.getString("akka.remote.startup-timeout")).isEqualTo("1000ms");
     }
 
     @Test
@@ -244,10 +237,10 @@ public class AkkaUtilsTest extends TestLogger {
                 AkkaUtils.getAkkaConfig(configuration, new HostAndPort("localhost", 31337));
         final Config sslConfig = akkaConfig.getConfig("akka.remote.classic.netty.ssl");
 
-        assertThat(
-                sslConfig.getString("ssl-engine-provider"),
-                is("org.apache.flink.runtime.rpc.akka.CustomSSLEngineProvider"));
-        assertThat(sslConfig.getStringList("security.cert-fingerprints"), empty());
+        assertThat(sslConfig.getString("ssl-engine-provider"))
+                .isEqualTo("org.apache.flink.runtime.rpc.akka.CustomSSLEngineProvider");
+        assertThat(sslConfig.getStringList("security.cert-fingerprints"))
+                .satisfies(matching(empty()));
     }
 
     @Test
@@ -262,9 +255,8 @@ public class AkkaUtilsTest extends TestLogger {
                 AkkaUtils.getAkkaConfig(configuration, new HostAndPort("localhost", 31337));
         final Config sslConfig = akkaConfig.getConfig("akka.remote.classic.netty.ssl");
 
-        assertThat(
-                sslConfig.getString("ssl-engine-provider"),
-                is("org.apache.flink.runtime.rpc.akka.CustomSSLEngineProvider"));
-        assertThat(sslConfig.getStringList("security.cert-fingerprints"), hasItem(fingerprint));
+        assertThat(sslConfig.getString("ssl-engine-provider"))
+                .isEqualTo("org.apache.flink.runtime.rpc.akka.CustomSSLEngineProvider");
+        assertThat(sslConfig.getStringList("security.cert-fingerprints")).contains(fingerprint);
     }
 }

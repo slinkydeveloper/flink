@@ -55,11 +55,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
 
@@ -151,14 +148,14 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
                 MutableObjectIterator<Tuple2<Long, String>> iter = table.getEntryIterator();
                 Tuple2<Long, String> next;
                 while ((next = iter.next()) != null) {
-                    assertNotNull(next.f0);
-                    assertNotNull(next.f1);
-                    assertEquals(next.f0.longValue(), Long.parseLong(next.f1));
+                    assertThat(next.f0).isNotNull();
+                    assertThat(next.f1).isNotNull();
+                    assertThat(Long.parseLong(next.f1)).isEqualTo(next.f0.longValue());
 
                     bitSet.set(next.f0.intValue());
                 }
 
-                assertEquals(numElements, bitSet.cardinality());
+                assertThat(bitSet.cardinality()).isEqualTo(numElements);
             }
 
             // make sure all entries are contained via the prober
@@ -169,8 +166,8 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
                 Tuple2<Long, String> reuse = new Tuple2<>();
 
                 for (long i = 0; i < numElements; i++) {
-                    assertNotNull(proper.getMatchFor(i, reuse));
-                    assertNull(proper.getMatchFor(i + numElements, reuse));
+                    assertThat(proper.getMatchFor(i, reuse)).isNotNull();
+                    assertThat(proper.getMatchFor(i + numElements, reuse)).isNull();
                 }
             }
 
@@ -209,14 +206,14 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
                 MutableObjectIterator<Tuple2<Long, String>> iter = table.getEntryIterator();
                 Tuple2<Long, String> next;
                 while ((next = iter.next()) != null) {
-                    assertNotNull(next.f0);
-                    assertNotNull(next.f1);
-                    assertEquals(next.f0.longValue(), Long.parseLong(next.f1));
+                    assertThat(next.f0).isNotNull();
+                    assertThat(next.f1).isNotNull();
+                    assertThat(Long.parseLong(next.f1)).isEqualTo(next.f0.longValue());
 
                     bitSet.set(next.f0.intValue());
                 }
 
-                assertEquals(numElements, bitSet.cardinality());
+                assertThat(bitSet.cardinality()).isEqualTo(numElements);
             }
 
             // make sure all entries are contained via the prober
@@ -227,8 +224,8 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
                 Tuple2<Long, String> reuse = new Tuple2<>();
 
                 for (long i = 0; i < numElements; i++) {
-                    assertNotNull(proper.getMatchFor(i, reuse));
-                    assertNull(proper.getMatchFor(i + numElements, reuse));
+                    assertThat(proper.getMatchFor(i, reuse)).isNotNull();
+                    assertThat(proper.getMatchFor(i + numElements, reuse)).isNull();
                 }
             }
 
@@ -352,7 +349,7 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
 
         // Check results
 
-        assertEquals(expectedOutput.size(), actualOutput.size());
+        assertThat(actualOutput.size()).isEqualTo(expectedOutput.size());
 
         Integer[] expectedValues = new Integer[expectedOutput.size()];
         for (int i = 0; i < expectedOutput.size(); i++) {
@@ -365,7 +362,7 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
 
         Arrays.sort(expectedValues, Ordering.<Integer>natural());
         Arrays.sort(actualValues, Ordering.<Integer>natural());
-        assertArrayEquals(expectedValues, actualValues);
+        assertThat(actualValues).isEqualTo(expectedValues);
     }
 
     class SumReducer implements ReduceFunction<IntPair> {
@@ -466,7 +463,7 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
 
             // Check results
 
-            assertEquals(expectedOutput.size(), actualOutput.size());
+            assertThat(actualOutput.size()).isEqualTo(expectedOutput.size());
 
             String[] expectedValues = new String[expectedOutput.size()];
             for (int i = 0; i < expectedOutput.size(); i++) {
@@ -479,7 +476,7 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
 
             Arrays.sort(expectedValues, Ordering.<String>natural());
             Arrays.sort(actualValues, Ordering.<String>natural());
-            assertArrayEquals(expectedValues, actualValues);
+            assertThat(actualValues).isEqualTo(expectedValues);
 
             expectedOutput.clear();
             actualOutput.clear();
@@ -541,7 +538,7 @@ public class InPlaceMutableHashTableTest extends MutableHashTableTestBase {
                     prober = table.getProber(comparator, new SameTypePairComparator<>(comparator));
             Tuple2<Long, String> reuse = new Tuple2<>();
             for (long i = 0; i < numElements; i++) {
-                assertNotNull(prober.getMatchFor(Tuple2.of(i, longString2), reuse));
+                assertThat(prober.getMatchFor(Tuple2.of(i, longString2), reuse)).isNotNull();
             }
 
             table.close();

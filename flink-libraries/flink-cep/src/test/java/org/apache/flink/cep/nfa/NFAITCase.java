@@ -37,7 +37,6 @@ import org.apache.flink.util.TestLogger;
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -54,9 +53,7 @@ import java.util.Set;
 import static org.apache.flink.cep.utils.NFATestUtilities.comparePatterns;
 import static org.apache.flink.cep.utils.NFATestUtilities.feedNFA;
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.anyLong;
 
 /**
@@ -491,10 +488,10 @@ public class NFAITCase extends TestLogger {
             resultingTimeoutPatterns.addAll(timeoutPatterns);
         }
 
-        assertEquals(1, resultingPatterns.size());
-        assertEquals(expectedTimeoutPatterns.size(), resultingTimeoutPatterns.size());
+        assertThat(resultingPatterns.size()).isEqualTo(1);
+        assertThat(resultingTimeoutPatterns.size()).isEqualTo(expectedTimeoutPatterns.size());
 
-        assertEquals(expectedTimeoutPatterns, resultingTimeoutPatterns);
+        assertThat(resultingTimeoutPatterns).isEqualTo(expectedTimeoutPatterns);
     }
 
     @Test
@@ -3238,8 +3235,8 @@ public class NFAITCase extends TestLogger {
         // pruning element
         nfa.advanceTime(sharedBufferAccessor, nfaState, 10);
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -3297,8 +3294,8 @@ public class NFAITCase extends TestLogger {
         // pruning element
         nfa.advanceTime(sharedBufferAccessor, nfaState, 10);
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -3359,8 +3356,8 @@ public class NFAITCase extends TestLogger {
         // pruning element
         nfa.advanceTime(sharedBufferAccessor, nfaState, 10);
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -3422,8 +3419,8 @@ public class NFAITCase extends TestLogger {
         // pruning element
         nfa.advanceTime(sharedBufferAccessor, nfaState, 10);
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     ///////////////////////////////////////   Skip till next     /////////////////////////////
@@ -3824,16 +3821,14 @@ public class NFAITCase extends TestLogger {
         Collection<Map<String, List<Event>>> resultingPatterns =
                 nfaTestHarness.consumeRecords(inputEvents);
 
-        Assert.assertEquals(1L, resultingPatterns.size());
+        assertThat(resultingPatterns.size()).isEqualTo(1L);
 
         Map<String, List<Event>> match = resultingPatterns.iterator().next();
-        Assert.assertArrayEquals(
-                match.get("start").toArray(),
-                Lists.newArrayList(startEvent1, startEvent2, startEvent3, startEvent4).toArray());
+        assertThat(Lists.newArrayList(startEvent1, startEvent2, startEvent3, startEvent4).toArray())
+                .isEqualTo(match.get("start").toArray());
 
-        Assert.assertArrayEquals(
-                match.get("middle").toArray(),
-                Lists.newArrayList(endEvent1, endEvent2, endEvent3).toArray());
+        assertThat(Lists.newArrayList(endEvent1, endEvent2, endEvent3).toArray())
+                .isEqualTo(match.get("middle").toArray());
     }
 
     @Test
@@ -3901,7 +3896,7 @@ public class NFAITCase extends TestLogger {
         Collection<Map<String, List<Event>>> resultingPatterns =
                 nfaTestHarness.consumeRecords(inputEvents);
 
-        Assert.assertEquals(1L, resultingPatterns.size());
+        assertThat(resultingPatterns.size()).isEqualTo(1L);
 
         Map<String, List<Event>> match = resultingPatterns.iterator().next();
 
@@ -3911,7 +3906,7 @@ public class NFAITCase extends TestLogger {
             resultOrder.add(key);
         }
 
-        Assert.assertEquals(expectedOrder, resultOrder);
+        assertThat(resultOrder).isEqualTo(expectedOrder);
     }
 
     @Test
@@ -3970,6 +3965,6 @@ public class NFAITCase extends TestLogger {
             nfa.advanceTime(accessor, nfaState, 4);
         }
 
-        assertThat(sharedBuffer.getEventsBufferSize(), equalTo(1));
+        assertThat(sharedBuffer.getEventsBufferSize()).isEqualTo(1);
     }
 }

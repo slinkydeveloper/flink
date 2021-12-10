@@ -39,9 +39,8 @@ import java.util.function.Consumer;
 
 import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.createRandomExecutionVertexId;
 import static org.apache.flink.runtime.scheduler.SharedSlotTestingUtils.createExecutionSlotSharingGroup;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test suite for {@link SharedSlot}. */
 public class SharedSlotTest extends TestLogger {
@@ -55,10 +54,10 @@ public class SharedSlotTest extends TestLogger {
     public void testCreation() {
         SharedSlot sharedSlot =
                 SharedSlotBuilder.newBuilder().slotWillBeOccupiedIndefinitely().build();
-        assertThat(sharedSlot.getPhysicalSlotRequestId(), is(PHYSICAL_SLOT_REQUEST_ID));
-        assertThat(sharedSlot.getPhysicalSlotResourceProfile(), is(RP));
-        assertThat(sharedSlot.willOccupySlotIndefinitely(), is(true));
-        assertThat(sharedSlot.isEmpty(), is(true));
+        assertThat(sharedSlot.getPhysicalSlotRequestId()).isEqualTo(PHYSICAL_SLOT_REQUEST_ID);
+        assertThat(sharedSlot.getPhysicalSlotResourceProfile()).isEqualTo(RP);
+        assertThat(sharedSlot.willOccupySlotIndefinitely()).isEqualTo(true);
+        assertThat(sharedSlot.isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -68,7 +67,7 @@ public class SharedSlotTest extends TestLogger {
                 SharedSlotBuilder.newBuilder().withSlotContextFuture(slotContextFuture).build();
         TestingPhysicalSlot physicalSlot = new TestingPhysicalSlot(RP, new AllocationID());
         slotContextFuture.complete(physicalSlot);
-        assertThat(physicalSlot.getPayload(), is(sharedSlot));
+        assertThat(physicalSlot.getPayload()).isEqualTo(sharedSlot);
     }
 
     @Test
@@ -83,7 +82,7 @@ public class SharedSlotTest extends TestLogger {
                         .build();
         CompletableFuture<LogicalSlot> logicalSlotFuture = sharedSlot.allocateLogicalSlot(EV1);
 
-        assertThat(logicalSlotFuture.isDone(), is(false));
+        assertThat(logicalSlotFuture.isDone()).isEqualTo(false);
 
         AllocationID allocationId = new AllocationID();
         LocalTaskManagerLocation taskManagerLocation = new LocalTaskManagerLocation();
@@ -92,14 +91,14 @@ public class SharedSlotTest extends TestLogger {
                 new TestingPhysicalSlot(
                         allocationId, taskManagerLocation, 3, taskManagerGateway, RP));
 
-        assertThat(sharedSlot.isEmpty(), is(false));
-        assertThat(released.isDone(), is(false));
-        assertThat(logicalSlotFuture.isDone(), is(true));
+        assertThat(sharedSlot.isEmpty()).isEqualTo(false);
+        assertThat(released.isDone()).isEqualTo(false);
+        assertThat(logicalSlotFuture.isDone()).isEqualTo(true);
         LogicalSlot logicalSlot = logicalSlotFuture.join();
-        assertThat(logicalSlot.getAllocationId(), is(allocationId));
-        assertThat(logicalSlot.getTaskManagerLocation(), is(taskManagerLocation));
-        assertThat(logicalSlot.getTaskManagerGateway(), is(taskManagerGateway));
-        assertThat(logicalSlot.getLocality(), is(Locality.UNKNOWN));
+        assertThat(logicalSlot.getAllocationId()).isEqualTo(allocationId);
+        assertThat(logicalSlot.getTaskManagerLocation()).isEqualTo(taskManagerLocation);
+        assertThat(logicalSlot.getTaskManagerGateway()).isEqualTo(taskManagerGateway);
+        assertThat(logicalSlot.getLocality()).isEqualTo(Locality.UNKNOWN);
     }
 
     @Test
@@ -115,14 +114,14 @@ public class SharedSlotTest extends TestLogger {
         Throwable cause = new Throwable();
         slotContextFuture.completeExceptionally(cause);
 
-        assertThat(logicalSlotFuture.isCompletedExceptionally(), is(true));
+        assertThat(logicalSlotFuture.isCompletedExceptionally()).isEqualTo(true);
         try {
             logicalSlotFuture.get();
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), is(cause));
+            assertThat(e.getCause()).isEqualTo(cause);
         }
-        assertThat(sharedSlot.isEmpty(), is(true));
-        assertThat(released.isDone(), is(true));
+        assertThat(sharedSlot.isEmpty()).isEqualTo(true);
+        assertThat(released.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -138,9 +137,9 @@ public class SharedSlotTest extends TestLogger {
         slotContextFuture.complete(new TestingPhysicalSlot(RP, new AllocationID()));
         sharedSlot.cancelLogicalSlotRequest(EV1, new Throwable());
 
-        assertThat(logicalSlotFuture.isCompletedExceptionally(), is(false));
-        assertThat(sharedSlot.isEmpty(), is(false));
-        assertThat(released.isDone(), is(false));
+        assertThat(logicalSlotFuture.isCompletedExceptionally()).isEqualTo(false);
+        assertThat(sharedSlot.isEmpty()).isEqualTo(false);
+        assertThat(released.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -154,14 +153,14 @@ public class SharedSlotTest extends TestLogger {
         Throwable cause = new Throwable();
         sharedSlot.cancelLogicalSlotRequest(EV1, cause);
 
-        assertThat(logicalSlotFuture.isCompletedExceptionally(), is(true));
+        assertThat(logicalSlotFuture.isCompletedExceptionally()).isEqualTo(true);
         try {
             logicalSlotFuture.get();
         } catch (ExecutionException e) {
-            assertThat(e.getCause(), is(cause));
+            assertThat(e.getCause()).isEqualTo(cause);
         }
-        assertThat(sharedSlot.isEmpty(), is(true));
-        assertThat(released.isDone(), is(true));
+        assertThat(sharedSlot.isEmpty()).isEqualTo(true);
+        assertThat(released.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -177,8 +176,8 @@ public class SharedSlotTest extends TestLogger {
         slotContextFuture.complete(new TestingPhysicalSlot(RP, new AllocationID()));
         sharedSlot.returnLogicalSlot(logicalSlotFuture.join());
 
-        assertThat(sharedSlot.isEmpty(), is(true));
-        assertThat(released.isDone(), is(true));
+        assertThat(sharedSlot.isEmpty()).isEqualTo(true);
+        assertThat(released.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -199,8 +198,8 @@ public class SharedSlotTest extends TestLogger {
         } catch (IllegalStateException e) {
             // expected
         }
-        assertThat(sharedSlot.isEmpty(), is(false));
-        assertThat(released.isDone(), is(false));
+        assertThat(sharedSlot.isEmpty()).isEqualTo(false);
+        assertThat(released.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -216,12 +215,12 @@ public class SharedSlotTest extends TestLogger {
         LogicalSlot logicalSlot = sharedSlot.allocateLogicalSlot(EV1).join();
         CompletableFuture<Object> terminalFuture = new CompletableFuture<>();
         logicalSlot.tryAssignPayload(new DummyPayload(terminalFuture));
-        assertThat(terminalFuture.isDone(), is(false));
+        assertThat(terminalFuture.isDone()).isEqualTo(false);
         sharedSlot.release(new Throwable());
 
-        assertThat(terminalFuture.isDone(), is(true));
-        assertThat(sharedSlot.isEmpty(), is(true));
-        assertThat(released.isDone(), is(true));
+        assertThat(terminalFuture.isDone()).isEqualTo(true);
+        assertThat(sharedSlot.isEmpty()).isEqualTo(true);
+        assertThat(released.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -265,14 +264,14 @@ public class SharedSlotTest extends TestLogger {
         sharedSlotReleaseFuture.complete(sharedSlot);
         LogicalSlot logicalSlot = sharedSlot.allocateLogicalSlot(EV1).join();
 
-        assertThat(released.get(), is(0));
+        assertThat(released.get()).isEqualTo(0);
         // returns the only and last slot, calling the external release callback
         sharedSlot.returnLogicalSlot(logicalSlot);
-        assertThat(released.get(), is(1));
+        assertThat(released.get()).isEqualTo(1);
 
         // slot is already released, it should not get released again
         sharedSlot.release(new Throwable());
-        assertThat(released.get(), is(1));
+        assertThat(released.get()).isEqualTo(1);
     }
 
     @Test

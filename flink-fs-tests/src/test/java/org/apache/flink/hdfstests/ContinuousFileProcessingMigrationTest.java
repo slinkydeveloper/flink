@@ -44,7 +44,6 @@ import org.apache.flink.testutils.migration.MigrationVersion;
 import org.apache.flink.util.OperatingSystem;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
@@ -61,6 +60,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that verify the migration from previous Flink version snapshots. */
 @RunWith(Parameterized.class)
@@ -208,10 +208,10 @@ public class ContinuousFileProcessingMigrationTest {
         // compare if the results contain what they should contain and also if
         // they are the same, as they should.
 
-        Assert.assertTrue(testHarness.getOutput().contains(new StreamRecord<>(split1)));
-        Assert.assertTrue(testHarness.getOutput().contains(new StreamRecord<>(split2)));
-        Assert.assertTrue(testHarness.getOutput().contains(new StreamRecord<>(split3)));
-        Assert.assertTrue(testHarness.getOutput().contains(new StreamRecord<>(split4)));
+        assertThat(testHarness.getOutput().contains(new StreamRecord<>(split1))).isTrue();
+        assertThat(testHarness.getOutput().contains(new StreamRecord<>(split2))).isTrue();
+        assertThat(testHarness.getOutput().contains(new StreamRecord<>(split3))).isTrue();
+        assertThat(testHarness.getOutput().contains(new StreamRecord<>(split4))).isTrue();
     }
 
     /** Manually run this to write binary snapshot data. Remove @Ignore to run. */
@@ -322,7 +322,8 @@ public class ContinuousFileProcessingMigrationTest {
 
         testHarness.open();
 
-        Assert.assertEquals((long) expectedModTime, monitoringFunction.getGlobalModificationTime());
+        assertThat(monitoringFunction.getGlobalModificationTime())
+                .isEqualTo((long) expectedModTime);
     }
 
     private static class BlockingFileInputFormat extends FileInputFormat<FileInputSplit> {
@@ -397,7 +398,7 @@ public class ContinuousFileProcessingMigrationTest {
             File base, String fileName, int fileIdx, String sampleLine) throws IOException {
 
         File file = new File(base, fileName + fileIdx);
-        Assert.assertFalse(file.exists());
+        assertThat(file.exists()).isFalse();
 
         File tmp = new File(base, "." + fileName + fileIdx);
         FileOutputStream stream = new FileOutputStream(tmp);
@@ -411,7 +412,7 @@ public class ContinuousFileProcessingMigrationTest {
 
         FileUtils.moveFile(tmp, file);
 
-        Assert.assertTrue("No result file present", file.exists());
+        assertThat(file.exists()).as("No result file present").isTrue();
         return new Tuple2<>(file, str.toString());
     }
 

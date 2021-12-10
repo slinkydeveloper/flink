@@ -25,11 +25,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for ResourceSpec class, including its all public api: isValid, lessThanOrEqual, equals,
@@ -42,47 +38,47 @@ public class ResourceSpecTest extends TestLogger {
     public void testLessThanOrEqualWhenBothSpecified() {
         ResourceSpec rs1 = ResourceSpec.newBuilder(1.0, 100).build();
         ResourceSpec rs2 = ResourceSpec.newBuilder(1.0, 100).build();
-        assertTrue(rs1.lessThanOrEqual(rs2));
-        assertTrue(rs2.lessThanOrEqual(rs1));
+        assertThat(rs1.lessThanOrEqual(rs2)).isTrue();
+        assertThat(rs2.lessThanOrEqual(rs1)).isTrue();
 
         ResourceSpec rs3 =
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 1.1))
                         .build();
-        assertTrue(rs1.lessThanOrEqual(rs3));
-        assertFalse(rs3.lessThanOrEqual(rs1));
+        assertThat(rs1.lessThanOrEqual(rs3)).isTrue();
+        assertThat(rs3.lessThanOrEqual(rs1)).isFalse();
 
         ResourceSpec rs4 =
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 2.2))
                         .build();
-        assertFalse(rs4.lessThanOrEqual(rs3));
-        assertTrue(rs3.lessThanOrEqual(rs4));
+        assertThat(rs4.lessThanOrEqual(rs3)).isFalse();
+        assertThat(rs3.lessThanOrEqual(rs4)).isTrue();
     }
 
     @Test
     public void testLessThanOrEqualWhenBothUnknown() {
-        assertTrue(ResourceSpec.UNKNOWN.lessThanOrEqual(ResourceSpec.UNKNOWN));
+        assertThat(ResourceSpec.UNKNOWN.lessThanOrEqual(ResourceSpec.UNKNOWN)).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testLessThanOrEqualWhenUnknownWithSpecified() {
         final ResourceSpec rs1 = ResourceSpec.newBuilder(1.0, 100).build();
-        assertTrue(ResourceSpec.UNKNOWN.lessThanOrEqual(rs1));
+        assertThat(ResourceSpec.UNKNOWN.lessThanOrEqual(rs1)).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testLessThanOrEqualWhenSpecifiedWithUnknown() {
         final ResourceSpec rs1 = ResourceSpec.newBuilder(1.0, 100).build();
-        assertTrue(rs1.lessThanOrEqual(ResourceSpec.UNKNOWN));
+        assertThat(rs1.lessThanOrEqual(ResourceSpec.UNKNOWN)).isTrue();
     }
 
     @Test
     public void testEquals() throws Exception {
         ResourceSpec rs1 = ResourceSpec.newBuilder(1.0, 100).build();
         ResourceSpec rs2 = ResourceSpec.newBuilder(1.0, 100).build();
-        assertEquals(rs1, rs2);
-        assertEquals(rs2, rs1);
+        assertThat(rs2).isEqualTo(rs1);
+        assertThat(rs1).isEqualTo(rs2);
 
         ResourceSpec rs3 =
                 ResourceSpec.newBuilder(1.0, 100)
@@ -92,20 +88,20 @@ public class ResourceSpecTest extends TestLogger {
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 1))
                         .build();
-        assertNotEquals(rs3, rs4);
+        assertThat(rs4).isEqualTo(rs3);
 
         ResourceSpec rs5 =
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 2.2))
                         .build();
-        assertEquals(rs3, rs5);
+        assertThat(rs5).isEqualTo(rs3);
     }
 
     @Test
     public void testHashCode() throws Exception {
         ResourceSpec rs1 = ResourceSpec.newBuilder(1.0, 100).build();
         ResourceSpec rs2 = ResourceSpec.newBuilder(1.0, 100).build();
-        assertEquals(rs1.hashCode(), rs2.hashCode());
+        assertThat(rs2.hashCode()).isEqualTo(rs1.hashCode());
 
         ResourceSpec rs3 =
                 ResourceSpec.newBuilder(1.0, 100)
@@ -115,13 +111,13 @@ public class ResourceSpecTest extends TestLogger {
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 1))
                         .build();
-        assertNotEquals(rs3.hashCode(), rs4.hashCode());
+        assertThat(rs4.hashCode()).isEqualTo(rs3.hashCode());
 
         ResourceSpec rs5 =
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 2.2))
                         .build();
-        assertEquals(rs3.hashCode(), rs5.hashCode());
+        assertThat(rs5.hashCode()).isEqualTo(rs3.hashCode());
     }
 
     @Test
@@ -133,16 +129,14 @@ public class ResourceSpecTest extends TestLogger {
         ResourceSpec rs2 = ResourceSpec.newBuilder(1.0, 100).build();
 
         ResourceSpec rs3 = rs1.merge(rs2);
-        assertEquals(new CPUResource(2.0), rs3.getCpuCores());
-        assertEquals(200, rs3.getTaskHeapMemory().getMebiBytes());
-        assertEquals(
-                new ExternalResource(EXTERNAL_RESOURCE_NAME, 1.1),
-                rs3.getExtendedResource(EXTERNAL_RESOURCE_NAME).get());
+        assertThat(rs3.getCpuCores()).isEqualTo(new CPUResource(2.0));
+        assertThat(rs3.getTaskHeapMemory().getMebiBytes()).isEqualTo(200);
+        assertThat(rs3.getExtendedResource(EXTERNAL_RESOURCE_NAME).get())
+                .isEqualTo(new ExternalResource(EXTERNAL_RESOURCE_NAME, 1.1));
 
         ResourceSpec rs4 = rs1.merge(rs3);
-        assertEquals(
-                new ExternalResource(EXTERNAL_RESOURCE_NAME, 2.2),
-                rs4.getExtendedResource(EXTERNAL_RESOURCE_NAME).get());
+        assertThat(rs4.getExtendedResource(EXTERNAL_RESOURCE_NAME).get())
+                .isEqualTo(new ExternalResource(EXTERNAL_RESOURCE_NAME, 2.2));
     }
 
     @Test
@@ -153,7 +147,7 @@ public class ResourceSpecTest extends TestLogger {
                         .build();
 
         ResourceSpec rs2 = CommonTestUtils.createCopySerializable(rs1);
-        assertEquals(rs1, rs2);
+        assertThat(rs2).isEqualTo(rs1);
     }
 
     @Test
@@ -166,7 +160,7 @@ public class ResourceSpecTest extends TestLogger {
 
         final ResourceSpec merged = spec1.merge(spec2);
 
-        assertEquals(ResourceSpec.UNKNOWN, merged);
+        assertThat(merged).isEqualTo(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -179,7 +173,7 @@ public class ResourceSpecTest extends TestLogger {
 
         final ResourceSpec merged = spec1.merge(spec2);
 
-        assertEquals(ResourceSpec.UNKNOWN, merged);
+        assertThat(merged).isEqualTo(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -189,7 +183,7 @@ public class ResourceSpecTest extends TestLogger {
 
         final ResourceSpec merged = spec1.merge(spec2);
 
-        assertEquals(ResourceSpec.UNKNOWN, merged);
+        assertThat(merged).isEqualTo(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -199,7 +193,7 @@ public class ResourceSpecTest extends TestLogger {
 
         final ResourceSpec merged = spec1.merge(spec2);
 
-        assertEquals(ResourceSpec.UNKNOWN, merged);
+        assertThat(merged).isEqualTo(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -207,7 +201,7 @@ public class ResourceSpecTest extends TestLogger {
         final ResourceSpec copiedSpec =
                 CommonTestUtils.createCopySerializable(ResourceSpec.UNKNOWN);
 
-        assertSame(ResourceSpec.UNKNOWN, copiedSpec);
+        assertThat(copiedSpec).isSameAs(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -222,11 +216,10 @@ public class ResourceSpecTest extends TestLogger {
                         .build();
 
         final ResourceSpec subtracted = rs1.subtract(rs2);
-        assertEquals(new CPUResource(0.8), subtracted.getCpuCores());
-        assertEquals(0, subtracted.getTaskHeapMemory().getMebiBytes());
-        assertEquals(
-                new ExternalResource(EXTERNAL_RESOURCE_NAME, 0.6),
-                subtracted.getExtendedResource(EXTERNAL_RESOURCE_NAME).get());
+        assertThat(subtracted.getCpuCores()).isEqualTo(new CPUResource(0.8));
+        assertThat(subtracted.getTaskHeapMemory().getMebiBytes()).isEqualTo(0);
+        assertThat(subtracted.getExtendedResource(EXTERNAL_RESOURCE_NAME).get())
+                .isEqualTo(new ExternalResource(EXTERNAL_RESOURCE_NAME, 0.6));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -246,7 +239,7 @@ public class ResourceSpecTest extends TestLogger {
                         .build();
 
         final ResourceSpec subtracted = rs1.subtract(rs2);
-        assertEquals(ResourceSpec.UNKNOWN, subtracted);
+        assertThat(subtracted).isEqualTo(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -258,7 +251,7 @@ public class ResourceSpecTest extends TestLogger {
         final ResourceSpec rs2 = ResourceSpec.UNKNOWN;
 
         final ResourceSpec subtracted = rs1.subtract(rs2);
-        assertEquals(ResourceSpec.UNKNOWN, subtracted);
+        assertThat(subtracted).isEqualTo(ResourceSpec.UNKNOWN);
     }
 
     @Test
@@ -267,7 +260,7 @@ public class ResourceSpecTest extends TestLogger {
                 ResourceSpec.newBuilder(1.0, 100)
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 0))
                         .build();
-        assertEquals(resourceSpec.getExtendedResources().size(), 0);
+        assertThat(0).isEqualTo(resourceSpec.getExtendedResources().size());
     }
 
     @Test
@@ -277,6 +270,6 @@ public class ResourceSpecTest extends TestLogger {
                         .setExtendedResource(new ExternalResource(EXTERNAL_RESOURCE_NAME, 1.0))
                         .build();
 
-        assertEquals(resourceSpec.subtract(resourceSpec).getExtendedResources().size(), 0);
+        assertThat(0).isEqualTo(resourceSpec.subtract(resourceSpec).getExtendedResources().size());
     }
 }

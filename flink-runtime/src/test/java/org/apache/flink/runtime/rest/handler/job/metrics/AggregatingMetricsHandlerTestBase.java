@@ -52,8 +52,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 /** Test base for handlers that extend {@link AbstractAggregatingMetricsHandler}. */
@@ -135,7 +135,7 @@ public abstract class AggregatingMetricsHandlerTestBase<
             Collection<? extends MetricStore.ComponentMetricStore> subStores =
                     handler.getStores(store, request);
 
-            assertEquals(3, subStores.size());
+            assertThat(subStores.size()).isEqualTo(3);
 
             List<String> sortedMetrics1 =
                     subStores.stream()
@@ -144,10 +144,10 @@ public abstract class AggregatingMetricsHandlerTestBase<
                             .sorted()
                             .collect(Collectors.toList());
 
-            assertEquals(2, sortedMetrics1.size());
+            assertThat(sortedMetrics1.size()).isEqualTo(2);
 
-            assertEquals("1", sortedMetrics1.get(0));
-            assertEquals("3", sortedMetrics1.get(1));
+            assertThat(sortedMetrics1.get(0)).isEqualTo("1");
+            assertThat(sortedMetrics1.get(1)).isEqualTo("3");
 
             List<String> sortedMetrics2 =
                     subStores.stream()
@@ -156,9 +156,9 @@ public abstract class AggregatingMetricsHandlerTestBase<
                             .sorted()
                             .collect(Collectors.toList());
 
-            assertEquals(1, sortedMetrics2.size());
+            assertThat(sortedMetrics2.size()).isEqualTo(1);
 
-            assertEquals("5", sortedMetrics2.get(0));
+            assertThat(sortedMetrics2.get(0)).isEqualTo("5");
         }
 
         { // test with filter
@@ -175,7 +175,7 @@ public abstract class AggregatingMetricsHandlerTestBase<
             Collection<? extends MetricStore.ComponentMetricStore> subStores =
                     handler.getStores(store, request);
 
-            assertEquals(2, subStores.size());
+            assertThat(subStores.size()).isEqualTo(2);
 
             List<String> sortedMetrics1 =
                     subStores.stream()
@@ -184,9 +184,9 @@ public abstract class AggregatingMetricsHandlerTestBase<
                             .sorted()
                             .collect(Collectors.toList());
 
-            assertEquals(1, sortedMetrics1.size());
+            assertThat(sortedMetrics1.size()).isEqualTo(1);
 
-            assertEquals("1", sortedMetrics1.get(0));
+            assertThat(sortedMetrics1.get(0)).isEqualTo("1");
 
             List<String> sortedMetrics2 =
                     subStores.stream()
@@ -195,9 +195,9 @@ public abstract class AggregatingMetricsHandlerTestBase<
                             .sorted()
                             .collect(Collectors.toList());
 
-            assertEquals(1, sortedMetrics2.size());
+            assertThat(sortedMetrics2.size()).isEqualTo(1);
 
-            assertEquals("5", sortedMetrics2.get(0));
+            assertThat(sortedMetrics2.get(0)).isEqualTo("5");
         }
     }
 
@@ -220,9 +220,9 @@ public abstract class AggregatingMetricsHandlerTestBase<
                         .sorted()
                         .collect(Collectors.toList());
 
-        assertEquals(2, availableMetrics.size());
-        assertEquals("abc.metric1", availableMetrics.get(0));
-        assertEquals("abc.metric2", availableMetrics.get(1));
+        assertThat(availableMetrics.size()).isEqualTo(2);
+        assertThat(availableMetrics.get(0)).isEqualTo("abc.metric1");
+        assertThat(availableMetrics.get(1)).isEqualTo("abc.metric2");
     }
 
     @Test
@@ -244,14 +244,14 @@ public abstract class AggregatingMetricsHandlerTestBase<
 
         Collection<AggregatedMetric> aggregatedMetrics = response.getMetrics();
 
-        assertEquals(1, aggregatedMetrics.size());
+        assertThat(aggregatedMetrics.size()).isEqualTo(1);
         AggregatedMetric aggregatedMetric = aggregatedMetrics.iterator().next();
 
-        assertEquals("abc.metric1", aggregatedMetric.getId());
-        assertEquals(1.0, aggregatedMetric.getMin(), 0.1);
-        assertNull(aggregatedMetric.getMax());
-        assertNull(aggregatedMetric.getSum());
-        assertNull(aggregatedMetric.getAvg());
+        assertThat(aggregatedMetric.getId()).isEqualTo("abc.metric1");
+        assertThat(aggregatedMetric.getMin()).isCloseTo(1.0, within(0.1));
+        assertThat(aggregatedMetric.getMax()).isNull();
+        assertThat(aggregatedMetric.getSum()).isNull();
+        assertThat(aggregatedMetric.getAvg()).isNull();
     }
 
     @Test
@@ -273,14 +273,14 @@ public abstract class AggregatingMetricsHandlerTestBase<
 
         Collection<AggregatedMetric> aggregatedMetrics = response.getMetrics();
 
-        assertEquals(1, aggregatedMetrics.size());
+        assertThat(aggregatedMetrics.size()).isEqualTo(1);
         AggregatedMetric aggregatedMetric = aggregatedMetrics.iterator().next();
 
-        assertEquals("abc.metric1", aggregatedMetric.getId());
-        assertEquals(3.0, aggregatedMetric.getMax(), 0.1);
-        assertNull(aggregatedMetric.getMin());
-        assertNull(aggregatedMetric.getSum());
-        assertNull(aggregatedMetric.getAvg());
+        assertThat(aggregatedMetric.getId()).isEqualTo("abc.metric1");
+        assertThat(aggregatedMetric.getMax()).isCloseTo(3.0, within(0.1));
+        assertThat(aggregatedMetric.getMin()).isNull();
+        assertThat(aggregatedMetric.getSum()).isNull();
+        assertThat(aggregatedMetric.getAvg()).isNull();
     }
 
     @Test
@@ -302,14 +302,14 @@ public abstract class AggregatingMetricsHandlerTestBase<
 
         Collection<AggregatedMetric> aggregatedMetrics = response.getMetrics();
 
-        assertEquals(1, aggregatedMetrics.size());
+        assertThat(aggregatedMetrics.size()).isEqualTo(1);
         AggregatedMetric aggregatedMetric = aggregatedMetrics.iterator().next();
 
-        assertEquals("abc.metric1", aggregatedMetric.getId());
-        assertEquals(4.0, aggregatedMetric.getSum(), 0.1);
-        assertNull(aggregatedMetric.getMin());
-        assertNull(aggregatedMetric.getMax());
-        assertNull(aggregatedMetric.getAvg());
+        assertThat(aggregatedMetric.getId()).isEqualTo("abc.metric1");
+        assertThat(aggregatedMetric.getSum()).isCloseTo(4.0, within(0.1));
+        assertThat(aggregatedMetric.getMin()).isNull();
+        assertThat(aggregatedMetric.getMax()).isNull();
+        assertThat(aggregatedMetric.getAvg()).isNull();
     }
 
     @Test
@@ -331,14 +331,14 @@ public abstract class AggregatingMetricsHandlerTestBase<
 
         Collection<AggregatedMetric> aggregatedMetrics = response.getMetrics();
 
-        assertEquals(1, aggregatedMetrics.size());
+        assertThat(aggregatedMetrics.size()).isEqualTo(1);
         AggregatedMetric aggregatedMetric = aggregatedMetrics.iterator().next();
 
-        assertEquals("abc.metric1", aggregatedMetric.getId());
-        assertEquals(2.0, aggregatedMetric.getAvg(), 0.1);
-        assertNull(aggregatedMetric.getMin());
-        assertNull(aggregatedMetric.getMax());
-        assertNull(aggregatedMetric.getSum());
+        assertThat(aggregatedMetric.getId()).isEqualTo("abc.metric1");
+        assertThat(aggregatedMetric.getAvg()).isCloseTo(2.0, within(0.1));
+        assertThat(aggregatedMetric.getMin()).isNull();
+        assertThat(aggregatedMetric.getMax()).isNull();
+        assertThat(aggregatedMetric.getSum()).isNull();
     }
 
     @Test
@@ -360,14 +360,14 @@ public abstract class AggregatingMetricsHandlerTestBase<
 
         Collection<AggregatedMetric> aggregatedMetrics = response.getMetrics();
 
-        assertEquals(1, aggregatedMetrics.size());
+        assertThat(aggregatedMetrics.size()).isEqualTo(1);
         AggregatedMetric aggregatedMetric = aggregatedMetrics.iterator().next();
 
-        assertEquals("abc.metric1", aggregatedMetric.getId());
-        assertEquals(1.0, aggregatedMetric.getMin(), 0.1);
-        assertEquals(3.0, aggregatedMetric.getMax(), 0.1);
-        assertEquals(2.0, aggregatedMetric.getAvg(), 0.1);
-        assertNull(aggregatedMetric.getSum());
+        assertThat(aggregatedMetric.getId()).isEqualTo("abc.metric1");
+        assertThat(aggregatedMetric.getMin()).isCloseTo(1.0, within(0.1));
+        assertThat(aggregatedMetric.getMax()).isCloseTo(3.0, within(0.1));
+        assertThat(aggregatedMetric.getAvg()).isCloseTo(2.0, within(0.1));
+        assertThat(aggregatedMetric.getSum()).isNull();
     }
 
     @Test
@@ -388,13 +388,13 @@ public abstract class AggregatingMetricsHandlerTestBase<
 
         Collection<AggregatedMetric> aggregatedMetrics = response.getMetrics();
 
-        assertEquals(1, aggregatedMetrics.size());
+        assertThat(aggregatedMetrics.size()).isEqualTo(1);
         AggregatedMetric aggregatedMetric = aggregatedMetrics.iterator().next();
 
-        assertEquals("abc.metric1", aggregatedMetric.getId());
-        assertEquals(1.0, aggregatedMetric.getMin(), 0.1);
-        assertEquals(3.0, aggregatedMetric.getMax(), 0.1);
-        assertEquals(2.0, aggregatedMetric.getAvg(), 0.1);
-        assertEquals(4.0, aggregatedMetric.getSum(), 0.1);
+        assertThat(aggregatedMetric.getId()).isEqualTo("abc.metric1");
+        assertThat(aggregatedMetric.getMin()).isCloseTo(1.0, within(0.1));
+        assertThat(aggregatedMetric.getMax()).isCloseTo(3.0, within(0.1));
+        assertThat(aggregatedMetric.getAvg()).isCloseTo(2.0, within(0.1));
+        assertThat(aggregatedMetric.getSum()).isCloseTo(4.0, within(0.1));
     }
 }

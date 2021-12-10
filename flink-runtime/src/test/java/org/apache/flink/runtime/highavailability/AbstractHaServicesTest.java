@@ -41,10 +41,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link AbstractHaServices}. */
 public class AbstractHaServicesTest extends TestLogger {
@@ -71,12 +71,13 @@ public class AbstractHaServicesTest extends TestLogger {
 
         haServices.closeAndCleanupAllData();
 
-        assertThat(
-                closeOperations,
-                contains(
-                        CloseOperations.HA_CLEANUP,
-                        CloseOperations.HA_CLOSE,
-                        CloseOperations.BLOB_CLEANUP_AND_CLOSE));
+        assertThat(closeOperations)
+                .satisfies(
+                        matching(
+                                contains(
+                                        CloseOperations.HA_CLEANUP,
+                                        CloseOperations.HA_CLOSE,
+                                        CloseOperations.BLOB_CLEANUP_AND_CLOSE)));
     }
 
     /**
@@ -108,7 +109,9 @@ public class AbstractHaServicesTest extends TestLogger {
 
         }
 
-        assertThat(closeOperations, contains(CloseOperations.HA_CLOSE, CloseOperations.BLOB_CLOSE));
+        assertThat(closeOperations)
+                .satisfies(
+                        matching(contains(CloseOperations.HA_CLOSE, CloseOperations.BLOB_CLOSE)));
     }
 
     @Test
@@ -131,7 +134,7 @@ public class AbstractHaServicesTest extends TestLogger {
 
         haServices.cleanupJobData(jobID);
         JobID jobIDCleaned = jobCleanupFuture.get();
-        assertThat(jobIDCleaned, is(jobID));
+        assertThat(jobIDCleaned).isEqualTo(jobID);
     }
 
     private enum CloseOperations {

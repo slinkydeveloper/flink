@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URLClassLoader;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * A class with tests that require to be run in a MapR/Hadoop-free environment, to test proper error
@@ -91,8 +91,8 @@ public class MapRNotInClassPathTest extends TestLogger {
                 factory.create(new URI("maprfs://somehost:9000/root/dir"));
                 fail("This statement should fail with an exception");
             } catch (IOException e) {
-                assertTrue(e.getMessage().contains("MapR"));
-                assertTrue(e.getMessage().contains("classpath"));
+                assertThat(e.getMessage().contains("MapR")).isTrue();
+                assertThat(e.getMessage().contains("classpath")).isTrue();
             }
         }
     }

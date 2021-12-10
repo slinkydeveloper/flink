@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * Leader service for {@link TestingManualHighAvailabilityServices} implementation. The leader
  * service allows to create multiple {@link TestingLeaderElectionService} and {@link
@@ -90,8 +92,9 @@ public class ManualLeaderService {
     }
 
     public void revokeLeadership() {
-        assert (currentLeaderId != null);
-        assert (0 <= currentLeaderIndex && currentLeaderIndex < leaderElectionServices.size());
+        assertThat((currentLeaderId != null)).isTrue();
+        assertThat((0 <= currentLeaderIndex && currentLeaderIndex < leaderElectionServices.size()))
+                .isTrue();
 
         TestingLeaderElectionService testingLeaderElectionService =
                 leaderElectionServices.get(currentLeaderIndex);

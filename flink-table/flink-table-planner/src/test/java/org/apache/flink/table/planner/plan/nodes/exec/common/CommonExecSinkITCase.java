@@ -60,13 +60,12 @@ import java.util.stream.Collectors;
 import static org.apache.flink.table.api.DataTypes.INT;
 import static org.apache.flink.table.api.config.ExecutionConfigOptions.TABLE_EXEC_SINK_CHAR_PRECISION_ENFORCER;
 import static org.apache.flink.table.api.config.ExecutionConfigOptions.TABLE_EXEC_SINK_NOT_NULL_ENFORCER;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 
 /** Test for {@link CommonExecSink}. */
 public class CommonExecSinkITCase extends AbstractTestBase {
@@ -189,8 +188,8 @@ public class CommonExecSinkITCase extends AbstractTestBase {
         tableEnv.executeSql(sqlStmt).await();
         final List<Integer> fetchedRows =
                 fetched.get().stream().map(r -> r.getInt(0)).sorted().collect(Collectors.toList());
-        assertEquals(fetchedRows.get(0).intValue(), 1);
-        assertEquals(fetchedRows.get(1).intValue(), 2);
+        assertThat(1).isEqualTo(fetchedRows.get(0).intValue());
+        assertThat(2).isEqualTo(fetchedRows.get(1).intValue());
     }
 
     @Test
@@ -216,7 +215,7 @@ public class CommonExecSinkITCase extends AbstractTestBase {
 
         final List<Row> results = new ArrayList<>();
         result.collect().forEachRemaining(results::add);
-        assertThat(results, containsInAnyOrder(rows.toArray()));
+        assertThat(results).satisfies(matching(containsInAnyOrder(rows.toArray())));
 
         // Change config option to "trim", to trim the strings based on their type precision
         try {
@@ -237,7 +236,7 @@ public class CommonExecSinkITCase extends AbstractTestBase {
                             Row.of(4, "Flink Pr", "SQL or", 44, 444, "Apache"));
             final List<Row> resultsTrimmed = new ArrayList<>();
             result.collect().forEachRemaining(resultsTrimmed::add);
-            assertThat(resultsTrimmed, containsInAnyOrder(expected.toArray()));
+            assertThat(resultsTrimmed).satisfies(matching(containsInAnyOrder(expected.toArray())));
 
         } finally {
             tableEnv.getConfig()
@@ -268,32 +267,30 @@ public class CommonExecSinkITCase extends AbstractTestBase {
                         .build());
 
         // Default config - ignore (no trim)
-        ExecutionException ee =
-                assertThrows(
-                        ExecutionException.class,
-                        () -> tableEnv.executeSql("INSERT INTO T1 SELECT * FROM T1").await());
-        assertThat(
-                ExceptionUtils.findThrowableWithMessage(
-                                ee,
-                                "Column 'b' is NOT NULL, however, a null value is being written into it. "
-                                        + "You can set job configuration 'table.exec.sink.not-null-enforcer'='DROP' "
-                                        + "to suppress this exception and drop such records silently.")
-                        .isPresent(),
-                is(true));
+
+        assertThatThrownBy(() -> tableEnv.executeSql("INSERT INTO T1 SELECT * FROM T1").await())
+                .isInstanceOf(ExecutionException.class)
+                .satisfies(
+                        ee ->
+                                assertThat(
+                                                ExceptionUtils.findThrowableWithMessage(
+                                                        ee,
+                                                        "Column 'b' is NOT NULL, however, a null value is being written into it. "
+                                                                + "You can set job configuration 'table.exec.sink.not-null-enforcer'='DROP' "
+                                                                + "to suppress this exception and drop such records silently."))
+                                        .isPresent());
 
         // Test not including a NOT NULL column
         results.get().clear();
-        ValidationException ve =
-                assertThrows(
-                        ValidationException.class,
+
+        assertThatThrownBy(
                         () ->
                                 tableEnv.executeSql("INSERT INTO T1(a, b) SELECT (a, b) FROM T1")
-                                        .await());
-        assertThat(
-                ve.getMessage(),
-                is(
+                                        .await())
+                .isInstanceOf(ValidationException.class)
+                .hasMessage(
                         "SQL validation failed. At line 0, column 0: Column 'c' has no default "
-                                + "value and does not allow NULLs"));
+                                + "value and does not allow NULLs");
 
         // Change config option to "drop", to drop the columns instead of throwing errors
         try {
@@ -305,13 +302,13 @@ public class CommonExecSinkITCase extends AbstractTestBase {
 
             results.get().clear();
             tableEnv.executeSql("INSERT INTO T1 SELECT * FROM T1").await();
-            assertThat(results.get().size(), is(2));
-            assertThat(results.get().get(0).getInt(0), is(1));
-            assertThat(results.get().get(0).getString(1).toString(), is("Apache"));
-            assertThat(results.get().get(0).getInt(2), is(11));
-            assertThat(results.get().get(1).isNullAt(0), is(true));
-            assertThat(results.get().get(1).getString(1).toString(), is("Flink"));
-            assertThat(results.get().get(1).getInt(2), is(33));
+            assertThat(results.get().size()).isEqualTo(2);
+            assertThat(results.get().get(0).getInt(0)).isEqualTo(1);
+            assertThat(results.get().get(0).getString(1).toString()).isEqualTo("Apache");
+            assertThat(results.get().get(0).getInt(2)).isEqualTo(11);
+            assertThat(results.get().get(1).isNullAt(0)).isEqualTo(true);
+            assertThat(results.get().get(1).getString(1).toString()).isEqualTo("Flink");
+            assertThat(results.get().get(1).getInt(2)).isEqualTo(33);
         } finally {
             tableEnv.getConfig()
                     .getConfiguration()
@@ -363,7 +360,8 @@ public class CommonExecSinkITCase extends AbstractTestBase {
         if (!containsStreamRecordTimestampInserter) {
             matcher = not(matcher);
         }
-        assertThat(tableEnv.explainSql(sql, ExplainDetail.JSON_EXECUTION_PLAN), matcher);
+        assertThat(tableEnv.explainSql(sql, ExplainDetail.JSON_EXECUTION_PLAN))
+                .satisfies(matching(matcher));
     }
 
     private static Schema schemaStreamRecordTimestampInserter(boolean withWatermark) {
@@ -399,9 +397,10 @@ public class CommonExecSinkITCase extends AbstractTestBase {
 
     private static void assertTimestampResults(
             SharedReference<List<Long>> timestamps, List<Row> rows) {
-        assertEquals(rows.size(), timestamps.get().size());
+        assertThat(timestamps.get().size()).isEqualTo(rows.size());
         for (int i = 0; i < rows.size(); i++) {
-            assertEquals(rows.get(i).getField(2), Instant.ofEpochMilli(timestamps.get().get(i)));
+            assertThat(Instant.ofEpochMilli(timestamps.get().get(i)))
+                    .isEqualTo(rows.get(i).getField(2));
         }
     }
 

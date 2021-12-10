@@ -25,9 +25,9 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.test.util.JavaProgramTestBase;
 
-import org.junit.Assert;
-
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test broadcast input after union. */
 public class BroadcastUnionITCase extends JavaProgramTestBase {
@@ -48,7 +48,7 @@ public class BroadcastUnionITCase extends JavaProgramTestBase {
                         .reduce(new Reducer())
                         .collect();
 
-        Assert.assertEquals(Long.valueOf(3025), result.get(0));
+        assertThat(result.get(0)).isEqualTo(Long.valueOf(3025));
     }
 
     private static class Mapper extends RichMapFunction<Long, Long> {

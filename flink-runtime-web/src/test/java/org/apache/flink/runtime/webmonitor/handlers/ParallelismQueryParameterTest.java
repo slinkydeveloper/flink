@@ -22,7 +22,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ParallelismQueryParameter}. */
 public class ParallelismQueryParameterTest extends TestLogger {
@@ -32,11 +32,11 @@ public class ParallelismQueryParameterTest extends TestLogger {
 
     @Test
     public void testConvertStringToValue() {
-        assertEquals("42", parallelismQueryParameter.convertValueToString(42));
+        assertThat(parallelismQueryParameter.convertValueToString(42)).isEqualTo("42");
     }
 
     @Test
     public void testConvertValueFromString() {
-        assertEquals(42, (int) parallelismQueryParameter.convertStringToValue("42"));
+        assertThat((int) parallelismQueryParameter.convertStringToValue("42")).isEqualTo(42);
     }
 }

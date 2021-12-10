@@ -41,8 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A simple test that runs a streaming topology with checkpointing enabled.
@@ -71,7 +70,7 @@ public class StateCheckpointedITCase extends StreamFaultToleranceTestBase {
      */
     @Override
     public void testProgram(StreamExecutionEnvironment env) {
-        assertTrue("Broken test setup", NUM_STRINGS % 40 == 0);
+        assertThat(NUM_STRINGS % 40 == 0).as("Broken test setup").isTrue();
 
         final long failurePosMin = (long) (0.4 * NUM_STRINGS / PARALLELISM);
         final long failurePosMax = (long) (0.7 * NUM_STRINGS / PARALLELISM);
@@ -125,13 +124,13 @@ public class StateCheckpointedITCase extends StreamFaultToleranceTestBase {
         }
 
         // verify that we counted exactly right
-        assertEquals(NUM_STRINGS, filterSum);
-        assertEquals(NUM_STRINGS, mapSum);
-        assertEquals(NUM_STRINGS, countSum);
+        assertThat(filterSum).isEqualTo(NUM_STRINGS);
+        assertThat(mapSum).isEqualTo(NUM_STRINGS);
+        assertThat(countSum).isEqualTo(NUM_STRINGS);
 
         for (Map<Character, Long> map : ValidatingSink.maps) {
             for (Long count : map.values()) {
-                assertEquals(NUM_STRINGS / 40, count.longValue());
+                assertThat(count.longValue()).isEqualTo(NUM_STRINGS / 40);
             }
         }
     }

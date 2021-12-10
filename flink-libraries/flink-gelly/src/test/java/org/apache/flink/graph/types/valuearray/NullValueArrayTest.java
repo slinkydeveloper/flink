@@ -22,9 +22,8 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for {@link NullValueArray}. */
 public class NullValueArrayTest {
@@ -37,46 +36,46 @@ public class NullValueArrayTest {
 
         // add several elements
         for (int i = 0; i < count; i++) {
-            assertFalse(nva.isFull());
-            assertEquals(i, nva.size());
+            assertThat(nva.isFull()).isFalse();
+            assertThat(nva.size()).isEqualTo(i);
 
-            assertTrue(nva.add(NullValue.getInstance()));
+            assertThat(nva.add(NullValue.getInstance())).isTrue();
 
-            assertEquals(i + 1, nva.size());
+            assertThat(nva.size()).isEqualTo(i + 1);
         }
 
         // array never fills
-        assertFalse(nva.isFull());
-        assertEquals(count, nva.size());
+        assertThat(nva.isFull()).isFalse();
+        assertThat(nva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (NullValue nv : nva) {
-            assertEquals(NullValue.getInstance(), nv);
+            assertThat(nv).isEqualTo(NullValue.getInstance());
         }
 
         // add element past end of array
-        assertTrue(nva.add(NullValue.getInstance()));
-        assertTrue(nva.addAll(nva));
+        assertThat(nva.add(NullValue.getInstance())).isTrue();
+        assertThat(nva.addAll(nva)).isTrue();
 
         // test copy
-        assertEquals(nva, nva.copy());
+        assertThatObject(nva.copy()).isEqualTo(nva);
 
         // test copyTo
         NullValueArray nvaTo = new NullValueArray();
         nva.copyTo(nvaTo);
-        assertEquals(nva, nvaTo);
+        assertThatObject(nvaTo).isEqualTo(nva);
 
         // test mark/reset
         int size = nva.size();
         nva.mark();
-        assertTrue(nva.add(NullValue.getInstance()));
-        assertEquals(size + 1, nva.size());
+        assertThat(nva.add(NullValue.getInstance())).isTrue();
+        assertThat(nva.size()).isEqualTo(size + 1);
         nva.reset();
-        assertEquals(size, nva.size());
+        assertThat(nva.size()).isEqualTo(size);
 
         // test clear
         nva.clear();
-        assertEquals(0, nva.size());
+        assertThat(nva.size()).isEqualTo(0);
     }
 }

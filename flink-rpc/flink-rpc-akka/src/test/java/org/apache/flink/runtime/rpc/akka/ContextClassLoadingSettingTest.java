@@ -49,8 +49,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import static org.apache.flink.runtime.concurrent.akka.ClassLoadingUtils.runWithContextClassLoader;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.either;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 
 /**
@@ -153,7 +154,7 @@ public class ContextClassLoadingSettingTest extends TestLogger {
                 () -> contextClassLoader.complete(Thread.currentThread().getContextClassLoader()),
                 5,
                 TimeUnit.MILLISECONDS);
-        assertThat(contextClassLoader.get(), is(pretendFlinkClassLoader));
+        assertThat(contextClassLoader.get()).isEqualTo(pretendFlinkClassLoader);
     }
 
     @Test
@@ -356,7 +357,8 @@ public class ContextClassLoadingSettingTest extends TestLogger {
     }
 
     private void assertIsFlinkClassLoader(ClassLoader classLoader) {
-        assertThat(classLoader, either(is(pretendFlinkClassLoader)).or(is(testClassLoader)));
+        assertThat(classLoader)
+                .satisfies(matching(either(is(pretendFlinkClassLoader)).or(is(testClassLoader))));
     }
 
     private interface TestEndpointGateway extends RpcGateway {

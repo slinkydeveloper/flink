@@ -22,8 +22,7 @@ import org.apache.flink.streaming.api.watermark.Watermark;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link IngestionTimeExtractor}. */
 public class IngestionTimeExtractorTest {
@@ -38,22 +37,22 @@ public class IngestionTimeExtractorTest {
         for (int i = 0; i < 1343; i++) {
             if (i % 7 == 1) {
                 Watermark mark = assigner.getCurrentWatermark();
-                assertNotNull(mark);
+                assertThat(mark).isNotNull();
 
                 // increasing watermarks
-                assertTrue(mark.getTimestamp() >= maxWatermarkSoFar);
+                assertThat(mark.getTimestamp() >= maxWatermarkSoFar).isTrue();
                 maxWatermarkSoFar = mark.getTimestamp();
 
                 // tight watermarks
-                assertTrue(mark.getTimestamp() >= maxRecordSoFar - 1);
+                assertThat(mark.getTimestamp() >= maxRecordSoFar - 1).isTrue();
             } else {
                 long next = assigner.extractTimestamp("a", Long.MIN_VALUE);
 
                 // increasing timestamps
-                assertTrue(next >= maxRecordSoFar);
+                assertThat(next >= maxRecordSoFar).isTrue();
 
                 // timestamps are never below or at the watermark
-                assertTrue(next > maxWatermarkSoFar);
+                assertThat(next > maxWatermarkSoFar).isTrue();
 
                 maxRecordSoFar = next;
             }

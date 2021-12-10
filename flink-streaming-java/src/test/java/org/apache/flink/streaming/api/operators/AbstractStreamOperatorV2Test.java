@@ -39,7 +39,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
 
 /** Tests for the facilities provided by {@link AbstractStreamOperatorV2}. */
@@ -86,7 +87,7 @@ public class AbstractStreamOperatorV2Test extends AbstractStreamOperatorTest {
             testHarness.processElement(0, new StreamRecord<>(3L, 3L));
             testHarness.processElement(0, new StreamRecord<>(4L, 4L));
             testHarness.processWatermark(0, new Watermark(1L));
-            assertThat(testHarness.getOutput(), empty());
+            assertThat(testHarness.getOutput()).satisfies(matching(empty()));
 
             testHarness.processWatermarkStatus(1, WatermarkStatus.IDLE);
             TestHarnessUtil.assertOutputEquals(

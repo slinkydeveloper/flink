@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit and behavior tests for the {@link StreamFormatAdapter}. */
 @SuppressWarnings("serial")
@@ -110,7 +110,7 @@ public class StreamFormatAdapterTest extends AdapterTestBase<StreamFormat<Intege
                 Configuration config, FSDataInputStream stream, long fileLen, long splitEnd)
                 throws IOException {
 
-            assertEquals("invalid file length", 0, fileLen % 4);
+            assertThat(fileLen % 4).as("invalid file length").isEqualTo(0);
 
             // round all positions to the next integer boundary
             // to simulate common split behavior, we round up to the next int boundary even when we
@@ -132,7 +132,7 @@ public class StreamFormatAdapterTest extends AdapterTestBase<StreamFormat<Intege
                 long splitEnd)
                 throws IOException {
 
-            assertEquals("invalid file length", 0, fileLen % 4);
+            assertThat(fileLen % 4).as("invalid file length").isEqualTo(0);
 
             // round end position to the next integer boundary
             final long end = splitEnd == fileLen ? fileLen : splitEnd + 4 - splitEnd % 4;

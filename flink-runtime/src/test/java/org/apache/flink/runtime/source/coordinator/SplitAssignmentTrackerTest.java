@@ -30,10 +30,7 @@ import java.util.Map;
 
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.getSplitsAssignment;
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.verifyAssignment;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit test for @link {@link SplitAssignmentTracker}. */
 public class SplitAssignmentTrackerTest {
@@ -60,16 +57,16 @@ public class SplitAssignmentTrackerTest {
         tracker.onCheckpoint(checkpointId);
 
         // Verify the uncheckpointed assignments.
-        assertTrue(tracker.uncheckpointedAssignments().isEmpty());
+        assertThat(tracker.uncheckpointedAssignments().isEmpty()).isTrue();
 
         // verify assignments put into the checkpoints.
         Map<Long, Map<Integer, LinkedHashSet<MockSourceSplit>>> assignmentsByCheckpoints =
                 tracker.assignmentsByCheckpointId();
-        assertEquals(1, assignmentsByCheckpoints.size());
+        assertThat(assignmentsByCheckpoints.size()).isEqualTo(1);
 
         Map<Integer, LinkedHashSet<MockSourceSplit>> assignmentForCheckpoint =
                 assignmentsByCheckpoints.get(checkpointId);
-        assertNotNull(assignmentForCheckpoint);
+        assertThat(assignmentForCheckpoint).isNotNull();
 
         verifyAssignment(Arrays.asList("0"), assignmentForCheckpoint.get(0));
         verifyAssignment(Arrays.asList("1", "2"), assignmentForCheckpoint.get(1));
@@ -108,7 +105,7 @@ public class SplitAssignmentTrackerTest {
 
         // Complete the first checkpoint.
         tracker.onCheckpointComplete(checkpointId1);
-        assertNull(tracker.assignmentsByCheckpointId(checkpointId1));
+        assertThat(tracker.assignmentsByCheckpointId(checkpointId1)).isNull();
         verifyAssignment(
                 Arrays.asList("3"), tracker.assignmentsByCheckpointId(checkpointId2).get(0));
         verifyAssignment(

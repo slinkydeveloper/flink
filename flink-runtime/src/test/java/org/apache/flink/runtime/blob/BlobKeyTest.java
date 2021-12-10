@@ -30,18 +30,8 @@ import java.io.IOException;
 
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.PERMANENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.TRANSIENT_BLOB;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 /** This class contains unit tests for the {@link BlobKey} class. */
 public final class BlobKeyTest extends TestLogger {
@@ -75,11 +65,11 @@ public final class BlobKeyTest extends TestLogger {
     public void testCreateKey() {
         BlobKey key = BlobKey.createKey(PERMANENT_BLOB, KEY_ARRAY_1);
         verifyType(PERMANENT_BLOB, key);
-        assertArrayEquals(KEY_ARRAY_1, key.getHash());
+        assertThat(key.getHash()).isEqualTo(KEY_ARRAY_1);
 
         key = BlobKey.createKey(TRANSIENT_BLOB, KEY_ARRAY_1);
         verifyType(TRANSIENT_BLOB, key);
-        assertArrayEquals(KEY_ARRAY_1, key.getHash());
+        assertThat(key.getHash()).isEqualTo(KEY_ARRAY_1);
     }
 
     @Test
@@ -96,9 +86,9 @@ public final class BlobKeyTest extends TestLogger {
     private void testSerialization(BlobKey.BlobType blobType) throws Exception {
         final BlobKey k1 = BlobKey.createKey(blobType, KEY_ARRAY_1, RANDOM_ARRAY_1);
         final BlobKey k2 = CommonTestUtils.createCopySerializable(k1);
-        assertEquals(k1, k2);
-        assertEquals(k1.hashCode(), k2.hashCode());
-        assertEquals(0, k1.compareTo(k2));
+        assertThat(k2).isEqualTo(k1);
+        assertThat(k2.hashCode()).isEqualTo(k1.hashCode());
+        assertThat(k1.compareTo(k2)).isEqualTo(0);
     }
 
     @Test
@@ -117,18 +107,18 @@ public final class BlobKeyTest extends TestLogger {
         final BlobKey k2 = BlobKey.createKey(blobType, KEY_ARRAY_1, RANDOM_ARRAY_1);
         final BlobKey k3 = BlobKey.createKey(blobType, KEY_ARRAY_2, RANDOM_ARRAY_1);
         final BlobKey k4 = BlobKey.createKey(blobType, KEY_ARRAY_1, RANDOM_ARRAY_2);
-        assertTrue(k1.equals(k2));
-        assertTrue(k2.equals(k1));
-        assertEquals(k1.hashCode(), k2.hashCode());
-        assertFalse(k1.equals(k3));
-        assertFalse(k3.equals(k1));
-        assertFalse(k1.equals(k4));
-        assertFalse(k4.equals(k1));
+        assertThat(k1.equals(k2)).isTrue();
+        assertThat(k2.equals(k1)).isTrue();
+        assertThat(k2.hashCode()).isEqualTo(k1.hashCode());
+        assertThat(k1.equals(k3)).isFalse();
+        assertThat(k3.equals(k1)).isFalse();
+        assertThat(k1.equals(k4)).isFalse();
+        assertThat(k4.equals(k1)).isFalse();
 
         //noinspection ObjectEqualsNull
-        assertFalse(k1.equals(null));
+        assertThat(k1.equals(null)).isFalse();
         //noinspection EqualsBetweenInconvertibleTypes
-        assertFalse(k1.equals(this));
+        assertThat(k1.equals(this)).isFalse();
     }
 
     /** Tests the equals method. */
@@ -136,8 +126,8 @@ public final class BlobKeyTest extends TestLogger {
     public void testEqualsDifferentBlobType() {
         final BlobKey k1 = BlobKey.createKey(TRANSIENT_BLOB, KEY_ARRAY_1, RANDOM_ARRAY_1);
         final BlobKey k2 = BlobKey.createKey(PERMANENT_BLOB, KEY_ARRAY_1, RANDOM_ARRAY_1);
-        assertFalse(k1.equals(k2));
-        assertFalse(k2.equals(k1));
+        assertThat(k1.equals(k2)).isFalse();
+        assertThat(k2.equals(k1)).isFalse();
     }
 
     @Test
@@ -156,20 +146,20 @@ public final class BlobKeyTest extends TestLogger {
         final BlobKey k2 = BlobKey.createKey(blobType, KEY_ARRAY_1, RANDOM_ARRAY_1);
         final BlobKey k3 = BlobKey.createKey(blobType, KEY_ARRAY_2, RANDOM_ARRAY_1);
         final BlobKey k4 = BlobKey.createKey(blobType, KEY_ARRAY_1, RANDOM_ARRAY_2);
-        assertThat(k1.compareTo(k2), is(0));
-        assertThat(k2.compareTo(k1), is(0));
-        assertThat(k1.compareTo(k3), lessThan(0));
-        assertThat(k1.compareTo(k4), lessThan(0));
-        assertThat(k3.compareTo(k1), greaterThan(0));
-        assertThat(k4.compareTo(k1), greaterThan(0));
+        assertThat(k1.compareTo(k2)).isEqualTo(0);
+        assertThat(k2.compareTo(k1)).isEqualTo(0);
+        assertThat(k1.compareTo(k3)).isLessThan(0);
+        assertThat(k1.compareTo(k4)).isLessThan(0);
+        assertThat(k3.compareTo(k1)).isGreaterThan(0);
+        assertThat(k4.compareTo(k1)).isGreaterThan(0);
     }
 
     @Test
     public void testComparesDifferentBlobType() {
         final BlobKey k1 = BlobKey.createKey(TRANSIENT_BLOB, KEY_ARRAY_1, RANDOM_ARRAY_1);
         final BlobKey k2 = BlobKey.createKey(PERMANENT_BLOB, KEY_ARRAY_1, RANDOM_ARRAY_1);
-        assertThat(k1.compareTo(k2), greaterThan(0));
-        assertThat(k2.compareTo(k1), lessThan(0));
+        assertThat(k1.compareTo(k2)).isGreaterThan(0);
+        assertThat(k2.compareTo(k1)).isLessThan(0);
     }
 
     @Test
@@ -193,7 +183,7 @@ public final class BlobKeyTest extends TestLogger {
         final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         final BlobKey k2 = BlobKey.readFromInputStream(bais);
 
-        assertEquals(k1, k2);
+        assertThat(k2).isEqualTo(k1);
     }
 
     /**
@@ -203,8 +193,8 @@ public final class BlobKeyTest extends TestLogger {
      * @param key2 second blob key
      */
     static void verifyKeyDifferentHashEquals(BlobKey key1, BlobKey key2) {
-        assertNotEquals(key1, key2);
-        assertThat(key1.getHash(), equalTo(key2.getHash()));
+        assertThat(key2).isEqualTo(key1);
+        assertThat(key1.getHash()).isEqualTo(key2.getHash());
     }
 
     /**
@@ -214,8 +204,8 @@ public final class BlobKeyTest extends TestLogger {
      * @param key2 second blob key
      */
     static void verifyKeyDifferentHashDifferent(BlobKey key1, BlobKey key2) {
-        assertNotEquals(key1, key2);
-        assertThat(key1.getHash(), not(equalTo(key2.getHash())));
+        assertThat(key2).isEqualTo(key1);
+        assertThat(key1.getHash()).isNotEqualTo(key2.getHash());
     }
 
     /**
@@ -226,9 +216,9 @@ public final class BlobKeyTest extends TestLogger {
      */
     static void verifyType(BlobKey.BlobType expected, BlobKey key) {
         if (expected == PERMANENT_BLOB) {
-            assertThat(key, is(instanceOf(PermanentBlobKey.class)));
+            assertThat(key).isEqualTo(instanceOf(PermanentBlobKey.class));
         } else {
-            assertThat(key, is(instanceOf(TransientBlobKey.class)));
+            assertThat(key).isEqualTo(instanceOf(TransientBlobKey.class));
         }
     }
 }

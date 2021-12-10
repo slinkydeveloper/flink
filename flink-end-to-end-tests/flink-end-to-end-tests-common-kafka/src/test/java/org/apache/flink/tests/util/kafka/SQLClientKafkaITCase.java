@@ -32,7 +32,6 @@ import org.apache.flink.testutils.junit.FailsOnJava11;
 import org.apache.flink.util.TestLogger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Ignore;
@@ -60,8 +59,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 /** End-to-end test for the kafka SQL connectors. */
 @RunWith(Parameterized.class)
@@ -213,13 +213,14 @@ public class SQLClientKafkaITCase extends TestLogger {
                 List<String> lines = readCsvResultFiles(result);
                 if (lines.size() == 4) {
                     success = true;
-                    assertThat(
-                            lines.toArray(new String[0]),
-                            arrayContainingInAnyOrder(
-                                    "2018-03-12 08:00:00.000,Alice,This was a warning.,2,Success constant folding.",
-                                    "2018-03-12 09:00:00.000,Bob,This was another warning.,1,Success constant folding.",
-                                    "2018-03-12 09:00:00.000,Steve,This was another info.,2,Success constant folding.",
-                                    "2018-03-12 09:00:00.000,Alice,This was a info.,1,Success constant folding."));
+                    assertThat(lines.toArray(new String[0]))
+                            .satisfies(
+                                    matching(
+                                            arrayContainingInAnyOrder(
+                                                    "2018-03-12 08:00:00.000,Alice,This was a warning.,2,Success constant folding.",
+                                                    "2018-03-12 09:00:00.000,Bob,This was another warning.,1,Success constant folding.",
+                                                    "2018-03-12 09:00:00.000,Steve,This was another info.,2,Success constant folding.",
+                                                    "2018-03-12 09:00:00.000,Alice,This was a info.,1,Success constant folding.")));
                     break;
                 } else {
                     LOG.info(
@@ -233,7 +234,7 @@ public class SQLClientKafkaITCase extends TestLogger {
             }
             Thread.sleep(500);
         }
-        Assert.assertTrue("Did not get expected results before timeout.", success);
+        assertThat(success).as("Did not get expected results before timeout.").isTrue();
     }
 
     private static List<String> readCsvResultFiles(Path path) throws IOException {

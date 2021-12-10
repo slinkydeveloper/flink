@@ -29,7 +29,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the {@link ImmutableValueState}. */
 public class ImmutableValueStateTest {
@@ -53,7 +53,7 @@ public class ImmutableValueStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testUpdate() throws IOException {
         long value = valueState.value();
-        assertEquals(42L, value);
+        assertThat(value).isEqualTo(42L);
 
         valueState.update(54L);
     }
@@ -61,7 +61,7 @@ public class ImmutableValueStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testClear() throws IOException {
         long value = valueState.value();
-        assertEquals(42L, value);
+        assertThat(value).isEqualTo(42L);
 
         valueState.clear();
     }

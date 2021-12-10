@@ -34,10 +34,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the SerializedJobExecutionResult */
 public class SerializedJobExecutionResultTest extends TestLogger {
@@ -62,21 +61,21 @@ public class SerializedJobExecutionResultTest extends TestLogger {
         // serialize and deserialize the object
         SerializedJobExecutionResult cloned = CommonTestUtils.createCopySerializable(result);
 
-        assertEquals(origJobId, cloned.getJobId());
-        assertEquals(origTime, cloned.getNetRuntime());
-        assertEquals(origTime, cloned.getNetRuntime(TimeUnit.MILLISECONDS));
-        assertEquals(origMap, cloned.getSerializedAccumulatorResults());
+        assertThat(cloned.getJobId()).isEqualTo(origJobId);
+        assertThat(cloned.getNetRuntime()).isEqualTo(origTime);
+        assertThat(cloned.getNetRuntime(TimeUnit.MILLISECONDS)).isEqualTo(origTime);
+        assertThat(cloned.getSerializedAccumulatorResults()).isEqualTo(origMap);
 
         // convert to deserialized result
         JobExecutionResult jResult = result.toJobExecutionResult(classloader);
         JobExecutionResult jResultCopied = result.toJobExecutionResult(classloader);
 
-        assertEquals(origJobId, jResult.getJobID());
-        assertEquals(origJobId, jResultCopied.getJobID());
-        assertEquals(origTime, jResult.getNetRuntime());
-        assertEquals(origTime, jResult.getNetRuntime(TimeUnit.MILLISECONDS));
-        assertEquals(origTime, jResultCopied.getNetRuntime());
-        assertEquals(origTime, jResultCopied.getNetRuntime(TimeUnit.MILLISECONDS));
+        assertThat(jResult.getJobID()).isEqualTo(origJobId);
+        assertThat(jResultCopied.getJobID()).isEqualTo(origJobId);
+        assertThat(jResult.getNetRuntime()).isEqualTo(origTime);
+        assertThat(jResult.getNetRuntime(TimeUnit.MILLISECONDS)).isEqualTo(origTime);
+        assertThat(jResultCopied.getNetRuntime()).isEqualTo(origTime);
+        assertThat(jResultCopied.getNetRuntime(TimeUnit.MILLISECONDS)).isEqualTo(origTime);
 
         for (Map.Entry<String, SerializedValue<OptionalFailure<Object>>> entry :
                 origMap.entrySet()) {
@@ -87,21 +86,23 @@ public class SerializedJobExecutionResultTest extends TestLogger {
                     jResult.getAccumulatorResult(name);
                     fail("expected failure");
                 } catch (FlinkRuntimeException ex) {
-                    assertTrue(
-                            ExceptionUtils.findThrowable(ex, ExpectedTestException.class)
-                                    .isPresent());
+                    assertThat(
+                                    ExceptionUtils.findThrowable(ex, ExpectedTestException.class)
+                                            .isPresent())
+                            .isTrue();
                 }
                 try {
                     jResultCopied.getAccumulatorResult(name);
                     fail("expected failure");
                 } catch (FlinkRuntimeException ex) {
-                    assertTrue(
-                            ExceptionUtils.findThrowable(ex, ExpectedTestException.class)
-                                    .isPresent());
+                    assertThat(
+                                    ExceptionUtils.findThrowable(ex, ExpectedTestException.class)
+                                            .isPresent())
+                            .isTrue();
                 }
             } else {
-                assertEquals(value.get(), jResult.getAccumulatorResult(name));
-                assertEquals(value.get(), jResultCopied.getAccumulatorResult(name));
+                assertThatObject(jResult.getAccumulatorResult(name)).isEqualTo(value.get());
+                assertThatObject(jResultCopied.getAccumulatorResult(name)).isEqualTo(value.get());
             }
         }
     }
@@ -111,12 +112,12 @@ public class SerializedJobExecutionResultTest extends TestLogger {
         SerializedJobExecutionResult result = new SerializedJobExecutionResult(null, 0L, null);
         SerializedJobExecutionResult cloned = CommonTestUtils.createCopySerializable(result);
 
-        assertNull(cloned.getJobId());
-        assertEquals(0L, cloned.getNetRuntime());
-        assertNull(cloned.getSerializedAccumulatorResults());
+        assertThat(cloned.getJobId()).isNull();
+        assertThat(cloned.getNetRuntime()).isEqualTo(0L);
+        assertThat(cloned.getSerializedAccumulatorResults()).isNull();
 
         JobExecutionResult jResult = result.toJobExecutionResult(getClass().getClassLoader());
-        assertNull(jResult.getJobID());
-        assertTrue(jResult.getAllAccumulatorResults().isEmpty());
+        assertThat(jResult.getJobID()).isNull();
+        assertThat(jResult.getAllAccumulatorResults().isEmpty()).isTrue();
     }
 }

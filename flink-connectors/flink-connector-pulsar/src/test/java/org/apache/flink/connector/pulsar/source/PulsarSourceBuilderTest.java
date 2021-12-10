@@ -23,7 +23,7 @@ import org.apache.flink.connector.pulsar.source.enumerator.topic.range.UniformRa
 import org.apache.pulsar.client.api.SubscriptionType;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link PulsarSourceBuilder}. */
 @SuppressWarnings("java:S5778")
@@ -32,22 +32,20 @@ class PulsarSourceBuilderTest {
     @Test
     void someSetterMethodCouldOnlyBeCalledOnce() {
         PulsarSourceBuilder<String> builder = new PulsarSourceBuilder<>();
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> builder.setAdminUrl("admin-url").setAdminUrl("admin-url2"));
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> builder.setServiceUrl("service-url").setServiceUrl("service-url2"));
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        builder.setSubscriptionName("set_subscription_name")
-                                .setSubscriptionName("set_subscription_name2"));
-        assertThrows(
-                IllegalArgumentException.class,
-                () ->
-                        builder.setSubscriptionType(SubscriptionType.Exclusive)
-                                .setSubscriptionType(SubscriptionType.Shared));
+        assertThatThrownBy(() -> builder.setAdminUrl("admin-url").setAdminUrl("admin-url2"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> builder.setServiceUrl("service-url").setServiceUrl("service-url2"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(
+                        () ->
+                                builder.setSubscriptionName("set_subscription_name")
+                                        .setSubscriptionName("set_subscription_name2"))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(
+                        () ->
+                                builder.setSubscriptionType(SubscriptionType.Exclusive)
+                                        .setSubscriptionType(SubscriptionType.Shared))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -55,7 +53,8 @@ class PulsarSourceBuilderTest {
         PulsarSourceBuilder<String> builder = new PulsarSourceBuilder<>();
         builder.setTopics("a", "b", "c");
 
-        assertThrows(IllegalStateException.class, () -> builder.setTopicPattern("a-a-a"));
+        assertThatThrownBy(() -> builder.setTopicPattern("a-a-a"))
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -63,8 +62,7 @@ class PulsarSourceBuilderTest {
         PulsarSourceBuilder<String> builder = new PulsarSourceBuilder<>();
         builder.setSubscriptionType(SubscriptionType.Shared);
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> builder.setRangeGenerator(new UniformRangeGenerator()));
+        assertThatThrownBy(() -> builder.setRangeGenerator(new UniformRangeGenerator()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

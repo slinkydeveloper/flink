@@ -41,8 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.streaming.connectors.gcp.pubsub.SimpleStringSchemaWithStopMarkerDetection.STOP_MARKER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test of the PubSub SOURCE with the Google PubSub emulator. */
 public class EmulatedPubSubSourceTest extends GCloudUnitTestBase {
@@ -146,9 +145,9 @@ public class EmulatedPubSubSourceTest extends GCloudUnitTestBase {
         List<String> output = new ArrayList<>();
         DataStreamUtils.collect(fromPubSub).forEachRemaining(output::add);
 
-        assertEquals("Wrong number of elements", input.size(), output.size());
+        assertThat(output.size()).as("Wrong number of elements").isEqualTo(input.size());
         for (String test : input) {
-            assertTrue("Missing " + test, output.contains(test));
+            assertThat(output.contains(test)).as("Missing " + test).isTrue();
         }
     }
 }

@@ -20,7 +20,6 @@ package org.apache.flink.runtime.rest.versioning;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -28,12 +27,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /** Tests for {@link RestAPIVersion}. */
 public class RestAPIVersionTest extends TestLogger {
     @Test
     public void testGetLatest() {
         Collection<RestAPIVersion> candidates = Arrays.asList(RestAPIVersion.V0, RestAPIVersion.V1);
-        Assert.assertEquals(RestAPIVersion.V1, RestAPIVersion.getLatestVersion(candidates));
+        assertThat(RestAPIVersion.getLatestVersion(candidates)).isEqualTo(RestAPIVersion.V1);
     }
 
     @Test
@@ -43,10 +44,10 @@ public class RestAPIVersionTest extends TestLogger {
                         .filter(RestAPIVersion::isDefaultVersion)
                         .collect(Collectors.toList());
 
-        Assert.assertEquals(
-                "Only one RestAPIVersion should be marked as the default. Defaults: "
-                        + defaultVersions,
-                1,
-                defaultVersions.size());
+        assertThat(defaultVersions.size())
+                .as(
+                        "Only one RestAPIVersion should be marked as the default. Defaults: "
+                                + defaultVersions)
+                .isEqualTo(1);
     }
 }

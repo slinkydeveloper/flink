@@ -30,8 +30,8 @@ import org.apache.flink.test.util.JavaProgramTestBase;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test delta iterations that do not join with the solution set. */
 @SuppressWarnings("serial")
@@ -69,7 +69,7 @@ public class DeltaIterationNotDependingOnSolutionSetITCase extends JavaProgramTe
         }
 
         for (int i = 0; i < present.length; i++) {
-            assertTrue(String.format("Missing tuple (%d, %d)", i, i), present[i]);
+            assertThat(present[i]).as(String.format("Missing tuple (%d, %d)", i, i)).isTrue();
         }
     }
 

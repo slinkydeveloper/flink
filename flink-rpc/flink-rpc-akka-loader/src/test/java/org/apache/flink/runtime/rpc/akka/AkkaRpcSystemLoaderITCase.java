@@ -28,9 +28,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.nio.file.Paths;
 
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the {@link AkkaRpcSystemLoader}.
@@ -48,7 +46,7 @@ public class AkkaRpcSystemLoaderITCase extends TestLogger {
     public void testServiceLoadingWithDefaultConfig() {
         final Configuration config = new Configuration();
         try (final RpcSystem rpcSystem = LOADER.loadRpcSystem(config)) {
-            assertThat(rpcSystem, not(nullValue()));
+            assertThat(rpcSystem).isNotNull();
         }
     }
 
@@ -59,7 +57,7 @@ public class AkkaRpcSystemLoaderITCase extends TestLogger {
                 CoreOptions.TMP_DIRS,
                 TMP_DIR.getRoot().toPath().resolve(Paths.get("some", "directory")).toString());
         try (final RpcSystem rpcSystem = LOADER.loadRpcSystem(config)) {
-            assertThat(rpcSystem, not(nullValue()));
+            assertThat(rpcSystem).isNotNull();
         }
     }
 }

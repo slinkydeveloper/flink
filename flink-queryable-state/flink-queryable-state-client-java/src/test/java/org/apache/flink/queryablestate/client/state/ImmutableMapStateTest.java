@@ -31,9 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the {@link ImmutableMapState}. */
 public class ImmutableMapStateTest {
@@ -65,26 +63,26 @@ public class ImmutableMapStateTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testPut() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         mapState.put(2L, 54L);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testPutAll() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         Map<Long, Long> nMap = new HashMap<>();
         nMap.put(1L, 7L);
@@ -95,26 +93,26 @@ public class ImmutableMapStateTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testUpdate() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         mapState.put(2L, 54L);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testIterator() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         Iterator<Map.Entry<Long, Long>> iterator = mapState.iterator();
         while (iterator.hasNext()) {
@@ -124,31 +122,31 @@ public class ImmutableMapStateTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testIterable() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         Iterable<Map.Entry<Long, Long>> iterable = mapState.entries();
         Iterator<Map.Entry<Long, Long>> iterator = iterable.iterator();
         while (iterator.hasNext()) {
-            assertEquals(5L, (long) iterator.next().getValue());
+            assertThat((long) iterator.next().getValue()).isEqualTo(5L);
             iterator.remove();
         }
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void testKeys() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         Iterator<Long> iterator = mapState.keys().iterator();
         while (iterator.hasNext()) {
@@ -158,13 +156,13 @@ public class ImmutableMapStateTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testValues() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         Iterator<Long> iterator = mapState.values().iterator();
         while (iterator.hasNext()) {
@@ -174,19 +172,19 @@ public class ImmutableMapStateTest {
 
     @Test(expected = UnsupportedOperationException.class)
     public void testClear() throws Exception {
-        assertTrue(mapState.contains(1L));
+        assertThat(mapState.contains(1L)).isTrue();
         long value = mapState.get(1L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
-        assertTrue(mapState.contains(2L));
+        assertThat(mapState.contains(2L)).isTrue();
         value = mapState.get(2L);
-        assertEquals(5L, value);
+        assertThat(value).isEqualTo(5L);
 
         mapState.clear();
     }
 
     @Test
     public void testIsEmpty() throws Exception {
-        assertFalse(mapState.isEmpty());
+        assertThat(mapState.isEmpty()).isFalse();
     }
 }

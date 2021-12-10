@@ -28,7 +28,6 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.apache.flink.util.FileUtils;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -46,12 +45,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.startsWith;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.iterableWithSize;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the {@link BucketStateSerializer} that verify we can still read snapshots written using
@@ -104,9 +101,9 @@ public class BucketStateSerializerTest {
 
         final Bucket<String, String> bucket = restoreBucket(0, recoveredState);
 
-        Assert.assertEquals(testBucketPath, bucket.getBucketPath());
-        Assert.assertNull(bucket.getInProgressPart());
-        Assert.assertTrue(bucket.getPendingFileRecoverablesPerCheckpoint().isEmpty());
+        assertThat(bucket.getBucketPath()).isEqualTo(testBucketPath);
+        assertThat(bucket.getInProgressPart()).isNull();
+        assertThat(bucket.getPendingFileRecoverablesPerCheckpoint().isEmpty()).isTrue();
     }
 
     @Test
@@ -130,23 +127,22 @@ public class BucketStateSerializerTest {
 
         final Bucket<String, String> bucket = restoreBucket(0, recoveredState);
 
-        Assert.assertEquals(testBucketPath, bucket.getBucketPath());
+        assertThat(bucket.getBucketPath()).isEqualTo(testBucketPath);
 
         // check restore the correct in progress file writer
-        Assert.assertEquals(8, bucket.getInProgressPart().getSize());
+        assertThat(bucket.getInProgressPart().getSize()).isEqualTo(8);
 
         long numFiles =
                 Files.list(Paths.get(testBucketPath.toString()))
                         .map(
                                 file -> {
-                                    assertThat(
-                                            file.getFileName().toString(),
-                                            startsWith(".part-0-0.inprogress"));
+                                    assertThat(file.getFileName().toString())
+                                            .startsWith(".part-0-0.inprogress");
                                     return 1;
                                 })
                         .count();
 
-        assertThat(numFiles, is(1L));
+        assertThat(numFiles).isEqualTo(1L);
     }
 
     @Test
@@ -189,7 +185,7 @@ public class BucketStateSerializerTest {
             final Map<Long, List<InProgressFileWriter.PendingFileRecoverable>>
                     pendingFileRecoverables =
                             recoveredState.getPendingFileRecoverablesPerCheckpoint();
-            Assert.assertEquals(5L, pendingFileRecoverables.size());
+            assertThat(pendingFileRecoverables.size()).isEqualTo(5L);
 
             final Set<String> beforeRestorePaths =
                     Files.list(outputPath.resolve(BUCKET_ID))
@@ -199,13 +195,13 @@ public class BucketStateSerializerTest {
             // before retsoring all file has "inprogress"
             for (int i = 0; i < noOfPendingCheckpoints; i++) {
                 final String part = ".part-0-" + i + ".inprogress";
-                assertThat(beforeRestorePaths, hasItem(startsWith(part)));
+                assertThat(beforeRestorePaths).startsWith(part);
             }
 
             // recover and commit
             final Bucket bucket = restoreBucket(noOfPendingCheckpoints + 1, recoveredState);
-            Assert.assertEquals(testBucketPath, bucket.getBucketPath());
-            Assert.assertEquals(0, bucket.getPendingFileRecoverablesForCurrentCheckpoint().size());
+            assertThat(bucket.getBucketPath()).isEqualTo(testBucketPath);
+            assertThat(bucket.getPendingFileRecoverablesForCurrentCheckpoint().size()).isEqualTo(0);
 
             final Set<String> afterRestorePaths =
                     Files.list(outputPath.resolve(BUCKET_ID))
@@ -216,20 +212,19 @@ public class BucketStateSerializerTest {
             // there is no "inporgress" in file name for the committed files.
             for (int i = 0; i < noOfPendingCheckpoints; i++) {
                 final String part = "part-0-" + i;
-                assertThat(afterRestorePaths, hasItem(part));
+                assertThat(afterRestorePaths).contains(part);
                 afterRestorePaths.remove(part);
             }
 
             if (withInProgress) {
                 // only the in-progress must be left
-                assertThat(afterRestorePaths, iterableWithSize(1));
+                assertThat(afterRestorePaths).satisfies(matching(iterableWithSize(1)));
 
                 // verify that the in-progress file is still there
-                assertThat(
-                        afterRestorePaths,
-                        hasItem(startsWith(".part-0-" + noOfPendingCheckpoints + ".inprogress")));
+                assertThat(afterRestorePaths)
+                        .startsWith(".part-0-" + noOfPendingCheckpoints + ".inprogress");
             } else {
-                assertThat(afterRestorePaths, empty());
+                assertThat(afterRestorePaths).satisfies(matching(empty()));
             }
         } finally {
             FileUtils.deleteDirectory(pathResolver.getResourcePath(scenarioName).toFile());

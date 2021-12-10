@@ -49,10 +49,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.apache.flink.core.fs.FileSystemTestUtils.checkPathEventualExistence;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** An implementation of the {@link FileSystemBehaviorTestSuite} for Azure based file system. */
 @RunWith(Parameterized.class)
@@ -166,7 +163,7 @@ public class AzureFileSystemBehaviorITCase extends FileSystemBehaviorTestSuite {
                     InputStreamReader ir = new InputStreamReader(in, StandardCharsets.UTF_8);
                     BufferedReader reader = new BufferedReader(ir)) {
                 String line = reader.readLine();
-                assertEquals(testLine, line);
+                assertThat(line).isEqualTo(testLine);
             }
         } finally {
             fs.delete(path, false);
@@ -184,16 +181,16 @@ public class AzureFileSystemBehaviorITCase extends FileSystemBehaviorTestSuite {
         final FileSystem fs = directory.getFileSystem();
 
         // directory must not yet exist
-        assertFalse(fs.exists(directory));
+        assertThat(fs.exists(directory)).isFalse();
 
         try {
             // create directory
-            assertTrue(fs.mkdirs(directory));
+            assertThat(fs.mkdirs(directory)).isTrue();
 
             checkPathEventualExistence(fs, directory, true, deadline);
 
             // directory empty
-            assertEquals(0, fs.listStatus(directory).length);
+            assertThat(fs.listStatus(directory).length).isEqualTo(0);
 
             // create some files
             final int numFiles = 3;
@@ -210,15 +207,15 @@ public class AzureFileSystemBehaviorITCase extends FileSystemBehaviorTestSuite {
             }
 
             FileStatus[] files = fs.listStatus(directory);
-            assertNotNull(files);
-            assertEquals(3, files.length);
+            assertThat(files).isNotNull();
+            assertThat(files.length).isEqualTo(3);
 
             for (FileStatus status : files) {
-                assertFalse(status.isDir());
+                assertThat(status.isDir()).isFalse();
             }
 
             // now that there are files, the directory must exist
-            assertTrue(fs.exists(directory));
+            assertThat(fs.exists(directory)).isTrue();
         } finally {
             // clean up
             fs.delete(directory, true);

@@ -41,9 +41,7 @@ import java.util.Queue;
 import java.util.Random;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for writing and reading {@link PartitionedFile} with {@link PartitionedFileWriter} and
@@ -121,7 +119,8 @@ public class PartitionedFileWriteReadTest {
         IOUtils.closeAllQuietly(dataFileChannel, indexFileChannel);
 
         for (int subpartition = 0; subpartition < numSubpartitions; ++subpartition) {
-            assertEquals(buffersWritten[subpartition].size(), buffersRead[subpartition].size());
+            assertThat(buffersRead[subpartition].size())
+                    .isEqualTo(buffersWritten[subpartition].size());
             for (int i = 0; i < buffersWritten[subpartition].size(); ++i) {
                 assertBufferEquals(
                         buffersWritten[subpartition].get(i), buffersRead[subpartition].get(i));
@@ -165,14 +164,14 @@ public class PartitionedFileWriteReadTest {
                 Buffer buffer = checkNotNull(fileReader.readCurrentRegion(readBuffer, (buf) -> {}));
                 assertBufferEquals(checkNotNull(subpartitionBuffers[subpartition].poll()), buffer);
             }
-            assertTrue(subpartitionBuffers[subpartition].isEmpty());
+            assertThat(subpartitionBuffers[subpartition].isEmpty()).isTrue();
         }
         IOUtils.closeAllQuietly(dataFileChannel, indexFileChannel);
     }
 
     private void assertBufferEquals(Buffer expected, Buffer actual) {
-        assertEquals(expected.getDataType(), actual.getDataType());
-        assertEquals(expected.getNioBufferReadable(), actual.getNioBufferReadable());
+        assertThat(actual.getDataType()).isEqualTo(expected.getDataType());
+        assertThat(actual.getNioBufferReadable()).isEqualTo(expected.getNioBufferReadable());
     }
 
     private Buffer createBuffer(Random random, int bufferSize) {
@@ -230,7 +229,8 @@ public class PartitionedFileWriteReadTest {
                 new PartitionedFileReader(partitionedFile, 1, dataFileChannel, indexFileChannel);
         MemorySegment target = MemorySegmentFactory.allocateUnpooledSegment(1024);
 
-        assertNull(partitionedFileReader.readCurrentRegion(target, FreeingBufferRecycler.INSTANCE));
+        assertThat(partitionedFileReader.readCurrentRegion(target, FreeingBufferRecycler.INSTANCE))
+                .isNull();
         IOUtils.closeAllQuietly(dataFileChannel, indexFileChannel);
     }
 

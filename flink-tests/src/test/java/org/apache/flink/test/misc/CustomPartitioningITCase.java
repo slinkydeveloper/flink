@@ -25,7 +25,7 @@ import org.apache.flink.api.java.functions.KeySelector;
 import org.apache.flink.api.java.io.DiscardingOutputFormat;
 import org.apache.flink.test.util.JavaProgramTestBase;
 
-import org.junit.Assert;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for custom {@link Partitioner}. */
 @SuppressWarnings("serial")
@@ -36,7 +36,7 @@ public class CustomPartitioningITCase extends JavaProgramTestBase {
         ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
 
         if (!isCollectionExecution()) {
-            Assert.assertTrue(env.getParallelism() > 1);
+            assertThat(env.getParallelism() > 1).isTrue();
         }
 
         env.generateSequence(1, 1000)

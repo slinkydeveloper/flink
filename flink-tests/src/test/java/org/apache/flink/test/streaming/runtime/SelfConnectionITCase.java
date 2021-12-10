@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for connected streams. */
 @SuppressWarnings("serial")
@@ -76,7 +76,7 @@ public class SelfConnectionITCase extends AbstractTestBase {
         Collections.sort(expected);
         Collections.sort(result);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     /**
@@ -132,6 +132,6 @@ public class SelfConnectionITCase extends AbstractTestBase {
         Collections.sort(expected);
         Collections.sort(result);
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 }

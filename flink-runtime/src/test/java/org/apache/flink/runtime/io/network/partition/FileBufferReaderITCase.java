@@ -51,8 +51,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests the bug reported in FLINK-131O0.
@@ -214,7 +213,7 @@ public class FileBufferReaderITCase extends TestLogger {
                 numReceived++;
             }
 
-            assertThat(numReceived, is(numRecords));
+            assertThat(numReceived).isEqualTo(numRecords);
         }
     }
 }

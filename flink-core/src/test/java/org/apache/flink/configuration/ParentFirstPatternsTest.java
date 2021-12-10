@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import java.util.HashSet;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test that checks that all packages that need to be loaded 'parent-first' are also in the
@@ -38,9 +38,9 @@ public class ParentFirstPatternsTest extends TestLogger {
     /** All java and Flink classes must be loaded parent first. */
     @Test
     public void testAllCorePatterns() {
-        assertTrue(PARENT_FIRST_PACKAGES.contains("java."));
-        assertTrue(PARENT_FIRST_PACKAGES.contains("org.apache.flink."));
-        assertTrue(PARENT_FIRST_PACKAGES.contains("javax.annotation."));
+        assertThat(PARENT_FIRST_PACKAGES.contains("java.")).isTrue();
+        assertThat(PARENT_FIRST_PACKAGES.contains("org.apache.flink.")).isTrue();
+        assertThat(PARENT_FIRST_PACKAGES.contains("javax.annotation.")).isTrue();
     }
 
     /**
@@ -49,11 +49,11 @@ public class ParentFirstPatternsTest extends TestLogger {
      */
     @Test
     public void testLoggersParentFirst() {
-        assertTrue(PARENT_FIRST_PACKAGES.contains("org.slf4j"));
-        assertTrue(PARENT_FIRST_PACKAGES.contains("org.apache.log4j"));
-        assertTrue(PARENT_FIRST_PACKAGES.contains("org.apache.logging"));
-        assertTrue(PARENT_FIRST_PACKAGES.contains("org.apache.commons.logging"));
-        assertTrue(PARENT_FIRST_PACKAGES.contains("ch.qos.logback"));
+        assertThat(PARENT_FIRST_PACKAGES.contains("org.slf4j")).isTrue();
+        assertThat(PARENT_FIRST_PACKAGES.contains("org.apache.log4j")).isTrue();
+        assertThat(PARENT_FIRST_PACKAGES.contains("org.apache.logging")).isTrue();
+        assertThat(PARENT_FIRST_PACKAGES.contains("org.apache.commons.logging")).isTrue();
+        assertThat(PARENT_FIRST_PACKAGES.contains("ch.qos.logback")).isTrue();
     }
 
     /**
@@ -62,7 +62,7 @@ public class ParentFirstPatternsTest extends TestLogger {
      */
     @Test
     public void testScalaParentFirst() {
-        assertTrue(PARENT_FIRST_PACKAGES.contains("scala."));
+        assertThat(PARENT_FIRST_PACKAGES.contains("scala.")).isTrue();
     }
 
     /**
@@ -71,6 +71,6 @@ public class ParentFirstPatternsTest extends TestLogger {
      */
     @Test
     public void testHadoopParentFirst() {
-        assertTrue(PARENT_FIRST_PACKAGES.contains("org.apache.hadoop."));
+        assertThat(PARENT_FIRST_PACKAGES.contains("org.apache.hadoop.")).isTrue();
     }
 }

@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test of different implementation of {@link ResultSubpartitionRecoveredStateHandler}. */
 public class ResultSubpartitionRecoveredStateHandlerTest extends RecoveredChannelStateHandlerTest {
@@ -86,7 +86,8 @@ public class ResultSubpartitionRecoveredStateHandlerTest extends RecoveredChanne
         partition.close();
 
         // then: All pre-allocated segments should be successfully recycled.
-        assertEquals(preAllocatedSegments, networkBufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(networkBufferPool.getNumberOfAvailableMemorySegments())
+                .isEqualTo(preAllocatedSegments);
     }
 
     @Test
@@ -102,6 +103,7 @@ public class ResultSubpartitionRecoveredStateHandlerTest extends RecoveredChanne
         partition.close();
 
         // then: All pre-allocated segments should be successfully recycled.
-        assertEquals(preAllocatedSegments, networkBufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(networkBufferPool.getNumberOfAvailableMemorySegments())
+                .isEqualTo(preAllocatedSegments);
     }
 }

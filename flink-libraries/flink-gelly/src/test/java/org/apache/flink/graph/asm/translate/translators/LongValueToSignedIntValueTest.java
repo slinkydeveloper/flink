@@ -24,7 +24,7 @@ import org.apache.flink.types.LongValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LongValueToSignedIntValue}. */
 public class LongValueToSignedIntValueTest {
@@ -35,13 +35,11 @@ public class LongValueToSignedIntValueTest {
 
     @Test
     public void testTranslation() throws Exception {
-        assertEquals(
-                new IntValue(Integer.MIN_VALUE),
-                translator.translate(new LongValue((long) Integer.MIN_VALUE), reuse));
-        assertEquals(new IntValue(0), translator.translate(new LongValue(0L), reuse));
-        assertEquals(
-                new IntValue(Integer.MAX_VALUE),
-                translator.translate(new LongValue((long) Integer.MAX_VALUE), reuse));
+        assertThat(translator.translate(new LongValue((long) Integer.MIN_VALUE), reuse))
+                .isEqualTo(new IntValue(Integer.MIN_VALUE));
+        assertThat(translator.translate(new LongValue(0L), reuse)).isEqualTo(new IntValue(0));
+        assertThat(translator.translate(new LongValue((long) Integer.MAX_VALUE), reuse))
+                .isEqualTo(new IntValue(Integer.MAX_VALUE));
     }
 
     @Test(expected = IllegalArgumentException.class)

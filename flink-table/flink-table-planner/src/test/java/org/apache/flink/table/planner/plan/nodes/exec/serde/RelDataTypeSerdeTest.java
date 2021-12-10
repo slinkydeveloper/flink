@@ -56,8 +56,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for serialization/deserialization of {@link RelDataType}. */
 @RunWith(Parameterized.class)
@@ -289,15 +288,15 @@ public class RelDataTypeSerdeTest {
         RelDataType actual = mapper.readValue(json, RelDataType.class);
         // type system will fill the default precision if the precision is not defined
         if (relDataType.toString().equals("DECIMAL")) {
-            assertEquals(SqlTypeName.DECIMAL, actual.getSqlTypeName());
-            assertEquals(relDataType.getScale(), actual.getScale());
-            assertEquals(
-                    serdeCtx.getTypeFactory()
-                            .getTypeSystem()
-                            .getDefaultPrecision(SqlTypeName.DECIMAL),
-                    actual.getPrecision());
+            assertThat(actual.getSqlTypeName()).isEqualTo(SqlTypeName.DECIMAL);
+            assertThat(actual.getScale()).isEqualTo(relDataType.getScale());
+            assertThat(actual.getPrecision())
+                    .isEqualTo(
+                            serdeCtx.getTypeFactory()
+                                    .getTypeSystem()
+                                    .getDefaultPrecision(SqlTypeName.DECIMAL));
         } else {
-            assertSame(relDataType, actual);
+            assertThat(actual).isSameAs(relDataType);
         }
     }
 }

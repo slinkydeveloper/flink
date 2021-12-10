@@ -25,11 +25,11 @@ import org.junit.Test;
 
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link EntrypointClusterConfigurationParserFactory}. */
 public class EntrypointClusterConfigurationParserFactoryTest extends TestLogger {
@@ -61,13 +61,13 @@ public class EntrypointClusterConfigurationParserFactoryTest extends TestLogger 
 
         final EntrypointClusterConfiguration clusterConfiguration = commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(configDir)));
-        assertThat(clusterConfiguration.getRestPort(), is(equalTo(restPort)));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(configDir));
+        assertThat(clusterConfiguration.getRestPort()).isEqualTo(equalTo(restPort));
         final Properties dynamicProperties = clusterConfiguration.getDynamicProperties();
 
-        assertThat(dynamicProperties, hasEntry(key, value));
+        assertThat(dynamicProperties).satisfies(matching(hasEntry(key, value)));
 
-        assertThat(clusterConfiguration.getArgs(), arrayContaining(arg1, arg2));
+        assertThat(clusterConfiguration.getArgs()).satisfies(matching(arrayContaining(arg1, arg2)));
     }
 
     @Test
@@ -77,8 +77,8 @@ public class EntrypointClusterConfigurationParserFactoryTest extends TestLogger 
 
         final EntrypointClusterConfiguration clusterConfiguration = commandLineParser.parse(args);
 
-        assertThat(clusterConfiguration.getConfigDir(), is(equalTo(configDir)));
-        assertThat(clusterConfiguration.getRestPort(), is(equalTo(-1)));
+        assertThat(clusterConfiguration.getConfigDir()).isEqualTo(equalTo(configDir));
+        assertThat(clusterConfiguration.getRestPort()).isEqualTo(equalTo(-1));
     }
 
     @Test(expected = FlinkParseException.class)

@@ -42,9 +42,9 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
 
 /** Implementation of PageRank accounting for "sink" vertices with 0 out-degree. */
 @RunWith(Parameterized.class)
@@ -234,11 +234,11 @@ public class DanglingPageRankITCase extends MultipleProgramsTestBase {
             double totalRank = 0.0;
             for (PageWithRankAndDangling r : result) {
                 totalRank += r.rank;
-                assertTrue(r.pageId >= 1 && r.pageId <= 5);
-                assertTrue(r.pageId != 3 || r.dangling);
+                assertThat(r.pageId >= 1 && r.pageId <= 5).isTrue();
+                assertThat(r.pageId != 3 || r.dangling).isTrue();
             }
 
-            assertEquals(1.0, totalRank, 0.001);
+            assertThat(totalRank).isCloseTo(1.0, within(0.001));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

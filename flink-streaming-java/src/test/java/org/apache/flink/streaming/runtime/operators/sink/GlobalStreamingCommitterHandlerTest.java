@@ -34,11 +34,10 @@ import java.util.List;
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.committableRecords;
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.toBytes;
 import static org.apache.flink.streaming.util.TestHarnessUtil.buildSubtaskState;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertTrue;
 
 /** Test for {@link GlobalStreamingCommitterHandler}. */
 public class GlobalStreamingCommitterHandlerTest extends TestLogger {
@@ -72,11 +71,12 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
         testHarness.processElements(committableRecords(input));
         testHarness.snapshot(1L, 1L);
         testHarness.notifyOfCompletedCheckpoint(1L);
-        assertThat(globalCommitter.getCommittedData(), Matchers.hasSize(0));
+        assertThat(globalCommitter.getCommittedData()).satisfies(matching(Matchers.hasSize(0)));
         // commits delayed by one checkpoint
         testHarness.snapshot(2L, 2L);
         testHarness.notifyOfCompletedCheckpoint(2L);
-        assertThat(globalCommitter.getCommittedData(), Matchers.contains("lazy|leaf"));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(Matchers.contains("lazy|leaf")));
 
         testHarness.close();
     }
@@ -94,11 +94,12 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
         testHarness.processElements(committableRecords(input));
         testHarness.snapshot(1L, 1L);
         testHarness.notifyOfCompletedCheckpoint(1L);
-        assertThat(globalCommitter.getCommittedData(), Matchers.hasSize(0));
+        assertThat(globalCommitter.getCommittedData()).satisfies(matching(Matchers.hasSize(0)));
 
         testHarness.getProcessingTimeService().setCurrentTime(Long.MAX_VALUE);
 
-        assertThat(globalCommitter.getCommittedData(), Matchers.contains("lazy|leaf"));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(Matchers.contains("lazy|leaf")));
 
         testHarness.close();
     }
@@ -112,7 +113,7 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
         testHarness.initializeEmptyState();
         testHarness.open();
         testHarness.close();
-        assertThat(globalCommitter.isClosed(), is(true));
+        assertThat(globalCommitter.isClosed()).isEqualTo(true);
     }
 
     @Test
@@ -148,8 +149,8 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
         testHarness.notifyOfCompletedCheckpoint(1L);
         testHarness.close();
 
-        assertThat(
-                globalCommitter.getCommittedData(), containsInAnyOrder(expectedOutput.toArray()));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(containsInAnyOrder(expectedOutput.toArray())));
     }
 
     @Test
@@ -184,8 +185,8 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
 
         testHarness.close();
 
-        assertThat(
-                globalCommitter.getCommittedData(), containsInAnyOrder(expectedOutput.toArray()));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(containsInAnyOrder(expectedOutput.toArray())));
     }
 
     @Test
@@ -208,7 +209,7 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
         testHarness.open();
         testHarness.snapshot(1L, 1L);
         testHarness.notifyOfCompletedCheckpoint(1L);
-        assertTrue(globalCommitter.getCommittedData().isEmpty());
+        assertThat(globalCommitter.getCommittedData().isEmpty()).isTrue();
         testHarness.close();
     }
 
@@ -225,7 +226,8 @@ public class GlobalStreamingCommitterHandlerTest extends TestLogger {
         testHarness.endInput();
         testHarness.notifyOfCompletedCheckpoint(1L);
         testHarness.close();
-        assertThat(globalCommitter.getCommittedData(), contains("end of input"));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(contains("end of input")));
     }
 
     private OneInputStreamOperatorTestHarness<byte[], byte[]> createTestHarness() throws Exception {

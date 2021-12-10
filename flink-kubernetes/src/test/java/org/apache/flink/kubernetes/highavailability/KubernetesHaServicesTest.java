@@ -30,8 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.kubernetes.utils.Constants.LABEL_CONFIGMAP_TYPE_HIGH_AVAILABILITY;
 import static org.apache.flink.kubernetes.utils.Constants.LABEL_CONFIGMAP_TYPE_KEY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link KubernetesHaServices}. */
 public class KubernetesHaServicesTest extends KubernetesHighAvailabilityTestBase {
@@ -49,7 +48,7 @@ public class KubernetesHaServicesTest extends KubernetesHighAvailabilityTestBase
                                             configuration,
                                             new VoidBlobStore());
                             kubernetesHaServices.internalClose();
-                            assertThat(closeKubeClientFuture.isDone(), is(true));
+                            assertThat(closeKubeClientFuture.isDone()).isEqualTo(true);
                         });
             }
         };
@@ -71,10 +70,9 @@ public class KubernetesHaServicesTest extends KubernetesHighAvailabilityTestBase
                             final Map<String, String> labels =
                                     deleteConfigMapByLabelsFuture.get(
                                             TIMEOUT, TimeUnit.MILLISECONDS);
-                            assertThat(labels.size(), is(3));
-                            assertThat(
-                                    labels.get(LABEL_CONFIGMAP_TYPE_KEY),
-                                    is(LABEL_CONFIGMAP_TYPE_HIGH_AVAILABILITY));
+                            assertThat(labels.size()).isEqualTo(3);
+                            assertThat(labels.get(LABEL_CONFIGMAP_TYPE_KEY))
+                                    .isEqualTo(LABEL_CONFIGMAP_TYPE_HIGH_AVAILABILITY);
                         });
             }
         };
@@ -99,13 +97,11 @@ public class KubernetesHaServicesTest extends KubernetesHighAvailabilityTestBase
                                     new TestingFlinkKubeClient.MockKubernetesConfigMap(
                                             configMapName);
                             flinkKubeClient.createConfigMap(configMap);
-                            assertThat(
-                                    flinkKubeClient.getConfigMap(configMapName).isPresent(),
-                                    is(true));
+                            assertThat(flinkKubeClient.getConfigMap(configMapName).isPresent())
+                                    .isEqualTo(true);
                             kubernetesHaServices.internalCleanupJobData(jobID);
-                            assertThat(
-                                    flinkKubeClient.getConfigMap(configMapName).isPresent(),
-                                    is(false));
+                            assertThat(flinkKubeClient.getConfigMap(configMapName).isPresent())
+                                    .isEqualTo(false);
                         });
             }
         };

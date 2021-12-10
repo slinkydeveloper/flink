@@ -34,10 +34,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 
 /** Tests {@link DefaultPreferredLocationsRetriever}. */
 public class DefaultPreferredLocationsRetrieverTest extends TestLogger {
@@ -65,7 +66,7 @@ public class DefaultPreferredLocationsRetrieverTest extends TestLogger {
         final CompletableFuture<Collection<TaskManagerLocation>> preferredLocations =
                 locationsRetriever.getPreferredLocations(consumerId, Collections.emptySet());
 
-        assertThat(preferredLocations.getNow(null), contains(stateLocation));
+        assertThat(preferredLocations.getNow(null)).satisfies(matching(contains(stateLocation)));
     }
 
     @Test
@@ -98,7 +99,7 @@ public class DefaultPreferredLocationsRetrieverTest extends TestLogger {
         final CompletableFuture<Collection<TaskManagerLocation>> preferredLocations =
                 locationsRetriever.getPreferredLocations(consumerId, Collections.emptySet());
 
-        assertThat(preferredLocations.getNow(null), hasSize(0));
+        assertThat(preferredLocations.getNow(null)).satisfies(matching(hasSize(0)));
     }
 
     @Test
@@ -150,8 +151,8 @@ public class DefaultPreferredLocationsRetrieverTest extends TestLogger {
         final CompletableFuture<Collection<TaskManagerLocation>> preferredLocations =
                 locationsRetriever.getPreferredLocations(consumerId, Collections.emptySet());
 
-        assertThat(
-                preferredLocations.getNow(null), containsInAnyOrder(expectedLocations.toArray()));
+        assertThat(preferredLocations.getNow(null))
+                .satisfies(matching(containsInAnyOrder(expectedLocations.toArray())));
     }
 
     @Test
@@ -186,10 +187,11 @@ public class DefaultPreferredLocationsRetrieverTest extends TestLogger {
                 locationsRetriever.getPreferredLocations(
                         consumerId, Collections.singleton(producerId1));
 
-        assertThat(preferredLocations.getNow(null), hasSize(1));
+        assertThat(preferredLocations.getNow(null)).satisfies(matching(hasSize(1)));
 
         final TaskManagerLocation producerLocation2 =
                 inputsLocationsRetriever.getTaskManagerLocation(producerId2).get().getNow(null);
-        assertThat(preferredLocations.getNow(null), contains(producerLocation2));
+        assertThat(preferredLocations.getNow(null))
+                .satisfies(matching(contains(producerLocation2)));
     }
 }

@@ -22,7 +22,6 @@ package org.apache.flink.runtime.state.heap;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,6 +30,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import static org.apache.flink.runtime.state.heap.SkipListUtils.DEFAULT_LEVEL;
 import static org.apache.flink.runtime.state.heap.SkipListUtils.MAX_LEVEL;
 import static org.apache.flink.runtime.state.heap.SkipListUtils.NIL_NODE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link OnHeapLevelIndexHeader}. */
 public class OnHeapLevelIndexHeaderTest extends TestLogger {
@@ -45,13 +46,13 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
 
     @Test
     public void testInitStatus() {
-        Assert.assertEquals(1, heapHeadIndex.getLevel());
-        Assert.assertEquals(DEFAULT_LEVEL, heapHeadIndex.getLevelIndex().length);
+        assertThat(heapHeadIndex.getLevel()).isEqualTo(1);
+        assertThat(heapHeadIndex.getLevelIndex().length).isEqualTo(DEFAULT_LEVEL);
         for (long node : heapHeadIndex.getLevelIndex()) {
-            Assert.assertEquals(NIL_NODE, node);
+            assertThat(node).isEqualTo(NIL_NODE);
         }
         for (int level = 0; level <= heapHeadIndex.getLevel(); level++) {
-            Assert.assertEquals(NIL_NODE, heapHeadIndex.getNextNode(level));
+            assertThat(heapHeadIndex.getNextNode(level)).isEqualTo(NIL_NODE);
         }
     }
 
@@ -61,13 +62,13 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
         // update level to no more than init max level
         for (; level <= DEFAULT_LEVEL; level++) {
             heapHeadIndex.updateLevel(level);
-            Assert.assertEquals(level, heapHeadIndex.getLevel());
-            Assert.assertEquals(DEFAULT_LEVEL, heapHeadIndex.getLevelIndex().length);
+            assertThat(heapHeadIndex.getLevel()).isEqualTo(level);
+            assertThat(heapHeadIndex.getLevelIndex().length).isEqualTo(DEFAULT_LEVEL);
         }
         // update level to trigger scale up
         heapHeadIndex.updateLevel(level);
-        Assert.assertEquals(level, heapHeadIndex.getLevel());
-        Assert.assertEquals(DEFAULT_LEVEL * 2, heapHeadIndex.getLevelIndex().length);
+        assertThat(heapHeadIndex.getLevel()).isEqualTo(level);
+        assertThat(heapHeadIndex.getLevelIndex().length).isEqualTo(DEFAULT_LEVEL * 2);
     }
 
     /** Test update to current level is allowed. */
@@ -87,7 +88,7 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
         // check update level to values less than current top level
         for (int i = level - 1; i >= 0; i--) {
             heapHeadIndex.updateLevel(i);
-            Assert.assertEquals(level, heapHeadIndex.getLevel());
+            assertThat(heapHeadIndex.getLevel()).isEqualTo(level);
         }
     }
 
@@ -96,9 +97,9 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
     public void testOnceUpdateMoreThanOneLevel() {
         try {
             heapHeadIndex.updateLevel(heapHeadIndex.getLevel() + 2);
-            Assert.fail("Should have thrown exception");
+            fail("Should have thrown exception");
         } catch (Exception e) {
-            Assert.assertTrue(e instanceof IllegalArgumentException);
+            assertThat(e).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -107,9 +108,9 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
     public void testUpdateToNegativeLevel() {
         try {
             heapHeadIndex.updateLevel(-1);
-            Assert.fail("Should throw exception");
+            fail("Should throw exception");
         } catch (Exception e) {
-            Assert.assertTrue(e instanceof IllegalArgumentException);
+            assertThat(e).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -118,9 +119,9 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
     public void testUpdateToMoreThanMaximumAllowed() {
         try {
             heapHeadIndex.updateLevel(MAX_LEVEL + 1);
-            Assert.fail("Should throw exception");
+            fail("Should throw exception");
         } catch (Exception e) {
-            Assert.assertTrue(e instanceof IllegalArgumentException);
+            assertThat(e).isInstanceOf(IllegalArgumentException.class);
         }
     }
 
@@ -130,13 +131,13 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
         int level = 0;
         long node1 = random.nextLong(Long.MAX_VALUE);
         heapHeadIndex.updateNextNode(level, node1);
-        Assert.assertEquals(node1, heapHeadIndex.getNextNode(level));
+        assertThat(heapHeadIndex.getNextNode(level)).isEqualTo(node1);
         // Increase one level and make sure everything still works
         heapHeadIndex.updateLevel(++level);
         long node2 = random.nextLong(Long.MAX_VALUE);
         heapHeadIndex.updateNextNode(level, node2);
-        Assert.assertEquals(node2, heapHeadIndex.getNextNode(level));
-        Assert.assertEquals(node1, heapHeadIndex.getNextNode(level - 1));
+        assertThat(heapHeadIndex.getNextNode(level)).isEqualTo(node2);
+        assertThat(heapHeadIndex.getNextNode(level - 1)).isEqualTo(node1);
     }
 
     @Test
@@ -148,9 +149,9 @@ public class OnHeapLevelIndexHeaderTest extends TestLogger {
         heapHeadIndex.updateLevel(level);
         long node = random.nextLong(Long.MAX_VALUE);
         heapHeadIndex.updateNextNode(level, node);
-        Assert.assertEquals(node, heapHeadIndex.getNextNode(level));
+        assertThat(heapHeadIndex.getNextNode(level)).isEqualTo(node);
         for (int i = 0; i < level; i++) {
-            Assert.assertEquals(NIL_NODE, heapHeadIndex.getNextNode(i));
+            assertThat(heapHeadIndex.getNextNode(i)).isEqualTo(NIL_NODE);
         }
     }
 }

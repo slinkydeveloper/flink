@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.apache.flink.runtime.testutils.CommonTestUtils.waitForAllTaskRunning;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests migrating from {@link StreamingFileSink} to {@link FileSink}. It trigger a savepoint for
@@ -103,10 +103,9 @@ public class FileSinkMigrationITCase extends TestLogger {
         env.setParallelism(100);
         env.fromSequence(0, n).map(i -> list.applySync(l -> l.add(i)));
         env.execute();
-        assertEquals(n + 1, list.get().size());
-        assertEquals(
-                LongStream.rangeClosed(0, n).boxed().collect(Collectors.toList()),
-                list.get().stream().sorted().collect(Collectors.toList()));
+        assertThat(list.get().size()).isEqualTo(n + 1);
+        assertThat(list.get().stream().sorted().collect(Collectors.toList()))
+                .isEqualTo(LongStream.rangeClosed(0, n).boxed().collect(Collectors.toList()));
     }
 
     @Test

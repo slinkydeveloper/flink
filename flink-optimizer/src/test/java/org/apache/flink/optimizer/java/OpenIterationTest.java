@@ -31,7 +31,7 @@ import org.apache.flink.optimizer.util.CompilerTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class OpenIterationTest extends CompilerTestBase {

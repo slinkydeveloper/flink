@@ -84,7 +84,7 @@ import java.util.List;
 
 import static org.apache.flink.table.types.utils.LogicalTypeDataTypeConverter.toDataType;
 import static org.apache.flink.table.types.utils.LogicalTypeDataTypeConverter.toLogicalType;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LogicalType} serialization and deserialization. */
 @RunWith(Parameterized.class)
@@ -119,8 +119,8 @@ public class LogicalTypeSerdeTest {
         }
         String json = writer.toString();
         LogicalType actual = mapper.readValue(json, LogicalType.class);
-        assertEquals(logicalType, actual);
-        assertEquals(logicalType.asSummaryString(), actual.asSummaryString());
+        assertThat(actual).isEqualTo(logicalType);
+        assertThat(actual.asSummaryString()).isEqualTo(logicalType.asSummaryString());
     }
 
     @Parameterized.Parameters(name = "{0}")

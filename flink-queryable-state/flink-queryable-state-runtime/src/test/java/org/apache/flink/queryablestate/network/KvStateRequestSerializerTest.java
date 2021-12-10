@@ -58,7 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link KvStateSerializer}. */
@@ -89,8 +89,8 @@ public class KvStateRequestSerializerTest {
                 KvStateSerializer.deserializeKeyAndNamespace(
                         serializedKeyAndNamespace, keySerializer, namespaceSerializer);
 
-        assertEquals(expectedKey, actual.f0.longValue());
-        assertEquals(expectedNamespace, actual.f1);
+        assertThat(actual.f0.longValue()).isEqualTo(expectedKey);
+        assertThat(actual.f1).isEqualTo(expectedNamespace);
     }
 
     /** Tests key and namespace deserialization utils with too few bytes. */
@@ -136,7 +136,7 @@ public class KvStateRequestSerializerTest {
         byte[] serializedValue = KvStateSerializer.serializeValue(expectedValue, valueSerializer);
         long actualValue = KvStateSerializer.deserializeValue(serializedValue, valueSerializer);
 
-        assertEquals(expectedValue, actualValue);
+        assertThat(actualValue).isEqualTo(expectedValue);
     }
 
     /** Tests value deserialization with too few bytes. */
@@ -225,15 +225,15 @@ public class KvStateRequestSerializerTest {
 
         List<Long> actualValues =
                 KvStateSerializer.deserializeList(serializedValues, valueSerializer);
-        assertEquals(expectedValues, actualValues);
+        assertThat(actualValues).isEqualTo(expectedValues);
 
         // Single value
         long expectedValue = ThreadLocalRandom.current().nextLong();
         byte[] serializedValue = KvStateSerializer.serializeValue(expectedValue, valueSerializer);
         List<Long> actualValue =
                 KvStateSerializer.deserializeList(serializedValue, valueSerializer);
-        assertEquals(1, actualValue.size());
-        assertEquals(expectedValue, actualValue.get(0).longValue());
+        assertThat(actualValue.size()).isEqualTo(1);
+        assertThat(actualValue.get(0).longValue()).isEqualTo(expectedValue);
     }
 
     /** Tests list deserialization with too few bytes. */
@@ -241,7 +241,7 @@ public class KvStateRequestSerializerTest {
     public void testDeserializeListEmpty() throws Exception {
         List<Long> actualValue =
                 KvStateSerializer.deserializeList(new byte[] {}, LongSerializer.INSTANCE);
-        assertEquals(0, actualValue.size());
+        assertThat(actualValue.size()).isEqualTo(0);
     }
 
     /** Tests list deserialization with too few bytes. */
@@ -353,9 +353,9 @@ public class KvStateRequestSerializerTest {
         Map<Long, String> actualValues =
                 KvStateSerializer.deserializeMap(
                         serializedValues, userKeySerializer, userValueSerializer);
-        assertEquals(expectedValues.size(), actualValues.size());
+        assertThat(actualValues.size()).isEqualTo(expectedValues.size());
         for (Map.Entry<Long, String> actualEntry : actualValues.entrySet()) {
-            assertEquals(expectedValues.get(actualEntry.getKey()), actualEntry.getValue());
+            assertThat(actualEntry.getValue()).isEqualTo(expectedValues.get(actualEntry.getKey()));
         }
 
         // Single value
@@ -372,8 +372,8 @@ public class KvStateRequestSerializerTest {
         Map<Long, String> actualValue =
                 KvStateSerializer.deserializeMap(
                         serializedValue, userKeySerializer, userValueSerializer);
-        assertEquals(1, actualValue.size());
-        assertEquals(expectedValue, actualValue.get(expectedKey));
+        assertThat(actualValue.size()).isEqualTo(1);
+        assertThat(actualValue.get(expectedKey)).isEqualTo(expectedValue);
     }
 
     /** Tests map deserialization with too few bytes. */
@@ -382,7 +382,7 @@ public class KvStateRequestSerializerTest {
         Map<Long, String> actualValue =
                 KvStateSerializer.deserializeMap(
                         new byte[] {}, LongSerializer.INSTANCE, StringSerializer.INSTANCE);
-        assertEquals(0, actualValue.size());
+        assertThat(actualValue.size()).isEqualTo(0);
     }
 
     /** Tests map deserialization with too few bytes. */

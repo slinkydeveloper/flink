@@ -26,7 +26,6 @@ import org.apache.flink.core.fs.Path;
 import org.apache.flink.table.utils.LegacyRowResource;
 import org.apache.flink.types.Row;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link PartitionWriter}s. */
 public class PartitionWriterTest {
@@ -111,7 +112,7 @@ public class PartitionWriterTest {
         SingleDirectoryWriter<Row> writer =
                 new SingleDirectoryWriter<>(context, manager, computer, new LinkedHashMap<>());
         writer.close();
-        Assert.assertTrue(records.isEmpty());
+        assertThat(records.isEmpty()).isTrue();
     }
 
     @Test
@@ -123,7 +124,7 @@ public class PartitionWriterTest {
         writer.write(Row.of("p1", 2));
         writer.write(Row.of("p2", 2));
         writer.close();
-        Assert.assertEquals("{task-0=[p1,1, p1,2, p2,2]}", records.toString());
+        assertThat(records.toString()).isEqualTo("{task-0=[p1,1, p1,2, p2,2]}");
 
         manager = new PartitionTempFileManager(fsFactory, tmpPath, 1);
         writer = new SingleDirectoryWriter<>(context, manager, computer, new LinkedHashMap<>());
@@ -131,8 +132,8 @@ public class PartitionWriterTest {
         writer.write(Row.of("p5", 5));
         writer.write(Row.of("p2", 2));
         writer.close();
-        Assert.assertEquals(
-                "{task-0=[p1,1, p1,2, p2,2], task-1=[p3,3, p5,5, p2,2]}", records.toString());
+        assertThat(records.toString())
+                .isEqualTo("{task-0=[p1,1, p1,2, p2,2], task-1=[p3,3, p5,5, p2,2]}");
     }
 
     @Test
@@ -144,7 +145,7 @@ public class PartitionWriterTest {
         writer.write(Row.of("p1", 2));
         writer.write(Row.of("p2", 2));
         writer.close();
-        Assert.assertEquals("{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2]}", records.toString());
+        assertThat(records.toString()).isEqualTo("{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2]}");
 
         manager = new PartitionTempFileManager(fsFactory, tmpPath, 1);
         writer = new GroupedPartitionWriter<>(context, manager, computer);
@@ -152,9 +153,9 @@ public class PartitionWriterTest {
         writer.write(Row.of("p4", 5));
         writer.write(Row.of("p5", 2));
         writer.close();
-        Assert.assertEquals(
-                "{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2], task-1/p=p3=[p3,3], task-1/p=p4=[p4,5], task-1/p=p5=[p5,2]}",
-                records.toString());
+        assertThat(records.toString())
+                .isEqualTo(
+                        "{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2], task-1/p=p3=[p3,3], task-1/p=p4=[p4,5], task-1/p=p5=[p5,2]}");
     }
 
     @Test
@@ -166,7 +167,7 @@ public class PartitionWriterTest {
         writer.write(Row.of("p2", 2));
         writer.write(Row.of("p1", 2));
         writer.close();
-        Assert.assertEquals("{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2]}", records.toString());
+        assertThat(records.toString()).isEqualTo("{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2]}");
 
         manager = new PartitionTempFileManager(fsFactory, tmpPath, 1);
         writer = new DynamicPartitionWriter<>(context, manager, computer);
@@ -174,8 +175,8 @@ public class PartitionWriterTest {
         writer.write(Row.of("p3", 3));
         writer.write(Row.of("p5", 2));
         writer.close();
-        Assert.assertEquals(
-                "{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2], task-1/p=p4=[p4,5], task-1/p=p3=[p3,3], task-1/p=p5=[p5,2]}",
-                records.toString());
+        assertThat(records.toString())
+                .isEqualTo(
+                        "{task-0/p=p1=[p1,1, p1,2], task-0/p=p2=[p2,2], task-1/p=p4=[p4,5], task-1/p=p3=[p3,3], task-1/p=p5=[p5,2]}");
     }
 }

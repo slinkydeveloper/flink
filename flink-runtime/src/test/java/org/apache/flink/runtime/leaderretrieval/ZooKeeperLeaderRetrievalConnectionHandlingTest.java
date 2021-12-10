@@ -49,10 +49,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests for the error handling in case of a suspended connection to the ZooKeeper instance when
@@ -111,21 +110,21 @@ public class ZooKeeperLeaderRetrievalConnectionHandlingTest extends TestLogger {
             // do the testing
             final CompletableFuture<String> firstAddress =
                     queueLeaderElectionListener.next(Duration.ofMillis(50));
-            assertThat(
-                    "No results are expected, yet, since no leader was elected.",
-                    firstAddress,
-                    is(nullValue()));
+            assertThat(firstAddress)
+                    .as("No results are expected, yet, since no leader was elected.")
+                    .isEqualTo(nullValue());
 
             restartTestServer();
 
             // QueueLeaderElectionListener will be notified with an empty leader when ZK connection
             // is suspended
             final CompletableFuture<String> secondAddress = queueLeaderElectionListener.next();
-            assertThat("The next result must not be missing.", secondAddress, is(notNullValue()));
-            assertThat(
-                    "The next result is expected to be null.",
-                    secondAddress.get(),
-                    is(nullValue()));
+            assertThat(secondAddress)
+                    .as("The next result must not be missing.")
+                    .isEqualTo(notNullValue());
+            assertThat(secondAddress.get())
+                    .as("The next result is expected to be null.")
+                    .isEqualTo(nullValue());
         } finally {
             if (leaderRetrievalDriver != null) {
                 leaderRetrievalDriver.close();
@@ -158,19 +157,19 @@ public class ZooKeeperLeaderRetrievalConnectionHandlingTest extends TestLogger {
 
             // do the testing
             CompletableFuture<String> firstAddress = queueLeaderElectionListener.next();
-            assertThat(
-                    "The first result is expected to be the initially set leader address.",
-                    firstAddress.get(),
-                    is(leaderAddress));
+            assertThat(firstAddress.get())
+                    .as("The first result is expected to be the initially set leader address.")
+                    .isEqualTo(leaderAddress);
 
             restartTestServer();
 
             CompletableFuture<String> secondAddress = queueLeaderElectionListener.next();
-            assertThat("The next result must not be missing.", secondAddress, is(notNullValue()));
-            assertThat(
-                    "The next result is expected to be null.",
-                    secondAddress.get(),
-                    is(nullValue()));
+            assertThat(secondAddress)
+                    .as("The next result must not be missing.")
+                    .isEqualTo(notNullValue());
+            assertThat(secondAddress.get())
+                    .as("The next result is expected to be null.")
+                    .isEqualTo(nullValue());
         } finally {
             if (leaderRetrievalDriver != null) {
                 leaderRetrievalDriver.close();
@@ -204,15 +203,15 @@ public class ZooKeeperLeaderRetrievalConnectionHandlingTest extends TestLogger {
 
             // do the testing
             CompletableFuture<String> firstAddress = queueLeaderElectionListener.next();
-            assertThat(
-                    "The first result is expected to be the initially set leader address.",
-                    firstAddress.get(),
-                    is(leaderAddress));
+            assertThat(firstAddress.get())
+                    .as("The first result is expected to be the initially set leader address.")
+                    .isEqualTo(leaderAddress);
 
             closeTestServer();
 
             // make sure that no new leader information is published
-            assertThat(queueLeaderElectionListener.next(Duration.ofMillis(100L)), is(nullValue()));
+            assertThat(queueLeaderElectionListener.next(Duration.ofMillis(100L)))
+                    .isEqualTo(nullValue());
         } finally {
             if (leaderRetrievalDriver != null) {
                 leaderRetrievalDriver.close();
@@ -257,7 +256,7 @@ public class ZooKeeperLeaderRetrievalConnectionHandlingTest extends TestLogger {
             // new old leader information should be announced
             final CompletableFuture<String> connectionReconnect =
                     queueLeaderElectionListener.next();
-            assertThat(connectionReconnect.get(), is(leaderAddress));
+            assertThat(connectionReconnect.get()).isEqualTo(leaderAddress);
         } finally {
             if (leaderRetrievalDriver != null) {
                 leaderRetrievalDriver.close();

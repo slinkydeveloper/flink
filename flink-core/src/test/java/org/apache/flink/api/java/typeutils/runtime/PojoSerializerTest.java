@@ -37,7 +37,6 @@ import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.core.memory.DataInputViewStreamWrapper;
 import org.apache.flink.core.memory.DataOutputViewStreamWrapper;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -48,10 +47,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** A test for the {@link PojoSerializer}. */
 public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.TestUserClass> {
@@ -60,7 +57,7 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
     @Override
     protected TypeSerializer<TestUserClass> createSerializer() {
         TypeSerializer<TestUserClass> serializer = type.createSerializer(new ExecutionConfig());
-        assert (serializer instanceof PojoSerializer);
+        assertThat((serializer instanceof PojoSerializer)).isTrue();
         return serializer;
     }
 
@@ -276,9 +273,9 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
 
         int tHash = tupleComp.hash(tupleTest);
 
-        Assert.assertTrue(
-                "The hashing for tuples and pojos must be the same, so that they are mixable",
-                pHash == tHash);
+        assertThat(pHash == tHash)
+                .as("The hashing for tuples and pojos must be the same, so that they are mixable")
+                .isTrue();
 
         Tuple3<Integer, String, Double> multiTupleTest =
                 new Tuple3<Integer, String, Double>(
@@ -295,11 +292,12 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
                         },
                         pType);
         try {
-            Assert.assertTrue(
-                    "Expecting the keys to be compatible", fieldKey.areCompatible(expressKey));
+            assertThat(fieldKey.areCompatible(expressKey))
+                    .as("Expecting the keys to be compatible")
+                    .isTrue();
         } catch (IncompatibleKeysException e) {
             e.printStackTrace();
-            Assert.fail("Keys must be compatible: " + e.getMessage());
+            fail("Keys must be compatible: " + e.getMessage());
         }
         TypeComparator<TestUserClass> multiPojoComp =
                 pType.createComparator(
@@ -318,9 +316,10 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
                         new ExecutionConfig());
         int multiTupleHash = multiTupleComp.hash(multiTupleTest);
 
-        Assert.assertTrue(
-                "The hashing for tuples and pojos must be the same, so that they are mixable. Also for those with multiple key fields",
-                multiPojoHash == multiTupleHash);
+        assertThat(multiPojoHash == multiTupleHash)
+                .as(
+                        "The hashing for tuples and pojos must be the same, so that they are mixable. Also for those with multiple key fields")
+                .isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -367,7 +366,7 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<SubTestUserClassA> compatResult =
                 pojoSerializerConfigSnapshot.resolveSchemaCompatibility(pojoSerializer2);
-        assertTrue(compatResult.isIncompatible());
+        assertThat(compatResult.isIncompatible()).isTrue();
     }
 
     /**
@@ -418,26 +417,26 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<TestUserClass> compatResult =
                 pojoSerializerConfigSnapshot.resolveSchemaCompatibility(pojoSerializer);
-        assertTrue(compatResult.isCompatibleWithReconfiguredSerializer());
-        assertThat(compatResult.getReconfiguredSerializer(), instanceOf(PojoSerializer.class));
+        assertThat(compatResult.isCompatibleWithReconfiguredSerializer()).isTrue();
+        assertThat(compatResult.getReconfiguredSerializer()).isInstanceOf(PojoSerializer.class);
 
         // reconfigure - check reconfiguration result and that registration ids remains the same
         // assertEquals(ReconfigureResult.COMPATIBLE,
         // pojoSerializer.reconfigure(pojoSerializerConfigSnapshot));
         PojoSerializer<TestUserClass> reconfiguredPojoSerializer =
                 (PojoSerializer<TestUserClass>) compatResult.getReconfiguredSerializer();
-        assertEquals(
-                subClassATag,
-                reconfiguredPojoSerializer
-                        .getRegisteredClasses()
-                        .get(SubTestUserClassA.class)
-                        .intValue());
-        assertEquals(
-                subClassBTag,
-                reconfiguredPojoSerializer
-                        .getRegisteredClasses()
-                        .get(SubTestUserClassB.class)
-                        .intValue());
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getRegisteredClasses()
+                                .get(SubTestUserClassA.class)
+                                .intValue())
+                .isEqualTo(subClassATag);
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getRegisteredClasses()
+                                .get(SubTestUserClassB.class)
+                                .intValue())
+                .isEqualTo(subClassBTag);
     }
 
     /** Tests that reconfiguration repopulates previously cached subclass serializers. */
@@ -451,11 +450,11 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
         pojoSerializer.getSubclassSerializer(SubTestUserClassA.class);
         pojoSerializer.getSubclassSerializer(SubTestUserClassB.class);
 
-        assertEquals(2, pojoSerializer.getSubclassSerializerCache().size());
-        assertTrue(
-                pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassA.class));
-        assertTrue(
-                pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassB.class));
+        assertThat(pojoSerializer.getSubclassSerializerCache().size()).isEqualTo(2);
+        assertThat(pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassA.class))
+                .isTrue();
+        assertThat(pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassB.class))
+                .isTrue();
 
         // snapshot configuration and serialize to bytes
         TypeSerializerSnapshot pojoSerializerConfigSnapshot =
@@ -488,20 +487,22 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<TestUserClass> compatResult =
                 pojoSerializerConfigSnapshot.resolveSchemaCompatibility(pojoSerializer);
-        assertTrue(compatResult.isCompatibleWithReconfiguredSerializer());
-        assertThat(compatResult.getReconfiguredSerializer(), instanceOf(PojoSerializer.class));
+        assertThat(compatResult.isCompatibleWithReconfiguredSerializer()).isTrue();
+        assertThat(compatResult.getReconfiguredSerializer()).isInstanceOf(PojoSerializer.class);
 
         PojoSerializer<TestUserClass> reconfiguredPojoSerializer =
                 (PojoSerializer<TestUserClass>) compatResult.getReconfiguredSerializer();
-        assertEquals(2, reconfiguredPojoSerializer.getSubclassSerializerCache().size());
-        assertTrue(
-                reconfiguredPojoSerializer
-                        .getSubclassSerializerCache()
-                        .containsKey(SubTestUserClassA.class));
-        assertTrue(
-                reconfiguredPojoSerializer
-                        .getSubclassSerializerCache()
-                        .containsKey(SubTestUserClassB.class));
+        assertThat(reconfiguredPojoSerializer.getSubclassSerializerCache().size()).isEqualTo(2);
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getSubclassSerializerCache()
+                                .containsKey(SubTestUserClassA.class))
+                .isTrue();
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getSubclassSerializerCache()
+                                .containsKey(SubTestUserClassB.class))
+                .isTrue();
     }
 
     /**
@@ -528,15 +529,15 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
         pojoSerializer.getSubclassSerializer(SubTestUserClassB.class);
 
         // make sure serializers are in cache
-        assertEquals(2, pojoSerializer.getSubclassSerializerCache().size());
-        assertTrue(
-                pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassA.class));
-        assertTrue(
-                pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassB.class));
+        assertThat(pojoSerializer.getSubclassSerializerCache().size()).isEqualTo(2);
+        assertThat(pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassA.class))
+                .isTrue();
+        assertThat(pojoSerializer.getSubclassSerializerCache().containsKey(SubTestUserClassB.class))
+                .isTrue();
 
         // make sure that registrations are empty
-        assertTrue(pojoSerializer.getRegisteredClasses().isEmpty());
-        assertEquals(0, pojoSerializer.getRegisteredSerializers().length);
+        assertThat(pojoSerializer.getRegisteredClasses().isEmpty()).isTrue();
+        assertThat(pojoSerializer.getRegisteredSerializers().length).isEqualTo(0);
 
         // snapshot configuration and serialize to bytes
         TypeSerializerSnapshot pojoSerializerConfigSnapshot =
@@ -572,28 +573,32 @@ public class PojoSerializerTest extends SerializerTestBase<PojoSerializerTest.Te
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<TestUserClass> compatResult =
                 pojoSerializerConfigSnapshot.resolveSchemaCompatibility(pojoSerializer);
-        assertTrue(compatResult.isCompatibleWithReconfiguredSerializer());
-        assertThat(compatResult.getReconfiguredSerializer(), instanceOf(PojoSerializer.class));
+        assertThat(compatResult.isCompatibleWithReconfiguredSerializer()).isTrue();
+        assertThat(compatResult.getReconfiguredSerializer()).isInstanceOf(PojoSerializer.class);
 
         PojoSerializer<TestUserClass> reconfiguredPojoSerializer =
                 (PojoSerializer<TestUserClass>) compatResult.getReconfiguredSerializer();
-        assertEquals(2, reconfiguredPojoSerializer.getSubclassSerializerCache().size());
-        assertTrue(
-                reconfiguredPojoSerializer
-                        .getSubclassSerializerCache()
-                        .containsKey(SubTestUserClassA.class));
-        assertTrue(
-                reconfiguredPojoSerializer
-                        .getSubclassSerializerCache()
-                        .containsKey(SubTestUserClassB.class));
-        assertEquals(2, reconfiguredPojoSerializer.getRegisteredClasses().size());
-        assertTrue(
-                reconfiguredPojoSerializer
-                        .getRegisteredClasses()
-                        .containsKey(SubTestUserClassA.class));
-        assertTrue(
-                reconfiguredPojoSerializer
-                        .getRegisteredClasses()
-                        .containsKey(SubTestUserClassB.class));
+        assertThat(reconfiguredPojoSerializer.getSubclassSerializerCache().size()).isEqualTo(2);
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getSubclassSerializerCache()
+                                .containsKey(SubTestUserClassA.class))
+                .isTrue();
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getSubclassSerializerCache()
+                                .containsKey(SubTestUserClassB.class))
+                .isTrue();
+        assertThat(reconfiguredPojoSerializer.getRegisteredClasses().size()).isEqualTo(2);
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getRegisteredClasses()
+                                .containsKey(SubTestUserClassA.class))
+                .isTrue();
+        assertThat(
+                        reconfiguredPojoSerializer
+                                .getRegisteredClasses()
+                                .containsKey(SubTestUserClassB.class))
+                .isTrue();
     }
 }

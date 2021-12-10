@@ -23,7 +23,6 @@ import org.apache.flink.core.memory.DataInputViewStreamWrapper;
 import org.apache.flink.core.memory.DataOutputView;
 import org.apache.flink.core.memory.DataOutputViewStreamWrapper;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,8 +32,8 @@ import java.io.PipedOutputStream;
 import java.util.Arrays;
 import java.util.Random;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class RecordTest {
 
@@ -65,21 +64,21 @@ public class RecordTest {
             Record empty = new Record();
             empty.write(this.out);
             empty.read(in);
-            Assert.assertTrue(
-                    "Deserialized Empty record is not another empty record.",
-                    empty.getNumFields() == 0);
+            assertThat(empty.getNumFields() == 0)
+                    .as("Deserialized Empty record is not another empty record.")
+                    .isTrue();
 
             // test deserialize into new
             empty = new Record();
             empty.write(this.out);
             empty = new Record();
             empty.read(this.in);
-            Assert.assertTrue(
-                    "Deserialized Empty record is not another empty record.",
-                    empty.getNumFields() == 0);
+            assertThat(empty.getNumFields() == 0)
+                    .as("Deserialized Empty record is not another empty record.")
+                    .isTrue();
 
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -88,11 +87,11 @@ public class RecordTest {
         try {
             // Add a value to an empty record
             Record record = new Record();
-            assertTrue(record.getNumFields() == 0);
+            assertThat(record.getNumFields() == 0).isTrue();
             record.addField(this.origVal1);
-            assertTrue(record.getNumFields() == 1);
-            assertTrue(
-                    origVal1.getValue().equals(record.getField(0, StringValue.class).getValue()));
+            assertThat(record.getNumFields() == 1).isTrue();
+            assertThat(origVal1.getValue().equals(record.getField(0, StringValue.class).getValue()))
+                    .isTrue();
 
             // Add 100 random integers to the record
             record = new Record();
@@ -101,25 +100,31 @@ public class RecordTest {
                 record.addField(orig);
                 IntValue rec = record.getField(i, IntValue.class);
 
-                assertTrue(record.getNumFields() == i + 1);
-                assertTrue(orig.getValue() == rec.getValue());
+                assertThat(record.getNumFields() == i + 1).isTrue();
+                assertThat(orig.getValue() == rec.getValue()).isTrue();
             }
 
             // Add 3 values of different type to the record
             record = new Record(this.origVal1, this.origVal2);
             record.addField(this.origVal3);
 
-            assertTrue(record.getNumFields() == 3);
+            assertThat(record.getNumFields() == 3).isTrue();
 
             StringValue recVal1 = record.getField(0, StringValue.class);
             DoubleValue recVal2 = record.getField(1, DoubleValue.class);
             IntValue recVal3 = record.getField(2, IntValue.class);
 
-            assertTrue("The value of the first field has changed", recVal1.equals(this.origVal1));
-            assertTrue("The value of the second field changed", recVal2.equals(this.origVal2));
-            assertTrue("The value of the third field has changed", recVal3.equals(this.origVal3));
+            assertThat(recVal1.equals(this.origVal1))
+                    .as("The value of the first field has changed")
+                    .isTrue();
+            assertThat(recVal2.equals(this.origVal2))
+                    .as("The value of the second field changed")
+                    .isTrue();
+            assertThat(recVal3.equals(this.origVal3))
+                    .as("The value of the third field has changed")
+                    .isTrue();
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -175,25 +180,25 @@ public class RecordTest {
         record.addField(this.origVal3);
         record.removeField(1);
 
-        assertTrue(record.getNumFields() == 2);
+        assertThat(record.getNumFields() == 2).isTrue();
 
         StringValue recVal1 = record.getField(0, StringValue.class);
         IntValue recVal2 = record.getField(1, IntValue.class);
 
-        assertTrue(recVal1.getValue().equals(this.origVal1.getValue()));
-        assertTrue(recVal2.getValue() == this.origVal3.getValue());
+        assertThat(recVal1.getValue().equals(this.origVal1.getValue())).isTrue();
+        assertThat(recVal2.getValue() == this.origVal3.getValue()).isTrue();
 
         record = this.generateFilledDenseRecord(100);
 
         // Remove field from the first position of the record
         oldLen = record.getNumFields();
         record.removeField(0);
-        assertTrue(record.getNumFields() == oldLen - 1);
+        assertThat(record.getNumFields() == oldLen - 1).isTrue();
 
         // Remove field from the end of the record
         oldLen = record.getNumFields();
         record.removeField(oldLen - 1);
-        assertTrue(record.getNumFields() == oldLen - 1);
+        assertThat(record.getNumFields() == oldLen - 1).isTrue();
 
         // Insert several random fields into the record
         record = this.generateFilledDenseRecord(100);
@@ -202,7 +207,7 @@ public class RecordTest {
             oldLen = record.getNumFields();
             int pos = this.rand.nextInt(record.getNumFields());
             record.removeField(pos);
-            assertTrue(record.getNumFields() == oldLen - 1);
+            assertThat(record.getNumFields() == oldLen - 1).isTrue();
         }
     }
 
@@ -275,10 +280,10 @@ public class RecordTest {
             Record record = this.generateFilledDenseRecord(58);
 
             record.setNull(42);
-            assertTrue(record.getNumFields() == 58);
-            assertTrue(record.getField(42, IntValue.class) == null);
+            assertThat(record.getNumFields() == 58).isTrue();
+            assertThat(record.getField(42, IntValue.class) == null).isTrue();
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -292,13 +297,13 @@ public class RecordTest {
 
             for (int i = 0; i < 58; i++) {
                 if (((1L << i) & mask) != 0) {
-                    assertTrue(record.getField(i, IntValue.class) == null);
+                    assertThat(record.getField(i, IntValue.class) == null).isTrue();
                 }
             }
 
-            assertTrue(record.getNumFields() == 58);
+            assertThat(record.getNumFields() == 58).isTrue();
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -309,10 +314,10 @@ public class RecordTest {
             long[] mask = {1L, 1L, 1L, 1L};
             record.setNull(mask);
 
-            assertTrue(record.getField(0, IntValue.class) == null);
-            assertTrue(record.getField(64, IntValue.class) == null);
-            assertTrue(record.getField(128, IntValue.class) == null);
-            assertTrue(record.getField(192, IntValue.class) == null);
+            assertThat(record.getField(0, IntValue.class) == null).isTrue();
+            assertThat(record.getField(64, IntValue.class) == null).isTrue();
+            assertThat(record.getField(128, IntValue.class) == null).isTrue();
+            assertThat(record.getField(192, IntValue.class) == null).isTrue();
 
             mask = new long[10];
             for (int i = 0; i < mask.length; i++) {
@@ -326,7 +331,7 @@ public class RecordTest {
 
             record.setNull(mask);
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -376,10 +381,10 @@ public class RecordTest {
 
                 r.updateBinaryRepresenation();
 
-                assertTrue(r.getField(1, IntValue.class).getValue() == 1);
-                assertTrue(r.getField(3, IntValue.class).getValue() == 2);
-                assertTrue(r.getField(7, IntValue.class).getValue() == 3);
-                assertTrue(r.getField(8, IntValue.class).getValue() == 4);
+                assertThat(r.getField(1, IntValue.class).getValue() == 1).isTrue();
+                assertThat(r.getField(3, IntValue.class).getValue() == 2).isTrue();
+                assertThat(r.getField(7, IntValue.class).getValue() == 3).isTrue();
+                assertThat(r.getField(8, IntValue.class).getValue() == 4).isTrue();
             } catch (RuntimeException re) {
                 fail("Error updating binary representation: " + re.getMessage());
             }
@@ -406,24 +411,28 @@ public class RecordTest {
                 r = new Record();
                 r.read(this.in);
 
-                assertTrue(r.getField(0, IntValue.class).getValue() == 0);
-                assertTrue(r.getField(1, IntValue.class).getValue() == 10);
-                assertTrue(r.getField(2, IntValue.class).getValue() == 2);
-                assertTrue(r.getField(3, IntValue.class).getValue() == 3);
-                assertTrue(r.getField(4, StringValue.class).getValue().equals("Some long value"));
-                assertTrue(
-                        r.getField(5, StringValue.class).getValue().equals("An even longer value"));
-                assertTrue(r.getField(6, IntValue.class).getValue() == 6);
-                assertTrue(r.getField(7, IntValue.class).getValue() == 7);
-                assertTrue(r.getField(8, IntValue.class) == null);
-                assertTrue(r.getField(9, IntValue.class) == null);
-                assertTrue(r.getField(10, IntValue.class).getValue() == 10);
+                assertThat(r.getField(0, IntValue.class).getValue() == 0).isTrue();
+                assertThat(r.getField(1, IntValue.class).getValue() == 10).isTrue();
+                assertThat(r.getField(2, IntValue.class).getValue() == 2).isTrue();
+                assertThat(r.getField(3, IntValue.class).getValue() == 3).isTrue();
+                assertThat(r.getField(4, StringValue.class).getValue().equals("Some long value"))
+                        .isTrue();
+                assertThat(
+                                r.getField(5, StringValue.class)
+                                        .getValue()
+                                        .equals("An even longer value"))
+                        .isTrue();
+                assertThat(r.getField(6, IntValue.class).getValue() == 6).isTrue();
+                assertThat(r.getField(7, IntValue.class).getValue() == 7).isTrue();
+                assertThat(r.getField(8, IntValue.class) == null).isTrue();
+                assertThat(r.getField(9, IntValue.class) == null).isTrue();
+                assertThat(r.getField(10, IntValue.class).getValue() == 10).isTrue();
 
             } catch (RuntimeException | IOException re) {
                 fail("Error updating binary representation: " + re.getMessage());
             }
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -439,23 +448,23 @@ public class RecordTest {
                 record1.write(this.out);
                 record2.read(this.in);
 
-                assertTrue(record1.getNumFields() == record2.getNumFields());
+                assertThat(record1.getNumFields() == record2.getNumFields()).isTrue();
 
                 StringValue rec1Val1 = record1.getField(0, StringValue.class);
                 IntValue rec1Val2 = record1.getField(1, IntValue.class);
                 StringValue rec2Val1 = record2.getField(0, StringValue.class);
                 IntValue rec2Val2 = record2.getField(1, IntValue.class);
 
-                assertTrue(origValue1.equals(rec1Val1));
-                assertTrue(origValue2.equals(rec1Val2));
-                assertTrue(origValue1.equals(rec2Val1));
-                assertTrue(origValue2.equals(rec2Val2));
+                assertThat(origValue1.equals(rec1Val1)).isTrue();
+                assertThat(origValue2.equals(rec1Val2)).isTrue();
+                assertThat(origValue1.equals(rec2Val1)).isTrue();
+                assertThat(origValue2.equals(rec2Val2)).isTrue();
             } catch (IOException e) {
                 fail("Error writing Record");
                 e.printStackTrace();
             }
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -465,22 +474,22 @@ public class RecordTest {
             Record record = new Record(new IntValue(42));
 
             record.write(this.out);
-            Assert.assertEquals(42, record.getField(0, IntValue.class).getValue());
+            assertThat(record.getField(0, IntValue.class).getValue()).isEqualTo(42);
 
             record.setField(0, new IntValue(23));
             record.write(this.out);
-            Assert.assertEquals(23, record.getField(0, IntValue.class).getValue());
+            assertThat(record.getField(0, IntValue.class).getValue()).isEqualTo(23);
 
             record.clear();
-            Assert.assertEquals(0, record.getNumFields());
+            assertThat(record.getNumFields()).isEqualTo(0);
 
             Record record2 = new Record(new IntValue(42));
             record2.read(in);
-            Assert.assertEquals(42, record2.getField(0, IntValue.class).getValue());
+            assertThat(record2.getField(0, IntValue.class).getValue()).isEqualTo(42);
             record2.read(in);
-            Assert.assertEquals(23, record2.getField(0, IntValue.class).getValue());
+            assertThat(record2.getField(0, IntValue.class).getValue()).isEqualTo(23);
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -587,7 +596,7 @@ public class RecordTest {
                 blackboxTestRecordWithValues(fields, this.rand, this.in, this.out);
             }
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -740,7 +749,7 @@ public class RecordTest {
             if (e == null) {
                 final Value retrieved = rec.getField(pos, IntValue.class);
                 if (retrieved != null) {
-                    Assert.fail(
+                    fail(
                             "Value at position "
                                     + pos
                                     + " expected to be null in "
@@ -749,10 +758,13 @@ public class RecordTest {
             } else {
                 final Value retrieved = rec.getField(pos, e.getClass());
                 if (!(e.equals(retrieved))) {
-                    Assert.assertEquals(
-                            "Wrong value at position " + pos + " in " + Arrays.toString(expected),
-                            e,
-                            retrieved);
+                    assertThat(retrieved)
+                            .as(
+                                    "Wrong value at position "
+                                            + pos
+                                            + " in "
+                                            + Arrays.toString(expected))
+                            .isEqualTo(e);
                 }
             }
         }
@@ -765,7 +777,7 @@ public class RecordTest {
             if (e == null) {
                 final Value retrieved = rec.getField(pos, new IntValue());
                 if (retrieved != null) {
-                    Assert.fail(
+                    fail(
                             "Value at position "
                                     + pos
                                     + " expected to be null in "
@@ -774,10 +786,13 @@ public class RecordTest {
             } else {
                 final Value retrieved = rec.getField(pos, e.getClass().newInstance());
                 if (!(e.equals(retrieved))) {
-                    Assert.assertEquals(
-                            "Wrong value at position " + pos + " in " + Arrays.toString(expected),
-                            e,
-                            retrieved);
+                    assertThat(retrieved)
+                            .as(
+                                    "Wrong value at position "
+                                            + pos
+                                            + " in "
+                                            + Arrays.toString(expected))
+                            .isEqualTo(e);
                 }
             }
         }
@@ -789,7 +804,7 @@ public class RecordTest {
 
             if (e == null) {
                 if (rec.getFieldInto(pos, new IntValue())) {
-                    Assert.fail(
+                    fail(
                             "Value at position "
                                     + pos
                                     + " expected to be null in "
@@ -798,7 +813,7 @@ public class RecordTest {
             } else {
                 final Value retrieved = e.getClass().newInstance();
                 if (!rec.getFieldInto(pos, retrieved)) {
-                    Assert.fail(
+                    fail(
                             "Value at position "
                                     + pos
                                     + " expected to be not null in "
@@ -806,10 +821,13 @@ public class RecordTest {
                 }
 
                 if (!(e.equals(retrieved))) {
-                    Assert.assertEquals(
-                            "Wrong value at position " + pos + " in " + Arrays.toString(expected),
-                            e,
-                            retrieved);
+                    assertThat(retrieved)
+                            .as(
+                                    "Wrong value at position "
+                                            + pos
+                                            + " in "
+                                            + Arrays.toString(expected))
+                            .isEqualTo(e);
                 }
             }
         }
@@ -854,7 +872,7 @@ public class RecordTest {
                 testUnionFieldsForValues(values[i + 1], values[i], this.rand);
             }
         } catch (Throwable t) {
-            Assert.fail("Test failed due to an exception: " + t.getMessage());
+            fail("Test failed due to an exception: " + t.getMessage());
         }
     }
 
@@ -940,25 +958,26 @@ public class RecordTest {
             // check value from record against expected value
             if (expected == null) {
                 final Value retrieved = union.getField(i, IntValue.class);
-                Assert.assertNull(
-                        "Value at position "
-                                + i
-                                + " expected to be null in "
-                                + Arrays.toString(rec1fields)
-                                + " U "
-                                + Arrays.toString(rec2fields),
-                        retrieved);
+                assertThat(retrieved)
+                        .as(
+                                "Value at position "
+                                        + i
+                                        + " expected to be null in "
+                                        + Arrays.toString(rec1fields)
+                                        + " U "
+                                        + Arrays.toString(rec2fields))
+                        .isNull();
             } else {
                 final Value retrieved = union.getField(i, expected.getClass());
-                Assert.assertEquals(
-                        "Wrong value at position "
-                                + i
-                                + " in "
-                                + Arrays.toString(rec1fields)
-                                + " U "
-                                + Arrays.toString(rec2fields),
-                        expected,
-                        retrieved);
+                assertThat(retrieved)
+                        .as(
+                                "Wrong value at position "
+                                        + i
+                                        + " in "
+                                        + Arrays.toString(rec1fields)
+                                        + " U "
+                                        + Arrays.toString(rec2fields))
+                        .isEqualTo(expected);
             }
         }
     }

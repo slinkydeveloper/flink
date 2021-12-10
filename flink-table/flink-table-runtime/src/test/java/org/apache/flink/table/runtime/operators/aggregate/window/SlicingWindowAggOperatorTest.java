@@ -60,10 +60,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.apache.flink.core.testutils.FlinkMatchers.containsMessage;
 import static org.apache.flink.table.runtime.util.StreamRecordUtils.insertRecord;
 import static org.apache.flink.table.runtime.util.TimeWindowUtil.toUtcTimestampMills;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for window aggregate operators created by {@link SlicingWindowAggOperatorBuilder}. */
 @RunWith(Parameterized.class)
@@ -175,7 +174,7 @@ public class SlicingWindowAggOperatorTest {
         OperatorSubtaskState snapshot = testHarness.snapshot(0L, 0);
         testHarness.close();
 
-        assertTrue("Close was not called.", aggsFunction.closeCalled.get() > 0);
+        assertThat(aggsFunction.closeCalled.get() > 0).as("Close was not called.").isTrue();
 
         expectedOutput.clear();
         testHarness = createTestHarness(operator);
@@ -216,7 +215,7 @@ public class SlicingWindowAggOperatorTest {
         ASSERTER.assertOutputEqualsSorted(
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
 
-        assertEquals(1, operator.getNumLateRecordsDropped().getCount());
+        assertThat(operator.getNumLateRecordsDropped().getCount()).isEqualTo(1);
 
         testHarness.close();
     }
@@ -339,7 +338,7 @@ public class SlicingWindowAggOperatorTest {
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
 
         testHarness.close();
-        assertTrue("Close was not called.", aggsFunction.closeCalled.get() > 0);
+        assertThat(aggsFunction.closeCalled.get() > 0).as("Close was not called.").isTrue();
     }
 
     @Test
@@ -396,7 +395,7 @@ public class SlicingWindowAggOperatorTest {
         OperatorSubtaskState snapshot = testHarness.snapshot(0L, 0);
         testHarness.close();
 
-        assertTrue("Close was not called.", aggsFunction.closeCalled.get() > 0);
+        assertThat(aggsFunction.closeCalled.get() > 0).as("Close was not called.").isTrue();
 
         expectedOutput.clear();
         testHarness = createTestHarness(operator);
@@ -453,7 +452,7 @@ public class SlicingWindowAggOperatorTest {
         ASSERTER.assertOutputEqualsSorted(
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
 
-        assertEquals(1, operator.getNumLateRecordsDropped().getCount());
+        assertThat(operator.getNumLateRecordsDropped().getCount()).isEqualTo(1);
 
         testHarness.close();
     }
@@ -590,7 +589,7 @@ public class SlicingWindowAggOperatorTest {
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
 
         testHarness.close();
-        assertTrue("Close was not called.", aggsFunction.closeCalled.get() > 0);
+        assertThat(aggsFunction.closeCalled.get() > 0).as("Close was not called.").isTrue();
     }
 
     @Test
@@ -643,7 +642,7 @@ public class SlicingWindowAggOperatorTest {
         OperatorSubtaskState snapshot = testHarness.snapshot(0L, 0);
         testHarness.close();
 
-        assertTrue("Close was not called.", aggsFunction.closeCalled.get() > 0);
+        assertThat(aggsFunction.closeCalled.get() > 0).as("Close was not called.").isTrue();
 
         expectedOutput.clear();
         testHarness = createTestHarness(operator);
@@ -689,7 +688,7 @@ public class SlicingWindowAggOperatorTest {
         ASSERTER.assertOutputEqualsSorted(
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
 
-        assertEquals(2, operator.getNumLateRecordsDropped().getCount());
+        assertThat(operator.getNumLateRecordsDropped().getCount()).isEqualTo(2);
 
         testHarness.close();
     }
@@ -767,7 +766,7 @@ public class SlicingWindowAggOperatorTest {
                         epochMills(UTC_ZONE_ID, "1970-01-01T05:00:00"),
                         epochMills(UTC_ZONE_ID, "1970-01-01T10:00:00")));
 
-        assertEquals(Long.valueOf(0L), operator.getWatermarkLatency().getValue());
+        assertThat(operator.getWatermarkLatency().getValue()).isEqualTo(Long.valueOf(0L));
         ASSERTER.assertOutputEqualsSorted(
                 "Output was not correct.", expectedOutput, testHarness.getOutput());
         testHarness.close();
@@ -791,10 +790,11 @@ public class SlicingWindowAggOperatorTest {
                     .build();
             fail("should fail");
         } catch (Exception e) {
-            assertThat(
-                    e,
-                    containsMessage(
-                            "Hopping window requires a COUNT(*) in the aggregate functions."));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    containsMessage(
+                                            "Hopping window requires a COUNT(*) in the aggregate functions.")));
         }
     }
 

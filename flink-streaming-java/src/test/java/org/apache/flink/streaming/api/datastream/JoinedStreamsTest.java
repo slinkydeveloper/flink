@@ -25,9 +25,10 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit test for {@link JoinedStreams}. */
 public class JoinedStreamsTest {
@@ -61,9 +62,8 @@ public class JoinedStreamsTest {
 
         withLateness.apply(joinFunction, BasicTypeInfo.STRING_TYPE_INFO);
 
-        Assert.assertEquals(
-                lateness.toMilliseconds(),
-                withLateness.getCoGroupedWindowedStream().getAllowedLateness().toMilliseconds());
+        assertThat(withLateness.getCoGroupedWindowedStream().getAllowedLateness().toMilliseconds())
+                .isEqualTo(lateness.toMilliseconds());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class JoinedStreamsTest {
                         .window(tsAssigner)
                         .allowedLateness(lateness);
 
-        Assert.assertEquals(
-                lateness.toMilliseconds(), withLateness.getAllowedLateness().toMilliseconds());
+        assertThat(withLateness.getAllowedLateness().toMilliseconds())
+                .isEqualTo(lateness.toMilliseconds());
     }
 }

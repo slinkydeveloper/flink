@@ -36,10 +36,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link JobExecutionResultResponseBody}. */
 @RunWith(Parameterized.class)
@@ -109,26 +106,22 @@ public class JobExecutionResultResponseBodyTest
             final JobExecutionResultResponseBody expected,
             final JobExecutionResultResponseBody actual) {
 
-        assertThat(actual.getStatus(), equalTo(actual.getStatus()));
+        assertThat(actual.getStatus()).isEqualTo(actual.getStatus());
 
         final JobResult expectedJobExecutionResult = expected.getJobExecutionResult();
         final JobResult actualJobExecutionResult = actual.getJobExecutionResult();
 
         if (expectedJobExecutionResult != null) {
-            assertNotNull(actualJobExecutionResult);
+            assertThat(actualJobExecutionResult).isNotNull();
 
-            assertThat(
-                    actualJobExecutionResult.getJobId(),
-                    equalTo(expectedJobExecutionResult.getJobId()));
-            assertThat(
-                    actualJobExecutionResult.getApplicationStatus(),
-                    equalTo(expectedJobExecutionResult.getApplicationStatus()));
-            assertThat(
-                    actualJobExecutionResult.getNetRuntime(),
-                    equalTo(expectedJobExecutionResult.getNetRuntime()));
-            assertThat(
-                    actualJobExecutionResult.getAccumulatorResults(),
-                    equalTo(expectedJobExecutionResult.getAccumulatorResults()));
+            assertThat(actualJobExecutionResult.getJobId())
+                    .isEqualTo(expectedJobExecutionResult.getJobId());
+            assertThat(actualJobExecutionResult.getApplicationStatus())
+                    .isEqualTo(expectedJobExecutionResult.getApplicationStatus());
+            assertThat(actualJobExecutionResult.getNetRuntime())
+                    .isEqualTo(expectedJobExecutionResult.getNetRuntime());
+            assertThat(actualJobExecutionResult.getAccumulatorResults())
+                    .isEqualTo(expectedJobExecutionResult.getAccumulatorResults());
 
             final Optional<SerializedThrowable> expectedFailureCauseOptional =
                     expectedJobExecutionResult.getSerializedThrowable();
@@ -141,28 +134,26 @@ public class JobExecutionResultResponseBodyTest
                                                 () ->
                                                         new AssertionError(
                                                                 "actualFailureCause is not available"));
-                        assertThat(
-                                actualFailureCause.getFullStringifiedStackTrace(),
-                                equalTo(expectedFailureCause.getFullStringifiedStackTrace()));
-                        assertThat(
-                                actualFailureCause.getOriginalErrorClassName(),
-                                equalTo(expectedFailureCause.getOriginalErrorClassName()));
-                        assertArrayEquals(
-                                expectedFailureCause.getSerializedException(),
-                                actualFailureCause.getSerializedException());
+                        assertThat(actualFailureCause.getFullStringifiedStackTrace())
+                                .isEqualTo(expectedFailureCause.getFullStringifiedStackTrace());
+                        assertThat(actualFailureCause.getOriginalErrorClassName())
+                                .isEqualTo(expectedFailureCause.getOriginalErrorClassName());
+                        assertThat(actualFailureCause.getSerializedException())
+                                .isEqualTo(expectedFailureCause.getSerializedException());
                     });
 
             if (expectedJobExecutionResult.getAccumulatorResults() != null) {
-                assertNotNull(actualJobExecutionResult.getAccumulatorResults());
-                assertArrayEquals(
-                        actualJobExecutionResult
-                                .getAccumulatorResults()
-                                .get(TEST_ACCUMULATOR_NAME)
-                                .getByteArray(),
-                        expectedJobExecutionResult
-                                .getAccumulatorResults()
-                                .get(TEST_ACCUMULATOR_NAME)
-                                .getByteArray());
+                assertThat(actualJobExecutionResult.getAccumulatorResults()).isNotNull();
+                assertThat(
+                                expectedJobExecutionResult
+                                        .getAccumulatorResults()
+                                        .get(TEST_ACCUMULATOR_NAME)
+                                        .getByteArray())
+                        .isEqualTo(
+                                actualJobExecutionResult
+                                        .getAccumulatorResults()
+                                        .get(TEST_ACCUMULATOR_NAME)
+                                        .getByteArray());
             }
         }
     }

@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import static org.apache.flink.test.util.TestUtils.tryExecute;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * To test approximate downstream failover.
@@ -210,7 +211,7 @@ public class ApproximateLocalRecoveryDownstreamITCase extends TestLogger {
                 while (key < 1000 && selectedChannel(key) != i) {
                     key++;
                 }
-                assert key < 1000 : "Can not find a key within number 1000";
+                assertThat(key < 1000).isTrue();
                 keys[i] = key;
             }
 
@@ -296,7 +297,7 @@ public class ApproximateLocalRecoveryDownstreamITCase extends TestLogger {
 
         @Override
         public void invoke(InvertedKeyTuple tuple, Context ctx) throws Exception {
-            assert tuple.selectedChannel < numberOfInputChannels;
+            assertThat(tuple.selectedChannel < numberOfInputChannels).isTrue();
             numElements[tuple.selectedChannel]++;
 
             boolean allReachNumElementsTotal = true;
@@ -308,8 +309,11 @@ public class ApproximateLocalRecoveryDownstreamITCase extends TestLogger {
                 }
             }
             if (allReachNumElementsTotal) {
-                assert Collections.max(Arrays.asList(indexReachingNumElements))
-                        >= numElementsTotal * numberOfInputChannels;
+                assertThat(
+                                Collections.max(Arrays.asList(indexReachingNumElements))
+                                        >= numElementsTotal * numberOfInputChannels)
+                        .isTrue();
+
                 throw new SuccessException();
             }
         }

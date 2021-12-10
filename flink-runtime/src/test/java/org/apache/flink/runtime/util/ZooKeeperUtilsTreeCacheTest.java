@@ -40,7 +40,8 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * Tests for {@link ZooKeeperUtils#createTreeCache(CuratorFramework, String,
@@ -119,9 +120,8 @@ public class ZooKeeperUtilsTreeCacheTest extends TestLogger {
     public void testCallbackNotCalledOnCreationOfParents() throws Exception {
         callbackFutureReference.set(new CompletableFuture<>());
         client.create().forPath(PARENT_PATH);
-        assertThat(
-                callbackFutureReference.get(),
-                FlinkMatchers.willNotComplete(Duration.ofMillis(20)));
+        assertThat(callbackFutureReference.get())
+                .satisfies(matching(FlinkMatchers.willNotComplete(Duration.ofMillis(20))));
     }
 
     @Test
@@ -130,9 +130,8 @@ public class ZooKeeperUtilsTreeCacheTest extends TestLogger {
 
         callbackFutureReference.set(new CompletableFuture<>());
         client.create().forPath(CHILD_PATH + "/baz");
-        assertThat(
-                callbackFutureReference.get(),
-                FlinkMatchers.willNotComplete(Duration.ofMillis(20)));
+        assertThat(callbackFutureReference.get())
+                .satisfies(matching(FlinkMatchers.willNotComplete(Duration.ofMillis(20))));
     }
 
     @Test
@@ -141,9 +140,8 @@ public class ZooKeeperUtilsTreeCacheTest extends TestLogger {
         client.create()
                 .creatingParentContainersIfNeeded()
                 .forPath(CHILD_PATH.substring(0, CHILD_PATH.length() - 1));
-        assertThat(
-                callbackFutureReference.get(),
-                FlinkMatchers.willNotComplete(Duration.ofMillis(20)));
+        assertThat(callbackFutureReference.get())
+                .satisfies(matching(FlinkMatchers.willNotComplete(Duration.ofMillis(20))));
     }
 
     @Test

@@ -43,8 +43,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests {@link KeyedProcessOperator}. */
 public class KeyedProcessOperatorTest extends TestLogger {
@@ -62,7 +61,9 @@ public class KeyedProcessOperatorTest extends TestLogger {
                     Tuple2<Integer, String> value, Context ctx, Collector<String> out)
                     throws Exception {
 
-                assertTrue("Did not get expected key.", ctx.getCurrentKey().equals(value.f0));
+                assertThat(ctx.getCurrentKey().equals(value.f0))
+                        .as("Did not get expected key.")
+                        .isTrue();
 
                 // we check that we receive this output, to ensure that the assert was actually
                 // checked
@@ -516,8 +517,8 @@ public class KeyedProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<Integer> out)
                 throws Exception {
-            assertEquals(expectedKey, ctx.getCurrentKey());
-            assertEquals(expectedTimeDomain, ctx.timeDomain());
+            assertThat(ctx.getCurrentKey()).isEqualTo(expectedKey);
+            assertThat(ctx.timeDomain()).isEqualTo(expectedTimeDomain);
             out.collect(1777);
         }
     }
@@ -564,7 +565,7 @@ public class KeyedProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(expectedTimeDomain, ctx.timeDomain());
+            assertThat(ctx.timeDomain()).isEqualTo(expectedTimeDomain);
             out.collect("STATE:" + getRuntimeContext().getState(state).value());
         }
     }
@@ -596,7 +597,7 @@ public class KeyedProcessOperatorTest extends TestLogger {
         @Override
         public void onTimer(long timestamp, OnTimerContext ctx, Collector<String> out)
                 throws Exception {
-            assertEquals(expectedKey, ctx.getCurrentKey());
+            assertThat(ctx.getCurrentKey()).isEqualTo(expectedKey);
 
             if (TimeDomain.EVENT_TIME.equals(ctx.timeDomain())) {
                 out.collect("EVENT:1777");

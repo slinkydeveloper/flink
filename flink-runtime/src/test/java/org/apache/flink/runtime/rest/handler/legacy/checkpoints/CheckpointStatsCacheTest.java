@@ -24,8 +24,7 @@ import org.apache.flink.runtime.rest.handler.job.checkpoints.CheckpointStatsCach
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +37,7 @@ public class CheckpointStatsCacheTest {
 
         CheckpointStatsCache cache = new CheckpointStatsCache(0);
         cache.tryAdd(checkpoint);
-        assertNull(cache.tryGet(0L));
+        assertThat(cache.tryGet(0L)).isNull();
     }
 
     @Test
@@ -49,16 +48,16 @@ public class CheckpointStatsCacheTest {
 
         CheckpointStatsCache cache = new CheckpointStatsCache(1);
         cache.tryAdd(chk0);
-        assertEquals(chk0, cache.tryGet(0));
+        assertThat(cache.tryGet(0)).isEqualTo(chk0);
 
         cache.tryAdd(chk1);
-        assertNull(cache.tryGet(0));
-        assertEquals(chk1, cache.tryGet(1));
+        assertThat(cache.tryGet(0)).isNull();
+        assertThat(cache.tryGet(1)).isEqualTo(chk1);
 
         cache.tryAdd(chk2);
-        assertNull(cache.tryGet(2));
-        assertNull(cache.tryGet(0));
-        assertEquals(chk1, cache.tryGet(1));
+        assertThat(cache.tryGet(2)).isNull();
+        assertThat(cache.tryGet(0)).isNull();
+        assertThat(cache.tryGet(1)).isEqualTo(chk1);
     }
 
     private AbstractCheckpointStats createCheckpoint(long id, CheckpointStatsStatus status) {

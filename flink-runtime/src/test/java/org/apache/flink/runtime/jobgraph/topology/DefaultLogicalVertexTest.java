@@ -40,8 +40,7 @@ import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.
 import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.PIPELINED;
 import static org.apache.flink.runtime.jobgraph.DistributionPattern.ALL_TO_ALL;
 import static org.apache.flink.runtime.jobgraph.topology.DefaultLogicalResultTest.assertResultsEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link DefaultLogicalVertex}. */
 public class DefaultLogicalVertexTest extends TestLogger {
@@ -118,17 +117,17 @@ public class DefaultLogicalVertexTest extends TestLogger {
         for (JobVertex jobVertex : jobVertices) {
             final DefaultLogicalVertex logicalVertex = logicalVertextMap.remove(jobVertex.getID());
 
-            assertNotNull(logicalVertex);
+            assertThat(logicalVertex).isNotNull();
             assertVertexInfoEquals(jobVertex, logicalVertex);
         }
 
         // this ensures the two collections exactly matches
-        assertEquals(0, logicalVertextMap.size());
+        assertThat(logicalVertextMap.size()).isEqualTo(0);
     }
 
     static void assertVertexInfoEquals(
             final JobVertex jobVertex, final DefaultLogicalVertex logicalVertex) {
 
-        assertEquals(jobVertex.getID(), logicalVertex.getId());
+        assertThat(logicalVertex.getId()).isEqualTo(jobVertex.getID());
     }
 }

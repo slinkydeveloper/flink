@@ -21,10 +21,12 @@ package org.apache.flink.runtime.executiongraph;
 import org.apache.flink.runtime.jobgraph.JobVertex;
 import org.apache.flink.runtime.jobgraph.tasks.AbstractInvokable;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class AllVerticesIteratorTest {
 
@@ -59,14 +61,14 @@ public class AllVerticesIteratorTest {
             int numReturned = 0;
             while (iter.hasNext()) {
                 iter.hasNext();
-                Assert.assertNotNull(iter.next());
+                assertThat(iter.next()).isNotNull();
                 numReturned++;
             }
 
-            Assert.assertEquals(13, numReturned);
+            assertThat(numReturned).isEqualTo(13);
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 }

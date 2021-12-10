@@ -50,9 +50,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
 
 /**
  * Tests ensuring correct behaviour of {@link
@@ -83,7 +83,7 @@ public class RestoreStreamTaskTest extends TestLogger {
 
         TaskStateSnapshot stateHandles = restore.getTaskStateSnapshot();
 
-        assertEquals(2, stateHandles.getSubtaskStateMappings().size());
+        assertThat(stateHandles.getSubtaskStateMappings().size()).isEqualTo(2);
 
         createRunAndCheckpointOperatorChain(
                 headOperatorID,
@@ -92,12 +92,10 @@ public class RestoreStreamTaskTest extends TestLogger {
                 new CounterOperator(),
                 Optional.of(restore));
 
-        assertEquals(
-                new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)),
-                RESTORED_OPERATORS.keySet());
-        assertThat(
-                new HashSet<>(RESTORED_OPERATORS.values()),
-                contains(restore.getRestoreCheckpointId()));
+        assertThat(RESTORED_OPERATORS.keySet())
+                .isEqualTo(new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)));
+        assertThat(new HashSet<>(RESTORED_OPERATORS.values()))
+                .satisfies(matching(contains(restore.getRestoreCheckpointId())));
     }
 
     @Test
@@ -115,7 +113,7 @@ public class RestoreStreamTaskTest extends TestLogger {
 
         TaskStateSnapshot stateHandles = restore.getTaskStateSnapshot();
 
-        assertEquals(2, stateHandles.getSubtaskStateMappings().size());
+        assertThat(stateHandles.getSubtaskStateMappings().size()).isEqualTo(2);
 
         createRunAndCheckpointOperatorChain(
                 new OperatorID(4242L, 4242L),
@@ -124,10 +122,9 @@ public class RestoreStreamTaskTest extends TestLogger {
                 new CounterOperator(),
                 Optional.of(restore));
 
-        assertEquals(Collections.singleton(tailOperatorID), RESTORED_OPERATORS.keySet());
-        assertThat(
-                new HashSet<>(RESTORED_OPERATORS.values()),
-                contains(restore.getRestoreCheckpointId()));
+        assertThat(RESTORED_OPERATORS.keySet()).isEqualTo(Collections.singleton(tailOperatorID));
+        assertThat(new HashSet<>(RESTORED_OPERATORS.values()))
+                .satisfies(matching(contains(restore.getRestoreCheckpointId())));
     }
 
     @Test
@@ -143,7 +140,7 @@ public class RestoreStreamTaskTest extends TestLogger {
                         Optional.empty());
 
         TaskStateSnapshot stateHandles = restore.getTaskStateSnapshot();
-        assertEquals(2, stateHandles.getSubtaskStateMappings().size());
+        assertThat(stateHandles.getSubtaskStateMappings().size()).isEqualTo(2);
 
         createRunAndCheckpointOperatorChain(
                 headOperatorID,
@@ -152,10 +149,9 @@ public class RestoreStreamTaskTest extends TestLogger {
                 new CounterOperator(),
                 Optional.of(restore));
 
-        assertEquals(Collections.singleton(headOperatorID), RESTORED_OPERATORS.keySet());
-        assertThat(
-                new HashSet<>(RESTORED_OPERATORS.values()),
-                contains(restore.getRestoreCheckpointId()));
+        assertThat(RESTORED_OPERATORS.keySet()).isEqualTo(Collections.singleton(headOperatorID));
+        assertThat(new HashSet<>(RESTORED_OPERATORS.values()))
+                .satisfies(matching(contains(restore.getRestoreCheckpointId())));
     }
 
     @Test
@@ -173,7 +169,7 @@ public class RestoreStreamTaskTest extends TestLogger {
 
         TaskStateSnapshot stateHandles = restore.getTaskStateSnapshot();
 
-        assertEquals(2, stateHandles.getSubtaskStateMappings().size());
+        assertThat(stateHandles.getSubtaskStateMappings().size()).isEqualTo(2);
 
         // test empty state in case of scale up
 
@@ -188,12 +184,10 @@ public class RestoreStreamTaskTest extends TestLogger {
                 new CounterOperator(),
                 Optional.of(restore));
 
-        assertEquals(
-                new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)),
-                RESTORED_OPERATORS.keySet());
-        assertThat(
-                new HashSet<>(RESTORED_OPERATORS.values()),
-                contains(restore.getRestoreCheckpointId()));
+        assertThat(RESTORED_OPERATORS.keySet())
+                .isEqualTo(new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)));
+        assertThat(new HashSet<>(RESTORED_OPERATORS.values()))
+                .satisfies(matching(contains(restore.getRestoreCheckpointId())));
     }
 
     @Test
@@ -210,7 +204,7 @@ public class RestoreStreamTaskTest extends TestLogger {
                         Optional.empty());
 
         TaskStateSnapshot stateHandles = restore.getTaskStateSnapshot();
-        assertEquals(2, stateHandles.getSubtaskStateMappings().size());
+        assertThat(stateHandles.getSubtaskStateMappings().size()).isEqualTo(2);
 
         createRunAndCheckpointOperatorChain(
                 headOperatorID,
@@ -219,12 +213,10 @@ public class RestoreStreamTaskTest extends TestLogger {
                 new CounterOperator(),
                 Optional.of(restore));
 
-        assertEquals(
-                new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)),
-                RESTORED_OPERATORS.keySet());
-        assertThat(
-                new HashSet<>(RESTORED_OPERATORS.values()),
-                contains(restore.getRestoreCheckpointId()));
+        assertThat(RESTORED_OPERATORS.keySet())
+                .isEqualTo(new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)));
+        assertThat(new HashSet<>(RESTORED_OPERATORS.values()))
+                .satisfies(matching(contains(restore.getRestoreCheckpointId())));
     }
 
     private JobManagerTaskRestore createRunAndCheckpointOperatorChain(
@@ -298,7 +290,7 @@ public class RestoreStreamTaskTest extends TestLogger {
         testHarness.taskStateManager.getWaitForReportLatch().await();
         long reportedCheckpointId = testHarness.taskStateManager.getReportedCheckpointId();
 
-        assertEquals(checkpointId, reportedCheckpointId);
+        assertThat(reportedCheckpointId).isEqualTo(checkpointId);
     }
 
     private void processRecords(OneInputStreamTaskTestHarness<String, String> testHarness)
@@ -323,10 +315,9 @@ public class RestoreStreamTaskTest extends TestLogger {
 
         @Override
         public void initializeState(StateInitializationContext context) throws Exception {
-            assertEquals(
-                    "Restored context id should be set iff is restored",
-                    context.isRestored(),
-                    context.getRestoredCheckpointId().isPresent());
+            assertThat(context.getRestoredCheckpointId().isPresent())
+                    .as("Restored context id should be set iff is restored")
+                    .isEqualTo(context.isRestored());
             if (context.isRestored()) {
                 RESTORED_OPERATORS.put(
                         getOperatorID(), context.getRestoredCheckpointId().getAsLong());

@@ -30,8 +30,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TaskSlotTest extends TestLogger {
     private static final JobID JOB_ID = new JobID();
@@ -49,11 +48,11 @@ public class TaskSlotTest extends TestLogger {
             task.waitForFailure();
             MemoryManager memoryManager = taskSlot.getMemoryManager();
 
-            assertThat(closingFuture.isDone(), is(false));
-            assertThat(memoryManager.isShutdown(), is(false));
+            assertThat(closingFuture.isDone()).isEqualTo(false);
+            assertThat(memoryManager.isShutdown()).isEqualTo(false);
             task.terminate();
             closingFuture.get();
-            assertThat(memoryManager.isShutdown(), is(true));
+            assertThat(memoryManager.isShutdown()).isEqualTo(true);
         }
     }
 

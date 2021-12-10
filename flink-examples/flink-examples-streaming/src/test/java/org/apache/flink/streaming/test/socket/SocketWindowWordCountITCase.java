@@ -34,7 +34,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link SocketWindowWordCount}. */
 public class SocketWindowWordCountITCase extends AbstractTestBase {

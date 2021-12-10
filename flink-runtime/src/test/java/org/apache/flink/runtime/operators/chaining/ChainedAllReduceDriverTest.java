@@ -35,11 +35,12 @@ import org.apache.flink.runtime.testutils.recordutils.RecordSerializerFactory;
 import org.apache.flink.types.IntValue;
 import org.apache.flink.types.Record;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ChainedAllReduceDriverTest extends TaskTestBase {
 
@@ -103,8 +104,8 @@ public class ChainedAllReduceDriverTest extends TaskTestBase {
 
         int sumTotal = valCnt * keyCnt * (keyCnt - 1) / 2;
 
-        Assert.assertEquals(1, this.outList.size());
-        Assert.assertEquals(sumTotal, this.outList.get(0).getField(0, IntValue.class).getValue());
+        assertThat(this.outList.size()).isEqualTo(1);
+        assertThat(this.outList.get(0).getField(0, IntValue.class).getValue()).isEqualTo(sumTotal);
     }
 
     public static class MockReduceStub implements ReduceFunction<Record> {

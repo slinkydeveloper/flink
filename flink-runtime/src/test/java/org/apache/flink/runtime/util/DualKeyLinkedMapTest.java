@@ -21,7 +21,6 @@ package org.apache.flink.runtime.util;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.util.TestLogger;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -29,9 +28,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DualKeyLinkedMap}. */
 public class DualKeyLinkedMapTest extends TestLogger {
@@ -55,12 +52,10 @@ public class DualKeyLinkedMapTest extends TestLogger {
             dualKeyMap.put(key.f0, key.f1, "foobar");
         }
 
-        assertThat(
-                dualKeyMap.keySetA(),
-                Matchers.equalTo(keys.stream().map(t -> t.f0).collect(Collectors.toSet())));
-        assertThat(
-                dualKeyMap.keySetB(),
-                Matchers.equalTo(keys.stream().map(t -> t.f1).collect(Collectors.toSet())));
+        assertThat(dualKeyMap.keySetA())
+                .isEqualTo(keys.stream().map(t -> t.f0).collect(Collectors.toSet()));
+        assertThat(dualKeyMap.keySetB())
+                .isEqualTo(keys.stream().map(t -> t.f1).collect(Collectors.toSet()));
     }
 
     @Test
@@ -71,9 +66,9 @@ public class DualKeyLinkedMapTest extends TestLogger {
         map.put(1, 1, "foobar");
         map.put(1, 2, secondValue);
 
-        assertThat(map.getValueByKeyB(1), nullValue());
-        assertThat(map.getValueByKeyA(1), is(secondValue));
-        assertThat(map.getValueByKeyB(2), is(secondValue));
+        assertThat(map.getValueByKeyB(1)).isNull();
+        assertThat(map.getValueByKeyA(1)).isEqualTo(secondValue);
+        assertThat(map.getValueByKeyB(2)).isEqualTo(secondValue);
     }
 
     @Test
@@ -84,9 +79,9 @@ public class DualKeyLinkedMapTest extends TestLogger {
         map.put(1, 1, "foobar");
         map.put(2, 1, secondValue);
 
-        assertThat(map.getValueByKeyA(1), nullValue());
-        assertThat(map.getValueByKeyB(1), is(secondValue));
-        assertThat(map.getValueByKeyA(2), is(secondValue));
+        assertThat(map.getValueByKeyA(1)).isNull();
+        assertThat(map.getValueByKeyB(1)).isEqualTo(secondValue);
+        assertThat(map.getValueByKeyA(2)).isEqualTo(secondValue);
     }
 
     @Test
@@ -100,8 +95,8 @@ public class DualKeyLinkedMapTest extends TestLogger {
 
         final String value3 = "3";
         map.put(1, 1, value3);
-        assertThat(map.keySetA().iterator().next(), is(1));
-        assertThat(map.values().iterator().next(), is(value3));
+        assertThat(map.keySetA().iterator().next()).isEqualTo(1);
+        assertThat(map.values().iterator().next()).isEqualTo(value3);
     }
 
     @Test
@@ -115,7 +110,7 @@ public class DualKeyLinkedMapTest extends TestLogger {
 
         final String value3 = "3";
         map.put(1, 3, value3);
-        assertThat(map.keySetA().iterator().next(), is(1));
-        assertThat(map.values().iterator().next(), is(value3));
+        assertThat(map.keySetA().iterator().next()).isEqualTo(1);
+        assertThat(map.values().iterator().next()).isEqualTo(value3);
     }
 }

@@ -44,8 +44,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link PackagedProgramUtils} methods that should be executed for {@link
@@ -77,10 +76,10 @@ public class PackagedProgramUtilsPipelineTest {
     public void testConfigurationForwarding() throws Exception {
         // we want to test forwarding with this config, ensure that the default is what we expect.
         assertThat(
-                ExecutionEnvironment.getExecutionEnvironment()
-                        .getConfig()
-                        .isAutoTypeRegistrationDisabled(),
-                is(false));
+                        ExecutionEnvironment.getExecutionEnvironment()
+                                .getConfig()
+                                .isAutoTypeRegistrationDisabled())
+                .isEqualTo(false);
 
         PackagedProgram packagedProgram =
                 PackagedProgram.newBuilder()
@@ -97,7 +96,7 @@ public class PackagedProgramUtilsPipelineTest {
         ExecutionConfig executionConfig = testParameter.extractExecutionConfig(pipeline);
 
         // we want to test forwarding with this config, ensure that the default is what we expect.
-        assertThat(executionConfig.isAutoTypeRegistrationDisabled(), is(true));
+        assertThat(executionConfig.isAutoTypeRegistrationDisabled()).isEqualTo(true);
     }
 
     @Test
@@ -127,11 +126,11 @@ public class PackagedProgramUtilsPipelineTest {
         ExecutionConfig executionConfig = testParameter.extractExecutionConfig(pipeline);
 
         assertThat(
-                executionConfig
-                        .getDefaultKryoSerializerClasses()
-                        .get(PackagedProgramUtilsPipelineTest.class)
-                        .getName(),
-                is(userSerializerClassName));
+                        executionConfig
+                                .getDefaultKryoSerializerClasses()
+                                .get(PackagedProgramUtilsPipelineTest.class)
+                                .getName())
+                .isEqualTo(userSerializerClassName);
     }
 
     private List<URL> getClassUrls(String className) throws IOException {

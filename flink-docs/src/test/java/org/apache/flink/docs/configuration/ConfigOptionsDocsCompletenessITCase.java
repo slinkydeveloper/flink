@@ -24,7 +24,6 @@ import org.apache.flink.configuration.ConfigOption;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -52,6 +51,7 @@ import static org.apache.flink.docs.configuration.ConfigOptionsDocGenerator.getD
 import static org.apache.flink.docs.configuration.ConfigOptionsDocGenerator.processConfigOptions;
 import static org.apache.flink.docs.configuration.ConfigOptionsDocGenerator.stringifyDefault;
 import static org.apache.flink.docs.configuration.ConfigOptionsDocGenerator.typeToHtml;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test verifies that all {@link ConfigOption ConfigOptions} in the configured {@link
@@ -214,7 +214,7 @@ public class ConfigOptionsDocsCompletenessITCase {
                 sb.append("\t\t");
                 sb.append(problem);
             }
-            Assert.fail(sb.toString());
+            fail(sb.toString());
         }
     }
 

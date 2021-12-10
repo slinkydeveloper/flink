@@ -42,11 +42,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Predicate;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link org.apache.flink.streaming.api.transformations.SinkTransformation}. */
 @RunWith(Parameterized.class)
@@ -72,7 +68,7 @@ public class SinkTransformationTranslatorTest extends TestLogger {
         final StreamNode sourceNode = findNodeName(streamGraph, node -> node.contains("Source"));
         final StreamNode writerNode = findWriter(streamGraph);
 
-        assertThat(streamGraph.getStreamNodes().size(), equalTo(2));
+        assertThat(streamGraph.getStreamNodes().size()).isEqualTo(2);
 
         validateTopology(
                 sourceNode,
@@ -94,14 +90,14 @@ public class SinkTransformationTranslatorTest extends TestLogger {
 
         if (runtimeExecutionMode == RuntimeExecutionMode.STREAMING) {
             // in streaming writer and committer are merged into one operator
-            assertThat(writerNode.getOutEdges(), equalTo(Collections.emptyList()));
+            assertThat(writerNode.getOutEdges()).isEqualTo(Collections.emptyList());
             return;
         }
 
         final StreamNode committerNode =
                 findNodeName(streamGraph, name -> name.contains("Committer"));
 
-        assertThat(streamGraph.getStreamNodes().size(), equalTo(3));
+        assertThat(streamGraph.getStreamNodes().size()).isEqualTo(3);
 
         validateTopology(
                 writerNode,
@@ -198,10 +194,10 @@ public class SinkTransformationTranslatorTest extends TestLogger {
         final StreamNode writer = findWriter(streamGraph);
         final StreamNode globalCommitter = findCommitter(streamGraph);
 
-        assertThat(writer.getOperatorFactory().getChainingStrategy(), is(ChainingStrategy.NEVER));
-        assertThat(
-                globalCommitter.getOperatorFactory().getChainingStrategy(),
-                is(ChainingStrategy.ALWAYS));
+        assertThat(writer.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.NEVER);
+        assertThat(globalCommitter.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.ALWAYS);
     }
 
     private void validateTopology(
@@ -214,26 +210,27 @@ public class SinkTransformationTranslatorTest extends TestLogger {
 
         // verify src node
         final StreamEdge srcOutEdge = src.getOutEdges().get(0);
-        assertThat(srcOutEdge.getTargetId(), equalTo(dest.getId()));
-        assertThat(src.getTypeSerializerOut(), instanceOf(srcOutTypeInfo));
+        assertThat(srcOutEdge.getTargetId()).isEqualTo(dest.getId());
+        assertThat(src.getTypeSerializerOut()).isInstanceOf(srcOutTypeInfo);
 
         // verify dest node input
         final StreamEdge destInputEdge = dest.getInEdges().get(0);
-        assertThat(destInputEdge.getSourceId(), equalTo(src.getId()));
-        assertThat(dest.getTypeSerializersIn()[0], instanceOf(srcOutTypeInfo));
+        assertThat(destInputEdge.getSourceId()).isEqualTo(src.getId());
+        assertThat(dest.getTypeSerializersIn()[0]).isInstanceOf(srcOutTypeInfo);
 
         // make sure 2 sink operators have different names/uid
-        assertThat(dest.getOperatorName(), not(equalTo(src.getOperatorName())));
-        assertThat(dest.getTransformationUID(), not(equalTo(src.getTransformationUID())));
+        assertThat(dest.getOperatorName()).isNotEqualTo(src.getOperatorName());
+        assertThat(dest.getTransformationUID()).isNotEqualTo(src.getTransformationUID());
 
-        assertThat(dest.getOperatorFactory(), instanceOf(operatorFactoryClass));
-        assertThat(dest.getParallelism(), equalTo(expectedParallelism));
-        assertThat(dest.getMaxParallelism(), equalTo(expectedMaxParallelism));
-        assertThat(dest.getOperatorFactory().getChainingStrategy(), is(ChainingStrategy.ALWAYS));
-        assertThat(dest.getSlotSharingGroup(), equalTo(SLOT_SHARE_GROUP));
+        assertThat(dest.getOperatorFactory()).isInstanceOf(operatorFactoryClass);
+        assertThat(dest.getParallelism()).isEqualTo(expectedParallelism);
+        assertThat(dest.getMaxParallelism()).isEqualTo(expectedMaxParallelism);
+        assertThat(dest.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.ALWAYS);
+        assertThat(dest.getSlotSharingGroup()).isEqualTo(SLOT_SHARE_GROUP);
 
         // verify dest node output
-        assertThat(dest.getOutEdges().size(), equalTo(0));
+        assertThat(dest.getOutEdges().size()).isEqualTo(0);
     }
 
     private StreamGraph buildGraph(TestSink sink, RuntimeExecutionMode runtimeExecutionMode) {

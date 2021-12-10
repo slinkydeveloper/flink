@@ -33,7 +33,7 @@ import org.apache.flink.types.LongValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RequestedLocalPropertiesFilteringTest {
 
@@ -78,7 +78,7 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -93,13 +93,13 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNotNull(filtered);
-        assertNotNull(filtered.getGroupedFields());
-        assertEquals(3, filtered.getGroupedFields().size());
-        assertTrue(filtered.getGroupedFields().contains(0));
-        assertTrue(filtered.getGroupedFields().contains(2));
-        assertTrue(filtered.getGroupedFields().contains(3));
-        assertNull(filtered.getOrdering());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getGroupedFields()).isNotNull();
+        assertThat(filtered.getGroupedFields().size()).isEqualTo(3);
+        assertThat(filtered.getGroupedFields().contains(0)).isTrue();
+        assertThat(filtered.getGroupedFields().contains(2)).isTrue();
+        assertThat(filtered.getGroupedFields().contains(3)).isTrue();
+        assertThat(filtered.getOrdering()).isNull();
     }
 
     @Test
@@ -114,13 +114,13 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNotNull(filtered);
-        assertNotNull(filtered.getGroupedFields());
-        assertEquals(3, filtered.getGroupedFields().size());
-        assertTrue(filtered.getGroupedFields().contains(3));
-        assertTrue(filtered.getGroupedFields().contains(5));
-        assertTrue(filtered.getGroupedFields().contains(1));
-        assertNull(filtered.getOrdering());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getGroupedFields()).isNotNull();
+        assertThat(filtered.getGroupedFields().size()).isEqualTo(3);
+        assertThat(filtered.getGroupedFields().contains(3)).isTrue();
+        assertThat(filtered.getGroupedFields().contains(5)).isTrue();
+        assertThat(filtered.getGroupedFields().contains(1)).isTrue();
+        assertThat(filtered.getOrdering()).isNull();
     }
 
     @Test
@@ -135,7 +135,7 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -155,19 +155,19 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNotNull(filtered);
-        assertNotNull(filtered.getOrdering());
-        assertEquals(3, filtered.getOrdering().getNumberOfFields());
-        assertEquals(4, filtered.getOrdering().getFieldNumber(0).intValue());
-        assertEquals(1, filtered.getOrdering().getFieldNumber(1).intValue());
-        assertEquals(6, filtered.getOrdering().getFieldNumber(2).intValue());
-        assertEquals(LongValue.class, filtered.getOrdering().getType(0));
-        assertEquals(IntValue.class, filtered.getOrdering().getType(1));
-        assertEquals(ByteValue.class, filtered.getOrdering().getType(2));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(0));
-        assertEquals(Order.ASCENDING, filtered.getOrdering().getOrder(1));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(2));
-        assertNull(filtered.getGroupedFields());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getOrdering()).isNotNull();
+        assertThat(filtered.getOrdering().getNumberOfFields()).isEqualTo(3);
+        assertThat(filtered.getOrdering().getFieldNumber(0).intValue()).isEqualTo(4);
+        assertThat(filtered.getOrdering().getFieldNumber(1).intValue()).isEqualTo(1);
+        assertThat(filtered.getOrdering().getFieldNumber(2).intValue()).isEqualTo(6);
+        assertThat(filtered.getOrdering().getType(0)).isEqualTo(LongValue.class);
+        assertThat(filtered.getOrdering().getType(1)).isEqualTo(IntValue.class);
+        assertThat(filtered.getOrdering().getType(2)).isEqualTo(ByteValue.class);
+        assertThat(filtered.getOrdering().getOrder(0)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getOrdering().getOrder(1)).isEqualTo(Order.ASCENDING);
+        assertThat(filtered.getOrdering().getOrder(2)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getGroupedFields()).isNull();
     }
 
     @Test
@@ -187,19 +187,19 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNotNull(filtered);
-        assertNotNull(filtered.getOrdering());
-        assertEquals(3, filtered.getOrdering().getNumberOfFields());
-        assertEquals(0, filtered.getOrdering().getFieldNumber(0).intValue());
-        assertEquals(5, filtered.getOrdering().getFieldNumber(1).intValue());
-        assertEquals(2, filtered.getOrdering().getFieldNumber(2).intValue());
-        assertEquals(LongValue.class, filtered.getOrdering().getType(0));
-        assertEquals(IntValue.class, filtered.getOrdering().getType(1));
-        assertEquals(ByteValue.class, filtered.getOrdering().getType(2));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(0));
-        assertEquals(Order.ASCENDING, filtered.getOrdering().getOrder(1));
-        assertEquals(Order.DESCENDING, filtered.getOrdering().getOrder(2));
-        assertNull(filtered.getGroupedFields());
+        assertThat(filtered).isNotNull();
+        assertThat(filtered.getOrdering()).isNotNull();
+        assertThat(filtered.getOrdering().getNumberOfFields()).isEqualTo(3);
+        assertThat(filtered.getOrdering().getFieldNumber(0).intValue()).isEqualTo(0);
+        assertThat(filtered.getOrdering().getFieldNumber(1).intValue()).isEqualTo(5);
+        assertThat(filtered.getOrdering().getFieldNumber(2).intValue()).isEqualTo(2);
+        assertThat(filtered.getOrdering().getType(0)).isEqualTo(LongValue.class);
+        assertThat(filtered.getOrdering().getType(1)).isEqualTo(IntValue.class);
+        assertThat(filtered.getOrdering().getType(2)).isEqualTo(ByteValue.class);
+        assertThat(filtered.getOrdering().getOrder(0)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getOrdering().getOrder(1)).isEqualTo(Order.ASCENDING);
+        assertThat(filtered.getOrdering().getOrder(2)).isEqualTo(Order.DESCENDING);
+        assertThat(filtered.getGroupedFields()).isNull();
     }
 
     @Test
@@ -219,7 +219,7 @@ public class RequestedLocalPropertiesFilteringTest {
 
         RequestedLocalProperties filtered = rlProp.filterBySemanticProperties(sProps, 0);
 
-        assertNull(filtered);
+        assertThat(filtered).isNull();
     }
 
     @Test
@@ -247,20 +247,20 @@ public class RequestedLocalPropertiesFilteringTest {
         RequestedLocalProperties filtered1 = lprops1.filterBySemanticProperties(dprops, 0);
         RequestedLocalProperties filtered2 = lprops2.filterBySemanticProperties(dprops, 1);
 
-        assertNotNull(filtered1);
-        assertNotNull(filtered1.getGroupedFields());
-        assertEquals(3, filtered1.getGroupedFields().size());
-        assertTrue(filtered1.getGroupedFields().contains(1));
-        assertTrue(filtered1.getGroupedFields().contains(2));
-        assertTrue(filtered1.getGroupedFields().contains(3));
-        assertNull(filtered1.getOrdering());
+        assertThat(filtered1).isNotNull();
+        assertThat(filtered1.getGroupedFields()).isNotNull();
+        assertThat(filtered1.getGroupedFields().size()).isEqualTo(3);
+        assertThat(filtered1.getGroupedFields().contains(1)).isTrue();
+        assertThat(filtered1.getGroupedFields().contains(2)).isTrue();
+        assertThat(filtered1.getGroupedFields().contains(3)).isTrue();
+        assertThat(filtered1.getOrdering()).isNull();
 
-        assertNotNull(filtered2);
-        assertNotNull(filtered2.getGroupedFields());
-        assertEquals(2, filtered2.getGroupedFields().size());
-        assertTrue(filtered2.getGroupedFields().contains(0));
-        assertTrue(filtered2.getGroupedFields().contains(1));
-        assertNull(filtered2.getOrdering());
+        assertThat(filtered2).isNotNull();
+        assertThat(filtered2.getGroupedFields()).isNotNull();
+        assertThat(filtered2.getGroupedFields().size()).isEqualTo(2);
+        assertThat(filtered2.getGroupedFields().contains(0)).isTrue();
+        assertThat(filtered2.getGroupedFields().contains(1)).isTrue();
+        assertThat(filtered2.getOrdering()).isNull();
     }
 
     @Test(expected = IndexOutOfBoundsException.class)

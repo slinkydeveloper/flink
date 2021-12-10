@@ -22,6 +22,7 @@ import org.apache.flink.streaming.runtime.tasks.StreamTaskActionExecutor;
 import java.util.Optional;
 
 import static org.apache.flink.streaming.runtime.tasks.mailbox.TaskMailbox.MIN_PRIORITY;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A {@link MailboxProcessor} that allows to execute one mail at a time. */
 public class SteppingMailboxProcessor extends MailboxProcessor {
@@ -34,7 +35,7 @@ public class SteppingMailboxProcessor extends MailboxProcessor {
 
     @Override
     public boolean runMailboxStep() throws Exception {
-        assert mailbox.getState() == TaskMailbox.State.OPEN : "Mailbox must be opened!";
+        assertThat(mailbox.getState()).isEqualTo(TaskMailbox.State.OPEN);
         final MailboxController defaultActionContext = new MailboxController(this);
 
         Optional<Mail> maybeMail;

@@ -44,10 +44,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link org.apache.flink.runtime.scheduler.MergingSharedSlotProfileRetrieverFactory}.
@@ -70,11 +70,11 @@ public class MergingSharedSlotProfileRetrieverTest extends TestLogger {
                 sharedSlotProfileRetriever.getSlotProfile(
                         new ExecutionSlotSharingGroup(), ResourceProfile.ZERO);
 
-        assertThat(slotProfile.getTaskResourceProfile(), is(ResourceProfile.ZERO));
-        assertThat(slotProfile.getPhysicalSlotResourceProfile(), is(ResourceProfile.ZERO));
-        assertThat(slotProfile.getPreferredLocations(), hasSize(0));
-        assertThat(slotProfile.getPreferredAllocations(), hasSize(0));
-        assertThat(slotProfile.getReservedAllocations(), hasSize(0));
+        assertThat(slotProfile.getTaskResourceProfile()).isEqualTo(ResourceProfile.ZERO);
+        assertThat(slotProfile.getPhysicalSlotResourceProfile()).isEqualTo(ResourceProfile.ZERO);
+        assertThat(slotProfile.getPreferredLocations()).satisfies(matching(hasSize(0)));
+        assertThat(slotProfile.getPreferredAllocations()).satisfies(matching(hasSize(0)));
+        assertThat(slotProfile.getReservedAllocations()).satisfies(matching(hasSize(0)));
     }
 
     @Test
@@ -87,8 +87,8 @@ public class MergingSharedSlotProfileRetrieverTest extends TestLogger {
         SlotProfile slotProfile =
                 getSlotProfile(resourceProfile, Collections.nCopies(3, new AllocationID()), 2);
 
-        assertThat(slotProfile.getTaskResourceProfile(), is(resourceProfile));
-        assertThat(slotProfile.getPhysicalSlotResourceProfile(), is(resourceProfile));
+        assertThat(slotProfile.getTaskResourceProfile()).isEqualTo(resourceProfile);
+        assertThat(slotProfile.getPhysicalSlotResourceProfile()).isEqualTo(resourceProfile);
     }
 
     @Test
@@ -112,7 +112,8 @@ public class MergingSharedSlotProfileRetrieverTest extends TestLogger {
         SlotProfile slotProfile =
                 getSlotProfile(
                         (executionVertexId, producersToIgnore) -> {
-                            assertThat(producersToIgnore, containsInAnyOrder(executions.toArray()));
+                            assertThat(producersToIgnore)
+                                    .satisfies(matching(containsInAnyOrder(executions.toArray())));
                             return locations.get(executionVertexId);
                         },
                         executions,
@@ -122,20 +123,20 @@ public class MergingSharedSlotProfileRetrieverTest extends TestLogger {
                         2);
 
         assertThat(
-                slotProfile.getPreferredLocations().stream()
-                        .filter(allLocations.get(0)::equals)
-                        .count(),
-                is(1L));
+                        slotProfile.getPreferredLocations().stream()
+                                .filter(allLocations.get(0)::equals)
+                                .count())
+                .isEqualTo(1L);
         assertThat(
-                slotProfile.getPreferredLocations().stream()
-                        .filter(allLocations.get(1)::equals)
-                        .count(),
-                is(2L));
+                        slotProfile.getPreferredLocations().stream()
+                                .filter(allLocations.get(1)::equals)
+                                .count())
+                .isEqualTo(2L);
         assertThat(
-                slotProfile.getPreferredLocations().stream()
-                        .filter(allLocations.get(2)::equals)
-                        .count(),
-                is(1L));
+                        slotProfile.getPreferredLocations().stream()
+                                .filter(allLocations.get(2)::equals)
+                                .count())
+                .isEqualTo(1L);
     }
 
     @Test
@@ -148,9 +149,8 @@ public class MergingSharedSlotProfileRetrieverTest extends TestLogger {
 
         SlotProfile slotProfile = getSlotProfile(ResourceProfile.ZERO, prevAllocationIDs, 2);
 
-        assertThat(
-                slotProfile.getPreferredAllocations(),
-                containsInAnyOrder(prevAllocationID1, prevAllocationID2));
+        assertThat(slotProfile.getPreferredAllocations())
+                .satisfies(matching(containsInAnyOrder(prevAllocationID1, prevAllocationID2)));
     }
 
     @Test
@@ -168,9 +168,8 @@ public class MergingSharedSlotProfileRetrieverTest extends TestLogger {
                         reservedAllocationIds,
                         0);
 
-        assertThat(
-                slotProfile.getReservedAllocations(),
-                containsInAnyOrder(reservedAllocationIds.toArray()));
+        assertThat(slotProfile.getReservedAllocations())
+                .satisfies(matching(containsInAnyOrder(reservedAllocationIds.toArray())));
     }
 
     private static SlotProfile getSlotProfile(

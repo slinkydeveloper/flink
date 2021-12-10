@@ -55,15 +55,13 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeNoException;
 
 /**
@@ -97,8 +95,8 @@ public class TaskManagerRunnerConfigurationTest extends TestLogger {
                     TaskManagerRunner.createRpcService(
                             config, highAvailabilityServices, RPC_SYSTEM);
 
-            assertThat(taskManagerRpcService.getPort(), is(greaterThanOrEqualTo(0)));
-            assertThat(taskManagerRpcService.getAddress(), is(equalTo(taskmanagerHost)));
+            assertThat(taskManagerRpcService.getPort()).isEqualTo(greaterThanOrEqualTo(0));
+            assertThat(taskManagerRpcService.getAddress()).isEqualTo(equalTo(taskmanagerHost));
         } finally {
             maybeCloseRpcService(taskManagerRpcService);
             highAvailabilityServices.closeAndCleanupAllData();
@@ -116,7 +114,8 @@ public class TaskManagerRunnerConfigurationTest extends TestLogger {
             taskManagerRpcService =
                     TaskManagerRunner.createRpcService(
                             config, highAvailabilityServices, RPC_SYSTEM);
-            assertThat(taskManagerRpcService.getAddress(), not(isEmptyOrNullString()));
+            assertThat(taskManagerRpcService.getAddress())
+                    .satisfies(matching(not(isEmptyOrNullString())));
         } finally {
             maybeCloseRpcService(taskManagerRpcService);
             highAvailabilityServices.closeAndCleanupAllData();
@@ -138,7 +137,7 @@ public class TaskManagerRunnerConfigurationTest extends TestLogger {
             taskManagerRpcService =
                     TaskManagerRunner.createRpcService(
                             config, highAvailabilityServices, RPC_SYSTEM);
-            assertThat(taskManagerRpcService.getAddress(), is(ipAddress()));
+            assertThat(taskManagerRpcService.getAddress()).isEqualTo(ipAddress());
         } finally {
             maybeCloseRpcService(taskManagerRpcService);
             highAvailabilityServices.closeAndCleanupAllData();
@@ -161,7 +160,7 @@ public class TaskManagerRunnerConfigurationTest extends TestLogger {
             TaskManagerRunner.createRpcService(config, highAvailabilityServices, RPC_SYSTEM);
             fail("Should fail because -1 is not a valid port range");
         } catch (final IllegalArgumentException e) {
-            assertThat(e.getMessage(), containsString("Invalid port range definition: -1"));
+            assertThat(e.getMessage()).contains("Invalid port range definition: -1");
         } finally {
             highAvailabilityServices.closeAndCleanupAllData();
         }
@@ -183,7 +182,7 @@ public class TaskManagerRunnerConfigurationTest extends TestLogger {
             Configuration configuration = TaskManagerRunner.loadConfiguration(args);
             FileSystem.initialize(configuration);
 
-            assertEquals(defaultFS, FileSystem.getDefaultFsUri());
+            assertThat(FileSystem.getDefaultFsUri()).isEqualTo(defaultFS);
         } finally {
             // reset FS settings
             FileSystem.initialize(new Configuration());
@@ -210,11 +209,10 @@ public class TaskManagerRunnerConfigurationTest extends TestLogger {
                     "-D" + JobManagerOptions.PORT.key() + "=" + jmPort
                 };
         Configuration configuration = TaskManagerRunner.loadConfiguration(args);
-        assertEquals(
-                MemorySize.parse(managedMemory + "b"),
-                configuration.get(TaskManagerOptions.MANAGED_MEMORY_SIZE));
-        assertEquals(jmHost, configuration.get(JobManagerOptions.ADDRESS));
-        assertEquals(jmPort, configuration.getInteger(JobManagerOptions.PORT));
+        assertThat(configuration.get(TaskManagerOptions.MANAGED_MEMORY_SIZE))
+                .isEqualTo(MemorySize.parse(managedMemory + "b"));
+        assertThat(configuration.get(JobManagerOptions.ADDRESS)).isEqualTo(jmHost);
+        assertThat(configuration.getInteger(JobManagerOptions.PORT)).isEqualTo(jmPort);
     }
 
     private static Configuration createFlinkConfigWithPredefinedTaskManagerHostname(

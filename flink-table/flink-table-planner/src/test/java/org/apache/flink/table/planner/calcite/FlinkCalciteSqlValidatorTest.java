@@ -23,8 +23,9 @@ import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.ValidationException;
 import org.apache.flink.table.planner.utils.PlannerMocks;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Test for {@link FlinkCalciteSqlValidator}. */
 public class FlinkCalciteSqlValidatorTest {
@@ -36,9 +37,8 @@ public class FlinkCalciteSqlValidatorTest {
 
     @Test
     public void testUpsertInto() {
-        Assert.assertThrows(
-                "UPSERT INTO statement is not supported. Please use INSERT INTO instead.",
-                ValidationException.class,
-                () -> plannerMocks.getParser().parse("UPSERT INTO t1 VALUES(1)"));
+        assertThatThrownBy(() -> plannerMocks.getParser().parse("UPSERT INTO t1 VALUES(1)"))
+                .as("UPSERT INTO statement is not supported. Please use INSERT INTO instead.")
+                .isInstanceOf(ValidationException.class);
     }
 }

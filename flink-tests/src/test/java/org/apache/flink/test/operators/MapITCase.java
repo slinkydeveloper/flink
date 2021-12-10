@@ -28,13 +28,14 @@ import org.apache.flink.test.operators.util.CollectionDataSets;
 import org.apache.flink.test.operators.util.CollectionDataSets.CustomType;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Collection;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link MapFunction} and {@link RichMapFunction}. */
 @RunWith(Parameterized.class)
@@ -84,18 +85,21 @@ public class MapITCase extends MultipleProgramsTestBase {
         DataSet<String> identityMapDs =
                 ds.map(
                         new RichMapFunction<String, String>() {
+
                             @Override
                             public String map(String value) throws Exception {
-                                Assert.assertTrue(
-                                        1000
-                                                == getRuntimeContext()
-                                                        .getExecutionConfig()
-                                                        .getNumberOfExecutionRetries());
-                                Assert.assertTrue(
-                                        50000
-                                                == getRuntimeContext()
-                                                        .getExecutionConfig()
-                                                        .getTaskCancellationInterval());
+                                assertThat(
+                                                1000
+                                                        == getRuntimeContext()
+                                                                .getExecutionConfig()
+                                                                .getNumberOfExecutionRetries())
+                                        .isTrue();
+                                assertThat(
+                                                50000
+                                                        == getRuntimeContext()
+                                                                .getExecutionConfig()
+                                                                .getTaskCancellationInterval())
+                                        .isTrue();
                                 return value;
                             }
                         });
@@ -527,7 +531,7 @@ public class MapITCase extends MultipleProgramsTestBase {
         @Override
         public void open(Configuration config) {
             int val = config.getInteger(TEST_KEY, -1);
-            Assert.assertEquals(TEST_VALUE, val);
+            assertThat(val).isEqualTo(TEST_VALUE);
         }
 
         @Override

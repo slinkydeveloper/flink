@@ -29,9 +29,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * {@code StateHandleStoreUtilsTest} tests the utility classes collected in {@link
@@ -47,8 +46,8 @@ public class StateHandleStoreUtilsTest extends TestLogger {
 
         final TestingLongStateHandleHelper.LongStateHandle deserializedInstance =
                 StateHandleStoreUtils.deserialize(serializedData);
-        assertThat(deserializedInstance.getStateSize(), is(original.getStateSize()));
-        assertThat(deserializedInstance.getValue(), is(original.getValue()));
+        assertThat(deserializedInstance.getStateSize()).isEqualTo(original.getStateSize());
+        assertThat(deserializedInstance.getValue()).isEqualTo(original.getValue());
     }
 
     @Test
@@ -64,7 +63,7 @@ public class StateHandleStoreUtilsTest extends TestLogger {
             // IOException is expected
         }
 
-        assertThat(discardCalled.get(), is(true));
+        assertThat(discardCalled.get()).isEqualTo(true);
     }
 
     @Test
@@ -83,8 +82,8 @@ public class StateHandleStoreUtilsTest extends TestLogger {
             fail("An IOException is expected to be thrown.");
         } catch (IOException e) {
             // IOException is expected
-            assertThat(e.getSuppressed().length, is(1));
-            assertThat(e.getSuppressed()[0], is(discardException));
+            assertThat(e.getSuppressed().length).isEqualTo(1);
+            assertThat(e.getSuppressed()[0]).isEqualTo(discardException);
         }
     }
 

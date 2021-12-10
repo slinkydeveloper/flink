@@ -28,8 +28,7 @@ import org.junit.Test;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A test class to test PythonConfigUtil getting executionEnvironment correctly. */
 public class PythonConfigUtilTest {
@@ -41,7 +40,7 @@ public class PythonConfigUtilTest {
                 StreamExecutionEnvironment.getExecutionEnvironment();
         Configuration envConfig =
                 PythonConfigUtil.getEnvConfigWithDependencies(executionEnvironment);
-        assertNotNull(envConfig);
+        assertThat(envConfig).isNotNull();
     }
 
     @Test
@@ -53,6 +52,6 @@ public class PythonConfigUtilTest {
 
         env.fromCollection(Collections.singletonList("test")).addSink(new DiscardingSink<>());
         StreamGraph streamGraph = env.getStreamGraph(true);
-        assertEquals(jobName, streamGraph.getJobName());
+        assertThat(streamGraph.getJobName()).isEqualTo(jobName);
     }
 }

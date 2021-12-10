@@ -27,7 +27,7 @@ import org.apache.flink.types.StringValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ToNullValue}. */
 public class ToNullValueTest {
@@ -36,14 +36,15 @@ public class ToNullValueTest {
     public void testTranslation() throws Exception {
         NullValue reuse = NullValue.getInstance();
 
-        assertEquals(
-                NullValue.getInstance(), new ToNullValue<>().translate(new DoubleValue(), reuse));
-        assertEquals(
-                NullValue.getInstance(), new ToNullValue<>().translate(new FloatValue(), reuse));
-        assertEquals(NullValue.getInstance(), new ToNullValue<>().translate(new IntValue(), reuse));
-        assertEquals(
-                NullValue.getInstance(), new ToNullValue<>().translate(new LongValue(), reuse));
-        assertEquals(
-                NullValue.getInstance(), new ToNullValue<>().translate(new StringValue(), reuse));
+        assertThat(new ToNullValue<>().translate(new DoubleValue(), reuse))
+                .isEqualTo(NullValue.getInstance());
+        assertThat(new ToNullValue<>().translate(new FloatValue(), reuse))
+                .isEqualTo(NullValue.getInstance());
+        assertThat(new ToNullValue<>().translate(new IntValue(), reuse))
+                .isEqualTo(NullValue.getInstance());
+        assertThat(new ToNullValue<>().translate(new LongValue(), reuse))
+                .isEqualTo(NullValue.getInstance());
+        assertThat(new ToNullValue<>().translate(new StringValue(), reuse))
+                .isEqualTo(NullValue.getInstance());
     }
 }

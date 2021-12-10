@@ -22,8 +22,8 @@ import org.apache.flink.runtime.metrics.util.SystemResourcesCounter;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /** Tests for {@link SystemResourcesCounter}. */
 public class SystemResourcesCounterTest {
@@ -57,11 +57,12 @@ public class SystemResourcesCounterTest {
                         + systemResources.getCpuUser()
                         + systemResources.getIOWait();
 
-        assertTrue(
-                "There should be at least one processor", systemResources.getProcessorsCount() > 0);
-        assertTrue(
-                "There should be at least one network interface",
-                systemResources.getNetworkInterfaceNames().length > 0);
-        assertEquals(100.0, totalCpuUsage + systemResources.getCpuIdle(), EPSILON);
+        assertThat(systemResources.getProcessorsCount() > 0)
+                .as("There should be at least one processor")
+                .isTrue();
+        assertThat(systemResources.getNetworkInterfaceNames().length > 0)
+                .as("There should be at least one network interface")
+                .isTrue();
+        assertThat(totalCpuUsage + systemResources.getCpuIdle()).isCloseTo(100.0, within(EPSILON));
     }
 }

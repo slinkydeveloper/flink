@@ -56,11 +56,8 @@ import java.util.function.Supplier;
 import static org.apache.flink.core.testutils.CommonTestUtils.waitUtil;
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.verifyAssignment;
 import static org.apache.flink.runtime.source.coordinator.CoordinatorTestUtils.verifyException;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Unit tests for {@link SourceCoordinator}. */
 @SuppressWarnings("serial")
@@ -103,14 +100,14 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         sourceCoordinator.start();
         waitForCoordinatorToProcessActions();
 
-        assertTrue(getEnumerator().isStarted());
+        assertThat(getEnumerator().isStarted()).isTrue();
     }
 
     @Test
     public void testClosed() throws Exception {
         sourceCoordinator.start();
         sourceCoordinator.close();
-        assertTrue(getEnumerator().isClosed());
+        assertThat(getEnumerator().isClosed()).isTrue();
     }
 
     @Test
@@ -121,8 +118,8 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         sourceCoordinator.handleEventFromOperator(0, new SourceEventWrapper(sourceEvent));
         waitForCoordinatorToProcessActions();
 
-        assertEquals(1, getEnumerator().getHandledSourceEvent().size());
-        assertEquals(sourceEvent, getEnumerator().getHandledSourceEvent().get(0));
+        assertThat(getEnumerator().getHandledSourceEvent().size()).isEqualTo(1);
+        assertThat(getEnumerator().getHandledSourceEvent().get(0)).isEqualTo(sourceEvent);
     }
 
     @Test
@@ -144,15 +141,13 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         TestingSplitEnumerator<?> restoredEnumerator =
                 (TestingSplitEnumerator<?>) restoredCoordinator.getEnumerator();
         SourceCoordinatorContext<?> restoredContext = restoredCoordinator.getContext();
-        assertEquals(
-                "2 splits should have been assigned to reader 0",
-                4,
-                restoredEnumerator.getUnassignedSplits().size());
-        assertTrue(restoredEnumerator.getContext().registeredReaders().isEmpty());
-        assertEquals(
-                "Registered readers should not be recovered by restoring",
-                0,
-                restoredContext.registeredReaders().size());
+        assertThat(restoredEnumerator.getUnassignedSplits().size())
+                .as("2 splits should have been assigned to reader 0")
+                .isEqualTo(4);
+        assertThat(restoredEnumerator.getContext().registeredReaders().isEmpty()).isTrue();
+        assertThat(restoredContext.registeredReaders().size())
+                .as("Registered readers should not be recovered by restoring")
+                .isEqualTo(0);
     }
 
     @Test
@@ -173,8 +168,8 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         // check the state.
         waitForCoordinatorToProcessActions();
 
-        assertEquals(4, getEnumerator().getUnassignedSplits().size());
-        assertTrue(splitSplitAssignmentTracker.uncheckpointedAssignments().isEmpty());
+        assertThat(getEnumerator().getUnassignedSplits().size()).isEqualTo(4);
+        assertThat(splitSplitAssignmentTracker.uncheckpointedAssignments().isEmpty()).isTrue();
         verifyAssignment(
                 Arrays.asList("0", "1"),
                 splitSplitAssignmentTracker.assignmentsByCheckpointId().get(100L).get(0));
@@ -187,20 +182,21 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         sourceCoordinator.subtaskReset(0, 99L);
         waitForCoordinatorToProcessActions();
 
-        assertFalse(
-                "Reader 0 should have been unregistered.",
-                context.registeredReaders().containsKey(0));
+        assertThat(context.registeredReaders().containsKey(0))
+                .as("Reader 0 should have been unregistered.")
+                .isFalse();
         // The tracker should have reverted all the splits assignment to reader 0.
         for (Map<Integer, ?> assignment :
                 splitSplitAssignmentTracker.assignmentsByCheckpointId().values()) {
-            assertFalse(
-                    "Assignment in uncompleted checkpoint should have been reverted.",
-                    assignment.containsKey(0));
+            assertThat(assignment.containsKey(0))
+                    .as("Assignment in uncompleted checkpoint should have been reverted.")
+                    .isFalse();
         }
-        assertFalse(splitSplitAssignmentTracker.uncheckpointedAssignments().containsKey(0));
+        assertThat(splitSplitAssignmentTracker.uncheckpointedAssignments().containsKey(0))
+                .isFalse();
         // The split enumerator should now contains the splits used to b
         // assigned to reader 0.
-        assertEquals(7, getEnumerator().getUnassignedSplits().size());
+        assertThat(getEnumerator().getUnassignedSplits().size()).isEqualTo(7);
     }
 
     @Test
@@ -220,11 +216,12 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
 
         waitForCoordinatorToProcessActions();
 
-        assertEquals(100L, (long) getEnumerator().getSuccessfulCheckpoints().get(0));
-        assertFalse(context.registeredReaders().containsKey(0));
-        assertEquals(4, getEnumerator().getUnassignedSplits().size());
-        assertFalse(splitSplitAssignmentTracker.uncheckpointedAssignments().containsKey(0));
-        assertTrue(splitSplitAssignmentTracker.assignmentsByCheckpointId().isEmpty());
+        assertThat((long) getEnumerator().getSuccessfulCheckpoints().get(0)).isEqualTo(100L);
+        assertThat(context.registeredReaders().containsKey(0)).isFalse();
+        assertThat(getEnumerator().getUnassignedSplits().size()).isEqualTo(4);
+        assertThat(splitSplitAssignmentTracker.uncheckpointedAssignments().containsKey(0))
+                .isFalse();
+        assertThat(splitSplitAssignmentTracker.assignmentsByCheckpointId().isEmpty()).isTrue();
     }
 
     @Test
@@ -251,7 +248,7 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
                     () -> operatorCoordinatorContext.isJobFailed(),
                     Duration.ofSeconds(10),
                     "The job should have failed due to the artificial exception.");
-            assertEquals(failureReason, operatorCoordinatorContext.getJobFailureReason());
+            assertThat(operatorCoordinatorContext.getJobFailureReason()).isEqualTo(failureReason);
         }
     }
 
@@ -271,8 +268,8 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
 
         coordinator.start();
 
-        assertTrue(operatorCoordinatorContext.isJobFailed());
-        assertEquals(failureReason, operatorCoordinatorContext.getJobFailureReason());
+        assertThat(operatorCoordinatorContext.isJobFailed()).isTrue();
+        assertThat(operatorCoordinatorContext.getJobFailureReason()).isEqualTo(failureReason);
     }
 
     @Test
@@ -301,7 +298,7 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
                     () -> operatorCoordinatorContext.isJobFailed(),
                     Duration.ofSeconds(10),
                     "The job should have failed due to the artificial exception.");
-            assertEquals(error, operatorCoordinatorContext.getJobFailureReason());
+            assertThat(operatorCoordinatorContext.getJobFailureReason()).isEqualTo(error);
         }
     }
 
@@ -320,8 +317,8 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         coordinator.start();
 
         final ClassLoaderTestEnumerator enumerator = source.createEnumeratorFuture.get();
-        assertSame(testClassLoader, enumerator.constructorClassLoader);
-        assertSame(testClassLoader, enumerator.threadClassLoader.get());
+        assertThat(enumerator.constructorClassLoader).isSameAs(testClassLoader);
+        assertThat(enumerator.threadClassLoader.get()).isSameAs(testClassLoader);
 
         // cleanup
         coordinator.close();
@@ -343,8 +340,8 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         coordinator.start();
 
         final ClassLoaderTestEnumerator enumerator = source.restoreEnumeratorFuture.get();
-        assertSame(testClassLoader, enumerator.constructorClassLoader);
-        assertSame(testClassLoader, enumerator.threadClassLoader.get());
+        assertThat(enumerator.constructorClassLoader).isSameAs(testClassLoader);
+        assertThat(enumerator.threadClassLoader.get()).isSameAs(testClassLoader);
 
         // cleanup
         coordinator.close();
@@ -370,9 +367,9 @@ public class SourceCoordinatorTest extends SourceCoordinatorTestBase {
         SourceCoordinatorContext<?> restoredContext = restoredCoordinator.getContext();
 
         // Check if enumerator is restored correctly
-        assertEquals(splits, restoredEnumerator.getUnassignedSplits());
-        assertTrue(restoredEnumerator.getHandledSourceEvent().isEmpty());
-        assertEquals(0, restoredContext.registeredReaders().size());
+        assertThat(restoredEnumerator.getUnassignedSplits()).isEqualTo(splits);
+        assertThat(restoredEnumerator.getHandledSourceEvent().isEmpty()).isTrue();
+        assertThat(restoredContext.registeredReaders().size()).isEqualTo(0);
     }
 
     // ------------------------------------------------------------------------

@@ -36,7 +36,6 @@ import org.apache.flink.test.operators.util.CollectionDataSets.PojoWithDateAndEn
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,6 +43,9 @@ import org.junit.runners.Parameterized;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Integration tests for {@link ReduceFunction} and {@link RichReduceFunction}. */
 @SuppressWarnings("serial")
@@ -396,13 +398,13 @@ public class ReduceITCase extends MultipleProgramsTestBase {
                 throws Exception {
             for (PojoWithDateAndEnum val : values) {
                 if (val.cat == CollectionDataSets.Category.CAT_A) {
-                    Assert.assertEquals("a", val.group);
+                    assertThat(val.group).isEqualTo("a");
                 } else if (val.cat == CollectionDataSets.Category.CAT_B) {
-                    Assert.assertEquals("b", val.group);
+                    assertThat(val.group).isEqualTo("b");
                 } else {
-                    Assert.fail("error. Cat = " + val.cat);
+                    fail("error. Cat = " + val.cat);
                 }
-                Assert.assertEquals(666, val.date.getTime());
+                assertThat(val.date.getTime()).isEqualTo(666);
             }
             out.collect("ok");
         }

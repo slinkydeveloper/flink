@@ -23,7 +23,6 @@ import org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils;
 import org.apache.flink.runtime.io.network.buffer.BufferCompressor;
 import org.apache.flink.runtime.io.network.buffer.BufferDecompressor;
 
-import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -35,11 +34,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that read the BoundedBlockingSubpartition with multiple threads in parallel. */
 @RunWith(Parameterized.class)
@@ -125,9 +120,9 @@ public abstract class BoundedDataTestBase {
             final BoundedData.Reader reader = bd.createReader();
 
             // check that multiple calls now return empty buffers
-            assertNull(reader.nextBuffer());
-            assertNull(reader.nextBuffer());
-            assertNull(reader.nextBuffer());
+            assertThat(reader.nextBuffer()).isNull();
+            assertThat(reader.nextBuffer()).isNull();
+            assertThat(reader.nextBuffer()).isNull();
         }
     }
 
@@ -135,11 +130,11 @@ public abstract class BoundedDataTestBase {
     public void testDeleteFileOnClose() throws Exception {
         final Path path = createTempPath();
         final BoundedData bd = createBoundedData(path);
-        assertTrue(Files.exists(path));
+        assertThat(Files.exists(path)).isTrue();
 
         bd.close();
 
-        assertFalse(Files.exists(path));
+        assertThat(Files.exists(path)).isFalse();
     }
 
     @Test
@@ -168,13 +163,13 @@ public abstract class BoundedDataTestBase {
                 bufferSize1 + bufferSize2 + 2 * BufferReaderWriterUtil.HEADER_LENGTH;
 
         bd.writeBuffer(BufferBuilderTestUtils.buildSomeBuffer(bufferSize1));
-        assertEquals(expectedSize1, bd.getSize());
+        assertThat(bd.getSize()).isEqualTo(expectedSize1);
 
         bd.writeBuffer(BufferBuilderTestUtils.buildSomeBuffer(bufferSize2));
-        assertEquals(expectedSizeFinal, bd.getSize());
+        assertThat(bd.getSize()).isEqualTo(expectedSizeFinal);
 
         bd.finishWrite();
-        assertEquals(expectedSizeFinal, bd.getSize());
+        assertThat(bd.getSize()).isEqualTo(expectedSizeFinal);
     }
 
     // ------------------------------------------------------------------------
@@ -222,8 +217,8 @@ public abstract class BoundedDataTestBase {
             b.recycleBuffer();
         }
 
-        assertEquals(numBuffersExpected, numBuffers);
-        assertThat(nextValue, Matchers.greaterThanOrEqualTo(numInts));
+        assertThat(numBuffers).isEqualTo(numBuffersExpected);
+        assertThat(nextValue).isGreaterThanOrEqualTo(numInts);
     }
 
     private static Path createTempPath() throws IOException {

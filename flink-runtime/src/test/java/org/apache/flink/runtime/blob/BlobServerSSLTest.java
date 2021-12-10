@@ -28,7 +28,7 @@ import java.io.IOException;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
 import static org.apache.flink.util.ExceptionUtils.findThrowableWithMessage;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Testing a {@link BlobServer} would fail with improper SSL config. */
 public class BlobServerSSLTest extends TestLogger {
@@ -51,7 +51,7 @@ public class BlobServerSSLTest extends TestLogger {
         config.setString(SecurityOptions.SSL_ALGORITHMS, "TLSv1,TLSv1.1");
 
         try (final BlobServer ignored = new BlobServer(config, new VoidBlobStore())) {
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
             findThrowable(e, IOException.class);
             findThrowableWithMessage(e, "Unable to open BLOB Server in specified port range: 0");
@@ -70,7 +70,7 @@ public class BlobServerSSLTest extends TestLogger {
         config.setString(SecurityOptions.SSL_TRUSTSTORE_PASSWORD, "password");
 
         try (final BlobServer ignored = new BlobServer(config, new VoidBlobStore())) {
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
             findThrowable(e, IOException.class);
             findThrowableWithMessage(e, "Failed to initialize SSL for the blob server");
@@ -84,7 +84,7 @@ public class BlobServerSSLTest extends TestLogger {
         config.setBoolean(SecurityOptions.SSL_INTERNAL_ENABLED, true);
 
         try (final BlobServer ignored = new BlobServer(config, new VoidBlobStore())) {
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
             findThrowable(e, IOException.class);
             findThrowableWithMessage(e, "Failed to initialize SSL for the blob server");

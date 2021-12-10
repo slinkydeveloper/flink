@@ -48,9 +48,8 @@ import org.slf4j.Logger;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the JobMaster scheduler interaction. */
 public class JobMasterSchedulerTest extends TestLogger {
@@ -78,9 +77,8 @@ public class JobMasterSchedulerTest extends TestLogger {
 
         jobMaster.start();
 
-        assertThat(
-                onCompletionActions.getJobMasterFailedFuture().join(),
-                is(instanceOf(JobMasterException.class)));
+        assertThat(onCompletionActions.getJobMasterFailedFuture().join())
+                .isEqualTo(instanceOf(JobMasterException.class));
 
         // close the jobMaster to remove it from the testing rpc service so that it can shut down
         // cleanly

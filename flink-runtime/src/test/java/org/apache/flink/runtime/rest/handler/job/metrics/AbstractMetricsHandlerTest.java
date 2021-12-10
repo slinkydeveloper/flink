@@ -49,11 +49,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 /** Tests for {@link AbstractMetricsHandler}. */
@@ -108,14 +107,14 @@ public class AbstractMetricsHandlerTest extends TestLogger {
                                 Collections.emptyList()),
                         mockDispatcherGateway);
 
-        assertTrue(completableFuture.isDone());
+        assertThat(completableFuture.isDone()).isTrue();
 
         final MetricCollectionResponseBody metricCollectionResponseBody = completableFuture.get();
-        assertThat(metricCollectionResponseBody.getMetrics(), hasSize(1));
+        assertThat(metricCollectionResponseBody.getMetrics()).satisfies(matching(hasSize(1)));
 
         final Metric metric = metricCollectionResponseBody.getMetrics().iterator().next();
-        assertThat(metric.getId(), equalTo(TEST_METRIC_NAME));
-        assertThat(metric.getValue(), equalTo(null));
+        assertThat(metric.getId()).isEqualTo(TEST_METRIC_NAME);
+        assertThat(metric.getValue()).isEqualTo(null);
     }
 
     @Test
@@ -130,10 +129,10 @@ public class AbstractMetricsHandlerTest extends TestLogger {
                                 Collections.emptyList()),
                         mockDispatcherGateway);
 
-        assertTrue(completableFuture.isDone());
+        assertThat(completableFuture.isDone()).isTrue();
 
         final MetricCollectionResponseBody metricCollectionResponseBody = completableFuture.get();
-        assertThat(metricCollectionResponseBody.getMetrics(), empty());
+        assertThat(metricCollectionResponseBody.getMetrics()).satisfies(matching(empty()));
     }
 
     @Test
@@ -150,14 +149,14 @@ public class AbstractMetricsHandlerTest extends TestLogger {
                                 Collections.emptyList()),
                         mockDispatcherGateway);
 
-        assertTrue(completableFuture.isDone());
+        assertThat(completableFuture.isDone()).isTrue();
 
         final MetricCollectionResponseBody metricCollectionResponseBody = completableFuture.get();
-        assertThat(metricCollectionResponseBody.getMetrics(), hasSize(1));
+        assertThat(metricCollectionResponseBody.getMetrics()).satisfies(matching(hasSize(1)));
 
         final Metric metric = metricCollectionResponseBody.getMetrics().iterator().next();
-        assertThat(metric.getId(), equalTo(TEST_METRIC_NAME));
-        assertThat(metric.getValue(), equalTo(Integer.toString(TEST_METRIC_VALUE)));
+        assertThat(metric.getId()).isEqualTo(TEST_METRIC_NAME);
+        assertThat(metric.getValue()).isEqualTo(Integer.toString(TEST_METRIC_VALUE));
     }
 
     @Test
@@ -174,10 +173,10 @@ public class AbstractMetricsHandlerTest extends TestLogger {
                                 Collections.emptyList()),
                         mockDispatcherGateway);
 
-        assertTrue(completableFuture.isDone());
+        assertThat(completableFuture.isDone()).isTrue();
 
         final MetricCollectionResponseBody metricCollectionResponseBody = completableFuture.get();
-        assertThat(metricCollectionResponseBody.getMetrics(), empty());
+        assertThat(metricCollectionResponseBody.getMetrics()).satisfies(matching(empty()));
     }
 
     private static class TestMetricsHandler extends AbstractMetricsHandler<TestMessageParameters> {

@@ -24,9 +24,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TaskManagerIdPathParameter}. */
 public class TaskManagerIdPathParameterTest extends TestLogger {
@@ -43,14 +41,14 @@ public class TaskManagerIdPathParameterTest extends TestLogger {
         final String resourceIdString = "foo";
         final ResourceID resourceId =
                 taskManagerIdPathParameter.convertFromString(resourceIdString);
-        assertThat(resourceId.getResourceIdString(), equalTo(resourceIdString));
+        assertThat(resourceId.getResourceIdString()).isEqualTo(resourceIdString);
 
-        assertThat(
-                taskManagerIdPathParameter.convertToString(resourceId), equalTo(resourceIdString));
+        assertThat(taskManagerIdPathParameter.convertToString(resourceId))
+                .isEqualTo(resourceIdString);
     }
 
     @Test
     public void testIsMandatory() {
-        assertTrue(taskManagerIdPathParameter.isMandatory());
+        assertThat(taskManagerIdPathParameter.isMandatory()).isTrue();
     }
 }

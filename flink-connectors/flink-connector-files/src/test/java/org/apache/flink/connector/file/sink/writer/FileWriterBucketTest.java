@@ -53,10 +53,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link FileWriterBucket}. */
 public class FileWriterBucketTest {
@@ -81,11 +79,11 @@ public class FileWriterBucketTest {
         FileWriterBucketState bucketState = bucket.snapshotState();
 
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 0, 0);
-        assertEquals(BUCKET_ID, bucketState.getBucketId());
-        assertEquals(path, bucketState.getBucketPath());
-        assertNotNull(
-                "The bucket should have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getBucketId()).isEqualTo(BUCKET_ID);
+        assertThat(bucketState.getBucketPath()).isEqualTo(path);
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should have in-progress recoverable")
+                .isNotNull();
     }
 
     @Test
@@ -106,11 +104,11 @@ public class FileWriterBucketTest {
         FileWriterBucketState bucketState = bucket.snapshotState();
 
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 1, 0);
-        assertEquals(BUCKET_ID, bucketState.getBucketId());
-        assertEquals(path, bucketState.getBucketPath());
-        assertNull(
-                "The bucket should not have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getBucketId()).isEqualTo(BUCKET_ID);
+        assertThat(bucketState.getBucketPath()).isEqualTo(path);
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should not have in-progress recoverable")
+                .isNull();
     }
 
     @Test
@@ -134,11 +132,11 @@ public class FileWriterBucketTest {
 
         // The last element would not roll
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 2, 0);
-        assertEquals(BUCKET_ID, bucketState.getBucketId());
-        assertEquals(path, bucketState.getBucketPath());
-        assertNotNull(
-                "The bucket should not have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getBucketId()).isEqualTo(BUCKET_ID);
+        assertThat(bucketState.getBucketPath()).isEqualTo(path);
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should not have in-progress recoverable")
+                .isNotNull();
     }
 
     @Test
@@ -165,11 +163,11 @@ public class FileWriterBucketTest {
         FileWriterBucketState bucketState = bucket.snapshotState();
 
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 0, 1);
-        assertEquals(BUCKET_ID, bucketState.getBucketId());
-        assertEquals(path, bucketState.getBucketPath());
-        assertNotNull(
-                "The bucket should not have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getBucketId()).isEqualTo(BUCKET_ID);
+        assertThat(bucketState.getBucketPath()).isEqualTo(path);
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should not have in-progress recoverable")
+                .isNotNull();
     }
 
     @Test
@@ -190,9 +188,9 @@ public class FileWriterBucketTest {
         List<FileSinkCommittable> fileSinkCommittables = bucket.prepareCommit(true);
 
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 1, 0);
-        assertNull(
-                "The bucket should not have in-progress part after flushed",
-                bucket.getInProgressPart());
+        assertThat(bucket.getInProgressPart())
+                .as("The bucket should not have in-progress part after flushed")
+                .isNull();
     }
 
     @Test
@@ -214,13 +212,15 @@ public class FileWriterBucketTest {
         bucket.write("test-element", 12);
 
         bucket.onProcessingTime(20);
-        assertNotNull(
-                "The bucket should not roll since interval is not reached",
-                bucket.getInProgressPart());
+        assertThat(bucket.getInProgressPart())
+                .as("The bucket should not roll since interval is not reached")
+                .isNotNull();
 
         bucket.write("test-element", 21);
         bucket.onProcessingTime(21);
-        assertNull("The bucket should roll since interval is reached", bucket.getInProgressPart());
+        assertThat(bucket.getInProgressPart())
+                .as("The bucket should roll since interval is reached")
+                .isNull();
         List<FileSinkCommittable> fileSinkCommittables = bucket.prepareCommit(false);
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 1, 0);
     }
@@ -231,14 +231,16 @@ public class FileWriterBucketTest {
         StubNonResumableWriter nonResumableWriter = new StubNonResumableWriter();
         FileWriterBucket<String> bucket =
                 getRestoredBucketWithOnlyInProgressPart(nonResumableWriter, DEFAULT_ROLLING_POLICY);
-        assertNull("The in-progress file should be pre-committed", bucket.getInProgressPart());
+        assertThat(bucket.getInProgressPart())
+                .as("The in-progress file should be pre-committed")
+                .isNull();
 
         List<FileSinkCommittable> fileSinkCommittables = bucket.prepareCommit(false);
         FileWriterBucketState bucketState = bucket.snapshotState();
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 1, 0);
-        assertNull(
-                "The bucket should not have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should not have in-progress recoverable")
+                .isNull();
     }
 
     @Test
@@ -246,14 +248,16 @@ public class FileWriterBucketTest {
         StubResumableWriter resumableWriter = new StubResumableWriter();
         FileWriterBucket<String> bucket =
                 getRestoredBucketWithOnlyInProgressPart(resumableWriter, DEFAULT_ROLLING_POLICY);
-        assertNotNull("The in-progress file should be recovered", bucket.getInProgressPart());
+        assertThat(bucket.getInProgressPart())
+                .as("The in-progress file should be recovered")
+                .isNotNull();
 
         List<FileSinkCommittable> fileSinkCommittables = bucket.prepareCommit(false);
         FileWriterBucketState bucketState = bucket.snapshotState();
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 0, 0);
-        assertNotNull(
-                "The bucket should have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should have in-progress recoverable")
+                .isNotNull();
     }
 
     /**
@@ -268,9 +272,9 @@ public class FileWriterBucketTest {
         FileWriterBucket<String> bucket =
                 getRestoredBucketWithOnlyPendingFiles(
                         resumableWriter, DEFAULT_ROLLING_POLICY, noOfPendingFileCheckpoints);
-        assertNull("There should be no in-progress file", bucket.getInProgressPart());
+        assertThat(bucket.getInProgressPart()).as("There should be no in-progress file").isNull();
         // There is one pending file for each checkpoint
-        assertEquals(noOfPendingFileCheckpoints, bucket.getPendingFiles().size());
+        assertThat(bucket.getPendingFiles().size()).isEqualTo(noOfPendingFileCheckpoints);
 
         List<FileSinkCommittable> fileSinkCommittables = bucket.prepareCommit(false);
         bucket.snapshotState();
@@ -286,14 +290,16 @@ public class FileWriterBucketTest {
                 getRestoredBucketWithOnlyInProgressPart(
                         new StubNonResumableWriter(), DEFAULT_ROLLING_POLICY);
         bucket1.merge(bucket2);
-        assertNull("The in-progress file should be pre-committed", bucket1.getInProgressPart());
+        assertThat(bucket1.getInProgressPart())
+                .as("The in-progress file should be pre-committed")
+                .isNull();
 
         List<FileSinkCommittable> fileSinkCommittables = bucket1.prepareCommit(false);
         FileWriterBucketState bucketState = bucket1.snapshotState();
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 2, 0);
-        assertNull(
-                "The bucket should have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should have in-progress recoverable")
+                .isNull();
     }
 
     @Test
@@ -305,14 +311,16 @@ public class FileWriterBucketTest {
                 getRestoredBucketWithOnlyInProgressPart(
                         new StubResumableWriter(), DEFAULT_ROLLING_POLICY);
         bucket1.merge(bucket2);
-        assertNotNull("The in-progress file should be recovered", bucket1.getInProgressPart());
+        assertThat(bucket1.getInProgressPart())
+                .as("The in-progress file should be recovered")
+                .isNotNull();
 
         List<FileSinkCommittable> fileSinkCommittables = bucket1.prepareCommit(false);
         FileWriterBucketState bucketState = bucket1.snapshotState();
         compareNumberOfPendingAndInProgress(fileSinkCommittables, 1, 0);
-        assertNotNull(
-                "The bucket should not have in-progress recoverable",
-                bucketState.getInProgressFileRecoverable());
+        assertThat(bucketState.getInProgressFileRecoverable())
+                .as("The bucket should not have in-progress recoverable")
+                .isNotNull();
     }
 
     // ------------------------------- Mock Classes --------------------------------
@@ -469,7 +477,7 @@ public class FileWriterBucketTest {
             }
             return new TestRecoverableWriter((LocalFileSystem) fs);
         } catch (IOException e) {
-            fail();
+            fail("unknown failure");
         }
         return null;
     }
@@ -491,8 +499,8 @@ public class FileWriterBucketTest {
             }
         }
 
-        assertEquals(expectedPendingFiles, numPendingFiles);
-        assertEquals(expectedInProgressFiles, numInProgressFiles);
+        assertThat(numPendingFiles).isEqualTo(expectedPendingFiles);
+        assertThat(numInProgressFiles).isEqualTo(expectedInProgressFiles);
     }
 
     private FileWriterBucket<String> getRestoredBucketWithOnlyInProgressPart(

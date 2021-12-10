@@ -43,9 +43,7 @@ import java.util.List;
 
 import static com.google.protobuf.Message.Builder;
 import static org.apache.flink.formats.parquet.protobuf.SimpleRecord.SimpleProtoRecord;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Simple integration test case for writing bulk encoded files with the {@link StreamingFileSink}
@@ -90,18 +88,18 @@ public class ParquetProtoStreamingFileSinkITCase extends AbstractTestBase {
     private static <T extends MessageOrBuilder> void validateResults(File folder, List<T> expected)
             throws Exception {
         File[] buckets = folder.listFiles();
-        assertNotNull(buckets);
-        assertEquals(1, buckets.length);
+        assertThat(buckets).isNotNull();
+        assertThat(buckets.length).isEqualTo(1);
 
         File[] partFiles = buckets[0].listFiles();
-        assertNotNull(partFiles);
-        assertEquals(2, partFiles.length);
+        assertThat(partFiles).isNotNull();
+        assertThat(partFiles.length).isEqualTo(2);
 
         for (File partFile : partFiles) {
-            assertTrue(partFile.length() > 0);
+            assertThat(partFile.length() > 0).isTrue();
 
             final List<Message> fileContent = readParquetFile(partFile);
-            assertEquals(expected, fileContent);
+            assertThat(fileContent).isEqualTo(expected);
         }
     }
 

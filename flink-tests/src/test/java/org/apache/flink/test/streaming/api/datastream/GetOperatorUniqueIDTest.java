@@ -28,7 +28,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the uid translation to {@link org.apache.flink.runtime.jobgraph.OperatorID}. */
 @SuppressWarnings("serial")
@@ -65,9 +65,8 @@ public class GetOperatorUniqueIDTest extends TestLogger {
         public void open(Configuration parameters) throws Exception {
             super.open(parameters);
 
-            assertEquals(
-                    expectedOperatorUniqueID,
-                    ((StreamingRuntimeContext) getRuntimeContext()).getOperatorUniqueID());
+            assertThat(((StreamingRuntimeContext) getRuntimeContext()).getOperatorUniqueID())
+                    .isEqualTo(expectedOperatorUniqueID);
         }
 
         @Override

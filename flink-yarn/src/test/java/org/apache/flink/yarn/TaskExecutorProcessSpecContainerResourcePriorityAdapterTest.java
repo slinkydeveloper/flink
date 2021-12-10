@@ -33,9 +33,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
@@ -143,12 +143,10 @@ public class TaskExecutorProcessSpecContainerResourcePriorityAdapterTest extends
     public void testGetResourceFromSpec() {
         final TaskExecutorProcessSpecContainerResourcePriorityAdapter adapter = getAdapter();
         final Resource resource = getResource(adapter, TASK_EXECUTOR_PROCESS_SPEC_1);
-        assertThat(
-                resource.getMemory(),
-                is(TASK_EXECUTOR_PROCESS_SPEC_1.getTotalProcessMemorySize().getMebiBytes()));
-        assertThat(
-                resource.getVirtualCores(),
-                is(TASK_EXECUTOR_PROCESS_SPEC_1.getCpuCores().getValue().intValue()));
+        assertThat(resource.getMemory())
+                .isEqualTo(TASK_EXECUTOR_PROCESS_SPEC_1.getTotalProcessMemorySize().getMebiBytes());
+        assertThat(resource.getVirtualCores())
+                .isEqualTo(TASK_EXECUTOR_PROCESS_SPEC_1.getCpuCores().getValue().intValue());
     }
 
     @Test
@@ -157,16 +155,17 @@ public class TaskExecutorProcessSpecContainerResourcePriorityAdapterTest extends
         final Priority priority1 = getPriority(adapter, TASK_EXECUTOR_PROCESS_SPEC_1);
         final Priority priority2 = getPriority(adapter, TASK_EXECUTOR_PROCESS_SPEC_2);
         final Priority priority3 = getPriority(adapter, TASK_EXECUTOR_PROCESS_SPEC_1);
-        assertThat(priority1, not(priority2));
-        assertThat(priority1, is(priority3));
+        assertThat(priority1).satisfies(matching(not(priority2)));
+        assertThat(priority1).isEqualTo(priority3);
     }
 
     @Test
     public void testMaxContainerResource() {
         final TaskExecutorProcessSpecContainerResourcePriorityAdapter adapter = getAdapter();
         assertThat(
-                adapter.getPriorityAndResource(TASK_EXECUTOR_PROCESS_SPEC_EXCEED_MAX).isPresent(),
-                is(false));
+                        adapter.getPriorityAndResource(TASK_EXECUTOR_PROCESS_SPEC_EXCEED_MAX)
+                                .isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -185,13 +184,12 @@ public class TaskExecutorProcessSpecContainerResourcePriorityAdapterTest extends
                                         addedPriorityAndResource.getPriority())
                                 .get();
 
-        assertThat(
-                resultSpecAndResource.getTaskExecutorProcessSpec(),
-                is(TASK_EXECUTOR_PROCESS_SPEC_1));
-        assertThat(resultSpecAndResource.getResource(), is(addedPriorityAndResource.getResource()));
-        assertThat(
-                adapter.getTaskExecutorProcessSpecAndResource(unknownPriority).isPresent(),
-                is(false));
+        assertThat(resultSpecAndResource.getTaskExecutorProcessSpec())
+                .isEqualTo(TASK_EXECUTOR_PROCESS_SPEC_1);
+        assertThat(resultSpecAndResource.getResource())
+                .isEqualTo(addedPriorityAndResource.getResource());
+        assertThat(adapter.getTaskExecutorProcessSpecAndResource(unknownPriority).isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -206,10 +204,9 @@ public class TaskExecutorProcessSpecContainerResourcePriorityAdapterTest extends
 
         final Map<String, Long> resultExternalResources =
                 ResourceInformationReflector.INSTANCE.getExternalResources(resource);
-        assertThat(resultExternalResources.size(), is(1));
-        assertThat(
-                resultExternalResources.get(SUPPORTED_EXTERNAL_RESOURCE_CONFIG_KEY),
-                is(SUPPORTED_EXTERNAL_RESOURCE_MAX));
+        assertThat(resultExternalResources.size()).isEqualTo(1);
+        assertThat(resultExternalResources.get(SUPPORTED_EXTERNAL_RESOURCE_CONFIG_KEY))
+                .isEqualTo(SUPPORTED_EXTERNAL_RESOURCE_MAX);
     }
 
     @Test(expected = IllegalStateException.class)

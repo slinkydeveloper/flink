@@ -24,7 +24,7 @@ import org.apache.flink.streaming.runtime.tasks.StreamTaskTestHarness;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link StreamIterationHead}. */
 public class StreamIterationHeadTest {
@@ -40,7 +40,7 @@ public class StreamIterationHeadTest {
         harness.invoke();
         harness.waitForTaskCompletion();
 
-        assertEquals(1, harness.getOutput().size());
-        assertEquals(new Watermark(Long.MAX_VALUE), harness.getOutput().peek());
+        assertThat(harness.getOutput().size()).isEqualTo(1);
+        assertThat(harness.getOutput().peek()).isEqualTo(new Watermark(Long.MAX_VALUE));
     }
 }

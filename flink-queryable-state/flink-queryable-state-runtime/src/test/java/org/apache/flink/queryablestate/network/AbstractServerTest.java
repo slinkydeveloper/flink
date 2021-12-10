@@ -31,7 +31,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.apache.flink.shaded.netty4.io.netty.buffer.ByteBuf;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -45,6 +44,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests general behavior of the {@link AbstractServerBase}. */
 public class AbstractServerTest extends TestLogger {
@@ -112,39 +113,41 @@ public class AbstractServerTest extends TestLogger {
                                         new TestMessage.TestMessageDeserializer()),
                                 clientStats)) {
             server1.start();
-            Assert.assertTrue(
-                    server1.getServerAddress().getPort() >= portRangeStart
-                            && server1.getServerAddress().getPort() <= portRangeEnd);
+            assertThat(
+                            server1.getServerAddress().getPort() >= portRangeStart
+                                    && server1.getServerAddress().getPort() <= portRangeEnd)
+                    .isTrue();
 
             server2.start();
-            Assert.assertTrue(
-                    server2.getServerAddress().getPort() >= portRangeStart
-                            && server2.getServerAddress().getPort() <= portRangeEnd);
+            assertThat(
+                            server2.getServerAddress().getPort() >= portRangeStart
+                                    && server2.getServerAddress().getPort() <= portRangeEnd)
+                    .isTrue();
 
             TestMessage response1 =
                     client.sendRequest(server1.getServerAddress(), new TestMessage("ping")).join();
-            Assert.assertEquals(server1.getServerName() + "-ping", response1.getMessage());
+            assertThat(response1.getMessage()).isEqualTo(server1.getServerName() + "-ping");
 
             TestMessage response2 =
                     client.sendRequest(server2.getServerAddress(), new TestMessage("pong")).join();
-            Assert.assertEquals(server2.getServerName() + "-pong", response2.getMessage());
+            assertThat(response2.getMessage()).isEqualTo(server2.getServerName() + "-pong");
 
-            Assert.assertEquals(1L, serverStats1.getNumConnections());
-            Assert.assertEquals(1L, serverStats2.getNumConnections());
+            assertThat(serverStats1.getNumConnections()).isEqualTo(1L);
+            assertThat(serverStats2.getNumConnections()).isEqualTo(1L);
 
-            Assert.assertEquals(2L, clientStats.getNumConnections());
-            Assert.assertEquals(0L, clientStats.getNumFailed());
-            Assert.assertEquals(2L, clientStats.getNumSuccessful());
-            Assert.assertEquals(2L, clientStats.getNumRequests());
+            assertThat(clientStats.getNumConnections()).isEqualTo(2L);
+            assertThat(clientStats.getNumFailed()).isEqualTo(0L);
+            assertThat(clientStats.getNumSuccessful()).isEqualTo(2L);
+            assertThat(clientStats.getNumRequests()).isEqualTo(2L);
         }
 
-        Assert.assertEquals(0L, serverStats1.getNumConnections());
-        Assert.assertEquals(0L, serverStats2.getNumConnections());
+        assertThat(serverStats1.getNumConnections()).isEqualTo(0L);
+        assertThat(serverStats2.getNumConnections()).isEqualTo(0L);
 
-        Assert.assertEquals(0L, clientStats.getNumConnections());
-        Assert.assertEquals(0L, clientStats.getNumFailed());
-        Assert.assertEquals(2L, clientStats.getNumSuccessful());
-        Assert.assertEquals(2L, clientStats.getNumRequests());
+        assertThat(clientStats.getNumConnections()).isEqualTo(0L);
+        assertThat(clientStats.getNumFailed()).isEqualTo(0L);
+        assertThat(clientStats.getNumSuccessful()).isEqualTo(2L);
+        assertThat(clientStats.getNumRequests()).isEqualTo(2L);
     }
 
     private static class TestClient extends Client<TestMessage, TestMessage>
@@ -161,7 +164,7 @@ public class AbstractServerTest extends TestLogger {
         @Override
         public void close() throws Exception {
             shutdown().join();
-            Assert.assertTrue(isEventGroupShutdown());
+            assertThat(isEventGroupShutdown()).isTrue();
         }
     }
 
@@ -207,8 +210,8 @@ public class AbstractServerTest extends TestLogger {
         @Override
         public void close() throws Exception {
             shutdownServer().get();
-            Assert.assertTrue(getQueryExecutor().isTerminated());
-            Assert.assertTrue(isEventGroupShutdown());
+            assertThat(getQueryExecutor().isTerminated()).isTrue();
+            assertThat(isEventGroupShutdown()).isTrue();
         }
     }
 

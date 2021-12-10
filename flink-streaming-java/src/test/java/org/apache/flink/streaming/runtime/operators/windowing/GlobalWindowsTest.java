@@ -27,11 +27,9 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link GlobalWindows}. */
@@ -44,22 +42,22 @@ public class GlobalWindowsTest extends TestLogger {
 
         GlobalWindows assigner = GlobalWindows.create();
 
-        assertThat(assigner.assignWindows("String", 0L, mockContext), contains(GlobalWindow.get()));
-        assertThat(
-                assigner.assignWindows("String", 4999L, mockContext), contains(GlobalWindow.get()));
-        assertThat(
-                assigner.assignWindows("String", 5000L, mockContext), contains(GlobalWindow.get()));
+        assertThat(assigner.assignWindows("String", 0L, mockContext))
+                .satisfies(matching(contains(GlobalWindow.get())));
+        assertThat(assigner.assignWindows("String", 4999L, mockContext))
+                .satisfies(matching(contains(GlobalWindow.get())));
+        assertThat(assigner.assignWindows("String", 5000L, mockContext))
+                .satisfies(matching(contains(GlobalWindow.get())));
     }
 
     @Test
     public void testProperties() {
         GlobalWindows assigner = GlobalWindows.create();
 
-        assertFalse(assigner.isEventTime());
-        assertEquals(
-                new GlobalWindow.Serializer(), assigner.getWindowSerializer(new ExecutionConfig()));
-        assertThat(
-                assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)),
-                instanceOf(GlobalWindows.NeverTrigger.class));
+        assertThat(assigner.isEventTime()).isFalse();
+        assertThat(assigner.getWindowSerializer(new ExecutionConfig()))
+                .isEqualTo(new GlobalWindow.Serializer());
+        assertThat(assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)))
+                .isInstanceOf(GlobalWindows.NeverTrigger.class);
     }
 }

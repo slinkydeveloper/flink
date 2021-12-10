@@ -31,7 +31,6 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction;
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
@@ -39,6 +38,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test for streaming program behaviour in case of TaskManager failure based on {@link
@@ -220,14 +222,14 @@ public class TaskManagerProcessFailureStreamingRecoveryITCase
         public void invoke(Long value) throws Exception {
             long expected = collected * stepSize + congruence;
 
-            Assert.assertTrue(
-                    "Value did not match expected value. " + expected + " != " + value,
-                    value.equals(expected));
+            assertThat(value.equals(expected))
+                    .as("Value did not match expected value. " + expected + " != " + value)
+                    .isTrue();
 
             collected++;
 
             if (collected > toCollect) {
-                Assert.fail("Collected <= toCollect: " + collected + " > " + toCollect);
+                fail("Collected <= toCollect: " + collected + " > " + toCollect);
             }
         }
 

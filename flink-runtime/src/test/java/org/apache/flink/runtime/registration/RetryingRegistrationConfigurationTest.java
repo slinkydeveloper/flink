@@ -27,8 +27,7 @@ import org.junit.Test;
 
 import java.time.Duration;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RetryingRegistrationConfiguration}. */
 public class RetryingRegistrationConfigurationTest extends TestLogger {
@@ -51,18 +50,14 @@ public class RetryingRegistrationConfigurationTest extends TestLogger {
         final RetryingRegistrationConfiguration retryingRegistrationConfiguration =
                 RetryingRegistrationConfiguration.fromConfiguration(configuration);
 
-        assertThat(
-                retryingRegistrationConfiguration.getInitialRegistrationTimeoutMillis(),
-                is(initialRegistrationTimeout));
-        assertThat(
-                retryingRegistrationConfiguration.getMaxRegistrationTimeoutMillis(),
-                is(maxRegistrationTimeout));
-        assertThat(
-                retryingRegistrationConfiguration.getRefusedDelayMillis(),
-                is(refusedRegistrationDelay));
-        assertThat(
-                retryingRegistrationConfiguration.getErrorDelayMillis(),
-                is(errorRegistrationDelay));
+        assertThat(retryingRegistrationConfiguration.getInitialRegistrationTimeoutMillis())
+                .isEqualTo(initialRegistrationTimeout);
+        assertThat(retryingRegistrationConfiguration.getMaxRegistrationTimeoutMillis())
+                .isEqualTo(maxRegistrationTimeout);
+        assertThat(retryingRegistrationConfiguration.getRefusedDelayMillis())
+                .isEqualTo(refusedRegistrationDelay);
+        assertThat(retryingRegistrationConfiguration.getErrorDelayMillis())
+                .isEqualTo(errorRegistrationDelay);
     }
 
     @Test
@@ -82,14 +77,11 @@ public class RetryingRegistrationConfigurationTest extends TestLogger {
         final RetryingRegistrationConfiguration retryingRegistrationConfiguration =
                 RetryingRegistrationConfiguration.fromConfiguration(configuration);
 
-        assertThat(
-                retryingRegistrationConfiguration.getInitialRegistrationTimeoutMillis(),
-                is(ClusterOptions.INITIAL_REGISTRATION_TIMEOUT.defaultValue()));
-        assertThat(
-                retryingRegistrationConfiguration.getRefusedDelayMillis(),
-                is(ClusterOptions.REFUSED_REGISTRATION_DELAY.defaultValue()));
-        assertThat(
-                retryingRegistrationConfiguration.getMaxRegistrationTimeoutMillis(),
-                is(ClusterOptions.MAX_REGISTRATION_TIMEOUT.defaultValue()));
+        assertThat(retryingRegistrationConfiguration.getInitialRegistrationTimeoutMillis())
+                .isEqualTo(ClusterOptions.INITIAL_REGISTRATION_TIMEOUT.defaultValue());
+        assertThat(retryingRegistrationConfiguration.getRefusedDelayMillis())
+                .isEqualTo(ClusterOptions.REFUSED_REGISTRATION_DELAY.defaultValue());
+        assertThat(retryingRegistrationConfiguration.getMaxRegistrationTimeoutMillis())
+                .isEqualTo(ClusterOptions.MAX_REGISTRATION_TIMEOUT.defaultValue());
     }
 }

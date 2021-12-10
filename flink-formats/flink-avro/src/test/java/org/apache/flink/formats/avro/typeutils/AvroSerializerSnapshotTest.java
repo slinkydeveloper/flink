@@ -44,8 +44,8 @@ import java.util.Random;
 import static org.apache.flink.api.common.typeutils.TypeSerializerMatchers.isCompatibleAfterMigration;
 import static org.apache.flink.api.common.typeutils.TypeSerializerMatchers.isCompatibleAsIs;
 import static org.apache.flink.api.common.typeutils.TypeSerializerMatchers.isIncompatible;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Test {@link AvroSerializerSnapshot}. */
 public class AvroSerializerSnapshotTest {
@@ -77,33 +77,32 @@ public class AvroSerializerSnapshotTest {
 
     @Test
     public void sameSchemaShouldBeCompatibleAsIs() {
-        assertThat(
-                AvroSerializerSnapshot.resolveSchemaCompatibility(FIRST_NAME, FIRST_NAME),
-                isCompatibleAsIs());
+        assertThat(AvroSerializerSnapshot.resolveSchemaCompatibility(FIRST_NAME, FIRST_NAME))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
     public void removingAnOptionalFieldsIsCompatibleAsIs() {
         assertThat(
-                AvroSerializerSnapshot.resolveSchemaCompatibility(
-                        FIRST_REQUIRED_LAST_OPTIONAL, FIRST_NAME),
-                isCompatibleAfterMigration());
+                        AvroSerializerSnapshot.resolveSchemaCompatibility(
+                                FIRST_REQUIRED_LAST_OPTIONAL, FIRST_NAME))
+                .satisfies(matching(isCompatibleAfterMigration()));
     }
 
     @Test
     public void addingAnOptionalFieldsIsCompatibleAsIs() {
         assertThat(
-                AvroSerializerSnapshot.resolveSchemaCompatibility(
-                        FIRST_NAME, FIRST_REQUIRED_LAST_OPTIONAL),
-                isCompatibleAfterMigration());
+                        AvroSerializerSnapshot.resolveSchemaCompatibility(
+                                FIRST_NAME, FIRST_REQUIRED_LAST_OPTIONAL))
+                .satisfies(matching(isCompatibleAfterMigration()));
     }
 
     @Test
     public void addingARequiredMakesSerializersIncompatible() {
         assertThat(
-                AvroSerializerSnapshot.resolveSchemaCompatibility(
-                        FIRST_REQUIRED_LAST_OPTIONAL, BOTH_REQUIRED),
-                isIncompatible());
+                        AvroSerializerSnapshot.resolveSchemaCompatibility(
+                                FIRST_REQUIRED_LAST_OPTIONAL, BOTH_REQUIRED))
+                .satisfies(matching(isIncompatible()));
     }
 
     @Test
@@ -113,7 +112,8 @@ public class AvroSerializerSnapshotTest {
 
         TypeSerializerSnapshot<GenericRecord> snapshot = serializer.snapshotConfiguration();
 
-        assertThat(snapshot.resolveSchemaCompatibility(serializer), isCompatibleAsIs());
+        assertThat(snapshot.resolveSchemaCompatibility(serializer))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -124,7 +124,8 @@ public class AvroSerializerSnapshotTest {
         AvroSerializerSnapshot<GenericRecord> restored =
                 roundTrip(serializer.snapshotConfiguration());
 
-        assertThat(restored.resolveSchemaCompatibility(serializer), isCompatibleAsIs());
+        assertThat(restored.resolveSchemaCompatibility(serializer))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -134,7 +135,8 @@ public class AvroSerializerSnapshotTest {
 
         AvroSerializerSnapshot<User> restored = roundTrip(serializer.snapshotConfiguration());
 
-        assertThat(restored.resolveSchemaCompatibility(serializer), isCompatibleAsIs());
+        assertThat(restored.resolveSchemaCompatibility(serializer))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -143,7 +145,8 @@ public class AvroSerializerSnapshotTest {
 
         AvroSerializerSnapshot<Pojo> restored = roundTrip(serializer.snapshotConfiguration());
 
-        assertThat(restored.resolveSchemaCompatibility(serializer), isCompatibleAsIs());
+        assertThat(restored.resolveSchemaCompatibility(serializer))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -166,7 +169,8 @@ public class AvroSerializerSnapshotTest {
         AvroSerializerSnapshot<GenericRecord> restored =
                 roundTrip(serializer.snapshotConfiguration());
 
-        assertThat(restored.resolveSchemaCompatibility(serializer), isCompatibleAsIs());
+        assertThat(restored.resolveSchemaCompatibility(serializer))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -188,7 +192,7 @@ public class AvroSerializerSnapshotTest {
         //
         User restoredUser = deserialize(restoredSerializer, serializedUser);
 
-        assertThat(user, is(restoredUser));
+        assertThat(user).isEqualTo(restoredUser);
     }
 
     @Test
@@ -201,9 +205,8 @@ public class AvroSerializerSnapshotTest {
         TypeSerializerSnapshot<GenericRecord> originalSnapshot =
                 originalSerializer.snapshotConfiguration();
 
-        assertThat(
-                originalSnapshot.resolveSchemaCompatibility(newSerializer),
-                isCompatibleAfterMigration());
+        assertThat(originalSnapshot.resolveSchemaCompatibility(newSerializer))
+                .satisfies(matching(isCompatibleAfterMigration()));
     }
 
     @Test
@@ -216,7 +219,8 @@ public class AvroSerializerSnapshotTest {
         TypeSerializerSnapshot<GenericRecord> originalSnapshot =
                 originalSerializer.snapshotConfiguration();
 
-        assertThat(originalSnapshot.resolveSchemaCompatibility(newSerializer), isIncompatible());
+        assertThat(originalSnapshot.resolveSchemaCompatibility(newSerializer))
+                .satisfies(matching(isIncompatible()));
     }
 
     @Test
@@ -231,8 +235,8 @@ public class AvroSerializerSnapshotTest {
         AvroSerializer<Object> specificSerializer = new AvroSerializer(User.class);
         specificSerializer.snapshotConfiguration();
 
-        assertThat(
-                genericSnapshot.resolveSchemaCompatibility(specificSerializer), isCompatibleAsIs());
+        assertThat(genericSnapshot.resolveSchemaCompatibility(specificSerializer))
+                .satisfies(matching(isCompatibleAsIs()));
     }
 
     @Test
@@ -249,7 +253,8 @@ public class AvroSerializerSnapshotTest {
                     TypeSerializerSnapshotSerializationUtil.readSerializerSnapshot(
                             in, AvroSerializer.class.getClassLoader(), null);
 
-            assertThat(restored.resolveSchemaCompatibility(currentSerializer), isCompatibleAsIs());
+            assertThat(restored.resolveSchemaCompatibility(currentSerializer))
+                    .satisfies(matching(isCompatibleAsIs()));
         }
     }
 

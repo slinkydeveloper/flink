@@ -53,8 +53,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test savepoint migration. */
 public abstract class SavepointMigrationTestBase extends TestBaseUtils {
@@ -215,7 +215,7 @@ public abstract class SavepointMigrationTestBase extends TestBaseUtils {
                                     .get()
                                     .deserializeError(ClassLoader.getSystemClassLoader()));
                 }
-                assertNotEquals(JobStatus.FAILED, jobStatus);
+                assertThat(jobStatus).isEqualTo(JobStatus.FAILED);
             } catch (Exception e) {
                 fail("Could not connect to job: " + e);
             }

@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link org.apache.flink.api.java.RemoteEnvironment}. */
 @SuppressWarnings("serial")
@@ -83,7 +83,7 @@ public class RemoteEnvironmentITCase extends TestLogger {
                                     }
                                 });
         List<Integer> resultCollection = result.collect();
-        assertEquals(USER_DOP, resultCollection.size());
+        assertThat(resultCollection.size()).isEqualTo(USER_DOP);
     }
 
     private static class ParallelismDependentInputFormat extends GenericInputFormat<Integer> {
@@ -92,7 +92,7 @@ public class RemoteEnvironmentITCase extends TestLogger {
 
         @Override
         public GenericInputSplit[] createInputSplits(int numSplits) throws IOException {
-            assertEquals(USER_DOP, numSplits);
+            assertThat(numSplits).isEqualTo(USER_DOP);
             return super.createInputSplits(numSplits);
         }
 

@@ -24,7 +24,6 @@ import org.apache.flink.util.StringUtils;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,7 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * A base test-suite for the {@link RecoverableWriter}. This should be subclassed to test each
@@ -92,15 +92,15 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
 
         final RecoverableFsDataOutputStream stream = writer.open(path);
         for (Map.Entry<Path, String> fileContents : getFileContentByPath(testDir).entrySet()) {
-            Assert.assertTrue(fileContents.getKey().getName().startsWith(".part-0.inprogress."));
-            Assert.assertTrue(fileContents.getValue().isEmpty());
+            assertThat(fileContents.getKey().getName().startsWith(".part-0.inprogress.")).isTrue();
+            assertThat(fileContents.getValue().isEmpty()).isTrue();
         }
 
         stream.closeForCommit().commit();
 
         for (Map.Entry<Path, String> fileContents : getFileContentByPath(testDir).entrySet()) {
-            Assert.assertEquals("part-0", fileContents.getKey().getName());
-            Assert.assertTrue(fileContents.getValue().isEmpty());
+            assertThat(fileContents.getKey().getName()).isEqualTo("part-0");
+            assertThat(fileContents.getValue().isEmpty()).isTrue();
         }
     }
 
@@ -119,8 +119,8 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
             stream.closeForCommit().commit();
 
             for (Map.Entry<Path, String> fileContents : getFileContentByPath(testDir).entrySet()) {
-                Assert.assertEquals("part-0", fileContents.getKey().getName());
-                Assert.assertEquals(testData1, fileContents.getValue());
+                assertThat(fileContents.getKey().getName()).isEqualTo("part-0");
+                assertThat(fileContents.getValue()).isEqualTo(testData1);
             }
         } finally {
             IOUtils.closeQuietly(stream);
@@ -145,8 +145,8 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
             stream.closeForCommit().commit();
 
             for (Map.Entry<Path, String> fileContents : getFileContentByPath(testDir).entrySet()) {
-                Assert.assertEquals("part-0", fileContents.getKey().getName());
-                Assert.assertEquals(testData1 + testData2, fileContents.getValue());
+                assertThat(fileContents.getKey().getName()).isEqualTo("part-0");
+                assertThat(fileContents.getValue()).isEqualTo(testData1 + testData2);
             }
         } finally {
             IOUtils.closeQuietly(stream);
@@ -230,23 +230,23 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
 
             // we expect the data to be truncated
             Map<Path, String> files = getFileContentByPath(testDir);
-            Assert.assertEquals(1L, files.size());
+            assertThat(files.size()).isEqualTo(1L);
 
             for (Map.Entry<Path, String> fileContents : files.entrySet()) {
-                Assert.assertTrue(
-                        fileContents.getKey().getName().startsWith(".part-0.inprogress."));
-                Assert.assertEquals(expectedPostRecoveryContents, fileContents.getValue());
+                assertThat(fileContents.getKey().getName().startsWith(".part-0.inprogress."))
+                        .isTrue();
+                assertThat(fileContents.getValue()).isEqualTo(expectedPostRecoveryContents);
             }
 
             recoveredStream.write(testData3.getBytes(StandardCharsets.UTF_8));
             recoveredStream.closeForCommit().commit();
 
             files = getFileContentByPath(testDir);
-            Assert.assertEquals(1L, files.size());
+            assertThat(files.size()).isEqualTo(1L);
 
             for (Map.Entry<Path, String> fileContents : files.entrySet()) {
-                Assert.assertEquals("part-0", fileContents.getKey().getName());
-                Assert.assertEquals(expectedFinalContents, fileContents.getValue());
+                assertThat(fileContents.getKey().getName()).isEqualTo("part-0");
+                assertThat(fileContents.getValue()).isEqualTo(expectedFinalContents);
             }
         } finally {
             IOUtils.closeQuietly(recoveredStream);
@@ -293,11 +293,11 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
         committer.commitAfterRecovery();
 
         Map<Path, String> files = getFileContentByPath(testDir);
-        Assert.assertEquals(1L, files.size());
+        assertThat(files.size()).isEqualTo(1L);
 
         for (Map.Entry<Path, String> fileContents : files.entrySet()) {
-            Assert.assertEquals("part-0", fileContents.getKey().getName());
-            Assert.assertEquals(testData1 + testData2, fileContents.getValue());
+            assertThat(fileContents.getKey().getName()).isEqualTo("part-0");
+            assertThat(fileContents.getValue()).isEqualTo(testData1 + testData2);
         }
     }
 
@@ -317,7 +317,7 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
 
             stream.closeForCommit().getRecoverable();
             stream.write(testData2.getBytes(StandardCharsets.UTF_8));
-            fail();
+            fail("unknown failure");
         } finally {
             IOUtils.closeQuietly(stream);
         }
@@ -346,7 +346,7 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
 
         // this should throw an exception as the file is already committed
         writer.recover(recoverable);
-        fail();
+        fail("unknown failure");
     }
 
     @Test
@@ -378,17 +378,17 @@ public abstract class AbstractRecoverableWriterTest extends TestLogger {
         try (RecoverableFsDataOutputStream ignored = writer.recover(recoverable1)) {
             // this should work fine
         } catch (Exception e) {
-            fail();
+            fail("unknown failure");
         }
 
         // this should throw an exception
         try (RecoverableFsDataOutputStream ignored = writer.recover(recoverable2)) {
-            fail();
+            fail("unknown failure");
         } catch (IOException e) {
             // we expect this
             return;
         }
-        fail();
+        fail("unknown failure");
     }
 
     private Map<Path, String> getFileContentByPath(Path directory) throws Exception {

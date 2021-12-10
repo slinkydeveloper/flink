@@ -39,10 +39,8 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link YarnEntrypointUtils}. */
 public class YarnEntrypointUtilsTest extends TestLogger {
@@ -60,7 +58,7 @@ public class YarnEntrypointUtilsTest extends TestLogger {
         final Configuration configuration = loadConfiguration(initialConfiguration);
 
         // having not specified the ports should set the rest bind port to 0
-        assertThat(configuration.getString(RestOptions.BIND_PORT), is(equalTo("0")));
+        assertThat(configuration.getString(RestOptions.BIND_PORT)).isEqualTo(equalTo("0"));
     }
 
     /** Tests that the binding REST port is set to the REST port if set. */
@@ -73,8 +71,8 @@ public class YarnEntrypointUtilsTest extends TestLogger {
         final Configuration configuration = loadConfiguration(initialConfiguration);
 
         // if the bind port is not specified it should fall back to the rest port
-        assertThat(
-                configuration.getString(RestOptions.BIND_PORT), is(equalTo(String.valueOf(port))));
+        assertThat(configuration.getString(RestOptions.BIND_PORT))
+                .isEqualTo(equalTo(String.valueOf(port)));
     }
 
     /** Tests that the binding REST port has precedence over the REST port if both are set. */
@@ -89,7 +87,8 @@ public class YarnEntrypointUtilsTest extends TestLogger {
         final Configuration configuration = loadConfiguration(initialConfiguration);
 
         // bind port should have precedence over the rest port
-        assertThat(configuration.getString(RestOptions.BIND_PORT), is(equalTo(bindingPortRange)));
+        assertThat(configuration.getString(RestOptions.BIND_PORT))
+                .isEqualTo(equalTo(bindingPortRange));
     }
 
     @Test
@@ -102,10 +101,10 @@ public class YarnEntrypointUtilsTest extends TestLogger {
 
         Configuration configuration = loadConfiguration(initialConfiguration, env);
 
-        assertThat(
-                configuration.get(SecurityOptions.KERBEROS_LOGIN_KEYTAB),
-                is(keytabFile.getAbsolutePath()));
-        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_PRINCIPAL), is("starlord"));
+        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_KEYTAB))
+                .isEqualTo(keytabFile.getAbsolutePath());
+        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_PRINCIPAL))
+                .isEqualTo("starlord");
     }
 
     @Test
@@ -118,8 +117,8 @@ public class YarnEntrypointUtilsTest extends TestLogger {
         Configuration configuration = loadConfiguration(initialConfiguration, env);
 
         // both keytab and principal should be null
-        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_KEYTAB), nullValue());
-        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_PRINCIPAL), nullValue());
+        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_KEYTAB)).isNull();
+        assertThat(configuration.get(SecurityOptions.KERBEROS_LOGIN_PRINCIPAL)).isNull();
     }
 
     @Test
@@ -132,9 +131,8 @@ public class YarnEntrypointUtilsTest extends TestLogger {
         Configuration overloadedConfiguration =
                 loadConfiguration(initialConfiguration, dynamicParameters);
 
-        assertThat(
-                overloadedConfiguration.get(JobManagerOptions.JVM_METASPACE),
-                is(MemorySize.MAX_VALUE));
+        assertThat(overloadedConfiguration.get(JobManagerOptions.JVM_METASPACE))
+                .isEqualTo(MemorySize.MAX_VALUE);
     }
 
     @Nonnull

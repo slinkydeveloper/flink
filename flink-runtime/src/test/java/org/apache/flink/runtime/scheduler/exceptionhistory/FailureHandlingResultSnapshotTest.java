@@ -43,7 +43,6 @@ import org.apache.flink.shaded.guava30.com.google.common.collect.Iterables;
 
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
 import org.hamcrest.collection.IsIterableContainingInOrder;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -51,8 +50,8 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * {@code FailureHandlingResultSnapshotTest} tests the creation of {@link
@@ -117,15 +116,16 @@ public class FailureHandlingResultSnapshotTest extends TestLogger {
         final Throwable actualException =
                 new SerializedThrowable(testInstance.getRootCause())
                         .deserializeError(ClassLoader.getSystemClassLoader());
-        assertThat(actualException, IsInstanceOf.instanceOf(FlinkException.class));
-        assertThat(
-                actualException,
-                FlinkMatchers.containsMessage(ErrorInfo.handleMissingThrowable(null).getMessage()));
-        assertThat(testInstance.getTimestamp(), is(rootCauseTimestamp));
-        assertThat(testInstance.getRootCauseExecution().isPresent(), is(true));
-        assertThat(
-                testInstance.getRootCauseExecution().get(),
-                is(rootCauseExecutionVertex.getCurrentExecutionAttempt()));
+        assertThat(actualException).isInstanceOf(FlinkException.class);
+        assertThat(actualException)
+                .satisfies(
+                        matching(
+                                FlinkMatchers.containsMessage(
+                                        ErrorInfo.handleMissingThrowable(null).getMessage())));
+        assertThat(testInstance.getTimestamp()).isEqualTo(rootCauseTimestamp);
+        assertThat(testInstance.getRootCauseExecution().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getRootCauseExecution().get())
+                .isEqualTo(rootCauseExecutionVertex.getCurrentExecutionAttempt());
     }
 
     @Test
@@ -156,17 +156,17 @@ public class FailureHandlingResultSnapshotTest extends TestLogger {
                 FailureHandlingResultSnapshot.create(
                         failureHandlingResult, this::getLatestExecution);
 
-        assertThat(testInstance.getRootCause(), is(rootCause));
-        assertThat(testInstance.getTimestamp(), is(rootCauseTimestamp));
-        assertThat(testInstance.getRootCauseExecution().isPresent(), is(true));
-        assertThat(
-                testInstance.getRootCauseExecution().get(),
-                is(rootCauseExecutionVertex.getCurrentExecutionAttempt()));
+        assertThat(testInstance.getRootCause()).isEqualTo(rootCause);
+        assertThat(testInstance.getTimestamp()).isEqualTo(rootCauseTimestamp);
+        assertThat(testInstance.getRootCauseExecution().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getRootCauseExecution().get())
+                .isEqualTo(rootCauseExecutionVertex.getCurrentExecutionAttempt());
 
-        assertThat(
-                testInstance.getConcurrentlyFailedExecution(),
-                IsIterableContainingInOrder.contains(
-                        otherFailedExecutionVertex.getCurrentExecutionAttempt()));
+        assertThat(testInstance.getConcurrentlyFailedExecution())
+                .satisfies(
+                        matching(
+                                IsIterableContainingInOrder.contains(
+                                        otherFailedExecutionVertex.getCurrentExecutionAttempt())));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -209,15 +209,16 @@ public class FailureHandlingResultSnapshotTest extends TestLogger {
                 FailureHandlingResultSnapshot.create(
                         failureHandlingResult, this::getLatestExecution);
 
-        assertThat(testInstance.getRootCause(), is(rootCause));
-        assertThat(testInstance.getTimestamp(), is(timestamp));
-        assertThat(testInstance.getRootCauseExecution().isPresent(), is(false));
+        assertThat(testInstance.getRootCause()).isEqualTo(rootCause);
+        assertThat(testInstance.getTimestamp()).isEqualTo(timestamp);
+        assertThat(testInstance.getRootCauseExecution().isPresent()).isEqualTo(false);
 
-        assertThat(
-                testInstance.getConcurrentlyFailedExecution(),
-                IsIterableContainingInAnyOrder.containsInAnyOrder(
-                        failedExecutionVertex0.getCurrentExecutionAttempt(),
-                        failedExecutionVertex1.getCurrentExecutionAttempt()));
+        assertThat(testInstance.getConcurrentlyFailedExecution())
+                .satisfies(
+                        matching(
+                                IsIterableContainingInAnyOrder.containsInAnyOrder(
+                                        failedExecutionVertex0.getCurrentExecutionAttempt(),
+                                        failedExecutionVertex1.getCurrentExecutionAttempt())));
     }
 
     private Execution getLatestExecution(ExecutionVertexID executionVertexId) {

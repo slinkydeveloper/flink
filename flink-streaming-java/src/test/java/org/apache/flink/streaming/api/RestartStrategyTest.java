@@ -24,8 +24,9 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import org.apache.flink.streaming.api.graph.StreamGraph;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RestartStrategies}. */
 public class RestartStrategyTest extends TestLogger {
@@ -49,9 +50,9 @@ public class RestartStrategyTest extends TestLogger {
                         .deserializeValue(getClass().getClassLoader())
                         .getRestartStrategy();
 
-        Assert.assertNotNull(restartStrategy);
-        Assert.assertTrue(
-                restartStrategy instanceof RestartStrategies.FallbackRestartStrategyConfiguration);
+        assertThat(restartStrategy).isNotNull();
+        assertThat(restartStrategy)
+                .isInstanceOf(RestartStrategies.FallbackRestartStrategyConfiguration.class);
     }
 
     /**
@@ -75,9 +76,9 @@ public class RestartStrategyTest extends TestLogger {
                         .deserializeValue(getClass().getClassLoader())
                         .getRestartStrategy();
 
-        Assert.assertNotNull(restartStrategy);
-        Assert.assertTrue(
-                restartStrategy instanceof RestartStrategies.NoRestartStrategyConfiguration);
+        assertThat(restartStrategy).isNotNull();
+        assertThat(restartStrategy)
+                .isInstanceOf(RestartStrategies.NoRestartStrategyConfiguration.class);
     }
 
     /**
@@ -102,18 +103,17 @@ public class RestartStrategyTest extends TestLogger {
                         .deserializeValue(getClass().getClassLoader())
                         .getRestartStrategy();
 
-        Assert.assertNotNull(restartStrategy);
-        Assert.assertTrue(
-                restartStrategy
-                        instanceof RestartStrategies.FixedDelayRestartStrategyConfiguration);
-        Assert.assertEquals(
-                42,
-                ((RestartStrategies.FixedDelayRestartStrategyConfiguration) restartStrategy)
-                        .getRestartAttempts());
-        Assert.assertEquals(
-                1337,
-                ((RestartStrategies.FixedDelayRestartStrategyConfiguration) restartStrategy)
-                        .getDelayBetweenAttemptsInterval()
-                        .toMilliseconds());
+        assertThat(restartStrategy).isNotNull();
+        assertThat(restartStrategy)
+                .isInstanceOf(RestartStrategies.FixedDelayRestartStrategyConfiguration.class);
+        assertThat(
+                        ((RestartStrategies.FixedDelayRestartStrategyConfiguration) restartStrategy)
+                                .getRestartAttempts())
+                .isEqualTo(42);
+        assertThat(
+                        ((RestartStrategies.FixedDelayRestartStrategyConfiguration) restartStrategy)
+                                .getDelayBetweenAttemptsInterval()
+                                .toMilliseconds())
+                .isEqualTo(1337);
     }
 }

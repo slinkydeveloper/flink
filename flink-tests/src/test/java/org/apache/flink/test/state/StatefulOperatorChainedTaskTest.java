@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static org.apache.flink.configuration.CheckpointingOptions.CHECKPOINTS_DIRECTORY;
 import static org.apache.flink.configuration.CheckpointingOptions.INCREMENTAL_CHECKPOINTS;
 import static org.apache.flink.configuration.StateBackendOptions.STATE_BACKEND;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for StatefulOperatorChainedTaskTest. */
 public class StatefulOperatorChainedTaskTest {
@@ -89,7 +89,7 @@ public class StatefulOperatorChainedTaskTest {
 
         TaskStateSnapshot stateHandles = restore.getTaskStateSnapshot();
 
-        assertEquals(2, stateHandles.getSubtaskStateMappings().size());
+        assertThat(stateHandles.getSubtaskStateMappings().size()).isEqualTo(2);
 
         createRunAndCheckpointOperatorChain(
                 headOperatorID,
@@ -98,8 +98,8 @@ public class StatefulOperatorChainedTaskTest {
                 new CounterOperator("tail"),
                 Optional.of(restore));
 
-        assertEquals(
-                new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)), RESTORED_OPERATORS);
+        assertThat(RESTORED_OPERATORS)
+                .isEqualTo(new HashSet<>(Arrays.asList(headOperatorID, tailOperatorID)));
     }
 
     private JobManagerTaskRestore createRunAndCheckpointOperatorChain(
@@ -187,7 +187,7 @@ public class StatefulOperatorChainedTaskTest {
         testHarness.getTaskStateManager().getWaitForReportLatch().await();
         long reportedCheckpointId = testHarness.getTaskStateManager().getReportedCheckpointId();
 
-        assertEquals(checkpointId, reportedCheckpointId);
+        assertThat(reportedCheckpointId).isEqualTo(checkpointId);
     }
 
     private void processRecords(OneInputStreamTaskTestHarness<String, String> testHarness)
@@ -252,7 +252,7 @@ public class StatefulOperatorChainedTaskTest {
 
             if (context.isRestored()) {
                 counter = counterState.value();
-                assertEquals(snapshotOutData, counter);
+                assertThat(counter).isEqualTo(snapshotOutData);
                 counterState.clear();
             }
         }

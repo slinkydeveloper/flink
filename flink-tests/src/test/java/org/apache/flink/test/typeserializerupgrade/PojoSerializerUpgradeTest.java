@@ -71,9 +71,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests the state migration behaviour when the underlying POJO type changes and one tries to
@@ -414,7 +413,7 @@ public class PojoSerializerUpgradeTest extends TestLogger {
 
             if (verify) {
                 if (keyed) {
-                    assertEquals(pojo, keyedValueState.value());
+                    assertThat(keyedValueState.value()).isEqualTo(pojo);
 
                     Iterator<Object> listIterator = keyedListState.get().iterator();
 
@@ -424,23 +423,23 @@ public class PojoSerializerUpgradeTest extends TestLogger {
                         elementFound |= pojo.equals(listIterator.next());
                     }
 
-                    assertTrue(elementFound);
+                    assertThat(elementFound).isTrue();
 
-                    assertEquals(pojo, keyedReducingState.get());
+                    assertThat(keyedReducingState.get()).isEqualTo(pojo);
                 } else {
                     boolean elementFound = false;
                     Iterator<Object> listIterator = partitionableListState.get().iterator();
                     while (listIterator.hasNext()) {
                         elementFound |= pojo.equals(listIterator.next());
                     }
-                    assertTrue(elementFound);
+                    assertThat(elementFound).isTrue();
 
                     elementFound = false;
                     listIterator = unionListState.get().iterator();
                     while (listIterator.hasNext()) {
                         elementFound |= pojo.equals(listIterator.next());
                     }
-                    assertTrue(elementFound);
+                    assertThat(elementFound).isTrue();
                 }
             } else {
                 if (keyed) {

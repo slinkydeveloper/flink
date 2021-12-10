@@ -36,9 +36,9 @@ import java.util.stream.Collectors;
 
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.fromRecords;
 import static org.apache.flink.streaming.util.TestHarnessUtil.buildSubtaskState;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.equalTo;
 
 /** Test the {@link StreamingCommitterHandler}. */
 public class StreamingCommitterHandlerTest extends TestLogger {
@@ -75,7 +75,7 @@ public class StreamingCommitterHandlerTest extends TestLogger {
                 committer.getCommittedData().stream()
                         .map(s -> s.substring(1, s.length() - 1).split(",")[0].trim())
                         .collect(Collectors.toList());
-        assertThat(committedInputs, Matchers.contains("lazy", "leaf"));
+        assertThat(committedInputs).satisfies(matching(Matchers.contains("lazy", "leaf")));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class StreamingCommitterHandlerTest extends TestLogger {
         testHarness.initializeEmptyState();
         testHarness.open();
         testHarness.close();
-        assertThat(committer.isClosed(), Matchers.equalTo(true));
+        assertThat(committer.isClosed()).isEqualTo(true);
     }
 
     @Test
@@ -127,9 +127,11 @@ public class StreamingCommitterHandlerTest extends TestLogger {
                 expectedOutput.stream()
                         .map(output -> Tuple3.of(output, null, Long.MIN_VALUE).toString())
                         .toArray(String[]::new);
-        assertThat(fromRecords(testHarness.getRecordOutput()), containsInAnyOrder(expectedList));
+        assertThat(fromRecords(testHarness.getRecordOutput()))
+                .satisfies(matching(containsInAnyOrder(expectedList)));
 
-        assertThat(committer.getCommittedData(), containsInAnyOrder(expectedList));
+        assertThat(committer.getCommittedData())
+                .satisfies(matching(containsInAnyOrder(expectedList)));
     }
 
     @Test
@@ -174,9 +176,9 @@ public class StreamingCommitterHandlerTest extends TestLogger {
                 expectedOutput.stream()
                         .map(output -> Tuple3.of(output, null, Long.MIN_VALUE).toString())
                         .collect(Collectors.toList());
-        assertThat(fromRecords(testHarness.getRecordOutput()), equalTo(expectedList));
+        assertThat(fromRecords(testHarness.getRecordOutput())).isEqualTo(expectedList);
 
-        assertThat(committer.getCommittedData(), equalTo(expectedList));
+        assertThat(committer.getCommittedData()).isEqualTo(expectedList);
     }
 
     private OneInputStreamOperatorTestHarness<String, byte[]> createTestHarness() throws Exception {

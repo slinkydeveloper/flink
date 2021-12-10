@@ -27,7 +27,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link StatementSetImpl}. */
 public class StatementSetImplTest {
@@ -67,10 +67,10 @@ public class StatementSetImplTest {
         stmtSet.addInsertSql("INSERT INTO MySink SELECT * FROM MyTable");
         String jsonPlan = stmtSet.getJsonPlan();
         String actual = TableTestUtil.readFromResource("/jsonplan/testGetJsonPlan.out");
-        assertEquals(
-                TableTestUtil.replaceExecNodeId(
-                        TableTestUtil.replaceFlinkVersion(
-                                TableTestUtil.getFormattedJson(jsonPlan))),
-                TableTestUtil.replaceExecNodeId(TableTestUtil.getFormattedJson(actual)));
+        assertThat(TableTestUtil.replaceExecNodeId(TableTestUtil.getFormattedJson(actual)))
+                .isEqualTo(
+                        TableTestUtil.replaceExecNodeId(
+                                TableTestUtil.replaceFlinkVersion(
+                                        TableTestUtil.getFormattedJson(jsonPlan))));
     }
 }

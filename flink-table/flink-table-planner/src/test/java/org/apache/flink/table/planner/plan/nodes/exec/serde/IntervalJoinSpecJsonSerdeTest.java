@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link IntervalJoinSpec} serialization and deserialization. */
 public class IntervalJoinSpecJsonSerdeTest {
@@ -50,11 +50,11 @@ public class IntervalJoinSpecJsonSerdeTest {
     public void testWindowBoundsSerde() throws IOException {
         IntervalJoinSpec.WindowBounds windowBounds =
                 new IntervalJoinSpec.WindowBounds(true, 0L, 10L, 1, 2);
-        assertEquals(
-                windowBounds,
-                mapper.readValue(
-                        mapper.writeValueAsString(windowBounds),
-                        IntervalJoinSpec.WindowBounds.class));
+        assertThat(
+                        mapper.readValue(
+                                mapper.writeValueAsString(windowBounds),
+                                IntervalJoinSpec.WindowBounds.class))
+                .isEqualTo(windowBounds);
     }
 
     @Test
@@ -69,8 +69,7 @@ public class IntervalJoinSpecJsonSerdeTest {
         IntervalJoinSpec.WindowBounds windowBounds =
                 new IntervalJoinSpec.WindowBounds(true, 0L, 10L, 1, 2);
         IntervalJoinSpec actual = new IntervalJoinSpec(joinSpec, windowBounds);
-        assertEquals(
-                actual,
-                mapper.readValue(mapper.writeValueAsString(actual), IntervalJoinSpec.class));
+        assertThat(mapper.readValue(mapper.writeValueAsString(actual), IntervalJoinSpec.class))
+                .isEqualTo(actual);
     }
 }

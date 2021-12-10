@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the serialization and deserialization for {@link FileWriterBucketState}. */
 public class FileWriterBucketStateSerializerTest {
@@ -53,14 +53,12 @@ public class FileWriterBucketStateSerializerTest {
 
     private void assertBucketStateEquals(
             FileWriterBucketState bucketState, FileWriterBucketState deserialized) {
-        assertEquals(bucketState.getBucketId(), deserialized.getBucketId());
-        assertEquals(bucketState.getBucketPath(), deserialized.getBucketPath());
-        assertEquals(
-                bucketState.getInProgressFileCreationTime(),
-                deserialized.getInProgressFileCreationTime());
-        assertEquals(
-                bucketState.getInProgressFileRecoverable(),
-                deserialized.getInProgressFileRecoverable());
+        assertThat(deserialized.getBucketId()).isEqualTo(bucketState.getBucketId());
+        assertThat(deserialized.getBucketPath()).isEqualTo(bucketState.getBucketPath());
+        assertThat(deserialized.getInProgressFileCreationTime())
+                .isEqualTo(bucketState.getInProgressFileCreationTime());
+        assertThat(deserialized.getInProgressFileRecoverable())
+                .isEqualTo(bucketState.getInProgressFileRecoverable());
     }
 
     private FileWriterBucketState serializeAndDeserialize(FileWriterBucketState bucketState)

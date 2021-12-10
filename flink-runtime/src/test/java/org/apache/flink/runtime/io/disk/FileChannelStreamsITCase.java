@@ -40,7 +40,8 @@ import org.junit.Test;
 import java.io.EOFException;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FileChannelStreamsITCase extends TestLogger {
 
@@ -79,7 +80,9 @@ public class FileChannelStreamsITCase extends TestLogger {
     @After
     public void afterTest() throws Exception {
         ioManager.close();
-        assertTrue("The memory has not been properly released", memManager.verifyEmpty());
+        assertThat(memManager.verifyEmpty())
+                .as("The memory has not been properly released")
+                .isTrue();
     }
 
     // --------------------------------------------------------------------------------------------
@@ -129,7 +132,9 @@ public class FileChannelStreamsITCase extends TestLogger {
             for (int i = 0; i < NUM_PAIRS_SHORT; i++) {
                 generator.next(pair);
                 readPair.read(inView);
-                assertEquals("The re-generated and the read record do not match.", pair, readPair);
+                assertThat(readPair)
+                        .as("The re-generated and the read record do not match.")
+                        .isEqualTo(pair);
             }
 
             inView.close();
@@ -185,7 +190,9 @@ public class FileChannelStreamsITCase extends TestLogger {
             for (int i = 0; i < NUM_PAIRS_LONG; i++) {
                 generator.next(pair);
                 readPair.read(inView);
-                assertEquals("The re-generated and the read record do not match.", pair, readPair);
+                assertThat(readPair)
+                        .as("The re-generated and the read record do not match.")
+                        .isEqualTo(pair);
             }
 
             inView.close();
@@ -242,8 +249,9 @@ public class FileChannelStreamsITCase extends TestLogger {
                 for (int i = 0; i < NUM_PAIRS_SHORT + 1; i++) {
                     generator.next(pair);
                     readPair.read(inView);
-                    assertEquals(
-                            "The re-generated and the read record do not match.", pair, readPair);
+                    assertThat(readPair)
+                            .as("The re-generated and the read record do not match.")
+                            .isEqualTo(pair);
                 }
                 fail("Expected an EOFException which did not occur.");
             } catch (EOFException eofex) {
@@ -301,7 +309,9 @@ public class FileChannelStreamsITCase extends TestLogger {
             for (int i = 0; i < NUM_PAIRS_SHORT; i++) {
                 generator.next(pair);
                 readPair.read(inView);
-                assertEquals("The re-generated and the read record do not match.", pair, readPair);
+                assertThat(readPair)
+                        .as("The re-generated and the read record do not match.")
+                        .isEqualTo(pair);
             }
 
             inView.close();
@@ -357,7 +367,9 @@ public class FileChannelStreamsITCase extends TestLogger {
             for (int i = 0; i < NUM_PAIRS_SHORT / 2; i++) {
                 generator.next(pair);
                 readPair.read(inView);
-                assertEquals("The re-generated and the read record do not match.", pair, readPair);
+                assertThat(readPair)
+                        .as("The re-generated and the read record do not match.")
+                        .isEqualTo(pair);
             }
 
             inView.close();

@@ -37,8 +37,8 @@ import java.util.HashMap;
 import java.util.concurrent.Future;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Checks the GenericDataSinkBase operator for both Rich and non-Rich output formats. */
 @SuppressWarnings("serial")
@@ -68,13 +68,13 @@ public class GenericDataSinkBaseTest implements java.io.Serializable {
             executionConfig.disableObjectReuse();
             in.reset();
             sink.executeOnCollections(asList(TestIOData.NAMES), null, executionConfig);
-            assertEquals(out.output, asList(TestIOData.NAMES));
+            assertThat(asList(TestIOData.NAMES)).isEqualTo(out.output);
 
             executionConfig.enableObjectReuse();
             out.clear();
             in.reset();
             sink.executeOnCollections(asList(TestIOData.NAMES), null, executionConfig);
-            assertEquals(out.output, asList(TestIOData.NAMES));
+            assertThat(asList(TestIOData.NAMES)).isEqualTo(out.output);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -113,7 +113,7 @@ public class GenericDataSinkBaseTest implements java.io.Serializable {
                             UnregisteredMetricsGroup.createOperatorMetricGroup()),
                     executionConfig);
 
-            assertEquals(out.output, asList(TestIOData.RICH_NAMES));
+            assertThat(asList(TestIOData.RICH_NAMES)).isEqualTo(out.output);
 
             executionConfig.enableObjectReuse();
             out.clear();
@@ -129,7 +129,7 @@ public class GenericDataSinkBaseTest implements java.io.Serializable {
                             accumulatorMap,
                             UnregisteredMetricsGroup.createOperatorMetricGroup()),
                     executionConfig);
-            assertEquals(out.output, asList(TestIOData.RICH_NAMES));
+            assertThat(asList(TestIOData.RICH_NAMES)).isEqualTo(out.output);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

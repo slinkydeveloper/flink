@@ -45,7 +45,6 @@ import org.apache.flink.streaming.runtime.streamrecord.LatencyMarker;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.runtime.watermarkstatus.WatermarkStatus;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -55,8 +54,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Longer running IT tests for {@link SortingDataInput} and {@link MultiInputSortingDataInput}.
@@ -90,7 +89,7 @@ public class LargeSortingDataInputITCase {
                 inputStatus = sortingDataInput.emitNext(output);
             } while (inputStatus != DataInputStatus.END_OF_INPUT);
 
-            assertThat(output.getSeenRecords(), equalTo(numberOfRecords));
+            assertThat(output.getSeenRecords()).isEqualTo(numberOfRecords);
         }
     }
 
@@ -119,7 +118,7 @@ public class LargeSortingDataInputITCase {
                 inputStatus = sortingDataInput.emitNext(output);
             } while (inputStatus != DataInputStatus.END_OF_INPUT);
 
-            assertThat(output.getSeenRecords(), equalTo(numberOfRecords));
+            assertThat(output.getSeenRecords()).isEqualTo(numberOfRecords);
         }
     }
 
@@ -173,7 +172,7 @@ public class LargeSortingDataInputITCase {
                     inputStatus = multiSortedProcessor.processInput();
                 } while (inputStatus != DataInputStatus.END_OF_INPUT);
 
-                assertThat(output.getSeenRecords(), equalTo(numberOfRecords * 2));
+                assertThat(output.getSeenRecords()).isEqualTo(numberOfRecords * 2);
             }
         }
     }
@@ -204,7 +203,7 @@ public class LargeSortingDataInputITCase {
             E incomingKey = keySelector.getKey(streamRecord.getValue());
             if (!Objects.equals(incomingKey, currentKey)) {
                 if (!seenKeys.add(incomingKey)) {
-                    Assert.fail("Received an out of order key: " + incomingKey);
+                    fail("Received an out of order key: " + incomingKey);
                 }
                 this.currentKey = incomingKey;
             }

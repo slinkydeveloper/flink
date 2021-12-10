@@ -24,8 +24,8 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class JobIdTest {
 
@@ -40,8 +40,8 @@ public class JobIdTest {
             JobID copy1 = JobID.fromByteBuffer(buffer);
             JobID copy2 = JobID.fromByteArray(bytes);
 
-            assertEquals(origID, copy1);
-            assertEquals(origID, copy2);
+            assertThat(copy1).isEqualTo(origID);
+            assertThat(copy2).isEqualTo(origID);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

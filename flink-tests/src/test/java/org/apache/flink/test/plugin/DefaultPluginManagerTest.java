@@ -27,7 +27,6 @@ import org.apache.flink.util.Preconditions;
 
 import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +41,8 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link DefaultPluginManager}. */
 public class DefaultPluginManagerTest extends PluginTestBase {
@@ -86,22 +87,22 @@ public class DefaultPluginManagerTest extends PluginTestBase {
         final PluginManager pluginManager =
                 new DefaultPluginManager(descriptors, PARENT_CLASS_LOADER, parentPatterns);
         final List<TestSpi> serviceImplList = Lists.newArrayList(pluginManager.load(TestSpi.class));
-        Assert.assertEquals(2, serviceImplList.size());
+        assertThat(serviceImplList.size()).isEqualTo(2);
 
         // check that all impl have unique classloader
         final Set<ClassLoader> classLoaders = Collections.newSetFromMap(new IdentityHashMap<>(3));
         classLoaders.add(PARENT_CLASS_LOADER);
         for (TestSpi testSpi : serviceImplList) {
-            Assert.assertNotNull(testSpi.testMethod());
-            Assert.assertTrue(classLoaders.add(testSpi.getClass().getClassLoader()));
+            assertThat(testSpi.testMethod()).isNotNull();
+            assertThat(classLoaders.add(testSpi.getClass().getClassLoader())).isTrue();
         }
 
         final List<OtherTestSpi> otherServiceImplList =
                 Lists.newArrayList(pluginManager.load(OtherTestSpi.class));
-        Assert.assertEquals(1, otherServiceImplList.size());
+        assertThat(otherServiceImplList.size()).isEqualTo(1);
         for (OtherTestSpi otherTestSpi : otherServiceImplList) {
-            Assert.assertNotNull(otherTestSpi.otherTestMethod());
-            Assert.assertTrue(classLoaders.add(otherTestSpi.getClass().getClassLoader()));
+            assertThat(otherTestSpi.otherTestMethod()).isNotNull();
+            assertThat(classLoaders.add(otherTestSpi.getClass().getClassLoader())).isTrue();
         }
     }
 }

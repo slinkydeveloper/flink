@@ -69,11 +69,9 @@ import java.util.function.Consumer;
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.core.testutils.FlinkMatchers.containsMessage;
 import static org.apache.flink.core.testutils.FlinkMatchers.willNotComplete;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link JobMasterServiceLeadershipRunner}. */
 public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
@@ -119,14 +117,16 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
             final CompletableFuture<JobManagerRunnerResult> resultFuture =
                     jobManagerRunner.getResultFuture();
 
-            assertThat(resultFuture.isDone(), is(false));
+            assertThat(resultFuture.isDone()).isEqualTo(false);
 
             jobManagerRunner.closeAsync();
 
             assertJobNotFinished(resultFuture);
-            assertThat(
-                    jobManagerRunner.getJobMasterGateway(),
-                    FlinkMatchers.futureWillCompleteExceptionally(Duration.ofMillis(5L)));
+            assertThat(jobManagerRunner.getJobMasterGateway())
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            Duration.ofMillis(5L))));
         }
     }
 
@@ -180,7 +180,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
                 leaderElectionService.isLeader(UUID.randomUUID());
 
         // the new leadership should wait first for the suspension to happen
-        assertThat(leaderFuture.isDone(), is(false));
+        assertThat(leaderFuture.isDone()).isEqualTo(false);
 
         try {
             leaderFuture.get(1L, TimeUnit.MILLISECONDS);
@@ -216,12 +216,13 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
                 new FlinkException("The JobMasterService failed unexpectedly.");
         resultFuture.completeExceptionally(cause);
 
-        assertThat(
-                jobManagerRunner.getResultFuture(),
-                FlinkMatchers.futureWillCompleteExceptionally(
-                        cause::equals,
-                        Duration.ofMillis(5L),
-                        "Wrong cause of failed result future"));
+        assertThat(jobManagerRunner.getResultFuture())
+                .satisfies(
+                        matching(
+                                FlinkMatchers.futureWillCompleteExceptionally(
+                                        cause::equals,
+                                        Duration.ofMillis(5L),
+                                        "Wrong cause of failed result future")));
     }
 
     @Test
@@ -248,9 +249,10 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         final JobManagerRunnerResult jobManagerRunnerResult =
                 jobManagerRunner.getResultFuture().join();
-        assertTrue(jobManagerRunnerResult.isInitializationFailure());
+        assertThat(jobManagerRunnerResult.isInitializationFailure()).isTrue();
 
-        assertThat(jobManagerRunnerResult.getInitializationFailure(), containsCause(testException));
+        assertThat(jobManagerRunnerResult.getInitializationFailure())
+                .satisfies(matching(containsCause(testException)));
     }
 
     @Nonnull
@@ -284,7 +286,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         jobManagerRunner.closeAsync().join();
 
         assertJobNotFinished(jobManagerRunner.getResultFuture());
-        assertTrue(terminationFuture.isDone());
+        assertThat(terminationFuture.isDone()).isTrue();
     }
 
     @Test
@@ -304,7 +306,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         leaderElectionService.notLeader();
 
-        assertTrue(terminationFuture.isDone());
+        assertThat(terminationFuture.isDone()).isTrue();
     }
 
     @Test
@@ -327,7 +329,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         CompletableFuture<Acknowledge> cancellationFuture =
                 jobManagerRunner.cancel(TESTING_TIMEOUT);
 
-        assertThat(cancellationFuture.isDone(), is(false));
+        assertThat(cancellationFuture.isDone()).isEqualTo(false);
 
         AtomicBoolean cancelCalled = new AtomicBoolean(false);
         JobMasterGateway jobMasterGateway =
@@ -343,7 +345,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         // assert that cancellation future completes when cancellation completes.
         cancellationFuture.get();
-        assertThat(cancelCalled.get(), is(true));
+        assertThat(cancelCalled.get()).isEqualTo(true);
     }
 
     @Test
@@ -371,21 +373,19 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
     private static void assertInitializingStates(JobManagerRunner jobManagerRunner)
             throws ExecutionException, InterruptedException {
+        assertThat(jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).get())
+                .isEqualTo(JobStatus.INITIALIZING);
+        assertThat(jobManagerRunner.getResultFuture().isDone()).isEqualTo(false);
         assertThat(
-                jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).get(),
-                is(JobStatus.INITIALIZING));
-        assertThat(jobManagerRunner.getResultFuture().isDone(), is(false));
-        assertThat(
-                jobManagerRunner
-                        .requestJob(TESTING_TIMEOUT)
-                        .get()
-                        .getArchivedExecutionGraph()
-                        .getState(),
-                is(JobStatus.INITIALIZING));
+                        jobManagerRunner
+                                .requestJob(TESTING_TIMEOUT)
+                                .get()
+                                .getArchivedExecutionGraph()
+                                .getState())
+                .isEqualTo(JobStatus.INITIALIZING);
 
-        assertThat(
-                jobManagerRunner.requestJobDetails(TESTING_TIMEOUT).get().getStatus(),
-                is(JobStatus.INITIALIZING));
+        assertThat(jobManagerRunner.requestJobDetails(TESTING_TIMEOUT).get().getStatus())
+                .isEqualTo(JobStatus.INITIALIZING);
     }
 
     // It can happen that a series of leadership operations happens while the JobMaster
@@ -414,9 +414,8 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         // first leadership assignment to get into blocking initialization
         leaderElectionService.isLeader(UUID.randomUUID());
 
-        assertThat(
-                jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).get(),
-                is(JobStatus.INITIALIZING));
+        assertThat(jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).get())
+                .isEqualTo(JobStatus.INITIALIZING);
 
         // we are now blocked on the initialization, enqueue some operations:
         for (int i = 0; i < 10; i++) {
@@ -429,7 +428,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         jobManagerRunner.closeAsync();
 
         // this ensures that the second JobMasterServiceProcess is taken
-        assertTrue(secondTerminationFuture.isDone());
+        assertThat(secondTerminationFuture.isDone()).isTrue();
     }
 
     @Test
@@ -469,20 +468,19 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         leaderElectionService.isLeader(UUID.randomUUID());
 
         // cancel while initializing
-        assertThat(
-                jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).get(),
-                is(JobStatus.INITIALIZING));
+        assertThat(jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).get())
+                .isEqualTo(JobStatus.INITIALIZING);
 
         CompletableFuture<Acknowledge> cancelFuture = jobManagerRunner.cancel(TESTING_TIMEOUT);
-        assertThat(cancelFuture.isDone(), is(false));
+        assertThat(cancelFuture.isDone()).isEqualTo(false);
 
         testAction.accept(jobManagerRunnerResultFuture);
 
         try {
             cancelFuture.get();
-            fail();
+            fail("unknown failure");
         } catch (Throwable t) {
-            assertThat(t, containsMessage("Cancellation failed."));
+            assertThat(t).satisfies(matching(containsMessage("Cancellation failed.")));
         }
     }
 
@@ -507,7 +505,8 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
                 JobManagerRunnerResult.forSuccess(
                         createFailedExecutionGraphInfo(new FlinkException("test exception"))));
 
-        assertThat(jobManagerRunner.getResultFuture(), willNotComplete(Duration.ofMillis(5L)));
+        assertThat(jobManagerRunner.getResultFuture())
+                .satisfies(matching(willNotComplete(Duration.ofMillis(5L))));
     }
 
     @Test
@@ -529,9 +528,11 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         leaderElectionService.notLeader();
 
-        assertThat(
-                jobMasterGateway,
-                FlinkMatchers.futureWillCompleteExceptionally(Duration.ofMillis(5L)));
+        assertThat(jobMasterGateway)
+                .satisfies(
+                        matching(
+                                FlinkMatchers.futureWillCompleteExceptionally(
+                                        Duration.ofMillis(5L))));
     }
 
     @Test
@@ -554,7 +555,7 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         leaderAddressFuture.complete("foobar");
 
-        assertThat(leaderFuture, willNotComplete(Duration.ofMillis(5L)));
+        assertThat(leaderFuture).satisfies(matching(willNotComplete(Duration.ofMillis(5L))));
     }
 
     @Test
@@ -564,9 +565,8 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         jobManagerRunner.start();
 
-        assertThat(
-                jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).join(),
-                is(JobStatus.INITIALIZING));
+        assertThat(jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).join())
+                .isEqualTo(JobStatus.INITIALIZING);
     }
 
     @Test
@@ -578,9 +578,8 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         jobManagerRunner.cancel(TESTING_TIMEOUT);
 
-        assertThat(
-                jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).join(),
-                is(JobStatus.CANCELLING));
+        assertThat(jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).join())
+                .isEqualTo(JobStatus.CANCELLING);
     }
 
     @Test
@@ -595,9 +594,8 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         leaderElectionService.isLeader(UUID.randomUUID());
         leaderElectionService.notLeader();
 
-        assertThat(
-                jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).join(),
-                is(JobStatus.INITIALIZING));
+        assertThat(jobManagerRunner.requestJobStatus(TESTING_TIMEOUT).join())
+                .isEqualTo(JobStatus.INITIALIZING);
     }
 
     @Test
@@ -621,14 +619,16 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
         final FlinkException testException = new FlinkException("Test exception");
         terminationFuture.completeExceptionally(testException);
 
-        assertThat(
-                jobManagerRunner.getResultFuture(),
-                FlinkMatchers.futureWillCompleteExceptionally(
-                        cause ->
-                                ExceptionUtils.findThrowable(cause, testException::equals)
-                                        .isPresent(),
-                        Duration.ofMillis(5L),
-                        "Result future should be completed exceptionally."));
+        assertThat(jobManagerRunner.getResultFuture())
+                .satisfies(
+                        matching(
+                                FlinkMatchers.futureWillCompleteExceptionally(
+                                        cause ->
+                                                ExceptionUtils.findThrowable(
+                                                                cause, testException::equals)
+                                                        .isPresent(),
+                                        Duration.ofMillis(5L),
+                                        "Result future should be completed exceptionally.")));
     }
 
     @Test
@@ -650,14 +650,16 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
 
         leaderElectionService.isLeader(UUID.randomUUID());
 
-        assertThat(
-                jobManagerRunner.getResultFuture(),
-                FlinkMatchers.futureWillCompleteExceptionally(
-                        cause ->
-                                ExceptionUtils.findThrowable(cause, testException::equals)
-                                        .isPresent(),
-                        Duration.ofMillis(5L),
-                        "Result future should be completed exceptionally."));
+        assertThat(jobManagerRunner.getResultFuture())
+                .satisfies(
+                        matching(
+                                FlinkMatchers.futureWillCompleteExceptionally(
+                                        cause ->
+                                                ExceptionUtils.findThrowable(
+                                                                cause, testException::equals)
+                                                        .isPresent(),
+                                        Duration.ofMillis(5L),
+                                        "Result future should be completed exceptionally.")));
     }
 
     @Test
@@ -678,21 +680,20 @@ public class JobMasterServiceLeadershipRunnerTest extends TestLogger {
                     jobManagerRunner.getResultFuture();
 
             JobManagerRunnerResult result = resultFuture.get();
-            assertEquals(
-                    JobStatus.FAILED,
-                    result.getExecutionGraphInfo().getArchivedExecutionGraph().getState());
+            assertThat(result.getExecutionGraphInfo().getArchivedExecutionGraph().getState())
+                    .isEqualTo(JobStatus.FAILED);
         }
     }
 
     private void assertJobNotFinished(CompletableFuture<JobManagerRunnerResult> resultFuture)
             throws ExecutionException, InterruptedException {
         final JobManagerRunnerResult jobManagerRunnerResult = resultFuture.get();
-        assertEquals(
-                jobManagerRunnerResult
-                        .getExecutionGraphInfo()
-                        .getArchivedExecutionGraph()
-                        .getState(),
-                JobStatus.SUSPENDED);
+        assertThat(JobStatus.SUSPENDED)
+                .isEqualTo(
+                        jobManagerRunnerResult
+                                .getExecutionGraphInfo()
+                                .getArchivedExecutionGraph()
+                                .getState());
     }
 
     public JobMasterServiceLeadershipRunnerBuilder newJobMasterServiceLeadershipRunnerBuilder() {

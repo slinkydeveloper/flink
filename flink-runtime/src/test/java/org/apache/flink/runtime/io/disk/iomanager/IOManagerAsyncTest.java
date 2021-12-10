@@ -30,8 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class IOManagerAsyncTest {
 
@@ -199,7 +199,7 @@ public class IOManagerAsyncTest {
                 }
             }
 
-            assertTrue(exceptionForwarded.get());
+            assertThat(exceptionForwarded.get()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -246,7 +246,7 @@ public class IOManagerAsyncTest {
                 }
             }
 
-            assertTrue(exceptionForwarded.get());
+            assertThat(exceptionForwarded.get()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

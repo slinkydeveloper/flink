@@ -49,7 +49,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link org.apache.hadoop.fs.viewfs.ViewFileSystem} support. */
 public class HadoopViewFileSystemTruncateTest {
@@ -166,7 +166,7 @@ public class HadoopViewFileSystemTruncateTest {
                 InputStreamReader ir = new InputStreamReader(in, UTF_8);
                 BufferedReader reader = new BufferedReader(ir)) {
             final String line = reader.readLine();
-            assertEquals(expectedContent, line);
+            assertThat(line).isEqualTo(expectedContent);
         }
     }
 }

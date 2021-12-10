@@ -34,8 +34,9 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.flink.changelog.fs.UnregisteredChangelogStorageMetricGroup.createUnregisteredChangelogStorageMetricGroup;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
 
 /** {@link RetryingExecutor} test. */
 public class RetryingExecutorTest {
@@ -92,10 +93,11 @@ public class RetryingExecutorTest {
                     }
                 },
                 new DirectScheduledExecutorService() {
+
                     @Override
                     public ScheduledFuture<?> schedule(
                             Runnable command, long delay, TimeUnit unit) {
-                        assertEquals(delayAfterFailure, delay);
+                        assertThat(delay).isEqualTo(delayAfterFailure);
                         command.run();
                         return CompletedScheduledFuture.create(null);
                     }
@@ -143,11 +145,8 @@ public class RetryingExecutorTest {
                     }
                 },
                 Executors.newScheduledThreadPool(2));
-        assertEquals(
-                timeout,
-                ((double) secondStart.get() - firstStart.get()) / 1_000_000,
-                timeout
-                        * 0.75d /* future completion can be delayed arbitrarily causing start delta be less than timeout */);
+        assertThat(((double) secondStart.get() - firstStart.get()) / 1_000_000)
+                .isCloseTo(timeout, within(timeout * 0.75d));
     }
 
     private void testPolicy(
@@ -179,6 +178,6 @@ public class RetryingExecutorTest {
                     });
             firstAttemptCompletedLatch.await(); // before closing executor
         }
-        assertEquals(expectedAttempts, attemptsMade.get());
+        assertThat(attemptsMade.get()).isEqualTo(expectedAttempts);
     }
 }

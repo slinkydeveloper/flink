@@ -31,8 +31,7 @@ import java.net.URLClassLoader;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -56,37 +55,35 @@ public class MasterHooksTest extends TestLogger {
         final Runnable command =
                 spy(
                         new Runnable() {
+
                             @Override
                             public void run() {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                             }
                         });
 
         MasterTriggerRestoreHook<String> hook =
                 spy(
                         new MasterTriggerRestoreHook<String>() {
+
                             @Override
                             public String getIdentifier() {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                                 return id;
                             }
 
                             @Override
                             public void reset() throws Exception {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                             }
 
                             @Override
                             public void close() throws Exception {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                             }
 
                             @Nullable
@@ -94,9 +91,8 @@ public class MasterHooksTest extends TestLogger {
                             public CompletableFuture<String> triggerCheckpoint(
                                     long checkpointId, long timestamp, Executor executor)
                                     throws Exception {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                                 executor.execute(command);
                                 return null;
                             }
@@ -105,18 +101,16 @@ public class MasterHooksTest extends TestLogger {
                             public void restoreCheckpoint(
                                     long checkpointId, @Nullable String checkpointData)
                                     throws Exception {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                             }
 
                             @Nullable
                             @Override
                             public SimpleVersionedSerializer<String>
                                     createCheckpointDataSerializer() {
-                                assertEquals(
-                                        userClassLoader,
-                                        Thread.currentThread().getContextClassLoader());
+                                assertThat(Thread.currentThread().getContextClassLoader())
+                                        .isEqualTo(userClassLoader);
                                 return null;
                             }
                         });
@@ -126,31 +120,31 @@ public class MasterHooksTest extends TestLogger {
         // verify getIdentifier
         wrapped.getIdentifier();
         verify(hook, times(1)).getIdentifier();
-        assertEquals(originalClassLoader, thread.getContextClassLoader());
+        assertThat(thread.getContextClassLoader()).isEqualTo(originalClassLoader);
 
         // verify triggerCheckpoint and its wrapped executor
         TestExecutor testExecutor = new TestExecutor();
         wrapped.triggerCheckpoint(0L, 0, testExecutor);
-        assertEquals(originalClassLoader, thread.getContextClassLoader());
-        assertNotNull(testExecutor.command);
+        assertThat(thread.getContextClassLoader()).isEqualTo(originalClassLoader);
+        assertThat(testExecutor.command).isNotNull();
         testExecutor.command.run();
         verify(command, times(1)).run();
-        assertEquals(originalClassLoader, thread.getContextClassLoader());
+        assertThat(thread.getContextClassLoader()).isEqualTo(originalClassLoader);
 
         // verify restoreCheckpoint
         wrapped.restoreCheckpoint(0L, "");
         verify(hook, times(1)).restoreCheckpoint(eq(0L), eq(""));
-        assertEquals(originalClassLoader, thread.getContextClassLoader());
+        assertThat(thread.getContextClassLoader()).isEqualTo(originalClassLoader);
 
         // verify createCheckpointDataSerializer
         wrapped.createCheckpointDataSerializer();
         verify(hook, times(1)).createCheckpointDataSerializer();
-        assertEquals(originalClassLoader, thread.getContextClassLoader());
+        assertThat(thread.getContextClassLoader()).isEqualTo(originalClassLoader);
 
         // verify close
         wrapped.close();
         verify(hook, times(1)).close();
-        assertEquals(originalClassLoader, thread.getContextClassLoader());
+        assertThat(thread.getContextClassLoader()).isEqualTo(originalClassLoader);
     }
 
     private static class TestExecutor implements Executor {

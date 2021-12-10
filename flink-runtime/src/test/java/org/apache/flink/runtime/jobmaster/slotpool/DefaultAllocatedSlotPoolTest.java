@@ -49,14 +49,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link DefaultAllocatedSlotPool}. */
 public class DefaultAllocatedSlotPoolTest extends TestLogger {
@@ -120,9 +117,12 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
         final AllocatedSlotPool.AllocatedSlotsAndReservationStatus
                 allocatedSlotsAndReservationStatus = slotPool.removeSlots(owner);
 
-        assertThat(allocatedSlotsAndReservationStatus.getAllocatedSlots(), hasItems(slot1, slot2));
-        assertThat(allocatedSlotsAndReservationStatus.wasFree(slot1.getAllocationId()), is(false));
-        assertThat(allocatedSlotsAndReservationStatus.wasFree(slot2.getAllocationId()), is(true));
+        assertThat(allocatedSlotsAndReservationStatus.getAllocatedSlots())
+                .satisfies(matching(hasItems(slot1, slot2)));
+        assertThat(allocatedSlotsAndReservationStatus.wasFree(slot1.getAllocationId()))
+                .isEqualTo(false);
+        assertThat(allocatedSlotsAndReservationStatus.wasFree(slot2.getAllocationId()))
+                .isEqualTo(true);
     }
 
     @Test
@@ -133,8 +133,8 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
 
         slotPool.addSlots(Collections.singleton(allocatedSlot), 0);
 
-        assertTrue(slotPool.containsSlots(owner));
-        assertFalse(slotPool.containsSlots(ResourceID.generate()));
+        assertThat(slotPool.containsSlots(owner)).isTrue();
+        assertThat(slotPool.containsSlots(ResourceID.generate())).isFalse();
     }
 
     @Test
@@ -144,8 +144,8 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
 
         slotPool.addSlots(Collections.singleton(allocatedSlot), 0);
 
-        assertTrue(slotPool.containsSlot(allocatedSlot.getAllocationId()));
-        assertFalse(slotPool.containsSlot(new AllocationID()));
+        assertThat(slotPool.containsSlot(allocatedSlot.getAllocationId())).isTrue();
+        assertThat(slotPool.containsSlot(new AllocationID())).isFalse();
     }
 
     @Test
@@ -159,9 +159,8 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
 
         slotPool.addSlots(allSlots, 0);
 
-        assertThat(
-                slotPool.reserveFreeSlot(allocatedSlot.getAllocationId()),
-                sameInstance(allocatedSlot));
+        assertThat(slotPool.reserveFreeSlot(allocatedSlot.getAllocationId()))
+                .isSameAs(allocatedSlot);
 
         assertSlotPoolContainsFreeSlots(slotPool, freeSlots);
         assertSlotPoolContainsSlots(slotPool, allSlots);
@@ -191,7 +190,8 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
         slotPool.reserveFreeSlot(slot.getAllocationId());
 
         final int releaseTime = 1;
-        assertTrue(slotPool.freeReservedSlot(slot.getAllocationId(), releaseTime).isPresent());
+        assertThat(slotPool.freeReservedSlot(slot.getAllocationId(), releaseTime).isPresent())
+                .isTrue();
         assertSlotPoolContainsFreeSlots(slotPool, slots);
 
         for (AllocatedSlotPool.FreeSlotInfo freeSlotInfo : slotPool.getFreeSlotsInformation()) {
@@ -202,7 +202,7 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
                 time = initialTime;
             }
 
-            assertThat(freeSlotInfo.getFreeSince(), is(time));
+            assertThat(freeSlotInfo.getFreeSince()).isEqualTo(time);
         }
     }
 
@@ -213,12 +213,12 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
 
         slotPool.addSlots(Collections.singleton(slot), 0);
 
-        assertFalse(slotPool.freeReservedSlot(slot.getAllocationId(), 1).isPresent());
+        assertThat(slotPool.freeReservedSlot(slot.getAllocationId(), 1).isPresent()).isFalse();
 
         final AllocatedSlotPool.FreeSlotInfo freeSlotInfo =
                 Iterables.getOnlyElement(slotPool.getFreeSlotsInformation());
 
-        assertThat(freeSlotInfo.getFreeSince(), is(0L));
+        assertThat(freeSlotInfo.getFreeSince()).isEqualTo(0L);
     }
 
     @Test
@@ -230,19 +230,19 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
         slotPool.addSlots(slots, 0);
 
         for (AllocatedSlotPool.FreeSlotInfo freeSlotInfo : slotPool.getFreeSlotsInformation()) {
-            assertThat(freeSlotInfo.asSlotInfo().getTaskExecutorUtilization(), closeTo(0, 0.1));
+            assertThat(freeSlotInfo.asSlotInfo().getTaskExecutorUtilization())
+                    .satisfies(matching(closeTo(0, 0.1)));
         }
 
         int numAllocatedSlots = 0;
         for (AllocatedSlot slot : slots) {
-            assertThat(slotPool.reserveFreeSlot(slot.getAllocationId()), sameInstance(slot));
+            assertThat(slotPool.reserveFreeSlot(slot.getAllocationId())).isSameAs(slot);
             numAllocatedSlots++;
 
             for (AllocatedSlotPool.FreeSlotInfo freeSlotInfo : slotPool.getFreeSlotsInformation()) {
                 final double utilization = (double) numAllocatedSlots / slots.size();
-                assertThat(
-                        freeSlotInfo.asSlotInfo().getTaskExecutorUtilization(),
-                        closeTo(utilization, 0.1));
+                assertThat(freeSlotInfo.asSlotInfo().getTaskExecutorUtilization())
+                        .satisfies(matching(closeTo(utilization, 0.1)));
             }
         }
     }
@@ -261,14 +261,14 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
 
         slotPool.addSlots(Collections.singleton(allocatedSlot), 0);
 
-        assertTrue(slotPool.containsFreeSlot(allocatedSlot.getAllocationId()));
+        assertThat(slotPool.containsFreeSlot(allocatedSlot.getAllocationId())).isTrue();
     }
 
     @Test
     public void testContainsFreeSlotReturnsFalseIfSlotDoesNotExist() {
         final DefaultAllocatedSlotPool slotPool = new DefaultAllocatedSlotPool();
 
-        assertFalse(slotPool.containsFreeSlot(new AllocationID()));
+        assertThat(slotPool.containsFreeSlot(new AllocationID())).isFalse();
     }
 
     @Test
@@ -279,12 +279,12 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
         slotPool.addSlots(Collections.singleton(allocatedSlot), 0);
         slotPool.reserveFreeSlot(allocatedSlot.getAllocationId());
 
-        assertFalse(slotPool.containsFreeSlot(allocatedSlot.getAllocationId()));
+        assertThat(slotPool.containsFreeSlot(allocatedSlot.getAllocationId())).isFalse();
     }
 
     private void assertSlotPoolContainsSlots(
             DefaultAllocatedSlotPool slotPool, Collection<AllocatedSlot> slots) {
-        assertThat(slotPool.getAllSlotsInformation(), hasSize(slots.size()));
+        assertThat(slotPool.getAllSlotsInformation()).satisfies(matching(hasSize(slots.size())));
 
         final Map<AllocationID, AllocatedSlot> slotsPerAllocationId =
                 slots.stream()
@@ -293,11 +293,11 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
                                         AllocatedSlot::getAllocationId, Function.identity()));
 
         for (SlotInfo slotInfo : slotPool.getAllSlotsInformation()) {
-            assertTrue(slotsPerAllocationId.containsKey(slotInfo.getAllocationId()));
+            assertThat(slotsPerAllocationId.containsKey(slotInfo.getAllocationId())).isTrue();
             final AllocatedSlot allocatedSlot =
                     slotsPerAllocationId.get(slotInfo.getAllocationId());
 
-            assertThat(slotInfo, matchesPhysicalSlot(allocatedSlot));
+            assertThat(slotInfo).satisfies(matching(matchesPhysicalSlot(allocatedSlot)));
         }
     }
 
@@ -306,7 +306,7 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
         final Collection<AllocatedSlotPool.FreeSlotInfo> freeSlotsInformation =
                 slotPool.getFreeSlotsInformation();
 
-        assertThat(freeSlotsInformation, hasSize(allocatedSlots.size()));
+        assertThat(freeSlotsInformation).satisfies(matching(hasSize(allocatedSlots.size())));
 
         final Map<AllocationID, AllocatedSlot> allocatedSlotMap =
                 allocatedSlots.stream()
@@ -315,11 +315,13 @@ public class DefaultAllocatedSlotPoolTest extends TestLogger {
                                         AllocatedSlot::getAllocationId, Function.identity()));
 
         for (AllocatedSlotPool.FreeSlotInfo freeSlotInfo : freeSlotsInformation) {
-            assertTrue(allocatedSlotMap.containsKey(freeSlotInfo.getAllocationId()));
+            assertThat(allocatedSlotMap.containsKey(freeSlotInfo.getAllocationId())).isTrue();
 
-            assertThat(
-                    freeSlotInfo.asSlotInfo(),
-                    matchesPhysicalSlot(allocatedSlotMap.get(freeSlotInfo.getAllocationId())));
+            assertThat(freeSlotInfo.asSlotInfo())
+                    .satisfies(
+                            matching(
+                                    matchesPhysicalSlot(
+                                            allocatedSlotMap.get(freeSlotInfo.getAllocationId()))));
         }
     }
 

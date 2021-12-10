@@ -56,10 +56,8 @@ import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for the {@link FileUploadHandler}. Ensures that multipart http messages containing files
@@ -172,9 +170,8 @@ public class FileUploadHandlerTest extends TestLogger {
         Request fileRequest =
                 buildFileRequest(fileHandler.getMessageHeaders().getTargetRestEndpointURL());
         try (Response response = client.newCall(fileRequest).execute()) {
-            assertEquals(
-                    fileHandler.getMessageHeaders().getResponseStatusCode().code(),
-                    response.code());
+            assertThat(response.code())
+                    .isEqualTo(fileHandler.getMessageHeaders().getResponseStatusCode().code());
         }
 
         verifyNoFileIsRegisteredToDeleteOnExitHook();
@@ -193,14 +190,14 @@ public class FileUploadHandlerTest extends TestLogger {
                         new MultipartUploadResource.TestRequestBody());
         try (Response response = client.newCall(jsonRequest).execute()) {
             // explicitly rejected by the test handler implementation
-            assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
         }
 
         Request fileRequest =
                 buildFileRequest(mixedHandler.getMessageHeaders().getTargetRestEndpointURL());
         try (Response response = client.newCall(fileRequest).execute()) {
             // expected JSON payload is missing
-            assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
         }
 
         MultipartUploadResource.TestRequestBody json =
@@ -209,10 +206,9 @@ public class FileUploadHandlerTest extends TestLogger {
                 buildMixedRequest(
                         mixedHandler.getMessageHeaders().getTargetRestEndpointURL(), json);
         try (Response response = client.newCall(mixedRequest).execute()) {
-            assertEquals(
-                    mixedHandler.getMessageHeaders().getResponseStatusCode().code(),
-                    response.code());
-            assertEquals(json, mixedHandler.lastReceivedRequest);
+            assertThat(response.code())
+                    .isEqualTo(mixedHandler.getMessageHeaders().getResponseStatusCode().code());
+            assertThat(mixedHandler.lastReceivedRequest).isEqualTo(json);
         }
 
         verifyNoFileIsRegisteredToDeleteOnExitHook();
@@ -230,17 +226,16 @@ public class FileUploadHandlerTest extends TestLogger {
         Request jsonRequest =
                 buildJsonRequest(jsonHandler.getMessageHeaders().getTargetRestEndpointURL(), json);
         try (Response response = client.newCall(jsonRequest).execute()) {
-            assertEquals(
-                    jsonHandler.getMessageHeaders().getResponseStatusCode().code(),
-                    response.code());
-            assertEquals(json, jsonHandler.lastReceivedRequest);
+            assertThat(response.code())
+                    .isEqualTo(jsonHandler.getMessageHeaders().getResponseStatusCode().code());
+            assertThat(jsonHandler.lastReceivedRequest).isEqualTo(json);
         }
 
         Request fileRequest =
                 buildFileRequest(jsonHandler.getMessageHeaders().getTargetRestEndpointURL());
         try (Response response = client.newCall(fileRequest).execute()) {
             // either because JSON payload is missing or FileUploads are outright forbidden
-            assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
         }
 
         Request mixedRequest =
@@ -249,7 +244,7 @@ public class FileUploadHandlerTest extends TestLogger {
                         new MultipartUploadResource.TestRequestBody());
         try (Response response = client.newCall(mixedRequest).execute()) {
             // FileUploads are outright forbidden
-            assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
         }
 
         verifyNoFileIsRegisteredToDeleteOnExitHook();
@@ -268,15 +263,14 @@ public class FileUploadHandlerTest extends TestLogger {
                         new MultipartUploadResource.TestRequestBody());
         try (Response response = client.newCall(jsonRequest).execute()) {
             // JSON payload did not match expected format
-            assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
         }
 
         Request fileRequest =
                 buildFileRequest(fileHandler.getMessageHeaders().getTargetRestEndpointURL());
         try (Response response = client.newCall(fileRequest).execute()) {
-            assertEquals(
-                    fileHandler.getMessageHeaders().getResponseStatusCode().code(),
-                    response.code());
+            assertThat(response.code())
+                    .isEqualTo(fileHandler.getMessageHeaders().getResponseStatusCode().code());
         }
 
         Request mixedRequest =
@@ -285,7 +279,7 @@ public class FileUploadHandlerTest extends TestLogger {
                         new MultipartUploadResource.TestRequestBody());
         try (Response response = client.newCall(mixedRequest).execute()) {
             // JSON payload did not match expected format
-            assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
         }
 
         verifyNoFileIsRegisteredToDeleteOnExitHook();
@@ -302,7 +296,7 @@ public class FileUploadHandlerTest extends TestLogger {
                                 .getMessageHeaders()
                                 .getTargetRestEndpointURL());
         try (Response response = client.newCall(request).execute()) {
-            assertEquals(HttpResponseStatus.BAD_REQUEST.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.BAD_REQUEST.code());
         }
         multipartUpdateResource.assertUploadDirectoryIsEmpty();
 
@@ -325,7 +319,7 @@ public class FileUploadHandlerTest extends TestLogger {
                                 .getTargetRestEndpointURL());
         try (Response response = client.newCall(request).execute()) {
             // decoding errors aren't handled separately by the FileUploadHandler
-            assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(), response.code());
+            assertThat(response.code()).isEqualTo(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
         }
         multipartUpdateResource.assertUploadDirectoryIsEmpty();
 
@@ -354,7 +348,7 @@ public class FileUploadHandlerTest extends TestLogger {
                         customFilename1,
                         customFilename2);
         try (Response response = client.newCall(request).execute()) {
-            assertEquals(messageHeaders.getResponseStatusCode().code(), response.code());
+            assertThat(response.code()).isEqualTo(messageHeaders.getResponseStatusCode().code());
         }
 
         verifyNoFileIsRegisteredToDeleteOnExitHook();
@@ -386,7 +380,7 @@ public class FileUploadHandlerTest extends TestLogger {
                         String.format("../%s", customFilename1),
                         String.format("../%s", customFilename2));
         try (Response response = client.newCall(request).execute()) {
-            assertEquals(messageHeaders.getResponseStatusCode().code(), response.code());
+            assertThat(response.code()).isEqualTo(messageHeaders.getResponseStatusCode().code());
         }
 
         verifyNoFileIsRegisteredToDeleteOnExitHook();
@@ -430,7 +424,7 @@ public class FileUploadHandlerTest extends TestLogger {
             expectedFilenamesAndContent.put(customFilename1, fileContent1);
             expectedFilenamesAndContent.put(customFilename2, fileContent2);
 
-            assertEquals(expectedFilenamesAndContent.size(), uploadedFiles.size());
+            assertThat(uploadedFiles.size()).isEqualTo(expectedFilenamesAndContent.size());
 
             Iterator<Path> uploadedFileIterator = actualList.iterator();
             for (Map.Entry<String, Path> expectedFilenameAndContent :
@@ -438,14 +432,14 @@ public class FileUploadHandlerTest extends TestLogger {
                 String expectedFilename = expectedFilenameAndContent.getKey();
                 Path expectedContent = expectedFilenameAndContent.getValue();
 
-                assertTrue(uploadedFileIterator.hasNext());
+                assertThat(uploadedFileIterator.hasNext()).isTrue();
                 Path actual = uploadedFileIterator.next();
 
-                assertEquals(expectedFilename, actual.getFileName().toString());
+                assertThat(actual.getFileName().toString()).isEqualTo(expectedFilename);
 
                 byte[] originalContent = java.nio.file.Files.readAllBytes(expectedContent);
                 byte[] receivedContent = java.nio.file.Files.readAllBytes(actual);
-                assertArrayEquals(originalContent, receivedContent);
+                assertThat(receivedContent).isEqualTo(originalContent);
             }
         }
     }
@@ -472,7 +466,7 @@ public class FileUploadHandlerTest extends TestLogger {
             Field field = clazz.getDeclaredField("files");
             field.setAccessible(true);
             LinkedHashSet files = (LinkedHashSet) field.get(null);
-            assertTrue(files.isEmpty());
+            assertThat(files.isEmpty()).isTrue();
         } catch (ClassNotFoundException | IllegalAccessException | NoSuchFieldException e) {
             fail("This should never happen.");
         }

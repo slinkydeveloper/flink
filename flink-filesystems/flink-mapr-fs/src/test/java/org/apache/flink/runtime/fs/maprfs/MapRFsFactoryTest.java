@@ -27,8 +27,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link MapRFsFactory}. */
 public class MapRFsFactoryTest extends TestLogger {
@@ -39,7 +39,7 @@ public class MapRFsFactoryTest extends TestLogger {
 
         final FileSystem fs = path.getFileSystem();
 
-        assertEquals(path.toUri().getScheme(), fs.getUri().getScheme());
+        assertThat(fs.getUri().getScheme()).isEqualTo(path.toUri().getScheme());
     }
 
     @Test
@@ -48,7 +48,7 @@ public class MapRFsFactoryTest extends TestLogger {
 
         final FileSystem fs = path.getFileSystem();
 
-        assertEquals(FileSystemKind.FILE_SYSTEM, fs.getKind());
+        assertThat(fs.getKind()).isEqualTo(FileSystemKind.FILE_SYSTEM);
     }
 
     @Test

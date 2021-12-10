@@ -21,11 +21,13 @@ package org.apache.flink.runtime.rest.messages;
 import org.apache.flink.api.common.JobID;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link MessageParameters}. */
 public class MessageParametersTest extends TestLogger {
@@ -40,7 +42,7 @@ public class MessageParametersTest extends TestLogger {
 
         String resolvedUrl = MessageParameters.resolveUrl(genericUrl, parameters);
 
-        Assert.assertEquals("/jobs/" + pathJobID + "/state?jobid=" + queryJobID, resolvedUrl);
+        assertThat(resolvedUrl).isEqualTo("/jobs/" + pathJobID + "/state?jobid=" + queryJobID);
     }
 
     @Test
@@ -49,7 +51,7 @@ public class MessageParametersTest extends TestLogger {
         TestMessageParameters parameters = new TestMessageParameters();
         try {
             MessageParameters.resolveUrl(genericUrl, parameters);
-            Assert.fail();
+            fail("unknown failure");
         } catch (IllegalStateException expected) {
             // the mandatory jobid path parameter was not resolved
         }
@@ -57,7 +59,7 @@ public class MessageParametersTest extends TestLogger {
         parameters.pathParameter.resolve(jobID);
 
         String resolvedUrl = MessageParameters.resolveUrl(genericUrl, parameters);
-        Assert.assertEquals("/jobs/" + jobID + "/state", resolvedUrl);
+        assertThat(resolvedUrl).isEqualTo("/jobs/" + jobID + "/state");
     }
 
     private static class TestMessageParameters extends MessageParameters {

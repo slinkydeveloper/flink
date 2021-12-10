@@ -37,7 +37,6 @@ import org.apache.avro.generic.IndexedRecord;
 import org.apache.avro.io.Encoder;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.specific.SpecificDatumWriter;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -69,10 +68,9 @@ import static org.apache.flink.table.api.DataTypes.STRING;
 import static org.apache.flink.table.api.DataTypes.TIME;
 import static org.apache.flink.table.api.DataTypes.TIMESTAMP;
 import static org.apache.flink.table.api.DataTypes.TINYINT;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Test for the Avro serialization and deserialization schema. */
 public class AvroRowDataDeSerializationSchemaTest {
@@ -83,7 +81,7 @@ public class AvroRowDataDeSerializationSchemaTest {
         AvroRowDataDeserializationSchema deserializationSchema =
                 createDeserializationSchema(dataType);
 
-        assertNull(deserializationSchema.deserialize(null));
+        assertThat(deserializationSchema.deserialize(null)).isNull();
     }
 
     @Test
@@ -175,7 +173,7 @@ public class AvroRowDataDeSerializationSchemaTest {
         RowData rowData = deserializationSchema.deserialize(input);
         byte[] output = serializationSchema.serialize(rowData);
 
-        assertArrayEquals(input, output);
+        assertThat(output).isEqualTo(input);
     }
 
     @Test
@@ -206,18 +204,18 @@ public class AvroRowDataDeSerializationSchemaTest {
         RowData rowData = deserializationSchema.deserialize(input);
         byte[] output = serializationSchema.serialize(rowData);
         RowData rowData2 = deserializationSchema.deserialize(output);
-        Assert.assertEquals(rowData, rowData2);
-        Assert.assertEquals(timestamp, rowData.getTimestamp(0, 3).toInstant());
-        Assert.assertEquals(
-                "2014-03-01",
-                DataFormatConverters.LocalDateConverter.INSTANCE
-                        .toExternal(rowData.getInt(1))
-                        .toString());
-        Assert.assertEquals(
-                "12:12:12",
-                DataFormatConverters.LocalTimeConverter.INSTANCE
-                        .toExternal(rowData.getInt(2))
-                        .toString());
+        assertThat(rowData2).isEqualTo(rowData);
+        assertThat(rowData.getTimestamp(0, 3).toInstant()).isEqualTo(timestamp);
+        assertThat(
+                        DataFormatConverters.LocalDateConverter.INSTANCE
+                                .toExternal(rowData.getInt(1))
+                                .toString())
+                .isEqualTo("2014-03-01");
+        assertThat(
+                        DataFormatConverters.LocalTimeConverter.INSTANCE
+                                .toExternal(rowData.getInt(2))
+                                .toString())
+                .isEqualTo("12:12:12");
     }
 
     @Test
@@ -232,7 +230,7 @@ public class AvroRowDataDeSerializationSchemaTest {
             serializationSchema.serialize(rowData);
             fail("expecting exception message: " + errorMessage);
         } catch (Throwable t) {
-            assertThat(t, FlinkMatchers.containsMessage(errorMessage));
+            assertThat(t).satisfies(matching(FlinkMatchers.containsMessage(errorMessage)));
         }
     }
 

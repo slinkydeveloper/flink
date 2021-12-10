@@ -29,6 +29,8 @@ import org.junit.Test;
 import java.util.Objects;
 import java.util.Random;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /** A test for the {@link PojoSerializer}. */
 public class PojoSubclassSerializerTest
         extends SerializerTestBase<PojoSubclassSerializerTest.TestUserClassBase> {
@@ -41,7 +43,7 @@ public class PojoSubclassSerializerTest
         ExecutionConfig conf = new ExecutionConfig();
         conf.registerPojoType(TestUserClass1.class);
         TypeSerializer<TestUserClassBase> serializer = type.createSerializer(conf);
-        assert (serializer instanceof PojoSerializer);
+        assertThat((serializer instanceof PojoSerializer)).isTrue();
         return serializer;
     }
 

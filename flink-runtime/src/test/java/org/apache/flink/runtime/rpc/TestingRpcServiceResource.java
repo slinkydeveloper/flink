@@ -22,6 +22,8 @@ import org.junit.rules.ExternalResource;
 
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * {@link ExternalResource} which starts a {@link org.apache.flink.runtime.rpc.TestingRpcService}.
  */
@@ -39,7 +41,7 @@ public class TestingRpcServiceResource extends ExternalResource {
     }
 
     private void checkInitialized() {
-        assert (testingRpcService != null);
+        assertThat((testingRpcService != null)).isTrue();
     }
 
     @Override

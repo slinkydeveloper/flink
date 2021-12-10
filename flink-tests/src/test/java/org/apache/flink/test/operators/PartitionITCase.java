@@ -49,8 +49,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link MapPartitionFunction}. */
 @RunWith(Parameterized.class)
@@ -473,8 +472,8 @@ public class PartitionITCase extends MultipleProgramsTestBase {
                 previousMax = tuple2.f1;
             } else {
                 long currentMin = tuple2.f0;
-                assertTrue(tuple2.f0 < tuple2.f1);
-                assertEquals(previousMax + 1, currentMin);
+                assertThat(tuple2.f0 < tuple2.f1).isTrue();
+                assertThat(currentMin).isEqualTo(previousMax + 1);
                 previousMax = tuple2.f1;
             }
         }
@@ -544,21 +543,20 @@ public class PartitionITCase extends MultipleProgramsTestBase {
 
         Tuple2<Long, Long> previousMax = null;
         for (Tuple2<Tuple2<Long, Long>, Tuple2<Long, Long>> tuple2 : collected) {
-            assertTrue(
-                    "Min element in each partition should be smaller than max.",
-                    tuple2Comparator.compare(tuple2.f0, tuple2.f1) <= 0);
+            assertThat(tuple2Comparator.compare(tuple2.f0, tuple2.f1) <= 0)
+                    .as("Min element in each partition should be smaller than max.")
+                    .isTrue();
             if (previousMax == null) {
                 previousMax = tuple2.f1;
             } else {
-                assertTrue(
-                        "Partitions overlap. Previous max should be smaller than current min.",
-                        tuple2Comparator.compare(previousMax, tuple2.f0) < 0);
+                assertThat(tuple2Comparator.compare(previousMax, tuple2.f0) < 0)
+                        .as("Partitions overlap. Previous max should be smaller than current min.")
+                        .isTrue();
                 if (previousMax.f0.equals(tuple2.f0.f0)) {
                     // check that ordering on the second key is correct
-                    assertEquals(
-                            "Ordering on the second field should be continous.",
-                            previousMax.f1 - 1,
-                            tuple2.f0.f1.longValue());
+                    assertThat(tuple2.f0.f1.longValue())
+                            .as("Ordering on the second field should be continous.")
+                            .isEqualTo(previousMax.f1 - 1);
                 }
                 previousMax = tuple2.f1;
             }
@@ -607,20 +605,19 @@ public class PartitionITCase extends MultipleProgramsTestBase {
 
         Tuple2<Long, Long> previousMax = null;
         for (Tuple2<Tuple2<Long, Long>, Tuple2<Long, Long>> tuple2 : collected) {
-            assertTrue(
-                    "Min element in each partition should be smaller than max.",
-                    tuple2Comparator.compare(tuple2.f0, tuple2.f1) <= 0);
+            assertThat(tuple2Comparator.compare(tuple2.f0, tuple2.f1) <= 0)
+                    .as("Min element in each partition should be smaller than max.")
+                    .isTrue();
             if (previousMax == null) {
                 previousMax = tuple2.f1;
             } else {
-                assertTrue(
-                        "Partitions overlap. Previous max should be smaller than current min.",
-                        tuple2Comparator.compare(previousMax, tuple2.f0) < 0);
+                assertThat(tuple2Comparator.compare(previousMax, tuple2.f0) < 0)
+                        .as("Partitions overlap. Previous max should be smaller than current min.")
+                        .isTrue();
                 if (previousMax.f0.equals(tuple2.f0.f0)) {
-                    assertEquals(
-                            "Ordering on the second field should be continous.",
-                            previousMax.f1 + 1,
-                            tuple2.f0.f1.longValue());
+                    assertThat(tuple2.f0.f1.longValue())
+                            .as("Ordering on the second field should be continous.")
+                            .isEqualTo(previousMax.f1 + 1);
                 }
                 previousMax = tuple2.f1;
             }
@@ -671,20 +668,19 @@ public class PartitionITCase extends MultipleProgramsTestBase {
 
         ComparablePojo previousMax = null;
         for (Tuple2<ComparablePojo, ComparablePojo> element : collected) {
-            assertTrue(
-                    "Min element in each partition should be smaller than max.",
-                    element.f0.compareTo(element.f1) <= 0);
+            assertThat(element.f0.compareTo(element.f1) <= 0)
+                    .as("Min element in each partition should be smaller than max.")
+                    .isTrue();
             if (previousMax == null) {
                 previousMax = element.f1;
             } else {
-                assertTrue(
-                        "Partitions overlap. Previous max should be smaller than current min.",
-                        previousMax.compareTo(element.f0) < 0);
+                assertThat(previousMax.compareTo(element.f0) < 0)
+                        .as("Partitions overlap. Previous max should be smaller than current min.")
+                        .isTrue();
                 if (previousMax.first.equals(element.f0.first)) {
-                    assertEquals(
-                            "Ordering on the second field should be continous.",
-                            previousMax.second - 1,
-                            element.f0.second.longValue());
+                    assertThat(element.f0.second.longValue())
+                            .as("Ordering on the second field should be continous.")
+                            .isEqualTo(previousMax.second - 1);
                 }
                 previousMax = element.f1;
             }

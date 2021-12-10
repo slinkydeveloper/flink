@@ -31,8 +31,8 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.not;
 
 /**
@@ -62,9 +62,8 @@ public class PhysicalSlotProviderImplWithSpreadOutStrategyTest extends TestLogge
         PhysicalSlotRequest.Result result1 =
                 physicalSlotProviderResource.allocateSlot(request1).get();
 
-        assertThat(
-                result0.getPhysicalSlot().getTaskManagerLocation(),
-                not(result1.getPhysicalSlot().getTaskManagerLocation()));
+        assertThat(result0.getPhysicalSlot().getTaskManagerLocation())
+                .satisfies(matching(not(result1.getPhysicalSlot().getTaskManagerLocation())));
     }
 
     @Test
@@ -91,9 +90,8 @@ public class PhysicalSlotProviderImplWithSpreadOutStrategyTest extends TestLogge
         PhysicalSlotRequest.Result result1 =
                 physicalSlotProviderResource.allocateSlot(request1).get();
 
-        assertThat(
-                result1.getPhysicalSlot().getTaskManagerLocation(),
-                is(preferredTaskManagerLocation));
+        assertThat(result1.getPhysicalSlot().getTaskManagerLocation())
+                .isEqualTo(preferredTaskManagerLocation);
     }
 
     @Test
@@ -102,7 +100,7 @@ public class PhysicalSlotProviderImplWithSpreadOutStrategyTest extends TestLogge
         final CompletableFuture<PhysicalSlotRequest.Result> slotFuture =
                 physicalSlotProviderResource.allocateSlot(
                         physicalSlotProviderResource.createSimpleRequest());
-        assertThat(slotFuture.isDone(), is(false));
+        assertThat(slotFuture.isDone()).isEqualTo(false);
         physicalSlotProviderResource.registerSlotOffersFromNewTaskExecutor(ResourceProfile.ANY);
         slotFuture.get();
     }
@@ -113,10 +111,10 @@ public class PhysicalSlotProviderImplWithSpreadOutStrategyTest extends TestLogge
         DeclarativeSlotPoolBridge slotPool =
                 new DeclarativeSlotPoolBridgeBuilder()
                         .buildAndStart(physicalSlotProviderResource.getMainThreadExecutor());
-        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled(), is(true));
+        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled()).isEqualTo(true);
 
         new PhysicalSlotProviderImpl(
                 LocationPreferenceSlotSelectionStrategy.createEvenlySpreadOut(), slotPool);
-        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled(), is(false));
+        assertThat(slotPool.isBatchSlotRequestTimeoutCheckEnabled()).isEqualTo(false);
     }
 }

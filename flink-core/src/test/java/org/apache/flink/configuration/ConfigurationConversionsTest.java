@@ -34,10 +34,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.closeTo;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for {@link Configuration} conversion between types. Extracted from {@link
@@ -461,7 +462,7 @@ public class ConfigurationConversionsTest {
         }
 
         void assertConfiguration(Configuration conf) throws Exception {
-            assertThat(configurationAccessor.access(conf), matcher);
+            assertThat(configurationAccessor.access(conf)).satisfies(matching(matcher));
         }
     }
 }

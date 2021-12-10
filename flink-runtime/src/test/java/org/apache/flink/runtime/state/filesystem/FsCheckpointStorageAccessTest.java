@@ -39,10 +39,7 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -140,7 +137,7 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
         final StreamStateHandle stateHandle;
 
         try (CheckpointStateOutputStream stream = storage.createTaskOwnedStateStream()) {
-            assertTrue(stream instanceof FsCheckpointStateOutputStream);
+            assertThat(stream).isInstanceOf(FsCheckpointStateOutputStream.class);
 
             new ObjectOutputStream(stream).writeObject(state);
             stateHandle = stream.closeAndGetHandle();
@@ -151,11 +148,12 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
 
         // check that the state is in the correct directory
         String parentDirName = fileStateHandle.getFilePath().getParent().getName();
-        assertEquals(FsCheckpointStorageAccess.CHECKPOINT_TASK_OWNED_STATE_DIR, parentDirName);
+        assertThat(parentDirName)
+                .isEqualTo(FsCheckpointStorageAccess.CHECKPOINT_TASK_OWNED_STATE_DIR);
 
         // validate the contents
         try (ObjectInputStream in = new ObjectInputStream(stateHandle.openInputStream())) {
-            assertEquals(state, in.readObject());
+            assertThat(in.readObject()).isEqualTo(state);
         }
     }
 
@@ -175,12 +173,11 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
                         FILE_SIZE_THRESHOLD,
                         WRITE_BUFFER_SIZE);
 
-        assertNotEquals(
-                storageLocation.getCheckpointDirectory(),
-                storageLocation.getSharedStateDirectory());
+        assertThat(storageLocation.getSharedStateDirectory())
+                .isEqualTo(storageLocation.getCheckpointDirectory());
 
-        assertEquals(0, fs.listStatus(storageLocation.getCheckpointDirectory()).length);
-        assertEquals(0, fs.listStatus(storageLocation.getSharedStateDirectory()).length);
+        assertThat(fs.listStatus(storageLocation.getCheckpointDirectory()).length).isEqualTo(0);
+        assertThat(fs.listStatus(storageLocation.getSharedStateDirectory()).length).isEqualTo(0);
 
         // create exclusive state
 
@@ -191,8 +188,8 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
         exclusiveStream.flushToFile();
         StreamStateHandle exclusiveHandle = exclusiveStream.closeAndGetHandle();
 
-        assertEquals(1, fs.listStatus(storageLocation.getCheckpointDirectory()).length);
-        assertEquals(0, fs.listStatus(storageLocation.getSharedStateDirectory()).length);
+        assertThat(fs.listStatus(storageLocation.getCheckpointDirectory()).length).isEqualTo(1);
+        assertThat(fs.listStatus(storageLocation.getSharedStateDirectory()).length).isEqualTo(0);
 
         // create shared state
 
@@ -203,8 +200,8 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
         sharedStream.flushToFile();
         StreamStateHandle sharedHandle = sharedStream.closeAndGetHandle();
 
-        assertEquals(1, fs.listStatus(storageLocation.getCheckpointDirectory()).length);
-        assertEquals(1, fs.listStatus(storageLocation.getSharedStateDirectory()).length);
+        assertThat(fs.listStatus(storageLocation.getCheckpointDirectory()).length).isEqualTo(1);
+        assertThat(fs.listStatus(storageLocation.getSharedStateDirectory()).length).isEqualTo(1);
 
         // drop state
 
@@ -227,11 +224,11 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
                         WRITE_BUFFER_SIZE);
 
         File baseDir = new File(storage.getCheckpointsDirectory().getPath());
-        assertFalse(baseDir.exists());
+        assertThat(baseDir.exists()).isFalse();
 
         // mkdirs would only be called when initializeBaseLocations
         storage.initializeBaseLocationsForCheckpoint();
-        assertTrue(baseDir.exists());
+        assertThat(baseDir.exists()).isTrue();
 
         // mkdir would not be called when resolveCheckpointStorageLocation
         storage =
@@ -249,7 +246,7 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
 
         Path checkpointPath = location.getCheckpointDirectory();
         File checkpointDir = new File(checkpointPath.getPath());
-        assertFalse(checkpointDir.exists());
+        assertThat(checkpointDir.exists()).isFalse();
     }
 
     @Test
@@ -267,7 +264,7 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
                 (FsCheckpointStorageLocation)
                         storage.resolveCheckpointStorageLocation(
                                 1L, CheckpointStorageLocationReference.getDefault());
-        assertEquals(checkpointFileSystem, checkpointStreamFactory.getFileSystem());
+        assertThat(checkpointStreamFactory.getFileSystem()).isEqualTo(checkpointFileSystem);
 
         final CheckpointStorageLocationReference savepointLocationReference =
                 AbstractFsCheckpointStorageAccess.encodePathAsReference(
@@ -277,7 +274,7 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
                 (FsCheckpointStorageLocation)
                         storage.resolveCheckpointStorageLocation(2L, savepointLocationReference);
         final FileSystem fileSystem = savepointStreamFactory.getFileSystem();
-        assertTrue(fileSystem instanceof LocalFileSystem);
+        assertThat(fileSystem).isInstanceOf(LocalFileSystem.class);
     }
 
     // ------------------------------------------------------------------------
@@ -286,7 +283,7 @@ public class FsCheckpointStorageAccessTest extends AbstractFileCheckpointStorage
 
     private void assertParent(Path parent, Path child) {
         Path path = new Path(parent, child.getName());
-        assertEquals(path, child);
+        assertThat(child).isEqualTo(path);
     }
 
     private static final class TestingPath extends Path {

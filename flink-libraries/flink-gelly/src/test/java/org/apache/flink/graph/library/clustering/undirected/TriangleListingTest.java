@@ -34,7 +34,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TriangleListing}. */
 public class TriangleListingTest extends AsmTestBase {
@@ -96,21 +96,21 @@ public class TriangleListingTest extends AsmTestBase {
 
         Checksum checksum = new ChecksumHashCode<Result<LongValue>>().run(tl).execute();
 
-        assertEquals(expectedCount, checksum.getCount());
+        assertThat(checksum.getCount()).isEqualTo(expectedCount);
     }
 
     @Test
     public void testWithEmptyGraphWithVertices() throws Exception {
         DataSet<Result<LongValue>> tl = emptyGraphWithVertices.run(new TriangleListing<>());
 
-        assertEquals(0, tl.collect().size());
+        assertThat(tl.collect().size()).isEqualTo(0);
     }
 
     @Test
     public void testWithEmptyGraphWithoutVertices() throws Exception {
         DataSet<Result<LongValue>> tl = emptyGraphWithoutVertices.run(new TriangleListing<>());
 
-        assertEquals(0, tl.collect().size());
+        assertThat(tl.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -123,7 +123,7 @@ public class TriangleListingTest extends AsmTestBase {
 
         Checksum checksum = new ChecksumHashCode<Result<LongValue>>().run(tl).execute();
 
-        assertEquals(75049, checksum.getCount());
-        assertEquals(0x000092826c991dd9L, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(75049);
+        assertThat(checksum.getChecksum()).isEqualTo(0x000092826c991dd9L);
     }
 }

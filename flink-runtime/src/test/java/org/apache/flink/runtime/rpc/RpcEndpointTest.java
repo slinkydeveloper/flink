@@ -35,12 +35,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the RpcEndpoint, its self gateways and MainThreadExecutor scheduling command. */
 public class RpcEndpointTest extends TestLogger {
@@ -74,7 +70,7 @@ public class RpcEndpointTest extends TestLogger {
 
             CompletableFuture<Integer> foobar = baseGateway.foobar();
 
-            assertEquals(Integer.valueOf(expectedValue), foobar.get());
+            assertThat(foobar.get()).isEqualTo(Integer.valueOf(expectedValue));
         } finally {
             RpcUtils.terminateRpcEndpoint(baseEndpoint, TIMEOUT);
         }
@@ -120,11 +116,11 @@ public class RpcEndpointTest extends TestLogger {
             ExtendedGateway extendedGateway = endpoint.getSelfGateway(ExtendedGateway.class);
             DifferentGateway differentGateway = endpoint.getSelfGateway(DifferentGateway.class);
 
-            assertEquals(Integer.valueOf(foobar), baseGateway.foobar().get());
-            assertEquals(Integer.valueOf(foobar), extendedGateway.foobar().get());
+            assertThat(baseGateway.foobar().get()).isEqualTo(Integer.valueOf(foobar));
+            assertThat(extendedGateway.foobar().get()).isEqualTo(Integer.valueOf(foobar));
 
-            assertEquals(Integer.valueOf(barfoo), extendedGateway.barfoo().get());
-            assertEquals(foo, differentGateway.foo().get());
+            assertThat(extendedGateway.barfoo().get()).isEqualTo(Integer.valueOf(barfoo));
+            assertThat(differentGateway.foo().get()).isEqualTo(foo);
         } finally {
             RpcUtils.terminateRpcEndpoint(endpoint, TIMEOUT);
         }
@@ -142,7 +138,7 @@ public class RpcEndpointTest extends TestLogger {
 
         try {
             endpoint.start();
-            assertThat(gateway.queryIsRunningFlag().get(), is(true));
+            assertThat(gateway.queryIsRunningFlag().get()).isEqualTo(true);
         } finally {
             RpcUtils.terminateRpcEndpoint(endpoint, TIMEOUT);
         }
@@ -161,7 +157,7 @@ public class RpcEndpointTest extends TestLogger {
         endpoint.start();
         CompletableFuture<Void> terminationFuture = endpoint.closeAndWaitUntilOnStopCalled();
 
-        assertThat(gateway.queryIsRunningFlag().get(), is(false));
+        assertThat(gateway.queryIsRunningFlag().get()).isEqualTo(false);
 
         stopFuture.complete(null);
         terminationFuture.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
@@ -324,7 +320,7 @@ public class RpcEndpointTest extends TestLogger {
 
         scheduler.accept(mainThreadExecutor, expectedDelay);
 
-        assertThat(actualDelayMsFuture.get(), is(expectedDelay.toMillis()));
+        assertThat(actualDelayMsFuture.get()).isEqualTo(expectedDelay.toMillis());
     }
 
     /**
@@ -346,7 +342,8 @@ public class RpcEndpointTest extends TestLogger {
                                 return expectedInteger;
                             },
                             TIMEOUT);
-            assertEquals(expectedInteger, integerFuture.get(TIMEOUT.getSize(), TIMEOUT.getUnit()));
+            assertThat(integerFuture.get(TIMEOUT.getSize(), TIMEOUT.getUnit()))
+                    .isEqualTo(expectedInteger);
         } finally {
             RpcUtils.terminateRpcEndpoint(endpoint, TIMEOUT);
         }
@@ -375,8 +372,8 @@ public class RpcEndpointTest extends TestLogger {
                             .handle((ignore, throwable) -> throwable);
             final Throwable throwable = throwableFuture.get();
 
-            assertNotNull(throwable);
-            assertThat(throwable, instanceOf(TimeoutException.class));
+            assertThat(throwable).isNotNull();
+            assertThat(throwable).isInstanceOf(TimeoutException.class);
         } finally {
             latch.countDown();
             RpcUtils.terminateRpcEndpoint(endpoint, TIMEOUT);

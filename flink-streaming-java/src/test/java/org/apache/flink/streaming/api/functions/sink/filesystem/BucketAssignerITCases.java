@@ -25,12 +25,13 @@ import org.apache.flink.core.fs.Path;
 import org.apache.flink.streaming.api.functions.sink.filesystem.bucketassigners.BasePathBucketAssigner;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link BucketAssigner bucket assigners}. */
 public class BucketAssignerITCases {
@@ -60,6 +61,6 @@ public class BucketAssignerITCases {
 
         Bucket<String, String> bucket =
                 buckets.onElement("abc", new TestUtils.MockSinkContext(time, time, time));
-        Assert.assertEquals(new Path(basePath.toUri()), bucket.getBucketPath());
+        assertThat(bucket.getBucketPath()).isEqualTo(new Path(basePath.toUri()));
     }
 }

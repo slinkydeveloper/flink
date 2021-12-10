@@ -49,7 +49,6 @@ import org.apache.flink.util.concurrent.ManuallyTriggeredScheduledExecutor;
 
 import org.apache.flink.shaded.guava30.com.google.common.collect.Iterables;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,10 +80,8 @@ import static org.apache.flink.runtime.checkpoint.CheckpointCoordinatorTestingUt
 import static org.apache.flink.runtime.checkpoint.CheckpointCoordinatorTestingUtils.verifyStateRestore;
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNewInputChannelStateHandle;
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNewResultSubpartitionStateHandle;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -210,7 +207,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         manuallyTriggeredScheduledExecutor.triggerAll();
 
         // we should have a single pending checkpoint
-        assertEquals(1, coordinator.getPendingCheckpoints().size());
+        assertThat(coordinator.getPendingCheckpoints().size()).isEqualTo(1);
         final long checkpointId =
                 Iterables.getOnlyElement(coordinator.getPendingCheckpoints().keySet());
 
@@ -223,7 +220,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
 
         final List<CompletedCheckpoint> completedCheckpoints =
                 coordinator.getSuccessfulCheckpoints();
-        assertEquals(1, completedCheckpoints.size());
+        assertThat(completedCheckpoints.size()).isEqualTo(1);
 
         // shutdown the store
         store.shutdown(JobStatus.SUSPENDED, new CheckpointsCleaner());
@@ -252,7 +249,8 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                         .map(TestingVertex::getId)
                         .map(executionGraph::getJobVertex)
                         .collect(Collectors.toSet());
-        assertTrue(coordinator.restoreLatestCheckpointedStateToAll(executionVertices, false));
+        assertThat(coordinator.restoreLatestCheckpointedStateToAll(executionVertices, false))
+                .isTrue();
 
         // validate that all shared states are registered again after the recovery.
         for (CompletedCheckpoint completedCheckpoint : completedCheckpoints) {
@@ -319,7 +317,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         coord.triggerCheckpoint(false);
         manuallyTriggeredScheduledExecutor.triggerAll();
 
-        assertEquals(1, coord.getPendingCheckpoints().size());
+        assertThat(coord.getPendingCheckpoints().size()).isEqualTo(1);
         long checkpointId = Iterables.getOnlyElement(coord.getPendingCheckpoints().keySet());
 
         List<KeyGroupRange> keyGroupPartitions1 =
@@ -406,7 +404,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
 
         List<CompletedCheckpoint> completedCheckpoints = coord.getSuccessfulCheckpoints();
 
-        assertEquals(1, completedCheckpoints.size());
+        assertThat(completedCheckpoints.size()).isEqualTo(1);
 
         List<KeyGroupRange> newKeyGroupPartitions2 =
                 StateAssignmentOperation.createKeyGroupPartitions(maxParallelism2, newParallelism2);
@@ -432,7 +430,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         Set<ExecutionJobVertex> tasks = new HashSet<>();
         tasks.add(newJobVertex1);
         tasks.add(newJobVertex2);
-        assertTrue(newCoord.restoreLatestCheckpointedStateToAll(tasks, false));
+        assertThat(newCoord.restoreLatestCheckpointedStateToAll(tasks, false)).isTrue();
 
         // verify the restored state
         verifyStateRestore(jobVertexID1, newJobVertex1, keyGroupPartitions1);
@@ -454,7 +452,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                             .getTaskVertices()[i]
                             .getCurrentExecutionAttempt()
                             .getTaskRestore();
-            Assert.assertEquals(1L, taskRestore.getRestoreCheckpointId());
+            assertThat(taskRestore.getRestoreCheckpointId()).isEqualTo(1L);
             TaskStateSnapshot taskStateHandles = taskRestore.getTaskStateSnapshot();
 
             final int headOpIndex = operatorIDs.size() - 1;
@@ -523,7 +521,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         coord.triggerCheckpoint(false);
         manuallyTriggeredScheduledExecutor.triggerAll();
 
-        assertEquals(1, coord.getPendingCheckpoints().size());
+        assertThat(coord.getPendingCheckpoints().size()).isEqualTo(1);
         long checkpointId = Iterables.getOnlyElement(coord.getPendingCheckpoints().keySet());
 
         List<KeyGroupRange> keyGroupPartitions1 =
@@ -577,7 +575,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
 
         List<CompletedCheckpoint> completedCheckpoints = coord.getSuccessfulCheckpoints();
 
-        assertEquals(1, completedCheckpoints.size());
+        assertThat(completedCheckpoints.size()).isEqualTo(1);
 
         int newMaxParallelism1 = 20;
         int newMaxParallelism2 = 42;
@@ -602,7 +600,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         Set<ExecutionJobVertex> tasks = new HashSet<>();
         tasks.add(newJobVertex1);
         tasks.add(newJobVertex2);
-        assertTrue(newCoord.restoreLatestCheckpointedStateToAll(tasks, false));
+        assertThat(newCoord.restoreLatestCheckpointedStateToAll(tasks, false)).isTrue();
 
         fail("The restoration should have failed because the max parallelism changed.");
     }
@@ -798,14 +796,14 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                             .getTaskVertices()[i]
                             .getCurrentExecutionAttempt()
                             .getTaskRestore();
-            Assert.assertEquals(2L, taskRestore.getRestoreCheckpointId());
+            assertThat(taskRestore.getRestoreCheckpointId()).isEqualTo(2L);
             TaskStateSnapshot stateSnapshot = taskRestore.getTaskStateSnapshot();
 
             OperatorSubtaskState headOpState =
                     stateSnapshot.getSubtaskStateByOperatorID(
                             operatorIDs.get(operatorIDs.size() - 1).getGeneratedOperatorID());
-            assertTrue(headOpState.getManagedKeyedState().isEmpty());
-            assertTrue(headOpState.getRawKeyedState().isEmpty());
+            assertThat(headOpState.getManagedKeyedState().isEmpty()).isTrue();
+            assertThat(headOpState.getRawKeyedState().isEmpty()).isTrue();
 
             // operator5
             {
@@ -814,8 +812,8 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                         stateSnapshot.getSubtaskStateByOperatorID(
                                 operatorIDs.get(operatorIndexInChain).getGeneratedOperatorID());
 
-                assertTrue(opState.getManagedOperatorState().isEmpty());
-                assertTrue(opState.getRawOperatorState().isEmpty());
+                assertThat(opState.getManagedOperatorState().isEmpty()).isTrue();
+                assertThat(opState.getRawOperatorState().isEmpty()).isTrue();
             }
             // operator1
             {
@@ -831,18 +829,20 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
 
                 Collection<OperatorStateHandle> managedOperatorState =
                         opState.getManagedOperatorState();
-                assertEquals(1, managedOperatorState.size());
-                assertTrue(
-                        CommonTestUtils.isStreamContentEqual(
-                                expectedManagedOpState.openInputStream(),
-                                managedOperatorState.iterator().next().openInputStream()));
+                assertThat(managedOperatorState.size()).isEqualTo(1);
+                assertThat(
+                                CommonTestUtils.isStreamContentEqual(
+                                        expectedManagedOpState.openInputStream(),
+                                        managedOperatorState.iterator().next().openInputStream()))
+                        .isTrue();
 
                 Collection<OperatorStateHandle> rawOperatorState = opState.getRawOperatorState();
-                assertEquals(1, rawOperatorState.size());
-                assertTrue(
-                        CommonTestUtils.isStreamContentEqual(
-                                expectedRawOpState.openInputStream(),
-                                rawOperatorState.iterator().next().openInputStream()));
+                assertThat(rawOperatorState.size()).isEqualTo(1);
+                assertThat(
+                                CommonTestUtils.isStreamContentEqual(
+                                        expectedRawOpState.openInputStream(),
+                                        rawOperatorState.iterator().next().openInputStream()))
+                        .isTrue();
             }
             // operator2
             {
@@ -858,18 +858,20 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
 
                 Collection<OperatorStateHandle> managedOperatorState =
                         opState.getManagedOperatorState();
-                assertEquals(1, managedOperatorState.size());
-                assertTrue(
-                        CommonTestUtils.isStreamContentEqual(
-                                expectedManagedOpState.openInputStream(),
-                                managedOperatorState.iterator().next().openInputStream()));
+                assertThat(managedOperatorState.size()).isEqualTo(1);
+                assertThat(
+                                CommonTestUtils.isStreamContentEqual(
+                                        expectedManagedOpState.openInputStream(),
+                                        managedOperatorState.iterator().next().openInputStream()))
+                        .isTrue();
 
                 Collection<OperatorStateHandle> rawOperatorState = opState.getRawOperatorState();
-                assertEquals(1, rawOperatorState.size());
-                assertTrue(
-                        CommonTestUtils.isStreamContentEqual(
-                                expectedRawOpState.openInputStream(),
-                                rawOperatorState.iterator().next().openInputStream()));
+                assertThat(rawOperatorState.size()).isEqualTo(1);
+                assertThat(
+                                CommonTestUtils.isStreamContentEqual(
+                                        expectedRawOpState.openInputStream(),
+                                        rawOperatorState.iterator().next().openInputStream()))
+                        .isTrue();
             }
         }
 
@@ -887,7 +889,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                             .getTaskVertices()[i]
                             .getCurrentExecutionAttempt()
                             .getTaskRestore();
-            Assert.assertEquals(2L, taskRestore.getRestoreCheckpointId());
+            assertThat(taskRestore.getRestoreCheckpointId()).isEqualTo(2L);
             TaskStateSnapshot stateSnapshot = taskRestore.getTaskStateSnapshot();
 
             // operator 3
@@ -915,8 +917,8 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                 OperatorSubtaskState opState =
                         stateSnapshot.getSubtaskStateByOperatorID(
                                 operatorIDs.get(operatorIndexInChain).getGeneratedOperatorID());
-                assertTrue(opState.getManagedOperatorState().isEmpty());
-                assertTrue(opState.getRawOperatorState().isEmpty());
+                assertThat(opState.getManagedOperatorState().isEmpty()).isTrue();
+                assertThat(opState.getRawOperatorState().isEmpty()).isTrue();
             }
 
             KeyGroupsStateHandle originalKeyedStateBackend =
@@ -987,7 +989,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         coord.triggerCheckpoint(false);
         manuallyTriggeredScheduledExecutor.triggerAll();
 
-        assertEquals(1, coord.getPendingCheckpoints().size());
+        assertThat(coord.getPendingCheckpoints().size()).isEqualTo(1);
         long checkpointId = Iterables.getOnlyElement(coord.getPendingCheckpoints().keySet());
 
         List<KeyGroupRange> keyGroupPartitions1 =
@@ -1035,12 +1037,12 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
             coord.receiveAcknowledgeMessage(acknowledgeCheckpoint, TASK_MANAGER_LOCATION_INFO);
         }
 
-        assertEquals(1, coord.getSuccessfulCheckpoints().size());
+        assertThat(coord.getSuccessfulCheckpoints().size()).isEqualTo(1);
 
         // when: Restore latest checkpoint without in-flight data.
         Set<ExecutionJobVertex> tasks = new HashSet<>();
         tasks.add(jobVertex);
-        assertTrue(coord.restoreLatestCheckpointedStateToAll(tasks, false));
+        assertThat(coord.restoreLatestCheckpointedStateToAll(tasks, false)).isTrue();
 
         // then: All states should be restored successfully except InputChannel and
         // ResultSubpartition which should be ignored.
@@ -1048,20 +1050,20 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
         for (int i = 0; i < jobVertex.getParallelism(); i++) {
             JobManagerTaskRestore taskRestore =
                     jobVertex.getTaskVertices()[i].getCurrentExecutionAttempt().getTaskRestore();
-            Assert.assertEquals(1L, taskRestore.getRestoreCheckpointId());
+            assertThat(taskRestore.getRestoreCheckpointId()).isEqualTo(1L);
             TaskStateSnapshot stateSnapshot = taskRestore.getTaskStateSnapshot();
 
             OperatorSubtaskState operatorState =
                     stateSnapshot.getSubtaskStateByOperatorID(
                             OperatorID.fromJobVertexID(jobVertexID));
 
-            assertTrue(operatorState.getInputChannelState().isEmpty());
-            assertTrue(operatorState.getResultSubpartitionState().isEmpty());
+            assertThat(operatorState.getInputChannelState().isEmpty()).isTrue();
+            assertThat(operatorState.getResultSubpartitionState().isEmpty()).isTrue();
 
-            assertFalse(operatorState.getRawOperatorState().isEmpty());
-            assertFalse(operatorState.getManagedOperatorState().isEmpty());
-            assertFalse(operatorState.getRawKeyedState().isEmpty());
-            assertFalse(operatorState.getManagedOperatorState().isEmpty());
+            assertThat(operatorState.getRawOperatorState().isEmpty()).isFalse();
+            assertThat(operatorState.getManagedOperatorState().isEmpty()).isFalse();
+            assertThat(operatorState.getRawKeyedState().isEmpty()).isFalse();
+            assertThat(operatorState.getManagedOperatorState().isEmpty()).isFalse();
         }
     }
 
@@ -1111,7 +1113,7 @@ public class CheckpointCoordinatorRestoringTest extends TestLogger {
                         .getCurrentExecutionAttempt()
                         .getTaskRestore()
                         .getTaskStateSnapshot();
-        assertTrue(restoredState.isTaskDeployedAsFinished());
+        assertThat(restoredState.isTaskDeployedAsFinished()).isTrue();
     }
 
     @Test

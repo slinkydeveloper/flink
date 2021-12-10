@@ -34,10 +34,7 @@ import org.junit.rules.TemporaryFolder;
 import java.net.URLClassLoader;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link DeclineCheckpoint} message. */
 public class DeclineCheckpointTest extends TestLogger {
@@ -72,10 +69,10 @@ public class DeclineCheckpointTest extends TestLogger {
 
         Throwable throwable =
                 deserializedCheckpointMessage.getSerializedCheckpointException().unwrap();
-        assertThat(throwable, instanceOf(CheckpointException.class));
+        assertThat(throwable).isInstanceOf(CheckpointException.class);
         Optional<Throwable> throwableWithMessage =
                 ExceptionUtils.findThrowableWithMessage(throwable, userException.getMessage());
-        assertTrue(throwableWithMessage.isPresent());
-        assertThat(throwableWithMessage.get().getMessage(), equalTo(userException.getMessage()));
+        assertThat(throwableWithMessage.isPresent()).isTrue();
+        assertThat(throwableWithMessage.get().getMessage()).isEqualTo(userException.getMessage());
     }
 }

@@ -32,7 +32,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link EdgeDegreesPair}. */
 public class EdgeDegreesPairTest extends AsmTestBase {
@@ -59,7 +59,7 @@ public class EdgeDegreesPairTest extends AsmTestBase {
         DataSet<Edge<LongValue, Tuple3<NullValue, Degrees, Degrees>>> degreesPair =
                 emptyGraphWithVertices.run(new EdgeDegreesPair<>());
 
-        assertEquals(0, degreesPair.collect().size());
+        assertThat(degreesPair.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -67,7 +67,7 @@ public class EdgeDegreesPairTest extends AsmTestBase {
         DataSet<Edge<LongValue, Tuple3<NullValue, Degrees, Degrees>>> degreesPair =
                 emptyGraphWithoutVertices.run(new EdgeDegreesPair<>());
 
-        assertEquals(0, degreesPair.collect().size());
+        assertThat(degreesPair.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class EdgeDegreesPairTest extends AsmTestBase {
                         .run(degreesPair)
                         .execute();
 
-        assertEquals(12009, checksum.getCount());
-        assertEquals(0x0000176fe94702a3L, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(12009);
+        assertThat(checksum.getChecksum()).isEqualTo(0x0000176fe94702a3L);
     }
 }

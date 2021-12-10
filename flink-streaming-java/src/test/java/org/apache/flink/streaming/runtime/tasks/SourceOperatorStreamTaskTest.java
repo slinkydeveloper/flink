@@ -75,13 +75,11 @@ import java.util.stream.IntStream;
 
 import static org.apache.flink.runtime.checkpoint.CheckpointType.SAVEPOINT_TERMINATE;
 import static org.apache.flink.streaming.util.TestHarnessUtil.assertOutputEquals;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for verifying that the {@link SourceOperator} as a task input can be integrated well with
@@ -147,7 +145,7 @@ public class SourceOperatorStreamTaskTest extends SourceStreamTaskTestBase {
             Queue<Object> expectedOutput = new LinkedList<>();
             expectedOutput.add(Watermark.MAX_WATERMARK);
             expectedOutput.add(new EndOfData(StopMode.DRAIN));
-            assertThat(testHarness.getOutput().toArray(), equalTo(expectedOutput.toArray()));
+            assertThat(testHarness.getOutput().toArray()).isEqualTo(expectedOutput.toArray());
         }
     }
 
@@ -157,7 +155,7 @@ public class SourceOperatorStreamTaskTest extends SourceStreamTaskTestBase {
             testHarness.getStreamTask().cancel();
             testHarness.finishProcessing();
 
-            assertThat(testHarness.getOutput(), hasSize(0));
+            assertThat(testHarness.getOutput()).satisfies(matching(hasSize(0)));
         }
     }
 
@@ -176,12 +174,11 @@ public class SourceOperatorStreamTaskTest extends SourceStreamTaskTestBase {
 
             testHarness.processAll();
 
-            assertEquals(totalNumEvents, runtimeTestingReader.numEmittedEvents);
-            assertTrue(runtimeTestingReader.checkpointed);
-            assertEquals(
-                    TestingExternallyInducedSourceReader.CHECKPOINT_ID,
-                    runtimeTestingReader.checkpointedId);
-            assertEquals(numEventsBeforeCheckpoint, runtimeTestingReader.checkpointedAt);
+            assertThat(runtimeTestingReader.numEmittedEvents).isEqualTo(totalNumEvents);
+            assertThat(runtimeTestingReader.checkpointed).isTrue();
+            assertThat(runtimeTestingReader.checkpointedId)
+                    .isEqualTo(TestingExternallyInducedSourceReader.CHECKPOINT_ID);
+            assertThat(runtimeTestingReader.checkpointedAt).isEqualTo(numEventsBeforeCheckpoint);
         }
     }
 
@@ -215,7 +212,12 @@ public class SourceOperatorStreamTaskTest extends SourceStreamTaskTestBase {
 
             testHarness.getStreamTask().invoke();
             testHarness.processAll();
-            assertThat(output, contains(Watermark.MAX_WATERMARK, new EndOfData(StopMode.DRAIN)));
+            assertThat(output)
+                    .satisfies(
+                            matching(
+                                    contains(
+                                            Watermark.MAX_WATERMARK,
+                                            new EndOfData(StopMode.DRAIN))));
 
             LifeCycleMonitorSourceReader sourceReader =
                     (LifeCycleMonitorSourceReader)
@@ -271,9 +273,9 @@ public class SourceOperatorStreamTaskTest extends SourceStreamTaskTestBase {
             testHarness.waitForTaskCompletion();
             testHarness.finishProcessing();
 
-            assertTrue(triggerResult.isDone());
-            assertTrue(triggerResult.get());
-            assertTrue(checkpointCompleted.isDone());
+            assertThat(triggerResult.isDone()).isTrue();
+            assertThat(triggerResult.get()).isTrue();
+            assertThat(checkpointCompleted.isDone()).isTrue();
         }
     }
 
@@ -304,7 +306,8 @@ public class SourceOperatorStreamTaskTest extends SourceStreamTaskTestBase {
             expectedOutput.add(
                     new CheckpointBarrier(checkpointId, checkpointId, checkpointOptions));
 
-            assertEquals(checkpointId, testHarness.taskStateManager.getReportedCheckpointId());
+            assertThat(testHarness.taskStateManager.getReportedCheckpointId())
+                    .isEqualTo(checkpointId);
             assertOutputEquals("Output was not correct.", expectedOutput, testHarness.getOutput());
 
             return testHarness.taskStateManager.getLastJobManagerTaskStateSnapshot();

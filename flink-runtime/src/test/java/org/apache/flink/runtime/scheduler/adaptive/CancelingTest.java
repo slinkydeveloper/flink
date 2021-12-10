@@ -29,8 +29,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link Canceling} state of the {@link AdaptiveScheduler}. */
 public class CancelingTest extends TestLogger {
@@ -42,7 +41,7 @@ public class CancelingTest extends TestLogger {
                     new StateTrackingMockExecutionGraph();
             createCancelingState(ctx, stateTrackingMockExecutionGraph);
 
-            assertThat(stateTrackingMockExecutionGraph.getState(), is(JobStatus.CANCELLING));
+            assertThat(stateTrackingMockExecutionGraph.getState()).isEqualTo(JobStatus.CANCELLING);
         }
     }
 
@@ -52,10 +51,11 @@ public class CancelingTest extends TestLogger {
             StateTrackingMockExecutionGraph stateTrackingMockExecutionGraph =
                     new StateTrackingMockExecutionGraph();
             Canceling canceling = createCancelingState(ctx, stateTrackingMockExecutionGraph);
-            assertThat(stateTrackingMockExecutionGraph.getState(), is(JobStatus.CANCELLING));
+            assertThat(stateTrackingMockExecutionGraph.getState()).isEqualTo(JobStatus.CANCELLING);
             ctx.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.CANCELED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.CANCELED));
             // this transitions the EG from CANCELLING to CANCELLED.
             stateTrackingMockExecutionGraph.completeTerminationFuture(JobStatus.CANCELED);
         }
@@ -67,7 +67,8 @@ public class CancelingTest extends TestLogger {
             Canceling canceling = createCancelingState(ctx, new StateTrackingMockExecutionGraph());
             ctx.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.SUSPENDED));
             canceling.suspend(new RuntimeException("suspend"));
         }
     }
@@ -125,11 +126,11 @@ public class CancelingTest extends TestLogger {
             meg.completeTerminationFuture(JobStatus.CANCELED);
 
             // this is just a sanity check for the test
-            assertThat(meg.getState(), is(JobStatus.CANCELED));
+            assertThat(meg.getState()).isEqualTo(JobStatus.CANCELED);
 
-            assertThat(canceling.getJobStatus(), is(JobStatus.CANCELLING));
-            assertThat(canceling.getJob().getState(), is(JobStatus.CANCELLING));
-            assertThat(canceling.getJob().getStatusTimestamp(JobStatus.CANCELED), is(0L));
+            assertThat(canceling.getJobStatus()).isEqualTo(JobStatus.CANCELLING);
+            assertThat(canceling.getJob().getState()).isEqualTo(JobStatus.CANCELLING);
+            assertThat(canceling.getJob().getStatusTimestamp(JobStatus.CANCELED)).isEqualTo(0L);
         }
     }
 

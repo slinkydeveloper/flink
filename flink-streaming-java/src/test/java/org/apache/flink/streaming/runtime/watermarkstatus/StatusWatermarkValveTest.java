@@ -29,9 +29,7 @@ import org.junit.Test;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for {@link StatusWatermarkValve}. While tests in {@link
@@ -59,12 +57,12 @@ public class StatusWatermarkValveTest {
         StatusWatermarkValve valve = new StatusWatermarkValve(1);
 
         valve.inputWatermark(new Watermark(0), 0, valveOutput);
-        assertEquals(new Watermark(0), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(0));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(25), 0, valveOutput);
-        assertEquals(new Watermark(25), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(25));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -77,14 +75,14 @@ public class StatusWatermarkValveTest {
         StatusWatermarkValve valve = new StatusWatermarkValve(1);
 
         valve.inputWatermark(new Watermark(25), 0, valveOutput);
-        assertEquals(new Watermark(25), valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(25));
 
         valve.inputWatermark(new Watermark(18), 0, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(42), 0, valveOutput);
-        assertEquals(new Watermark(42), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(42));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -98,17 +96,17 @@ public class StatusWatermarkValveTest {
 
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 0, valveOutput);
         // this also implicitly verifies that input channels start as ACTIVE
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
-        assertEquals(WatermarkStatus.IDLE, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.IDLE);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 0, valveOutput);
-        assertEquals(WatermarkStatus.ACTIVE, valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.ACTIVE);
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /** Tests that the watermark of an input channel remains intact while in the IDLE status. */
@@ -118,23 +116,23 @@ public class StatusWatermarkValveTest {
         StatusWatermarkValve valve = new StatusWatermarkValve(1);
 
         valve.inputWatermark(new Watermark(25), 0, valveOutput);
-        assertEquals(new Watermark(25), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(25));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
-        assertEquals(WatermarkStatus.IDLE, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.IDLE);
 
         valve.inputWatermark(new Watermark(50), 0, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
-        assertEquals(25, valve.getInputChannelStatus(0).watermark);
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
+        assertThat(valve.getInputChannelStatus(0).watermark).isEqualTo(25);
 
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 0, valveOutput);
-        assertEquals(WatermarkStatus.ACTIVE, valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.ACTIVE);
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(50), 0, valveOutput);
-        assertEquals(new Watermark(50), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(50));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /** Tests that the valve yields a watermark only when all inputs have received a watermark. */
@@ -146,12 +144,12 @@ public class StatusWatermarkValveTest {
 
         valve.inputWatermark(new Watermark(0), 0, valveOutput);
         valve.inputWatermark(new Watermark(0), 1, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // now, all channels have watermarks
         valve.inputWatermark(new Watermark(0), 2, valveOutput);
-        assertEquals(new Watermark(0), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(0));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -166,27 +164,27 @@ public class StatusWatermarkValveTest {
         valve.inputWatermark(new Watermark(0), 0, valveOutput);
         valve.inputWatermark(new Watermark(0), 1, valveOutput);
         valve.inputWatermark(new Watermark(0), 2, valveOutput);
-        assertEquals(new Watermark(0), valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(0));
 
         valve.inputWatermark(new Watermark(12), 0, valveOutput);
         valve.inputWatermark(new Watermark(8), 2, valveOutput);
         valve.inputWatermark(new Watermark(10), 2, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(15), 1, valveOutput);
         // lowest watermark across all channels is now channel 2, with watermark @ 10
-        assertEquals(new Watermark(10), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(10));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(17), 2, valveOutput);
         // lowest watermark across all channels is now channel 0, with watermark @ 12
-        assertEquals(new Watermark(12), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(12));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(20), 0, valveOutput);
         // lowest watermark across all channels is now channel 1, with watermark @ 15
-        assertEquals(new Watermark(15), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(15));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /** Tests that for a multiple input valve, decreasing watermarks will yield no output. */
@@ -198,12 +196,12 @@ public class StatusWatermarkValveTest {
         valve.inputWatermark(new Watermark(25), 0, valveOutput);
         valve.inputWatermark(new Watermark(10), 1, valveOutput);
         valve.inputWatermark(new Watermark(17), 2, valveOutput);
-        assertEquals(new Watermark(10), valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(10));
 
         valve.inputWatermark(new Watermark(12), 0, valveOutput);
         valve.inputWatermark(new Watermark(8), 1, valveOutput);
         valve.inputWatermark(new Watermark(15), 2, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -218,26 +216,26 @@ public class StatusWatermarkValveTest {
         // this also implicitly verifies that all input channels start as active
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 0, valveOutput);
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 1, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 1, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // now, all channels are IDLE
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
-        assertEquals(WatermarkStatus.IDLE, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.IDLE);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 1, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // as soon as at least one input becomes active again, the ACTIVE marker should be forwarded
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 1, valveOutput);
-        assertEquals(WatermarkStatus.ACTIVE, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.ACTIVE);
 
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 0, valveOutput);
         // already back to ACTIVE, should yield no output
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -251,22 +249,22 @@ public class StatusWatermarkValveTest {
 
         valve.inputWatermark(new Watermark(15), 0, valveOutput);
         valve.inputWatermark(new Watermark(10), 1, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 2, valveOutput);
         // min watermark should be computed from remaining ACTIVE channels
-        assertEquals(new Watermark(10), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(10));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(18), 1, valveOutput);
         // now, min watermark should be 15 from channel #0
-        assertEquals(new Watermark(15), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(15));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermark(new Watermark(20), 0, valveOutput);
         // now, min watermark should be 18 from channel #1
-        assertEquals(new Watermark(18), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(18));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -282,16 +280,16 @@ public class StatusWatermarkValveTest {
         valve.inputWatermark(new Watermark(25), 0, valveOutput);
         valve.inputWatermark(new Watermark(10), 1, valveOutput);
         valve.inputWatermark(new Watermark(17), 2, valveOutput);
-        assertEquals(new Watermark(10), valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(10));
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 1, valveOutput);
         // only channel 0 & 2 is ACTIVE; 17 is the overall min watermark now
-        assertEquals(new Watermark(17), valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(17));
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 2, valveOutput);
         // only channel 0 is ACTIVE; 25 is the overall min watermark now
-        assertEquals(new Watermark(25), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(25));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -320,7 +318,7 @@ public class StatusWatermarkValveTest {
         valve.inputWatermark(new Watermark(10), 0, valveOutput);
         valve.inputWatermark(new Watermark(5), 1, valveOutput);
         valve.inputWatermark(new Watermark(3), 2, valveOutput);
-        assertEquals(new Watermark(3), valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(3));
 
         // -------------------------------------------------------------------------------------------
         // Order of becoming IDLE:
@@ -330,12 +328,12 @@ public class StatusWatermarkValveTest {
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 1, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 2, valveOutput);
-        assertEquals(new Watermark(10), valveOutput.popLastSeenOutput());
-        assertEquals(WatermarkStatus.IDLE, valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(10));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(WatermarkStatus.IDLE);
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -350,33 +348,33 @@ public class StatusWatermarkValveTest {
         valve.inputWatermark(new Watermark(10), 0, valveOutput);
         valve.inputWatermark(new Watermark(7), 1, valveOutput);
         valve.inputWatermark(new Watermark(3), 2, valveOutput);
-        assertEquals(new Watermark(3), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(3));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 2, valveOutput);
-        assertEquals(new Watermark(7), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(7));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // let channel 2 become active again; since the min watermark has now advanced to 7,
         // channel 2 should have been marked as non-aligned.
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 2, valveOutput);
-        assertFalse(valve.getInputChannelStatus(2).isWatermarkAligned);
+        assertThat(valve.getInputChannelStatus(2).isWatermarkAligned).isFalse();
 
         // during the realignment process, watermarks should still be accepted by channel 2 (but
         // shouldn't yield new watermarks)
         valve.inputWatermark(new Watermark(5), 2, valveOutput);
-        assertEquals(5, valve.getInputChannelStatus(2).watermark);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valve.getInputChannelStatus(2).watermark).isEqualTo(5);
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // let channel 2 catch up with the min watermark; now should be realigned
         valve.inputWatermark(new Watermark(9), 2, valveOutput);
-        assertTrue(valve.getInputChannelStatus(2).isWatermarkAligned);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valve.getInputChannelStatus(2).isWatermarkAligned).isTrue();
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // check that realigned inputs is now taken into account for watermark advancement
         valve.inputWatermark(new Watermark(12), 1, valveOutput);
-        assertEquals(new Watermark(9), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(9));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     /**
@@ -394,19 +392,19 @@ public class StatusWatermarkValveTest {
 
         // make channel 2 ACTIVE, it is now in "catch up" mode (unaligned watermark)
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 2, valveOutput);
-        assertEquals(new Watermark(7), valveOutput.popLastSeenOutput());
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(new Watermark(7));
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // make channel 2 ACTIVE again, it is still unaligned
         valve.inputWatermarkStatus(WatermarkStatus.ACTIVE, 2, valveOutput);
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
 
         // make channel 0 and 1 IDLE, now channel 2 is the only ACTIVE channel but it's unaligned
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 0, valveOutput);
         valve.inputWatermarkStatus(WatermarkStatus.IDLE, 1, valveOutput);
 
         // we should not see any output
-        assertEquals(null, valveOutput.popLastSeenOutput());
+        assertThat(valveOutput.popLastSeenOutput()).isEqualTo(null);
     }
 
     private static class StatusWatermarkOutput implements PushingAsyncDataInput.DataOutput {

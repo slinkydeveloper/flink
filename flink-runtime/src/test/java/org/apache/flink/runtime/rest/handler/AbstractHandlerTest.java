@@ -40,7 +40,6 @@ import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpVersion;
 import org.apache.flink.shaded.netty4.io.netty.util.Attribute;
 import org.apache.flink.shaded.netty4.io.netty.util.AttributeKey;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -53,6 +52,7 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -98,9 +98,9 @@ public class AbstractHandlerTest extends TestLogger {
         handler.respondAsLeader(context, routerRequest, mockRestfulGateway);
 
         // the (asynchronous) request processing is not yet complete so the files should still exist
-        Assert.assertTrue(Files.exists(file));
+        assertThat(Files.exists(file)).isTrue();
         requestProcessingCompleteFuture.complete(null);
-        Assert.assertFalse(Files.exists(file));
+        assertThat(Files.exists(file)).isFalse();
     }
 
     private static class SimpleAttribute implements Attribute<FileUploads> {

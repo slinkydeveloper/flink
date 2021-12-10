@@ -23,8 +23,9 @@ import org.apache.flink.runtime.rest.messages.RestResponseMarshallingTestBase;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 /** Test for (un)marshalling of the {@link ThreadDumpInfo}. */
 public class ThreadDumpInfoTest extends RestResponseMarshallingTestBase<ThreadDumpInfo> {
@@ -47,7 +48,7 @@ public class ThreadDumpInfoTest extends RestResponseMarshallingTestBase<ThreadDu
     @Override
     protected void assertOriginalEqualsToUnmarshalled(
             ThreadDumpInfo expected, ThreadDumpInfo actual) {
-        assertThat(
-                actual.getThreadInfos(), containsInAnyOrder(expected.getThreadInfos().toArray()));
+        assertThat(actual.getThreadInfos())
+                .satisfies(matching(containsInAnyOrder(expected.getThreadInfos().toArray())));
     }
 }

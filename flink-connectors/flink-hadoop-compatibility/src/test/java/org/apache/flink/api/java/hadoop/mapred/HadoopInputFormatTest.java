@@ -39,9 +39,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
@@ -95,7 +94,7 @@ public class HadoopInputFormatTest {
         verify(recordReader, times(1)).createKey();
         verify(recordReader, times(1)).createValue();
 
-        assertThat(hadoopInputFormat.fetched, is(false));
+        assertThat(hadoopInputFormat.fetched).isEqualTo(false);
 
         hadoopInputFormat.close();
         verify(recordReader, times(1)).close();
@@ -119,7 +118,7 @@ public class HadoopInputFormatTest {
         verify(recordReader, times(1)).createKey();
         verify(recordReader, times(1)).createValue();
 
-        assertThat(hadoopInputFormat.fetched, is(false));
+        assertThat(hadoopInputFormat.fetched).isEqualTo(false);
     }
 
     @Test
@@ -146,7 +145,7 @@ public class HadoopInputFormatTest {
         hadoopInputFormat.fetched = true;
         hadoopInputFormat.hasNext = true;
 
-        assertThat(hadoopInputFormat.reachedEnd(), is(false));
+        assertThat(hadoopInputFormat.reachedEnd()).isEqualTo(false);
     }
 
     @Test
@@ -157,7 +156,7 @@ public class HadoopInputFormatTest {
         hadoopInputFormat.fetched = true;
         hadoopInputFormat.hasNext = false;
 
-        assertThat(hadoopInputFormat.reachedEnd(), is(true));
+        assertThat(hadoopInputFormat.reachedEnd()).isEqualTo(true);
     }
 
     @Test
@@ -176,8 +175,8 @@ public class HadoopInputFormatTest {
         hadoopInputFormat.fetchNext();
 
         verify(recordReader, times(1)).next(nullable(String.class), anyLong());
-        assertThat(hadoopInputFormat.hasNext, is(true));
-        assertThat(hadoopInputFormat.fetched, is(true));
+        assertThat(hadoopInputFormat.hasNext).isEqualTo(true);
+        assertThat(hadoopInputFormat.fetched).isEqualTo(true);
     }
 
     @Test
@@ -190,8 +189,8 @@ public class HadoopInputFormatTest {
         TypeInformation<Tuple2<Void, Long>> expectedType =
                 new TupleTypeInfo<>(BasicTypeInfo.VOID_TYPE_INFO, BasicTypeInfo.LONG_TYPE_INFO);
 
-        assertThat(tupleType.isTupleType(), is(true));
-        assertThat(tupleType, is(equalTo(expectedType)));
+        assertThat(tupleType.isTupleType()).isEqualTo(true);
+        assertThat(tupleType).isEqualTo(equalTo(expectedType));
     }
 
     @Test

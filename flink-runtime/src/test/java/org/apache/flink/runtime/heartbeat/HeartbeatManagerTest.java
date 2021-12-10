@@ -48,14 +48,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link HeartbeatManager}. */
 public class HeartbeatManagerTest extends TestLogger {
@@ -108,12 +105,12 @@ public class HeartbeatManagerTest extends TestLogger {
         final String inputPayload1 = "foobar";
         heartbeatManager.requestHeartbeat(targetResourceID, inputPayload1);
 
-        assertThat(reportedPayloads.take(), is(inputPayload1));
-        assertThat(reportedPayloadsHeartbeatTarget.take(), is(outputPayload));
+        assertThat(reportedPayloads.take()).isEqualTo(inputPayload1);
+        assertThat(reportedPayloadsHeartbeatTarget.take()).isEqualTo(outputPayload);
 
         final String inputPayload2 = "barfoo";
         heartbeatManager.receiveHeartbeat(targetResourceID, inputPayload2);
-        assertThat(reportedPayloads.take(), is(inputPayload2));
+        assertThat(reportedPayloads.take()).isEqualTo(inputPayload2);
     }
 
     /** Tests that the heartbeat monitors are updated when receiving a new heartbeat signal. */
@@ -149,9 +146,9 @@ public class HeartbeatManagerTest extends TestLogger {
         final List<ScheduledFuture<?>> scheduledTasksAfterHeartbeat =
                 manuallyTriggeredScheduledExecutor.getAllScheduledTasks();
 
-        assertThat(scheduledTasksAfterHeartbeat, hasSize(2));
+        assertThat(scheduledTasksAfterHeartbeat).satisfies(matching(hasSize(2)));
         // the first scheduled future should be cancelled by the heartbeat update
-        assertTrue(scheduledTasksAfterHeartbeat.get(0).isCancelled());
+        assertThat(scheduledTasksAfterHeartbeat.get(0).isCancelled()).isTrue();
     }
 
     /** Tests that a heartbeat timeout is signaled if the heartbeat is not reported in time. */
@@ -189,12 +186,12 @@ public class HeartbeatManagerTest extends TestLogger {
             Thread.sleep(HEARTBEAT_INTERVAL);
         }
 
-        assertFalse(timeoutFuture.isDone());
+        assertThat(timeoutFuture.isDone()).isFalse();
 
         ResourceID timeoutResourceID =
                 timeoutFuture.get(2 * HEARTBEAT_TIMEOUT, TimeUnit.MILLISECONDS);
 
-        assertEquals(targetResourceID, timeoutResourceID);
+        assertThat(timeoutResourceID).isEqualTo(targetResourceID);
     }
 
     /**
@@ -256,20 +253,20 @@ public class HeartbeatManagerTest extends TestLogger {
 
         Thread.sleep(2 * HEARTBEAT_TIMEOUT);
 
-        assertFalse(targetHeartbeatTimeoutFuture.isDone());
+        assertThat(targetHeartbeatTimeoutFuture.isDone()).isFalse();
 
         heartbeatManagerTarget.stop();
 
         ResourceID timeoutResourceID =
                 targetHeartbeatTimeoutFuture.get(2 * HEARTBEAT_TIMEOUT, TimeUnit.MILLISECONDS);
 
-        assertThat(timeoutResourceID, is(resourceIdTarget));
+        assertThat(timeoutResourceID).isEqualTo(resourceIdTarget);
 
         int numberHeartbeats = (int) (2 * HEARTBEAT_TIMEOUT / HEARTBEAT_INTERVAL);
 
         final Matcher<Integer> numberHeartbeatsMatcher = greaterThanOrEqualTo(numberHeartbeats / 2);
-        assertThat(numReportPayloadCallsTarget.get(), is(numberHeartbeatsMatcher));
-        assertThat(numReportPayloadCallsSender.get(), is(numberHeartbeatsMatcher));
+        assertThat(numReportPayloadCallsTarget.get()).isEqualTo(numberHeartbeatsMatcher);
+        assertThat(numReportPayloadCallsSender.get()).isEqualTo(numberHeartbeatsMatcher);
     }
 
     /** Tests that after unmonitoring a target, there won't be a timeout triggered. */
@@ -329,7 +326,7 @@ public class HeartbeatManagerTest extends TestLogger {
                         LOG);
 
         try {
-            assertEquals(-1L, heartbeatManager.getLastHeartbeatFrom(ResourceID.generate()));
+            assertThat(heartbeatManager.getLastHeartbeatFrom(ResourceID.generate())).isEqualTo(-1L);
         } finally {
             heartbeatManager.stop();
         }
@@ -355,13 +352,13 @@ public class HeartbeatManagerTest extends TestLogger {
             heartbeatManager.monitorTarget(
                     target, new TestingHeartbeatTargetBuilder<>().createTestingHeartbeatTarget());
 
-            assertEquals(0L, heartbeatManager.getLastHeartbeatFrom(target));
+            assertThat(heartbeatManager.getLastHeartbeatFrom(target)).isEqualTo(0L);
 
             final long currentTime = System.currentTimeMillis();
 
             heartbeatManager.receiveHeartbeat(target, null);
 
-            assertTrue(heartbeatManager.getLastHeartbeatFrom(target) >= currentTime);
+            assertThat(heartbeatManager.getLastHeartbeatFrom(target) >= currentTime).isTrue();
         } finally {
             heartbeatManager.stop();
         }
@@ -421,10 +418,11 @@ public class HeartbeatManagerTest extends TestLogger {
             heartbeatManager.monitorTarget(specialTargetId, specialHeartbeatTarget);
 
             heartbeatManager.requestHeartbeat(someTargetId, null);
-            assertThat(someHeartbeatPayloadFuture.get(), is(payloads.get(someTargetId)));
+            assertThat(someHeartbeatPayloadFuture.get()).isEqualTo(payloads.get(someTargetId));
 
             heartbeatManager.requestHeartbeat(specialTargetId, null);
-            assertThat(specialHeartbeatPayloadFuture.get(), is(payloads.get(specialTargetId)));
+            assertThat(specialHeartbeatPayloadFuture.get())
+                    .isEqualTo(payloads.get(specialTargetId));
         } finally {
             heartbeatManager.stop();
         }
@@ -474,9 +472,10 @@ public class HeartbeatManagerTest extends TestLogger {
             someTargetReceivedLatch.await(5, TimeUnit.SECONDS);
             specialTargetReceivedLatch.await(5, TimeUnit.SECONDS);
 
-            assertEquals(defaultResponse, someHeartbeatTarget.getLastRequestedHeartbeatPayload());
-            assertEquals(
-                    specialResponse, specialHeartbeatTarget.getLastRequestedHeartbeatPayload());
+            assertThat(someHeartbeatTarget.getLastRequestedHeartbeatPayload())
+                    .isEqualTo(defaultResponse);
+            assertThat(specialHeartbeatTarget.getLastRequestedHeartbeatPayload())
+                    .isEqualTo(specialResponse);
         } finally {
             heartbeatManager.stop();
             scheduledThreadPoolExecutor.shutdown();
@@ -560,9 +559,8 @@ public class HeartbeatManagerTest extends TestLogger {
             for (int i = 0; i < failedRpcRequestsUntilUnreachable - 1; i++) {
                 heartbeatManager.requestHeartbeat(someTargetId, null);
 
-                assertThat(
-                        unreachableTargetFuture,
-                        FlinkMatchers.willNotComplete(willNotCompleteWithin));
+                assertThat(unreachableTargetFuture)
+                        .satisfies(matching(FlinkMatchers.willNotComplete(willNotCompleteWithin)));
             }
 
             heartbeatManager.requestHeartbeat(someTargetId, null);
@@ -611,8 +609,8 @@ public class HeartbeatManagerTest extends TestLogger {
                 heartbeatManager.requestHeartbeat(someTargetId, null);
             }
 
-            assertThat(
-                    unreachableTargetFuture, FlinkMatchers.willNotComplete(willNotCompleteWithin));
+            assertThat(unreachableTargetFuture)
+                    .satisfies(matching(FlinkMatchers.willNotComplete(willNotCompleteWithin)));
         } finally {
             heartbeatManager.stop();
         }
@@ -660,8 +658,8 @@ public class HeartbeatManagerTest extends TestLogger {
                 heartbeatManager.requestHeartbeat(someTargetId, null);
             }
 
-            assertThat(
-                    unreachableTargetFuture, FlinkMatchers.willNotComplete(willNotCompleteWithin));
+            assertThat(unreachableTargetFuture)
+                    .satisfies(matching(FlinkMatchers.willNotComplete(willNotCompleteWithin)));
         } finally {
             heartbeatManager.stop();
         }

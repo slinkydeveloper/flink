@@ -30,9 +30,9 @@ import java.util.List;
 
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.committableRecord;
 import static org.apache.flink.streaming.runtime.operators.sink.SinkTestUtil.committableRecords;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
 
 /** Tests for {@link GlobalBatchCommitterHandler}. */
 public class GlobalBatchCommitterHandlerTest extends TestLogger {
@@ -58,7 +58,8 @@ public class GlobalBatchCommitterHandlerTest extends TestLogger {
         testHarness.processElement(committableRecord("motel"));
         testHarness.endInput();
         testHarness.close();
-        assertThat(globalCommitter.getCommittedData(), Matchers.contains("hotel|motel"));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(Matchers.contains("hotel|motel")));
     }
 
     @Test
@@ -79,9 +80,8 @@ public class GlobalBatchCommitterHandlerTest extends TestLogger {
         final List<String> expectedCommittedData =
                 Arrays.asList(globalCommitter.combine(inputs), "end of input");
 
-        assertThat(
-                globalCommitter.getCommittedData(),
-                containsInAnyOrder(expectedCommittedData.toArray()));
+        assertThat(globalCommitter.getCommittedData())
+                .satisfies(matching(containsInAnyOrder(expectedCommittedData.toArray())));
 
         testHarness.close();
     }
@@ -96,7 +96,7 @@ public class GlobalBatchCommitterHandlerTest extends TestLogger {
         testHarness.open();
         testHarness.close();
 
-        assertThat(globalCommitter.isClosed(), is(true));
+        assertThat(globalCommitter.isClosed()).isEqualTo(true);
     }
 
     private OneInputStreamOperatorTestHarness<byte[], byte[]> createTestHarness(

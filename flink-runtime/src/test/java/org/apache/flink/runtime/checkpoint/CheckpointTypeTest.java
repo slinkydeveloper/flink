@@ -20,7 +20,7 @@ package org.apache.flink.runtime.checkpoint;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CheckpointTypeTest {
 
@@ -34,8 +34,8 @@ public class CheckpointTypeTest {
      */
     @Test
     public void testOrdinalsAreConstant() {
-        assertEquals(0, CheckpointType.CHECKPOINT.ordinal());
-        assertEquals(1, CheckpointType.SAVEPOINT.ordinal());
-        assertEquals(2, CheckpointType.SAVEPOINT_SUSPEND.ordinal());
+        assertThat(CheckpointType.CHECKPOINT.ordinal()).isEqualTo(0);
+        assertThat(CheckpointType.SAVEPOINT.ordinal()).isEqualTo(1);
+        assertThat(CheckpointType.SAVEPOINT_SUSPEND.ordinal()).isEqualTo(2);
     }
 }

@@ -19,7 +19,6 @@ package org.apache.flink.tests.util.util;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -32,6 +31,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FileUtils}. */
 public class FileUtilsTest extends TestLogger {
@@ -55,24 +56,22 @@ public class FileUtilsTest extends TestLogger {
     public void replaceSingleMatch() throws IOException {
         FileUtils.replace(testFile, Pattern.compile("line1"), matcher -> "removed");
 
-        Assert.assertEquals(
-                Arrays.asList("removed", ORIGINAL_LINES.get(1), ORIGINAL_LINES.get(2)),
-                Files.readAllLines(testFile));
+        assertThat(Files.readAllLines(testFile))
+                .isEqualTo(Arrays.asList("removed", ORIGINAL_LINES.get(1), ORIGINAL_LINES.get(2)));
     }
 
     @Test
     public void replaceMultipleMatch() throws IOException {
         FileUtils.replace(testFile, Pattern.compile("line(.*)"), matcher -> matcher.group(1));
 
-        Assert.assertEquals(Arrays.asList("1", "2", "3"), Files.readAllLines(testFile));
+        assertThat(Files.readAllLines(testFile)).isEqualTo(Arrays.asList("1", "2", "3"));
     }
 
     @Test
     public void replaceWithEmptyLine() throws IOException {
         FileUtils.replace(testFile, Pattern.compile("line2"), matcher -> "");
 
-        Assert.assertEquals(
-                Arrays.asList(ORIGINAL_LINES.get(0), "", ORIGINAL_LINES.get(2)),
-                Files.readAllLines(testFile));
+        assertThat(Files.readAllLines(testFile))
+                .isEqualTo(Arrays.asList(ORIGINAL_LINES.get(0), "", ORIGINAL_LINES.get(2)));
     }
 }

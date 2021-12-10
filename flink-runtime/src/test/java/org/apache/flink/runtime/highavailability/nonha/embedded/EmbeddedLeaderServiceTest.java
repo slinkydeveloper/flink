@@ -22,14 +22,13 @@ import org.apache.flink.runtime.leaderelection.LeaderElectionService;
 import org.apache.flink.testutils.TestingUtils;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link EmbeddedLeaderService}. */
 public class EmbeddedLeaderServiceTest extends TestLogger {
@@ -60,7 +59,7 @@ public class EmbeddedLeaderServiceTest extends TestLogger {
             }
 
             // the election service should still be running
-            Assert.assertThat(embeddedLeaderService.isShutdown(), is(false));
+            assertThat(embeddedLeaderService.isShutdown()).isEqualTo(false);
         } finally {
             embeddedLeaderService.shutdown();
         }
@@ -98,7 +97,7 @@ public class EmbeddedLeaderServiceTest extends TestLogger {
             }
 
             // the election service should still be running
-            Assert.assertThat(embeddedLeaderService.isShutdown(), is(false));
+            assertThat(embeddedLeaderService.isShutdown()).isEqualTo(false);
         } finally {
             embeddedLeaderService.shutdown();
         }

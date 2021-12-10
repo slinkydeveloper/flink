@@ -33,8 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.time.Duration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests the logic of {@link FileChannelManagerImpl}. */
@@ -92,24 +91,26 @@ public class FileChannelManagerImplTest extends TestLogger {
                     Runtime.getRuntime()
                             .exec("kill " + fileChannelManagerTestProcess.getProcessId());
             kill.waitFor();
-            assertEquals("Failed to send SIG_TERM to process", 0, kill.exitValue());
+            assertThat(kill.exitValue()).as("Failed to send SIG_TERM to process").isEqualTo(0);
 
             Deadline deadline = Deadline.now().plus(TEST_TIMEOUT);
             while (fileChannelManagerTestProcess.isAlive() && deadline.hasTimeLeft()) {
                 Thread.sleep(100);
             }
 
-            assertFalse(
-                    "The file channel manager test process does not terminate in time, its output is: \n"
-                            + fileChannelManagerTestProcess.getProcessOutput(),
-                    fileChannelManagerTestProcess.isAlive());
+            assertThat(fileChannelManagerTestProcess.isAlive())
+                    .as(
+                            "The file channel manager test process does not terminate in time, its output is: \n"
+                                    + fileChannelManagerTestProcess.getProcessOutput())
+                    .isFalse();
 
             // Checks if the directories are cleared.
-            assertFalse(
-                    "The file channel manager test process does not remove the tmp shuffle directories after termination, "
-                            + "its output is \n"
-                            + fileChannelManagerTestProcess.getProcessOutput(),
-                    fileOrDirExists(fileChannelDir, DIR_NAME_PREFIX));
+            assertThat(fileOrDirExists(fileChannelDir, DIR_NAME_PREFIX))
+                    .as(
+                            "The file channel manager test process does not remove the tmp shuffle directories after termination, "
+                                    + "its output is \n"
+                                    + fileChannelManagerTestProcess.getProcessOutput())
+                    .isFalse();
         } finally {
             fileChannelManagerTestProcess.destroy();
         }

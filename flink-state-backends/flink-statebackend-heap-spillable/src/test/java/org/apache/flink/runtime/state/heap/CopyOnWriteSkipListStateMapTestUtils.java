@@ -54,12 +54,9 @@ import static org.apache.flink.runtime.state.heap.CopyOnWriteSkipListStateMap.DE
 import static org.apache.flink.runtime.state.heap.CopyOnWriteSkipListStateMap.DEFAULT_MAX_KEYS_TO_DELETE_ONE_TIME;
 import static org.apache.flink.runtime.state.heap.SkipListUtils.NIL_NODE;
 import static org.apache.flink.runtime.state.testutils.StateEntryMatcher.entry;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Utils for CopyOnWriteSkipListStateMap test. */
 class CopyOnWriteSkipListStateMapTestUtils {
@@ -99,8 +96,8 @@ class CopyOnWriteSkipListStateMapTestUtils {
             for (Map.Entry<K, S> keyEntry : entry.getValue().entrySet()) {
                 K key = keyEntry.getKey();
                 S state = keyEntry.getValue();
-                assertEquals(state, stateMap.get(key, namespace));
-                assertTrue(stateMap.containsKey(key, namespace));
+                assertThat(stateMap.get(key, namespace)).isEqualTo(state);
+                assertThat(stateMap.containsKey(key, namespace)).isTrue();
             }
         }
 
@@ -108,13 +105,13 @@ class CopyOnWriteSkipListStateMapTestUtils {
         for (Map.Entry<N, Map<K, S>> entry : referenceStates.entrySet()) {
             N namespace = entry.getKey();
             Set<K> expectedKeySet = new HashSet<>(entry.getValue().keySet());
-            assertEquals(expectedKeySet.size(), stateMap.sizeOfNamespace(namespace));
+            assertThat(stateMap.sizeOfNamespace(namespace)).isEqualTo(expectedKeySet.size());
             Iterator<K> keyIterator = stateMap.getKeys(namespace).iterator();
             while (keyIterator.hasNext()) {
                 K key = keyIterator.next();
-                assertTrue(expectedKeySet.remove(key));
+                assertThat(expectedKeySet.remove(key)).isTrue();
             }
-            assertTrue(expectedKeySet.isEmpty());
+            assertThat(expectedKeySet.isEmpty()).isTrue();
         }
 
         // validates iterator()
@@ -126,14 +123,14 @@ class CopyOnWriteSkipListStateMapTestUtils {
                     actualStates
                             .computeIfAbsent(entry.getNamespace(), (none) -> new HashMap<>())
                             .put(entry.getKey(), entry.getState());
-            assertNull(oldState);
+            assertThat(oldState).isNull();
         }
         referenceStates.forEach(
                 (ns, kvMap) -> {
                     if (kvMap.isEmpty()) {
-                        assertThat(actualStates.get(ns), nullValue());
+                        assertThat(actualStates.get(ns)).isNull();
                     } else {
-                        assertEquals(kvMap, actualStates.get(ns));
+                        assertThat(actualStates.get(ns)).isEqualTo(kvMap);
                     }
                 });
 
@@ -148,15 +145,15 @@ class CopyOnWriteSkipListStateMapTestUtils {
                         actualStates
                                 .computeIfAbsent(entry.getNamespace(), (none) -> new HashMap<>())
                                 .put(entry.getKey(), entry.getState());
-                assertNull(oldState);
+                assertThat(oldState).isNull();
             }
         }
         referenceStates.forEach(
                 (ns, kvMap) -> {
                     if (kvMap.isEmpty()) {
-                        assertThat(actualStates.get(ns), nullValue());
+                        assertThat(actualStates.get(ns)).isNull();
                     } else {
-                        assertEquals(kvMap, actualStates.get(ns));
+                        assertThat(actualStates.get(ns)).isEqualTo(kvMap);
                     }
                 });
     }
@@ -212,7 +209,8 @@ class CopyOnWriteSkipListStateMapTestUtils {
         if (verificationMode == SnapshotVerificationMode.ITERATOR) {
             Iterator<StateEntry<K, N, S>> iterator =
                     snapshot.getIterator(keySerializer, namespaceSerializer, stateSerializer, null);
-            assertThat(() -> iterator, containsInAnyOrder(toMatchers(referenceStates)));
+            assertThat(iterator)
+                    .satisfies(matching(containsInAnyOrder(toMatchers(referenceStates))));
         } else {
             snapshot.writeState(
                     keySerializer, namespaceSerializer, stateSerializer, outputView, null);
@@ -223,7 +221,7 @@ class CopyOnWriteSkipListStateMapTestUtils {
                             keySerializer,
                             namespaceSerializer,
                             stateSerializer);
-            assertEquals(referenceStates, actualStates);
+            assertThat(actualStates).isEqualTo(referenceStates);
         }
     }
 
@@ -288,11 +286,12 @@ class CopyOnWriteSkipListStateMapTestUtils {
                             keySerializer,
                             namespaceSerializer,
                             stateSerializer);
-            assertEquals(transformedStates, actualStates);
+            assertThat(actualStates).isEqualTo(transformedStates);
         } else {
             Iterator<StateEntry<K, N, S>> iterator =
                     snapshot.getIterator(keySerializer, namespaceSerializer, stateSerializer, null);
-            assertThat(() -> iterator, containsInAnyOrder(toMatchers(referenceStates)));
+            assertThat(iterator)
+                    .satisfies(matching(containsInAnyOrder(toMatchers(referenceStates))));
         }
     }
 

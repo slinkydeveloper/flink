@@ -35,8 +35,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.apache.flink.connector.pulsar.source.enumerator.PulsarSourceEnumStateSerializer.INSTANCE;
 import static org.apache.flink.connector.pulsar.source.enumerator.topic.TopicRange.createFullRange;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link PulsarSourceEnumStateSerializer}. */
 class PulsarSourceEnumStateSerializerTest {
@@ -64,11 +63,11 @@ class PulsarSourceEnumStateSerializerTest {
         byte[] bytes = INSTANCE.serialize(state);
         PulsarSourceEnumState state1 = INSTANCE.deserialize(INSTANCE.getVersion(), bytes);
 
-        assertEquals(state.getAppendedPartitions(), state1.getAppendedPartitions());
-        assertEquals(state.getPendingPartitionSplits(), state1.getPendingPartitionSplits());
-        assertEquals(state.getReaderAssignedSplits(), state1.getReaderAssignedSplits());
-        assertEquals(state.isInitialized(), state1.isInitialized());
+        assertThat(state1.getAppendedPartitions()).isEqualTo(state.getAppendedPartitions());
+        assertThat(state1.getPendingPartitionSplits()).isEqualTo(state.getPendingPartitionSplits());
+        assertThat(state1.getReaderAssignedSplits()).isEqualTo(state.getReaderAssignedSplits());
+        assertThat(state1.isInitialized()).isEqualTo(state.isInitialized());
 
-        assertNotSame(state, state1);
+        assertThat(state1).isNotSameAs(state);
     }
 }

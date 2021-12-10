@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static java.util.concurrent.TimeUnit.MINUTES;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests to ensure the docker image with PubSub is working correctly. */
 public class CheckPubSubEmulatorTest extends GCloudUnitTestBase {
@@ -75,9 +75,9 @@ public class CheckPubSubEmulatorTest extends GCloudUnitTestBase {
         List<ReceivedMessage> receivedMessages =
                 pubsubHelper.pullMessages(PROJECT_NAME, SUBSCRIPTION_NAME, 1);
 
-        assertEquals(1, receivedMessages.size());
-        assertEquals(
-                "Hello World PULL", receivedMessages.get(0).getMessage().getData().toStringUtf8());
+        assertThat(receivedMessages.size()).isEqualTo(1);
+        assertThat(receivedMessages.get(0).getMessage().getData().toStringUtf8())
+                .isEqualTo("Hello World PULL");
 
         publisher.shutdown();
     }
@@ -107,8 +107,8 @@ public class CheckPubSubEmulatorTest extends GCloudUnitTestBase {
 
         waitUntil(() -> receivedMessages.size() > 0);
 
-        assertEquals(1, receivedMessages.size());
-        assertEquals("Hello World", receivedMessages.get(0).getData().toStringUtf8());
+        assertThat(receivedMessages.size()).isEqualTo(1);
+        assertThat(receivedMessages.get(0).getData().toStringUtf8()).isEqualTo("Hello World");
 
         LOG.info("Received message. Shutting down ...");
 

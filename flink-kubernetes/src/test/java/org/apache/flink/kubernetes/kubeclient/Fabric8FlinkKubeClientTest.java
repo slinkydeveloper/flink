@@ -64,15 +64,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.flink.kubernetes.utils.Constants.CONFIG_FILE_LOG4J_NAME;
 import static org.apache.flink.kubernetes.utils.Constants.CONFIG_FILE_LOGBACK_NAME;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for Fabric implementation of {@link FlinkKubeClient}. */
 public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
@@ -146,15 +141,15 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
 
         final List<Deployment> resultedDeployments =
                 kubeClient.apps().deployments().inNamespace(NAMESPACE).list().getItems();
-        assertEquals(1, resultedDeployments.size());
+        assertThat(resultedDeployments.size()).isEqualTo(1);
 
         final List<ConfigMap> resultedConfigMaps =
                 kubeClient.configMaps().inNamespace(NAMESPACE).list().getItems();
-        assertEquals(1, resultedConfigMaps.size());
+        assertThat(resultedConfigMaps.size()).isEqualTo(1);
 
         final List<Service> resultedServices =
                 kubeClient.services().inNamespace(NAMESPACE).list().getItems();
-        assertEquals(2, resultedServices.size());
+        assertThat(resultedServices.size()).isEqualTo(2);
 
         testOwnerReferenceSetting(resultedDeployments.get(0), resultedConfigMaps);
         testOwnerReferenceSetting(resultedDeployments.get(0), resultedServices);
@@ -166,9 +161,9 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                 resource -> {
                     List<OwnerReference> ownerReferences =
                             resource.getMetadata().getOwnerReferences();
-                    assertEquals(1, ownerReferences.size());
-                    assertEquals(
-                            ownerReference.getMetadata().getUid(), ownerReferences.get(0).getUid());
+                    assertThat(ownerReferences.size()).isEqualTo(1);
+                    assertThat(ownerReferences.get(0).getUid())
+                            .isEqualTo(ownerReference.getMetadata().getUid());
                 });
     }
 
@@ -190,17 +185,17 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
         final Pod resultTaskManagerPod =
                 this.kubeClient.pods().inNamespace(NAMESPACE).withName(TASKMANAGER_POD_NAME).get();
 
-        assertEquals(
-                this.kubeClient
-                        .apps()
-                        .deployments()
-                        .inNamespace(NAMESPACE)
-                        .list()
-                        .getItems()
-                        .get(0)
-                        .getMetadata()
-                        .getUid(),
-                resultTaskManagerPod.getMetadata().getOwnerReferences().get(0).getUid());
+        assertThat(resultTaskManagerPod.getMetadata().getOwnerReferences().get(0).getUid())
+                .isEqualTo(
+                        this.kubeClient
+                                .apps()
+                                .deployments()
+                                .inNamespace(NAMESPACE)
+                                .list()
+                                .getItems()
+                                .get(0)
+                                .getMetadata()
+                                .getUid());
     }
 
     @Test
@@ -216,10 +211,11 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                         .build();
 
         this.kubeClient.pods().inNamespace(NAMESPACE).create(pod);
-        assertNotNull(this.kubeClient.pods().inNamespace(NAMESPACE).withName(podName).get());
+        assertThat(this.kubeClient.pods().inNamespace(NAMESPACE).withName(podName).get())
+                .isNotNull();
 
         this.flinkKubeClient.stopPod(podName).get();
-        assertNull(this.kubeClient.pods().inNamespace(NAMESPACE).withName(podName).get());
+        assertThat(this.kubeClient.pods().inNamespace(NAMESPACE).withName(podName).get()).isNull();
     }
 
     @Test
@@ -229,9 +225,9 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
 
         final Optional<Endpoint> resultEndpoint = flinkKubeClient.getRestEndpoint(CLUSTER_ID);
 
-        assertThat(resultEndpoint.isPresent(), is(true));
-        assertThat(resultEndpoint.get().getAddress(), is(hostName));
-        assertThat(resultEndpoint.get().getPort(), is(REST_PORT));
+        assertThat(resultEndpoint.isPresent()).isEqualTo(true);
+        assertThat(resultEndpoint.get().getAddress()).isEqualTo(hostName);
+        assertThat(resultEndpoint.get().getPort()).isEqualTo(REST_PORT);
     }
 
     @Test
@@ -239,7 +235,7 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
         mockExpectedServiceFromServerSide(buildExternalServiceWithLoadBalancer("", ""));
 
         final Optional<Endpoint> resultEndpoint = flinkKubeClient.getRestEndpoint(CLUSTER_ID);
-        assertThat(resultEndpoint.isPresent(), is(false));
+        assertThat(resultEndpoint.isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -247,7 +243,7 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
         mockExpectedServiceFromServerSide(buildExternalServiceWithLoadBalancer(null, null));
 
         final Optional<Endpoint> resultEndpoint = flinkKubeClient.getRestEndpoint(CLUSTER_ID);
-        assertThat(resultEndpoint.isPresent(), is(false));
+        assertThat(resultEndpoint.isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -278,7 +274,7 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                         kubeClient,
                         org.apache.flink.util.concurrent.Executors.newDirectExecutorService())) {
             final Optional<Endpoint> resultEndpoint = localClient.getRestEndpoint(CLUSTER_ID);
-            assertThat(resultEndpoint.isPresent(), is(true));
+            assertThat(resultEndpoint.isPresent()).isEqualTo(true);
             final List<String> expectedIps;
             switch (addressType) {
                 case InternalIP:
@@ -297,15 +293,15 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                     throw new IllegalArgumentException(
                             String.format("Unexpected address type %s.", addressType));
             }
-            assertThat(resultEndpoint.get().getAddress(), isIn(expectedIps));
-            assertThat(resultEndpoint.get().getPort(), is(NODE_PORT));
+            assertThat(resultEndpoint.get().getAddress()).satisfies(matching(isIn(expectedIps)));
+            assertThat(resultEndpoint.get().getPort()).isEqualTo(NODE_PORT);
         }
     }
 
     @Test
     public void testNodePortServiceWithNoMatchingIP() {
         mockExpectedServiceFromServerSide(buildExternalServiceWithNodePort());
-        assertFalse(flinkKubeClient.getRestEndpoint(CLUSTER_ID).isPresent());
+        assertThat(flinkKubeClient.getRestEndpoint(CLUSTER_ID).isPresent()).isFalse();
     }
 
     @Test
@@ -313,13 +309,12 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
         mockExpectedServiceFromServerSide(buildExternalServiceWithClusterIP());
 
         final Optional<Endpoint> resultEndpoint = flinkKubeClient.getRestEndpoint(CLUSTER_ID);
-        assertThat(resultEndpoint.isPresent(), is(true));
-        assertThat(
-                resultEndpoint.get().getAddress(),
-                is(
+        assertThat(resultEndpoint.isPresent()).isEqualTo(true);
+        assertThat(resultEndpoint.get().getAddress())
+                .isEqualTo(
                         ExternalServiceDecorator.getNamespacedExternalServiceName(
-                                CLUSTER_ID, NAMESPACE)));
-        assertThat(resultEndpoint.get().getPort(), is(REST_PORT));
+                                CLUSTER_ID, NAMESPACE));
+        assertThat(resultEndpoint.get().getPort()).isEqualTo(REST_PORT);
     }
 
     @Test
@@ -337,29 +332,32 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                                 .build());
         this.flinkKubeClient.createTaskManagerPod(kubernetesPod).get();
 
-        assertEquals(
-                1,
-                this.kubeClient
-                        .apps()
-                        .deployments()
-                        .inNamespace(NAMESPACE)
-                        .list()
-                        .getItems()
-                        .size());
-        assertEquals(
-                1, this.kubeClient.configMaps().inNamespace(NAMESPACE).list().getItems().size());
-        assertEquals(2, this.kubeClient.services().inNamespace(NAMESPACE).list().getItems().size());
-        assertEquals(1, this.kubeClient.pods().inNamespace(NAMESPACE).list().getItems().size());
+        assertThat(
+                        this.kubeClient
+                                .apps()
+                                .deployments()
+                                .inNamespace(NAMESPACE)
+                                .list()
+                                .getItems()
+                                .size())
+                .isEqualTo(1);
+        assertThat(this.kubeClient.configMaps().inNamespace(NAMESPACE).list().getItems().size())
+                .isEqualTo(1);
+        assertThat(this.kubeClient.services().inNamespace(NAMESPACE).list().getItems().size())
+                .isEqualTo(2);
+        assertThat(this.kubeClient.pods().inNamespace(NAMESPACE).list().getItems().size())
+                .isEqualTo(1);
 
         this.flinkKubeClient.stopAndCleanupCluster(CLUSTER_ID);
-        assertTrue(
-                this.kubeClient
-                        .apps()
-                        .deployments()
-                        .inNamespace(NAMESPACE)
-                        .list()
-                        .getItems()
-                        .isEmpty());
+        assertThat(
+                        this.kubeClient
+                                .apps()
+                                .deployments()
+                                .inNamespace(NAMESPACE)
+                                .list()
+                                .getItems()
+                                .isEmpty())
+                .isTrue();
     }
 
     @Test
@@ -368,10 +366,9 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
         this.flinkKubeClient.createConfigMap(configMap).get();
         final Optional<KubernetesConfigMap> currentOpt =
                 this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME);
-        assertThat(currentOpt.isPresent(), is(true));
-        assertThat(
-                currentOpt.get().getData().get(TESTING_CONFIG_MAP_KEY),
-                is(TESTING_CONFIG_MAP_VALUE));
+        assertThat(currentOpt.isPresent()).isEqualTo(true);
+        assertThat(currentOpt.get().getData().get(TESTING_CONFIG_MAP_KEY))
+                .isEqualTo(TESTING_CONFIG_MAP_VALUE);
     }
 
     @Test
@@ -386,35 +383,34 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
             fail("Overwrite an already existing config map should fail with an exception.");
         } catch (Exception ex) {
             final String errorMsg = "Failed to create ConfigMap " + TESTING_CONFIG_MAP_NAME;
-            assertThat(ex, FlinkMatchers.containsMessage(errorMsg));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsMessage(errorMsg)));
         }
         // Create failed we should still get the old value
         final Optional<KubernetesConfigMap> currentOpt =
                 this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME);
-        assertThat(currentOpt.isPresent(), is(true));
-        assertThat(
-                currentOpt.get().getData().get(TESTING_CONFIG_MAP_KEY),
-                is(TESTING_CONFIG_MAP_VALUE));
+        assertThat(currentOpt.isPresent()).isEqualTo(true);
+        assertThat(currentOpt.get().getData().get(TESTING_CONFIG_MAP_KEY))
+                .isEqualTo(TESTING_CONFIG_MAP_VALUE);
     }
 
     @Test
     public void testDeleteConfigMapByLabels() throws Exception {
         this.flinkKubeClient.createConfigMap(buildTestingConfigMap()).get();
-        assertThat(
-                this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent(), is(true));
+        assertThat(this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent())
+                .isEqualTo(true);
         this.flinkKubeClient.deleteConfigMapsByLabels(TESTING_LABELS).get();
-        assertThat(
-                this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent(), is(false));
+        assertThat(this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent())
+                .isEqualTo(false);
     }
 
     @Test
     public void testDeleteConfigMapByName() throws Exception {
         this.flinkKubeClient.createConfigMap(buildTestingConfigMap()).get();
-        assertThat(
-                this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent(), is(true));
+        assertThat(this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent())
+                .isEqualTo(true);
         this.flinkKubeClient.deleteConfigMap(TESTING_CONFIG_MAP_NAME).get();
-        assertThat(
-                this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent(), is(false));
+        assertThat(this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME).isPresent())
+                .isEqualTo(false);
     }
 
     @Test
@@ -434,14 +430,13 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                                     return Optional.of(c);
                                 })
                         .get();
-        assertThat(updated, is(true));
+        assertThat(updated).isEqualTo(true);
 
         final Optional<KubernetesConfigMap> configMapOpt =
                 this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME);
-        assertThat(configMapOpt.isPresent(), is(true));
-        assertThat(
-                configMapOpt.get().getData().get(TESTING_CONFIG_MAP_KEY),
-                is(TESTING_CONFIG_MAP_NEW_VALUE));
+        assertThat(configMapOpt.isPresent()).isEqualTo(true);
+        assertThat(configMapOpt.get().getData().get(TESTING_CONFIG_MAP_KEY))
+                .isEqualTo(TESTING_CONFIG_MAP_NEW_VALUE);
     }
 
     @Test
@@ -453,14 +448,13 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                 this.flinkKubeClient
                         .checkAndUpdateConfigMap(TESTING_CONFIG_MAP_NAME, c -> Optional.empty())
                         .get();
-        assertThat(updated, is(false));
+        assertThat(updated).isEqualTo(false);
 
         final Optional<KubernetesConfigMap> configMapOpt =
                 this.flinkKubeClient.getConfigMap(TESTING_CONFIG_MAP_NAME);
-        assertThat(configMapOpt.isPresent(), is(true));
-        assertThat(
-                configMapOpt.get().getData().get(TESTING_CONFIG_MAP_KEY),
-                is(TESTING_CONFIG_MAP_VALUE));
+        assertThat(configMapOpt.isPresent()).isEqualTo(true);
+        assertThat(configMapOpt.get().getData().get(TESTING_CONFIG_MAP_KEY))
+                .isEqualTo(TESTING_CONFIG_MAP_VALUE);
     }
 
     @Test
@@ -477,12 +471,13 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
                     "Cannot retry checkAndUpdateConfigMap with configMap "
                             + TESTING_CONFIG_MAP_NAME
                             + " because it does not exist.";
-            assertThat(ex, FlinkMatchers.containsMessage(errMsg));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsMessage(errMsg)));
             // Should not retry when ConfigMap does not exist.
-            assertThat(
-                    ex,
-                    FlinkMatchers.containsMessage(
-                            "Stopped retrying the operation because the error is not retryable."));
+            assertThat(ex)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.containsMessage(
+                                            "Stopped retrying the operation because the error is not retryable.")));
         }
     }
 
@@ -509,18 +504,21 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
             fail(
                     "checkAndUpdateConfigMap should fail without a PossibleInconsistentStateException being the cause when number of retries has been exhausted.");
         } catch (Exception ex) {
-            assertThat(
-                    ex,
-                    FlinkMatchers.containsMessage(
-                            "Could not complete the "
-                                    + "operation. Number of retries has been exhausted."));
+            assertThat(ex)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.containsMessage(
+                                            "Could not complete the "
+                                                    + "operation. Number of retries has been exhausted.")));
             final int actualRetryCount = server.getRequestCount() - initialRequestCount;
-            assertThat(actualRetryCount, is(configuredRetries + 1));
+            assertThat(actualRetryCount).isEqualTo(configuredRetries + 1);
             assertThat(
-                    "An error while retrieving the ConfigMap should not cause a PossibleInconsistentStateException.",
-                    ExceptionUtils.findThrowable(ex, PossibleInconsistentStateException.class)
-                            .isPresent(),
-                    is(false));
+                            ExceptionUtils.findThrowable(
+                                            ex, PossibleInconsistentStateException.class)
+                                    .isPresent())
+                    .as(
+                            "An error while retrieving the ConfigMap should not cause a PossibleInconsistentStateException.")
+                    .isEqualTo(false);
         }
     }
 
@@ -547,18 +545,21 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
             fail(
                     "checkAndUpdateConfigMap should fail due to a PossibleInconsistentStateException when number of retries has been exhausted.");
         } catch (Exception ex) {
-            assertThat(
-                    ex,
-                    FlinkMatchers.containsMessage(
-                            "Could not complete the "
-                                    + "operation. Number of retries has been exhausted."));
-            assertThat(retries.get(), is(configuredRetries + 1));
+            assertThat(ex)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.containsMessage(
+                                            "Could not complete the "
+                                                    + "operation. Number of retries has been exhausted.")));
+            assertThat(retries.get()).isEqualTo(configuredRetries + 1);
 
             assertThat(
-                    "An error while replacing the ConfigMap should cause an PossibleInconsistentStateException.",
-                    ExceptionUtils.findThrowable(ex, PossibleInconsistentStateException.class)
-                            .isPresent(),
-                    is(true));
+                            ExceptionUtils.findThrowable(
+                                            ex, PossibleInconsistentStateException.class)
+                                    .isPresent())
+                    .as(
+                            "An error while replacing the ConfigMap should cause an PossibleInconsistentStateException.")
+                    .isEqualTo(true);
         }
     }
 
@@ -569,7 +570,7 @@ public class Fabric8FlinkKubeClientTest extends KubernetesClientTestBase {
         final FlinkKubeClient flinkKubeClient =
                 new Fabric8FlinkKubeClient(flinkConfig, kubeClient, executorService);
         flinkKubeClient.close();
-        assertThat(executorService.isShutdown(), is(true));
+        assertThat(executorService.isShutdown()).isEqualTo(true);
     }
 
     private KubernetesConfigMap buildTestingConfigMap() {

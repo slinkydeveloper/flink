@@ -45,12 +45,8 @@ import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link JobExecutionResultHandler}. */
 public class JobExecutionResultHandlerTest extends TestLogger {
@@ -92,7 +88,7 @@ public class JobExecutionResultHandlerTest extends TestLogger {
         final JobExecutionResultResponseBody responseBody =
                 jobExecutionResultHandler.handleRequest(testRequest, testingRestfulGateway).get();
 
-        assertThat(responseBody.getStatus().getId(), equalTo(QueueStatus.Id.IN_PROGRESS));
+        assertThat(responseBody.getStatus().getId()).isEqualTo(QueueStatus.Id.IN_PROGRESS);
     }
 
     @Test
@@ -108,12 +104,12 @@ public class JobExecutionResultHandlerTest extends TestLogger {
                 new TestingRestfulGateway.Builder()
                         .setRequestJobStatusFunction(
                                 jobId -> {
-                                    assertThat(jobId, equalTo(TEST_JOB_ID));
+                                    assertThat(jobId).isEqualTo(TEST_JOB_ID);
                                     return CompletableFuture.completedFuture(jobStatus);
                                 })
                         .setRequestJobResultFunction(
                                 jobId -> {
-                                    assertThat(jobId, equalTo(TEST_JOB_ID));
+                                    assertThat(jobId).isEqualTo(TEST_JOB_ID);
                                     return CompletableFuture.completedFuture(
                                             JobResult.createFrom(executionGraph));
                                 })
@@ -122,8 +118,8 @@ public class JobExecutionResultHandlerTest extends TestLogger {
         final JobExecutionResultResponseBody responseBody =
                 jobExecutionResultHandler.handleRequest(testRequest, testingRestfulGateway).get();
 
-        assertThat(responseBody.getStatus().getId(), equalTo(QueueStatus.Id.COMPLETED));
-        assertThat(responseBody.getJobExecutionResult(), not(nullValue()));
+        assertThat(responseBody.getStatus().getId()).isEqualTo(QueueStatus.Id.COMPLETED);
+        assertThat(responseBody.getJobExecutionResult()).isNotNull();
     }
 
     @Test
@@ -141,10 +137,9 @@ public class JobExecutionResultHandlerTest extends TestLogger {
             fail("Expected exception not thrown");
         } catch (final ExecutionException e) {
             final Throwable cause = ExceptionUtils.stripCompletionException(e.getCause());
-            assertThat(cause, instanceOf(RestHandlerException.class));
-            assertThat(
-                    ((RestHandlerException) cause).getHttpResponseStatus(),
-                    equalTo(HttpResponseStatus.NOT_FOUND));
+            assertThat(cause).isInstanceOf(RestHandlerException.class);
+            assertThat(((RestHandlerException) cause).getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.NOT_FOUND);
         }
     }
 }

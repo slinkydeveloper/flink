@@ -33,7 +33,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test ExecutionEnvironment from user perspective. */
 @SuppressWarnings("serial")
@@ -62,7 +62,7 @@ public class ExecutionEnvironmentITCase extends TestLogger {
                                     }
                                 });
         List<Integer> resultCollection = result.collect();
-        assertEquals(PARALLELISM, resultCollection.size());
+        assertThat(resultCollection.size()).isEqualTo(PARALLELISM);
     }
 
     private static class ParallelismDependentInputFormat extends GenericInputFormat<Integer> {
@@ -71,7 +71,7 @@ public class ExecutionEnvironmentITCase extends TestLogger {
 
         @Override
         public GenericInputSplit[] createInputSplits(int numSplits) throws IOException {
-            assertEquals(PARALLELISM, numSplits);
+            assertThat(numSplits).isEqualTo(PARALLELISM);
             return super.createInputSplits(numSplits);
         }
 

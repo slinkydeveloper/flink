@@ -41,8 +41,6 @@ import org.apache.flink.runtime.testtasks.NoOpInvokable;
 import org.apache.flink.testutils.TestingUtils;
 import org.apache.flink.util.TestLogger;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -52,9 +50,9 @@ import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link DefaultExecutionGraphFactory}. */
 public class DefaultExecutionGraphFactoryTest extends TestLogger {
@@ -80,8 +78,11 @@ public class DefaultExecutionGraphFactoryTest extends TestLogger {
                     log);
             fail("Expected ExecutionGraph creation to fail because of non restored state.");
         } catch (Exception e) {
-            assertThat(
-                    e, FlinkMatchers.containsMessage("Failed to rollback to checkpoint/savepoint"));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.containsMessage(
+                                            "Failed to rollback to checkpoint/savepoint")));
         }
     }
 
@@ -109,9 +110,9 @@ public class DefaultExecutionGraphFactoryTest extends TestLogger {
 
         final CompletedCheckpoint savepoint = completedCheckpointStore.getLatestCheckpoint();
 
-        MatcherAssert.assertThat(savepoint, notNullValue());
+        assertThat(savepoint).isNotNull();
 
-        MatcherAssert.assertThat(savepoint.getCheckpointID(), Matchers.is(savepointId));
+        assertThat(savepoint.getCheckpointID()).isEqualTo(savepointId);
     }
 
     @Nonnull

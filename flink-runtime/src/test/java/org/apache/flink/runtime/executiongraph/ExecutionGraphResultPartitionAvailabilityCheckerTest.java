@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ExecutionGraphResultPartitionAvailabilityChecker}. */
 public class ExecutionGraphResultPartitionAvailabilityCheckerTest extends TestLogger {
@@ -70,9 +70,8 @@ public class ExecutionGraphResultPartitionAvailabilityCheckerTest extends TestLo
                         partitionIDMapper, partitionTracker);
 
         for (IntermediateResultPartitionID irpID : expectedAvailability.keySet()) {
-            assertEquals(
-                    expectedAvailability.get(irpID),
-                    resultPartitionAvailabilityChecker.isAvailable(irpID));
+            assertThat(resultPartitionAvailabilityChecker.isAvailable(irpID))
+                    .isEqualTo(expectedAvailability.get(irpID));
         }
     }
 }

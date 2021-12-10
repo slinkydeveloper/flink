@@ -28,7 +28,7 @@ import org.apache.flink.test.util.JavaProgramTestBase;
 import org.apache.flink.types.NullValue;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link CoGroupFunction}. */
 @SuppressWarnings({"serial", "unchecked"})
@@ -92,7 +92,7 @@ public class CoGroupGroupSortITCase extends JavaProgramTestBase {
 
                 for (Tuple2<Long, Long> t : first) {
                     long current = t.f1;
-                    Assert.assertTrue(current <= lastValue);
+                    assertThat(current <= lastValue).isTrue();
                     lastValue = current;
                 }
             }
@@ -102,8 +102,8 @@ public class CoGroupGroupSortITCase extends JavaProgramTestBase {
                 TestPojo lastValue = new TestPojo(Long.MAX_VALUE, 0, Long.MIN_VALUE);
 
                 for (TestPojo current : second) {
-                    Assert.assertTrue(current.c >= lastValue.c);
-                    Assert.assertTrue(current.c != lastValue.c || current.a <= lastValue.a);
+                    assertThat(current.c >= lastValue.c).isTrue();
+                    assertThat(current.c != lastValue.c || current.a <= lastValue.a).isTrue();
 
                     lastValue = current;
                 }

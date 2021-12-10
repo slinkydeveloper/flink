@@ -57,15 +57,9 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 
@@ -155,7 +149,7 @@ public class RMQSourceTest {
         try {
             rmqSource.open(new Configuration());
         } catch (RuntimeException ex) {
-            assertEquals("None of RabbitMQ channels are available", ex.getMessage());
+            assertThat(ex.getMessage()).isEqualTo("None of RabbitMQ channels are available");
         }
     }
 
@@ -172,9 +166,9 @@ public class RMQSourceTest {
         RMQSource<String> rmqSource =
                 new RMQSource<>(
                         connectionConfig, "queueDummy", true, new StringDeserializationScheme());
-        RuntimeException ex =
-                assertThrows(RuntimeException.class, () -> rmqSource.open(new Configuration()));
-        assertEquals("Cannot create RMQ connection with queueDummy at hostDummy", ex.getMessage());
+        assertThatThrownBy(() -> rmqSource.open(new Configuration()))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Cannot create RMQ connection with queueDummy at hostDummy");
         Mockito.verify(rmqSource.connection, Mockito.atLeastOnce()).close();
     }
 
@@ -219,13 +213,17 @@ public class RMQSourceTest {
         rmqSource.initializeState(mockContext);
         rmqSource.open(new Configuration());
 
-        Exception ex = assertThrows(RuntimeException.class, rmqSource::close);
-        assertEquals(
-                "Error while cancelling RMQ consumer on queueDummy at hostDummy", ex.getMessage());
-        assertEquals(1, ex.getSuppressed().length);
-        assertEquals(
-                "Error while closing RMQ source with queueDummy at hostDummy",
-                ex.getSuppressed()[0].getMessage());
+        assertThatThrownBy(rmqSource::close)
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Error while cancelling RMQ consumer on queueDummy at hostDummy")
+                .satisfies(
+                        ex -> {
+                            assertThat(ex.getSuppressed().length).isEqualTo(1);
+                            assertThat(ex.getSuppressed()[0].getMessage())
+                                    .isEqualTo(
+                                            "Error while closing RMQ source with queueDummy at hostDummy");
+                        });
+        ;
         Mockito.verify(rmqSource.channel, Mockito.atLeastOnce()).basicCancel(any());
         Mockito.verify(rmqSource.channel, Mockito.atLeastOnce()).close();
         Mockito.verify(rmqSource.connection, Mockito.atLeastOnce()).close();
@@ -278,9 +276,9 @@ public class RMQSourceTest {
             ArrayDeque<Tuple2<Long, Set<String>>> deque = sourceCopy.getRestoredState();
             Set<String> messageIds = deque.getLast().f1;
 
-            assertEquals(numIds, messageIds.size());
+            assertThat(messageIds.size()).isEqualTo(numIds);
             if (messageIds.size() > 0) {
-                assertTrue(messageIds.contains(Long.toString(lastSnapshotId - 1)));
+                assertThat(messageIds.contains(Long.toString(lastSnapshotId - 1))).isTrue();
             }
 
             // check if the messages are being acknowledged and the transaction committed
@@ -318,8 +316,8 @@ public class RMQSourceTest {
         }
 
         synchronized (DummySourceContext.lock) {
-            assertEquals(
-                    Math.max(messageId, oldMessageId), DummySourceContext.numElementsCollected);
+            assertThat(DummySourceContext.numElementsCollected)
+                    .isEqualTo(Math.max(messageId, oldMessageId));
         }
     }
 
@@ -338,7 +336,7 @@ public class RMQSourceTest {
         }
 
         // verify if RMQTestSource#addId was never called
-        assertEquals(0, ((RMQTestSource) source).addIdCalls);
+        assertThat(((RMQTestSource) source).addIdCalls).isEqualTo(0);
     }
 
     /** Tests error reporting in case of invalid correlation ids. */
@@ -350,8 +348,8 @@ public class RMQSourceTest {
 
         sourceThread.join();
 
-        assertNotNull(exception);
-        assertTrue(exception instanceof NullPointerException);
+        assertThat(exception).isNotNull();
+        assertThat(exception).isInstanceOf(NullPointerException.class);
     }
 
     /** Tests whether redelivered messages are acknowledged properly. */
@@ -392,8 +390,8 @@ public class RMQSourceTest {
 
             // check if all the messages are being collected and acknowledged
             long totalNumberOfAcks = numMsgRedelivered + lastMessageId;
-            assertEquals(lastMessageId, DummySourceContext.numElementsCollected);
-            assertEquals(totalNumberOfAcks, ((RMQTestSource) source).addIdCalls);
+            assertThat(DummySourceContext.numElementsCollected).isEqualTo(lastMessageId);
+            assertThat(((RMQTestSource) source).addIdCalls).isEqualTo(totalNumberOfAcks);
         }
 
         // check if all the acks are being sent
@@ -423,10 +421,10 @@ public class RMQSourceTest {
             // connection fails but check if args have been passed correctly
         }
 
-        assertEquals("hostTest", testObj.getFactory().getHost());
-        assertEquals(999, testObj.getFactory().getPort());
-        assertEquals("userTest", testObj.getFactory().getUsername());
-        assertEquals("passTest", testObj.getFactory().getPassword());
+        assertThat(testObj.getFactory().getHost()).isEqualTo("hostTest");
+        assertThat(testObj.getFactory().getPort()).isEqualTo(999);
+        assertThat(testObj.getFactory().getUsername()).isEqualTo("userTest");
+        assertThat(testObj.getFactory().getPassword()).isEqualTo("passTest");
     }
 
     @Test(timeout = 30000L)
@@ -437,7 +435,7 @@ public class RMQSourceTest {
         sourceThread.start();
         sourceThread.join();
 
-        assertThat(DummySourceContext.numElementsCollected, equalTo(2L));
+        assertThat(DummySourceContext.numElementsCollected).isEqualTo(2L);
     }
 
     @Test
@@ -449,7 +447,9 @@ public class RMQSourceTest {
                 new AbstractStreamOperatorTestHarness<>(new StreamSource<>(consumer), 1, 1, 0);
 
         testHarness.open();
-        assertThat("Open method was not called", deserializationSchema.isOpenCalled(), is(true));
+        assertThat(deserializationSchema.isOpenCalled())
+                .as("Open method was not called")
+                .isEqualTo(true);
     }
 
     @Test
@@ -541,7 +541,7 @@ public class RMQSourceTest {
         sourceThread.join();
         Mockito.verify(source.consumer, Mockito.never()).nextDelivery();
         Mockito.verify(source.consumer, Mockito.atLeastOnce()).nextDelivery(any(Long.class));
-        assertNull(exception);
+        assertThat(exception).isNull();
     }
 
     private static class CallsRealMethodsWithLatch extends CallsRealMethods {
@@ -811,7 +811,7 @@ public class RMQSourceTest {
         @Override
         protected boolean addId(String uid) {
             addIdCalls++;
-            assertEquals(false, autoAck);
+            assertThat(autoAck).isEqualTo(false);
             return super.addId(uid);
         }
     }

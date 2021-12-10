@@ -30,11 +30,10 @@ import org.junit.Test;
 import java.io.File;
 import java.util.Arrays;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Unit tests for the {@link ContinuousFileSplitEnumerator}. */
 public class StaticFileSplitEnumeratorTest {
@@ -54,7 +53,7 @@ public class StaticFileSplitEnumeratorTest {
 
         final PendingSplitsCheckpoint<FileSourceSplit> checkpoint = enumerator.snapshotState(1L);
 
-        assertThat(checkpoint.getSplits(), contains(split));
+        assertThat(checkpoint.getSplits()).satisfies(matching(contains(split)));
     }
 
     @Test
@@ -68,8 +67,9 @@ public class StaticFileSplitEnumeratorTest {
         enumerator.addReader(3);
         enumerator.handleSplitRequest(3, "somehost");
 
-        assertThat(enumerator.snapshotState(1L).getSplits(), empty());
-        assertThat(context.getSplitAssignments().get(3).getAssignedSplits(), contains(split));
+        assertThat(enumerator.snapshotState(1L).getSplits()).satisfies(matching(empty()));
+        assertThat(context.getSplitAssignments().get(3).getAssignedSplits())
+                .satisfies(matching(contains(split)));
     }
 
     @Test
@@ -81,8 +81,8 @@ public class StaticFileSplitEnumeratorTest {
 
         enumerator.handleSplitRequest(3, "somehost");
 
-        assertFalse(context.getSplitAssignments().containsKey(3));
-        assertThat(enumerator.snapshotState(1L).getSplits(), contains(split));
+        assertThat(context.getSplitAssignments().containsKey(3)).isFalse();
+        assertThat(enumerator.snapshotState(1L).getSplits()).satisfies(matching(contains(split)));
     }
 
     @Test
@@ -100,8 +100,9 @@ public class StaticFileSplitEnumeratorTest {
         // second request has no more split
         enumerator.handleSplitRequest(1, "somehost");
 
-        assertThat(context.getSplitAssignments().get(1).getAssignedSplits(), contains(split));
-        assertTrue(context.getSplitAssignments().get(1).hasReceivedNoMoreSplitsSignal());
+        assertThat(context.getSplitAssignments().get(1).getAssignedSplits())
+                .satisfies(matching(contains(split)));
+        assertThat(context.getSplitAssignments().get(1).hasReceivedNoMoreSplitsSignal()).isTrue();
     }
 
     // ------------------------------------------------------------------------

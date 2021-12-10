@@ -21,10 +21,10 @@ package org.apache.flink.runtime.scheduler;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for the {@link DefaultVertexParallelismStore}. */
 public class DefaultVertexParallelismStoreTest extends TestLogger {
@@ -32,10 +32,9 @@ public class DefaultVertexParallelismStoreTest extends TestLogger {
     public void testNotSet() {
         DefaultVertexParallelismStore store = new DefaultVertexParallelismStore();
 
-        assertThrows(
-                "No parallelism information set for vertex",
-                IllegalStateException.class,
-                () -> store.getParallelismInfo(new JobVertexID()));
+        assertThatThrownBy(() -> store.getParallelismInfo(new JobVertexID()))
+                .as("No parallelism information set for vertex")
+                .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
@@ -48,7 +47,7 @@ public class DefaultVertexParallelismStoreTest extends TestLogger {
 
         VertexParallelismInformation storedInfo = store.getParallelismInfo(id);
 
-        Assert.assertEquals(storedInfo, storedInfo);
+        assertThat(storedInfo).isEqualTo(storedInfo);
     }
 
     private static final class MockVertexParallelismInfo implements VertexParallelismInformation {

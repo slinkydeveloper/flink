@@ -49,7 +49,7 @@ import java.net.ServerSocket;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test proper handling of IPv6 address literals in URLs. */
 @SuppressWarnings("serial")

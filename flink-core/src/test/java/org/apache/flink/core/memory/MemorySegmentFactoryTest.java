@@ -20,7 +20,7 @@ package org.apache.flink.core.memory;
 import org.junit.Test;
 
 import static java.lang.System.arraycopy;
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link MemorySegmentFactory} test. */
 public class MemorySegmentFactoryTest {
@@ -32,7 +32,7 @@ public class MemorySegmentFactoryTest {
         arraycopy(data, 0, changingData, 0, data.length);
         MemorySegment segment = MemorySegmentFactory.wrapCopy(changingData, 0, changingData.length);
         changingData[0]++;
-        assertArrayEquals(data, segment.getHeapMemory());
+        assertThat(segment.getHeapMemory()).isEqualTo(data);
     }
 
     @Test
@@ -41,7 +41,7 @@ public class MemorySegmentFactoryTest {
         MemorySegment segment = MemorySegmentFactory.wrapCopy(data, 0, data.length / 2);
         byte[] exp = new byte[segment.size()];
         arraycopy(data, 0, exp, 0, exp.length);
-        assertArrayEquals(exp, segment.getHeapMemory());
+        assertThat(segment.getHeapMemory()).isEqualTo(exp);
     }
 
     @Test

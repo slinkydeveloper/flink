@@ -59,9 +59,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the execution deployment-reconciliation logic in the {@link JobMaster}. */
 public class JobMasterExecutionDeploymentReconciliationTest extends TestLogger {
@@ -123,7 +121,7 @@ public class JobMasterExecutionDeploymentReconciliationTest extends TestLogger {
 
         ExecutionAttemptID deployedExecution =
                 deploymentTrackerWrapper.getTaskDeploymentFuture().get();
-        assertFalse(taskCancellationFuture.isDone());
+        assertThat(taskCancellationFuture.isDone()).isFalse();
 
         ExecutionAttemptID unknownDeployment = new ExecutionAttemptID();
         //  the deployment report is missing the just deployed task, but contains the ID of some
@@ -135,16 +133,16 @@ public class JobMasterExecutionDeploymentReconciliationTest extends TestLogger {
                         new AccumulatorReport(Collections.emptyList()),
                         new ExecutionDeploymentReport(Collections.singleton(unknownDeployment))));
 
-        assertThat(taskCancellationFuture.get(), is(unknownDeployment));
-        assertThat(deploymentTrackerWrapper.getStopFuture().get(), is(deployedExecution));
+        assertThat(taskCancellationFuture.get()).isEqualTo(unknownDeployment);
+        assertThat(deploymentTrackerWrapper.getStopFuture().get()).isEqualTo(deployedExecution);
 
         assertThat(
-                onCompletionActions
-                        .getJobReachedGloballyTerminalStateFuture()
-                        .get()
-                        .getArchivedExecutionGraph()
-                        .getState(),
-                is(JobStatus.FAILED));
+                        onCompletionActions
+                                .getJobReachedGloballyTerminalStateFuture()
+                                .get()
+                                .getArchivedExecutionGraph()
+                                .getState())
+                .isEqualTo(JobStatus.FAILED);
     }
 
     /**
@@ -195,7 +193,7 @@ public class JobMasterExecutionDeploymentReconciliationTest extends TestLogger {
         taskSubmissionAcknowledgeFuture.complete(Acknowledge.get());
 
         deploymentTrackerWrapper.getTaskDeploymentFuture().get();
-        assertFalse(taskCancellationFuture.isDone());
+        assertThat(taskCancellationFuture.isDone()).isFalse();
     }
 
     private JobMaster createAndStartJobMaster(

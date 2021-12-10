@@ -24,7 +24,8 @@ import org.apache.flink.api.common.operators.util.FieldSet;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class GlobalPropertiesPushdownTest {
 
@@ -36,12 +37,13 @@ public class GlobalPropertiesPushdownTest {
 
             RequestedGlobalProperties preserved =
                     req.filterBySemanticProperties(getAllPreservingSemProps(), 0);
-            assertEquals(PartitioningProperty.ANY_PARTITIONING, preserved.getPartitioning());
-            assertTrue(preserved.getPartitionedFields().isValidSubset(new FieldSet(1, 3)));
+            assertThat(preserved.getPartitioning())
+                    .isEqualTo(PartitioningProperty.ANY_PARTITIONING);
+            assertThat(preserved.getPartitionedFields().isValidSubset(new FieldSet(1, 3))).isTrue();
 
             RequestedGlobalProperties nonPreserved =
                     req.filterBySemanticProperties(getNonePreservingSemProps(), 0);
-            assertTrue(nonPreserved == null || nonPreserved.isTrivial());
+            assertThat(nonPreserved == null || nonPreserved.isTrivial()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -56,12 +58,13 @@ public class GlobalPropertiesPushdownTest {
 
             RequestedGlobalProperties preserved =
                     req.filterBySemanticProperties(getAllPreservingSemProps(), 0);
-            assertEquals(PartitioningProperty.HASH_PARTITIONED, preserved.getPartitioning());
-            assertTrue(preserved.getPartitionedFields().isValidSubset(new FieldSet(1, 3)));
+            assertThat(preserved.getPartitioning())
+                    .isEqualTo(PartitioningProperty.HASH_PARTITIONED);
+            assertThat(preserved.getPartitionedFields().isValidSubset(new FieldSet(1, 3))).isTrue();
 
             RequestedGlobalProperties nonPreserved =
                     req.filterBySemanticProperties(getNonePreservingSemProps(), 0);
-            assertTrue(nonPreserved == null || nonPreserved.isTrivial());
+            assertThat(nonPreserved == null || nonPreserved.isTrivial()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -76,7 +79,7 @@ public class GlobalPropertiesPushdownTest {
 
             RequestedGlobalProperties pushedDown =
                     req.filterBySemanticProperties(getAllPreservingSemProps(), 0);
-            assertTrue(pushedDown == null || pushedDown.isTrivial());
+            assertThat(pushedDown == null || pushedDown.isTrivial()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -91,7 +94,7 @@ public class GlobalPropertiesPushdownTest {
 
             RequestedGlobalProperties pushedDown =
                     req.filterBySemanticProperties(getAllPreservingSemProps(), 0);
-            assertTrue(pushedDown == null || pushedDown.isTrivial());
+            assertThat(pushedDown == null || pushedDown.isTrivial()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

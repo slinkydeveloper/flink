@@ -50,12 +50,9 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link AkkaRpcService}. */
 public class AkkaRpcServiceTest extends TestLogger {
@@ -106,10 +103,12 @@ public class AkkaRpcServiceTest extends TestLogger {
 
         scheduledFuture.get();
 
-        assertTrue(latch.isTriggered());
+        assertThat(latch.isTriggered()).isTrue();
         final long stop = System.nanoTime();
 
-        assertTrue("call was not properly delayed", ((stop - start) / 1000000) >= delay);
+        assertThat(((stop - start) / 1000000) >= delay)
+                .as("call was not properly delayed")
+                .isTrue();
     }
 
     /** Tests that the {@link AkkaRpcService} can execute runnables. */
@@ -140,18 +139,20 @@ public class AkkaRpcServiceTest extends TestLogger {
 
         int actual = result.get(30L, TimeUnit.SECONDS);
 
-        assertEquals(expected, actual);
-        assertTrue(latch.isTriggered());
+        assertThat(actual).isEqualTo(expected);
+        assertThat(latch.isTriggered()).isTrue();
     }
 
     @Test
     public void testGetAddress() {
-        assertEquals(AkkaUtils.getAddress(actorSystem).host().get(), akkaRpcService.getAddress());
+        assertThat(akkaRpcService.getAddress())
+                .isEqualTo(AkkaUtils.getAddress(actorSystem).host().get());
     }
 
     @Test
     public void testGetPort() {
-        assertEquals(AkkaUtils.getAddress(actorSystem).port().get(), akkaRpcService.getPort());
+        assertThat(akkaRpcService.getPort())
+                .isEqualTo(AkkaUtils.getAddress(actorSystem).port().get());
     }
 
     /** Tests that we can wait for the termination of the rpc service. */
@@ -161,7 +162,7 @@ public class AkkaRpcServiceTest extends TestLogger {
 
         CompletableFuture<Void> terminationFuture = rpcService.getTerminationFuture();
 
-        assertFalse(terminationFuture.isDone());
+        assertThat(terminationFuture.isDone()).isFalse();
 
         rpcService.stopService();
 
@@ -184,7 +185,7 @@ public class AkkaRpcServiceTest extends TestLogger {
         future.get();
 
         // once the future is completed, then the latch should have been triggered
-        assertTrue(latch.isTriggered());
+        assertThat(latch.isTriggered()).isTrue();
     }
 
     /**
@@ -205,17 +206,17 @@ public class AkkaRpcServiceTest extends TestLogger {
                 scheduledExecutor.scheduleAtFixedRate(
                         countDownLatch::countDown, delay, delay, TimeUnit.MILLISECONDS);
 
-        assertTrue(!future.isDone());
+        assertThat(!future.isDone()).isTrue();
 
         countDownLatch.await();
 
         // the future should not complete since we have a periodic task
-        assertTrue(!future.isDone());
+        assertThat(!future.isDone()).isTrue();
 
         long finalTime = System.nanoTime() - currentTime;
 
         // the processing should have taken at least delay times the number of count downs.
-        assertTrue(finalTime >= tries * delay);
+        assertThat(finalTime >= tries * delay).isTrue();
 
         future.cancel(true);
     }
@@ -238,17 +239,17 @@ public class AkkaRpcServiceTest extends TestLogger {
                 scheduledExecutor.scheduleWithFixedDelay(
                         countDownLatch::countDown, delay, delay, TimeUnit.MILLISECONDS);
 
-        assertTrue(!future.isDone());
+        assertThat(!future.isDone()).isTrue();
 
         countDownLatch.await();
 
         // the future should not complete since we have a periodic task
-        assertTrue(!future.isDone());
+        assertThat(!future.isDone()).isTrue();
 
         long finalTime = System.nanoTime() - currentTime;
 
         // the processing should have taken at least delay times the number of count downs.
-        assertTrue(finalTime >= tries * delay);
+        assertThat(finalTime >= tries * delay).isTrue();
 
         future.cancel(true);
     }
@@ -319,7 +320,8 @@ public class AkkaRpcServiceTest extends TestLogger {
             }
 
             terminationFuture.get();
-            assertThat(akkaRpcService.getActorSystem().whenTerminated().isCompleted(), is(true));
+            assertThat(akkaRpcService.getActorSystem().whenTerminated().isCompleted())
+                    .isEqualTo(true);
         } finally {
             RpcUtils.terminateRpcService(akkaRpcService, TIMEOUT);
         }
@@ -356,11 +358,11 @@ public class AkkaRpcServiceTest extends TestLogger {
             terminationFuture.get();
             fail("Expected the termination future to complete exceptionally.");
         } catch (ExecutionException e) {
-            assertThat(
-                    ExceptionUtils.findThrowable(e, OnStopException.class).isPresent(), is(true));
+            assertThat(ExceptionUtils.findThrowable(e, OnStopException.class).isPresent())
+                    .isEqualTo(true);
         }
 
-        assertThat(akkaRpcService.getActorSystem().whenTerminated().isCompleted(), is(true));
+        assertThat(akkaRpcService.getActorSystem().whenTerminated().isCompleted()).isEqualTo(true);
     }
 
     @Test
@@ -382,7 +384,11 @@ public class AkkaRpcServiceTest extends TestLogger {
                 gateway.getSerializedValue().join();
                 fail("The endpoint should have been stopped.");
             } catch (Exception e) {
-                assertThat(e, FlinkMatchers.containsCause(RecipientUnreachableException.class));
+                assertThat(e)
+                        .satisfies(
+                                matching(
+                                        FlinkMatchers.containsCause(
+                                                RecipientUnreachableException.class)));
             }
         }
     }
@@ -404,8 +410,8 @@ public class AkkaRpcServiceTest extends TestLogger {
 
         CompletableFuture<Void> terminationFuture = akkaRpcService.stopService();
 
-        assertThat(terminationFuture.isDone(), is(false));
-        assertThat(akkaRpcService.getActorSystem().whenTerminated().isCompleted(), is(false));
+        assertThat(terminationFuture.isDone()).isEqualTo(false);
+        assertThat(akkaRpcService.getActorSystem().whenTerminated().isCompleted()).isEqualTo(false);
 
         countDownLatch.await();
 

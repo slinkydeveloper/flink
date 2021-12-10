@@ -27,10 +27,12 @@ import org.apache.flink.util.CollectionUtil;
 import org.apache.flink.util.TestLogger;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * Tests for {@code DataStream} collect methods.
@@ -49,10 +51,9 @@ public class DataStreamCollectTestITCase extends TestLogger {
 
         try (CloseableIterator<Integer> iterator = stream.executeAndCollect()) {
             List<Integer> results = CollectionUtil.iteratorToList(iterator);
-            Assert.assertThat(
-                    "Failed to collect all data from the stream",
-                    results,
-                    Matchers.containsInAnyOrder(1, 2, 3));
+            assertThat(results)
+                    .as("Failed to collect all data from the stream")
+                    .satisfies(matching(Matchers.containsInAnyOrder(1, 2, 3)));
         }
     }
 
@@ -64,10 +65,9 @@ public class DataStreamCollectTestITCase extends TestLogger {
         DataStream<Integer> stream = env.fromElements(1, 2, 3, 4, 5);
 
         List<Integer> results = stream.executeAndCollect(1);
-        Assert.assertEquals(
-                "Failed to collect the correct number of elements from the stream",
-                1,
-                results.size());
+        assertThat(results.size())
+                .as("Failed to collect the correct number of elements from the stream")
+                .isEqualTo(1);
     }
 
     @Test
@@ -83,10 +83,9 @@ public class DataStreamCollectTestITCase extends TestLogger {
 
         try (CloseableIterator<Integer> iterator = stream.executeAndCollect()) {
             List<Integer> results = CollectionUtil.iteratorToList(iterator);
-            Assert.assertThat(
-                    "Failed to collect all data from the stream",
-                    results,
-                    Matchers.containsInAnyOrder(1, 2, 3));
+            assertThat(results)
+                    .as("Failed to collect all data from the stream")
+                    .satisfies(matching(Matchers.containsInAnyOrder(1, 2, 3)));
         }
     }
 
@@ -102,9 +101,8 @@ public class DataStreamCollectTestITCase extends TestLogger {
         DataStream<Integer> stream = env.fromElements(1, 2, 3, 4, 5);
 
         List<Integer> results = stream.executeAndCollect(1);
-        Assert.assertEquals(
-                "Failed to collect the correct number of elements from the stream",
-                1,
-                results.size());
+        assertThat(results.size())
+                .as("Failed to collect the correct number of elements from the stream")
+                .isEqualTo(1);
     }
 }

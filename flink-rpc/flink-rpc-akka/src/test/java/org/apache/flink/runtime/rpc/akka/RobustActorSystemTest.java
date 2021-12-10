@@ -29,8 +29,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RobustActorSystem}. */
 public class RobustActorSystemTest extends TestLogger {
@@ -69,7 +68,7 @@ public class RobustActorSystemTest extends TestLogger {
         final Throwable uncaughtException =
                 testingUncaughtExceptionHandler.waitForUncaughtException();
 
-        assertThat(uncaughtException, is(error));
+        assertThat(uncaughtException).isEqualTo(error);
     }
 
     @Test
@@ -83,7 +82,7 @@ public class RobustActorSystemTest extends TestLogger {
         final Throwable uncaughtException =
                 testingUncaughtExceptionHandler.waitForUncaughtException();
 
-        assertThat(uncaughtException, is(error));
+        assertThat(uncaughtException).isEqualTo(error);
     }
 
     private static class UncaughtExceptionActor extends AbstractActor {

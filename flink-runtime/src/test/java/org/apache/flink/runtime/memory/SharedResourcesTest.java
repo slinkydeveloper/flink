@@ -22,9 +22,7 @@ import org.junit.Test;
 
 import java.util.function.LongConsumer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link SharedResources} class. */
 public class SharedResourcesTest {
@@ -39,8 +37,8 @@ public class SharedResourcesTest {
                                 "theType", new Object(), TestResource::new, 100)
                         .resourceHandle();
 
-        assertEquals(1, resources.getNumResources());
-        assertFalse(tr.closed);
+        assertThat(resources.getNumResources()).isEqualTo(1);
+        assertThat(tr.closed).isFalse();
     }
 
     @Test
@@ -55,7 +53,7 @@ public class SharedResourcesTest {
 
         resources.release(type, leaseHolder1);
 
-        assertEquals(1, resources.getNumResources());
+        assertThat(resources.getNumResources()).isEqualTo(1);
     }
 
     @Test
@@ -71,7 +69,7 @@ public class SharedResourcesTest {
         resources.release(type, leaseHolder2);
         resources.release(type, leaseHolder2);
 
-        assertEquals(1, resources.getNumResources());
+        assertThat(resources.getNumResources()).isEqualTo(1);
     }
 
     @Test
@@ -83,7 +81,7 @@ public class SharedResourcesTest {
 
         resources.release(type, leaseHolder);
 
-        assertEquals(0, resources.getNumResources());
+        assertThat(resources.getNumResources()).isEqualTo(0);
     }
 
     @Test
@@ -99,7 +97,7 @@ public class SharedResourcesTest {
 
         resources.release(type, leaseHolder);
 
-        assertTrue(tr.closed);
+        assertThat(tr.closed).isTrue();
     }
 
     @Test
@@ -113,7 +111,7 @@ public class SharedResourcesTest {
         resources.getOrAllocateSharedResource(type, leaseHolder, TestResource::new, size);
         resources.release(type, leaseHolder, hook);
 
-        assertTrue(hook.wasCalled);
+        assertThat(hook.wasCalled).isTrue();
     }
 
     @Test
@@ -122,7 +120,7 @@ public class SharedResourcesTest {
 
         resources.release("theType", new Object());
 
-        assertEquals(0, resources.getNumResources());
+        assertThat(resources.getNumResources()).isEqualTo(0);
     }
 
     // ------------------------------------------------------------------------
@@ -157,7 +155,7 @@ public class SharedResourcesTest {
         @Override
         public void accept(long value) {
             wasCalled = true;
-            assertEquals(expectedValue, value);
+            assertThat(value).isEqualTo(expectedValue);
         }
     }
 }

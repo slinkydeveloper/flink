@@ -75,20 +75,13 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.hasItem;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link DeclarativeSlotManager}. */
 public class DeclarativeSlotManagerTest extends TestLogger {
@@ -137,13 +130,12 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.registerTaskManager(
                     taskManagerConnection, slotReport, ResourceProfile.ANY, ResourceProfile.ANY);
 
-            assertThat(
-                    "The number registered slots does not equal the expected number.",
-                    slotManager.getNumberRegisteredSlots(),
-                    is(2));
+            assertThat(slotManager.getNumberRegisteredSlots())
+                    .as("The number registered slots does not equal the expected number.")
+                    .isEqualTo(2);
 
-            assertNotNull(slotTracker.getSlot(slotId1));
-            assertNotNull(slotTracker.getSlot(slotId2));
+            assertThat(slotTracker.getSlot(slotId1)).isNotNull();
+            assertThat(slotTracker.getSlot(slotId2)).isNotNull();
         }
     }
 
@@ -177,17 +169,16 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.registerTaskManager(
                     taskManagerConnection, slotReport, ResourceProfile.ANY, ResourceProfile.ANY);
 
-            assertEquals(
-                    "The number registered slots does not equal the expected number.",
-                    2,
-                    slotManager.getNumberRegisteredSlots());
+            assertThat(slotManager.getNumberRegisteredSlots())
+                    .as("The number registered slots does not equal the expected number.")
+                    .isEqualTo(2);
 
             slotManager.processResourceRequirements(resourceRequirements);
 
             slotManager.unregisterTaskManager(
                     taskManagerConnection.getInstanceID(), TEST_EXCEPTION);
 
-            assertEquals(0, slotManager.getNumberRegisteredSlots());
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(0);
         }
     }
 
@@ -237,8 +228,8 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.processResourceRequirements(resourceRequirements);
 
             final JobID jobId = resourceRequirements.getJobId();
-            assertThat(
-                    getTotalResourceCount(resourceTracker.getMissingResources().get(jobId)), is(1));
+            assertThat(getTotalResourceCount(resourceTracker.getMissingResources().get(jobId)))
+                    .isEqualTo(1);
         }
     }
 
@@ -339,9 +330,8 @@ public class DeclarativeSlotManagerTest extends TestLogger {
                         ResourceProfile.ANY);
             }
 
-            assertThat(
-                    requestFuture.get(),
-                    is(
+            assertThat(requestFuture.get())
+                    .isEqualTo(
                             equalTo(
                                     Tuple6.of(
                                             slotId,
@@ -349,14 +339,13 @@ public class DeclarativeSlotManagerTest extends TestLogger {
                                             requestFuture.get().f2,
                                             resourceProfile,
                                             targetAddress,
-                                            resourceManagerId))));
+                                            resourceManagerId)));
 
             DeclarativeTaskManagerSlot slot = slotTracker.getSlot(slotId);
 
-            assertEquals(
-                    "The slot has not been allocated to the expected allocation id.",
-                    jobId,
-                    slot.getJobId());
+            assertThat(slot.getJobId())
+                    .as("The slot has not been allocated to the expected allocation id.")
+                    .isEqualTo(jobId);
         }
     }
 
@@ -380,13 +369,13 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             DeclarativeTaskManagerSlot slot = slotTracker.getSlot(slotId);
 
-            assertSame(SlotState.ALLOCATED, slot.getState());
+            assertThat(slot.getState()).isSameAs(SlotState.ALLOCATED);
 
             slotManager.freeSlot(slotId, new AllocationID());
 
-            assertSame(SlotState.FREE, slot.getState());
+            assertThat(slot.getState()).isSameAs(SlotState.FREE);
 
-            assertEquals(1, slotManager.getNumberFreeSlots());
+            assertThat(slotManager.getNumberFreeSlots()).isEqualTo(1);
         }
     }
 
@@ -430,14 +419,14 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             DeclarativeTaskManagerSlot slot = slotTracker.getSlot(slotId);
 
-            assertThat(slot.getState(), is(SlotState.ALLOCATED));
+            assertThat(slot.getState()).isEqualTo(SlotState.ALLOCATED);
 
             slotManager.processResourceRequirements(requirements);
         }
 
         // check that we have only called the resource allocation only for the first slot request,
         // since the second request is a duplicate
-        assertThat(allocateResourceCalls.get(), is(0));
+        assertThat(allocateResourceCalls.get()).isEqualTo(0);
     }
 
     /**
@@ -482,10 +471,9 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             DeclarativeTaskManagerSlot slot = slotTracker.getSlot(slotId);
 
-            assertEquals(
-                    "The slot has not been allocated to the expected job id.",
-                    resourceRequirements1.getJobId(),
-                    slot.getJobId());
+            assertThat(slot.getJobId())
+                    .as("The slot has not been allocated to the expected job id.")
+                    .isEqualTo(resourceRequirements1.getJobId());
 
             if (secondRequirementDeclarationTime == SecondRequirementDeclarationTime.BEFORE_FREE) {
                 slotManager.processResourceRequirements(resourceRequirements2);
@@ -504,10 +492,9 @@ public class DeclarativeSlotManagerTest extends TestLogger {
                 slotManager.processResourceRequirements(resourceRequirements2);
             }
 
-            assertEquals(
-                    "The slot has not been allocated to the expected job id.",
-                    resourceRequirements2.getJobId(),
-                    slot.getJobId());
+            assertThat(slot.getJobId())
+                    .as("The slot has not been allocated to the expected job id.")
+                    .isEqualTo(resourceRequirements2.getJobId());
         }
     }
 
@@ -527,13 +514,14 @@ public class DeclarativeSlotManagerTest extends TestLogger {
         try (SlotManager slotManager =
                 createSlotManager(resourceManagerId, resourceManagerActions)) {
             // check that we don't have any slots registered
-            assertThat(slotManager.getNumberRegisteredSlots(), is(0));
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(0);
 
             // this should not update anything since the instance id is not known to the slot
             // manager
-            assertFalse(slotManager.reportSlotStatus(unknownInstanceID, unknownSlotReport));
+            assertThat(slotManager.reportSlotStatus(unknownInstanceID, unknownSlotReport))
+                    .isFalse();
 
-            assertThat(slotManager.getNumberRegisteredSlots(), is(0));
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(0);
         }
     }
 
@@ -565,7 +553,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
                         .buildAndStartWithDirectExec()) {
 
             // check that we don't have any slots registered
-            assertEquals(0, slotManager.getNumberRegisteredSlots());
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(0);
 
             slotManager.registerTaskManager(
                     taskManagerConnection, slotReport1, ResourceProfile.ANY, ResourceProfile.ANY);
@@ -573,23 +561,24 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             DeclarativeTaskManagerSlot slot1 = slotTracker.getSlot(slotId1);
             DeclarativeTaskManagerSlot slot2 = slotTracker.getSlot(slotId2);
 
-            assertEquals(2, slotManager.getNumberRegisteredSlots());
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(2);
 
-            assertSame(SlotState.FREE, slot1.getState());
-            assertSame(SlotState.FREE, slot2.getState());
+            assertThat(slot1.getState()).isSameAs(SlotState.FREE);
+            assertThat(slot2.getState()).isSameAs(SlotState.FREE);
 
-            assertTrue(
-                    slotManager.reportSlotStatus(
-                            taskManagerConnection.getInstanceID(), slotReport2));
+            assertThat(
+                            slotManager.reportSlotStatus(
+                                    taskManagerConnection.getInstanceID(), slotReport2))
+                    .isTrue();
 
-            assertEquals(2, slotManager.getNumberRegisteredSlots());
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(2);
 
-            assertNotNull(slotTracker.getSlot(slotId1));
-            assertNotNull(slotTracker.getSlot(slotId2));
+            assertThat(slotTracker.getSlot(slotId1)).isNotNull();
+            assertThat(slotTracker.getSlot(slotId2)).isNotNull();
 
             // slot1 should still be free, slot2 should have been allocated
-            assertSame(SlotState.FREE, slot1.getState());
-            assertEquals(jobId, slotTracker.getSlot(slotId2).getJobId());
+            assertThat(slot1.getState()).isSameAs(SlotState.FREE);
+            assertThat(slotTracker.getSlot(slotId2).getJobId()).isEqualTo(jobId);
         }
     }
 
@@ -692,7 +681,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.processResourceRequirements(resourceRequirements);
 
             final SlotID firstSlotId = slotIds.take();
-            assertThat(slotIds, is(empty()));
+            assertThat(slotIds).isEqualTo(empty());
 
             DeclarativeTaskManagerSlot failedSlot = slotTracker.getSlot(firstSlotId);
 
@@ -700,21 +689,22 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotRequestFuture1.completeExceptionally(
                     new SlotAllocationException("Test exception."));
 
-            assertThat(getTotalResourceCount(resourceTracker.getAcquiredResources(jobId)), is(1));
+            assertThat(getTotalResourceCount(resourceTracker.getAcquiredResources(jobId)))
+                    .isEqualTo(1);
 
             // the second attempt succeeds
             slotRequestFuture2.complete(Acknowledge.get());
 
             final SlotID secondSlotId = slotIds.take();
-            assertThat(slotIds, is(empty()));
+            assertThat(slotIds).isEqualTo(empty());
 
             DeclarativeTaskManagerSlot slot = slotTracker.getSlot(secondSlotId);
 
-            assertThat(slot.getState(), is(SlotState.ALLOCATED));
-            assertEquals(jobId, slot.getJobId());
+            assertThat(slot.getState()).isEqualTo(SlotState.ALLOCATED);
+            assertThat(slot.getJobId()).isEqualTo(jobId);
 
             if (!failedSlot.getSlotId().equals(slot.getSlotId())) {
-                assertThat(failedSlot.getState(), is(SlotState.FREE));
+                assertThat(failedSlot.getState()).isEqualTo(SlotState.FREE);
             }
         }
     }
@@ -778,7 +768,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             final SlotID secondRequestedSlotId = requestedSlotIds.take();
 
-            assertEquals(freeSlotId, secondRequestedSlotId);
+            assertThat(secondRequestedSlotId).isEqualTo(freeSlotId);
         }
     }
 
@@ -815,7 +805,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
                     ResourceProfile.ANY,
                     ResourceProfile.ANY);
 
-            assertThat(slotManager.getNumberRegisteredSlots(), is(equalTo(1)));
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(equalTo(1));
 
             // Now report this slot as allocated
             final SlotStatus slotStatus = createAllocatedSlotStatus(slotId);
@@ -829,9 +819,9 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             slotManager.processResourceRequirements(requirements);
 
-            assertThat(slotTracker.getSlot(slotId).getJobId(), is(slotStatus.getJobID()));
-            assertThat(
-                    getTotalResourceCount(resourceTracker.getMissingResources().get(jobId)), is(1));
+            assertThat(slotTracker.getSlot(slotId).getJobId()).isEqualTo(slotStatus.getJobID());
+            assertThat(getTotalResourceCount(resourceTracker.getMissingResources().get(jobId)))
+                    .isEqualTo(1);
         }
     }
 
@@ -904,14 +894,14 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             final Tuple6<SlotID, JobID, AllocationID, ResourceProfile, String, ResourceManagerId>
                     secondRequest = requestSlotQueue.take();
 
-            assertThat(secondRequest.f1, equalTo(firstRequest.f1));
-            assertThat(secondRequest.f0, equalTo(firstRequest.f0));
+            assertThat(secondRequest.f1).isEqualTo(firstRequest.f1);
+            assertThat(secondRequest.f0).isEqualTo(firstRequest.f0);
 
             secondManualSlotRequestResponse.complete(Acknowledge.get());
 
             final DeclarativeTaskManagerSlot slot = slotTracker.getSlot(secondRequest.f0);
-            assertThat(slot.getState(), equalTo(SlotState.ALLOCATED));
-            assertThat(slot.getJobId(), equalTo(secondRequest.f1));
+            assertThat(slot.getState()).isEqualTo(SlotState.ALLOCATED);
+            assertThat(slot.getJobId()).isEqualTo(secondRequest.f1);
         }
     }
 
@@ -990,16 +980,17 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             secondManualSlotRequestResponse.completeExceptionally(
                     new SlotOccupiedException("Test exception", new AllocationID(), jobID));
 
-            assertThat(firstRequest.f1, equalTo(jobID));
-            assertThat(secondRequest.f1, equalTo(jobID));
-            assertThat(secondRequest.f0, equalTo(firstRequest.f0));
+            assertThat(firstRequest.f1).isEqualTo(jobID);
+            assertThat(secondRequest.f1).isEqualTo(jobID);
+            assertThat(secondRequest.f0).isEqualTo(firstRequest.f0);
 
             final DeclarativeTaskManagerSlot slot = slotTracker.getSlot(secondRequest.f0);
-            assertThat(slot.getState(), equalTo(SlotState.ALLOCATED));
-            assertThat(slot.getJobId(), equalTo(firstRequest.f1));
+            assertThat(slot.getState()).isEqualTo(SlotState.ALLOCATED);
+            assertThat(slot.getJobId()).isEqualTo(firstRequest.f1);
 
-            assertThat(slotManager.getNumberRegisteredSlots(), is(1));
-            assertThat(getTotalResourceCount(resourceTracker.getAcquiredResources(jobID)), is(1));
+            assertThat(slotManager.getNumberRegisteredSlots()).isEqualTo(1);
+            assertThat(getTotalResourceCount(resourceTracker.getAcquiredResources(jobID)))
+                    .isEqualTo(1);
         }
     }
 
@@ -1028,8 +1019,8 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.unregisterTaskManager(
                     taskExecutionConnection1.getInstanceID(), TEST_EXCEPTION);
 
-            assertThat(
-                    getTotalResourceCount(resourceTracker.getMissingResources().get(jobId)), is(2));
+            assertThat(getTotalResourceCount(resourceTracker.getMissingResources().get(jobId)))
+                    .isEqualTo(2);
         }
     }
 
@@ -1059,13 +1050,13 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             // the first 2 requirements should be fulfillable with the pending slots of the first
             // allocation (2 slots per worker)
             slotManager.processResourceRequirements(createResourceRequirements(jobId, 1));
-            assertThat(resourceRequests.get(), is(1));
+            assertThat(resourceRequests.get()).isEqualTo(1);
 
             slotManager.processResourceRequirements(createResourceRequirements(jobId, 2));
-            assertThat(resourceRequests.get(), is(1));
+            assertThat(resourceRequests.get()).isEqualTo(1);
 
             slotManager.processResourceRequirements(createResourceRequirements(jobId, 3));
-            assertThat(resourceRequests.get(), is(2));
+            assertThat(resourceRequests.get()).isEqualTo(2);
         }
     }
 
@@ -1112,8 +1103,8 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             final Set<JobID> jobIds =
                     new HashSet<>(
                             FutureUtils.combineAll(requestSlotFutures).get(10L, TimeUnit.SECONDS));
-            assertThat(jobIds, hasSize(1));
-            assertThat(jobIds, containsInAnyOrder(jobId));
+            assertThat(jobIds).satisfies(matching(hasSize(1)));
+            assertThat(jobIds).satisfies(matching(containsInAnyOrder(jobId)));
         }
     }
 
@@ -1195,24 +1186,23 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.processResourceRequirements(resourceRequirements);
 
             if (withNotificationGracePeriod) {
-                assertThat(notEnoughResourceNotifications, empty());
+                assertThat(notEnoughResourceNotifications).satisfies(matching(empty()));
 
                 // re-enable notifications which should also trigger another resource check
                 slotManager.setFailUnfulfillableRequest(true);
             }
 
-            assertThat(notEnoughResourceNotifications, hasSize(1));
+            assertThat(notEnoughResourceNotifications).satisfies(matching(hasSize(1)));
             Tuple2<JobID, Collection<ResourceRequirement>> notification =
                     notEnoughResourceNotifications.get(0);
-            assertThat(notification.f0, is(jobId));
-            assertThat(
-                    notification.f1,
-                    hasItem(ResourceRequirement.create(ResourceProfile.ANY, numExistingSlots)));
+            assertThat(notification.f0).isEqualTo(jobId);
+            assertThat(notification.f1)
+                    .contains(ResourceRequirement.create(ResourceProfile.ANY, numExistingSlots));
 
             // another slot report that does not indicate any changes should not trigger another
             // notification
             slotManager.reportSlotStatus(taskExecutionConnection.getInstanceID(), slotReport);
-            assertThat(notEnoughResourceNotifications, hasSize(1));
+            assertThat(notEnoughResourceNotifications).satisfies(matching(hasSize(1)));
         }
     }
 
@@ -1257,7 +1247,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             executor.triggerAll();
 
-            assertThat(trackingSecurityManager.getSystemExitFuture().isDone(), is(false));
+            assertThat(trackingSecurityManager.getSystemExitFuture().isDone()).isEqualTo(false);
         } finally {
             System.setSecurityManager(null);
         }
@@ -1307,7 +1297,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             executor.triggerAll();
 
-            assertThat(trackingSecurityManager.getSystemExitFuture().isDone(), is(false));
+            assertThat(trackingSecurityManager.getSystemExitFuture().isDone()).isEqualTo(false);
         } finally {
             System.setSecurityManager(null);
         }
@@ -1374,7 +1364,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             firstSlotRequestAcknowledgeFuture.complete(Acknowledge.get());
 
             // sanity check that the acknowledge was really ignored
-            assertThat(slotTracker.getSlot(slotId).getJobId(), is(not(firstJobId)));
+            assertThat(slotTracker.getSlot(slotId).getJobId()).isEqualTo(not(firstJobId));
         }
     }
 
@@ -1406,15 +1396,15 @@ public class DeclarativeSlotManagerTest extends TestLogger {
 
             // setup initial requirements, which should not trigger slots being reclaimed
             slotManager.processResourceRequirements(createResourceRequirements(jobId, 2));
-            assertThat(freeInactiveSlotsJobIdFuture.isDone(), is(false));
+            assertThat(freeInactiveSlotsJobIdFuture.isDone()).isEqualTo(false);
 
             // set requirements to 0, which should not trigger slots being reclaimed
             slotManager.processResourceRequirements(ResourceRequirements.empty(jobId, "foobar"));
-            assertThat(freeInactiveSlotsJobIdFuture.isDone(), is(false));
+            assertThat(freeInactiveSlotsJobIdFuture.isDone()).isEqualTo(false);
 
             // clear requirements, which should trigger slots being reclaimed
             slotManager.clearResourceRequirements(jobId);
-            assertThat(freeInactiveSlotsJobIdFuture.get(), is(jobId));
+            assertThat(freeInactiveSlotsJobIdFuture.get()).isEqualTo(jobId);
         }
     }
 
@@ -1450,7 +1440,7 @@ public class DeclarativeSlotManagerTest extends TestLogger {
             slotManager.processResourceRequirements(createResourceRequirements(jobId, 2));
             slotManager.clearResourceRequirements(jobId);
 
-            assertThat(resourceTracker.getMissingResources().keySet(), empty());
+            assertThat(resourceTracker.getMissingResources().keySet()).satisfies(matching(empty()));
         }
     }
 
@@ -1480,9 +1470,9 @@ public class DeclarativeSlotManagerTest extends TestLogger {
                         .buildAndStartWithDirectExec();
 
         // sanity check to ensure metrics were actually registered
-        assertThat(registeredMetrics.get(), greaterThan(0));
+        assertThat(registeredMetrics.get()).isGreaterThan(0);
         closeFn.accept(slotManager);
-        assertThat(registeredMetrics.get(), is(0));
+        assertThat(registeredMetrics.get()).isEqualTo(0);
     }
 
     private static SlotReport createSlotReport(ResourceID taskExecutorResourceId, int numberSlots) {

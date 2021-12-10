@@ -35,9 +35,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.configuration.ConfigOptions.key;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link GenericCLI}. */
 public class GenericCLITest {
@@ -66,7 +64,7 @@ public class GenericCLITest {
         final CommandLine emptyCommandLine =
                 CliFrontendParser.parse(testOptions, new String[0], true);
 
-        assertTrue(cliUnderTest.isActive(emptyCommandLine));
+        assertThat(cliUnderTest.isActive(emptyCommandLine)).isTrue();
     }
 
     @Test
@@ -95,10 +93,10 @@ public class GenericCLITest {
 
         final Configuration configuration = cliUnderTest.toConfiguration(commandLine);
 
-        assertEquals("test-executor", configuration.getString(DeploymentOptions.TARGET));
-        assertEquals(5, configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM));
-        assertFalse(configuration.getBoolean(DeploymentOptions.ATTACHED));
-        assertEquals(listValue, configuration.get(listOption));
+        assertThat(configuration.getString(DeploymentOptions.TARGET)).isEqualTo("test-executor");
+        assertThat(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM)).isEqualTo(5);
+        assertThat(configuration.getBoolean(DeploymentOptions.ATTACHED)).isFalse();
+        assertThat(configuration.get(listOption)).isEqualTo(listValue);
     }
 
     @Test
@@ -125,7 +123,7 @@ public class GenericCLITest {
         final CommandLine commandLine = CliFrontendParser.parse(testOptions, args, true);
 
         final Configuration configuration = cliUnderTest.toConfiguration(commandLine);
-        assertEquals(expectedExecutorName, configuration.get(DeploymentOptions.TARGET));
-        assertEquals(expectedValue, configuration.getInteger(configOption));
+        assertThat(configuration.get(DeploymentOptions.TARGET)).isEqualTo(expectedExecutorName);
+        assertThat(configuration.getInteger(configOption)).isEqualTo(expectedValue);
     }
 }

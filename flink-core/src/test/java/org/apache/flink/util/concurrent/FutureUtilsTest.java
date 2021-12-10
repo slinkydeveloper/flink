@@ -28,7 +28,6 @@ import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.FlinkRuntimeException;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -52,20 +51,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the utility methods in {@link FutureUtils}. */
 public class FutureUtilsTest extends TestLogger {
@@ -95,8 +89,8 @@ public class FutureUtilsTest extends TestLogger {
                         retries,
                         TestingUtils.defaultExecutor());
 
-        assertTrue(retryFuture.get());
-        assertEquals(retries, atomicInteger.get());
+        assertThat(retryFuture.get()).isTrue();
+        assertThat(atomicInteger.get()).isEqualTo(retries);
     }
 
     /** Tests that a retry future is failed after all retries have been consumed. */
@@ -152,7 +146,7 @@ public class FutureUtilsTest extends TestLogger {
         // await that we have failed once
         notificationLatch.await();
 
-        assertFalse(retryFuture.isDone());
+        assertThat(retryFuture.isDone()).isFalse();
 
         // cancel the retry future
         retryFuture.cancel(false);
@@ -160,8 +154,8 @@ public class FutureUtilsTest extends TestLogger {
         // let the retry operation continue
         waitLatch.trigger();
 
-        assertTrue(retryFuture.isCancelled());
-        assertEquals(2, atomicInteger.get());
+        assertThat(retryFuture.isCancelled()).isTrue();
+        assertThat(atomicInteger.get()).isEqualTo(2);
 
         if (atomicThrowable.get() != null) {
             throw new FlinkException(
@@ -202,9 +196,9 @@ public class FutureUtilsTest extends TestLogger {
             retryFuture.get();
             fail("Exception should be thrown.");
         } catch (Exception ex) {
-            assertThat(ex, FlinkMatchers.containsCause(nonRetryableException));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsCause(nonRetryableException)));
         }
-        assertThat(atomicInteger.get(), is(notRetry));
+        assertThat(atomicInteger.get()).isEqualTo(notRetry);
     }
 
     /** Tests that retry with delay fails after having exceeded all retries. */
@@ -274,10 +268,10 @@ public class FutureUtilsTest extends TestLogger {
 
         long completionTime = System.currentTimeMillis() - start;
 
-        assertTrue(result);
-        assertTrue(
-                "The completion time should be at least retries times delay between retries.",
-                completionTime >= retries * delay.toMilliseconds());
+        assertThat(result).isTrue();
+        assertThat(completionTime >= retries * delay.toMilliseconds())
+                .as("The completion time should be at least retries times delay between retries.")
+                .isTrue();
     }
 
     /**
@@ -310,10 +304,10 @@ public class FutureUtilsTest extends TestLogger {
 
         long completionTime = System.currentTimeMillis() - start;
 
-        assertTrue(result);
-        assertTrue(
-                "The completion time should be at least retries times delay between retries.",
-                completionTime >= (2 + 4 + 5 + 5));
+        assertThat(result).isTrue();
+        assertThat(completionTime >= (2 + 4 + 5 + 5))
+                .as("The completion time should be at least retries times delay between retries.")
+                .isTrue();
     }
 
     /** Tests that all scheduled tasks are canceled if the retry future is being cancelled. */
@@ -331,21 +325,21 @@ public class FutureUtilsTest extends TestLogger {
                         TestingUtils.infiniteTime(),
                         scheduledExecutor);
 
-        assertFalse(retryFuture.isDone());
+        assertThat(retryFuture.isDone()).isFalse();
 
         final Collection<ScheduledFuture<?>> scheduledTasks =
                 scheduledExecutor.getActiveScheduledTasks();
 
-        assertFalse(scheduledTasks.isEmpty());
+        assertThat(scheduledTasks.isEmpty()).isFalse();
 
         final ScheduledFuture<?> scheduledFuture = scheduledTasks.iterator().next();
 
-        assertFalse(scheduledFuture.isDone());
+        assertThat(scheduledFuture.isDone()).isFalse();
 
         retryFuture.cancel(false);
 
-        assertTrue(retryFuture.isCancelled());
-        assertTrue(scheduledFuture.isCancelled());
+        assertThat(retryFuture.isCancelled()).isTrue();
+        assertThat(scheduledFuture.isCancelled()).isTrue();
     }
 
     /** Tests that the operation could be scheduled with expected delay. */
@@ -362,7 +356,7 @@ public class FutureUtilsTest extends TestLogger {
         scheduledExecutor.triggerScheduledTasks();
         final int actualResult = completableFuture.get();
 
-        assertEquals(expectedResult, actualResult);
+        assertThat(actualResult).isEqualTo(expectedResult);
     }
 
     /** Tests that a scheduled task is canceled if the scheduled future is being cancelled. */
@@ -381,8 +375,8 @@ public class FutureUtilsTest extends TestLogger {
 
         completableFuture.cancel(false);
 
-        assertTrue(completableFuture.isCancelled());
-        assertTrue(scheduledFuture.isCancelled());
+        assertThat(completableFuture.isCancelled()).isTrue();
+        assertThat(scheduledFuture.isCancelled()).isTrue();
     }
 
     /** Tests that the operation is never scheduled if the delay is virtually infinite. */
@@ -395,7 +389,7 @@ public class FutureUtilsTest extends TestLogger {
                         TestingUtils.infiniteTime(),
                         TestingUtils.defaultScheduledExecutor());
 
-        assertFalse(completableFuture.isDone());
+        assertThat(completableFuture.isDone()).isFalse();
 
         completableFuture.cancel(false);
     }
@@ -411,7 +405,8 @@ public class FutureUtilsTest extends TestLogger {
         try {
             future.get();
         } catch (ExecutionException e) {
-            assertTrue(ExceptionUtils.stripExecutionException(e) instanceof TimeoutException);
+            assertThat(ExceptionUtils.stripExecutionException(e))
+                    .isInstanceOf(TimeoutException.class);
         }
     }
 
@@ -447,7 +442,7 @@ public class FutureUtilsTest extends TestLogger {
                             new ScheduledExecutorServiceAdapter(retryExecutor))
                     .get();
         } catch (final ExecutionException e) {
-            assertThat(e.getMessage(), containsString("should propagate"));
+            assertThat(e.getMessage()).contains("should propagate");
         }
     }
 
@@ -459,13 +454,13 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Void> runFuture =
                 FutureUtils.runAfterwards(inputFuture, runnableLatch::trigger);
 
-        assertThat(runnableLatch.isTriggered(), is(false));
-        assertThat(runFuture.isDone(), is(false));
+        assertThat(runnableLatch.isTriggered()).isEqualTo(false);
+        assertThat(runFuture.isDone()).isEqualTo(false);
 
         inputFuture.complete(null);
 
-        assertThat(runnableLatch.isTriggered(), is(true));
-        assertThat(runFuture.isDone(), is(true));
+        assertThat(runnableLatch.isTriggered()).isEqualTo(true);
+        assertThat(runFuture.isDone()).isEqualTo(true);
 
         // check that this future is not exceptionally completed
         runFuture.get();
@@ -480,19 +475,19 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Void> runFuture =
                 FutureUtils.runAfterwards(inputFuture, runnableLatch::trigger);
 
-        assertThat(runnableLatch.isTriggered(), is(false));
-        assertThat(runFuture.isDone(), is(false));
+        assertThat(runnableLatch.isTriggered()).isEqualTo(false);
+        assertThat(runFuture.isDone()).isEqualTo(false);
 
         inputFuture.completeExceptionally(testException);
 
-        assertThat(runnableLatch.isTriggered(), is(true));
-        assertThat(runFuture.isDone(), is(true));
+        assertThat(runnableLatch.isTriggered()).isEqualTo(true);
+        assertThat(runFuture.isDone()).isEqualTo(true);
 
         try {
             runFuture.get();
             fail("Expected an exceptional completion");
         } catch (ExecutionException ee) {
-            assertThat(ExceptionUtils.stripExecutionException(ee), is(testException));
+            assertThat(ExceptionUtils.stripExecutionException(ee)).isEqualTo(testException);
         }
     }
 
@@ -509,13 +504,13 @@ public class FutureUtilsTest extends TestLogger {
                             return CompletableFuture.completedFuture(null);
                         });
 
-        assertThat(composeLatch.isTriggered(), is(false));
-        assertThat(composeFuture.isDone(), is(false));
+        assertThat(composeLatch.isTriggered()).isEqualTo(false);
+        assertThat(composeFuture.isDone()).isEqualTo(false);
 
         inputFuture.complete(null);
 
-        assertThat(composeLatch.isTriggered(), is(true));
-        assertThat(composeFuture.isDone(), is(true));
+        assertThat(composeLatch.isTriggered()).isEqualTo(true);
+        assertThat(composeFuture.isDone()).isEqualTo(true);
 
         // check that tthis future is not exceptionally completed
         composeFuture.get();
@@ -535,20 +530,20 @@ public class FutureUtilsTest extends TestLogger {
                             return CompletableFuture.completedFuture(null);
                         });
 
-        assertThat(composeLatch.isTriggered(), is(false));
-        assertThat(composeFuture.isDone(), is(false));
+        assertThat(composeLatch.isTriggered()).isEqualTo(false);
+        assertThat(composeFuture.isDone()).isEqualTo(false);
 
         inputFuture.completeExceptionally(testException);
 
-        assertThat(composeLatch.isTriggered(), is(true));
-        assertThat(composeFuture.isDone(), is(true));
+        assertThat(composeLatch.isTriggered()).isEqualTo(true);
+        assertThat(composeFuture.isDone()).isEqualTo(true);
 
         // check that this future is not exceptionally completed
         try {
             composeFuture.get();
             fail("Expected an exceptional completion");
         } catch (ExecutionException ee) {
-            assertThat(ExceptionUtils.stripExecutionException(ee), is(testException));
+            assertThat(ExceptionUtils.stripExecutionException(ee)).isEqualTo(testException);
         }
     }
 
@@ -566,20 +561,20 @@ public class FutureUtilsTest extends TestLogger {
                             return FutureUtils.completedExceptionally(testException);
                         });
 
-        assertThat(composeLatch.isTriggered(), is(false));
-        assertThat(composeFuture.isDone(), is(false));
+        assertThat(composeLatch.isTriggered()).isEqualTo(false);
+        assertThat(composeFuture.isDone()).isEqualTo(false);
 
         inputFuture.complete(null);
 
-        assertThat(composeLatch.isTriggered(), is(true));
-        assertThat(composeFuture.isDone(), is(true));
+        assertThat(composeLatch.isTriggered()).isEqualTo(true);
+        assertThat(composeFuture.isDone()).isEqualTo(true);
 
         // check that this future is not exceptionally completed
         try {
             composeFuture.get();
             fail("Expected an exceptional completion");
         } catch (ExecutionException ee) {
-            assertThat(ExceptionUtils.stripExecutionException(ee), is(testException));
+            assertThat(ExceptionUtils.stripExecutionException(ee)).isEqualTo(testException);
         }
     }
 
@@ -598,13 +593,13 @@ public class FutureUtilsTest extends TestLogger {
                             return FutureUtils.completedExceptionally(testException2);
                         });
 
-        assertThat(composeLatch.isTriggered(), is(false));
-        assertThat(composeFuture.isDone(), is(false));
+        assertThat(composeLatch.isTriggered()).isEqualTo(false);
+        assertThat(composeFuture.isDone()).isEqualTo(false);
 
         inputFuture.completeExceptionally(testException1);
 
-        assertThat(composeLatch.isTriggered(), is(true));
-        assertThat(composeFuture.isDone(), is(true));
+        assertThat(composeLatch.isTriggered()).isEqualTo(true);
+        assertThat(composeFuture.isDone()).isEqualTo(true);
 
         // check that this future is not exceptionally completed
         try {
@@ -612,9 +607,9 @@ public class FutureUtilsTest extends TestLogger {
             fail("Expected an exceptional completion");
         } catch (ExecutionException ee) {
             final Throwable actual = ExceptionUtils.stripExecutionException(ee);
-            assertThat(actual, is(testException1));
-            assertThat(actual.getSuppressed(), arrayWithSize(1));
-            assertThat(actual.getSuppressed()[0], is(testException2));
+            assertThat(actual).isEqualTo(testException1);
+            assertThat(actual.getSuppressed()).satisfies(matching(arrayWithSize(1)));
+            assertThat(actual.getSuppressed()[0]).isEqualTo(testException2);
         }
     }
 
@@ -628,19 +623,19 @@ public class FutureUtilsTest extends TestLogger {
         final FutureUtils.ConjunctFuture<Void> completeFuture =
                 FutureUtils.completeAll(futuresToComplete);
 
-        assertThat(completeFuture.isDone(), is(false));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(0));
-        assertThat(completeFuture.getNumFuturesTotal(), is(futuresToComplete.size()));
+        assertThat(completeFuture.isDone()).isEqualTo(false);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(0);
+        assertThat(completeFuture.getNumFuturesTotal()).isEqualTo(futuresToComplete.size());
 
         inputFuture2.complete(42);
 
-        assertThat(completeFuture.isDone(), is(false));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(1));
+        assertThat(completeFuture.isDone()).isEqualTo(false);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(1);
 
         inputFuture1.complete("foobar");
 
-        assertThat(completeFuture.isDone(), is(true));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(2));
+        assertThat(completeFuture.isDone()).isEqualTo(true);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(2);
 
         completeFuture.get();
     }
@@ -655,26 +650,26 @@ public class FutureUtilsTest extends TestLogger {
         final FutureUtils.ConjunctFuture<Void> completeFuture =
                 FutureUtils.completeAll(futuresToComplete);
 
-        assertThat(completeFuture.isDone(), is(false));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(0));
-        assertThat(completeFuture.getNumFuturesTotal(), is(futuresToComplete.size()));
+        assertThat(completeFuture.isDone()).isEqualTo(false);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(0);
+        assertThat(completeFuture.getNumFuturesTotal()).isEqualTo(futuresToComplete.size());
 
         final FlinkException testException1 = new FlinkException("Test exception 1");
         inputFuture2.completeExceptionally(testException1);
 
-        assertThat(completeFuture.isDone(), is(false));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(1));
+        assertThat(completeFuture.isDone()).isEqualTo(false);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(1);
 
         inputFuture1.complete("foobar");
 
-        assertThat(completeFuture.isDone(), is(true));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(2));
+        assertThat(completeFuture.isDone()).isEqualTo(true);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(2);
 
         try {
             completeFuture.get();
             fail("Expected an exceptional completion");
         } catch (ExecutionException ee) {
-            assertThat(ExceptionUtils.stripExecutionException(ee), is(testException1));
+            assertThat(ExceptionUtils.stripExecutionException(ee)).isEqualTo(testException1);
         }
     }
 
@@ -688,21 +683,21 @@ public class FutureUtilsTest extends TestLogger {
         final FutureUtils.ConjunctFuture<Void> completeFuture =
                 FutureUtils.completeAll(futuresToComplete);
 
-        assertThat(completeFuture.isDone(), is(false));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(0));
-        assertThat(completeFuture.getNumFuturesTotal(), is(futuresToComplete.size()));
+        assertThat(completeFuture.isDone()).isEqualTo(false);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(0);
+        assertThat(completeFuture.getNumFuturesTotal()).isEqualTo(futuresToComplete.size());
 
         final FlinkException testException1 = new FlinkException("Test exception 1");
         inputFuture1.completeExceptionally(testException1);
 
-        assertThat(completeFuture.isDone(), is(false));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(1));
+        assertThat(completeFuture.isDone()).isEqualTo(false);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(1);
 
         final FlinkException testException2 = new FlinkException("Test exception 2");
         inputFuture2.completeExceptionally(testException2);
 
-        assertThat(completeFuture.isDone(), is(true));
-        assertThat(completeFuture.getNumFuturesCompleted(), is(2));
+        assertThat(completeFuture.isDone()).isEqualTo(true);
+        assertThat(completeFuture.getNumFuturesCompleted()).isEqualTo(2);
 
         try {
             completeFuture.get();
@@ -719,8 +714,8 @@ public class FutureUtilsTest extends TestLogger {
                 suppressedException = testException1;
             }
 
-            assertThat(suppressed, is(not(emptyArray())));
-            assertThat(suppressed, arrayContaining(suppressedException));
+            assertThat(suppressed).isEqualTo(not(emptyArray()));
+            assertThat(suppressed).satisfies(matching(arrayContaining(suppressedException)));
         }
     }
 
@@ -739,9 +734,8 @@ public class FutureUtilsTest extends TestLogger {
             future.get();
             fail("Expected an exception.");
         } catch (ExecutionException e) {
-            assertThat(
-                    ExceptionUtils.findThrowableWithMessage(e, exceptionMessage).isPresent(),
-                    is(true));
+            assertThat(ExceptionUtils.findThrowableWithMessage(e, exceptionMessage).isPresent())
+                    .isEqualTo(true);
         }
     }
 
@@ -751,7 +745,7 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Object> future =
                 FutureUtils.supplyAsync(() -> expectedResult, TestingUtils.defaultExecutor());
 
-        assertEquals(future.get(), expectedResult);
+        assertThat(expectedResult).isEqualTo(future.get());
     }
 
     @Test
@@ -806,20 +800,20 @@ public class FutureUtilsTest extends TestLogger {
         // branch for a start future that has not completed
         CompletableFuture<?> continuationFuture =
                 testFunctionGenerator.apply(startFuture, executor);
-        Assert.assertFalse(continuationFuture.isDone());
+        assertThat(continuationFuture.isDone()).isFalse();
 
         startFuture.complete(null);
 
-        Assert.assertTrue(runWithExecutor.get());
-        Assert.assertTrue(continuationFuture.isDone());
+        assertThat(runWithExecutor.get()).isTrue();
+        assertThat(continuationFuture.isDone()).isTrue();
 
         // branch for a start future that was completed
         runWithExecutor.set(false);
 
         continuationFuture = testFunctionGenerator.apply(startFuture, executor);
 
-        Assert.assertFalse(runWithExecutor.get());
-        Assert.assertTrue(continuationFuture.isDone());
+        assertThat(runWithExecutor.get()).isFalse();
+        assertThat(continuationFuture.isDone()).isTrue();
     }
 
     @Test
@@ -827,7 +821,7 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<String> future = CompletableFuture.completedFuture("foobar");
         final CompletableFuture<String> handled =
                 FutureUtils.handleException(future, Exception.class, exception -> "handled");
-        assertEquals("foobar", handled.join());
+        assertThat(handled.join()).isEqualTo("foobar");
     }
 
     @Test
@@ -836,7 +830,7 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<String> handled =
                 FutureUtils.handleException(future, Exception.class, exception -> "handled");
         future.complete("foobar");
-        assertEquals("foobar", handled.join());
+        assertThat(handled.join()).isEqualTo("foobar");
     }
 
     @Test
@@ -846,7 +840,7 @@ public class FutureUtilsTest extends TestLogger {
                 FutureUtils.handleException(
                         future, UnsupportedOperationException.class, exception -> "handled");
         future.completeExceptionally(new UnsupportedOperationException("foobar"));
-        assertEquals("handled", handled.join());
+        assertThat(handled.join()).isEqualTo("handled");
     }
 
     @Test
@@ -857,9 +851,9 @@ public class FutureUtilsTest extends TestLogger {
                         future, UnsupportedOperationException.class, exception -> "handled");
         final IllegalArgumentException futureException = new IllegalArgumentException("foobar");
         future.completeExceptionally(futureException);
-        final CompletionException completionException =
-                assertThrows(CompletionException.class, handled::join);
-        assertEquals(futureException, completionException.getCause());
+        assertThatThrownBy(handled::join)
+                .isInstanceOf(CompletionException.class)
+                .hasCause(futureException);
     }
 
     @Test
@@ -875,9 +869,9 @@ public class FutureUtilsTest extends TestLogger {
                             throw handlerException;
                         });
         future.completeExceptionally(new UnsupportedOperationException("foobar"));
-        final CompletionException completionException =
-                assertThrows(CompletionException.class, handled::join);
-        assertEquals(handlerException, completionException.getCause());
+        assertThatThrownBy(handled::join)
+                .isInstanceOf(CompletionException.class)
+                .hasCause(handlerException);
     }
 
     @Test
@@ -887,7 +881,7 @@ public class FutureUtilsTest extends TestLogger {
                 new TestingUncaughtExceptionHandler();
 
         FutureUtils.handleUncaughtException(future, uncaughtExceptionHandler);
-        assertThat(uncaughtExceptionHandler.hasBeenCalled(), is(false));
+        assertThat(uncaughtExceptionHandler.hasBeenCalled()).isEqualTo(false);
     }
 
     @Test
@@ -899,7 +893,7 @@ public class FutureUtilsTest extends TestLogger {
 
         FutureUtils.handleUncaughtException(future, uncaughtExceptionHandler);
         future.complete("barfoo");
-        assertThat(uncaughtExceptionHandler.hasBeenCalled(), is(false));
+        assertThat(uncaughtExceptionHandler.hasBeenCalled()).isEqualTo(false);
     }
 
     @Test
@@ -911,7 +905,7 @@ public class FutureUtilsTest extends TestLogger {
                 new TestingUncaughtExceptionHandler();
 
         FutureUtils.handleUncaughtException(future, uncaughtExceptionHandler);
-        assertThat(uncaughtExceptionHandler.hasBeenCalled(), is(true));
+        assertThat(uncaughtExceptionHandler.hasBeenCalled()).isEqualTo(true);
     }
 
     @Test
@@ -922,9 +916,9 @@ public class FutureUtilsTest extends TestLogger {
                 new TestingUncaughtExceptionHandler();
 
         FutureUtils.handleUncaughtException(future, uncaughtExceptionHandler);
-        assertThat(uncaughtExceptionHandler.hasBeenCalled(), is(false));
+        assertThat(uncaughtExceptionHandler.hasBeenCalled()).isEqualTo(false);
         future.completeExceptionally(new FlinkException("barfoo"));
-        assertThat(uncaughtExceptionHandler.hasBeenCalled(), is(true));
+        assertThat(uncaughtExceptionHandler.hasBeenCalled()).isEqualTo(true);
     }
 
     private static class TestingUncaughtExceptionHandler
@@ -949,12 +943,12 @@ public class FutureUtilsTest extends TestLogger {
 
         FutureUtils.forward(source, target);
 
-        assertThat(target.isDone(), is(source.isDone()));
+        assertThat(target.isDone()).isEqualTo(source.isDone());
 
         source.complete("foobar");
 
-        assertThat(target.isDone(), is(source.isDone()));
-        assertThat(target.get(), is(equalTo(source.get())));
+        assertThat(target.isDone()).isEqualTo(source.isDone());
+        assertThat(target.get()).isEqualTo(equalTo(source.get()));
     }
 
     @Test
@@ -964,16 +958,16 @@ public class FutureUtilsTest extends TestLogger {
 
         FutureUtils.forward(source, target);
 
-        assertThat(target.isDone(), is(source.isDone()));
+        assertThat(target.isDone()).isEqualTo(source.isDone());
 
         source.completeExceptionally(new FlinkException("foobar"));
 
-        assertThat(target.isDone(), is(source.isDone()));
+        assertThat(target.isDone()).isEqualTo(source.isDone());
 
         Throwable targetException = getThrowable(target);
         Throwable actualException = getThrowable(source);
 
-        assertThat(targetException, is(equalTo(actualException)));
+        assertThat(targetException).isEqualTo(equalTo(actualException));
     }
 
     @Test
@@ -987,12 +981,12 @@ public class FutureUtilsTest extends TestLogger {
 
         source.complete("foobar");
 
-        assertThat(target.isDone(), is(false));
+        assertThat(target.isDone()).isEqualTo(false);
 
         // execute the forward action
         executor.triggerAll();
 
-        assertThat(target.get(), is(equalTo(source.get())));
+        assertThat(target.get()).isEqualTo(equalTo(source.get()));
     }
 
     @Test
@@ -1000,7 +994,7 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Integer> completableFuture = new CompletableFuture<>();
         completableFuture.complete(1);
 
-        assertEquals(new Integer(1), FutureUtils.getWithoutException(completableFuture));
+        assertThat(FutureUtils.getWithoutException(completableFuture)).isEqualTo(new Integer(1));
     }
 
     @Test
@@ -1008,14 +1002,14 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Integer> completableFuture = new CompletableFuture<>();
         completableFuture.completeExceptionally(new RuntimeException("expected"));
 
-        assertNull(FutureUtils.getWithoutException(completableFuture));
+        assertThat(FutureUtils.getWithoutException(completableFuture)).isNull();
     }
 
     @Test
     public void testGetWithoutExceptionWithoutFinishing() {
         final CompletableFuture<Integer> completableFuture = new CompletableFuture<>();
 
-        assertNull(FutureUtils.getWithoutException(completableFuture));
+        assertThat(FutureUtils.getWithoutException(completableFuture)).isNull();
     }
 
     @Test
@@ -1036,9 +1030,9 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Void> assertionFuture =
                 resultFuture.handle(
                         (s, throwable) -> {
-                            assertThat(s, is(expectedValue));
-                            assertThat(Thread.currentThread().getName(), is(expectedThreadName));
-
+                            assertThat(s).isEqualTo(expectedValue);
+                            assertThat(Thread.currentThread().getName())
+                                    .isEqualTo(expectedThreadName);
                             return null;
                         });
         source.complete(expectedValue);
@@ -1064,9 +1058,13 @@ public class FutureUtilsTest extends TestLogger {
         final CompletableFuture<Void> assertionFuture =
                 resultFuture.handle(
                         (s, throwable) -> {
-                            assertThat(throwable, FlinkMatchers.containsCause(expectedException));
-                            assertThat(Thread.currentThread().getName(), is(expectedThreadName));
-
+                            assertThat(throwable)
+                                    .satisfies(
+                                            matching(
+                                                    FlinkMatchers.containsCause(
+                                                            expectedException)));
+                            assertThat(Thread.currentThread().getName())
+                                    .isEqualTo(expectedThreadName);
                             return null;
                         });
         source.completeExceptionally(expectedException);

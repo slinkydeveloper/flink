@@ -58,9 +58,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link MiniDispatcher}. */
 public class MiniDispatcherTest extends TestLogger {
@@ -146,7 +144,7 @@ public class MiniDispatcherTest extends TestLogger {
             final TestingJobManagerRunner testingJobManagerRunner =
                     testingJobManagerRunnerFactory.takeCreatedJobManagerRunner();
 
-            assertThat(testingJobManagerRunner.getJobID(), is(jobGraph.getJobID()));
+            assertThat(testingJobManagerRunner.getJobID()).isEqualTo(jobGraph.getJobID());
         } finally {
             RpcUtils.terminateRpcEndpoint(miniDispatcher, timeout);
         }
@@ -196,7 +194,7 @@ public class MiniDispatcherTest extends TestLogger {
 
             testingJobManagerRunner.completeResultFuture(executionGraphInfo);
 
-            assertFalse(miniDispatcher.getTerminationFuture().isDone());
+            assertThat(miniDispatcher.getTerminationFuture().isDone()).isFalse();
 
             final DispatcherGateway dispatcherGateway =
                     miniDispatcher.getSelfGateway(DispatcherGateway.class);
@@ -206,7 +204,7 @@ public class MiniDispatcherTest extends TestLogger {
 
             final JobResult jobResult = jobResultFuture.get();
 
-            assertThat(jobResult.getJobId(), is(jobGraph.getJobID()));
+            assertThat(jobResult.getJobId()).isEqualTo(jobGraph.getJobID());
         } finally {
             RpcUtils.terminateRpcEndpoint(miniDispatcher, timeout);
         }
@@ -223,7 +221,7 @@ public class MiniDispatcherTest extends TestLogger {
             final TestingJobManagerRunner testingJobManagerRunner =
                     testingJobManagerRunnerFactory.takeCreatedJobManagerRunner();
 
-            assertFalse(miniDispatcher.getTerminationFuture().isDone());
+            assertThat(miniDispatcher.getTerminationFuture().isDone()).isFalse();
 
             final DispatcherGateway dispatcherGateway =
                     miniDispatcher.getSelfGateway(DispatcherGateway.class);
@@ -237,7 +235,7 @@ public class MiniDispatcherTest extends TestLogger {
                                     .build()));
 
             ApplicationStatus applicationStatus = miniDispatcher.getShutDownFuture().get();
-            assertThat(applicationStatus, is(ApplicationStatus.CANCELED));
+            assertThat(applicationStatus).isEqualTo(ApplicationStatus.CANCELED);
         } finally {
             RpcUtils.terminateRpcEndpoint(miniDispatcher, timeout);
         }

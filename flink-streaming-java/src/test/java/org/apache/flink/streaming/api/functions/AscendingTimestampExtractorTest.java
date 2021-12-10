@@ -22,8 +22,8 @@ import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExt
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link AscendingTimestampExtractor}. */
 public class AscendingTimestampExtractorTest {
@@ -73,34 +73,35 @@ public class AscendingTimestampExtractorTest {
     @Test
     public void testInitialAndFinalWatermark() {
         AscendingTimestampExtractor<Long> extractor = new LongExtractor();
-        assertEquals(Long.MIN_VALUE, extractor.getCurrentWatermark().getTimestamp());
+        assertThat(extractor.getCurrentWatermark().getTimestamp()).isEqualTo(Long.MIN_VALUE);
 
         extractor.extractTimestamp(Long.MIN_VALUE, -1L);
 
         extractor.extractTimestamp(Long.MAX_VALUE, -1L);
-        assertEquals(Long.MAX_VALUE - 1, extractor.getCurrentWatermark().getTimestamp());
+        assertThat(extractor.getCurrentWatermark().getTimestamp()).isEqualTo(Long.MAX_VALUE - 1);
     }
 
     // ------------------------------------------------------------------------
 
     private void runValidTests(AscendingTimestampExtractor<Long> extractor) {
-        assertEquals(13L, extractor.extractTimestamp(13L, -1L));
-        assertEquals(13L, extractor.extractTimestamp(13L, 0L));
-        assertEquals(14L, extractor.extractTimestamp(14L, 0L));
-        assertEquals(20L, extractor.extractTimestamp(20L, 0L));
-        assertEquals(20L, extractor.extractTimestamp(20L, 0L));
-        assertEquals(20L, extractor.extractTimestamp(20L, 0L));
-        assertEquals(500L, extractor.extractTimestamp(500L, 0L));
+        assertThat(extractor.extractTimestamp(13L, -1L)).isEqualTo(13L);
+        assertThat(extractor.extractTimestamp(13L, 0L)).isEqualTo(13L);
+        assertThat(extractor.extractTimestamp(14L, 0L)).isEqualTo(14L);
+        assertThat(extractor.extractTimestamp(20L, 0L)).isEqualTo(20L);
+        assertThat(extractor.extractTimestamp(20L, 0L)).isEqualTo(20L);
+        assertThat(extractor.extractTimestamp(20L, 0L)).isEqualTo(20L);
+        assertThat(extractor.extractTimestamp(500L, 0L)).isEqualTo(500L);
 
-        assertEquals(Long.MAX_VALUE - 1, extractor.extractTimestamp(Long.MAX_VALUE - 1, 99999L));
+        assertThat(extractor.extractTimestamp(Long.MAX_VALUE - 1, 99999L))
+                .isEqualTo(Long.MAX_VALUE - 1);
     }
 
     private void runInvalidTest(AscendingTimestampExtractor<Long> extractor) {
-        assertEquals(1000L, extractor.extractTimestamp(1000L, 100));
-        assertEquals(1000L, extractor.extractTimestamp(1000L, 100));
+        assertThat(extractor.extractTimestamp(1000L, 100)).isEqualTo(1000L);
+        assertThat(extractor.extractTimestamp(1000L, 100)).isEqualTo(1000L);
 
         // violation
-        assertEquals(999L, extractor.extractTimestamp(999L, 100));
+        assertThat(extractor.extractTimestamp(999L, 100)).isEqualTo(999L);
     }
 
     // ------------------------------------------------------------------------

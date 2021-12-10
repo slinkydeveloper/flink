@@ -91,9 +91,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -167,8 +166,8 @@ public class InterruptSensitiveRestoreTest {
             fail("Task is stuck and not canceling");
         }
 
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(task.getFailureCause()).isNull();
     }
 
     // ------------------------------------------------------------------------

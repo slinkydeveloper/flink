@@ -84,9 +84,7 @@ import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TimeUtils;
 import org.apache.flink.util.function.ThrowingRunnable;
 
-import org.hamcrest.Matchers;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -117,16 +115,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.core.testutils.FlinkMatchers.containsMessage;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
+import static org.assertj.core.api.InstanceOfAssertFactories.BOOLEAN;
 
 /** Test for the {@link Dispatcher} component. */
 public class DispatcherTest extends AbstractDispatcherTest {
@@ -200,9 +193,9 @@ public class DispatcherTest extends AbstractDispatcherTest {
 
         jobMasterLeaderElectionService.getStartFuture().get();
 
-        assertTrue(
-                "jobManagerRunner was not started",
-                jobMasterLeaderElectionService.getStartFuture().isDone());
+        assertThat(jobMasterLeaderElectionService.getStartFuture().isDone())
+                .as("jobManagerRunner was not started")
+                .isTrue();
     }
 
     @Test
@@ -218,12 +211,13 @@ public class DispatcherTest extends AbstractDispatcherTest {
                 dispatcher.getSelfGateway(DispatcherGateway.class);
         final CompletableFuture<Acknowledge> submitFuture =
                 dispatcherGateway.submitJob(jobGraph, TIMEOUT);
-        final ExecutionException executionException =
-                assertThrows(ExecutionException.class, submitFuture::get);
-        assertTrue(executionException.getCause() instanceof DuplicateJobSubmissionException);
-        final DuplicateJobSubmissionException duplicateException =
-                (DuplicateJobSubmissionException) executionException.getCause();
-        assertTrue(duplicateException.isGloballyTerminated());
+        assertThatThrownBy(submitFuture::get)
+                .isInstanceOf(ExecutionException.class)
+                .getCause()
+                .isInstanceOf(DuplicateJobSubmissionException.class)
+                .extracting(
+                        t -> ((DuplicateJobSubmissionException) t).isGloballyTerminated(), BOOLEAN)
+                .isTrue();
     }
 
     @Test
@@ -240,12 +234,13 @@ public class DispatcherTest extends AbstractDispatcherTest {
                 dispatcher.getSelfGateway(DispatcherGateway.class);
         final CompletableFuture<Acknowledge> submitFuture =
                 dispatcherGateway.submitJob(jobGraph, TIMEOUT);
-        final ExecutionException executionException =
-                assertThrows(ExecutionException.class, submitFuture::get);
-        assertTrue(executionException.getCause() instanceof DuplicateJobSubmissionException);
-        final DuplicateJobSubmissionException duplicateException =
-                (DuplicateJobSubmissionException) executionException.getCause();
-        assertFalse(duplicateException.isGloballyTerminated());
+        assertThatThrownBy(submitFuture::get)
+                .isInstanceOf(ExecutionException.class)
+                .getCause()
+                .isInstanceOf(DuplicateJobSubmissionException.class)
+                .extracting(
+                        t -> ((DuplicateJobSubmissionException) t).isGloballyTerminated(), BOOLEAN)
+                .isFalse();
     }
 
     /**
@@ -281,7 +276,8 @@ public class DispatcherTest extends AbstractDispatcherTest {
             acknowledgeFuture.get();
             fail("job submission should have failed");
         } catch (ExecutionException e) {
-            assertTrue(ExceptionUtils.findThrowable(e, JobSubmissionException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, JobSubmissionException.class).isPresent())
+                    .isTrue();
         }
     }
 
@@ -297,15 +293,14 @@ public class DispatcherTest extends AbstractDispatcherTest {
         blockingJobMaster.waitForBlockingInit();
 
         // ensure INITIALIZING status
-        assertThat(
-                dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get(),
-                is(JobStatus.INITIALIZING));
+        assertThat(dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get())
+                .isEqualTo(JobStatus.INITIALIZING);
 
         // ensure correct JobDetails
         MultipleJobsDetails multiDetails =
                 dispatcherGateway.requestMultipleJobDetails(TIMEOUT).get();
-        assertEquals(1, multiDetails.getJobs().size());
-        assertEquals(jobId, multiDetails.getJobs().iterator().next().getJobId());
+        assertThat(multiDetails.getJobs().size()).isEqualTo(1);
+        assertThat(multiDetails.getJobs().iterator().next().getJobId()).isEqualTo(jobId);
 
         // let the initialization finish.
         blockingJobMaster.unblockJobMasterInitialization();
@@ -323,9 +318,8 @@ public class DispatcherTest extends AbstractDispatcherTest {
 
         dispatcherGateway.submitJob(jobGraph, TIMEOUT).get();
 
-        assertThat(
-                dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get(),
-                is(JobStatus.INITIALIZING));
+        assertThat(dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get())
+                .isEqualTo(JobStatus.INITIALIZING);
 
         // this call is supposed to fail
         try {
@@ -335,7 +329,7 @@ public class DispatcherTest extends AbstractDispatcherTest {
                     .get();
             fail("Previous statement should have failed");
         } catch (ExecutionException t) {
-            assertTrue(t.getCause() instanceof UnavailableDispatcherOperationException);
+            assertThat(t.getCause()).isInstanceOf(UnavailableDispatcherOperationException.class);
         }
     }
 
@@ -356,23 +350,21 @@ public class DispatcherTest extends AbstractDispatcherTest {
 
         dispatcherGateway.submitJob(blockingJobGraph.f0, TIMEOUT).get();
 
-        assertThat(
-                dispatcherGateway.requestJobStatus(jobID, TIMEOUT).get(),
-                is(JobStatus.INITIALIZING));
+        assertThat(dispatcherGateway.requestJobStatus(jobID, TIMEOUT).get())
+                .isEqualTo(JobStatus.INITIALIZING);
 
         // submission has succeeded, now cancel the job
         CompletableFuture<Acknowledge> cancellationFuture =
                 dispatcherGateway.cancelJob(jobID, TIMEOUT);
-        assertThat(
-                dispatcherGateway.requestJobStatus(jobID, TIMEOUT).get(), is(JobStatus.CANCELLING));
-        assertThat(cancellationFuture.isDone(), is(false));
+        assertThat(dispatcherGateway.requestJobStatus(jobID, TIMEOUT).get())
+                .isEqualTo(JobStatus.CANCELLING);
+        assertThat(cancellationFuture.isDone()).isEqualTo(false);
         // unblock
         blockingJobGraph.f1.unblock();
         // wait until cancelled
         cancellationFuture.get();
-        assertThat(
-                dispatcherGateway.requestJobResult(jobID, TIMEOUT).get().getApplicationStatus(),
-                is(ApplicationStatus.CANCELED));
+        assertThat(dispatcherGateway.requestJobResult(jobID, TIMEOUT).get().getApplicationStatus())
+                .isEqualTo(ApplicationStatus.CANCELED);
     }
 
     @Test
@@ -401,8 +393,8 @@ public class DispatcherTest extends AbstractDispatcherTest {
         // wait for job to finish
         dispatcherGateway.requestJobResult(jobId, TIMEOUT).get();
         // sanity check
-        assertThat(
-                dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get(), is(JobStatus.CANCELED));
+        assertThat(dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get())
+                .isEqualTo(JobStatus.CANCELED);
 
         dispatcherGateway.cancelJob(jobId, TIMEOUT).get();
     }
@@ -435,16 +427,18 @@ public class DispatcherTest extends AbstractDispatcherTest {
         // wait for job to finish
         dispatcherGateway.requestJobResult(jobId, TIMEOUT).get();
         // sanity check
-        assertThat(
-                dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get(), is(JobStatus.FINISHED));
+        assertThat(dispatcherGateway.requestJobStatus(jobId, TIMEOUT).get())
+                .isEqualTo(JobStatus.FINISHED);
 
         final CompletableFuture<Acknowledge> cancelFuture =
                 dispatcherGateway.cancelJob(jobId, TIMEOUT);
 
-        assertThat(
-                cancelFuture,
-                FlinkMatchers.futureWillCompleteExceptionally(
-                        FlinkJobTerminatedWithoutCancellationException.class, Duration.ofHours(8)));
+        assertThat(cancelFuture)
+                .satisfies(
+                        matching(
+                                FlinkMatchers.futureWillCompleteExceptionally(
+                                        FlinkJobTerminatedWithoutCancellationException.class,
+                                        Duration.ofHours(8))));
     }
 
     @Test
@@ -485,9 +479,9 @@ public class DispatcherTest extends AbstractDispatcherTest {
         // get failure cause
         ArchivedExecutionGraph execGraph =
                 dispatcherGateway.requestJob(jobGraph.getJobID(), TIMEOUT).get();
-        assertThat(execGraph.getState(), is(JobStatus.FAILED));
+        assertThat(execGraph.getState()).isEqualTo(JobStatus.FAILED);
 
-        Assert.assertNotNull(execGraph.getFailureInfo());
+        assertThat(execGraph.getFailureInfo()).isNotNull();
         Throwable throwable =
                 execGraph
                         .getFailureInfo()
@@ -495,7 +489,7 @@ public class DispatcherTest extends AbstractDispatcherTest {
                         .deserializeError(ClassLoader.getSystemClassLoader());
 
         // ensure correct exception type
-        assertThat(throwable, is(testFailure));
+        assertThat(throwable).isEqualTo(testFailure);
     }
 
     /** Test that {@link JobResult} is cached when the job finishes. */
@@ -525,12 +519,10 @@ public class DispatcherTest extends AbstractDispatcherTest {
 
         dispatcher.completeJobExecution(failedExecutionGraphInfo);
 
-        assertThat(
-                dispatcherGateway.requestJobStatus(failedJobId, TIMEOUT).get(),
-                equalTo(expectedState));
-        assertThat(
-                dispatcherGateway.requestExecutionGraphInfo(failedJobId, TIMEOUT).get(),
-                equalTo(failedExecutionGraphInfo));
+        assertThat(dispatcherGateway.requestJobStatus(failedJobId, TIMEOUT).get())
+                .isEqualTo(expectedState);
+        assertThat(dispatcherGateway.requestExecutionGraphInfo(failedJobId, TIMEOUT).get())
+                .isEqualTo(failedExecutionGraphInfo);
     }
 
     @Test
@@ -548,7 +540,7 @@ public class DispatcherTest extends AbstractDispatcherTest {
             dispatcherGateway.requestJob(new JobID(), TIMEOUT).get();
         } catch (ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripExecutionException(e);
-            assertThat(throwable, instanceOf(FlinkJobNotFoundException.class));
+            assertThat(throwable).isInstanceOf(FlinkJobNotFoundException.class);
         }
     }
 
@@ -568,11 +560,11 @@ public class DispatcherTest extends AbstractDispatcherTest {
         final DispatcherGateway dispatcherGateway =
                 dispatcher.getSelfGateway(DispatcherGateway.class);
 
-        assertThat(Files.exists(savepointPath), is(true));
+        assertThat(Files.exists(savepointPath)).isEqualTo(true);
 
         dispatcherGateway.disposeSavepoint(externalPointer.toString(), TIMEOUT).get();
 
-        assertThat(Files.exists(savepointPath), is(false));
+        assertThat(Files.exists(savepointPath)).isEqualTo(false);
     }
 
     @Nonnull
@@ -647,9 +639,9 @@ public class DispatcherTest extends AbstractDispatcherTest {
                         .get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
 
         assertThat(
-                ExceptionUtils.findThrowableWithMessage(error, testException.getMessage())
-                        .isPresent(),
-                is(true));
+                        ExceptionUtils.findThrowableWithMessage(error, testException.getMessage())
+                                .isPresent())
+                .isEqualTo(true);
 
         fatalErrorHandler.clearError();
     }
@@ -710,16 +702,16 @@ public class DispatcherTest extends AbstractDispatcherTest {
         try {
             dispatcherGateway.submitJob(jobGraph, TIMEOUT).get();
         } catch (Throwable expectedException) {
-            assertThat(expectedException, containsCause(FlinkException.class));
-            assertThat(expectedException, containsMessage(testException.getMessage()));
+            assertThat(expectedException).satisfies(matching(containsCause(FlinkException.class)));
+            assertThat(expectedException)
+                    .satisfies(matching(containsMessage(testException.getMessage())));
             // make sure we've cleaned up in correct order (including HA)
-            assertThat(
-                    new ArrayList<>(cleanUpEvents),
-                    equalTo(
+            assertThat(new ArrayList<>(cleanUpEvents))
+                    .isEqualTo(
                             Arrays.asList(
                                     CLEANUP_JOB_GRAPH_REMOVE,
                                     CLEANUP_RUNNING_JOBS_REGISTRY,
-                                    CLEANUP_HA_SERVICES)));
+                                    CLEANUP_HA_SERVICES));
         }
 
         // don't fail this time
@@ -748,11 +740,11 @@ public class DispatcherTest extends AbstractDispatcherTest {
                 dispatcher.getSelfGateway(DispatcherGateway.class);
         dispatcherGateway.submitJob(jobGraph, TIMEOUT).get();
 
-        assertThat(dispatcher.getNumberJobs(TIMEOUT).get(), Matchers.is(1));
+        assertThat(dispatcher.getNumberJobs(TIMEOUT).get()).isEqualTo(1);
 
         dispatcher.close();
 
-        assertThat(submittedJobGraphStore.contains(jobGraph.getJobID()), Matchers.is(true));
+        assertThat(submittedJobGraphStore.contains(jobGraph.getJobID())).isEqualTo(true);
     }
 
     /** Tests that a submitted job is suspended if the Dispatcher is terminated. */
@@ -772,12 +764,12 @@ public class DispatcherTest extends AbstractDispatcherTest {
         final CompletableFuture<JobResult> jobResultFuture =
                 dispatcherGateway.requestJobResult(jobGraph.getJobID(), TIMEOUT);
 
-        assertThat(jobResultFuture.isDone(), is(false));
+        assertThat(jobResultFuture.isDone()).isEqualTo(false);
 
         dispatcher.close();
 
         final JobResult jobResult = jobResultFuture.get();
-        assertEquals(jobResult.getApplicationStatus(), ApplicationStatus.UNKNOWN);
+        assertThat(ApplicationStatus.UNKNOWN).isEqualTo(jobResult.getApplicationStatus());
     }
 
     @Test
@@ -861,7 +853,7 @@ public class DispatcherTest extends AbstractDispatcherTest {
 
         processFuture.join();
 
-        assertThat(releaseJobGraphFuture.get(), is(jobGraph.getJobID()));
+        assertThat(releaseJobGraphFuture.get()).isEqualTo(jobGraph.getJobID());
 
         try {
             removeJobGraphFuture.get(10L, TimeUnit.MILLISECONDS);
@@ -887,7 +879,7 @@ public class DispatcherTest extends AbstractDispatcherTest {
         final long initializationTimestamp = initializationTimestampQueue.take();
 
         // ensure all statuses are set in the ExecutionGraph
-        assertThat(initializationTimestamp, greaterThan(0L));
+        assertThat(initializationTimestamp).isGreaterThan(0L);
     }
 
     @Test
@@ -949,14 +941,13 @@ public class DispatcherTest extends AbstractDispatcherTest {
         // Wait for job to terminate.
         dispatcher.getJobTerminationFuture(jobId, TIMEOUT).get();
 
-        assertThat(
-                new ArrayList<>(cleanUpEvents),
-                equalTo(
+        assertThat(new ArrayList<>(cleanUpEvents))
+                .isEqualTo(
                         Arrays.asList(
                                 CLEANUP_JOB_GRAPH_REMOVE,
                                 CLEANUP_JOB_MANAGER_RUNNER,
                                 CLEANUP_RUNNING_JOBS_REGISTRY,
-                                CLEANUP_HA_SERVICES)));
+                                CLEANUP_HA_SERVICES));
     }
 
     private static class JobManagerRunnerWithBlockingJobMasterFactory
@@ -1238,7 +1229,7 @@ public class DispatcherTest extends AbstractDispatcherTest {
                 FatalErrorHandler fatalErrorHandler,
                 long initializationTimestamp)
                 throws Exception {
-            assertEquals(expectedJobId, jobGraph.getJobID());
+            assertThat(jobGraph.getJobID()).isEqualTo(expectedJobId);
 
             createdJobManagerRunnerLatch.countDown();
 

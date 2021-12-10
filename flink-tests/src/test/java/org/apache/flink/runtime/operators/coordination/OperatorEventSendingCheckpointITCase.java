@@ -80,7 +80,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A test suite for source enumerator (operator coordinator) for situations where RPC calls for
@@ -256,7 +256,7 @@ public class OperatorEventSendingCheckpointITCase extends TestLogger {
         final List<Long> expectedSequence =
                 LongStream.rangeClosed(1L, numElements).boxed().collect(Collectors.toList());
 
-        assertEquals(expectedSequence, sequence);
+        assertThat(sequence).isEqualTo(expectedSequence);
     }
 
     private static CompletableFuture<Acknowledge> askTimeoutFuture() {

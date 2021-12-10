@@ -35,7 +35,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ZooKeeperRegistryTest extends TestLogger {
 
@@ -75,18 +75,22 @@ public class ZooKeeperRegistryTest extends TestLogger {
 
         try {
             JobID jobID = JobID.generate();
-            assertEquals(JobSchedulingStatus.PENDING, zkRegistry.getJobSchedulingStatus(jobID));
+            assertThat(zkRegistry.getJobSchedulingStatus(jobID))
+                    .isEqualTo(JobSchedulingStatus.PENDING);
 
             // set when znode does not exist for job
             zkRegistry.setJobRunning(jobID);
-            assertEquals(JobSchedulingStatus.RUNNING, zkRegistry.getJobSchedulingStatus(jobID));
+            assertThat(zkRegistry.getJobSchedulingStatus(jobID))
+                    .isEqualTo(JobSchedulingStatus.RUNNING);
 
             // set when znode does exist for job
             zkRegistry.setJobFinished(jobID);
-            assertEquals(JobSchedulingStatus.DONE, zkRegistry.getJobSchedulingStatus(jobID));
+            assertThat(zkRegistry.getJobSchedulingStatus(jobID))
+                    .isEqualTo(JobSchedulingStatus.DONE);
 
             zkRegistry.clearJob(jobID);
-            assertEquals(JobSchedulingStatus.PENDING, zkRegistry.getJobSchedulingStatus(jobID));
+            assertThat(zkRegistry.getJobSchedulingStatus(jobID))
+                    .isEqualTo(JobSchedulingStatus.PENDING);
 
             // clear when znode does not exist for job
             zkRegistry.clearJob(jobID);

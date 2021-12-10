@@ -60,9 +60,7 @@ import static org.apache.flink.streaming.connectors.kinesis.table.RowDataKinesis
 import static org.apache.flink.streaming.connectors.kinesis.table.RowDataKinesisDeserializationSchema.Metadata.Timestamp;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSink;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSource;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link KinesisDynamicSource} and {@link KinesisDynamicSink} created by {@link
@@ -96,17 +94,17 @@ public class KinesisDynamicTableFactoryTest extends TestLogger {
                         new TestFormatFactory.DecodingFormatMock(",", true));
 
         // verify that the constructed DynamicTableSink is as expected
-        assertEquals(expectedSource, actualSource);
+        assertThat(actualSource).isEqualTo(expectedSource);
 
         // verify that the copy of the constructed DynamicTableSink is as expected
-        assertEquals(expectedSource, actualSource.copy());
+        assertThat(actualSource.copy()).isEqualTo(expectedSource);
 
         // verify produced sink
         ScanTableSource.ScanRuntimeProvider functionProvider =
                 actualSource.getScanRuntimeProvider(ScanRuntimeProviderContext.INSTANCE);
         SourceFunction<RowData> sourceFunction =
                 as(functionProvider, SourceFunctionProvider.class).createSourceFunction();
-        assertThat(sourceFunction, instanceOf(FlinkKinesisConsumer.class));
+        assertThat(sourceFunction).isInstanceOf(FlinkKinesisConsumer.class);
     }
 
     @Test
@@ -134,10 +132,10 @@ public class KinesisDynamicTableFactoryTest extends TestLogger {
                         Arrays.asList(requestedMetadata));
 
         // verify that the constructed DynamicTableSource is as expected
-        assertEquals(expectedSource, actualSource);
+        assertThat(actualSource).isEqualTo(expectedSource);
 
         // verify that the copy of the constructed DynamicTableSink is as expected
-        assertEquals(expectedSource, actualSource.copy());
+        assertThat(actualSource.copy()).isEqualTo(expectedSource);
     }
 
     @Test
@@ -162,17 +160,17 @@ public class KinesisDynamicTableFactoryTest extends TestLogger {
                                 (RowType) physicalDataType.getLogicalType(), sinkPartitionKeys));
 
         // verify that the constructed DynamicTableSink is as expected
-        assertEquals(expectedSink, actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink);
 
         // verify that the copy of the constructed DynamicTableSink is as expected
-        assertEquals(expectedSink.copy(), actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink.copy());
 
         // verify the produced sink
         DynamicTableSink.SinkRuntimeProvider sinkFunctionProvider =
                 actualSink.getSinkRuntimeProvider(new SinkRuntimeProviderContext(false));
         SinkFunction<RowData> sinkFunction =
                 as(sinkFunctionProvider, SinkFunctionProvider.class).createSinkFunction();
-        assertThat(sinkFunction, instanceOf(FlinkKinesisProducer.class));
+        assertThat(sinkFunction).isInstanceOf(FlinkKinesisProducer.class);
     }
 
     @Test
@@ -194,17 +192,17 @@ public class KinesisDynamicTableFactoryTest extends TestLogger {
                         new RandomKinesisPartitioner<>());
 
         // verify that the constructed DynamicTableSink is as expected
-        assertEquals(expectedSink, actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink);
 
         // verify that the copy of the constructed DynamicTableSink is as expected
-        assertEquals(expectedSink.copy(), actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink.copy());
 
         // verify the produced sink
         DynamicTableSink.SinkRuntimeProvider sinkFunctionProvider =
                 actualSink.getSinkRuntimeProvider(new SinkRuntimeProviderContext(false));
         SinkFunction<RowData> sinkFunction =
                 as(sinkFunctionProvider, SinkFunctionProvider.class).createSinkFunction();
-        assertThat(sinkFunction, instanceOf(FlinkKinesisProducer.class));
+        assertThat(sinkFunction).isInstanceOf(FlinkKinesisProducer.class);
     }
 
     // --------------------------------------------------------------------------------------------
@@ -343,7 +341,7 @@ public class KinesisDynamicTableFactoryTest extends TestLogger {
     }
 
     private <T> T as(Object object, Class<T> clazz) {
-        assertThat(object, instanceOf(clazz));
+        assertThat(object).isInstanceOf(clazz);
         return clazz.cast(object);
     }
 }

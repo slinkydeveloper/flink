@@ -35,7 +35,6 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction;
 import org.apache.flink.testutils.migration.MigrationVersion;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -44,6 +43,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Migration ITCases for a stateful job with broadcast state. The tests are parameterized to
@@ -429,14 +430,14 @@ public class StatefulJobWBroadcastStateMigrationITCase extends SavepointMigratio
                     ctx.getBroadcastState(firstStateDesc).immutableEntries()) {
                 actualFirstState.put(entry.getKey(), entry.getValue());
             }
-            Assert.assertEquals(expectedFirstState, actualFirstState);
+            assertThat(actualFirstState).isEqualTo(expectedFirstState);
 
             final Map<String, Long> actualSecondState = new HashMap<>();
             for (Map.Entry<String, Long> entry :
                     ctx.getBroadcastState(secondStateDesc).immutableEntries()) {
                 actualSecondState.put(entry.getKey(), entry.getValue());
             }
-            Assert.assertEquals(expectedSecondState, actualSecondState);
+            assertThat(actualSecondState).isEqualTo(expectedSecondState);
 
             out.collect(value);
         }
@@ -487,7 +488,7 @@ public class StatefulJobWBroadcastStateMigrationITCase extends SavepointMigratio
                     ctx.getBroadcastState(stateDesc).immutableEntries()) {
                 actualState.put(entry.getKey(), entry.getValue());
             }
-            Assert.assertEquals(expectedState, actualState);
+            assertThat(actualState).isEqualTo(expectedState);
 
             out.collect(value);
         }

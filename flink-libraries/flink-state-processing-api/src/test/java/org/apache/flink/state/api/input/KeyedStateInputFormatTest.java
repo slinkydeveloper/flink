@@ -41,7 +41,6 @@ import org.apache.flink.streaming.util.KeyedOneInputStreamOperatorTestHarness;
 import org.apache.flink.streaming.util.MockStreamingRuntimeContext;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;
@@ -52,6 +51,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for keyed state input format. */
 public class KeyedStateInputFormatTest {
@@ -74,8 +76,9 @@ public class KeyedStateInputFormatTest {
                         new Configuration(),
                         new KeyedStateReaderOperator<>(new ReaderFunction(), Types.INT));
         KeyGroupRangeInputSplit[] splits = format.createInputSplits(4);
-        Assert.assertEquals(
-                "Failed to properly partition operator state into input splits", 4, splits.length);
+        assertThat(splits.length)
+                .as("Failed to properly partition operator state into input splits")
+                .isEqualTo(4);
     }
 
     @Test
@@ -94,10 +97,9 @@ public class KeyedStateInputFormatTest {
                         new Configuration(),
                         new KeyedStateReaderOperator<>(new ReaderFunction(), Types.INT));
         KeyGroupRangeInputSplit[] splits = format.createInputSplits(129);
-        Assert.assertEquals(
-                "Failed to properly partition operator state into input splits",
-                128,
-                splits.length);
+        assertThat(splits.length)
+                .as("Failed to properly partition operator state into input splits")
+                .isEqualTo(128);
     }
 
     @Test
@@ -121,7 +123,9 @@ public class KeyedStateInputFormatTest {
 
         List<Integer> data = readInputSplit(split, userFunction);
 
-        Assert.assertEquals("Incorrect data read from input split", Arrays.asList(1, 2, 3), data);
+        assertThat(data)
+                .as("Incorrect data read from input split")
+                .isEqualTo(Arrays.asList(1, 2, 3));
     }
 
     @Test
@@ -145,8 +149,9 @@ public class KeyedStateInputFormatTest {
 
         List<Integer> data = readInputSplit(split, userFunction);
 
-        Assert.assertEquals(
-                "Incorrect data read from input split", Arrays.asList(1, 1, 2, 2, 3, 3), data);
+        assertThat(data)
+                .as("Incorrect data read from input split")
+                .isEqualTo(Arrays.asList(1, 1, 2, 2, 3, 3));
     }
 
     @Test(expected = IOException.class)
@@ -170,7 +175,7 @@ public class KeyedStateInputFormatTest {
 
         readInputSplit(split, userFunction);
 
-        Assert.fail("KeyedStateReaderFunction did not fail on invalid RuntimeContext use");
+        fail("KeyedStateReaderFunction did not fail on invalid RuntimeContext use");
     }
 
     @Test
@@ -195,8 +200,9 @@ public class KeyedStateInputFormatTest {
 
         List<Integer> data = readInputSplit(split, userFunction);
 
-        Assert.assertEquals(
-                "Incorrect data read from input split", Arrays.asList(1, 1, 2, 2, 3, 3), data);
+        assertThat(data)
+                .as("Incorrect data read from input split")
+                .isEqualTo(Arrays.asList(1, 1, 2, 2, 3, 3));
     }
 
     @Nonnull
@@ -338,18 +344,16 @@ public class KeyedStateInputFormatTest {
                 Integer key, KeyedStateReaderFunction.Context ctx, Collector<Integer> out)
                 throws Exception {
             Set<Long> eventTimers = ctx.registeredEventTimeTimers();
-            Assert.assertEquals(
-                    "Each key should have exactly one event timer for key " + key,
-                    1,
-                    eventTimers.size());
+            assertThat(eventTimers.size())
+                    .as("Each key should have exactly one event timer for key " + key)
+                    .isEqualTo(1);
 
             out.collect(eventTimers.iterator().next().intValue());
 
             Set<Long> procTimers = ctx.registeredProcessingTimeTimers();
-            Assert.assertEquals(
-                    "Each key should have exactly one processing timer for key " + key,
-                    1,
-                    procTimers.size());
+            assertThat(procTimers.size())
+                    .as("Each key should have exactly one processing timer for key " + key)
+                    .isEqualTo(1);
 
             out.collect(procTimers.iterator().next().intValue());
         }

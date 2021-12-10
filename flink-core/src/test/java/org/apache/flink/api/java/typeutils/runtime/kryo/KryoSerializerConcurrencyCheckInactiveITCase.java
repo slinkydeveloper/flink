@@ -22,7 +22,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeFalse;
 
 /**
@@ -61,9 +61,10 @@ public class KryoSerializerConcurrencyCheckInactiveITCase extends TestLogger {
             assertionError = true;
         }
 
-        assertTrue(
-                "testConcurrentUseOfSerializer() should have failed if "
-                        + "concurrency checks are off by default",
-                assertionError);
+        assertThat(assertionError)
+                .as(
+                        "testConcurrentUseOfSerializer() should have failed if "
+                                + "concurrency checks are off by default")
+                .isTrue();
     }
 }

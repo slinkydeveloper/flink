@@ -44,12 +44,8 @@ import java.util.Collection;
 import java.util.Random;
 import java.util.UUID;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
@@ -89,16 +85,16 @@ public class CheckpointStateOutputStreamTest extends TestLogger {
         }
 
         // must have created a handle
-        assertNotNull(handle);
-        assertEquals(filePath, handle.getFilePath());
+        assertThat(handle).isNotNull();
+        assertThat(handle.getFilePath()).isEqualTo(filePath);
 
         // the pointer path should exist as a directory
-        assertTrue(fs.exists(handle.getFilePath()));
-        assertFalse(fs.getFileStatus(filePath).isDir());
+        assertThat(fs.exists(handle.getFilePath())).isTrue();
+        assertThat(fs.getFileStatus(filePath).isDir()).isFalse();
 
         // the contents should be empty
         try (FSDataInputStream in = handle.openInputStream()) {
-            assertEquals(-1, in.read());
+            assertThat(in.read()).isEqualTo(-1);
         }
     }
 
@@ -131,14 +127,14 @@ public class CheckpointStateOutputStreamTest extends TestLogger {
         try (FSDataInputStream in = handle.openInputStream()) {
             byte[] buffer = new byte[data.length];
             readFully(in, buffer);
-            assertArrayEquals(data, buffer);
+            assertThat(buffer).isEqualTo(data);
         }
 
         // (2) the pointer must point to a file with that contents
         try (FSDataInputStream in = fs.open(handle.getFilePath())) {
             byte[] buffer = new byte[data.length];
             readFully(in, buffer);
-            assertArrayEquals(data, buffer);
+            assertThat(buffer).isEqualTo(data);
         }
     }
 
@@ -156,10 +152,10 @@ public class CheckpointStateOutputStreamTest extends TestLogger {
             for (int i = 0; i < rnd.nextInt(1000); i++) {
                 stream.write(rnd.nextInt(100));
             }
-            assertTrue(fs.exists(path));
+            assertThat(fs.exists(path)).isTrue();
         }
 
-        assertFalse(fs.exists(path));
+        assertThat(fs.exists(path)).isFalse();
     }
 
     /** Tests that the underlying stream file is deleted if the closeAndGetHandle method fails. */

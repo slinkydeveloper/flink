@@ -26,9 +26,7 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Simple tests for the {@link CheckpointMetadata} data holder class. */
 public class CheckpointMetadataTest {
@@ -52,16 +50,16 @@ public class CheckpointMetadataTest {
         CheckpointMetadata checkpoint =
                 new CheckpointMetadata(checkpointId, taskStates, masterStates);
 
-        assertEquals(checkpointId, checkpoint.getCheckpointId());
-        assertEquals(taskStates, checkpoint.getOperatorStates());
-        assertEquals(masterStates, checkpoint.getMasterStates());
+        assertThat(checkpoint.getCheckpointId()).isEqualTo(checkpointId);
+        assertThat(checkpoint.getOperatorStates()).isEqualTo(taskStates);
+        assertThat(checkpoint.getMasterStates()).isEqualTo(masterStates);
 
-        assertFalse(checkpoint.getOperatorStates().isEmpty());
-        assertFalse(checkpoint.getMasterStates().isEmpty());
+        assertThat(checkpoint.getOperatorStates().isEmpty()).isFalse();
+        assertThat(checkpoint.getMasterStates().isEmpty()).isFalse();
 
         checkpoint.dispose();
 
-        assertTrue(checkpoint.getOperatorStates().isEmpty());
-        assertTrue(checkpoint.getMasterStates().isEmpty());
+        assertThat(checkpoint.getOperatorStates().isEmpty()).isTrue();
+        assertThat(checkpoint.getMasterStates().isEmpty()).isTrue();
     }
 }

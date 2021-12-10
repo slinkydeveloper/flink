@@ -37,7 +37,8 @@ import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.core.testutils.FlinkMatchers.willNotComplete;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link DispatcherResourceManagerComponent}. */
 public class DispatcherResourceManagerComponentTest extends TestLogger {
@@ -58,7 +59,7 @@ public class DispatcherResourceManagerComponentTest extends TestLogger {
         terminationFuture.completeExceptionally(expectedException);
 
         final Throwable error = fatalErrorHandler.getException();
-        assertThat(error, containsCause(expectedException));
+        assertThat(error).satisfies(matching(containsCause(expectedException)));
     }
 
     private DispatcherResourceManagerComponent createDispatcherResourceManagerComponent(
@@ -93,7 +94,7 @@ public class DispatcherResourceManagerComponentTest extends TestLogger {
         terminationFuture.completeExceptionally(expectedException);
 
         final CompletableFuture<Throwable> errorFuture = fatalErrorHandler.getErrorFuture();
-        assertThat(errorFuture, willNotComplete(Duration.ofMillis(10L)));
+        assertThat(errorFuture).satisfies(matching(willNotComplete(Duration.ofMillis(10L))));
     }
 
     /**

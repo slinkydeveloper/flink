@@ -32,8 +32,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PythonTypeUtils}. */
 public class PythonTypeUtilsTest {
@@ -44,9 +43,9 @@ public class PythonTypeUtilsTest {
         rowFields.add(new RowType.RowField("f1", new BigIntType()));
         RowType rowType = new RowType(rowFields);
         TypeSerializer baseSerializer = PythonTypeUtils.toInternalSerializer(rowType);
-        assertTrue(baseSerializer instanceof RowDataSerializer);
+        assertThat(baseSerializer).isInstanceOf(RowDataSerializer.class);
 
-        assertEquals(1, ((RowDataSerializer) baseSerializer).getArity());
+        assertThat(((RowDataSerializer) baseSerializer).getArity()).isEqualTo(1);
     }
 
     @Test
@@ -57,10 +56,10 @@ public class PythonTypeUtilsTest {
         FlinkFnApi.Schema.FieldType protoType =
                 rowType.accept(new PythonTypeUtils.LogicalTypeToProtoTypeConverter());
         FlinkFnApi.Schema schema = protoType.getRowSchema();
-        assertEquals(1, schema.getFieldsCount());
-        assertEquals("f1", schema.getFields(0).getName());
-        assertEquals(
-                FlinkFnApi.Schema.TypeName.BIGINT, schema.getFields(0).getType().getTypeName());
+        assertThat(schema.getFieldsCount()).isEqualTo(1);
+        assertThat(schema.getFields(0).getName()).isEqualTo("f1");
+        assertThat(schema.getFields(0).getType().getTypeName())
+                .isEqualTo(FlinkFnApi.Schema.TypeName.BIGINT);
     }
 
     @Test
@@ -72,8 +71,10 @@ public class PythonTypeUtilsTest {
         try {
             PythonTypeUtils.toInternalSerializer(logicalType);
         } catch (Exception e) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(e, expectedTestException).isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(e, expectedTestException)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 }

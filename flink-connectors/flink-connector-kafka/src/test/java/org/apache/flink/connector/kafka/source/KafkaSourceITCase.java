@@ -69,7 +69,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unite test class for {@link KafkaSource}. */
 public class KafkaSourceITCase {
@@ -127,10 +127,12 @@ public class KafkaSourceITCase {
             stream.addSink(new DiscardingSink<>());
             JobExecutionResult result = env.execute();
 
-            assertEquals(
-                    Arrays.asList(
-                            currentTimestamp + 1L, currentTimestamp + 2L, currentTimestamp + 3L),
-                    result.getAccumulatorResult("timestamp"));
+            assertThat(result.<List<Long>>getAccumulatorResult("timestamp"))
+                    .isEqualTo(
+                            Arrays.asList(
+                                    currentTimestamp + 1L,
+                                    currentTimestamp + 2L,
+                                    currentTimestamp + 3L));
         }
 
         @Test
@@ -194,7 +196,7 @@ public class KafkaSourceITCase {
             // Since we have two topics, the expected sum value should be doubled
             expectedSum *= 2;
 
-            assertEquals(expectedSum, actualSum.get());
+            assertThat(actualSum.get()).isEqualTo(expectedSum);
         }
 
         @Test
@@ -358,11 +360,12 @@ public class KafkaSourceITCase {
                 (tp, values) -> {
                     int firstExpectedValue = Integer.parseInt(tp.substring(tp.indexOf('-') + 1));
                     for (int i = 0; i < values.size(); i++) {
-                        assertEquals(
-                                firstExpectedValue + i,
-                                (int) values.get(i),
-                                String.format(
-                                        "The %d-th value for partition %s should be %d", i, tp, i));
+                        assertThat((int) values.get(i))
+                                .as(
+                                        String.format(
+                                                "The %d-th value for partition %s should be %d",
+                                                i, tp, i))
+                                .isEqualTo(firstExpectedValue + i);
                     }
                 });
     }

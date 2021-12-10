@@ -22,10 +22,7 @@ import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link ArrayResultIterator}. */
 public class ArrayResultIteratorTest {
@@ -33,7 +30,7 @@ public class ArrayResultIteratorTest {
     @Test
     public void testEmptyConstruction() {
         final ArrayResultIterator<Object> iter = new ArrayResultIterator<>();
-        assertNull(iter.next());
+        assertThat(iter.next()).isNull();
     }
 
     @Test
@@ -47,9 +44,9 @@ public class ArrayResultIteratorTest {
 
         for (int i = 0; i < elements.length; i++) {
             final RecordAndPosition<String> recAndPos = iter.next();
-            assertEquals(elements[i], recAndPos.getRecord());
-            assertEquals(initialPos, recAndPos.getOffset());
-            assertEquals(initialSkipCount + i + 1, recAndPos.getRecordSkipCount());
+            assertThat(recAndPos.getRecord()).isEqualTo(elements[i]);
+            assertThat(recAndPos.getOffset()).isEqualTo(initialPos);
+            assertThat(recAndPos.getRecordSkipCount()).isEqualTo(initialSkipCount + i + 1);
         }
     }
 
@@ -61,7 +58,7 @@ public class ArrayResultIteratorTest {
         iter.next();
         iter.next();
 
-        assertNull(iter.next());
+        assertThat(iter.next()).isNull();
     }
 
     @Test
@@ -69,9 +66,9 @@ public class ArrayResultIteratorTest {
         final ArrayResultIterator<String> iter = new ArrayResultIterator<>();
         iter.set(new String[] {"1", "2", "3"}, 2, 0L, 0L);
 
-        assertNotNull(iter.next());
-        assertNotNull(iter.next());
-        assertNull(iter.next());
+        assertThat(iter.next()).isNotNull();
+        assertThat(iter.next()).isNotNull();
+        assertThat(iter.next()).isNull();
     }
 
     @Test
@@ -88,6 +85,6 @@ public class ArrayResultIteratorTest {
 
         iter.releaseBatch();
 
-        assertTrue(recycled.get());
+        assertThat(recycled.get()).isTrue();
     }
 }

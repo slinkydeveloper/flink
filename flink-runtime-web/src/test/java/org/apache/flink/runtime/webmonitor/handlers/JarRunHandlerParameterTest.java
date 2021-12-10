@@ -40,7 +40,6 @@ import org.apache.flink.util.ExceptionUtils;
 
 import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseStatus;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -57,13 +56,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the parameter handling of the {@link JarRunHandler}. */
 public class JarRunHandlerParameterTest
@@ -115,8 +109,9 @@ public class JarRunHandlerParameterTest
                 DispatcherGateway dispatcherGateway,
                 PackagedProgram program,
                 Configuration configuration) {
-            assertFalse(configuration.get(DeploymentOptions.ATTACHED));
-            assertEquals(EmbeddedExecutor.NAME, configuration.get(DeploymentOptions.TARGET));
+            assertThat(configuration.get(DeploymentOptions.ATTACHED)).isFalse();
+            assertThat(configuration.get(DeploymentOptions.TARGET))
+                    .isEqualTo(EmbeddedExecutor.NAME);
             return super.run(dispatcherGateway, program, configuration);
         }
     }
@@ -205,23 +200,22 @@ public class JarRunHandlerParameterTest
             handler.handleRequest(request, restfulGateway).get();
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripCompletionException(e.getCause());
-            assertThat(throwable, instanceOf(RestHandlerException.class));
+            assertThat(throwable).isInstanceOf(RestHandlerException.class);
 
             final RestHandlerException restHandlerException = (RestHandlerException) throwable;
-            assertThat(
-                    restHandlerException.getHttpResponseStatus(),
-                    equalTo(HttpResponseStatus.BAD_REQUEST));
+            assertThat(restHandlerException.getHttpResponseStatus())
+                    .isEqualTo(HttpResponseStatus.BAD_REQUEST);
 
             final Optional<ProgramInvocationException> invocationException =
                     ExceptionUtils.findThrowable(
                             restHandlerException, ProgramInvocationException.class);
 
             if (!invocationException.isPresent()) {
-                fail();
+                fail("unknown failure");
             }
 
             final String exceptionMsg = invocationException.get().getMessage();
-            assertThat(exceptionMsg, containsString("Job was submitted in detached mode."));
+            assertThat(exceptionMsg).contains("Job was submitted in detached mode.");
             return;
         }
         fail("The test should have failed.");
@@ -237,8 +231,8 @@ public class JarRunHandlerParameterTest
         JobGraph jobGraph = super.validateDefaultGraph();
         final SavepointRestoreSettings savepointRestoreSettings =
                 jobGraph.getSavepointRestoreSettings();
-        assertFalse(savepointRestoreSettings.allowNonRestoredState());
-        Assert.assertNull(savepointRestoreSettings.getRestorePath());
+        assertThat(savepointRestoreSettings.allowNonRestoredState()).isFalse();
+        assertThat(savepointRestoreSettings.getRestorePath()).isNull();
         return jobGraph;
     }
 
@@ -247,8 +241,8 @@ public class JarRunHandlerParameterTest
         JobGraph jobGraph = super.validateGraph();
         final SavepointRestoreSettings savepointRestoreSettings =
                 jobGraph.getSavepointRestoreSettings();
-        Assert.assertTrue(savepointRestoreSettings.allowNonRestoredState());
-        assertEquals(RESTORE_PATH, savepointRestoreSettings.getRestorePath());
+        assertThat(savepointRestoreSettings.allowNonRestoredState()).isTrue();
+        assertThat(savepointRestoreSettings.getRestorePath()).isEqualTo(RESTORE_PATH);
         return jobGraph;
     }
 }

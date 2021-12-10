@@ -21,8 +21,7 @@ import org.apache.flink.streaming.api.operators.InputSelection;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link MultipleInputSelectionHandler}. */
 public class MultipleInputSelectionHandlerTest {
@@ -35,19 +34,19 @@ public class MultipleInputSelectionHandlerTest {
                 new MultipleInputSelectionHandler(() -> secondAndThird, 3);
         selectionHandler.nextSelection();
 
-        assertFalse(selectionHandler.shouldSetAvailableForAnotherInput());
+        assertThat(selectionHandler.shouldSetAvailableForAnotherInput()).isFalse();
 
         selectionHandler.setUnavailableInput(0);
-        assertFalse(selectionHandler.shouldSetAvailableForAnotherInput());
+        assertThat(selectionHandler.shouldSetAvailableForAnotherInput()).isFalse();
 
         selectionHandler.setUnavailableInput(2);
-        assertTrue(selectionHandler.shouldSetAvailableForAnotherInput());
+        assertThat(selectionHandler.shouldSetAvailableForAnotherInput()).isTrue();
 
         selectionHandler.setAvailableInput(0);
-        assertTrue(selectionHandler.shouldSetAvailableForAnotherInput());
+        assertThat(selectionHandler.shouldSetAvailableForAnotherInput()).isTrue();
 
         selectionHandler.setAvailableInput(2);
-        assertFalse(selectionHandler.shouldSetAvailableForAnotherInput());
+        assertThat(selectionHandler.shouldSetAvailableForAnotherInput()).isFalse();
     }
 
     @Test
@@ -67,8 +66,8 @@ public class MultipleInputSelectionHandlerTest {
         for (int i = 0; i < inputCount - 1; i++) {
             selectionHandler.setUnavailableInput(i);
         }
-        assertTrue(selectionHandler.isAnyInputAvailable());
+        assertThat(selectionHandler.isAnyInputAvailable()).isTrue();
         selectionHandler.setUnavailableInput(inputCount - 1);
-        assertFalse(selectionHandler.isAnyInputAvailable());
+        assertThat(selectionHandler.isAnyInputAvailable()).isFalse();
     }
 }

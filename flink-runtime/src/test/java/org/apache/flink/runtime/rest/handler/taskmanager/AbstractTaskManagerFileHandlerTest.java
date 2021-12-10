@@ -86,10 +86,9 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for the {@link AbstractTaskManagerFileHandler}. */
@@ -173,8 +172,8 @@ public class AbstractTaskManagerFileHandlerTest extends TestLogger {
         testTaskManagerFileHandler.respondToRequest(
                 testingContext, HTTP_REQUEST, handlerRequest, null);
 
-        assertThat(outputFile.length(), is(greaterThan(0L)));
-        assertThat(FileUtils.readFileUtf8(outputFile), is(equalTo(fileContent1)));
+        assertThat(outputFile.length()).isEqualTo(greaterThan(0L));
+        assertThat(FileUtils.readFileUtf8(outputFile)).isEqualTo(equalTo(fileContent1));
     }
 
     /** Tests that files are cached. */
@@ -182,8 +181,8 @@ public class AbstractTaskManagerFileHandlerTest extends TestLogger {
     public void testFileCaching() throws Exception {
         final File outputFile = runFileCachingTest(Time.milliseconds(5000L), Time.milliseconds(0L));
 
-        assertThat(outputFile.length(), is(greaterThan(0L)));
-        assertThat(FileUtils.readFileUtf8(outputFile), is(equalTo(fileContent1)));
+        assertThat(outputFile.length()).isEqualTo(greaterThan(0L));
+        assertThat(FileUtils.readFileUtf8(outputFile)).isEqualTo(equalTo(fileContent1));
     }
 
     /** Tests that file cache entries expire. */
@@ -193,8 +192,8 @@ public class AbstractTaskManagerFileHandlerTest extends TestLogger {
 
         final File outputFile = runFileCachingTest(cacheEntryDuration, cacheEntryDuration);
 
-        assertThat(outputFile.length(), is(greaterThan(0L)));
-        assertThat(FileUtils.readFileUtf8(outputFile), is(equalTo(fileContent2)));
+        assertThat(outputFile.length()).isEqualTo(greaterThan(0L));
+        assertThat(FileUtils.readFileUtf8(outputFile)).isEqualTo(equalTo(fileContent2));
     }
 
     private File runFileCachingTest(Time cacheEntryDuration, Time delayBetweenRequests)
@@ -296,7 +295,7 @@ public class AbstractTaskManagerFileHandlerTest extends TestLogger {
         protected CompletableFuture<TransientBlobKey> requestFileUpload(
                 ResourceManagerGateway resourceManagerGateway,
                 Tuple2<ResourceID, String> taskManagerIdAndFileName) {
-            assertThat(taskManagerIdAndFileName.f0, is(equalTo(expectedTaskManagerId)));
+            assertThat(taskManagerIdAndFileName.f0).isEqualTo(equalTo(expectedTaskManagerId));
             final CompletableFuture<TransientBlobKey> transientBlobKeyFuture =
                     requestFileUploads.poll();
 

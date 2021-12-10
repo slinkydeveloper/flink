@@ -22,7 +22,6 @@ import org.apache.flink.api.common.JobID;
 import org.apache.flink.core.fs.Path;
 import org.apache.flink.runtime.history.FsJobArchivist;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -30,6 +29,8 @@ import org.junit.rules.TemporaryFolder;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /** Tests for the {@link FsJobArchivist}. */
@@ -49,6 +50,6 @@ public class FsJobArchivistTest {
         final Path archive = FsJobArchivist.archiveJob(tmpPath, jobId, toArchive);
         final Collection<ArchivedJson> restored = FsJobArchivist.getArchivedJsons(archive);
 
-        Assert.assertThat(restored, containsInAnyOrder(toArchive.toArray()));
+        assertThat(restored).satisfies(matching(containsInAnyOrder(toArchive.toArray())));
     }
 }

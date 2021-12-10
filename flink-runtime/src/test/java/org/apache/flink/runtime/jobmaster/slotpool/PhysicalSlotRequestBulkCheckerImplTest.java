@@ -45,9 +45,8 @@ import java.util.function.Supplier;
 
 import static org.apache.flink.runtime.jobmaster.slotpool.PhysicalSlotTestUtils.createPhysicalSlot;
 import static org.apache.flink.runtime.jobmaster.slotpool.PhysicalSlotTestUtils.occupyPhysicalSlot;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link PhysicalSlotRequestBulkCheckerImpl}. */
 public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
@@ -113,11 +112,11 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
             throws ExecutionException, InterruptedException {
         mainThreadExecutor.schedule(() -> {}, milli, TimeUnit.MILLISECONDS).get();
         try {
-            assertThat(cancellationFuture.isDone(), is(false));
+            assertThat(cancellationFuture.isDone()).isEqualTo(false);
             cancellationFuture.get(milli, TimeUnit.MILLISECONDS);
             fail("The future must not have been cancelled");
         } catch (TimeoutException e) {
-            assertThat(cancellationFuture.isDone(), is(false));
+            assertThat(cancellationFuture.isDone()).isEqualTo(false);
         }
     }
 
@@ -130,7 +129,7 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
                         cancellationFuture, slotRequestId);
         bulkChecker.schedulePendingRequestBulkTimeoutCheck(bulk, TIMEOUT);
         clock.advanceTime(TIMEOUT.toMilliseconds() + 1L, TimeUnit.MILLISECONDS);
-        assertThat(cancellationFuture.join(), is(slotRequestId));
+        assertThat(cancellationFuture.join()).isEqualTo(slotRequestId);
     }
 
     @Test
@@ -142,9 +141,8 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
 
         final PhysicalSlotRequestBulkWithTimestamp bulkWithTimestamp =
                 new PhysicalSlotRequestBulkWithTimestamp(bulk);
-        assertThat(
-                checkBulkTimeout(bulkWithTimestamp),
-                is(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.FULFILLED));
+        assertThat(checkBulkTimeout(bulkWithTimestamp))
+                .isEqualTo(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.FULFILLED);
     }
 
     @Test
@@ -153,9 +151,8 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
                 createPhysicalSlotRequestBulkWithTimestamp(new SlotRequestId());
 
         clock.advanceTime(TIMEOUT.toMilliseconds() + 1L, TimeUnit.MILLISECONDS);
-        assertThat(
-                checkBulkTimeout(bulk),
-                is(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.TIMEOUT));
+        assertThat(checkBulkTimeout(bulk))
+                .isEqualTo(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.TIMEOUT);
     }
 
     @Test
@@ -166,9 +163,8 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
         final PhysicalSlot slot = addOneSlot();
         occupyPhysicalSlot(slot, false);
 
-        assertThat(
-                checkBulkTimeout(bulk),
-                is(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.PENDING));
+        assertThat(checkBulkTimeout(bulk))
+                .isEqualTo(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.PENDING);
     }
 
     @Test
@@ -176,9 +172,8 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
         final PhysicalSlotRequestBulkWithTimestamp bulk =
                 createPhysicalSlotRequestBulkWithTimestamp(new SlotRequestId());
 
-        assertThat(
-                checkBulkTimeout(bulk),
-                is(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.PENDING));
+        assertThat(checkBulkTimeout(bulk))
+                .isEqualTo(PhysicalSlotRequestBulkCheckerImpl.TimeoutCheckResult.PENDING);
     }
 
     @Test
@@ -187,7 +182,7 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
 
         addOneSlot();
 
-        assertThat(isFulfillable(bulk), is(true));
+        assertThat(isFulfillable(bulk)).isEqualTo(true);
     }
 
     @Test
@@ -197,7 +192,7 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
 
         addOneSlot();
 
-        assertThat(isFulfillable(bulk), is(false));
+        assertThat(isFulfillable(bulk)).isEqualTo(false);
     }
 
     @Test
@@ -210,7 +205,7 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
 
         bulk.markRequestFulfilled(slotRequestId, slot.getAllocationId());
 
-        assertThat(isFulfillable(bulk), is(false));
+        assertThat(isFulfillable(bulk)).isEqualTo(false);
     }
 
     @Test
@@ -223,7 +218,7 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
 
         occupyPhysicalSlot(slot1, true);
 
-        assertThat(isFulfillable(bulk), is(false));
+        assertThat(isFulfillable(bulk)).isEqualTo(false);
     }
 
     @Test
@@ -236,7 +231,7 @@ public class PhysicalSlotRequestBulkCheckerImplTest extends TestLogger {
 
         occupyPhysicalSlot(slot1, false);
 
-        assertThat(isFulfillable(bulk), is(true));
+        assertThat(isFulfillable(bulk)).isEqualTo(true);
     }
 
     private PhysicalSlotRequestBulkWithTimestamp createPhysicalSlotRequestBulkWithTimestamp(

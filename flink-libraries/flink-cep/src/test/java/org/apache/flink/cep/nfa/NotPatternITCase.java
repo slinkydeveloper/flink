@@ -34,7 +34,7 @@ import java.util.List;
 import static org.apache.flink.cep.utils.NFATestUtilities.comparePatterns;
 import static org.apache.flink.cep.utils.NFATestUtilities.feedNFA;
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Pattern#notFollowedBy(String)} and {@link Pattern#notNext(String)}. */
 @SuppressWarnings("unchecked")
@@ -178,7 +178,7 @@ public class NotPatternITCase extends TestLogger {
 
         final List<List<Event>> matches = feedNFA(inputEvents, nfa);
 
-        assertEquals(0, matches.size());
+        assertThat(matches.size()).isEqualTo(0);
     }
 
     @Test
@@ -247,7 +247,7 @@ public class NotPatternITCase extends TestLogger {
 
         final List<List<Event>> matches = feedNFA(inputEvents, nfa);
 
-        assertEquals(0, matches.size());
+        assertThat(matches.size()).isEqualTo(0);
     }
 
     @Test
@@ -828,7 +828,7 @@ public class NotPatternITCase extends TestLogger {
     @Test
     public void testNotNextAfterOneOrMoreSkipTillNext() throws Exception {
         final List<List<Event>> matches = testNotNextAfterOneOrMore(false);
-        assertEquals(0, matches.size());
+        assertThat(matches.size()).isEqualTo(0);
     }
 
     @Test
@@ -908,7 +908,7 @@ public class NotPatternITCase extends TestLogger {
     @Test
     public void testNotFollowedByNextAfterOneOrMoreEager() throws Exception {
         final List<List<Event>> matches = testNotFollowedByAfterOneOrMore(true, false);
-        assertEquals(0, matches.size());
+        assertThat(matches.size()).isEqualTo(0);
     }
 
     @Test
@@ -944,7 +944,7 @@ public class NotPatternITCase extends TestLogger {
     @Test
     public void testNotFollowedByNextAfterOneOrMoreCombinations() throws Exception {
         final List<List<Event>> matches = testNotFollowedByAfterOneOrMore(false, false);
-        assertEquals(0, matches.size());
+        assertThat(matches.size()).isEqualTo(0);
     }
 
     @Test

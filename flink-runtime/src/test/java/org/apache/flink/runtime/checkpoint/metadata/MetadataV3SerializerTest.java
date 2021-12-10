@@ -48,9 +48,7 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Various tests for the version 3 format serializer of a checkpoint. */
 public class MetadataV3SerializerTest {
@@ -241,17 +239,18 @@ public class MetadataV3SerializerTest {
         DataInputStream in = new DataInputViewStreamWrapper(new ByteArrayInputStreamWithPos(bytes));
         CheckpointMetadata deserialized =
                 serializer.deserialize(in, getClass().getClassLoader(), basePath);
-        assertEquals(checkpointId, deserialized.getCheckpointId());
-        assertEquals(operatorStates, deserialized.getOperatorStates());
-        assertEquals(
-                operatorStates.stream()
-                        .map(OperatorState::isFullyFinished)
-                        .collect(Collectors.toList()),
-                deserialized.getOperatorStates().stream()
-                        .map(OperatorState::isFullyFinished)
-                        .collect(Collectors.toList()));
+        assertThat(deserialized.getCheckpointId()).isEqualTo(checkpointId);
+        assertThat(deserialized.getOperatorStates()).isEqualTo(operatorStates);
+        assertThat(
+                        deserialized.getOperatorStates().stream()
+                                .map(OperatorState::isFullyFinished)
+                                .collect(Collectors.toList()))
+                .isEqualTo(
+                        operatorStates.stream()
+                                .map(OperatorState::isFullyFinished)
+                                .collect(Collectors.toList()));
 
-        assertEquals(masterStates.size(), deserialized.getMasterStates().size());
+        assertThat(deserialized.getMasterStates().size()).isEqualTo(masterStates.size());
         for (Iterator<MasterState> a = masterStates.iterator(),
                         b = deserialized.getMasterStates().iterator();
                 a.hasNext(); ) {
@@ -271,12 +270,13 @@ public class MetadataV3SerializerTest {
                 StreamStateHandle handle =
                         MetadataV2V3SerializerBase.deserializeStreamStateHandle(
                                 new DataInputStream(in), null);
-                assertTrue(handle instanceof KeyGroupsStateHandle);
-                assertEquals(offsets, ((KeyGroupsStateHandle) handle).getGroupRangeOffsets());
+                assertThat(handle).isInstanceOf(KeyGroupsStateHandle.class);
+                assertThat(((KeyGroupsStateHandle) handle).getGroupRangeOffsets())
+                        .isEqualTo(offsets);
                 byte[] deserialized = new byte[data.length];
                 try (FSDataInputStream dataStream = handle.openInputStream()) {
                     dataStream.read(deserialized);
-                    assertArrayEquals(data, deserialized);
+                    assertThat(deserialized).isEqualTo(data);
                 }
             }
         }

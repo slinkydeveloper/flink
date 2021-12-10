@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 
 import java.time.ZoneId;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link DateTimeBucketAssigner}. */
 public class DateTimeBucketAssignerTest {
@@ -39,7 +39,7 @@ public class DateTimeBucketAssignerTest {
         DateTimeBucketAssigner bucketAssigner =
                 new DateTimeBucketAssigner(ZoneId.of("America/Los_Angeles"));
 
-        assertEquals("2018-08-03--23", bucketAssigner.getBucketId(null, mockedContext));
+        assertThat(bucketAssigner.getBucketId(null, mockedContext)).isEqualTo("2018-08-03--23");
     }
 
     @Test
@@ -47,7 +47,7 @@ public class DateTimeBucketAssignerTest {
         DateTimeBucketAssigner bucketAssigner =
                 new DateTimeBucketAssigner("yyyy-MM-dd-HH", ZoneId.of("America/Los_Angeles"));
 
-        assertEquals("2018-08-03-23", bucketAssigner.getBucketId(null, mockedContext));
+        assertThat(bucketAssigner.getBucketId(null, mockedContext)).isEqualTo("2018-08-03-23");
     }
 
     private static class MockedContext implements BucketAssigner.Context {

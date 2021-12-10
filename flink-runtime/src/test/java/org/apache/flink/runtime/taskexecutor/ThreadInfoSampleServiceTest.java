@@ -36,14 +36,13 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link ThreadInfoSampleService}. */
 public class ThreadInfoSampleServiceTest extends TestLogger {
@@ -81,12 +80,12 @@ public class ThreadInfoSampleServiceTest extends TestLogger {
                         .requestThreadInfoSamples(new TestTask(), requestParams)
                         .get();
 
-        assertThat(threadInfoSamples, hasSize(NUMBER_OF_SAMPLES));
+        assertThat(threadInfoSamples).satisfies(matching(hasSize(NUMBER_OF_SAMPLES)));
 
         for (ThreadInfoSample sample : threadInfoSamples) {
             StackTraceElement[] traces = sample.getStackTrace();
-            assertTrue(sample.getStackTrace().length <= MAX_STACK_TRACK_DEPTH);
-            assertThat(traces, is(arrayWithSize(lessThanOrEqualTo(MAX_STACK_TRACK_DEPTH))));
+            assertThat(sample.getStackTrace().length <= MAX_STACK_TRACK_DEPTH).isTrue();
+            assertThat(traces).isEqualTo(arrayWithSize(lessThanOrEqualTo(MAX_STACK_TRACK_DEPTH)));
         }
     }
 
@@ -110,14 +109,13 @@ public class ThreadInfoSampleServiceTest extends TestLogger {
                         .get();
 
         for (ThreadInfoSample sample : threadInfoSamples1) {
-            assertThat(
-                    sample.getStackTrace(),
-                    is(arrayWithSize(lessThanOrEqualTo(MAX_STACK_TRACK_DEPTH))));
-            assertTrue(sample.getStackTrace().length <= MAX_STACK_TRACK_DEPTH);
+            assertThat(sample.getStackTrace())
+                    .isEqualTo(arrayWithSize(lessThanOrEqualTo(MAX_STACK_TRACK_DEPTH)));
+            assertThat(sample.getStackTrace().length <= MAX_STACK_TRACK_DEPTH).isTrue();
         }
 
         for (ThreadInfoSample sample : threadInfoSamples2) {
-            assertThat(sample.getStackTrace(), is(arrayWithSize(MAX_STACK_TRACK_DEPTH - 5)));
+            assertThat(sample.getStackTrace()).isEqualTo(arrayWithSize(MAX_STACK_TRACK_DEPTH - 5));
         }
     }
 
@@ -131,7 +129,7 @@ public class ThreadInfoSampleServiceTest extends TestLogger {
                             1, -1, DELAY_BETWEEN_SAMPLES, MAX_STACK_TRACK_DEPTH));
             fail("Expected exception not thrown");
         } catch (final IllegalArgumentException e) {
-            assertThat(e.getMessage(), is(equalTo("numSamples must be positive")));
+            assertThat(e.getMessage()).isEqualTo(equalTo("numSamples must be positive"));
         }
     }
 
@@ -141,10 +139,11 @@ public class ThreadInfoSampleServiceTest extends TestLogger {
         final CompletableFuture<List<ThreadInfoSample>> sampleFuture =
                 threadInfoSampleService.requestThreadInfoSamples(
                         new NotRunningTask(), requestParams);
-        assertThat(
-                sampleFuture,
-                FlinkMatchers.futureWillCompleteExceptionally(
-                        IllegalStateException.class, Duration.ofSeconds(10)));
+        assertThat(sampleFuture)
+                .satisfies(
+                        matching(
+                                FlinkMatchers.futureWillCompleteExceptionally(
+                                        IllegalStateException.class, Duration.ofSeconds(10))));
     }
 
     private static class TestTask implements SampleableTask {

@@ -29,9 +29,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Common tests for the behavior of {@link FileSystem} methods. */
 public abstract class FileSystemBehaviorTestSuite {
@@ -81,21 +80,21 @@ public abstract class FileSystemBehaviorTestSuite {
 
     @Test
     public void testFileSystemKind() {
-        assertEquals(getFileSystemKind(), fs.getKind());
+        assertThat(fs.getKind()).isEqualTo(getFileSystemKind());
     }
 
     // --- access and scheme
 
     @Test
     public void testPathAndScheme() throws Exception {
-        assertEquals(fs.getUri(), getBasePath().getFileSystem().getUri());
-        assertEquals(fs.getUri().getScheme(), getBasePath().toUri().getScheme());
+        assertThat(getBasePath().getFileSystem().getUri()).isEqualTo(fs.getUri());
+        assertThat(getBasePath().toUri().getScheme()).isEqualTo(fs.getUri().getScheme());
     }
 
     @Test
     public void testHomeAndWorkDir() {
-        assertEquals(fs.getUri().getScheme(), fs.getWorkingDirectory().toUri().getScheme());
-        assertEquals(fs.getUri().getScheme(), fs.getHomeDirectory().toUri().getScheme());
+        assertThat(fs.getWorkingDirectory().toUri().getScheme()).isEqualTo(fs.getUri().getScheme());
+        assertThat(fs.getHomeDirectory().toUri().getScheme()).isEqualTo(fs.getUri().getScheme());
     }
 
     // --- mkdirs
@@ -106,10 +105,10 @@ public abstract class FileSystemBehaviorTestSuite {
         // return true when things are not bad
 
         final Path directory = new Path(basePath, randomName());
-        assertTrue(fs.mkdirs(directory));
+        assertThat(fs.mkdirs(directory)).isTrue();
 
         if (getFileSystemKind() != FileSystemKind.OBJECT_STORE) {
-            assertTrue(fs.exists(directory));
+            assertThat(fs.exists(directory)).isTrue();
         }
     }
 
@@ -120,10 +119,10 @@ public abstract class FileSystemBehaviorTestSuite {
 
         final Path directory =
                 new Path(new Path(new Path(basePath, randomName()), randomName()), randomName());
-        assertTrue(fs.mkdirs(directory));
+        assertThat(fs.mkdirs(directory)).isTrue();
 
         if (getFileSystemKind() != FileSystemKind.OBJECT_STORE) {
-            assertTrue(fs.exists(directory));
+            assertThat(fs.exists(directory)).isTrue();
         }
     }
 
@@ -137,7 +136,7 @@ public abstract class FileSystemBehaviorTestSuite {
         // make sure the directory exists
         createRandomFileInDirectory(directory);
 
-        assertTrue(fs.mkdirs(directory));
+        assertThat(fs.mkdirs(directory)).isTrue();
     }
 
     @Test

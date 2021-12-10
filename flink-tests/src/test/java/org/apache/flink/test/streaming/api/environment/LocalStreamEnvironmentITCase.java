@@ -25,7 +25,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LocalStreamEnvironment}. */
 @SuppressWarnings("serial")
@@ -38,7 +38,7 @@ public class LocalStreamEnvironmentITCase extends TestLogger {
     @Test
     public void testRunIsolatedJob() throws Exception {
         LocalStreamEnvironment env = new LocalStreamEnvironment();
-        assertEquals(1, env.getParallelism());
+        assertThat(env.getParallelism()).isEqualTo(1);
 
         addSmallBoundedJob(env, 3);
         env.execute();

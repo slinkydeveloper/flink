@@ -45,10 +45,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that {@link FileCache} can read zipped directories from BlobServer and properly cleans them
@@ -171,25 +168,25 @@ public class FileCacheDirectoriesTest {
         final FileSystem fs = dstPath.getFileSystem();
         final FileStatus fileStatus = fs.getFileStatus(dstPath);
         final Path cacheFile = new Path(dstPath, "cacheFile");
-        assertTrue(fileStatus.isDir());
-        assertTrue(fs.exists(cacheFile));
+        assertThat(fileStatus.isDir()).isTrue();
+        assertThat(fs.exists(cacheFile)).isTrue();
 
         fileCache.releaseJob(jobID, attemptID1);
         // still should be available
-        assertTrue(fileStatus.isDir());
-        assertTrue(fs.exists(cacheFile));
+        assertThat(fileStatus.isDir()).isTrue();
+        assertThat(fs.exists(cacheFile)).isTrue();
 
         fileCache.releaseJob(jobID, attemptID2);
         // still should be available, file will be deleted after cleanupInterval
-        assertTrue(fileStatus.isDir());
-        assertTrue(fs.exists(cacheFile));
+        assertThat(fileStatus.isDir()).isTrue();
+        assertThat(fs.exists(cacheFile)).isTrue();
 
         // after a while, the file should disappear
-        assertEquals(CLEANUP_INTERVAL, executorService.lastDelayMillis);
+        assertThat(executorService.lastDelayMillis).isEqualTo(CLEANUP_INTERVAL);
         executorService.lastDeleteProcess.run();
 
-        assertFalse(fs.exists(dstPath));
-        assertFalse(fs.exists(cacheFile));
+        assertThat(fs.exists(dstPath)).isFalse();
+        assertThat(fs.exists(cacheFile)).isFalse();
     }
 
     private final class DeleteCapturingDirectScheduledExecutorService
@@ -202,7 +199,7 @@ public class FileCacheDirectoriesTest {
         public ScheduledFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
 
             if (command instanceof FileCache.DeleteProcess) {
-                assertNull("Multiple delete process registered", lastDeleteProcess);
+                assertThat(lastDeleteProcess).as("Multiple delete process registered").isNull();
                 lastDeleteProcess = (FileCache.DeleteProcess) command;
                 lastDelayMillis = unit.toMillis(delay);
                 return super.schedule(() -> {}, delay, unit);
@@ -224,11 +221,11 @@ public class FileCacheDirectoriesTest {
         final Path dstPath = copyResult.get();
         final FileSystem fs = dstPath.getFileSystem();
         final FileStatus fileStatus = fs.getFileStatus(dstPath);
-        assertTrue(fileStatus.isDir());
+        assertThat(fileStatus.isDir()).isTrue();
 
         final Path cacheFile = new Path(dstPath, "cacheFile");
-        assertTrue(fs.exists(cacheFile));
+        assertThat(fs.exists(cacheFile)).isTrue();
         final String actualContent = FileUtils.readFileUtf8(new File(cacheFile.getPath()));
-        assertEquals(testFileContent, actualContent);
+        assertThat(actualContent).isEqualTo(testFileContent);
     }
 }

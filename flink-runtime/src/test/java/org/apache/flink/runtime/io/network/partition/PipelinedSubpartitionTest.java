@@ -32,7 +32,6 @@ import org.apache.flink.util.concurrent.FutureUtils;
 import org.apache.flink.util.function.CheckedSupplier;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 
@@ -43,11 +42,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils.createFilledFinishedBufferConsumer;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -85,7 +81,7 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
         final PipelinedSubpartition subpartition = createSubpartition();
 
         // Successful request
-        assertNotNull(subpartition.createReadView(new NoOpBufferAvailablityListener()));
+        assertThat(subpartition.createReadView(new NoOpBufferAvailablityListener())).isNotNull();
 
         try {
             subpartition.createReadView(new NoOpBufferAvailablityListener());
@@ -103,11 +99,11 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
         PipelinedSubpartitionView reader =
                 new PipelinedSubpartitionView(subpartition, mock(BufferAvailabilityListener.class));
 
-        assertFalse(reader.isReleased());
+        assertThat(reader.isReleased()).isFalse();
         verify(subpartition, times(1)).isReleased();
 
         when(subpartition.isReleased()).thenReturn(true);
-        assertTrue(reader.isReleased());
+        assertThat(reader.isReleased()).isTrue();
         verify(subpartition, times(2)).isReleased();
     }
 
@@ -174,12 +170,12 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
                     @Override
                     public void onBuffer(Buffer buffer) {
                         final MemorySegment segment = buffer.getMemorySegment();
-                        assertEquals(segment.size(), buffer.getSize());
+                        assertThat(buffer.getSize()).isEqualTo(segment.size());
 
                         int expected = numberOfBuffers * (segment.size() / 4);
 
                         for (int i = 0; i < segment.size(); i += 4) {
-                            assertEquals(expected, segment.getInt(i));
+                            assertThat(segment.getInt(i)).isEqualTo(expected);
 
                             expected++;
                         }
@@ -243,7 +239,7 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
         try {
             partition.add(buffer1);
             partition.add(buffer2);
-            assertEquals(2, partition.getNumberOfQueuedBuffers());
+            assertThat(partition.getNumberOfQueuedBuffers()).isEqualTo(2);
 
             // create the read view first
             ResultSubpartitionView view = null;
@@ -252,13 +248,13 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
             }
 
             partition.release();
-            assertEquals(0, partition.getNumberOfQueuedBuffers());
+            assertThat(partition.getNumberOfQueuedBuffers()).isEqualTo(0);
 
-            assertTrue(partition.isReleased());
+            assertThat(partition.isReleased()).isTrue();
             if (createView) {
-                assertTrue(view.isReleased());
+                assertThat(view.isReleased()).isTrue();
             }
-            assertTrue(buffer1.isRecycled());
+            assertThat(buffer1.isRecycled()).isTrue();
         } finally {
             buffer1Recycled = buffer1.isRecycled();
             if (!buffer1Recycled) {
@@ -270,13 +266,13 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
             }
         }
         if (!buffer1Recycled) {
-            Assert.fail("buffer 1 not recycled");
+            fail("buffer 1 not recycled");
         }
         if (!buffer2Recycled) {
-            Assert.fail("buffer 2 not recycled");
+            fail("buffer 2 not recycled");
         }
-        assertEquals(2, partition.getTotalNumberOfBuffers());
-        assertEquals(0, partition.getTotalNumberOfBytes()); // buffer data is never consumed
+        assertThat(partition.getTotalNumberOfBuffers()).isEqualTo(2);
+        assertThat(partition.getTotalNumberOfBytes()).isEqualTo(0); // buffer data is never consumed
     }
 
     @Test
@@ -290,34 +286,36 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
         final PipelinedSubpartition subpartition = createSubpartition();
 
         subpartition.add(createFilledFinishedBufferConsumer(4096));
-        assertEquals(1, subpartition.getNumberOfQueuedBuffers());
+        assertThat(subpartition.getNumberOfQueuedBuffers()).isEqualTo(1);
 
         subpartition.add(createFilledFinishedBufferConsumer(4096));
-        assertEquals(2, subpartition.getNumberOfQueuedBuffers());
+        assertThat(subpartition.getNumberOfQueuedBuffers()).isEqualTo(2);
 
         subpartition.getNextBuffer();
 
-        assertEquals(1, subpartition.getNumberOfQueuedBuffers());
+        assertThat(subpartition.getNumberOfQueuedBuffers()).isEqualTo(1);
     }
 
     @Test
     public void testNewBufferSize() throws Exception {
         // given: Buffer size equal to integer max value by default.
         final PipelinedSubpartition subpartition = createSubpartition();
-        assertEquals(Integer.MAX_VALUE, subpartition.add(createFilledFinishedBufferConsumer(4)));
+        assertThat(subpartition.add(createFilledFinishedBufferConsumer(4)))
+                .isEqualTo(Integer.MAX_VALUE);
 
         // when: Changing buffer size.
         subpartition.bufferSize(42);
 
         // then: Changes successfully applied.
-        assertEquals(42, subpartition.add(createFilledFinishedBufferConsumer(4)));
+        assertThat(subpartition.add(createFilledFinishedBufferConsumer(4))).isEqualTo(42);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testNegativeNewBufferSize() throws Exception {
         // given: Buffer size equal to integer max value by default.
         final PipelinedSubpartition subpartition = createSubpartition();
-        assertEquals(Integer.MAX_VALUE, subpartition.add(createFilledFinishedBufferConsumer(4)));
+        assertThat(subpartition.add(createFilledFinishedBufferConsumer(4)))
+                .isEqualTo(Integer.MAX_VALUE);
 
         // when: Changing buffer size to the negative value.
         subpartition.bufferSize(-1);
@@ -327,13 +325,14 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
     public void testNegativeBufferSizeAsSignOfAddingFail() throws Exception {
         // given: Buffer size equal to integer max value by default.
         final PipelinedSubpartition subpartition = createSubpartition();
-        assertEquals(Integer.MAX_VALUE, subpartition.add(createFilledFinishedBufferConsumer(4)));
+        assertThat(subpartition.add(createFilledFinishedBufferConsumer(4)))
+                .isEqualTo(Integer.MAX_VALUE);
 
         // when: Finishing the subpartition which make following adding impossible.
         subpartition.finish();
 
         // then: -1 should be return because the add operation fails.
-        assertEquals(-1, subpartition.add(createFilledFinishedBufferConsumer(4)));
+        assertThat(subpartition.add(createFilledFinishedBufferConsumer(4))).isEqualTo(-1);
     }
 
     private void verifyViewReleasedAfterParentRelease(ResultSubpartition partition)
@@ -349,15 +348,15 @@ public class PipelinedSubpartitionTest extends SubpartitionTestBase {
         ResultSubpartitionView view = partition.createReadView(listener);
 
         // The added bufferConsumer and end-of-partition event
-        assertNotNull(view.getNextBuffer());
-        assertNotNull(view.getNextBuffer());
+        assertThat(view.getNextBuffer()).isNotNull();
+        assertThat(view.getNextBuffer()).isNotNull();
 
         // Release the parent
-        assertFalse(view.isReleased());
+        assertThat(view.isReleased()).isFalse();
         partition.release();
 
         // Verify that parent release is reflected at partition view
-        assertTrue(view.isReleased());
+        assertThat(view.isReleased()).isTrue();
     }
 
     public static PipelinedSubpartition createPipelinedSubpartition() {

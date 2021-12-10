@@ -25,9 +25,7 @@ import org.junit.runners.Parameterized;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link MemorySegment} in off-heap mode using unsafe memory. */
 @RunWith(Parameterized.class)
@@ -59,7 +57,7 @@ public class OffHeapUnsafeMemorySegmentTest extends MemorySegmentTestBase {
         MemorySegmentFactory.allocateOffHeapUnsafeMemory(
                         10, null, () -> cleanerFuture.complete(null))
                 .free();
-        assertTrue(cleanerFuture.isDone());
+        assertThat(cleanerFuture.isDone()).isTrue();
     }
 
     @Test
@@ -86,6 +84,6 @@ public class OffHeapUnsafeMemorySegmentTest extends MemorySegmentTestBase {
         t1.join();
         t2.join();
 
-        assertThat(counter.get(), is(1));
+        assertThat(counter.get()).isEqualTo(1);
     }
 }

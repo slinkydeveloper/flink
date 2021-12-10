@@ -24,7 +24,7 @@ import org.apache.flink.types.StringValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for {@link LongValueToStringValue}. */
 public class LongValueToStringValueTest {
@@ -35,12 +35,11 @@ public class LongValueToStringValueTest {
     public void testTranslation() throws Exception {
         StringValue reuse = new StringValue();
 
-        assertEquals(
-                new StringValue("-9223372036854775808"),
-                translator.translate(new LongValue(Long.MIN_VALUE), reuse));
-        assertEquals(new StringValue("0"), translator.translate(new LongValue(0), reuse));
-        assertEquals(
-                new StringValue("9223372036854775807"),
-                translator.translate(new LongValue(Long.MAX_VALUE), reuse));
+        assertThatObject(translator.translate(new LongValue(Long.MIN_VALUE), reuse))
+                .isEqualTo(new StringValue("-9223372036854775808"));
+        assertThatObject(translator.translate(new LongValue(0), reuse))
+                .isEqualTo(new StringValue("0"));
+        assertThatObject(translator.translate(new LongValue(Long.MAX_VALUE), reuse))
+                .isEqualTo(new StringValue("9223372036854775807"));
     }
 }

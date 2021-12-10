@@ -44,8 +44,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the StatsDReporter. */
 public class StatsDReporterTest extends TestLogger {
@@ -54,9 +53,9 @@ public class StatsDReporterTest extends TestLogger {
     public void testReplaceInvalidChars() {
         StatsDReporter reporter = new StatsDReporter();
 
-        assertEquals("", reporter.filterCharacters(""));
-        assertEquals("abc", reporter.filterCharacters("abc"));
-        assertEquals("a-b--", reporter.filterCharacters("a:b::"));
+        assertThat(reporter.filterCharacters("")).isEqualTo("");
+        assertThat(reporter.filterCharacters("abc")).isEqualTo("abc");
+        assertThat(reporter.filterCharacters("a:b::")).isEqualTo("a-b--");
     }
 
     /** Tests that the registered metrics' names don't contain invalid characters. */
@@ -81,14 +80,14 @@ public class StatsDReporterTest extends TestLogger {
 
         Map<Counter, String> counters = reporter.getCounters();
 
-        assertTrue(counters.containsKey(myCounter));
+        assertThat(counters.containsKey(myCounter)).isTrue();
 
         String expectedCounterName =
                 reporter.filterCharacters(scope)
                         + delimiter
                         + reporter.filterCharacters(counterName);
 
-        assertEquals(expectedCounterName, counters.get(myCounter));
+        assertThat(counters.get(myCounter)).isEqualTo(expectedCounterName);
     }
 
     /** Tests that histograms are properly reported via the StatsD reporter. */
@@ -225,7 +224,7 @@ public class StatsDReporterTest extends TestLogger {
             reporter.report();
 
             receiver.waitUntilNumLines(expectation.size(), timeout);
-            assertEquals(expectation, receiver.getLines());
+            assertThat(receiver.getLines()).isEqualTo(expectation);
 
         } finally {
             if (reporter != null) {

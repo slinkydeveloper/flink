@@ -41,12 +41,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link PartitionRequestServerHandler}. */
 public class PartitionRequestServerHandlerTest extends TestLogger {
@@ -71,14 +66,14 @@ public class PartitionRequestServerHandlerTest extends TestLogger {
 
         // Read the response message after handling partition request
         final Object msg = channel.readOutbound();
-        assertThat(msg, instanceOf(ErrorResponse.class));
+        assertThat(msg).isInstanceOf(ErrorResponse.class);
 
         final ErrorResponse err = (ErrorResponse) msg;
-        assertThat(err.cause, instanceOf(PartitionNotFoundException.class));
+        assertThat(err.cause).isInstanceOf(PartitionNotFoundException.class);
 
         final ResultPartitionID actualPartitionId =
                 ((PartitionNotFoundException) err.cause).getPartitionId();
-        assertThat(partitionId, is(actualPartitionId));
+        assertThat(partitionId).isEqualTo(actualPartitionId);
     }
 
     @Test
@@ -99,7 +94,7 @@ public class PartitionRequestServerHandlerTest extends TestLogger {
         channel.writeInbound(new ResumeConsumption(inputChannelID));
         channel.runPendingTasks();
 
-        assertTrue(testViewReader.consumptionResumed);
+        assertThat(testViewReader.consumptionResumed).isTrue();
     }
 
     @Test
@@ -132,12 +127,12 @@ public class PartitionRequestServerHandlerTest extends TestLogger {
         resultPartition.notifyEndOfData(StopMode.DRAIN);
         CompletableFuture<Void> allRecordsProcessedFuture =
                 resultPartition.getAllDataProcessedFuture();
-        assertFalse(allRecordsProcessedFuture.isDone());
+        assertThat(allRecordsProcessedFuture.isDone()).isFalse();
         channel.writeInbound(new NettyMessage.AckAllUserRecordsProcessed(inputChannelID));
         channel.runPendingTasks();
 
-        assertTrue(allRecordsProcessedFuture.isDone());
-        assertFalse(allRecordsProcessedFuture.isCompletedExceptionally());
+        assertThat(allRecordsProcessedFuture.isDone()).isTrue();
+        assertThat(allRecordsProcessedFuture.isCompletedExceptionally()).isFalse();
     }
 
     @Test
@@ -158,7 +153,7 @@ public class PartitionRequestServerHandlerTest extends TestLogger {
         channel.writeInbound(new NettyMessage.NewBufferSize(666, inputChannelID));
         channel.runPendingTasks();
 
-        assertEquals(666, testViewReader.bufferSize);
+        assertThat(testViewReader.bufferSize).isEqualTo(666);
     }
 
     @Test
@@ -179,10 +174,12 @@ public class PartitionRequestServerHandlerTest extends TestLogger {
         channel.runPendingTasks();
 
         // If error happens outbound messages would be not empty.
-        assertTrue(channel.outboundMessages().toString(), channel.outboundMessages().isEmpty());
+        assertThat(channel.outboundMessages().isEmpty())
+                .as(channel.outboundMessages().toString())
+                .isTrue();
 
         // New buffer size should be silently ignored because it is possible situation.
-        assertEquals(-1, testViewReader.bufferSize);
+        assertThat(testViewReader.bufferSize).isEqualTo(-1);
     }
 
     private static class TestViewReader extends CreditBasedSequenceNumberingViewReader {

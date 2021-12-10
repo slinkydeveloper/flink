@@ -18,7 +18,6 @@
 
 package org.apache.flink.core.fs;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -32,6 +31,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.apache.flink.util.Preconditions.checkState;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RefCountedFile}. */
 public class RefCountedFileTest {
@@ -49,7 +49,7 @@ public class RefCountedFileTest {
         fileUnderTest.release();
 
         try (Stream<Path> files = Files.list(temporaryFolder.getRoot().toPath())) {
-            Assert.assertEquals(0L, files.count());
+            assertThat(files.count()).isEqualTo(0L);
         }
     }
 
@@ -65,26 +65,26 @@ public class RefCountedFileTest {
         fileUnderTest.retain();
         fileUnderTest.retain();
 
-        Assert.assertEquals(3, fileUnderTest.getReferenceCounter());
+        assertThat(fileUnderTest.getReferenceCounter()).isEqualTo(3);
 
         fileUnderTest.release();
-        Assert.assertEquals(2, fileUnderTest.getReferenceCounter());
+        assertThat(fileUnderTest.getReferenceCounter()).isEqualTo(2);
         verifyTheFileIsStillThere();
 
         fileUnderTest.release();
-        Assert.assertEquals(1, fileUnderTest.getReferenceCounter());
+        assertThat(fileUnderTest.getReferenceCounter()).isEqualTo(1);
         verifyTheFileIsStillThere();
 
         fileUnderTest.release();
         // the file is deleted now
         try (Stream<Path> files = Files.list(temporaryFolder.getRoot().toPath())) {
-            Assert.assertEquals(0L, files.count());
+            assertThat(files.count()).isEqualTo(0L);
         }
     }
 
     private void verifyTheFileIsStillThere() throws IOException {
         try (Stream<Path> files = Files.list(temporaryFolder.getRoot().toPath())) {
-            Assert.assertEquals(1L, files.count());
+            assertThat(files.count()).isEqualTo(1L);
         }
     }
 

@@ -32,12 +32,13 @@ import org.apache.flink.streaming.api.checkpoint.ListCheckpointed;
 import org.apache.flink.streaming.runtime.streamrecord.StreamRecord;
 import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test snapshot state with {@link WrappingFunction}. */
 public class WrappingFunctionSnapshotRestoreTest {
@@ -70,7 +71,7 @@ public class WrappingFunctionSnapshotRestoreTest {
         testHarness.initializeState(snapshot);
         testHarness.open();
 
-        Assert.assertTrue(innerTestFun.wasRestored);
+        assertThat(innerTestFun.wasRestored).isTrue();
         testHarness.close();
     }
 
@@ -102,7 +103,7 @@ public class WrappingFunctionSnapshotRestoreTest {
         testHarness.initializeState(snapshot);
         testHarness.open();
 
-        Assert.assertTrue(innerTestFun.wasRestored);
+        assertThat(innerTestFun.wasRestored).isTrue();
         testHarness.close();
     }
 
@@ -150,8 +151,8 @@ public class WrappingFunctionSnapshotRestoreTest {
             if (context.isRestored()) {
                 Iterator<Integer> integers = serializableListState.get().iterator();
                 int act = integers.next();
-                Assert.assertEquals(42, act);
-                Assert.assertFalse(integers.hasNext());
+                assertThat(act).isEqualTo(42);
+                assertThat(integers.hasNext()).isFalse();
                 wasRestored = true;
             }
         }
@@ -180,9 +181,9 @@ public class WrappingFunctionSnapshotRestoreTest {
 
         @Override
         public void restoreState(List<Integer> state) throws Exception {
-            Assert.assertEquals(1, state.size());
+            assertThat(state.size()).isEqualTo(1);
             int val = state.get(0);
-            Assert.assertEquals(42, val);
+            assertThat(val).isEqualTo(42);
             wasRestored = true;
         }
 

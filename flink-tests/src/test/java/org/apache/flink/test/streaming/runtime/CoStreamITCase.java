@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for co-streams. */
 @SuppressWarnings("serial")
@@ -123,6 +123,6 @@ public class CoStreamITCase extends AbstractTestBase {
         List<String> expected = Arrays.asList("(1,2)", "(3,4)", "(5,6)", "1", "3", "5");
         List<String> result = resultSink.getResult();
         Collections.sort(result);
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 }

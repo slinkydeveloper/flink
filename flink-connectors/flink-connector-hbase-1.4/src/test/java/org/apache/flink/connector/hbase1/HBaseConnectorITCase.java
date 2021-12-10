@@ -46,9 +46,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.table.api.Expressions.$;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT cases for HBase connector (source and sink). */
 public class HBaseConnectorITCase extends HBaseTestBase {
@@ -348,7 +346,7 @@ public class HBaseConnectorITCase extends HBaseTestBase {
                 "+I[7, 70, Hello-7, 700, 7.07, false, Welt-7, 2019-08-19T19:30, 2019-08-19, 19:30, 12345678.0007]");
         expected.add(
                 "+I[8, 80, null, 800, 8.08, true, Welt-8, 2019-08-19T19:40, 2019-08-19, 19:40, 12345678.0008]");
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -417,7 +415,7 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         expected.add(
                 "+I[3, 3, 30, Hello-3, 300, 3.03, false, Welt-3, 2019-08-18T19:02, 2019-08-18, 19:02, 12345678.0003]");
 
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -427,11 +425,12 @@ public class HBaseConnectorITCase extends HBaseTestBase {
         AbstractTableInputFormat<?> inputFormat =
                 new HBaseRowDataInputFormat(getConf(), TEST_TABLE_1, tableSchema, "null");
         inputFormat.open(inputFormat.createInputSplits(1)[0]);
-        assertNotNull(inputFormat.getConnection());
-        assertNotNull(inputFormat.getConnection().getTable(TableName.valueOf(TEST_TABLE_1)));
+        assertThat(inputFormat.getConnection()).isNotNull();
+        assertThat(inputFormat.getConnection().getTable(TableName.valueOf(TEST_TABLE_1)))
+                .isNotNull();
 
         inputFormat.close();
-        assertNull(inputFormat.getConnection());
+        assertThat(inputFormat.getConnection()).isNull();
     }
 
     // -------------------------------------------------------------------------------------

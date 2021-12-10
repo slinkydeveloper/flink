@@ -49,13 +49,8 @@ import static org.apache.flink.runtime.blob.BlobCachePutTest.verifyDeletedEventu
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.PERMANENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.TRANSIENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobKeyTest.verifyKeyDifferentHashEquals;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeFalse;
 
 /** This class contains unit tests for the {@link BlobClient}. */
@@ -170,8 +165,8 @@ public class BlobClientTest extends TestLogger {
                 bytesReceived += read;
 
                 if (bytesReceived == receivedBuffer.length) {
-                    assertEquals(-1, actualInputStream.read());
-                    assertArrayEquals(expectedBuf, receivedBuffer);
+                    assertThat(actualInputStream.read()).isEqualTo(-1);
+                    assertThat(receivedBuffer).isEqualTo(expectedBuf);
                     return;
                 }
             }
@@ -196,7 +191,7 @@ public class BlobClientTest extends TestLogger {
                 final int r1 = actualInputStream.read();
                 final int r2 = expectedInputStream.read();
 
-                assertEquals(r2, r1);
+                assertThat(r1).isEqualTo(r2);
 
                 if (r1 < 0) {
                     break;
@@ -262,13 +257,13 @@ public class BlobClientTest extends TestLogger {
             BlobKey receivedKey1 = null;
             if (blobType == TRANSIENT_BLOB) {
                 receivedKey1 = client.putBuffer(null, testBuffer, 0, testBuffer.length, blobType);
-                assertArrayEquals(digest, receivedKey1.getHash());
+                assertThat(receivedKey1.getHash()).isEqualTo(digest);
             }
 
             // try again with a job-related BLOB:
             BlobKey receivedKey2 =
                     client.putBuffer(jobId, testBuffer, 0, testBuffer.length, blobType);
-            assertArrayEquals(digest, receivedKey2.getHash());
+            assertThat(receivedKey2.getHash()).isEqualTo(digest);
             if (blobType == TRANSIENT_BLOB) {
                 verifyKeyDifferentHashEquals(receivedKey1, receivedKey2);
             }
@@ -356,7 +351,7 @@ public class BlobClientTest extends TestLogger {
             if (blobType == TRANSIENT_BLOB) {
                 is = new FileInputStream(testFile);
                 receivedKey1 = client.putInputStream(null, is, blobType);
-                assertArrayEquals(digest, receivedKey1.getHash());
+                assertThat(receivedKey1.getHash()).isEqualTo(digest);
             }
 
             // try again with a job-related BLOB:
@@ -427,7 +422,7 @@ public class BlobClientTest extends TestLogger {
 
             // put content addressable (like libraries)
             BlobKey key = client.putBuffer(jobId, data, 0, data.length, blobType);
-            assertNotNull(key);
+            assertThat(key).isNotNull();
 
             // issue a GET request that succeeds
             InputStream is = client.getInternal(jobId, key);
@@ -451,7 +446,7 @@ public class BlobClientTest extends TestLogger {
                         null);
                 // we tolerate that this succeeds, as the receiver socket may have buffered
                 // everything already, but in this case, also verify the contents
-                assertArrayEquals(data, receiveBuffer);
+                assertThat(receiveBuffer).isEqualTo(data);
             } catch (IOException e) {
                 // expected
             }
@@ -496,7 +491,7 @@ public class BlobClientTest extends TestLogger {
                         jobId,
                         Collections.singletonList(new Path(testFile.toURI())));
 
-        assertEquals(1, blobKeys.size());
+        assertThat(blobKeys.size()).isEqualTo(1);
 
         try (BlobClient blobClient = new BlobClient(serverAddress, blobClientConfig)) {
             validateGetAndClose(blobClient.getInternal(jobId, blobKeys.get(0)), testFile);
@@ -522,9 +517,10 @@ public class BlobClientTest extends TestLogger {
                 fail("Should throw an exception.");
             } catch (Throwable t) {
                 assertThat(
-                        ExceptionUtils.findThrowable(t, java.net.SocketTimeoutException.class)
-                                .isPresent(),
-                        is(true));
+                                ExceptionUtils.findThrowable(
+                                                t, java.net.SocketTimeoutException.class)
+                                        .isPresent())
+                        .isEqualTo(true);
             }
         } finally {
             clientConfig.setInteger(BlobServerOptions.SO_TIMEOUT, oldSoTimeout);
@@ -538,7 +534,7 @@ public class BlobClientTest extends TestLogger {
                 new BlobClient(
                         InetSocketAddress.createUnresolved("localhost", getBlobServer().getPort()),
                         getBlobClientConfig())) {
-            assertTrue(client.isConnected());
+            assertThat(client.isConnected()).isTrue();
         }
     }
 

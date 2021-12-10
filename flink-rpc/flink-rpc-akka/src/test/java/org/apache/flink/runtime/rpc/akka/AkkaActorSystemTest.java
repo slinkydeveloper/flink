@@ -36,8 +36,8 @@ import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for the {@link akka.actor.ActorSystem} instantiated through {@link
@@ -82,9 +82,10 @@ public class AkkaActorSystemTest extends TestLogger {
                 result.toCompletableFuture().get();
                 fail("Expected a recipient terminated exception.");
             } catch (Exception e) {
-                assertTrue(
-                        AkkaRpcServiceUtils.isRecipientTerminatedException(
-                                ExceptionUtils.stripExecutionException(e)));
+                assertThat(
+                                AkkaRpcServiceUtils.isRecipientTerminatedException(
+                                        ExceptionUtils.stripExecutionException(e)))
+                        .isTrue();
             }
         } finally {
             AkkaUtils.terminateActorSystem(actorSystem).join();

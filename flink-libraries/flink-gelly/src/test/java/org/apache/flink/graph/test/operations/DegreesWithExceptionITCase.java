@@ -26,7 +26,7 @@ import org.apache.flink.test.util.AbstractTestBase;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test expected errors for {@link Graph#inDegrees()}, {@link Graph#outDegrees()}, and {@link

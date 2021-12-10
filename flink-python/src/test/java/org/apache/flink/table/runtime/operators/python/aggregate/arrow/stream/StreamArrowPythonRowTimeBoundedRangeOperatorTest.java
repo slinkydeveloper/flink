@@ -43,7 +43,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test for {@link StreamArrowPythonRowTimeBoundedRangeOperator}. These test that:
@@ -207,7 +207,9 @@ public class StreamArrowPythonRowTimeBoundedRangeOperatorTest
 
         AbstractKeyedStateBackend stateBackend =
                 (AbstractKeyedStateBackend) operator.getKeyedStateBackend();
-        assertEquals("Initial state is not empty", 0, stateBackend.numKeyValueStateEntries());
+        assertThat(stateBackend.numKeyValueStateEntries())
+                .as("Initial state is not empty")
+                .isEqualTo(0);
 
         testHarness.processElement(new StreamRecord<>(newBinaryRow(true, "c1", "c2", 0L, 100L)));
         testHarness.processElement(new StreamRecord<>(newBinaryRow(true, "c1", "c4", 1L, 100L)));
@@ -219,7 +221,9 @@ public class StreamArrowPythonRowTimeBoundedRangeOperatorTest
         testHarness.processWatermark(new Watermark(4000L));
         // at this moment the function should have cleaned up states
 
-        assertEquals("State has not been cleaned up", 0, stateBackend.numKeyValueStateEntries());
+        assertThat(stateBackend.numKeyValueStateEntries())
+                .as("State has not been cleaned up")
+                .isEqualTo(0);
 
         testHarness.close();
     }

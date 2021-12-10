@@ -19,7 +19,7 @@ package org.apache.flink.streaming.api.functions.windowing.delta.extractor;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FieldFromArray}. */
 public class FieldFromArrayTest {
@@ -31,27 +31,24 @@ public class FieldFromArrayTest {
     @Test
     public void testStringArray() {
         for (int i = 0; i < this.testStringArray.length; i++) {
-            assertEquals(
-                    this.testStringArray[i],
-                    new FieldFromArray<String>(i).extract(testStringArray));
+            assertThat(new FieldFromArray<String>(i).extract(testStringArray))
+                    .isEqualTo(this.testStringArray[i]);
         }
     }
 
     @Test
     public void testIntegerArray() {
         for (int i = 0; i < this.testIntegerArray.length; i++) {
-            assertEquals(
-                    this.testIntegerArray[i],
-                    new FieldFromArray<String>(i).extract(testIntegerArray));
+            assertThat(new FieldFromArray<String>(i).extract(testIntegerArray))
+                    .isEqualTo(this.testIntegerArray[i]);
         }
     }
 
     @Test
     public void testIntArray() {
         for (int i = 0; i < this.testIntArray.length; i++) {
-            assertEquals(
-                    new Integer(this.testIntArray[i]),
-                    new FieldFromArray<Integer>(i).extract(testIntArray));
+            assertThat(new FieldFromArray<Integer>(i).extract(testIntArray))
+                    .isEqualTo(new Integer(this.testIntArray[i]));
         }
     }
 }

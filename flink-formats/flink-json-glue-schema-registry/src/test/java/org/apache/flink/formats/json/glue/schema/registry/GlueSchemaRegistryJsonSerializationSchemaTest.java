@@ -39,11 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GlueSchemaRegistryJsonSerializationSchema}. */
 public class GlueSchemaRegistryJsonSerializationSchemaTest {
@@ -107,12 +103,9 @@ public class GlueSchemaRegistryJsonSerializationSchemaTest {
     /** Test initialization works. */
     @Test
     public void testForGeneric_withValidParams_succeeds() {
-        assertThat(
-                new GlueSchemaRegistryJsonSerializationSchema<>(testTopic, configs),
-                notNullValue());
-        assertThat(
-                new GlueSchemaRegistryJsonSerializationSchema<>(testTopic, configs),
-                instanceOf(GlueSchemaRegistryJsonSerializationSchema.class));
+        assertThat(new GlueSchemaRegistryJsonSerializationSchema<>(testTopic, configs)).isNotNull();
+        assertThat(new GlueSchemaRegistryJsonSerializationSchema<>(testTopic, configs))
+                .isInstanceOf(GlueSchemaRegistryJsonSerializationSchema.class);
     }
 
     /**
@@ -134,7 +127,7 @@ public class GlueSchemaRegistryJsonSerializationSchemaTest {
 
         byte[] serializedData =
                 glueSchemaRegistryJsonSerializationSchema.serialize(userDefinedPojo);
-        assertThat(serializedData, equalTo(serializedBytes));
+        assertThat(serializedData).isEqualTo(serializedBytes);
     }
 
     /**
@@ -155,7 +148,7 @@ public class GlueSchemaRegistryJsonSerializationSchemaTest {
                 new GlueSchemaRegistryJsonSerializationSchema<>(glueSchemaRegistryJsonSchemaCoder);
 
         byte[] serializedData = glueSchemaRegistryJsonSerializationSchema.serialize(userSchema);
-        assertThat(serializedData, equalTo(serializedBytes));
+        assertThat(serializedData).isEqualTo(serializedBytes);
     }
 
     /**
@@ -177,7 +170,7 @@ public class GlueSchemaRegistryJsonSerializationSchemaTest {
 
         byte[] serializedData =
                 glueSchemaRegistryJsonSerializationSchema.serialize(userDefinedPojo);
-        assertThat(serializedData, equalTo(serializedBytes));
+        assertThat(serializedData).isEqualTo(serializedBytes);
     }
 
     /**
@@ -198,7 +191,7 @@ public class GlueSchemaRegistryJsonSerializationSchemaTest {
                 new GlueSchemaRegistryJsonSerializationSchema<>(glueSchemaRegistryJsonSchemaCoder);
 
         byte[] serializedData = glueSchemaRegistryJsonSerializationSchema.serialize(userSchema);
-        assertThat(serializedData, equalTo(serializedBytes));
+        assertThat(serializedData).isEqualTo(serializedBytes);
     }
 
     /** Test whether serialize method returns null when input object is null. */
@@ -206,7 +199,7 @@ public class GlueSchemaRegistryJsonSerializationSchemaTest {
     public void testSerialize_withNullObject_returnNull() {
         GlueSchemaRegistryJsonSerializationSchema glueSchemaRegistryJsonSerializationSchema =
                 new GlueSchemaRegistryJsonSerializationSchema<>(testTopic, configs);
-        assertThat(glueSchemaRegistryJsonSerializationSchema.serialize(null), nullValue());
+        assertThat(glueSchemaRegistryJsonSerializationSchema.serialize(null)).isNull();
     }
 
     private static class MockGlueSchemaRegistrySerializationFacade

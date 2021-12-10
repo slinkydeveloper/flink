@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link EmptyGraph}. */
 public class EmptyGraphTest extends GraphGeneratorTestBase {
@@ -46,14 +46,14 @@ public class EmptyGraphTest extends GraphGeneratorTestBase {
 
         Graph<LongValue, NullValue, NullValue> graph = new EmptyGraph(env, vertexCount).generate();
 
-        assertEquals(vertexCount, graph.numberOfVertices());
-        assertEquals(0, graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(vertexCount);
+        assertThat(graph.numberOfEdges()).isEqualTo(0);
 
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(0, maxInDegree);
-        assertEquals(0, maxOutDegree);
+        assertThat(maxInDegree).isEqualTo(0);
+        assertThat(maxOutDegree).isEqualTo(0);
     }
 
     @Test

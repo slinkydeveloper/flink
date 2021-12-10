@@ -25,7 +25,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SingletonEdgeGraph}. */
 public class SingletonEdgeGraphTest extends GraphGeneratorTestBase {
@@ -50,18 +50,18 @@ public class SingletonEdgeGraphTest extends GraphGeneratorTestBase {
         Graph<LongValue, NullValue, NullValue> graph =
                 new SingletonEdgeGraph(env, vertexPairCount).generate();
 
-        assertEquals(2 * vertexPairCount, graph.numberOfVertices());
-        assertEquals(2 * vertexPairCount, graph.numberOfEdges());
+        assertThat(graph.numberOfVertices()).isEqualTo(2 * vertexPairCount);
+        assertThat(graph.numberOfEdges()).isEqualTo(2 * vertexPairCount);
 
         long minInDegree = graph.inDegrees().min(1).collect().get(0).f1.getValue();
         long minOutDegree = graph.outDegrees().min(1).collect().get(0).f1.getValue();
         long maxInDegree = graph.inDegrees().max(1).collect().get(0).f1.getValue();
         long maxOutDegree = graph.outDegrees().max(1).collect().get(0).f1.getValue();
 
-        assertEquals(1, minInDegree);
-        assertEquals(1, minOutDegree);
-        assertEquals(1, maxInDegree);
-        assertEquals(1, maxOutDegree);
+        assertThat(minInDegree).isEqualTo(1);
+        assertThat(minOutDegree).isEqualTo(1);
+        assertThat(maxInDegree).isEqualTo(1);
+        assertThat(maxOutDegree).isEqualTo(1);
     }
 
     @Test

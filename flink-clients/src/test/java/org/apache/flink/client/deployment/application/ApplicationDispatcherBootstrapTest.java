@@ -68,13 +68,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link ApplicationDispatcherBootstrap}. */
 public class ApplicationDispatcherBootstrapTest extends TestLogger {
@@ -163,7 +159,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
 
         applicationFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        assertThat(submittedJobId.get(TIMEOUT_SECONDS, TimeUnit.SECONDS), is(new JobID(0L, 0L)));
+        assertThat(submittedJobId.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(new JobID(0L, 0L));
     }
 
     @Test
@@ -189,7 +186,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
 
         applicationFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        assertThat(submittedJobId.get(TIMEOUT_SECONDS, TimeUnit.SECONDS), is(new JobID(0L, 2L)));
+        assertThat(submittedJobId.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(new JobID(0L, 2L));
     }
 
     @Test
@@ -217,7 +215,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
 
         applicationFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        assertThat(submittedJobId.get(TIMEOUT_SECONDS, TimeUnit.SECONDS), is(new JobID(0L, 2L)));
+        assertThat(submittedJobId.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(new JobID(0L, 2L));
     }
 
     @Test
@@ -259,7 +258,7 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
         final CompletableFuture<Void> applicationFuture = runApplication(dispatcherBuilder, 2);
         final UnsuccessfulExecutionException exception =
                 assertException(applicationFuture, UnsuccessfulExecutionException.class);
-        assertEquals(exception.getStatus(), ApplicationStatus.FAILED);
+        assertThat(ApplicationStatus.FAILED).isEqualTo(exception.getStatus());
     }
 
     @Test
@@ -296,9 +295,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
         // fail the future exceptionally with a JobCancelledException
         completionFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        assertThat(
-                clusterShutdownStatus.get(TIMEOUT_SECONDS, TimeUnit.SECONDS),
-                is(ApplicationStatus.CANCELED));
+        assertThat(clusterShutdownStatus.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(ApplicationStatus.CANCELED);
     }
 
     @Test
@@ -349,7 +347,7 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
         assertException(completionFuture, CancellationException.class);
 
         // verify that the application task is being cancelled
-        assertThat(applicationExecutionFuture.isCancelled(), is(true));
+        assertThat(applicationExecutionFuture.isCancelled()).isEqualTo(true);
     }
 
     @Test
@@ -453,7 +451,7 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
                 bootstrap.getApplicationCompletionFuture();
         assertException(applicationFuture, UnsuccessfulExecutionException.class);
 
-        assertEquals(clusterShutdown.get(), ApplicationStatus.CANCELED);
+        assertThat(ApplicationStatus.CANCELED).isEqualTo(clusterShutdown.get());
     }
 
     @Test
@@ -482,9 +480,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
         completionFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         // verify that the dispatcher is actually being shut down
-        assertThat(
-                externalShutdownFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS),
-                is(ApplicationStatus.SUCCEEDED));
+        assertThat(externalShutdownFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(ApplicationStatus.SUCCEEDED);
     }
 
     @Test
@@ -513,9 +510,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
         completionFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         // verify that the dispatcher is actually being shut down
-        assertThat(
-                externalShutdownFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS),
-                is(ApplicationStatus.FAILED));
+        assertThat(externalShutdownFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(ApplicationStatus.FAILED);
     }
 
     @Test
@@ -544,9 +540,8 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
         completionFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
         // verify that the dispatcher is actually being shut down
-        assertThat(
-                externalShutdownFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS),
-                is(ApplicationStatus.CANCELED));
+        assertThat(externalShutdownFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isEqualTo(ApplicationStatus.CANCELED);
     }
 
     @Test
@@ -574,7 +569,7 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
 
         final UnsuccessfulExecutionException exception =
                 assertException(applicationFuture, UnsuccessfulExecutionException.class);
-        assertEquals(exception.getStatus(), ApplicationStatus.UNKNOWN);
+        assertThat(ApplicationStatus.UNKNOWN).isEqualTo(exception.getStatus());
     }
 
     @Test
@@ -682,15 +677,17 @@ public class ApplicationDispatcherBootstrapTest extends TestLogger {
                                                 DuplicateJobSubmissionException.of(testJobID)));
         final CompletableFuture<Void> applicationFuture =
                 runApplication(dispatcherBuilder, configurationUnderTest, 1);
-        final ExecutionException executionException =
-                assertThrows(
-                        ExecutionException.class,
-                        () -> applicationFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS));
-        final Optional<DuplicateJobSubmissionException> maybeDuplicate =
-                ExceptionUtils.findThrowable(
-                        executionException, DuplicateJobSubmissionException.class);
-        assertTrue(maybeDuplicate.isPresent());
-        assertFalse(maybeDuplicate.get().isGloballyTerminated());
+        assertThatThrownBy(() -> applicationFuture.get(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+                .isInstanceOf(ExecutionException.class)
+                .satisfies(
+                        executionException -> {
+                            final Optional<DuplicateJobSubmissionException> maybeDuplicate =
+                                    ExceptionUtils.findThrowable(
+                                            executionException,
+                                            DuplicateJobSubmissionException.class);
+                            assertThat(maybeDuplicate.isPresent()).isTrue();
+                            assertThat(maybeDuplicate.get().isGloballyTerminated()).isFalse();
+                        });
     }
 
     @ParameterizedTest

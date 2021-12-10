@@ -42,11 +42,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * {@code StopWithSavepointTerminationHandlerImplTest} tests {@link
@@ -87,12 +85,15 @@ public class StopWithSavepointTerminationHandlerImplTest extends TestLogger {
         testInstance.handleSavepointCreation(completedSavepoint, null);
         testInstance.handleExecutionsTermination(Collections.singleton(ExecutionState.FINISHED));
 
-        assertThat(
-                testInstance.getSavepointPath().get(), is(completedSavepoint.getExternalPointer()));
+        assertThat(testInstance.getSavepointPath().get())
+                .isEqualTo(completedSavepoint.getExternalPointer());
 
-        assertFalse(
-                "The savepoint should not have been discarded.", streamStateHandle.isDisposed());
-        assertFalse("Checkpoint scheduling should be disabled.", checkpointScheduling.isEnabled());
+        assertThat(streamStateHandle.isDisposed())
+                .as("The savepoint should not have been discarded.")
+                .isFalse();
+        assertThat(checkpointScheduling.isEnabled())
+                .as("Checkpoint scheduling should be disabled.")
+                .isFalse();
     }
 
     @Test
@@ -135,13 +136,15 @@ public class StopWithSavepointTerminationHandlerImplTest extends TestLogger {
         } catch (Throwable e) {
             final Optional<Throwable> actualException =
                     ExceptionUtils.findThrowableWithMessage(e, expectedErrorMessage);
-            assertTrue(
-                    "An exception with the expected error message should have been thrown.",
-                    actualException.isPresent());
+            assertThat(actualException.isPresent())
+                    .as("An exception with the expected error message should have been thrown.")
+                    .isTrue();
         }
 
         // the checkpoint scheduling should be enabled in case of failure
-        assertTrue("Checkpoint scheduling should be enabled.", checkpointScheduling.isEnabled());
+        assertThat(checkpointScheduling.isEnabled())
+                .as("Checkpoint scheduling should be enabled.")
+                .isTrue();
     }
 
     @Test
@@ -169,22 +172,26 @@ public class StopWithSavepointTerminationHandlerImplTest extends TestLogger {
         } catch (Throwable e) {
             final Optional<FlinkException> actualFlinkException =
                     ExceptionUtils.findThrowable(e, FlinkException.class);
-            assertTrue(
-                    "A FlinkException should have been thrown.", actualFlinkException.isPresent());
-            assertThat(
-                    actualFlinkException.get(),
-                    FlinkMatchers.containsMessage(expectedErrorMessage));
+            assertThat(actualFlinkException.isPresent())
+                    .as("A FlinkException should have been thrown.")
+                    .isTrue();
+            assertThat(actualFlinkException.get())
+                    .satisfies(matching(FlinkMatchers.containsMessage(expectedErrorMessage)));
         }
 
-        assertTrue("Global fail-over was not triggered.", globalFailOverTriggered.isDone());
-        assertThat(
-                globalFailOverTriggered.get(), FlinkMatchers.containsMessage(expectedErrorMessage));
+        assertThat(globalFailOverTriggered.isDone())
+                .as("Global fail-over was not triggered.")
+                .isTrue();
+        assertThat(globalFailOverTriggered.get())
+                .satisfies(matching(FlinkMatchers.containsMessage(expectedErrorMessage)));
 
-        assertFalse("Savepoint should not be discarded.", streamStateHandle.isDisposed());
+        assertThat(streamStateHandle.isDisposed())
+                .as("Savepoint should not be discarded.")
+                .isFalse();
 
-        assertFalse(
-                "Checkpoint scheduling should not be enabled in case of failure.",
-                checkpointScheduling.isEnabled());
+        assertThat(checkpointScheduling.isEnabled())
+                .as("Checkpoint scheduling should not be enabled in case of failure.")
+                .isFalse();
     }
 
     @Test(expected = UnsupportedOperationException.class)

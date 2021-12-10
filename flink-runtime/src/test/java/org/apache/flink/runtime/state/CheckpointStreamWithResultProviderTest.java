@@ -26,7 +26,6 @@ import org.apache.flink.util.MethodForwardingTestUtil;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -34,6 +33,9 @@ import org.junit.rules.TemporaryFolder;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test for CheckpointStreamWithResultProvider. */
 public class CheckpointStreamWithResultProviderTest extends TestLogger {
@@ -59,8 +61,8 @@ public class CheckpointStreamWithResultProviderTest extends TestLogger {
                 CheckpointStreamWithResultProvider.createSimpleStream(
                         CheckpointedStateScope.EXCLUSIVE, primaryFactory)) {
 
-            Assert.assertTrue(
-                    primaryOnly instanceof CheckpointStreamWithResultProvider.PrimaryStreamOnly);
+            assertThat(primaryOnly)
+                    .isInstanceOf(CheckpointStreamWithResultProvider.PrimaryStreamOnly.class);
         }
 
         LocalRecoveryDirectoryProvider directoryProvider = createLocalRecoveryDirectoryProvider();
@@ -68,10 +70,9 @@ public class CheckpointStreamWithResultProviderTest extends TestLogger {
                 CheckpointStreamWithResultProvider.createDuplicatingStream(
                         42L, CheckpointedStateScope.EXCLUSIVE, primaryFactory, directoryProvider)) {
 
-            Assert.assertTrue(
-                    primaryAndSecondary
-                            instanceof
-                            CheckpointStreamWithResultProvider.PrimaryAndSecondaryStream);
+            assertThat(primaryAndSecondary)
+                    .isInstanceOf(
+                            CheckpointStreamWithResultProvider.PrimaryAndSecondaryStream.class);
         }
     }
 
@@ -85,13 +86,13 @@ public class CheckpointStreamWithResultProviderTest extends TestLogger {
 
         SnapshotResult<StreamStateHandle> result = writeCheckpointTestData(resultProvider);
 
-        Assert.assertNotNull(result.getJobManagerOwnedSnapshot());
-        Assert.assertNull(result.getTaskLocalSnapshot());
+        assertThat(result.getJobManagerOwnedSnapshot()).isNotNull();
+        assertThat(result.getTaskLocalSnapshot()).isNull();
 
         try (FSDataInputStream inputStream =
                 result.getJobManagerOwnedSnapshot().openInputStream()) {
-            Assert.assertEquals(0x42, inputStream.read());
-            Assert.assertEquals(-1, inputStream.read());
+            assertThat(inputStream.read()).isEqualTo(0x42);
+            assertThat(inputStream.read()).isEqualTo(-1);
         }
     }
 
@@ -106,18 +107,18 @@ public class CheckpointStreamWithResultProviderTest extends TestLogger {
 
         SnapshotResult<StreamStateHandle> result = writeCheckpointTestData(resultProvider);
 
-        Assert.assertNotNull(result.getJobManagerOwnedSnapshot());
-        Assert.assertNotNull(result.getTaskLocalSnapshot());
+        assertThat(result.getJobManagerOwnedSnapshot()).isNotNull();
+        assertThat(result.getTaskLocalSnapshot()).isNotNull();
 
         try (FSDataInputStream inputStream =
                 result.getJobManagerOwnedSnapshot().openInputStream()) {
-            Assert.assertEquals(0x42, inputStream.read());
-            Assert.assertEquals(-1, inputStream.read());
+            assertThat(inputStream.read()).isEqualTo(0x42);
+            assertThat(inputStream.read()).isEqualTo(-1);
         }
 
         try (FSDataInputStream inputStream = result.getTaskLocalSnapshot().openInputStream()) {
-            Assert.assertEquals(0x42, inputStream.read());
-            Assert.assertEquals(-1, inputStream.read());
+            assertThat(inputStream.read()).isEqualTo(0x42);
+            assertThat(inputStream.read()).isEqualTo(-1);
         }
     }
 
@@ -203,7 +204,7 @@ public class CheckpointStreamWithResultProviderTest extends TestLogger {
         resultProvider.close();
         try {
             resultProvider.closeAndFinalizeCheckpointStreamResult();
-            Assert.fail();
+            fail("unknown failure");
         } catch (IOException ignore) {
         }
     }
@@ -211,7 +212,7 @@ public class CheckpointStreamWithResultProviderTest extends TestLogger {
     private void testCompleteBeforeClose(CheckpointStreamWithResultProvider resultProvider)
             throws IOException {
         resultProvider.getCheckpointOutputStream().write(0x42);
-        Assert.assertNotNull(resultProvider.closeAndFinalizeCheckpointStreamResult());
+        assertThat(resultProvider.closeAndFinalizeCheckpointStreamResult()).isNotNull();
         resultProvider.close();
     }
 

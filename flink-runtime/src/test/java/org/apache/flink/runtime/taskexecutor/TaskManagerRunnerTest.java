@@ -38,11 +38,8 @@ import javax.annotation.Nonnull;
 import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link TaskManagerRunner}. */
 public class TaskManagerRunnerTest extends TestLogger {
@@ -68,9 +65,8 @@ public class TaskManagerRunnerTest extends TestLogger {
 
         taskManagerRunner.onFatalError(new RuntimeException());
 
-        assertThat(
-                taskManagerRunner.getTerminationFuture().join(),
-                is(equalTo(TaskManagerRunner.Result.FAILURE)));
+        assertThat(taskManagerRunner.getTerminationFuture().join())
+                .isEqualTo(equalTo(TaskManagerRunner.Result.FAILURE));
     }
 
     @Test
@@ -80,9 +76,8 @@ public class TaskManagerRunnerTest extends TestLogger {
                 TaskManagerOptions.REGISTRATION_TIMEOUT, TimeUtils.parseDuration("10 ms"));
         taskManagerRunner = createTaskManagerRunner(configuration);
 
-        assertThat(
-                taskManagerRunner.getTerminationFuture().join(),
-                is(equalTo(TaskManagerRunner.Result.FAILURE)));
+        assertThat(taskManagerRunner.getTerminationFuture().join())
+                .isEqualTo(equalTo(TaskManagerRunner.Result.FAILURE));
     }
 
     @Test
@@ -93,7 +88,7 @@ public class TaskManagerRunnerTest extends TestLogger {
         final ResourceID taskManagerResourceID =
                 TaskManagerRunner.getTaskManagerResourceID(configuration, "", -1);
 
-        assertThat(taskManagerResourceID.getMetadata(), equalTo(metadata));
+        assertThat(taskManagerResourceID.getMetadata()).isEqualTo(metadata);
     }
 
     @Test
@@ -104,8 +99,8 @@ public class TaskManagerRunnerTest extends TestLogger {
         final ResourceID taskManagerResourceID =
                 TaskManagerRunner.getTaskManagerResourceID(configuration, "", -1);
 
-        assertThat(taskManagerResourceID.getMetadata(), equalTo(""));
-        assertThat(taskManagerResourceID.getStringWithMetadata(), equalTo("test"));
+        assertThat(taskManagerResourceID.getMetadata()).isEqualTo("");
+        assertThat(taskManagerResourceID.getStringWithMetadata()).isEqualTo("test");
     }
 
     @Test
@@ -116,7 +111,7 @@ public class TaskManagerRunnerTest extends TestLogger {
         final ResourceID taskManagerResourceID =
                 TaskManagerRunner.getTaskManagerResourceID(configuration, "", -1);
 
-        assertThat(taskManagerResourceID.getResourceIdString(), equalTo(resourceID));
+        assertThat(taskManagerResourceID.getResourceIdString()).isEqualTo(resourceID);
     }
 
     @Test
@@ -127,10 +122,9 @@ public class TaskManagerRunnerTest extends TestLogger {
         final ResourceID taskManagerResourceID =
                 TaskManagerRunner.getTaskManagerResourceID(configuration, rpcAddress, rpcPort);
 
-        assertThat(taskManagerResourceID, notNullValue());
-        assertThat(
-                taskManagerResourceID.getResourceIdString(),
-                containsString(rpcAddress + ":" + rpcPort));
+        assertThat(taskManagerResourceID).isNotNull();
+        assertThat(taskManagerResourceID.getResourceIdString())
+                .contains(rpcAddress + ":" + rpcPort);
     }
 
     @Test
@@ -141,10 +135,9 @@ public class TaskManagerRunnerTest extends TestLogger {
         final ResourceID taskManagerResourceID =
                 TaskManagerRunner.getTaskManagerResourceID(configuration, rpcAddress, rpcPort);
 
-        assertThat(taskManagerResourceID, notNullValue());
-        assertThat(
-                taskManagerResourceID.getResourceIdString(),
-                containsString(InetAddress.getLocalHost().getHostName()));
+        assertThat(taskManagerResourceID).isNotNull();
+        assertThat(taskManagerResourceID.getResourceIdString())
+                .contains(InetAddress.getLocalHost().getHostName());
     }
 
     @Test
@@ -161,9 +154,8 @@ public class TaskManagerRunnerTest extends TestLogger {
 
         terminationFuture.complete(null);
 
-        assertThat(
-                taskManagerRunner.getTerminationFuture().join(),
-                is(equalTo(TaskManagerRunner.Result.FAILURE)));
+        assertThat(taskManagerRunner.getTerminationFuture().join())
+                .isEqualTo(equalTo(TaskManagerRunner.Result.FAILURE));
     }
 
     @Test
@@ -184,9 +176,8 @@ public class TaskManagerRunnerTest extends TestLogger {
 
         terminationFuture.complete(null);
 
-        assertThat(
-                taskManagerRunner.getTerminationFuture().join(),
-                is(equalTo(TaskManagerRunner.Result.SUCCESS)));
+        assertThat(taskManagerRunner.getTerminationFuture().join())
+                .isEqualTo(equalTo(TaskManagerRunner.Result.SUCCESS));
     }
 
     @Nonnull

@@ -34,9 +34,9 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsMessage;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * Tests for the factory method {@link DefaultSchedulerComponents#createSchedulerComponents(
@@ -49,21 +49,18 @@ public class DefaultSchedulerComponentsFactoryTest extends TestLogger {
 
         final DefaultSchedulerComponents components =
                 createSchedulerComponents(new Configuration());
-        assertThat(
-                components.getSchedulingStrategyFactory(),
-                instanceOf(PipelinedRegionSchedulingStrategy.Factory.class));
-        assertThat(
-                components.getAllocatorFactory(),
-                instanceOf(SlotSharingExecutionSlotAllocatorFactory.class));
+        assertThat(components.getSchedulingStrategyFactory())
+                .isInstanceOf(PipelinedRegionSchedulingStrategy.Factory.class);
+        assertThat(components.getAllocatorFactory())
+                .isInstanceOf(SlotSharingExecutionSlotAllocatorFactory.class);
     }
 
     @Test
     public void testCreatingPipelinedRegionSchedulingStrategyFactoryByDefault() {
         final DefaultSchedulerComponents components =
                 createSchedulerComponents(new Configuration());
-        assertThat(
-                components.getSchedulingStrategyFactory(),
-                instanceOf(PipelinedRegionSchedulingStrategy.Factory.class));
+        assertThat(components.getSchedulingStrategyFactory())
+                .isInstanceOf(PipelinedRegionSchedulingStrategy.Factory.class);
     }
 
     @Test
@@ -74,10 +71,11 @@ public class DefaultSchedulerComponentsFactoryTest extends TestLogger {
             createSchedulerComponents(configuration, true, JobType.STREAMING);
             fail("expected failure");
         } catch (IllegalArgumentException e) {
-            assertThat(
-                    e,
-                    containsMessage(
-                            "Approximate local recovery can not be used together with PipelinedRegionScheduler for now"));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    containsMessage(
+                                            "Approximate local recovery can not be used together with PipelinedRegionScheduler for now")));
         }
     }
 
@@ -90,8 +88,8 @@ public class DefaultSchedulerComponentsFactoryTest extends TestLogger {
                 DefaultSchedulerComponents.selectSlotSelectionStrategy(
                         JobType.STREAMING, configuration);
 
-        assertThat(
-                slotSelectionStrategy, instanceOf(PreviousAllocationSlotSelectionStrategy.class));
+        assertThat(slotSelectionStrategy)
+                .isInstanceOf(PreviousAllocationSlotSelectionStrategy.class);
     }
 
     @Test
@@ -103,8 +101,8 @@ public class DefaultSchedulerComponentsFactoryTest extends TestLogger {
                 DefaultSchedulerComponents.selectSlotSelectionStrategy(
                         JobType.BATCH, configuration);
 
-        assertThat(
-                slotSelectionStrategy, instanceOf(LocationPreferenceSlotSelectionStrategy.class));
+        assertThat(slotSelectionStrategy)
+                .isInstanceOf(LocationPreferenceSlotSelectionStrategy.class);
     }
 
     private static DefaultSchedulerComponents createSchedulerComponents(

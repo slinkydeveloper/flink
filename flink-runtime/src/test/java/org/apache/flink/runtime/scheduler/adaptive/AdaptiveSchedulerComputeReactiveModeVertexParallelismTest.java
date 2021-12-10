@@ -24,7 +24,6 @@ import org.apache.flink.runtime.scheduler.VertexParallelismInformation;
 import org.apache.flink.runtime.scheduler.VertexParallelismStore;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -33,6 +32,7 @@ import java.util.Collections;
 
 import static org.apache.flink.runtime.executiongraph.ExecutionGraphTestUtils.createNoOpVertex;
 import static org.apache.flink.runtime.state.KeyGroupRangeAssignment.UPPER_BOUND_MAX_PARALLELISM;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test vertex parallelism configuration for the {@link AdaptiveScheduler} in Reactive mode. */
 @RunWith(Parameterized.class)
@@ -89,13 +89,12 @@ public class AdaptiveSchedulerComputeReactiveModeVertexParallelismTest extends T
 
         VertexParallelismInformation info = store.getParallelismInfo(jobVertex.getID());
 
-        Assert.assertEquals("parallelism is not adjusted", parallelism, info.getParallelism());
-        Assert.assertEquals("expected max", expectedMaxParallelism, info.getMaxParallelism());
+        assertThat(info.getParallelism()).as("parallelism is not adjusted").isEqualTo(parallelism);
+        assertThat(info.getMaxParallelism()).as("expected max").isEqualTo(expectedMaxParallelism);
 
-        Assert.assertEquals(
-                "can rescale max",
-                expectedCanRescaleTo,
-                info.canRescaleMaxParallelism(maxToScaleTo));
+        assertThat(info.canRescaleMaxParallelism(maxToScaleTo))
+                .as("can rescale max")
+                .isEqualTo(expectedCanRescaleTo);
     }
 
     @Test
@@ -109,13 +108,13 @@ public class AdaptiveSchedulerComputeReactiveModeVertexParallelismTest extends T
 
         VertexParallelismInformation info = store.getParallelismInfo(jobVertex.getID());
 
-        Assert.assertEquals(
-                "parallelism is adjusted to max", expectedMaxParallelism, info.getParallelism());
-        Assert.assertEquals("expected max", expectedMaxParallelism, info.getMaxParallelism());
+        assertThat(info.getParallelism())
+                .as("parallelism is adjusted to max")
+                .isEqualTo(expectedMaxParallelism);
+        assertThat(info.getMaxParallelism()).as("expected max").isEqualTo(expectedMaxParallelism);
 
-        Assert.assertEquals(
-                "can rescale max",
-                expectedCanRescaleTo,
-                info.canRescaleMaxParallelism(maxToScaleTo));
+        assertThat(info.canRescaleMaxParallelism(maxToScaleTo))
+                .as("can rescale max")
+                .isEqualTo(expectedCanRescaleTo);
     }
 }

@@ -44,7 +44,7 @@ import java.util.List;
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.streaming.connectors.kinesis.table.RowDataFieldsKinesisPartitioner.MAX_PARTITION_KEY_LENGTH;
 import static org.apache.flink.table.utils.EncodingUtils.repeat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link RowDataFieldsKinesisPartitioner}. */
 public class RowDataFieldsKinesisPartitionerTest extends TestLogger {
@@ -108,7 +108,7 @@ public class RowDataFieldsKinesisPartitionerTest extends TestLogger {
                 String expectedKey = String.join(delimiter, String.valueOf(days(time)), IP);
                 String actualKey = partitioner.getPartitionId(createElement(time, IP));
 
-                assertEquals(expectedKey, actualKey);
+                assertThat(actualKey).isEqualTo(expectedKey);
             }
         }
     }
@@ -124,7 +124,7 @@ public class RowDataFieldsKinesisPartitionerTest extends TestLogger {
 
         for (LocalDateTime time : DATE_TIMES) {
             String actualKey = partitioner.getPartitionId(createElement(time, ip, route));
-            assertEquals(expectedKey, actualKey);
+            assertThat(actualKey).isEqualTo(expectedKey);
         }
     }
 
@@ -151,7 +151,7 @@ public class RowDataFieldsKinesisPartitionerTest extends TestLogger {
                 String expectedKey = String.join(delimiter, year, month, day);
                 String actualKey = partitioner.getPartitionId(createElement(time, IP));
 
-                assertEquals(expectedKey, actualKey);
+                assertThat(actualKey).isEqualTo(expectedKey);
             }
         }
     }
@@ -179,7 +179,7 @@ public class RowDataFieldsKinesisPartitionerTest extends TestLogger {
                 String expectedKey = String.join(delimiter, year, month, day);
                 String actualKey = partitioner.getPartitionId(createElement(time, IP));
 
-                assertEquals(expectedKey, actualKey);
+                assertThat(actualKey).isEqualTo(expectedKey);
             }
         }
     }
@@ -206,7 +206,7 @@ public class RowDataFieldsKinesisPartitionerTest extends TestLogger {
                 String expectedKey = String.join(delimiter, year, month, day);
                 String actualKey = partitioner.getPartitionId(createElement(time, IP));
 
-                assertEquals(expectedKey, actualKey);
+                assertThat(actualKey).isEqualTo(expectedKey);
             }
         }
     }

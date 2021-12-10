@@ -25,7 +25,7 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link IterableUtils}. */
 public class IterableUtilsTest extends TestLogger {
@@ -38,6 +38,6 @@ public class IterableUtilsTest extends TestLogger {
         testIterable.forEach(deque::add);
 
         Stream<Integer> stream = IterableUtils.toStream(testIterable);
-        assertTrue(stream.allMatch(value -> deque.poll().equals(value)));
+        assertThat(stream.allMatch(value -> deque.poll().equals(value))).isTrue();
     }
 }

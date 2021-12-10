@@ -35,10 +35,8 @@ import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.apache.flink.util.Preconditions.checkArgument;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class BufferFileWriterReaderTest {
 
@@ -119,16 +117,18 @@ public class BufferFileWriterReaderTest {
 
         // Read buffers back in...
         for (int i = 0; i < numBuffers; i++) {
-            assertFalse(reader.hasReachedEndOfFile());
+            assertThat(reader.hasReachedEndOfFile()).isFalse();
             reader.readInto(createBuffer());
         }
 
         reader.close();
 
-        assertTrue(reader.hasReachedEndOfFile());
+        assertThat(reader.hasReachedEndOfFile()).isTrue();
 
         // Verify that the content is the same
-        assertEquals("Read less buffers than written.", numBuffers, returnedBuffers.size());
+        assertThat(returnedBuffers.size())
+                .as("Read less buffers than written.")
+                .isEqualTo(numBuffers);
 
         currentNumber = 0;
         Buffer buffer;
@@ -165,16 +165,18 @@ public class BufferFileWriterReaderTest {
 
         // Read buffers back in...
         for (int i = 0; i < numBuffers; i++) {
-            assertFalse(reader.hasReachedEndOfFile());
+            assertThat(reader.hasReachedEndOfFile()).isFalse();
             reader.readInto(createBuffer());
         }
 
         reader.close();
 
-        assertTrue(reader.hasReachedEndOfFile());
+        assertThat(reader.hasReachedEndOfFile()).isTrue();
 
         // Verify that the content is the same
-        assertEquals("Read less buffers than written.", numBuffers, returnedBuffers.size());
+        assertThat(returnedBuffers.size())
+                .as("Read less buffers than written.")
+                .isEqualTo(numBuffers);
 
         // Start number after skipped buffers...
         currentNumber = (BUFFER_SIZE / 4) * toSkip;

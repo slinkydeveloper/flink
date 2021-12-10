@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link NFA}. */
 public class NFATest extends TestLogger {
@@ -104,7 +104,7 @@ public class NFATest extends TestLogger {
         Collection<Map<String, List<Event>>> actualPatterns =
                 nfaTestHarness.consumeRecords(streamEvents);
 
-        assertEquals(expectedPatterns, actualPatterns);
+        assertThat(actualPatterns).isEqualTo(expectedPatterns);
     }
 
     @Test
@@ -130,7 +130,7 @@ public class NFATest extends TestLogger {
         Collection<Map<String, List<Event>>> actualPatterns =
                 nfaTestHarness.consumeRecords(streamEvents);
 
-        assertEquals(expectedPatterns, actualPatterns);
+        assertThat(actualPatterns).isEqualTo(expectedPatterns);
     }
 
     /**
@@ -152,7 +152,7 @@ public class NFATest extends TestLogger {
         Collection<Map<String, List<Event>>> actualPatterns =
                 nfaTestHarness.consumeRecords(streamEvents);
 
-        assertEquals(expectedPatterns, actualPatterns);
+        assertThat(actualPatterns).isEqualTo(expectedPatterns);
     }
 
     /**
@@ -182,7 +182,7 @@ public class NFATest extends TestLogger {
         Collection<Map<String, List<Event>>> actualPatterns =
                 nfaTestHarness.consumeRecords(streamEvents);
 
-        assertEquals(expectedPatterns, actualPatterns);
+        assertThat(actualPatterns).isEqualTo(expectedPatterns);
     }
 
     @Test
@@ -369,7 +369,7 @@ public class NFATest extends TestLogger {
             NFAState copy =
                     serializer.duplicate().deserialize(new DataInputViewStreamWrapper(bais));
             bais.close();
-            assertEquals(nfaState, copy);
+            assertThat(copy).isEqualTo(nfaState);
         }
     }
 

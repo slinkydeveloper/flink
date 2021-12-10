@@ -29,7 +29,7 @@ import org.apache.flink.streaming.runtime.tasks.TestProcessingTimeService;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link TestProcessingTimeService}. */
 public class TestProcessingTimeServiceTest {
@@ -59,27 +59,27 @@ public class TestProcessingTimeServiceTest {
         ProcessingTimeService processingTimeService =
                 ((StreamMap<?, ?>) testHarness.getHeadOperator()).getProcessingTimeService();
 
-        assertEquals(Long.MIN_VALUE, processingTimeService.getCurrentProcessingTime());
+        assertThat(processingTimeService.getCurrentProcessingTime()).isEqualTo(Long.MIN_VALUE);
 
         tp.setCurrentTime(11);
-        assertEquals(processingTimeService.getCurrentProcessingTime(), 11);
+        assertThat(11).isEqualTo(processingTimeService.getCurrentProcessingTime());
 
         tp.setCurrentTime(15);
         tp.setCurrentTime(16);
-        assertEquals(processingTimeService.getCurrentProcessingTime(), 16);
+        assertThat(16).isEqualTo(processingTimeService.getCurrentProcessingTime());
 
         // register 2 tasks
         processingTimeService.registerTimer(30, timestamp -> {});
 
         processingTimeService.registerTimer(40, timestamp -> {});
 
-        assertEquals(2, tp.getNumActiveTimers());
+        assertThat(tp.getNumActiveTimers()).isEqualTo(2);
 
         tp.setCurrentTime(35);
-        assertEquals(1, tp.getNumActiveTimers());
+        assertThat(tp.getNumActiveTimers()).isEqualTo(1);
 
         tp.setCurrentTime(40);
-        assertEquals(0, tp.getNumActiveTimers());
+        assertThat(tp.getNumActiveTimers()).isEqualTo(0);
 
         tp.shutdownService();
     }

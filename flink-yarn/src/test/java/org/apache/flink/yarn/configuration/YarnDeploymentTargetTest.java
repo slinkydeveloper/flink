@@ -23,9 +23,7 @@ import org.apache.flink.configuration.DeploymentOptions;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link YarnDeploymentTarget}. */
 public class YarnDeploymentTargetTest {
@@ -50,13 +48,15 @@ public class YarnDeploymentTargetTest {
 
     @Test
     public void testThatAValidOptionIsValid() {
-        assertTrue(
-                YarnDeploymentTarget.isValidYarnTarget(YarnDeploymentTarget.APPLICATION.getName()));
+        assertThat(
+                        YarnDeploymentTarget.isValidYarnTarget(
+                                YarnDeploymentTarget.APPLICATION.getName()))
+                .isTrue();
     }
 
     @Test
     public void testThatAnInvalidOptionIsInvalid() {
-        assertFalse(YarnDeploymentTarget.isValidYarnTarget("invalid-target"));
+        assertThat(YarnDeploymentTarget.isValidYarnTarget("invalid-target")).isFalse();
     }
 
     private void testCorrectInstantiationFromConfigurationHelper(
@@ -66,7 +66,7 @@ public class YarnDeploymentTargetTest {
         final YarnDeploymentTarget actualDeploymentTarget =
                 YarnDeploymentTarget.fromConfig(configuration);
 
-        assertSame(actualDeploymentTarget, expectedDeploymentTarget);
+        assertThat(expectedDeploymentTarget).isSameAs(actualDeploymentTarget);
     }
 
     private Configuration getConfigurationWithTarget(final String target) {

@@ -47,7 +47,7 @@ import org.apache.flink.api.java.tuple.Tuple9;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FieldFromTuple}. */
 public class FieldFromTupleTest {
@@ -71,7 +71,8 @@ public class FieldFromTupleTest {
                 current.setField(testStrings[j], j);
             }
             for (int j = 0; j < i; j++) {
-                assertEquals(testStrings[j], new FieldFromTuple<String>(j).extract(current));
+                assertThat(new FieldFromTuple<String>(j).extract(current))
+                        .isEqualTo(testStrings[j]);
             }
         }
     }

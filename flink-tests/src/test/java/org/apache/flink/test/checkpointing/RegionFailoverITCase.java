@@ -57,7 +57,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -77,7 +76,8 @@ import java.util.stream.IntStream;
 import java.util.stream.StreamSupport;
 
 import static org.apache.flink.test.util.TestUtils.submitJobAndWaitForResult;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for region failover with multi regions. */
 public class RegionFailoverITCase extends TestLogger {
@@ -148,22 +148,23 @@ public class RegionFailoverITCase extends TestLogger {
             verifyAfterJobExecuted();
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
     private void verifyAfterJobExecuted() {
-        Assert.assertTrue(
-                "The test multi-region job has never ever restored state.", restoredState);
+        assertThat(restoredState)
+                .as("The test multi-region job has never ever restored state.")
+                .isTrue();
 
         int keyCount = 0;
         for (Map<Integer, Integer> map : ValidatingSink.maps) {
             for (Map.Entry<Integer, Integer> entry : map.entrySet()) {
-                assertEquals(4 * entry.getKey() + 1, (int) entry.getValue());
+                assertThat((int) entry.getValue()).isEqualTo(4 * entry.getKey() + 1);
                 keyCount += 1;
             }
         }
-        assertEquals(NUM_ELEMENTS / 2, keyCount);
+        assertThat(keyCount).isEqualTo(NUM_ELEMENTS / 2);
     }
 
     private JobGraph createJobGraph() {
@@ -308,25 +309,27 @@ public class RegionFailoverITCase extends TestLogger {
                         StreamSupport.stream(unionListState.get().spliterator(), false)
                                 .collect(Collectors.toSet());
                 if (getRuntimeContext().getTaskName().contains(SINGLE_REGION_SOURCE_NAME)) {
-                    Assert.assertTrue(
-                            CollectionUtils.isEqualCollection(
-                                    EXPECTED_INDICES_SINGLE_REGION, actualIndices));
+                    assertThat(
+                                    CollectionUtils.isEqualCollection(
+                                            EXPECTED_INDICES_SINGLE_REGION, actualIndices))
+                            .isTrue();
                 } else {
-                    Assert.assertTrue(
-                            CollectionUtils.isEqualCollection(
-                                    EXPECTED_INDICES_MULTI_REGION, actualIndices));
+                    assertThat(
+                                    CollectionUtils.isEqualCollection(
+                                            EXPECTED_INDICES_MULTI_REGION, actualIndices))
+                            .isTrue();
                 }
 
                 if (indexOfThisSubtask == 0) {
                     listState = context.getOperatorStateStore().getListState(stateDescriptor);
-                    Assert.assertTrue(
-                            "list state should be empty for subtask-0",
-                            ((List<Integer>) listState.get()).isEmpty());
+                    assertThat(((List<Integer>) listState.get()).isEmpty())
+                            .as("list state should be empty for subtask-0")
+                            .isTrue();
                 } else {
                     listState = context.getOperatorStateStore().getListState(stateDescriptor);
-                    Assert.assertTrue(
-                            "list state should not be empty for subtask-" + indexOfThisSubtask,
-                            ((List<Integer>) listState.get()).size() > 0);
+                    assertThat(((List<Integer>) listState.get()).size() > 0)
+                            .as("list state should not be empty for subtask-" + indexOfThisSubtask)
+                            .isTrue();
 
                     if (indexOfThisSubtask == NUM_OF_REGIONS - 1) {
                         index = listState.get().iterator().next();

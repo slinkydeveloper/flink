@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import static org.apache.flink.configuration.description.LinkElement.link;
 import static org.apache.flink.configuration.description.TextElement.text;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Description} and formatting with {@link HtmlFormatter}. */
 public class DescriptionHtmlTest {
@@ -35,9 +35,9 @@ public class DescriptionHtmlTest {
 
         String formattedDescription = new HtmlFormatter().format(description);
 
-        assertEquals(
-                "This is a text with a link <a href=\"https://somepage\">" + "to here</a>",
-                formattedDescription);
+        assertThat(formattedDescription)
+                .isEqualTo(
+                        "This is a text with a link <a href=\"https://somepage\">" + "to here</a>");
     }
 
     @Test
@@ -49,7 +49,8 @@ public class DescriptionHtmlTest {
 
         String formattedDescription = new HtmlFormatter().format(description);
 
-        assertEquals("This is a text that has some percentage value of 20%.", formattedDescription);
+        assertThat(formattedDescription)
+                .isEqualTo("This is a text that has some percentage value of 20%.");
     }
 
     @Test
@@ -63,10 +64,10 @@ public class DescriptionHtmlTest {
 
         String formattedDescription = new HtmlFormatter().format(description);
 
-        assertEquals(
-                "This is a text with a link <a href=\"https://somepage\">to here</a> and another "
-                        + "<a href=\"https://link\">https://link</a>",
-                formattedDescription);
+        assertThat(formattedDescription)
+                .isEqualTo(
+                        "This is a text with a link <a href=\"https://somepage\">to here</a> and another "
+                                + "<a href=\"https://link\">https://link</a>");
     }
 
     @Test
@@ -83,11 +84,11 @@ public class DescriptionHtmlTest {
 
         String formattedDescription = new HtmlFormatter().format(description);
 
-        assertEquals(
-                "This is some list: <ul><li><a href=\"http://first_link\">http://first_link"
-                        + "</a></li><li>this is second element of list "
-                        + "with a <a href=\"https://link\">https://link</a></li></ul>",
-                formattedDescription);
+        assertThat(formattedDescription)
+                .isEqualTo(
+                        "This is some list: <ul><li><a href=\"http://first_link\">http://first_link"
+                                + "</a></li><li>this is second element of list "
+                                + "with a <a href=\"https://link\">https://link</a></li></ul>");
     }
 
     @Test
@@ -101,7 +102,7 @@ public class DescriptionHtmlTest {
 
         String formattedDescription = new HtmlFormatter().format(description);
 
-        assertEquals("This is first line.<br />This is second line.", formattedDescription);
+        assertThat(formattedDescription).isEqualTo("This is first line.<br />This is second line.");
     }
 
     @Test
@@ -114,8 +115,8 @@ public class DescriptionHtmlTest {
 
         String formattedDescription = new HtmlFormatter().format(description);
 
-        assertEquals(
-                "This is some list: <ul><li>this is first element with illegal character '&gt;' and '&lt;'</li></ul>",
-                formattedDescription);
+        assertThat(formattedDescription)
+                .isEqualTo(
+                        "This is some list: <ul><li>this is first element with illegal character '&gt;' and '&lt;'</li></ul>");
     }
 }

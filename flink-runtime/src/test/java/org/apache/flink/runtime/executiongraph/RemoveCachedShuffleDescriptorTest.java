@@ -59,8 +59,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeoutException;
 
 import static org.apache.flink.runtime.deployment.TaskDeploymentDescriptorFactoryTest.deserializeShuffleDescriptors;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for removing cached {@link ShuffleDescriptor}s when the related partitions are no longer
@@ -122,8 +121,8 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
         final ShuffleDescriptor[] shuffleDescriptors =
                 deserializeShuffleDescriptors(
                         getConsumedCachedShuffleDescriptor(executionGraph, v2), jobId, blobWriter);
-        assertEquals(PARALLELISM, shuffleDescriptors.length);
-        assertEquals(expectedBefore, blobWriter.numberOfBlobs());
+        assertThat(shuffleDescriptors.length).isEqualTo(PARALLELISM);
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedBefore);
 
         // For the all-to-all edge, we transition all downstream tasks to finished
         CompletableFuture.runAsync(
@@ -133,8 +132,8 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
         ioExecutor.triggerAll();
 
         // Cache should be removed since partitions are released
-        assertNull(getConsumedCachedShuffleDescriptor(executionGraph, v2));
-        assertEquals(expectedAfter, blobWriter.numberOfBlobs());
+        assertThat(getConsumedCachedShuffleDescriptor(executionGraph, v2)).isNull();
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedAfter);
     }
 
     @Test
@@ -167,15 +166,15 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
         final ShuffleDescriptor[] shuffleDescriptors =
                 deserializeShuffleDescriptors(
                         getConsumedCachedShuffleDescriptor(executionGraph, v2), jobId, blobWriter);
-        assertEquals(PARALLELISM, shuffleDescriptors.length);
-        assertEquals(expectedBefore, blobWriter.numberOfBlobs());
+        assertThat(shuffleDescriptors.length).isEqualTo(PARALLELISM);
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedBefore);
 
         triggerGlobalFailoverAndComplete(scheduler, v1);
         ioExecutor.triggerAll();
 
         // Cache should be removed during ExecutionVertex#resetForNewExecution
-        assertNull(getConsumedCachedShuffleDescriptor(executionGraph, v2));
-        assertEquals(expectedAfter, blobWriter.numberOfBlobs());
+        assertThat(getConsumedCachedShuffleDescriptor(executionGraph, v2)).isNull();
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedAfter);
     }
 
     @Test
@@ -209,8 +208,8 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
         final ShuffleDescriptor[] shuffleDescriptors =
                 deserializeShuffleDescriptors(
                         getConsumedCachedShuffleDescriptor(executionGraph, v2), jobId, blobWriter);
-        assertEquals(1, shuffleDescriptors.length);
-        assertEquals(expectedBefore, blobWriter.numberOfBlobs());
+        assertThat(shuffleDescriptors.length).isEqualTo(1);
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedBefore);
 
         // For the pointwise edge, we just transition the first downstream task to FINISHED
         ExecutionVertex ev21 =
@@ -222,7 +221,7 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
         ioExecutor.triggerAll();
 
         // The cache of the first upstream task should be removed since its partition is released
-        assertNull(getConsumedCachedShuffleDescriptor(executionGraph, v2, 0));
+        assertThat(getConsumedCachedShuffleDescriptor(executionGraph, v2, 0)).isNull();
 
         // The cache of the other upstream tasks should stay
         final ShuffleDescriptor[] shuffleDescriptorsForOtherVertex =
@@ -230,9 +229,9 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
                         getConsumedCachedShuffleDescriptor(executionGraph, v2, 1),
                         jobId,
                         blobWriter);
-        assertEquals(1, shuffleDescriptorsForOtherVertex.length);
+        assertThat(shuffleDescriptorsForOtherVertex.length).isEqualTo(1);
 
-        assertEquals(expectedAfter, blobWriter.numberOfBlobs());
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedAfter);
     }
 
     @Test
@@ -266,15 +265,15 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
         final ShuffleDescriptor[] shuffleDescriptors =
                 deserializeShuffleDescriptors(
                         getConsumedCachedShuffleDescriptor(executionGraph, v2), jobId, blobWriter);
-        assertEquals(1, shuffleDescriptors.length);
-        assertEquals(expectedBefore, blobWriter.numberOfBlobs());
+        assertThat(shuffleDescriptors.length).isEqualTo(1);
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedBefore);
 
         triggerExceptionAndComplete(executionGraph, v1, v2);
         ioExecutor.triggerAll();
 
         // The cache of the first upstream task should be removed during
         // ExecutionVertex#resetForNewExecution
-        assertNull(getConsumedCachedShuffleDescriptor(executionGraph, v2, 0));
+        assertThat(getConsumedCachedShuffleDescriptor(executionGraph, v2, 0)).isNull();
 
         // The cache of the other upstream tasks should stay
         final ShuffleDescriptor[] shuffleDescriptorsForOtherVertex =
@@ -282,9 +281,9 @@ public class RemoveCachedShuffleDescriptorTest extends TestLogger {
                         getConsumedCachedShuffleDescriptor(executionGraph, v2, 1),
                         jobId,
                         blobWriter);
-        assertEquals(1, shuffleDescriptorsForOtherVertex.length);
+        assertThat(shuffleDescriptorsForOtherVertex.length).isEqualTo(1);
 
-        assertEquals(expectedAfter, blobWriter.numberOfBlobs());
+        assertThat(blobWriter.numberOfBlobs()).isEqualTo(expectedAfter);
     }
 
     private DefaultScheduler createSchedulerAndDeploy(

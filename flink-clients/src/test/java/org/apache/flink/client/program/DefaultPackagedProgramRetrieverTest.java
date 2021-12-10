@@ -39,7 +39,6 @@ import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TestLogger;
 
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
-import org.hamcrest.core.IsInstanceOf;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -53,11 +52,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.fail;
 
 /** {@code PackagedProgramRetrieverImplTest} tests {@link DefaultPackagedProgramRetriever}. */
 public class DefaultPackagedProgramRetrieverTest extends TestLogger {
@@ -89,10 +89,10 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
         final EntryClassInformationProvider informationProvider =
                 DefaultPackagedProgramRetriever.createEntryClassInformationProvider(
                         null, jarFile, jobClassName, new String[0]);
-        assertThat(informationProvider.getJobClassName().isPresent(), is(true));
-        assertThat(informationProvider.getJobClassName().get(), is(jobClassName));
-        assertThat(informationProvider.getJarFile().isPresent(), is(true));
-        assertThat(informationProvider.getJarFile().get(), is(jarFile));
+        assertThat(informationProvider.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJobClassName().get()).isEqualTo(jobClassName);
+        assertThat(informationProvider.getJarFile().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJarFile().get()).isEqualTo(jarFile);
     }
 
     @Test
@@ -107,9 +107,9 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
         final EntryClassInformationProvider informationProvider =
                 DefaultPackagedProgramRetriever.createEntryClassInformationProvider(
                         null, null, jobClassName, new String[0]);
-        assertThat(informationProvider.getJobClassName().isPresent(), is(true));
-        assertThat(informationProvider.getJobClassName().get(), is(jobClassName));
-        assertThat(informationProvider.getJarFile().isPresent(), is(false));
+        assertThat(informationProvider.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJobClassName().get()).isEqualTo(jobClassName);
+        assertThat(informationProvider.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -123,11 +123,10 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         null,
                         singleEntryClassClasspathProvider.getJobClassName(),
                         new String[0]);
-        assertThat(informationProvider.getJobClassName().isPresent(), is(true));
-        assertThat(
-                informationProvider.getJobClassName().get(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
-        assertThat(informationProvider.getJarFile().isPresent(), is(false));
+        assertThat(informationProvider.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJobClassName().get())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
+        assertThat(informationProvider.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -138,11 +137,10 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
         final EntryClassInformationProvider informationProvider =
                 DefaultPackagedProgramRetriever.createEntryClassInformationProvider(
                         null, null, null, new String[0]);
-        assertThat(informationProvider.getJobClassName().isPresent(), is(true));
-        assertThat(
-                informationProvider.getJobClassName().get(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
-        assertThat(informationProvider.getJarFile().isPresent(), is(false));
+        assertThat(informationProvider.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJobClassName().get())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
+        assertThat(informationProvider.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -156,11 +154,10 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         // two main method being present
                         multipleEntryClassesClasspathProvider.getJobClassName(),
                         new String[0]);
-        assertThat(informationProvider.getJobClassName().isPresent(), is(true));
-        assertThat(
-                informationProvider.getJobClassName().get(),
-                is(multipleEntryClassesClasspathProvider.getJobClassName()));
-        assertThat(informationProvider.getJarFile().isPresent(), is(false));
+        assertThat(informationProvider.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJobClassName().get())
+                .isEqualTo(multipleEntryClassesClasspathProvider.getJobClassName());
+        assertThat(informationProvider.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -174,11 +171,10 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         // on the user classpath
                         null,
                         new String[0]);
-        assertThat(informationProvider.getJobClassName().isPresent(), is(true));
-        assertThat(
-                informationProvider.getJobClassName().get(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
-        assertThat(informationProvider.getJarFile().isPresent(), is(false));
+        assertThat(informationProvider.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(informationProvider.getJobClassName().get())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
+        assertThat(informationProvider.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -192,9 +188,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         new Configuration());
 
         // the right information is picked up without any error
-        assertThat(
-                retriever.getPackagedProgram().getMainClassName(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
+        assertThat(retriever.getPackagedProgram().getMainClassName())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
     }
 
     @Test
@@ -217,12 +212,15 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
 
         final JobGraph jobGraph = retrieveJobGraph(retriever, configuration);
 
-        assertThat(
-                jobGraph.getName(),
-                is(testJobEntryClassClasspathProvider.getJobClassName() + "-" + expectedSuffix));
-        assertThat(jobGraph.getSavepointRestoreSettings(), is(SavepointRestoreSettings.none()));
-        assertThat(jobGraph.getMaximumParallelism(), is(parallelism));
-        assertThat(jobGraph.getJobID(), is(jobId));
+        assertThat(jobGraph.getName())
+                .isEqualTo(
+                        testJobEntryClassClasspathProvider.getJobClassName()
+                                + "-"
+                                + expectedSuffix);
+        assertThat(jobGraph.getSavepointRestoreSettings())
+                .isEqualTo(SavepointRestoreSettings.none());
+        assertThat(jobGraph.getMaximumParallelism()).isEqualTo(parallelism);
+        assertThat(jobGraph.getJobID()).isEqualTo(jobId);
     }
 
     @Test
@@ -239,9 +237,11 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
 
         final JobGraph jobGraph = retrieveJobGraph(retrieverUnderTest, new Configuration());
 
-        assertThat(
-                jobGraph.getName(),
-                is(testJobEntryClassClasspathProvider.getJobClassName() + "-" + expectedSuffix));
+        assertThat(jobGraph.getName())
+                .isEqualTo(
+                        testJobEntryClassClasspathProvider.getJobClassName()
+                                + "-"
+                                + expectedSuffix);
     }
 
     @Test
@@ -259,9 +259,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
 
         final JobGraph jobGraph = retrieveJobGraph(retrieverUnderTest, new Configuration());
 
-        assertThat(
-                jobGraph.getName(),
-                is(testJobEntryClassClasspathProvider.getJobClassName() + "-suffix"));
+        assertThat(jobGraph.getName())
+                .isEqualTo(testJobEntryClassClasspathProvider.getJobClassName() + "-suffix");
     }
 
     @Test
@@ -285,8 +284,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
 
         final JobGraph jobGraph = retrieveJobGraph(retrieverUnderTest, configuration);
 
-        assertThat(jobGraph.getSavepointRestoreSettings(), is(savepointRestoreSettings));
-        assertThat(jobGraph.getJobID(), is(jobId));
+        assertThat(jobGraph.getSavepointRestoreSettings()).isEqualTo(savepointRestoreSettings);
+        assertThat(jobGraph.getJobID()).isEqualTo(jobId);
     }
 
     @Test
@@ -299,12 +298,14 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                     new Configuration());
             fail("This case should throw exception !");
         } catch (FlinkException e) {
-            assertThat(
-                    e,
-                    FlinkMatchers.containsMessage(
-                            String.format(
-                                    "Could not find the provided job class (%s) in the user lib directory.",
-                                    testJobEntryClassClasspathProvider.getJobClassName())));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.containsMessage(
+                                            String.format(
+                                                    "Could not find the provided job class (%s) in the user lib directory.",
+                                                    testJobEntryClassClasspathProvider
+                                                            .getJobClassName()))));
         }
     }
 
@@ -354,9 +355,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         multipleEntryClassesClasspathProvider.getJobClassName(),
                         new String[0],
                         new Configuration());
-        assertThat(
-                retriever.getPackagedProgram().getMainClassName(),
-                is(multipleEntryClassesClasspathProvider.getJobClassName()));
+        assertThat(retriever.getPackagedProgram().getMainClassName())
+                .isEqualTo(multipleEntryClassesClasspathProvider.getJobClassName());
     }
 
     @Test
@@ -370,9 +370,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         multipleEntryClassesClasspathProvider.getJobClassName(),
                         new String[0],
                         new Configuration());
-        assertThat(
-                retriever.getPackagedProgram().getMainClassName(),
-                is(multipleEntryClassesClasspathProvider.getJobClassName()));
+        assertThat(retriever.getPackagedProgram().getMainClassName())
+                .isEqualTo(multipleEntryClassesClasspathProvider.getJobClassName());
     }
 
     @Test
@@ -392,9 +391,11 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                 extractRelativizedURLsForJarsFromDirectory(
                         singleEntryClassClasspathProvider.getDirectory());
 
-        assertThat(
-                actualClasspath,
-                IsIterableContainingInAnyOrder.containsInAnyOrder(expectedClasspath.toArray()));
+        assertThat(actualClasspath)
+                .satisfies(
+                        matching(
+                                IsIterableContainingInAnyOrder.containsInAnyOrder(
+                                        expectedClasspath.toArray())));
     }
 
     @Test
@@ -414,9 +415,11 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                 extractRelativizedURLsForJarsFromDirectory(
                         singleEntryClassClasspathProvider.getDirectory());
 
-        assertThat(
-                actualClasspath,
-                IsIterableContainingInAnyOrder.containsInAnyOrder(expectedClasspath.toArray()));
+        assertThat(actualClasspath)
+                .satisfies(
+                        matching(
+                                IsIterableContainingInAnyOrder.containsInAnyOrder(
+                                        expectedClasspath.toArray())));
     }
 
     @Test
@@ -437,7 +440,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         ClasspathProvider.parametersForTestJob("suffix"),
                         configuration);
         final JobGraph jobGraph = retrieveJobGraph(retrieverUnderTest, new Configuration());
-        assertThat(jobGraph.getClasspaths(), containsInAnyOrder(expectedMergedURLs.toArray()));
+        assertThat(jobGraph.getClasspaths())
+                .satisfies(matching(containsInAnyOrder(expectedMergedURLs.toArray())));
     }
 
     @Test
@@ -452,12 +456,15 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         new Configuration());
         final JobGraph jobGraph = retrieveJobGraph(retrieverUnderTest, new Configuration());
 
-        assertThat(
-                jobGraph.getUserJars(),
-                containsInAnyOrder(
-                        new org.apache.flink.core.fs.Path(
-                                testJobEntryClassClasspathProvider.getJobJar().toURI())));
-        assertThat(jobGraph.getClasspaths().isEmpty(), is(true));
+        assertThat(jobGraph.getUserJars())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        new org.apache.flink.core.fs.Path(
+                                                testJobEntryClassClasspathProvider
+                                                        .getJobJar()
+                                                        .toURI()))));
+        assertThat(jobGraph.getClasspaths().isEmpty()).isEqualTo(true);
     }
 
     @Test
@@ -473,20 +480,25 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         new Configuration());
         final JobGraph jobGraph = retrieveJobGraph(retrieverUnderTest, new Configuration());
 
-        assertThat(
-                jobGraph.getUserJars(),
-                containsInAnyOrder(
-                        new org.apache.flink.core.fs.Path(
-                                testJobEntryClassClasspathProvider.getJobJar().toURI())));
+        assertThat(jobGraph.getUserJars())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        new org.apache.flink.core.fs.Path(
+                                                testJobEntryClassClasspathProvider
+                                                        .getJobJar()
+                                                        .toURI()))));
         final List<String> actualClasspath =
                 jobGraph.getClasspaths().stream().map(URL::toString).collect(Collectors.toList());
         final List<String> expectedClasspath =
                 extractRelativizedURLsForJarsFromDirectory(
                         singleEntryClassClasspathProvider.getDirectory());
 
-        assertThat(
-                actualClasspath,
-                IsIterableContainingInAnyOrder.containsInAnyOrder(expectedClasspath.toArray()));
+        assertThat(actualClasspath)
+                .satisfies(
+                        matching(
+                                IsIterableContainingInAnyOrder.containsInAnyOrder(
+                                        expectedClasspath.toArray())));
     }
 
     @Test
@@ -505,18 +517,16 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         new String[0],
                         configuration);
 
-        assertThat(
-                retriever.getPackagedProgram().getUserCodeClassLoader(),
-                IsInstanceOf.instanceOf(ChildFirstClassLoader.class));
+        assertThat(retriever.getPackagedProgram().getUserCodeClassLoader())
+                .isInstanceOf(ChildFirstClassLoader.class);
     }
 
     @Test
     public void testConfigurationIsConsidered() throws FlinkException {
         final String parentFirstConfigValue = "parent-first";
         // we want to make sure that parent-first is not set as a default
-        assertThat(
-                CoreOptions.CLASSLOADER_RESOLVE_ORDER.defaultValue(),
-                not(is(parentFirstConfigValue)));
+        assertThat(CoreOptions.CLASSLOADER_RESOLVE_ORDER.defaultValue())
+                .satisfies(matching(not(is(parentFirstConfigValue))));
 
         final Configuration configuration = new Configuration();
         configuration.set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, parentFirstConfigValue);
@@ -532,9 +542,8 @@ public class DefaultPackagedProgramRetrieverTest extends TestLogger {
                         new String[0],
                         configuration);
 
-        assertThat(
-                retriever.getPackagedProgram().getUserCodeClassLoader(),
-                IsInstanceOf.instanceOf(FlinkUserCodeClassLoaders.ParentFirstClassLoader.class));
+        assertThat(retriever.getPackagedProgram().getUserCodeClassLoader())
+                .isInstanceOf(FlinkUserCodeClassLoaders.ParentFirstClassLoader.class);
     }
 
     private JobGraph retrieveJobGraph(

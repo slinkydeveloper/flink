@@ -42,8 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RpcGatewayRetriever}. */
 public class RpcGatewayRetrieverTest extends TestLogger {
@@ -101,7 +100,7 @@ public class RpcGatewayRetrieverTest extends TestLogger {
 
             final CompletableFuture<DummyGateway> gatewayFuture = gatewayRetriever.getFuture();
 
-            assertFalse(gatewayFuture.isDone());
+            assertThat(gatewayFuture.isDone()).isFalse();
 
             settableLeaderRetrievalService.notifyListener(
                     dummyRpcEndpoint.getAddress(), leaderSessionId);
@@ -109,12 +108,12 @@ public class RpcGatewayRetrieverTest extends TestLogger {
             final DummyGateway dummyGateway =
                     gatewayFuture.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
 
-            assertEquals(dummyRpcEndpoint.getAddress(), dummyGateway.getAddress());
-            assertEquals(
-                    expectedValue,
-                    dummyGateway
-                            .foobar(TIMEOUT)
-                            .get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS));
+            assertThat(dummyGateway.getAddress()).isEqualTo(dummyRpcEndpoint.getAddress());
+            assertThat(
+                            dummyGateway
+                                    .foobar(TIMEOUT)
+                                    .get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(expectedValue);
 
             // elect a new leader
             settableLeaderRetrievalService.notifyListener(
@@ -124,12 +123,12 @@ public class RpcGatewayRetrieverTest extends TestLogger {
             final DummyGateway dummyGateway2 =
                     gatewayFuture2.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);
 
-            assertEquals(dummyRpcEndpoint2.getAddress(), dummyGateway2.getAddress());
-            assertEquals(
-                    expectedValue2,
-                    dummyGateway2
-                            .foobar(TIMEOUT)
-                            .get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS));
+            assertThat(dummyGateway2.getAddress()).isEqualTo(dummyRpcEndpoint2.getAddress());
+            assertThat(
+                            dummyGateway2
+                                    .foobar(TIMEOUT)
+                                    .get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS))
+                    .isEqualTo(expectedValue2);
         } finally {
             RpcUtils.terminateRpcEndpoints(TIMEOUT, dummyRpcEndpoint, dummyRpcEndpoint2);
         }

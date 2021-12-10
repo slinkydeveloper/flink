@@ -42,11 +42,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Unit tests for {@link JobManagerCustomLogHandler}. */
 public class JobManagerCustomLogHandlerTest extends TestLogger {
@@ -80,7 +77,7 @@ public class JobManagerCustomLogHandlerTest extends TestLogger {
     private void initializeFolderStructure() throws IOException {
         File root = temporaryFolder.getRoot();
         logRoot = new File(root, "logs");
-        assertTrue(logRoot.mkdir());
+        assertThat(logRoot.mkdir()).isTrue();
 
         createFile(new File(root, FORBIDDEN_FILENAME), "forbidden content");
         createFile(new File(logRoot, VALID_LOG_FILENAME), VALID_LOG_CONTENT);
@@ -107,10 +104,10 @@ public class JobManagerCustomLogHandlerTest extends TestLogger {
     @Test
     public void testGetJobManagerCustomLogsValidFilename() throws Exception {
         File actualFile = testInstance.getFile(createHandlerRequest(VALID_LOG_FILENAME));
-        assertThat(actualFile, is(notNullValue()));
+        assertThat(actualFile).isEqualTo(notNullValue());
 
         String actualContent = String.join("", Files.readAllLines(actualFile.toPath()));
-        assertThat(actualContent, is(VALID_LOG_CONTENT));
+        assertThat(actualContent).isEqualTo(VALID_LOG_CONTENT);
     }
 
     @Test
@@ -118,10 +115,10 @@ public class JobManagerCustomLogHandlerTest extends TestLogger {
         File actualFile =
                 testInstance.getFile(
                         createHandlerRequest(String.format("foobar/%s", VALID_LOG_FILENAME)));
-        assertThat(actualFile, is(notNullValue()));
+        assertThat(actualFile).isEqualTo(notNullValue());
 
         String actualContent = String.join("", Files.readAllLines(actualFile.toPath()));
-        assertThat(actualContent, is(VALID_LOG_CONTENT));
+        assertThat(actualContent).isEqualTo(VALID_LOG_CONTENT);
     }
 
     @Test
@@ -129,17 +126,17 @@ public class JobManagerCustomLogHandlerTest extends TestLogger {
         File actualFile =
                 testInstance.getFile(
                         createHandlerRequest(String.format("../%s", VALID_LOG_FILENAME)));
-        assertThat(actualFile, is(notNullValue()));
+        assertThat(actualFile).isEqualTo(notNullValue());
 
         String actualContent = String.join("", Files.readAllLines(actualFile.toPath()));
-        assertThat(actualContent, is(VALID_LOG_CONTENT));
+        assertThat(actualContent).isEqualTo(VALID_LOG_CONTENT);
     }
 
     @Test
     public void testGetJobManagerCustomLogsNotExistingFile() throws Exception {
         File actualFile = testInstance.getFile(createHandlerRequest("not-existing"));
-        assertThat(actualFile, is(notNullValue()));
-        assertFalse(actualFile.exists());
+        assertThat(actualFile).isEqualTo(notNullValue());
+        assertThat(actualFile.exists()).isFalse();
     }
 
     @Test
@@ -147,8 +144,8 @@ public class JobManagerCustomLogHandlerTest extends TestLogger {
         File actualFile =
                 testInstance.getFile(
                         createHandlerRequest(String.format("../%s", FORBIDDEN_FILENAME)));
-        assertThat(actualFile, is(notNullValue()));
-        assertFalse(actualFile.exists());
+        assertThat(actualFile).isEqualTo(notNullValue());
+        assertThat(actualFile.exists()).isFalse();
     }
 
     @Test
@@ -156,9 +153,9 @@ public class JobManagerCustomLogHandlerTest extends TestLogger {
         File actualFile =
                 testInstance.getFile(
                         createHandlerRequest(String.format("foobar/../../%s", VALID_LOG_FILENAME)));
-        assertThat(actualFile, is(notNullValue()));
+        assertThat(actualFile).isEqualTo(notNullValue());
 
         String actualContent = String.join("", Files.readAllLines(actualFile.toPath()));
-        assertThat(actualContent, is(VALID_LOG_CONTENT));
+        assertThat(actualContent).isEqualTo(VALID_LOG_CONTENT);
     }
 }

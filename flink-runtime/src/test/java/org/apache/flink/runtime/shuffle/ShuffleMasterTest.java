@@ -46,10 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.api.common.restartstrategy.RestartStrategies.fixedDelayRestart;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ShuffleMaster}. */
 public class ShuffleMasterTest extends TestLogger {
@@ -71,7 +68,7 @@ public class ShuffleMasterTest extends TestLogger {
             cluster.start();
             cluster.executeJobBlocking(createJobGraph());
         }
-        assertTrue(TestShuffleMaster.currentInstance.get().closed.get());
+        assertThat(TestShuffleMaster.currentInstance.get().closed.get()).isTrue();
 
         String[] expectedPartitionEvents =
                 new String[] {
@@ -80,7 +77,7 @@ public class ShuffleMasterTest extends TestLogger {
                     EXTERNAL_PARTITION_RELEASE_EVENT,
                     EXTERNAL_PARTITION_RELEASE_EVENT,
                 };
-        assertArrayEquals(expectedPartitionEvents, TestShuffleMaster.partitionEvents.toArray());
+        assertThat(TestShuffleMaster.partitionEvents.toArray()).isEqualTo(expectedPartitionEvents);
     }
 
     @Test
@@ -89,7 +86,7 @@ public class ShuffleMasterTest extends TestLogger {
             cluster.start();
             cluster.executeJobBlocking(createJobGraph());
         }
-        assertTrue(TestShuffleMaster.currentInstance.get().closed.get());
+        assertThat(TestShuffleMaster.currentInstance.get().closed.get()).isTrue();
 
         String[] expectedPartitionEvents =
                 new String[] {
@@ -100,7 +97,7 @@ public class ShuffleMasterTest extends TestLogger {
                     EXTERNAL_PARTITION_RELEASE_EVENT,
                     EXTERNAL_PARTITION_RELEASE_EVENT,
                 };
-        assertArrayEquals(expectedPartitionEvents, TestShuffleMaster.partitionEvents.toArray());
+        assertThat(TestShuffleMaster.partitionEvents.toArray()).isEqualTo(expectedPartitionEvents);
     }
 
     private MiniClusterConfiguration createClusterConfiguration(boolean stopTrackingPartition) {
@@ -170,8 +167,8 @@ public class ShuffleMasterTest extends TestLogger {
 
         @Override
         public void start() throws Exception {
-            assertFalse(started.get());
-            assertFalse(closed.get());
+            assertThat(started.get()).isFalse();
+            assertThat(closed.get()).isFalse();
             started.set(true);
             super.start();
         }
@@ -186,7 +183,7 @@ public class ShuffleMasterTest extends TestLogger {
         @Override
         public void registerJob(JobShuffleContext context) {
             assertShuffleMasterAlive();
-            assertTrue(jobContext.compareAndSet(null, context));
+            assertThat(jobContext.compareAndSet(null, context)).isTrue();
             super.registerJob(context);
         }
 
@@ -239,13 +236,13 @@ public class ShuffleMasterTest extends TestLogger {
         }
 
         private void assertShuffleMasterAlive() {
-            assertFalse(closed.get());
-            assertTrue(started.get());
+            assertThat(closed.get()).isFalse();
+            assertThat(started.get()).isTrue();
         }
 
         private void assertJobRegistered() {
             assertShuffleMasterAlive();
-            assertNotNull(jobContext.get());
+            assertThat(jobContext.get()).isNotNull();
         }
     }
 }

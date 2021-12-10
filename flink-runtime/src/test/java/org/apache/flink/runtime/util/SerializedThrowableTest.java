@@ -26,10 +26,8 @@ import org.apache.flink.util.SerializedThrowable;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class SerializedThrowableTest {
 
@@ -39,14 +37,13 @@ public class SerializedThrowableTest {
             IllegalArgumentException original = new IllegalArgumentException("test message");
             SerializedThrowable serialized = new SerializedThrowable(original);
 
-            assertEquals(original.getMessage(), serialized.getMessage());
-            assertEquals(original.toString(), serialized.toString());
+            assertThat(serialized.getMessage()).isEqualTo(original.getMessage());
+            assertThat(serialized.toString()).isEqualTo(original.toString());
 
-            assertEquals(
-                    ExceptionUtils.stringifyException(original),
-                    ExceptionUtils.stringifyException(serialized));
+            assertThat(ExceptionUtils.stringifyException(serialized))
+                    .isEqualTo(ExceptionUtils.stringifyException(original));
 
-            assertArrayEquals(original.getStackTrace(), serialized.getStackTrace());
+            assertThat(serialized.getStackTrace()).isEqualTo(original.getStackTrace());
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -74,31 +71,28 @@ public class SerializedThrowableTest {
 
             // validate that the SerializedThrowable mimics the original exception
             SerializedThrowable serialized = new SerializedThrowable(userException);
-            assertEquals(userException.getMessage(), serialized.getMessage());
-            assertEquals(userException.toString(), serialized.toString());
-            assertEquals(
-                    ExceptionUtils.stringifyException(userException),
-                    ExceptionUtils.stringifyException(serialized));
-            assertArrayEquals(userException.getStackTrace(), serialized.getStackTrace());
+            assertThat(serialized.getMessage()).isEqualTo(userException.getMessage());
+            assertThat(serialized.toString()).isEqualTo(userException.toString());
+            assertThat(ExceptionUtils.stringifyException(serialized))
+                    .isEqualTo(ExceptionUtils.stringifyException(userException));
+            assertThat(serialized.getStackTrace()).isEqualTo(userException.getStackTrace());
 
             // copy the serialized throwable and make sure everything still works
             SerializedThrowable copy = CommonTestUtils.createCopySerializable(serialized);
-            assertEquals(userException.getMessage(), copy.getMessage());
-            assertEquals(userException.toString(), copy.toString());
-            assertEquals(
-                    ExceptionUtils.stringifyException(userException),
-                    ExceptionUtils.stringifyException(copy));
-            assertArrayEquals(userException.getStackTrace(), copy.getStackTrace());
+            assertThat(copy.getMessage()).isEqualTo(userException.getMessage());
+            assertThat(copy.toString()).isEqualTo(userException.toString());
+            assertThat(ExceptionUtils.stringifyException(copy))
+                    .isEqualTo(ExceptionUtils.stringifyException(userException));
+            assertThat(copy.getStackTrace()).isEqualTo(userException.getStackTrace());
 
             // deserialize the proper exception
             Throwable deserialized = copy.deserializeError(loader);
-            assertEquals(clazz, deserialized.getClass());
+            assertThat(deserialized.getClass()).isEqualTo(clazz);
 
             // deserialization with the wrong classloader does not lead to a failure
             Throwable wronglyDeserialized = copy.deserializeError(getClass().getClassLoader());
-            assertEquals(
-                    ExceptionUtils.stringifyException(userException),
-                    ExceptionUtils.stringifyException(wronglyDeserialized));
+            assertThat(ExceptionUtils.stringifyException(wronglyDeserialized))
+                    .isEqualTo(ExceptionUtils.stringifyException(userException));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -113,13 +107,13 @@ public class SerializedThrowableTest {
 
         SerializedThrowable st = new SerializedThrowable(root);
 
-        assertEquals("level0", st.getMessage());
+        assertThat(st.getMessage()).isEqualTo("level0");
 
-        assertNotNull(st.getCause());
-        assertEquals("level1", st.getCause().getMessage());
+        assertThat(st.getCause()).isNotNull();
+        assertThat(st.getCause().getMessage()).isEqualTo("level1");
 
-        assertNotNull(st.getCause().getCause());
-        assertEquals("level2", st.getCause().getCause().getMessage());
+        assertThat(st.getCause().getCause()).isNotNull();
+        assertThat(st.getCause().getCause().getMessage()).isEqualTo("level2");
     }
 
     @Test
@@ -134,9 +128,9 @@ public class SerializedThrowableTest {
 
         SerializedThrowable st = new SerializedThrowable(root);
 
-        assertArrayEquals(root.getStackTrace(), st.getStackTrace());
-        assertEquals(
-                ExceptionUtils.stringifyException(root), ExceptionUtils.stringifyException(st));
+        assertThat(st.getStackTrace()).isEqualTo(root.getStackTrace());
+        assertThat(ExceptionUtils.stringifyException(st))
+                .isEqualTo(ExceptionUtils.stringifyException(root));
     }
 
     @Test
@@ -145,11 +139,11 @@ public class SerializedThrowableTest {
         Exception parent = new Exception("parent message", original);
 
         SerializedThrowable serialized = new SerializedThrowable(parent);
-        assertNotNull(serialized.getCause());
+        assertThat(serialized.getCause()).isNotNull();
 
         SerializedThrowable copy = new SerializedThrowable(serialized);
-        assertEquals("parent message", copy.getMessage());
-        assertNotNull(copy.getCause());
-        assertEquals("original message", copy.getCause().getMessage());
+        assertThat(copy.getMessage()).isEqualTo("parent message");
+        assertThat(copy.getCause()).isNotNull();
+        assertThat(copy.getCause().getMessage()).isEqualTo("original message");
     }
 }

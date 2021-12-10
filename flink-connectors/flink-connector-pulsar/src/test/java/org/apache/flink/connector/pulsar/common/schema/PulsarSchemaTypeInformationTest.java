@@ -25,9 +25,8 @@ import org.apache.flink.util.InstantiationUtil;
 import org.apache.pulsar.client.api.Schema;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Unit tests for {@link PulsarSchemaTypeInformation}. */
 class PulsarSchemaTypeInformationTest {
@@ -36,14 +35,14 @@ class PulsarSchemaTypeInformationTest {
     void pulsarTypeInfoSerializationAndCreation() throws Exception {
         PulsarSchema<Bar> schema = new PulsarSchema<>(Schema.AVRO(Bar.class), Bar.class);
         PulsarSchemaTypeInformation<Bar> info = new PulsarSchemaTypeInformation<>(schema);
-        assertDoesNotThrow(() -> InstantiationUtil.clone(info));
+        assertThatThrownBy(() -> InstantiationUtil.clone(info)).isNull();
 
         PulsarSchemaTypeInformation<Bar> clonedInfo = InstantiationUtil.clone(info);
-        assertEquals(info, clonedInfo);
-        assertNotSame(info, clonedInfo);
+        assertThat(clonedInfo).isEqualTo(info);
+        assertThat(clonedInfo).isNotSameAs(info);
 
-        assertDoesNotThrow(() -> info.createSerializer(new ExecutionConfig()));
+        assertThatThrownBy(() -> info.createSerializer(new ExecutionConfig())).isNull();
 
-        assertEquals(info.getTypeClass(), clonedInfo.getTypeClass());
+        assertThat(clonedInfo.getTypeClass()).isEqualTo(info.getTypeClass());
     }
 }

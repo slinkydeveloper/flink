@@ -52,8 +52,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for the {@link TaskExecutor}. */
 public class TaskExecutorITCase extends TestLogger {
@@ -99,7 +98,7 @@ public class TaskExecutorITCase extends TestLogger {
 
         final JobResult jobResult = jobResultFuture.get();
 
-        assertThat(jobResult.isSuccess(), is(false));
+        assertThat(jobResult.isSuccess()).isEqualTo(false);
 
         miniCluster.startTaskManager();
 
@@ -124,7 +123,7 @@ public class TaskExecutorITCase extends TestLogger {
 
         BlockingOperator.unblock();
 
-        assertThat(jobResultFuture.get().isSuccess(), is(true));
+        assertThat(jobResultFuture.get().isSuccess()).isEqualTo(true);
     }
 
     private CompletableFuture<JobResult> submitJobAndWaitUntilRunning(JobGraph jobGraph)
@@ -134,7 +133,7 @@ public class TaskExecutorITCase extends TestLogger {
         final CompletableFuture<JobResult> jobResultFuture =
                 miniCluster.requestJobResult(jobGraph.getJobID());
 
-        assertThat(jobResultFuture.isDone(), is(false));
+        assertThat(jobResultFuture.isDone()).isEqualTo(false);
 
         CommonTestUtils.waitUntilCondition(
                 jobIsRunning(() -> miniCluster.getExecutionGraph(jobGraph.getJobID())),

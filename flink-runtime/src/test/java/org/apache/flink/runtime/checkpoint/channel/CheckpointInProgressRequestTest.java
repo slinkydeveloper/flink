@@ -22,8 +22,8 @@ import org.junit.Test;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link CheckpointInProgressRequest} test. */
 public class CheckpointInProgressRequestTest {
@@ -55,7 +55,7 @@ public class CheckpointInProgressRequestTest {
             threads[i].join();
         }
 
-        assertEquals(1, counter.get());
+        assertThat(counter.get()).isEqualTo(1);
     }
 
     private CheckpointInProgressRequest cancelCountingRequest(

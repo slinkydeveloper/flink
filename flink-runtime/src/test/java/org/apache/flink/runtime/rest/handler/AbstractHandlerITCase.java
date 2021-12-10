@@ -35,7 +35,6 @@ import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 import org.apache.flink.util.concurrent.FutureUtils;
 
-import org.hamcrest.core.StringContains;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -44,8 +43,8 @@ import java.net.InetAddress;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests to cover functionality provided by {@link AbstractHandler}. */
 public class AbstractHandlerITCase extends TestLogger {
@@ -113,10 +112,8 @@ public class AbstractHandlerITCase extends TestLogger {
                 fail(
                         "An ExecutionException was expected here being caused by the OutOfMemoryError.");
             } catch (ExecutionException e) {
-                assertThat(
-                        e.getMessage(),
-                        StringContains.containsString(
-                                "Metaspace. The metaspace out-of-memory error has occurred. "));
+                assertThat(e.getMessage())
+                        .contains("Metaspace. The metaspace out-of-memory error has occurred. ");
             }
         }
     }

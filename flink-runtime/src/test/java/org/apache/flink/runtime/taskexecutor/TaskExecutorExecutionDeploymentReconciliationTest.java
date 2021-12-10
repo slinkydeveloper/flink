@@ -75,10 +75,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.StreamSupport;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the execution deployment-reconciliation logic in the {@link TaskExecutor}. */
 public class TaskExecutorExecutionDeploymentReconciliationTest extends TestLogger {
@@ -170,7 +169,7 @@ public class TaskExecutorExecutionDeploymentReconciliationTest extends TestLogge
 
             // nothing as deployed, so the deployment report should be empty
             taskExecutorGateway.heartbeatFromJobManager(jobManagerResourceId, slotAllocationReport);
-            assertThat(deployedExecutionsQueue.take(), hasSize(0));
+            assertThat(deployedExecutionsQueue.take()).satisfies(matching(hasSize(0)));
 
             taskExecutorGateway
                     .submitTask(
@@ -181,16 +180,15 @@ public class TaskExecutorExecutionDeploymentReconciliationTest extends TestLogge
 
             // task is deployed, so the deployment report should contain it
             taskExecutorGateway.heartbeatFromJobManager(jobManagerResourceId, slotAllocationReport);
-            assertThat(
-                    deployedExecutionsQueue.take(),
-                    hasItem(taskDeploymentDescriptor.getExecutionAttemptId()));
+            assertThat(deployedExecutionsQueue.take())
+                    .contains(taskDeploymentDescriptor.getExecutionAttemptId());
 
             TestingInvokable.sync.releaseBlocker();
 
             // task is finished ans was cleaned up, so the deployment report should be empty
             taskFinishedFuture.get();
             taskExecutorGateway.heartbeatFromJobManager(jobManagerResourceId, slotAllocationReport);
-            assertThat(deployedExecutionsQueue.take(), hasSize(0));
+            assertThat(deployedExecutionsQueue.take()).satisfies(matching(hasSize(0)));
         } finally {
             RpcUtils.terminateRpcEndpoint(taskExecutor, timeout);
         }
@@ -315,7 +313,7 @@ public class TaskExecutorExecutionDeploymentReconciliationTest extends TestLogge
         final Optional<SlotStatus> slotStatusOptional =
                 StreamSupport.stream(initialSlotReportFuture.get().spliterator(), false).findAny();
 
-        assertTrue(slotStatusOptional.isPresent());
+        assertThat(slotStatusOptional.isPresent()).isTrue();
 
         taskExecutorGateway
                 .requestSlot(

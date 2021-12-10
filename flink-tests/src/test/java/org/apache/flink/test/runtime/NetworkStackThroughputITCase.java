@@ -38,7 +38,6 @@ import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.test.util.MiniClusterWithClientResource;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +46,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Manually test the throughput of the network stack. */
 public class NetworkStackThroughputITCase extends TestLogger {
@@ -298,7 +299,7 @@ public class NetworkStackThroughputITCase extends TestLogger {
         final JobResult jobResult =
                 client.submitJob(jobGraph).thenCompose(client::requestJobResult).get();
 
-        Assert.assertFalse(jobResult.getSerializedThrowable().isPresent());
+        assertThat(jobResult.getSerializedThrowable().isPresent()).isFalse();
 
         final long dataVolumeMbit = dataVolumeGb * 8192;
         final long runtimeSecs =

@@ -37,8 +37,7 @@ import static org.apache.flink.configuration.TaskManagerOptions.NETWORK_MEMORY_M
 import static org.apache.flink.configuration.TaskManagerOptions.NETWORK_MEMORY_MIN;
 import static org.apache.flink.configuration.TaskManagerOptions.TASK_HEAP_MEMORY;
 import static org.apache.flink.configuration.TaskManagerOptions.TASK_OFF_HEAP_MEMORY;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the initialization of TaskExecutorMemoryConfiguration. */
 public class TaskExecutorMemoryConfigurationTest extends TestLogger {
@@ -65,6 +64,6 @@ public class TaskExecutorMemoryConfigurationTest extends TestLogger {
         TaskExecutorMemoryConfiguration expected =
                 new TaskExecutorMemoryConfiguration(1L, 2L, 3L, 4L, 6L, 7L, 8L, 10L, 23L, 41L);
 
-        assertThat(actual, is(expected));
+        assertThat(actual).isEqualTo(expected);
     }
 }

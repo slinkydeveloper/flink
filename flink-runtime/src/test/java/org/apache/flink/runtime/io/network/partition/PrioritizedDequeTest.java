@@ -21,9 +21,8 @@ import org.junit.Test;
 
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests PrioritizedDeque.
@@ -43,9 +42,8 @@ public class PrioritizedDequeTest {
         deque.add(3);
         deque.add(3, true, true);
 
-        assertArrayEquals(
-                new Integer[] {3, 0, 1, 2},
-                deque.asUnmodifiableCollection().toArray(new Integer[0]));
+        assertThat(deque.asUnmodifiableCollection().toArray(new Integer[0]))
+                .isEqualTo(new Integer[] {3, 0, 1, 2});
     }
 
     @Test
@@ -58,9 +56,8 @@ public class PrioritizedDequeTest {
         deque.add(3);
         deque.prioritize(3);
 
-        assertArrayEquals(
-                new Integer[] {3, 0, 1, 2},
-                deque.asUnmodifiableCollection().toArray(new Integer[0]));
+        assertThat(deque.asUnmodifiableCollection().toArray(new Integer[0]))
+                .isEqualTo(new Integer[] {3, 0, 1, 2});
     }
 
     @Test
@@ -73,13 +70,12 @@ public class PrioritizedDequeTest {
         deque.add(1);
         deque.add(3);
 
-        assertEquals(1, deque.getAndRemove(v -> v == 1).intValue());
-        assertArrayEquals(
-                new Integer[] {0, 2, 1, 3},
-                deque.asUnmodifiableCollection().toArray(new Integer[0]));
-        assertEquals(1, deque.getAndRemove(v -> v == 1).intValue());
-        assertArrayEquals(
-                new Integer[] {0, 2, 3}, deque.asUnmodifiableCollection().toArray(new Integer[0]));
+        assertThat(deque.getAndRemove(v -> v == 1).intValue()).isEqualTo(1);
+        assertThat(deque.asUnmodifiableCollection().toArray(new Integer[0]))
+                .isEqualTo(new Integer[] {0, 2, 1, 3});
+        assertThat(deque.getAndRemove(v -> v == 1).intValue()).isEqualTo(1);
+        assertThat(deque.asUnmodifiableCollection().toArray(new Integer[0]))
+                .isEqualTo(new Integer[] {0, 2, 3});
         try {
             int removed = deque.getAndRemove(v -> v == 1);
             fail(

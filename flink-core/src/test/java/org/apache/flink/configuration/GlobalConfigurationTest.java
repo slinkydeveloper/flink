@@ -30,10 +30,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This class contains tests for the global configuration (parsing configuration directory
@@ -77,18 +74,18 @@ public class GlobalConfigurationTest extends TestLogger {
             Configuration conf = GlobalConfiguration.loadConfiguration(tmpDir.getAbsolutePath());
 
             // all distinct keys from confFile1 + confFile2 key
-            assertEquals(6, conf.keySet().size());
+            assertThat(conf.keySet().size()).isEqualTo(6);
 
             // keys 1, 2, 4, 5, 6, 7, 8 should be OK and match the expected values
-            assertEquals("myvalue1", conf.getString("mykey1", null));
-            assertEquals("myvalue2", conf.getString("mykey2", null));
-            assertEquals("null", conf.getString("mykey3", "null"));
-            assertEquals("myvalue4", conf.getString("mykey4", null));
-            assertEquals("myvalue5", conf.getString("mykey5", null));
-            assertEquals("my: value6", conf.getString("mykey6", null));
-            assertEquals("null", conf.getString("mykey7", "null"));
-            assertEquals("null", conf.getString("mykey8", "null"));
-            assertEquals("myvalue10", conf.getString("mykey9", null));
+            assertThat(conf.getString("mykey1", null)).isEqualTo("myvalue1");
+            assertThat(conf.getString("mykey2", null)).isEqualTo("myvalue2");
+            assertThat(conf.getString("mykey3", "null")).isEqualTo("null");
+            assertThat(conf.getString("mykey4", null)).isEqualTo("myvalue4");
+            assertThat(conf.getString("mykey5", null)).isEqualTo("myvalue5");
+            assertThat(conf.getString("mykey6", null)).isEqualTo("my: value6");
+            assertThat(conf.getString("mykey7", "null")).isEqualTo("null");
+            assertThat(conf.getString("mykey8", "null")).isEqualTo("null");
+            assertThat(conf.getString("mykey9", null)).isEqualTo("myvalue10");
         } finally {
             confFile.delete();
             tmpDir.delete();
@@ -119,20 +116,21 @@ public class GlobalConfigurationTest extends TestLogger {
             pw.append("invalid");
         }
 
-        assertNotNull(
-                GlobalConfiguration.loadConfiguration(tempFolder.getRoot().getAbsolutePath()));
+        assertThat(GlobalConfiguration.loadConfiguration(tempFolder.getRoot().getAbsolutePath()))
+                .isNotNull();
     }
 
     @Test
     public void testHiddenKey() {
-        assertTrue(GlobalConfiguration.isSensitive("password123"));
-        assertTrue(GlobalConfiguration.isSensitive("123pasSword"));
-        assertTrue(GlobalConfiguration.isSensitive("PasSword"));
-        assertTrue(GlobalConfiguration.isSensitive("Secret"));
-        assertTrue(
-                GlobalConfiguration.isSensitive(
-                        "fs.azure.account.key.storageaccount123456.core.windows.net"));
-        assertFalse(GlobalConfiguration.isSensitive("Hello"));
-        assertTrue(GlobalConfiguration.isSensitive("metrics.reporter.dghttp.apikey"));
+        assertThat(GlobalConfiguration.isSensitive("password123")).isTrue();
+        assertThat(GlobalConfiguration.isSensitive("123pasSword")).isTrue();
+        assertThat(GlobalConfiguration.isSensitive("PasSword")).isTrue();
+        assertThat(GlobalConfiguration.isSensitive("Secret")).isTrue();
+        assertThat(
+                        GlobalConfiguration.isSensitive(
+                                "fs.azure.account.key.storageaccount123456.core.windows.net"))
+                .isTrue();
+        assertThat(GlobalConfiguration.isSensitive("Hello")).isFalse();
+        assertThat(GlobalConfiguration.isSensitive("metrics.reporter.dghttp.apikey")).isTrue();
     }
 }

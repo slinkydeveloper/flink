@@ -65,8 +65,7 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.range;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link SequentialChannelStateReaderImpl} Test. */
 @RunWith(Parameterized.class)
@@ -184,7 +183,7 @@ public class SequentialChannelStateReaderImplTest {
     private void assertConsumed(InputGate[] gates)
             throws InterruptedException, java.util.concurrent.ExecutionException {
         for (InputGate gate : gates) {
-            assertTrue(gate.getStateConsumedFuture().isDone());
+            assertThat(gate.getStateConsumedFuture().isDone()).isTrue();
             gate.getStateConsumedFuture().get();
         }
     }
@@ -218,8 +217,8 @@ public class SequentialChannelStateReaderImplTest {
                 }
                 action.accept(gates);
             }
-            assertEquals(
-                    segmentsToAllocate, networkBufferPool.getNumberOfAvailableMemorySegments());
+            assertThat(networkBufferPool.getNumberOfAvailableMemorySegments())
+                    .isEqualTo(segmentsToAllocate);
         }
     }
 
@@ -247,8 +246,8 @@ public class SequentialChannelStateReaderImplTest {
                 resultPartition.close();
             }
             try {
-                assertEquals(
-                        segmentsToAllocate, networkBufferPool.getNumberOfAvailableMemorySegments());
+                assertThat(networkBufferPool.getNumberOfAvailableMemorySegments())
+                        .isEqualTo(segmentsToAllocate);
             } finally {
                 networkBufferPool.destroyAllBufferPools();
                 networkBufferPool.destroy();
@@ -363,9 +362,8 @@ public class SequentialChannelStateReaderImplTest {
     private <T> void assertBuffersEquals(
             Map<T, List<byte[]>> expected, Map<T, List<Buffer>> actual) {
         try {
-            assertEquals(
-                    mapValues(expected, this::concat),
-                    mapValues(actual, buffers -> concat(toBytes(buffers))));
+            assertThat(mapValues(actual, buffers -> concat(toBytes(buffers))))
+                    .isEqualTo(mapValues(expected, this::concat));
         } finally {
             actual.values().stream().flatMap(List::stream).forEach(Buffer::recycleBuffer);
         }

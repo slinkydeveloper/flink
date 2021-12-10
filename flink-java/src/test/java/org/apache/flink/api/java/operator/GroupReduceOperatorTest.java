@@ -37,7 +37,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link DataSet#reduceGroup(GroupReduceFunction)}. */
 @SuppressWarnings("serial")
@@ -70,28 +70,28 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 0).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) < 0);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 3);
-        assertTrue(semProps.getForwardingSourceField(0, 2) == 4);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 3);
-        assertTrue(semProps.getForwardingSourceField(0, 4) == 2);
+        assertThat(semProps.getForwardingSourceField(0, 0) < 0).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 3).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) == 4).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 3).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) == 2).isTrue();
 
-        assertTrue(semProps.getReadFields(0).size() == 3);
-        assertTrue(semProps.getReadFields(0).contains(2));
-        assertTrue(semProps.getReadFields(0).contains(5));
-        assertTrue(semProps.getReadFields(0).contains(6));
+        assertThat(semProps.getReadFields(0).size() == 3).isTrue();
+        assertThat(semProps.getReadFields(0).contains(2)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(5)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(6)).isTrue();
     }
 
     @Test
@@ -111,30 +111,30 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 7).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 8).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 7).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 8).size() == 0).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) < 0);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 2) == 6);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 4) == 4);
+        assertThat(semProps.getForwardingSourceField(0, 0) < 0).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) == 6).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) == 4).isTrue();
 
-        assertTrue(semProps.getReadFields(0).size() == 3);
-        assertTrue(semProps.getReadFields(0).contains(4));
-        assertTrue(semProps.getReadFields(0).contains(7));
-        assertTrue(semProps.getReadFields(0).contains(8));
+        assertThat(semProps.getReadFields(0).size() == 3).isTrue();
+        assertThat(semProps.getReadFields(0).contains(4)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(7)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(8)).isTrue();
     }
 
     @Test
@@ -154,28 +154,28 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 0).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) < 0);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 3);
-        assertTrue(semProps.getForwardingSourceField(0, 2) == 4);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 3);
-        assertTrue(semProps.getForwardingSourceField(0, 4) == 2);
+        assertThat(semProps.getForwardingSourceField(0, 0) < 0).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 3).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) == 4).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 3).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) == 2).isTrue();
 
-        assertTrue(semProps.getReadFields(0).size() == 3);
-        assertTrue(semProps.getReadFields(0).contains(2));
-        assertTrue(semProps.getReadFields(0).contains(5));
-        assertTrue(semProps.getReadFields(0).contains(6));
+        assertThat(semProps.getReadFields(0).size() == 3).isTrue();
+        assertThat(semProps.getReadFields(0).contains(2)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(5)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(6)).isTrue();
     }
 
     @Test
@@ -196,30 +196,30 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(4));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 7).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 8).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(4)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 7).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 8).size() == 0).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) < 0);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 2) == 6);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 4) == 4);
+        assertThat(semProps.getForwardingSourceField(0, 0) < 0).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) == 6).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) == 4).isTrue();
 
-        assertTrue(semProps.getReadFields(0).size() == 3);
-        assertTrue(semProps.getReadFields(0).contains(4));
-        assertTrue(semProps.getReadFields(0).contains(7));
-        assertTrue(semProps.getReadFields(0).contains(8));
+        assertThat(semProps.getReadFields(0).size() == 3).isTrue();
+        assertThat(semProps.getReadFields(0).contains(4)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(7)).isTrue();
+        assertThat(semProps.getReadFields(0).contains(8)).isTrue();
     }
 
     @Test
@@ -239,25 +239,25 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).contains(0));
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).contains(0)).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) == 6);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 2) == 4);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 4) < 0);
+        assertThat(semProps.getForwardingSourceField(0, 0) == 6).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) == 4).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) < 0).isTrue();
 
-        assertTrue(semProps.getReadFields(0) == null);
+        assertThat(semProps.getReadFields(0) == null).isTrue();
     }
 
     @Test
@@ -278,27 +278,27 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 6).contains(2));
-        assertTrue(semProps.getForwardingTargetFields(0, 7).size() == 2);
-        assertTrue(semProps.getForwardingTargetFields(0, 7).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 7).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 8).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 8).contains(0));
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).contains(2)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 7).size() == 2).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 7).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 7).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 8).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 8).contains(0)).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) == 8);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 7);
-        assertTrue(semProps.getForwardingSourceField(0, 2) == 6);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 7);
-        assertTrue(semProps.getForwardingSourceField(0, 4) < 0);
+        assertThat(semProps.getForwardingSourceField(0, 0) == 8).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 7).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) == 6).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 7).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) < 0).isTrue();
 
-        assertTrue(semProps.getReadFields(0) == null);
+        assertThat(semProps.getReadFields(0) == null).isTrue();
     }
 
     @Test
@@ -317,24 +317,24 @@ public class GroupReduceOperatorTest {
 
         SemanticProperties semProps = reduceOp.getSemanticProperties();
 
-        assertTrue(semProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 1).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 2).contains(0));
-        assertTrue(semProps.getForwardingTargetFields(0, 3).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 3).contains(1));
-        assertTrue(semProps.getForwardingTargetFields(0, 4).size() == 0);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).size() == 1);
-        assertTrue(semProps.getForwardingTargetFields(0, 5).contains(3));
-        assertTrue(semProps.getForwardingTargetFields(0, 6).size() == 0);
+        assertThat(semProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 1).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 2).contains(0)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 3).contains(1)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 4).size() == 0).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).size() == 1).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 5).contains(3)).isTrue();
+        assertThat(semProps.getForwardingTargetFields(0, 6).size() == 0).isTrue();
 
-        assertTrue(semProps.getForwardingSourceField(0, 0) == 2);
-        assertTrue(semProps.getForwardingSourceField(0, 1) == 3);
-        assertTrue(semProps.getForwardingSourceField(0, 2) < 0);
-        assertTrue(semProps.getForwardingSourceField(0, 3) == 5);
-        assertTrue(semProps.getForwardingSourceField(0, 4) < 0);
+        assertThat(semProps.getForwardingSourceField(0, 0) == 2).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 1) == 3).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 2) < 0).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 3) == 5).isTrue();
+        assertThat(semProps.getForwardingSourceField(0, 4) < 0).isTrue();
 
-        assertTrue(semProps.getReadFields(0) == null);
+        assertThat(semProps.getReadFields(0) == null).isTrue();
     }
 
     private static class DummyTestKeySelector

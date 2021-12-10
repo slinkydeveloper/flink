@@ -42,8 +42,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** ITCase for {@link JdbcDynamicTableSource}. */
 public class JdbcDynamicTableSourceITCase extends AbstractTestBase {
@@ -140,7 +139,7 @@ public class JdbcDynamicTableSourceITCase extends AbstractTestBase {
                                 "+I[2, 2020-01-01T15:36:01.123456, 2020-01-01T15:36:01.123456789, 15:36:01, -1.175E-37, -1.79769E308, 101.1234]")
                         .sorted()
                         .collect(Collectors.toList());
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -184,7 +183,7 @@ public class JdbcDynamicTableSourceITCase extends AbstractTestBase {
                                 "+I[2, 2020-01-01T15:36:01.123456, 101.1234]")
                         .sorted()
                         .collect(Collectors.toList());
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -227,9 +226,9 @@ public class JdbcDynamicTableSourceITCase extends AbstractTestBase {
                 "+I[1, 2020-01-01T15:35:00.123456, 2020-01-01T15:35:00.123456789, 15:35, 1.175E-37, 1.79769E308, 100.1234]");
         expected.add(
                 "+I[2, 2020-01-01T15:36:01.123456, 2020-01-01T15:36:01.123456789, 15:36:01, -1.175E-37, -1.79769E308, 101.1234]");
-        assertEquals(1, result.size());
-        assertTrue(
-                "The actual output is not a subset of the expected set.",
-                expected.containsAll(result));
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(expected.containsAll(result))
+                .as("The actual output is not a subset of the expected set.")
+                .isTrue();
     }
 }

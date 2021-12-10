@@ -86,7 +86,6 @@ import org.apache.flink.shaded.guava30.com.google.common.collect.Iterables;
 import org.hamcrest.collection.IsEmptyIterable;
 import org.hamcrest.collection.IsIterableContainingInOrder;
 import org.hamcrest.collection.IsIterableWithSize;
-import org.hamcrest.core.Is;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -117,20 +116,15 @@ import static org.apache.flink.runtime.scheduler.SchedulerTestingUtils.enableChe
 import static org.apache.flink.runtime.scheduler.SchedulerTestingUtils.getCheckpointCoordinator;
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
 import static org.apache.flink.util.ExceptionUtils.findThrowableWithMessage;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link DefaultScheduler}. */
 public class DefaultSchedulerTest extends TestLogger {
@@ -210,7 +204,7 @@ public class DefaultSchedulerTest extends TestLogger {
                 testExecutionVertexOperations.getDeployedVertices();
 
         final ExecutionVertexID executionVertexId = new ExecutionVertexID(onlyJobVertex.getID(), 0);
-        assertThat(deployedExecutionVertices, contains(executionVertexId));
+        assertThat(deployedExecutionVertices).satisfies(matching(contains(executionVertexId)));
     }
 
     @Test
@@ -224,16 +218,16 @@ public class DefaultSchedulerTest extends TestLogger {
                 executionGraphInfo.getArchivedExecutionGraph();
 
         // ensure all statuses are set in the ExecutionGraph
-        assertThat(
-                archivedExecutionGraph.getStatusTimestamp(JobStatus.INITIALIZING), greaterThan(0L));
-        assertThat(archivedExecutionGraph.getStatusTimestamp(JobStatus.CREATED), greaterThan(0L));
-        assertThat(archivedExecutionGraph.getStatusTimestamp(JobStatus.RUNNING), greaterThan(0L));
+        assertThat(archivedExecutionGraph.getStatusTimestamp(JobStatus.INITIALIZING))
+                .isGreaterThan(0L);
+        assertThat(archivedExecutionGraph.getStatusTimestamp(JobStatus.CREATED)).isGreaterThan(0L);
+        assertThat(archivedExecutionGraph.getStatusTimestamp(JobStatus.RUNNING)).isGreaterThan(0L);
 
         // ensure correct order
         assertThat(
-                archivedExecutionGraph.getStatusTimestamp(JobStatus.INITIALIZING)
-                        <= archivedExecutionGraph.getStatusTimestamp(JobStatus.CREATED),
-                Is.is(true));
+                        archivedExecutionGraph.getStatusTimestamp(JobStatus.INITIALIZING)
+                                <= archivedExecutionGraph.getStatusTimestamp(JobStatus.CREATED))
+                .isEqualTo(true);
     }
 
     @Test
@@ -261,13 +255,16 @@ public class DefaultSchedulerTest extends TestLogger {
                         new ExecutionVertexID(onlyJobVertexId, 3));
         schedulingStrategy.schedule(verticesToSchedule);
 
-        assertThat(testExecutionVertexOperations.getDeployedVertices(), hasSize(0));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .satisfies(matching(hasSize(0)));
 
         testExecutionSlotAllocator.completePendingRequest(verticesToSchedule.get(0));
-        assertThat(testExecutionVertexOperations.getDeployedVertices(), hasSize(0));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .satisfies(matching(hasSize(0)));
 
         testExecutionSlotAllocator.completePendingRequests();
-        assertThat(testExecutionVertexOperations.getDeployedVertices(), hasSize(4));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .satisfies(matching(hasSize(4)));
     }
 
     @Test
@@ -297,7 +294,7 @@ public class DefaultSchedulerTest extends TestLogger {
         final List<ExecutionVertexID> deployedExecutionVertices =
                 testExecutionVertexOperations.getDeployedVertices();
 
-        assertEquals(desiredScheduleOrder, deployedExecutionVertices);
+        assertThat(deployedExecutionVertices).isEqualTo(desiredScheduleOrder);
     }
 
     @Test
@@ -316,7 +313,8 @@ public class DefaultSchedulerTest extends TestLogger {
                 testExecutionVertexOperations.getDeployedVertices();
 
         final ExecutionVertexID executionVertexId = new ExecutionVertexID(onlyJobVertex.getID(), 0);
-        assertThat(deployedExecutionVertices, contains(executionVertexId, executionVertexId));
+        assertThat(deployedExecutionVertices)
+                .satisfies(matching(contains(executionVertexId, executionVertexId)));
     }
 
     @Test
@@ -342,7 +340,8 @@ public class DefaultSchedulerTest extends TestLogger {
         final List<ExecutionVertexID> deployedExecutionVertices =
                 testExecutionVertexOperations.getDeployedVertices();
         final ExecutionVertexID executionVertexId = new ExecutionVertexID(onlyJobVertex.getID(), 0);
-        assertThat(deployedExecutionVertices, contains(executionVertexId, executionVertexId));
+        assertThat(deployedExecutionVertices)
+                .satisfies(matching(contains(executionVertexId, executionVertexId)));
     }
 
     @Test
@@ -353,7 +352,7 @@ public class DefaultSchedulerTest extends TestLogger {
         final TaskExecutionState taskExecutionState =
                 createFailedTaskExecutionState(new ExecutionAttemptID());
 
-        assertFalse(scheduler.updateTaskExecutionState(taskExecutionState));
+        assertThat(scheduler.updateTaskExecutionState(taskExecutionState)).isFalse();
     }
 
     @Test
@@ -378,7 +377,7 @@ public class DefaultSchedulerTest extends TestLogger {
 
         waitForTermination(scheduler);
         final JobStatus jobStatus = scheduler.requestJobStatus();
-        assertThat(jobStatus, is(equalTo(JobStatus.FAILED)));
+        assertThat(jobStatus).isEqualTo(equalTo(JobStatus.FAILED));
     }
 
     @Test
@@ -393,7 +392,7 @@ public class DefaultSchedulerTest extends TestLogger {
 
         waitForTermination(scheduler);
         final JobStatus jobStatus = scheduler.requestJobStatus();
-        assertThat(jobStatus, is(equalTo(JobStatus.FAILED)));
+        assertThat(jobStatus).isEqualTo(equalTo(JobStatus.FAILED));
 
         Throwable failureCause =
                 scheduler
@@ -402,13 +401,15 @@ public class DefaultSchedulerTest extends TestLogger {
                         .getFailureInfo()
                         .getException()
                         .deserializeError(DefaultSchedulerTest.class.getClassLoader());
-        assertTrue(findThrowable(failureCause, NoResourceAvailableException.class).isPresent());
-        assertTrue(
-                findThrowableWithMessage(
-                                failureCause,
-                                "Could not allocate the required slot within slot request timeout.")
-                        .isPresent());
-        assertThat(jobStatus, is(equalTo(JobStatus.FAILED)));
+        assertThat(findThrowable(failureCause, NoResourceAvailableException.class).isPresent())
+                .isTrue();
+        assertThat(
+                        findThrowableWithMessage(
+                                        failureCause,
+                                        "Could not allocate the required slot within slot request timeout.")
+                                .isPresent())
+                .isTrue();
+        assertThat(jobStatus).isEqualTo(equalTo(JobStatus.FAILED));
     }
 
     @Test
@@ -457,7 +458,8 @@ public class DefaultSchedulerTest extends TestLogger {
         final ExecutionVertexID vid22 = new ExecutionVertexID(v2.getID(), 1);
         schedulingStrategy.schedule(Arrays.asList(vid11, vid12, vid21, vid22));
 
-        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet(), hasSize(4));
+        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet())
+                .satisfies(matching(hasSize(4)));
 
         actionsToTriggerTaskFailure.accept(vid11);
 
@@ -474,16 +476,16 @@ public class DefaultSchedulerTest extends TestLogger {
 
         // ev11 and ev21 needs to be restarted because it is pipelined region failover and
         // they are in the same region. ev12 and ev22 will not be affected
-        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet(), hasSize(2));
-        assertThat(ev11.getExecutionState(), is(ExecutionState.FAILED));
-        assertThat(ev21.getExecutionState(), is(ExecutionState.CANCELED));
-        assertThat(ev12.getExecutionState(), is(ExecutionState.SCHEDULED));
-        assertThat(ev22.getExecutionState(), is(ExecutionState.SCHEDULED));
+        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet())
+                .satisfies(matching(hasSize(2)));
+        assertThat(ev11.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(ev21.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(ev12.getExecutionState()).isEqualTo(ExecutionState.SCHEDULED);
+        assertThat(ev22.getExecutionState()).isEqualTo(ExecutionState.SCHEDULED);
 
         taskRestartExecutor.triggerScheduledTasks();
-        assertThat(
-                schedulingStrategy.getReceivedVerticesToRestart(),
-                containsInAnyOrder(vid11, vid21));
+        assertThat(schedulingStrategy.getReceivedVerticesToRestart())
+                .satisfies(matching(containsInAnyOrder(vid11, vid21)));
     }
 
     @Test
@@ -516,12 +518,13 @@ public class DefaultSchedulerTest extends TestLogger {
         testExecutionSlotAllocator.enableAutoCompletePendingRequests();
         taskRestartExecutor.triggerScheduledTasks();
 
-        assertThat(
-                testExecutionVertexOperations.getDeployedVertices(),
-                containsInAnyOrder(sourceExecutionVertexId, sinkExecutionVertexId));
-        assertThat(
-                scheduler.requestJob().getArchivedExecutionGraph().getState(),
-                is(equalTo(JobStatus.RUNNING)));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        sourceExecutionVertexId, sinkExecutionVertexId)));
+        assertThat(scheduler.requestJob().getArchivedExecutionGraph().getState())
+                .isEqualTo(equalTo(JobStatus.RUNNING));
     }
 
     @Test
@@ -537,7 +540,7 @@ public class DefaultSchedulerTest extends TestLogger {
         executionVertexVersioner.recordModification(onlyExecutionVertexId);
         testExecutionSlotAllocator.completePendingRequests();
 
-        assertThat(testExecutionSlotAllocator.getReturnedSlots(), hasSize(1));
+        assertThat(testExecutionSlotAllocator.getReturnedSlots()).satisfies(matching(hasSize(1)));
     }
 
     @Test
@@ -573,8 +576,9 @@ public class DefaultSchedulerTest extends TestLogger {
 
         taskRestartExecutor.triggerScheduledTasks();
 
-        assertThat(schedulingStrategy.getReceivedVerticesToRestart(), hasSize(1));
-        assertThat(onlySchedulingVertex.getState(), is(equalTo(ExecutionState.CREATED)));
+        assertThat(schedulingStrategy.getReceivedVerticesToRestart())
+                .satisfies(matching(hasSize(1)));
+        assertThat(onlySchedulingVertex.getState()).isEqualTo(equalTo(ExecutionState.CREATED));
     }
 
     @Test
@@ -634,7 +638,8 @@ public class DefaultSchedulerTest extends TestLogger {
         final List<ExecutionVertexID> deployedExecutionVertices =
                 testExecutionVertexOperations.getDeployedVertices();
         final ExecutionVertexID executionVertexId = new ExecutionVertexID(onlyJobVertex.getID(), 0);
-        assertThat(deployedExecutionVertices, contains(executionVertexId, executionVertexId));
+        assertThat(deployedExecutionVertices)
+                .satisfies(matching(contains(executionVertexId, executionVertexId)));
     }
 
     /**
@@ -682,14 +687,16 @@ public class DefaultSchedulerTest extends TestLogger {
                 new ExecutionVertexID(onlyJobVertex.getID(), 0);
         final ExecutionVertexID executionVertexId1 =
                 new ExecutionVertexID(onlyJobVertex.getID(), 1);
-        assertThat(
-                "The execution vertices should be deployed in a specific order reflecting the scheduling start and the global fail-over afterwards.",
-                testExecutionVertexOperations.getDeployedVertices(),
-                contains(
-                        executionVertexId0,
-                        executionVertexId1,
-                        executionVertexId0,
-                        executionVertexId1));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .as(
+                        "The execution vertices should be deployed in a specific order reflecting the scheduling start and the global fail-over afterwards.")
+                .satisfies(
+                        matching(
+                                contains(
+                                        executionVertexId0,
+                                        executionVertexId1,
+                                        executionVertexId0,
+                                        executionVertexId1)));
     }
 
     @Test
@@ -710,7 +717,7 @@ public class DefaultSchedulerTest extends TestLogger {
         enableCheckpointing(jobGraph);
 
         final DefaultScheduler scheduler = createSchedulerAndStartScheduling(jobGraph);
-        assertThat(scheduler.getCheckpointCoordinator(), is(notNullValue()));
+        assertThat(scheduler.getCheckpointCoordinator()).isEqualTo(notNullValue());
         scheduler.updateTaskExecutionState(
                 new TaskExecutionState(
                         Iterables.getOnlyElement(
@@ -719,9 +726,9 @@ public class DefaultSchedulerTest extends TestLogger {
                                 .getAttemptId(),
                         ExecutionState.FINISHED));
 
-        assertThat(scheduler.getCheckpointCoordinator(), is(nullValue()));
+        assertThat(scheduler.getCheckpointCoordinator()).isEqualTo(nullValue());
         callSchedulingOperation.accept(scheduler);
-        assertThat(scheduler.getCheckpointCoordinator(), is(nullValue()));
+        assertThat(scheduler.getCheckpointCoordinator()).isEqualTo(nullValue());
     }
 
     @Test
@@ -755,7 +762,7 @@ public class DefaultSchedulerTest extends TestLogger {
                 createFailedTaskExecutionState(v2.getCurrentExecutionAttempt().getAttemptId()));
 
         // v1 should not be affected
-        assertThat(sv1.getState(), is(equalTo(ExecutionState.SCHEDULED)));
+        assertThat(sv1.getState()).isEqualTo(equalTo(ExecutionState.SCHEDULED));
     }
 
     @Test
@@ -781,11 +788,11 @@ public class DefaultSchedulerTest extends TestLogger {
 
         checkpointCoordinator.triggerCheckpoint(false);
         checkpointTriggeredLatch.await();
-        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints(), is(equalTo(1)));
+        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints()).isEqualTo(equalTo(1));
 
         scheduler.updateTaskExecutionState(createFailedTaskExecutionState(attemptId));
         taskRestartExecutor.triggerScheduledTasks();
-        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints(), is(equalTo(0)));
+        assertThat(checkpointCoordinator.getNumberOfPendingCheckpoints()).isEqualTo(equalTo(0));
     }
 
     @Test
@@ -822,7 +829,7 @@ public class DefaultSchedulerTest extends TestLogger {
 
         scheduler.updateTaskExecutionState(createFailedTaskExecutionState(attemptId));
         taskRestartExecutor.triggerScheduledTasks();
-        assertThat(masterHook.getRestoreCount(), is(equalTo(1)));
+        assertThat(masterHook.getRestoreCount()).isEqualTo(equalTo(1));
     }
 
     @Test
@@ -866,12 +873,13 @@ public class DefaultSchedulerTest extends TestLogger {
 
         // the first task failover should be skipped on state restore failure
         final ExecutionVertexID executionVertexId = new ExecutionVertexID(onlyJobVertex.getID(), 0);
-        assertThat(deployedExecutionVertices, contains(executionVertexId));
+        assertThat(deployedExecutionVertices).satisfies(matching(contains(executionVertexId)));
 
         // a global failure should be triggered on state restore failure
         masterHook.disableFailOnRestore();
         taskRestartExecutor.triggerScheduledTasks();
-        assertThat(deployedExecutionVertices, contains(executionVertexId, executionVertexId));
+        assertThat(deployedExecutionVertices)
+                .satisfies(matching(contains(executionVertexId, executionVertexId)));
     }
 
     @Test
@@ -887,7 +895,7 @@ public class DefaultSchedulerTest extends TestLogger {
 
         scheduler.failJob(new FlinkException("Test failure."), System.currentTimeMillis());
 
-        assertTrue(executionVertexVersioner.isModified(executionVertexVersion));
+        assertThat(executionVertexVersioner.isModified(executionVertexVersion)).isTrue();
     }
 
     @Test
@@ -903,7 +911,7 @@ public class DefaultSchedulerTest extends TestLogger {
 
         scheduler.cancel();
 
-        assertTrue(executionVertexVersioner.isModified(executionVertexVersion));
+        assertThat(executionVertexVersioner.isModified(executionVertexVersion)).isTrue();
     }
 
     @Test
@@ -919,7 +927,7 @@ public class DefaultSchedulerTest extends TestLogger {
 
         scheduler.close();
 
-        assertTrue(executionVertexVersioner.isModified(executionVertexVersion));
+        assertThat(executionVertexVersioner.isModified(executionVertexVersion)).isTrue();
     }
 
     @Test
@@ -951,9 +959,9 @@ public class DefaultSchedulerTest extends TestLogger {
         taskRestartExecutor.triggerNonPeriodicScheduledTask();
         final JobStatus jobStatusAfterRestarts = scheduler.requestJobStatus();
 
-        assertThat(jobStatusAfterFirstFailure, equalTo(JobStatus.RESTARTING));
-        assertThat(jobStatusWithPendingRestarts, equalTo(JobStatus.RESTARTING));
-        assertThat(jobStatusAfterRestarts, equalTo(JobStatus.RUNNING));
+        assertThat(jobStatusAfterFirstFailure).isEqualTo(JobStatus.RESTARTING);
+        assertThat(jobStatusWithPendingRestarts).isEqualTo(JobStatus.RESTARTING);
+        assertThat(jobStatusAfterRestarts).isEqualTo(JobStatus.RUNNING);
     }
 
     @Test
@@ -986,9 +994,9 @@ public class DefaultSchedulerTest extends TestLogger {
                 new TaskExecutionState(
                         attemptId2, ExecutionState.CANCELED, new RuntimeException("expected")));
 
-        assertThat(vertex2StateAfterCancel, is(equalTo(ExecutionState.CANCELING)));
-        assertThat(statusAfterCancelWhileRestarting, is(equalTo(JobStatus.CANCELLING)));
-        assertThat(scheduler.requestJobStatus(), is(equalTo(JobStatus.CANCELED)));
+        assertThat(vertex2StateAfterCancel).isEqualTo(equalTo(ExecutionState.CANCELING));
+        assertThat(statusAfterCancelWhileRestarting).isEqualTo(equalTo(JobStatus.CANCELLING));
+        assertThat(scheduler.requestJobStatus()).isEqualTo(equalTo(JobStatus.CANCELED));
     }
 
     @Test
@@ -1012,8 +1020,8 @@ public class DefaultSchedulerTest extends TestLogger {
 
         final ErrorInfo failureInfo =
                 scheduler.requestJob().getArchivedExecutionGraph().getFailureInfo();
-        assertThat(failureInfo, is(notNullValue()));
-        assertThat(failureInfo.getExceptionAsString(), containsString(exceptionMessage));
+        assertThat(failureInfo).isEqualTo(notNullValue());
+        assertThat(failureInfo.getExceptionAsString()).contains(exceptionMessage);
     }
 
     @Test
@@ -1037,7 +1045,8 @@ public class DefaultSchedulerTest extends TestLogger {
                         .iterator();
         ArchivedExecutionVertex v1 = vertexIterator.next();
 
-        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet(), hasSize(2));
+        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet())
+                .satisfies(matching(hasSize(2)));
 
         final String exceptionMessage = "expected exception";
         scheduler.updateTaskExecutionState(
@@ -1054,9 +1063,10 @@ public class DefaultSchedulerTest extends TestLogger {
                         .iterator();
         v1 = vertexIterator.next();
         ArchivedExecutionVertex v2 = vertexIterator.next();
-        assertThat(v1.getExecutionState(), is(ExecutionState.FAILED));
-        assertThat(v2.getExecutionState(), is(ExecutionState.CANCELED));
-        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet(), hasSize(0));
+        assertThat(v1.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(v2.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet())
+                .satisfies(matching(hasSize(0)));
     }
 
     @Test
@@ -1082,12 +1092,11 @@ public class DefaultSchedulerTest extends TestLogger {
                 testExecutionSlotAllocator.getPendingRequests().values().stream()
                         .map(SlotExecutionVertexAssignment::getLogicalSlotFuture)
                         .collect(Collectors.toSet());
-        assertThat(pendingLogicalSlotFutures, hasSize(parallelism * 2));
+        assertThat(pendingLogicalSlotFutures).satisfies(matching(hasSize(parallelism * 2)));
 
         testExecutionSlotAllocator.completePendingRequest(ev1.getID());
-        assertThat(
-                pendingLogicalSlotFutures.stream().filter(CompletableFuture::isDone).count(),
-                is(1L));
+        assertThat(pendingLogicalSlotFutures.stream().filter(CompletableFuture::isDone).count())
+                .isEqualTo(1L);
 
         final String exceptionMessage = "expected exception";
         scheduler.updateTaskExecutionState(
@@ -1096,17 +1105,20 @@ public class DefaultSchedulerTest extends TestLogger {
                         ExecutionState.FAILED,
                         new RuntimeException(exceptionMessage)));
 
-        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet(), hasSize(0));
+        assertThat(testExecutionSlotAllocator.getPendingRequests().keySet())
+                .satisfies(matching(hasSize(0)));
 
         // the failed task will return its slot before triggering failover. And the slot
         // will be returned and re-assigned to another task which is waiting for a slot.
         // failover will be triggered after that and the re-assigned slot will be returned
         // once the attached task is canceled, but the slot will not be assigned to other
         // tasks which are identified to be restarted soon.
-        assertThat(testExecutionSlotAllocator.getReturnedSlots(), hasSize(2));
+        assertThat(testExecutionSlotAllocator.getReturnedSlots()).satisfies(matching(hasSize(2)));
         assertThat(
-                pendingLogicalSlotFutures.stream().filter(CompletableFuture::isCancelled).count(),
-                is(parallelism * 2L - 2L));
+                        pendingLogicalSlotFutures.stream()
+                                .filter(CompletableFuture::isCancelled)
+                                .count())
+                .isEqualTo(parallelism * 2L - 2L);
     }
 
     @Test
@@ -1135,15 +1147,21 @@ public class DefaultSchedulerTest extends TestLogger {
         final Iterable<RootExceptionHistoryEntry> actualExceptionHistory =
                 scheduler.getExceptionHistory();
 
-        assertThat(actualExceptionHistory, IsIterableWithSize.iterableWithSize(1));
+        assertThat(actualExceptionHistory)
+                .satisfies(matching(IsIterableWithSize.iterableWithSize(1)));
 
         final RootExceptionHistoryEntry failure = actualExceptionHistory.iterator().next();
-        assertThat(
-                failure,
-                ExceptionHistoryEntryMatcher.matchesGlobalFailure(
-                        expectedException,
-                        scheduler.getExecutionGraph().getFailureInfo().getTimestamp()));
-        assertThat(failure.getConcurrentExceptions(), IsEmptyIterable.emptyIterable());
+        assertThat(failure)
+                .satisfies(
+                        matching(
+                                ExceptionHistoryEntryMatcher.matchesGlobalFailure(
+                                        expectedException,
+                                        scheduler
+                                                .getExecutionGraph()
+                                                .getFailureInfo()
+                                                .getTimestamp())));
+        assertThat(failure.getConcurrentExceptions())
+                .satisfies(matching(IsEmptyIterable.emptyIterable()));
     }
 
     @Test
@@ -1193,16 +1211,20 @@ public class DefaultSchedulerTest extends TestLogger {
                 scheduler.getExceptionHistory();
 
         // assert restarted attempt
-        assertThat(
-                actualExceptionHistory,
-                IsIterableContainingInOrder.contains(
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                restartableException,
-                                updateStateTriggeringRestartTimestamp,
-                                taskFailureExecutionVertex.getTaskNameWithSubtaskIndex(),
-                                taskFailureExecutionVertex.getCurrentAssignedResourceLocation()),
-                        ExceptionHistoryEntryMatcher.matchesGlobalFailure(
-                                failingException, updateStateTriggeringJobFailureTimestamp)));
+        assertThat(actualExceptionHistory)
+                .satisfies(
+                        matching(
+                                IsIterableContainingInOrder.contains(
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                restartableException,
+                                                updateStateTriggeringRestartTimestamp,
+                                                taskFailureExecutionVertex
+                                                        .getTaskNameWithSubtaskIndex(),
+                                                taskFailureExecutionVertex
+                                                        .getCurrentAssignedResourceLocation()),
+                                        ExceptionHistoryEntryMatcher.matchesGlobalFailure(
+                                                failingException,
+                                                updateStateTriggeringJobFailureTimestamp))));
     }
 
     @Test
@@ -1227,8 +1249,8 @@ public class DefaultSchedulerTest extends TestLogger {
         taskRestartExecutor.triggerNonPeriodicScheduledTask();
 
         // sanity check that the TaskManagerLocation of the failed task is indeed null, as expected
-        assertThat(
-                taskFailureExecutionVertex.getCurrentAssignedResourceLocation(), is(nullValue()));
+        assertThat(taskFailureExecutionVertex.getCurrentAssignedResourceLocation())
+                .isEqualTo(nullValue());
 
         final ErrorInfo failureInfo =
                 taskFailureExecutionVertex
@@ -1237,14 +1259,17 @@ public class DefaultSchedulerTest extends TestLogger {
 
         final Iterable<RootExceptionHistoryEntry> actualExceptionHistory =
                 scheduler.getExceptionHistory();
-        assertThat(
-                actualExceptionHistory,
-                IsIterableContainingInOrder.contains(
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                failureInfo.getException(),
-                                failureInfo.getTimestamp(),
-                                taskFailureExecutionVertex.getTaskNameWithSubtaskIndex(),
-                                taskFailureExecutionVertex.getCurrentAssignedResourceLocation())));
+        assertThat(actualExceptionHistory)
+                .satisfies(
+                        matching(
+                                IsIterableContainingInOrder.contains(
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                failureInfo.getException(),
+                                                failureInfo.getTimestamp(),
+                                                taskFailureExecutionVertex
+                                                        .getTaskNameWithSubtaskIndex(),
+                                                taskFailureExecutionVertex
+                                                        .getCurrentAssignedResourceLocation()))));
     }
 
     @Test
@@ -1300,38 +1325,40 @@ public class DefaultSchedulerTest extends TestLogger {
 
         delayExecutor.triggerNonPeriodicScheduledTasks();
 
-        assertThat(scheduler.getExceptionHistory(), IsIterableWithSize.iterableWithSize(2));
+        assertThat(scheduler.getExceptionHistory())
+                .satisfies(matching(IsIterableWithSize.iterableWithSize(2)));
         final Iterator<RootExceptionHistoryEntry> actualExceptionHistory =
                 scheduler.getExceptionHistory().iterator();
 
         final RootExceptionHistoryEntry entry0 = actualExceptionHistory.next();
-        assertThat(
-                entry0,
-                is(
+        assertThat(entry0)
+                .isEqualTo(
                         ExceptionHistoryEntryMatcher.matchesFailure(
                                 exception0,
                                 updateStateTriggeringRestartTimestamp0,
                                 executionVertex0.getTaskNameWithSubtaskIndex(),
-                                executionVertex0.getCurrentAssignedResourceLocation())));
-        assertThat(
-                entry0.getConcurrentExceptions(),
-                IsIterableContainingInOrder.contains(
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                exception1,
-                                updateStateTriggeringRestartTimestamp1,
-                                executionVertex1.getTaskNameWithSubtaskIndex(),
-                                executionVertex1.getCurrentAssignedResourceLocation())));
+                                executionVertex0.getCurrentAssignedResourceLocation()));
+        assertThat(entry0.getConcurrentExceptions())
+                .satisfies(
+                        matching(
+                                IsIterableContainingInOrder.contains(
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                exception1,
+                                                updateStateTriggeringRestartTimestamp1,
+                                                executionVertex1.getTaskNameWithSubtaskIndex(),
+                                                executionVertex1
+                                                        .getCurrentAssignedResourceLocation()))));
 
         final RootExceptionHistoryEntry entry1 = actualExceptionHistory.next();
-        assertThat(
-                entry1,
-                is(
+        assertThat(entry1)
+                .isEqualTo(
                         ExceptionHistoryEntryMatcher.matchesFailure(
                                 exception1,
                                 updateStateTriggeringRestartTimestamp1,
                                 executionVertex1.getTaskNameWithSubtaskIndex(),
-                                executionVertex1.getCurrentAssignedResourceLocation())));
-        assertThat(entry1.getConcurrentExceptions(), IsEmptyIterable.emptyIterable());
+                                executionVertex1.getCurrentAssignedResourceLocation()));
+        assertThat(entry1.getConcurrentExceptions())
+                .satisfies(matching(IsEmptyIterable.emptyIterable()));
     }
 
     @Test
@@ -1367,14 +1394,16 @@ public class DefaultSchedulerTest extends TestLogger {
 
         taskRestartExecutor.triggerNonPeriodicScheduledTasks();
 
-        assertThat(
-                scheduler.getExceptionHistory(),
-                IsIterableContainingInOrder.contains(
-                        ExceptionHistoryEntryMatcher.matchesFailure(
-                                exception,
-                                relevantTimestamp,
-                                executionVertex1.getTaskNameWithSubtaskIndex(),
-                                executionVertex1.getCurrentAssignedResourceLocation())));
+        assertThat(scheduler.getExceptionHistory())
+                .satisfies(
+                        matching(
+                                IsIterableContainingInOrder.contains(
+                                        ExceptionHistoryEntryMatcher.matchesFailure(
+                                                exception,
+                                                relevantTimestamp,
+                                                executionVertex1.getTaskNameWithSubtaskIndex(),
+                                                executionVertex1
+                                                        .getCurrentAssignedResourceLocation()))));
     }
 
     @Test
@@ -1393,12 +1422,14 @@ public class DefaultSchedulerTest extends TestLogger {
 
         createSchedulerAndStartScheduling(jobGraph);
 
-        assertThat(trackedPartitions, hasSize(0));
-        assertThat(testExecutionVertexOperations.getDeployedVertices(), hasSize(0));
+        assertThat(trackedPartitions).satisfies(matching(hasSize(0)));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .satisfies(matching(hasSize(0)));
 
         shuffleMaster.completeAllPendingRegistrations();
-        assertThat(trackedPartitions, hasSize(1));
-        assertThat(testExecutionVertexOperations.getDeployedVertices(), hasSize(2));
+        assertThat(trackedPartitions).satisfies(matching(hasSize(1)));
+        assertThat(testExecutionVertexOperations.getDeployedVertices())
+                .satisfies(matching(hasSize(2)));
     }
 
     @Test
@@ -1409,12 +1440,16 @@ public class DefaultSchedulerTest extends TestLogger {
 
         createSchedulerAndStartScheduling(jobGraph);
 
-        assertThat(testExecutionVertexOperations.getCanceledVertices(), hasSize(0));
-        assertThat(testExecutionVertexOperations.getFailedVertices(), hasSize(0));
+        assertThat(testExecutionVertexOperations.getCanceledVertices())
+                .satisfies(matching(hasSize(0)));
+        assertThat(testExecutionVertexOperations.getFailedVertices())
+                .satisfies(matching(hasSize(0)));
 
         shuffleMaster.failAllPendingRegistrations();
-        assertThat(testExecutionVertexOperations.getCanceledVertices(), hasSize(2));
-        assertThat(testExecutionVertexOperations.getFailedVertices(), hasSize(1));
+        assertThat(testExecutionVertexOperations.getCanceledVertices())
+                .satisfies(matching(hasSize(2)));
+        assertThat(testExecutionVertexOperations.getFailedVertices())
+                .satisfies(matching(hasSize(1)));
     }
 
     @Test
@@ -1425,8 +1460,10 @@ public class DefaultSchedulerTest extends TestLogger {
 
         createSchedulerAndStartScheduling(jobGraph);
 
-        assertThat(testExecutionVertexOperations.getCanceledVertices(), hasSize(2));
-        assertThat(testExecutionVertexOperations.getFailedVertices(), hasSize(1));
+        assertThat(testExecutionVertexOperations.getCanceledVertices())
+                .satisfies(matching(hasSize(2)));
+        assertThat(testExecutionVertexOperations.getFailedVertices())
+                .satisfies(matching(hasSize(1)));
     }
 
     @Test
@@ -1483,8 +1520,8 @@ public class DefaultSchedulerTest extends TestLogger {
 
         // late registered partitions will not be tracked and will be released
         shuffleMaster.completeAllPendingRegistrations();
-        assertThat(trackedPartitions, hasSize(0));
-        assertThat(shuffleMaster.getExternallyReleasedPartitions(), hasSize(1));
+        assertThat(trackedPartitions).satisfies(matching(hasSize(0)));
+        assertThat(shuffleMaster.getExternallyReleasedPartitions()).satisfies(matching(hasSize(1)));
     }
 
     @Test
@@ -1569,9 +1606,9 @@ public class DefaultSchedulerTest extends TestLogger {
 
         // Wait for scheduler to start closing.
         schedulerClosing.await();
-        assertFalse(
-                "CheckpointCleaner should not close before checkpoint services.",
-                cleanerClosed.await(10, TimeUnit.MILLISECONDS));
+        assertThat(cleanerClosed.await(10, TimeUnit.MILLISECONDS))
+                .as("CheckpointCleaner should not close before checkpoint services.")
+                .isFalse();
         checkpointServicesShutdownBlocked.countDown();
         cleanerClosed.await();
         schedulerClosed.get();

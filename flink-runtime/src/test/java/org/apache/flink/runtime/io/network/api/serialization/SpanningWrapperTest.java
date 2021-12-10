@@ -32,7 +32,7 @@ import java.util.Random;
 
 import static org.apache.flink.core.memory.MemorySegmentFactory.wrap;
 import static org.apache.flink.runtime.io.network.api.serialization.SpillingAdaptiveSpanningRecordDeserializer.LENGTH_BYTES;
-import static org.junit.Assert.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link SpanningWrapper} test. */
 public class SpanningWrapperTest {
@@ -79,7 +79,7 @@ public class SpanningWrapperTest {
 
         canNotEecutableFile.setExecutable(true);
 
-        assertArrayEquals(concat(record1, record2), toByteArray(unconsumedSegment));
+        assertThat(toByteArray(unconsumedSegment)).isEqualTo(concat(record1, record2));
     }
 
     private byte[] recordBytes(int recordLen) {

@@ -25,10 +25,8 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils.createFilledFinishedBufferConsumer;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Basic subpartition behaviour tests. */
 public abstract class SubpartitionTestBase extends TestLogger {
@@ -60,16 +58,16 @@ public abstract class SubpartitionTestBase extends TestLogger {
 
         try {
             subpartition.finish();
-            assertEquals(1, subpartition.getTotalNumberOfBuffers());
-            assertEquals(0, subpartition.getBuffersInBacklogUnsafe());
+            assertThat(subpartition.getTotalNumberOfBuffers()).isEqualTo(1);
+            assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
 
             BufferConsumer bufferConsumer = createFilledFinishedBufferConsumer(4096);
 
-            assertEquals(-1, subpartition.add(bufferConsumer));
-            assertTrue(bufferConsumer.isRecycled());
+            assertThat(subpartition.add(bufferConsumer)).isEqualTo(-1);
+            assertThat(bufferConsumer.isRecycled()).isTrue();
 
-            assertEquals(1, subpartition.getTotalNumberOfBuffers());
-            assertEquals(0, subpartition.getBuffersInBacklogUnsafe());
+            assertThat(subpartition.getTotalNumberOfBuffers()).isEqualTo(1);
+            assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
         } finally {
             if (subpartition != null) {
                 subpartition.release();
@@ -86,8 +84,8 @@ public abstract class SubpartitionTestBase extends TestLogger {
 
             BufferConsumer bufferConsumer = createFilledFinishedBufferConsumer(4096);
 
-            assertEquals(-1, subpartition.add(bufferConsumer));
-            assertTrue(bufferConsumer.isRecycled());
+            assertThat(subpartition.add(bufferConsumer)).isEqualTo(-1);
+            assertThat(bufferConsumer.isRecycled()).isTrue();
 
         } finally {
             if (subpartition != null) {
@@ -105,13 +103,13 @@ public abstract class SubpartitionTestBase extends TestLogger {
         final ResultSubpartitionView reader =
                 partition.createReadView(new NoOpBufferAvailablityListener());
 
-        assertFalse(partition.isReleased());
-        assertFalse(reader.isReleased());
+        assertThat(partition.isReleased()).isFalse();
+        assertThat(reader.isReleased()).isFalse();
 
         reader.releaseAllResources();
 
-        assertTrue(reader.isReleased());
-        assertFalse(partition.isReleased());
+        assertThat(reader.isReleased()).isTrue();
+        assertThat(partition.isReleased()).isFalse();
 
         partition.release();
     }
@@ -160,7 +158,7 @@ public abstract class SubpartitionTestBase extends TestLogger {
                 // expected
             }
 
-            assertTrue(consumer.isRecycled());
+            assertThat(consumer.isRecycled()).isTrue();
         } finally {
             subpartition.release();
         }

@@ -31,13 +31,10 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.streaming.util.StreamRecordMatchers.timeWindow;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -53,19 +50,16 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
                 TumblingProcessingTimeWindows.of(Time.milliseconds(5000));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(0L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(0, 5000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(0, 5000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(4999L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(0, 5000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(0, 5000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5000L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(5000, 10000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(5000, 10000))));
     }
 
     @Test
@@ -78,19 +72,16 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
                         Time.milliseconds(5000), Time.milliseconds(0), WindowStagger.NATURAL);
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(150L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(150, 5150)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(150, 5150))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5049L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(150, 5150)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(150, 5150))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5150L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(5150, 10150)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(5150, 10150))));
     }
 
     @Test
@@ -102,19 +93,16 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
                 TumblingProcessingTimeWindows.of(Time.milliseconds(5000), Time.milliseconds(100));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(100L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(100, 5100)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(100, 5100))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5099L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(100, 5100)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(100, 5100))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5100L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(5100, 10100)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(5100, 10100))));
     }
 
     @Test
@@ -126,19 +114,16 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
                 TumblingProcessingTimeWindows.of(Time.milliseconds(5000), Time.milliseconds(-100));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(100L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(-100, 4900)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(-100, 4900))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(4899L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(-100, 4900)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(-100, 4900))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(4900L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(4900, 9900)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(4900, 9900))));
     }
 
     @Test
@@ -152,19 +137,16 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
                 TumblingProcessingTimeWindows.of(Time.seconds(5), Time.seconds(1));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(1000L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(1000, 6000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(1000, 6000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(5999L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(1000, 6000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(1000, 6000))));
 
         when(mockContext.getCurrentProcessingTime()).thenReturn(6000L);
-        assertThat(
-                assigner.assignWindows("String", Long.MIN_VALUE, mockContext),
-                contains(timeWindow(6000, 11000)));
+        assertThat(assigner.assignWindows("String", Long.MIN_VALUE, mockContext))
+                .satisfies(matching(contains(timeWindow(6000, 11000))));
     }
 
     @Test
@@ -173,21 +155,21 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
             TumblingProcessingTimeWindows.of(Time.seconds(-1));
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("abs(offset) < size"));
+            assertThat(e.toString()).contains("abs(offset) < size");
         }
 
         try {
             TumblingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(20));
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("abs(offset) < size"));
+            assertThat(e.toString()).contains("abs(offset) < size");
         }
 
         try {
             TumblingProcessingTimeWindows.of(Time.seconds(10), Time.seconds(-11));
             fail("should fail");
         } catch (IllegalArgumentException e) {
-            assertThat(e.toString(), containsString("abs(offset) < size"));
+            assertThat(e.toString()).contains("abs(offset) < size");
         }
     }
 
@@ -196,11 +178,10 @@ public class TumblingProcessingTimeWindowsTest extends TestLogger {
         TumblingProcessingTimeWindows assigner =
                 TumblingProcessingTimeWindows.of(Time.seconds(5), Time.milliseconds(100));
 
-        assertFalse(assigner.isEventTime());
-        assertEquals(
-                new TimeWindow.Serializer(), assigner.getWindowSerializer(new ExecutionConfig()));
-        assertThat(
-                assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)),
-                instanceOf(ProcessingTimeTrigger.class));
+        assertThat(assigner.isEventTime()).isFalse();
+        assertThat(assigner.getWindowSerializer(new ExecutionConfig()))
+                .isEqualTo(new TimeWindow.Serializer());
+        assertThat(assigner.getDefaultTrigger(mock(StreamExecutionEnvironment.class)))
+                .isInstanceOf(ProcessingTimeTrigger.class);
     }
 }

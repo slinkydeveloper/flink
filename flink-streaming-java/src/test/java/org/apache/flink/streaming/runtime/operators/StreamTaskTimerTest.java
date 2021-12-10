@@ -47,9 +47,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the timer service of {@link org.apache.flink.streaming.runtime.tasks.StreamTask}. */
 @SuppressWarnings("serial")
@@ -105,7 +103,7 @@ public class StreamTaskTimerTest extends TestLogger {
 
         timeService.registerTimer(System.currentTimeMillis(), callback);
         latch.await();
-        assertThat(errorRef.get(), instanceOf(Exception.class));
+        assertThat(errorRef.get()).isInstanceOf(Exception.class);
     }
 
     @Test
@@ -133,7 +131,7 @@ public class StreamTaskTimerTest extends TestLogger {
         for (ValidatingProcessingTimeCallback timeCallback : timeCallbacks) {
             timeCallback.assertExpectedValues();
         }
-        assertEquals(4, ValidatingProcessingTimeCallback.numInSequence);
+        assertThat(ValidatingProcessingTimeCallback.numInSequence).isEqualTo(4);
     }
 
     private static class ValidatingProcessingTimeCallback implements ProcessingTimeCallback {
@@ -153,8 +151,8 @@ public class StreamTaskTimerTest extends TestLogger {
         @Override
         public void onProcessingTime(long timestamp) {
             try {
-                assertEquals(expectedTimestamp, timestamp);
-                assertEquals(expectedInSequence, numInSequence);
+                assertThat(timestamp).isEqualTo(expectedTimestamp);
+                assertThat(numInSequence).isEqualTo(expectedInSequence);
                 numInSequence++;
                 finished.complete(null);
             } catch (Throwable t) {
@@ -213,9 +211,8 @@ public class StreamTaskTimerTest extends TestLogger {
             Thread.sleep(10);
         }
 
-        assertEquals(
-                "Trigger timer thread did not properly shut down",
-                0,
-                StreamTask.TRIGGER_THREAD_GROUP.activeCount());
+        assertThat(StreamTask.TRIGGER_THREAD_GROUP.activeCount())
+                .as("Trigger timer thread did not properly shut down")
+                .isEqualTo(0);
     }
 }

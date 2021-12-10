@@ -24,10 +24,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SlotSharingGroup}. */
 public class SlotSharingGroupTest {
@@ -46,13 +43,13 @@ public class SlotSharingGroupTest {
                         .setExternalResource("gpu", 1)
                         .build();
 
-        assertThat(slotSharingGroup.getName(), is(name));
-        assertThat(slotSharingGroup.getCpuCores().get(), is(1.0));
-        assertThat(slotSharingGroup.getTaskHeapMemory().get(), is(heap));
-        assertThat(slotSharingGroup.getTaskOffHeapMemory().get(), is(offHeap));
-        assertThat(slotSharingGroup.getManagedMemory().get(), is(managed));
-        assertThat(
-                slotSharingGroup.getExternalResources(), is(Collections.singletonMap("gpu", 1.0)));
+        assertThat(slotSharingGroup.getName()).isEqualTo(name);
+        assertThat(slotSharingGroup.getCpuCores().get()).isEqualTo(1.0);
+        assertThat(slotSharingGroup.getTaskHeapMemory().get()).isEqualTo(heap);
+        assertThat(slotSharingGroup.getTaskOffHeapMemory().get()).isEqualTo(offHeap);
+        assertThat(slotSharingGroup.getManagedMemory().get()).isEqualTo(managed);
+        assertThat(slotSharingGroup.getExternalResources())
+                .isEqualTo(Collections.singletonMap("gpu", 1.0));
     }
 
     @Test
@@ -60,12 +57,12 @@ public class SlotSharingGroupTest {
         final String name = "ssg";
         final SlotSharingGroup slotSharingGroup = SlotSharingGroup.newBuilder(name).build();
 
-        assertThat(slotSharingGroup.getName(), is(name));
-        assertFalse(slotSharingGroup.getCpuCores().isPresent());
-        assertFalse(slotSharingGroup.getTaskHeapMemory().isPresent());
-        assertFalse(slotSharingGroup.getManagedMemory().isPresent());
-        assertFalse(slotSharingGroup.getTaskOffHeapMemory().isPresent());
-        assertTrue(slotSharingGroup.getExternalResources().isEmpty());
+        assertThat(slotSharingGroup.getName()).isEqualTo(name);
+        assertThat(slotSharingGroup.getCpuCores().isPresent()).isFalse();
+        assertThat(slotSharingGroup.getTaskHeapMemory().isPresent()).isFalse();
+        assertThat(slotSharingGroup.getManagedMemory().isPresent()).isFalse();
+        assertThat(slotSharingGroup.getTaskOffHeapMemory().isPresent()).isFalse();
+        assertThat(slotSharingGroup.getExternalResources().isEmpty()).isTrue();
     }
 
     @Test(expected = IllegalArgumentException.class)

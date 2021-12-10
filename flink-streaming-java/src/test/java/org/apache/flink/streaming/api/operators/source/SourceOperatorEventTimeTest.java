@@ -59,9 +59,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests that validate correct handling of watermark generation in the {@link ReaderOutput} as
@@ -173,9 +174,9 @@ public class SourceOperatorEventTimeTest {
         // "STREAMING" and "BATCH" mode.
         if (emitProgressiveWatermarks) {
             ArrayList<Watermark> watermarks = Lists.newArrayList(expectedWatermarks);
-            assertThat(actualWatermarks, contains(watermarks.toArray()));
+            assertThat(actualWatermarks).satisfies(matching(contains(watermarks.toArray())));
         } else {
-            assertThat(actualWatermarks, hasSize(0));
+            assertThat(actualWatermarks).satisfies(matching(hasSize(0)));
         }
     }
 

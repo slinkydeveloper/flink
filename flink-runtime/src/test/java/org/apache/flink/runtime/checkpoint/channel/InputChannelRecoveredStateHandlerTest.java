@@ -32,7 +32,7 @@ import org.junit.Test;
 
 import java.util.HashSet;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test of different implementation of {@link InputChannelRecoveredStateHandler}. */
 public class InputChannelRecoveredStateHandlerTest extends RecoveredChannelStateHandlerTest {
@@ -90,7 +90,8 @@ public class InputChannelRecoveredStateHandlerTest extends RecoveredChannelState
         inputGate.close();
 
         // then: All pre-allocated segments should be successfully recycled.
-        assertEquals(preAllocatedSegments, networkBufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(networkBufferPool.getNumberOfAvailableMemorySegments())
+                .isEqualTo(preAllocatedSegments);
     }
 
     @Test
@@ -106,6 +107,7 @@ public class InputChannelRecoveredStateHandlerTest extends RecoveredChannelState
         inputGate.close();
 
         // then: All pre-allocated segments should be successfully recycled.
-        assertEquals(preAllocatedSegments, networkBufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(networkBufferPool.getNumberOfAvailableMemorySegments())
+                .isEqualTo(preAllocatedSegments);
     }
 }

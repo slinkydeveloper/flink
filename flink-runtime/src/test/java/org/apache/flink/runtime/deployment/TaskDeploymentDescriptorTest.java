@@ -44,11 +44,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link TaskDeploymentDescriptor}. */
 public class TaskDeploymentDescriptorTest extends TestLogger {
@@ -109,27 +106,29 @@ public class TaskDeploymentDescriptorTest extends TestLogger {
 
         final TaskDeploymentDescriptor copy = CommonTestUtils.createCopySerializable(orig);
 
-        assertFalse(orig.getSerializedJobInformation() == copy.getSerializedJobInformation());
-        assertFalse(orig.getSerializedTaskInformation() == copy.getSerializedTaskInformation());
-        assertFalse(orig.getExecutionAttemptId() == copy.getExecutionAttemptId());
-        assertFalse(orig.getTaskRestore() == copy.getTaskRestore());
-        assertFalse(orig.getProducedPartitions() == copy.getProducedPartitions());
-        assertFalse(orig.getInputGates() == copy.getInputGates());
+        assertThat(orig.getSerializedJobInformation() == copy.getSerializedJobInformation())
+                .isFalse();
+        assertThat(orig.getSerializedTaskInformation() == copy.getSerializedTaskInformation())
+                .isFalse();
+        assertThat(orig.getExecutionAttemptId() == copy.getExecutionAttemptId()).isFalse();
+        assertThat(orig.getTaskRestore() == copy.getTaskRestore()).isFalse();
+        assertThat(orig.getProducedPartitions() == copy.getProducedPartitions()).isFalse();
+        assertThat(orig.getInputGates() == copy.getInputGates()).isFalse();
 
-        assertEquals(orig.getSerializedJobInformation(), copy.getSerializedJobInformation());
-        assertEquals(orig.getSerializedTaskInformation(), copy.getSerializedTaskInformation());
-        assertEquals(orig.getExecutionAttemptId(), copy.getExecutionAttemptId());
-        assertEquals(orig.getAllocationId(), copy.getAllocationId());
-        assertEquals(orig.getSubtaskIndex(), copy.getSubtaskIndex());
-        assertEquals(orig.getAttemptNumber(), copy.getAttemptNumber());
-        assertEquals(
-                orig.getTaskRestore().getRestoreCheckpointId(),
-                copy.getTaskRestore().getRestoreCheckpointId());
-        assertEquals(
-                orig.getTaskRestore().getTaskStateSnapshot(),
-                copy.getTaskRestore().getTaskStateSnapshot());
-        assertEquals(orig.getProducedPartitions(), copy.getProducedPartitions());
-        assertEquals(orig.getInputGates(), copy.getInputGates());
+        assertThat(copy.getSerializedJobInformation())
+                .isEqualTo(orig.getSerializedJobInformation());
+        assertThat(copy.getSerializedTaskInformation())
+                .isEqualTo(orig.getSerializedTaskInformation());
+        assertThat(copy.getExecutionAttemptId()).isEqualTo(orig.getExecutionAttemptId());
+        assertThat(copy.getAllocationId()).isEqualTo(orig.getAllocationId());
+        assertThat(copy.getSubtaskIndex()).isEqualTo(orig.getSubtaskIndex());
+        assertThat(copy.getAttemptNumber()).isEqualTo(orig.getAttemptNumber());
+        assertThat(copy.getTaskRestore().getRestoreCheckpointId())
+                .isEqualTo(orig.getTaskRestore().getRestoreCheckpointId());
+        assertThat(copy.getTaskRestore().getTaskStateSnapshot())
+                .isEqualTo(orig.getTaskRestore().getTaskStateSnapshot());
+        assertThat(copy.getProducedPartitions()).isEqualTo(orig.getProducedPartitions());
+        assertThat(copy.getInputGates()).isEqualTo(orig.getInputGates());
     }
 
     @Test
@@ -141,7 +140,7 @@ public class TaskDeploymentDescriptorTest extends TestLogger {
 
         SerializedValue<JobInformation> actualSerializedJobInformation =
                 taskDeploymentDescriptor.getSerializedJobInformation();
-        assertThat(actualSerializedJobInformation, is(serializedJobInformation));
+        assertThat(actualSerializedJobInformation).isEqualTo(serializedJobInformation);
 
         try {
             taskDeploymentDescriptor.getSerializedTaskInformation();

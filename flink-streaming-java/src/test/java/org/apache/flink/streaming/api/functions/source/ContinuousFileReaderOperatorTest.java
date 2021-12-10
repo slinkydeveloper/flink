@@ -31,7 +31,7 @@ import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link ContinuousFileReaderOperator} test. */
 public class ContinuousFileReaderOperatorTest {

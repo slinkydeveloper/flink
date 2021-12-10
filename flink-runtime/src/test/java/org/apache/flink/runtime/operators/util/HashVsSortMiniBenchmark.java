@@ -43,9 +43,11 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.util.MutableObjectIterator;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("deprecation")
 public class HashVsSortMiniBenchmark {
@@ -103,9 +105,9 @@ public class HashVsSortMiniBenchmark {
     @After
     public void afterTest() throws Exception {
         if (this.memoryManager != null) {
-            Assert.assertTrue(
-                    "Memory Leak: Not all memory has been returned to the memory manager.",
-                    this.memoryManager.verifyEmpty());
+            assertThat(this.memoryManager.verifyEmpty())
+                    .as("Memory Leak: Not all memory has been returned to the memory manager.")
+                    .isTrue();
             this.memoryManager.shutdown();
             this.memoryManager = null;
         }
@@ -201,7 +203,7 @@ public class HashVsSortMiniBenchmark {
             System.out.println("Sort-Merge Took " + msecs + " msecs.");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("An exception occurred during the test: " + e.getMessage());
+            fail("An exception occurred during the test: " + e.getMessage());
         }
     }
 
@@ -260,7 +262,7 @@ public class HashVsSortMiniBenchmark {
             System.out.println("Hash Build First Took " + msecs + " msecs.");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("An exception occurred during the test: " + e.getMessage());
+            fail("An exception occurred during the test: " + e.getMessage());
         }
     }
 
@@ -319,7 +321,7 @@ public class HashVsSortMiniBenchmark {
             System.out.println("Hash Build Second took " + msecs + " msecs.");
         } catch (Exception e) {
             e.printStackTrace();
-            Assert.fail("An exception occurred during the test: " + e.getMessage());
+            fail("An exception occurred during the test: " + e.getMessage());
         }
     }
 

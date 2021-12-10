@@ -39,7 +39,6 @@ import org.apache.flink.shaded.guava30.com.google.common.collect.Lists;
 
 import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.ipc.ArrowStreamWriter;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
@@ -53,7 +52,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Abstract test base for the Arrow source function processing. */
 public abstract class ArrowSourceFunctionTestBase {
@@ -172,8 +172,8 @@ public abstract class ArrowSourceFunctionTestBase {
         }
         runner2.join();
 
-        Assert.assertNull(error[0]);
-        Assert.assertEquals(testData.f0.size(), numOfEmittedElements.get());
+        assertThat(error[0]).isNull();
+        assertThat(numOfEmittedElements.get()).isEqualTo(testData.f0.size());
         checkElementsEquals(results, testData.f0);
     }
 
@@ -253,9 +253,9 @@ public abstract class ArrowSourceFunctionTestBase {
         testHarness.close();
         testHarness2.close();
 
-        Assert.assertNull(error[0]);
-        Assert.assertNull(error[1]);
-        Assert.assertEquals(testData.f0.size(), numOfEmittedElements.get());
+        assertThat(error[0]).isNull();
+        assertThat(error[1]).isNull();
+        assertThat(numOfEmittedElements.get()).isEqualTo(testData.f0.size());
         checkElementsEquals(results, testData.f0);
     }
 
@@ -266,13 +266,15 @@ public abstract class ArrowSourceFunctionTestBase {
     public abstract ArrowSourceFunction createArrowSourceFunction(byte[][] arrowData);
 
     private void checkElementsEquals(List<RowData> actual, List<RowData> expected) {
-        Assert.assertEquals(actual.size(), expected.size());
+        assertThat(expected.size()).isEqualTo(actual.size());
         actual.sort(comparator);
         expected.sort(comparator);
         for (int i = 0; i < expected.size(); i++) {
-            assertThat(
-                    actual.get(i),
-                    CustomEqualityMatcher.deeplyEquals(expected.get(i)).withChecker(checker));
+            assertThat(actual.get(i))
+                    .satisfies(
+                            matching(
+                                    CustomEqualityMatcher.deeplyEquals(expected.get(i))
+                                            .withChecker(checker)));
         }
     }
 

@@ -51,10 +51,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test job graph generation in JSON format. */
 public class JsonJobGraphGenerationTest {
@@ -260,14 +258,14 @@ public class JsonJobGraphGenerationTest {
             JsonNode typeField = rootNode.get("type");
             JsonNode arrayField = rootNode.get("nodes");
 
-            assertNotNull(idField);
-            assertNotNull(nameField);
-            assertNotNull(typeField);
-            assertNotNull(arrayField);
-            assertTrue(idField.isTextual());
-            assertTrue(nameField.isTextual());
-            assertTrue(typeField.isTextual());
-            assertTrue(arrayField.isArray());
+            assertThat(idField).isNotNull();
+            assertThat(nameField).isNotNull();
+            assertThat(typeField).isNotNull();
+            assertThat(arrayField).isNotNull();
+            assertThat(idField.isTextual()).isTrue();
+            assertThat(nameField.isTextual()).isTrue();
+            assertThat(typeField.isTextual()).isTrue();
+            assertThat(arrayField.isArray()).isTrue();
 
             ArrayNode array = (ArrayNode) arrayField;
             Iterator<JsonNode> iter = array.elements();
@@ -279,25 +277,25 @@ public class JsonJobGraphGenerationTest {
                 JsonNode contentsFields = vertex.get("description");
                 JsonNode operatorField = vertex.get("operator");
 
-                assertNotNull(vertexIdField);
-                assertTrue(vertexIdField.isTextual());
-                assertNotNull(parallelismField);
-                assertTrue(parallelismField.isNumber());
-                assertNotNull(contentsFields);
-                assertTrue(contentsFields.isTextual());
-                assertNotNull(operatorField);
-                assertTrue(operatorField.isTextual());
+                assertThat(vertexIdField).isNotNull();
+                assertThat(vertexIdField.isTextual()).isTrue();
+                assertThat(parallelismField).isNotNull();
+                assertThat(parallelismField.isNumber()).isTrue();
+                assertThat(contentsFields).isNotNull();
+                assertThat(contentsFields.isTextual()).isTrue();
+                assertThat(operatorField).isNotNull();
+                assertThat(operatorField.isTextual()).isTrue();
 
                 if (contentsFields.asText().startsWith("Sync")) {
-                    assertEquals(1, parallelismField.asInt());
+                    assertThat(parallelismField.asInt()).isEqualTo(1);
                 } else {
-                    assertEquals(expectedParallelism, parallelismField.asInt());
+                    assertThat(parallelismField.asInt()).isEqualTo(expectedParallelism);
                 }
 
                 idToNode.put(vertexIdField.asText(), vertex);
             }
 
-            assertEquals(numNodes, idToNode.size());
+            assertThat(idToNode.size()).isEqualTo(numNodes);
 
             // check that all inputs are contained
             for (JsonNode node : idToNode.values()) {
@@ -308,11 +306,11 @@ public class JsonJobGraphGenerationTest {
                         JsonNode inputNode = inputsIter.next();
                         JsonNode inputIdField = inputNode.get("id");
 
-                        assertNotNull(inputIdField);
-                        assertTrue(inputIdField.isTextual());
+                        assertThat(inputIdField).isNotNull();
+                        assertThat(inputIdField.isTextual()).isTrue();
 
                         String inputIdString = inputIdField.asText();
-                        assertTrue(idToNode.containsKey(inputIdString));
+                        assertThat(idToNode.containsKey(inputIdString)).isTrue();
                     }
                 }
             }

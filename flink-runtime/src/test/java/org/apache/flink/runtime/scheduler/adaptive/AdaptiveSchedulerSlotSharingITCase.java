@@ -39,7 +39,7 @@ import org.junit.Test;
 
 import java.time.Duration;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** SlotSharing tests for the adaptive scheduler. */
 public class AdaptiveSchedulerSlotSharingITCase extends TestLogger {
@@ -96,7 +96,7 @@ public class AdaptiveSchedulerSlotSharingITCase extends TestLogger {
         // this throws an exception if the job failed
         jobResult.toJobExecutionResult(getClass().getClassLoader());
 
-        assertTrue(jobResult.isSuccess());
+        assertThat(jobResult.isSuccess()).isTrue();
     }
 
     /**

@@ -30,14 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This class contains test for the configuration package. In particular, the serialization of
@@ -83,18 +77,19 @@ public class ConfigurationTest extends TestLogger {
             orig.setClass("myclass", this.getClass());
 
             final Configuration copy = InstantiationUtil.createCopyWritable(orig);
-            assertEquals("myvalue", copy.getString("mykey", "null"));
-            assertEquals(100, copy.getInteger("mynumber", 0));
-            assertEquals(478236947162389746L, copy.getLong("longvalue", 0L));
-            assertEquals(3.1415926f, copy.getFloat("PI", 3.1415926f), 0.0);
-            assertEquals(Math.E, copy.getDouble("E", 0.0), 0.0);
-            assertEquals(true, copy.getBoolean("shouldbetrue", false));
-            assertArrayEquals(new byte[] {1, 2, 3, 4, 5}, copy.getBytes("bytes sequence", null));
-            assertEquals(getClass(), copy.getClass("myclass", null, getClass().getClassLoader()));
+            assertThat(copy.getString("mykey", "null")).isEqualTo("myvalue");
+            assertThat(copy.getInteger("mynumber", 0)).isEqualTo(100);
+            assertThat(copy.getLong("longvalue", 0L)).isEqualTo(478236947162389746L);
+            assertThat(copy.getFloat("PI", 3.1415926f)).isEqualTo(3.1415926f);
+            assertThat(copy.getDouble("E", 0.0)).isEqualTo(Math.E);
+            assertThat(copy.getBoolean("shouldbetrue", false)).isEqualTo(true);
+            assertThat(copy.getBytes("bytes sequence", null)).isEqualTo(new byte[] {1, 2, 3, 4, 5});
+            assertThat(copy.getClass("myclass", null, getClass().getClassLoader()))
+                    .isEqualTo(getClass());
 
-            assertEquals(orig, copy);
-            assertEquals(orig.keySet(), copy.keySet());
-            assertEquals(orig.hashCode(), copy.hashCode());
+            assertThat(copy).isEqualTo(orig);
+            assertThat(copy.keySet()).isEqualTo(orig.keySet());
+            assertThat(copy.hashCode()).isEqualTo(orig.hashCode());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -113,7 +108,7 @@ public class ConfigurationTest extends TestLogger {
             Configuration cfg2 = new Configuration(cfg1);
             cfg2.setString(key, "another value");
 
-            assertEquals("value", cfg1.getString(key, ""));
+            assertThat(cfg1.getString(key, "")).isEqualTo("value");
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -130,11 +125,11 @@ public class ConfigurationTest extends TestLogger {
                 ConfigOptions.key("string-key").defaultValue("my-beautiful-default");
         ConfigOption<Integer> presentIntOption = ConfigOptions.key("int-key").defaultValue(87);
 
-        assertEquals("abc", cfg.getString(presentStringOption));
-        assertEquals("abc", cfg.getValue(presentStringOption));
+        assertThat(cfg.getString(presentStringOption)).isEqualTo("abc");
+        assertThat(cfg.getValue(presentStringOption)).isEqualTo("abc");
 
-        assertEquals(11, cfg.getInteger(presentIntOption));
-        assertEquals("11", cfg.getValue(presentIntOption));
+        assertThat(cfg.getInteger(presentIntOption)).isEqualTo(11);
+        assertThat(cfg.getValue(presentIntOption)).isEqualTo("11");
 
         // test getting default when no value is present
 
@@ -143,15 +138,15 @@ public class ConfigurationTest extends TestLogger {
         ConfigOption<Integer> intOption = ConfigOptions.key("test2").defaultValue(87);
 
         // getting strings with default value should work
-        assertEquals("my-beautiful-default", cfg.getValue(stringOption));
-        assertEquals("my-beautiful-default", cfg.getString(stringOption));
+        assertThat(cfg.getValue(stringOption)).isEqualTo("my-beautiful-default");
+        assertThat(cfg.getString(stringOption)).isEqualTo("my-beautiful-default");
 
         // overriding the default should work
-        assertEquals("override", cfg.getString(stringOption, "override"));
+        assertThat(cfg.getString(stringOption, "override")).isEqualTo("override");
 
         // getting a primitive with a default value should work
-        assertEquals(87, cfg.getInteger(intOption));
-        assertEquals("87", cfg.getValue(intOption));
+        assertThat(cfg.getInteger(intOption)).isEqualTo(87);
+        assertThat(cfg.getValue(intOption)).isEqualTo("87");
     }
 
     @Test
@@ -162,19 +157,19 @@ public class ConfigurationTest extends TestLogger {
 
         ConfigOption<String> presentStringOption = ConfigOptions.key("string-key").noDefaultValue();
 
-        assertEquals("abc", cfg.getString(presentStringOption));
-        assertEquals("abc", cfg.getValue(presentStringOption));
+        assertThat(cfg.getString(presentStringOption)).isEqualTo("abc");
+        assertThat(cfg.getValue(presentStringOption)).isEqualTo("abc");
 
         // test getting default when no value is present
 
         ConfigOption<String> stringOption = ConfigOptions.key("test").noDefaultValue();
 
         // getting strings for null should work
-        assertNull(cfg.getValue(stringOption));
-        assertNull(cfg.getString(stringOption));
+        assertThat(cfg.getValue(stringOption)).isNull();
+        assertThat(cfg.getString(stringOption)).isNull();
 
         // overriding the null default should work
-        assertEquals("override", cfg.getString(stringOption, "override"));
+        assertThat(cfg.getString(stringOption, "override")).isEqualTo("override");
     }
 
     @Test
@@ -204,10 +199,10 @@ public class ConfigurationTest extends TestLogger {
                         .defaultValue(-1)
                         .withDeprecatedKeys("not-there", "also-not-there");
 
-        assertEquals(11, cfg.getInteger(matchesFirst));
-        assertEquals(12, cfg.getInteger(matchesSecond));
-        assertEquals(13, cfg.getInteger(matchesThird));
-        assertEquals(-1, cfg.getInteger(notContained));
+        assertThat(cfg.getInteger(matchesFirst)).isEqualTo(11);
+        assertThat(cfg.getInteger(matchesSecond)).isEqualTo(12);
+        assertThat(cfg.getInteger(matchesThird)).isEqualTo(13);
+        assertThat(cfg.getInteger(notContained)).isEqualTo(-1);
     }
 
     @Test
@@ -237,10 +232,10 @@ public class ConfigurationTest extends TestLogger {
                         .defaultValue(-1)
                         .withFallbackKeys("not-there", "also-not-there");
 
-        assertEquals(11, cfg.getInteger(matchesFirst));
-        assertEquals(12, cfg.getInteger(matchesSecond));
-        assertEquals(13, cfg.getInteger(matchesThird));
-        assertEquals(-1, cfg.getInteger(notContained));
+        assertThat(cfg.getInteger(matchesFirst)).isEqualTo(11);
+        assertThat(cfg.getInteger(matchesSecond)).isEqualTo(12);
+        assertThat(cfg.getInteger(matchesThird)).isEqualTo(13);
+        assertThat(cfg.getInteger(notContained)).isEqualTo(-1);
     }
 
     @Test
@@ -257,11 +252,11 @@ public class ConfigurationTest extends TestLogger {
 
         final Configuration fallbackCfg = new Configuration();
         fallbackCfg.setInteger(fallback, 1);
-        assertEquals(1, fallbackCfg.getInteger(mainOption));
+        assertThat(fallbackCfg.getInteger(mainOption)).isEqualTo(1);
 
         final Configuration deprecatedCfg = new Configuration();
         deprecatedCfg.setInteger(deprecated, 2);
-        assertEquals(2, deprecatedCfg.getInteger(mainOption));
+        assertThat(deprecatedCfg.getInteger(mainOption)).isEqualTo(2);
 
         // reverse declaration of fallback and deprecated keys, fallback keys should always be used
         // first
@@ -274,8 +269,8 @@ public class ConfigurationTest extends TestLogger {
         final Configuration deprecatedAndFallBackConfig = new Configuration();
         deprecatedAndFallBackConfig.setInteger(fallback, 1);
         deprecatedAndFallBackConfig.setInteger(deprecated, 2);
-        assertEquals(1, deprecatedAndFallBackConfig.getInteger(mainOption));
-        assertEquals(1, deprecatedAndFallBackConfig.getInteger(reversedMainOption));
+        assertThat(deprecatedAndFallBackConfig.getInteger(mainOption)).isEqualTo(1);
+        assertThat(deprecatedAndFallBackConfig.getInteger(reversedMainOption)).isEqualTo(1);
     }
 
     @Test
@@ -292,12 +287,16 @@ public class ConfigurationTest extends TestLogger {
         ConfigOption<Integer> unexistedOption =
                 ConfigOptions.key("e").defaultValue(-1).withDeprecatedKeys("f", "g", "j");
 
-        assertEquals("Wrong expectation about size", cfg.keySet().size(), 2);
-        assertTrue("Expected 'validOption' is removed", cfg.removeConfig(validOption));
-        assertEquals("Wrong expectation about size", cfg.keySet().size(), 1);
-        assertTrue("Expected 'existedOption' is removed", cfg.removeConfig(deprecatedOption));
-        assertEquals("Wrong expectation about size", cfg.keySet().size(), 0);
-        assertFalse("Expected 'unexistedOption' is not removed", cfg.removeConfig(unexistedOption));
+        assertThat(2).as("Wrong expectation about size").isEqualTo(cfg.keySet().size());
+        assertThat(cfg.removeConfig(validOption)).as("Expected 'validOption' is removed").isTrue();
+        assertThat(1).as("Wrong expectation about size").isEqualTo(cfg.keySet().size());
+        assertThat(cfg.removeConfig(deprecatedOption))
+                .as("Expected 'existedOption' is removed")
+                .isTrue();
+        assertThat(0).as("Wrong expectation about size").isEqualTo(cfg.keySet().size());
+        assertThat(cfg.removeConfig(unexistedOption))
+                .as("Expected 'unexistedOption' is not removed")
+                .isFalse();
     }
 
     @Test
@@ -306,7 +305,7 @@ public class ConfigurationTest extends TestLogger {
         configuration.setString(STRING_OPTION.key(), TestEnum.VALUE1.toString());
 
         final TestEnum parsedEnumValue = configuration.getEnum(TestEnum.class, STRING_OPTION);
-        assertEquals(TestEnum.VALUE1, parsedEnumValue);
+        assertThat(parsedEnumValue).isEqualTo(TestEnum.VALUE1);
     }
 
     @Test
@@ -315,7 +314,7 @@ public class ConfigurationTest extends TestLogger {
         configuration.setString(STRING_OPTION.key(), TestEnum.VALUE1.toString().toLowerCase());
 
         final TestEnum parsedEnumValue = configuration.getEnum(TestEnum.class, STRING_OPTION);
-        assertEquals(TestEnum.VALUE1, parsedEnumValue);
+        assertThat(parsedEnumValue).isEqualTo(TestEnum.VALUE1);
     }
 
     @Test
@@ -334,7 +333,7 @@ public class ConfigurationTest extends TestLogger {
                             + " must be one of [VALUE1, VALUE2] (was "
                             + invalidValueForTestEnum
                             + ")";
-            assertThat(e.getMessage(), containsString(expectedMessage));
+            assertThat(e.getMessage()).contains(expectedMessage);
         }
     }
 
@@ -353,17 +352,17 @@ public class ConfigurationTest extends TestLogger {
         final Duration duration = Duration.ofMillis(3000);
         configuration.set(DURATION_OPTION, duration);
 
-        assertEquals(listValues, configuration.toMap().get(LIST_STRING_OPTION.key()));
-        assertEquals(mapValues, configuration.toMap().get(MAP_OPTION.key()));
-        assertEquals("3 s", configuration.toMap().get(DURATION_OPTION.key()));
+        assertThat(configuration.toMap().get(LIST_STRING_OPTION.key())).isEqualTo(listValues);
+        assertThat(configuration.toMap().get(MAP_OPTION.key())).isEqualTo(mapValues);
+        assertThat(configuration.toMap().get(DURATION_OPTION.key())).isEqualTo("3 s");
     }
 
     @Test
     public void testMapNotContained() {
         final Configuration cfg = new Configuration();
 
-        assertFalse(cfg.getOptional(MAP_OPTION).isPresent());
-        assertFalse(cfg.contains(MAP_OPTION));
+        assertThat(cfg.getOptional(MAP_OPTION).isPresent()).isFalse();
+        assertThat(cfg.contains(MAP_OPTION)).isFalse();
     }
 
     @Test
@@ -372,8 +371,8 @@ public class ConfigurationTest extends TestLogger {
         cfg.setString(MAP_PROPERTY_1, "value1");
         cfg.setInteger(MAP_PROPERTY_2, 12);
 
-        assertEquals(cfg.get(MAP_OPTION), PROPERTIES_MAP);
-        assertTrue(cfg.contains(MAP_OPTION));
+        assertThat(PROPERTIES_MAP).isEqualTo(cfg.get(MAP_OPTION));
+        assertThat(cfg.contains(MAP_OPTION)).isTrue();
     }
 
     @Test
@@ -381,8 +380,8 @@ public class ConfigurationTest extends TestLogger {
         final Configuration cfg = new Configuration();
         cfg.set(MAP_OPTION, PROPERTIES_MAP);
 
-        assertEquals(cfg.get(MAP_OPTION), PROPERTIES_MAP);
-        assertTrue(cfg.contains(MAP_OPTION));
+        assertThat(PROPERTIES_MAP).isEqualTo(cfg.get(MAP_OPTION));
+        assertThat(cfg.contains(MAP_OPTION)).isTrue();
     }
 
     @Test
@@ -392,9 +391,9 @@ public class ConfigurationTest extends TestLogger {
         cfg.setString(MAP_PROPERTY_1, "value1");
         cfg.setInteger(MAP_PROPERTY_2, 99999);
 
-        assertEquals(cfg.get(MAP_OPTION), PROPERTIES_MAP);
-        assertTrue(cfg.contains(MAP_OPTION));
-        assertTrue(cfg.containsKey(MAP_PROPERTY_1));
+        assertThat(PROPERTIES_MAP).isEqualTo(cfg.get(MAP_OPTION));
+        assertThat(cfg.contains(MAP_OPTION)).isTrue();
+        assertThat(cfg.containsKey(MAP_PROPERTY_1)).isTrue();
     }
 
     @Test
@@ -404,9 +403,9 @@ public class ConfigurationTest extends TestLogger {
         cfg.setInteger(MAP_PROPERTY_2, 99999);
         cfg.set(MAP_OPTION, PROPERTIES_MAP);
 
-        assertEquals(cfg.get(MAP_OPTION), PROPERTIES_MAP);
-        assertTrue(cfg.contains(MAP_OPTION));
-        assertFalse(cfg.containsKey(MAP_PROPERTY_1));
+        assertThat(PROPERTIES_MAP).isEqualTo(cfg.get(MAP_OPTION));
+        assertThat(cfg.contains(MAP_OPTION)).isTrue();
+        assertThat(cfg.containsKey(MAP_PROPERTY_1)).isFalse();
     }
 
     @Test
@@ -416,9 +415,9 @@ public class ConfigurationTest extends TestLogger {
         cfg.setInteger(MAP_PROPERTY_2, 99999);
         cfg.removeConfig(MAP_OPTION);
 
-        assertFalse(cfg.contains(MAP_OPTION));
-        assertFalse(cfg.containsKey(MAP_PROPERTY_1));
-        assertFalse(cfg.containsKey(MAP_PROPERTY_2));
+        assertThat(cfg.contains(MAP_OPTION)).isFalse();
+        assertThat(cfg.containsKey(MAP_PROPERTY_1)).isFalse();
+        assertThat(cfg.containsKey(MAP_PROPERTY_2)).isFalse();
     }
 
     // --------------------------------------------------------------------------------------------

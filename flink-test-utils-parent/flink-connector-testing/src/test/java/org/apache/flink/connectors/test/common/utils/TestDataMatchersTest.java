@@ -21,7 +21,6 @@ package org.apache.flink.connectors.test.common.utils;
 import org.hamcrest.Description;
 import org.hamcrest.StringDescription;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -35,8 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Unit test for {@link TestDataMatchers}. */
 public class TestDataMatchersTest {
@@ -46,13 +45,18 @@ public class TestDataMatchersTest {
 
         @Test
         public void testPositiveCases() {
-            assertThat(testData.iterator(), TestDataMatchers.matchesSplitTestData(testData));
-            assertThat(
-                    testData.iterator(),
-                    TestDataMatchers.matchesSplitTestData(testData, testData.size()));
-            assertThat(
-                    testData.iterator(),
-                    TestDataMatchers.matchesSplitTestData(testData, testData.size() - 1));
+            assertThat(testData.iterator())
+                    .satisfies(matching(TestDataMatchers.matchesSplitTestData(testData)));
+            assertThat(testData.iterator())
+                    .satisfies(
+                            matching(
+                                    TestDataMatchers.matchesSplitTestData(
+                                            testData, testData.size())));
+            assertThat(testData.iterator())
+                    .satisfies(
+                            matching(
+                                    TestDataMatchers.matchesSplitTestData(
+                                            testData, testData.size() - 1)));
         }
 
         @Test
@@ -112,9 +116,11 @@ public class TestDataMatchersTest {
         @Test
         public void testPositiveCase() {
             final List<String> result = unionLists(splitA, splitB, splitC);
-            assertThat(
-                    result.iterator(),
-                    TestDataMatchers.matchesMultipleSplitTestData(testDataCollection));
+            assertThat(result.iterator())
+                    .satisfies(
+                            matching(
+                                    TestDataMatchers.matchesMultipleSplitTestData(
+                                            testDataCollection)));
         }
 
         @Test
@@ -209,10 +215,11 @@ public class TestDataMatchersTest {
                 TypeSafeDiagnosingMatcher.class.getDeclaredMethod(
                         "matchesSafely", Object.class, Description.class);
         method.setAccessible(true);
-        assertFalse((boolean) method.invoke(matcher, object, new Description.NullDescription()));
+        assertThat((boolean) method.invoke(matcher, object, new Description.NullDescription()))
+                .isFalse();
 
         final StringDescription actualDescription = new StringDescription();
         method.invoke(matcher, object, actualDescription);
-        Assertions.assertEquals(expectedDescription, actualDescription.toString());
+        assertThat(actualDescription.toString()).isEqualTo(expectedDescription);
     }
 }

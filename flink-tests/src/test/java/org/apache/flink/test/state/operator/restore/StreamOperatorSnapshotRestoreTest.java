@@ -63,7 +63,6 @@ import org.apache.flink.util.TernaryBoolean;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -76,6 +75,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link StreamOperator} snapshot restoration. */
 @RunWith(Parameterized.class)
@@ -248,8 +249,8 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
         OperatorSubtaskState taskLocalState = snapshotWithLocalState.getTaskLocalState();
 
         // We check if local state was created when we enabled local recovery
-        Assert.assertTrue(
-                mode > ONLY_JM_RECOVERY == (taskLocalState != null && taskLocalState.hasState()));
+        assertThat(mode > ONLY_JM_RECOVERY == (taskLocalState != null && taskLocalState.hasState()))
+                .isTrue();
 
         if (mode == TM_REMOVE_JM_RECOVERY) {
             jobManagerOwnedState.getManagedKeyedState().discardState();
@@ -292,7 +293,7 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
                 // check restored managed keyed state
                 long exp = element.getValue() + 1;
                 long act = keyedState.value();
-                Assert.assertEquals(exp, act);
+                assertThat(act).isEqualTo(exp);
             } else {
                 // write managed keyed state that goes into snapshot
                 keyedState.update(element.getValue() + 1);
@@ -318,7 +319,7 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
                 ++count;
             }
 
-            Assert.assertEquals(MAX_PARALLELISM, count);
+            assertThat(count).isEqualTo(MAX_PARALLELISM);
 
             // write raw operator state that goes into snapshot
             OperatorStateCheckpointOutputStream outOp = context.getRawOperatorStateOutput();
@@ -332,7 +333,7 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
         @Override
         public void initializeState(StateInitializationContext context) throws Exception {
 
-            Assert.assertEquals(verifyRestore, context.isRestored());
+            assertThat(context.isRestored()).isEqualTo(verifyRestore);
 
             keyedState =
                     context.getKeyedStateStore()
@@ -352,11 +353,11 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
                         context.getRawKeyedStateInputs()) {
                     try (InputStream in = streamProvider.getStream()) {
                         DataInputView div = new DataInputViewStreamWrapper(in);
-                        Assert.assertEquals(streamProvider.getKeyGroupId() + 2, div.readInt());
+                        assertThat(div.readInt()).isEqualTo(streamProvider.getKeyGroupId() + 2);
                         ++count;
                     }
                 }
-                Assert.assertEquals(MAX_PARALLELISM, count);
+                assertThat(count).isEqualTo(MAX_PARALLELISM);
 
                 // check restored managed operator state
                 BitSet check = new BitSet(10);
@@ -364,7 +365,7 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
                     check.set(v);
                 }
 
-                Assert.assertEquals(10, check.cardinality());
+                assertThat(check.cardinality()).isEqualTo(10);
 
                 // check restored raw operator state
                 check = new BitSet(13);
@@ -375,7 +376,7 @@ public class StreamOperatorSnapshotRestoreTest extends TestLogger {
                         check.set(div.readInt() - 42);
                     }
                 }
-                Assert.assertEquals(13, check.cardinality());
+                assertThat(check.cardinality()).isEqualTo(13);
             }
         }
     }

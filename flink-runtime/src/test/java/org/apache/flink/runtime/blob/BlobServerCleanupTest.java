@@ -52,10 +52,7 @@ import static org.apache.flink.runtime.blob.BlobKey.BlobType.TRANSIENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobServerGetTest.get;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.verifyContents;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** A few tests for the cleanup of transient BLOBs at the {@link BlobServer}. */
 public class BlobServerCleanupTest extends TestLogger {
@@ -113,13 +110,13 @@ public class BlobServerCleanupTest extends TestLogger {
             final TransientBlobKey key1 =
                     (TransientBlobKey) put(server, jobId, data, TRANSIENT_BLOB);
             final Long key1ExpiryAfterPut = transientBlobExpiryTimes.get(Tuple2.of(jobId, key1));
-            assertThat(key1ExpiryAfterPut, greaterThanOrEqualTo(cleanupLowerBound));
+            assertThat(key1ExpiryAfterPut).isGreaterThanOrEqualTo(cleanupLowerBound);
 
             cleanupLowerBound = System.currentTimeMillis() + cleanupInterval;
             final TransientBlobKey key2 =
                     (TransientBlobKey) put(server, jobId, data2, TRANSIENT_BLOB);
             final Long key2ExpiryAfterPut = transientBlobExpiryTimes.get(Tuple2.of(jobId, key2));
-            assertThat(key2ExpiryAfterPut, greaterThanOrEqualTo(cleanupLowerBound));
+            assertThat(key2ExpiryAfterPut).isGreaterThanOrEqualTo(cleanupLowerBound);
 
             // check that HA contents are not cleaned up
             final JobID jobIdHA = (jobId == null) ? new JobID() : jobId;
@@ -131,22 +128,22 @@ public class BlobServerCleanupTest extends TestLogger {
             cleanupLowerBound = System.currentTimeMillis() + cleanupInterval;
             verifyContents(server, jobId, key1, data);
             final Long key1ExpiryAfterGet = transientBlobExpiryTimes.get(Tuple2.of(jobId, key1));
-            assertThat(key1ExpiryAfterGet, greaterThan(key1ExpiryAfterPut));
-            assertThat(key1ExpiryAfterGet, greaterThanOrEqualTo(cleanupLowerBound));
-            assertEquals(key2ExpiryAfterPut, transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)));
+            assertThat(key1ExpiryAfterGet).isGreaterThan(key1ExpiryAfterPut);
+            assertThat(key1ExpiryAfterGet).isGreaterThanOrEqualTo(cleanupLowerBound);
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)))
+                    .isEqualTo(key2ExpiryAfterPut);
 
             // access key2, verify expiry times (delay at least 1ms to also verify key1 expiry is
             // unchanged)
             Thread.sleep(1);
             cleanupLowerBound = System.currentTimeMillis() + cleanupInterval;
             verifyContents(server, jobId, key2, data2);
-            assertEquals(key1ExpiryAfterGet, transientBlobExpiryTimes.get(Tuple2.of(jobId, key1)));
-            assertThat(
-                    transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)),
-                    greaterThan(key2ExpiryAfterPut));
-            assertThat(
-                    transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)),
-                    greaterThanOrEqualTo(cleanupLowerBound));
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key1)))
+                    .isEqualTo(key1ExpiryAfterGet);
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)))
+                    .isGreaterThan(key2ExpiryAfterPut);
+            assertThat(transientBlobExpiryTimes.get(Tuple2.of(jobId, key2)))
+                    .isGreaterThanOrEqualTo(cleanupLowerBound);
 
             // cleanup task is run every cleanupInterval seconds
             // => unaccessed file should remain at most 2*cleanupInterval seconds
@@ -259,10 +256,9 @@ public class BlobServerCleanupTest extends TestLogger {
                 throw new IOException("File " + jobDir + " does not exist.");
             }
         } else {
-            assertEquals(
-                    "Too many/few files in job dir: " + Arrays.asList(blobsForJob).toString(),
-                    expectedCount,
-                    blobsForJob.length);
+            assertThat(blobsForJob.length)
+                    .as("Too many/few files in job dir: " + Arrays.asList(blobsForJob).toString())
+                    .isEqualTo(expectedCount);
         }
     }
 }

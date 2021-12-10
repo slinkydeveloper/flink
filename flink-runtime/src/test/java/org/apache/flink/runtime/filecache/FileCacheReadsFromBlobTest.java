@@ -41,8 +41,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that {@link FileCache} can read files from {@link BlobServer}. */
 public class FileCacheReadsFromBlobTest {
@@ -116,7 +115,7 @@ public class FileCacheReadsFromBlobTest {
         final Path dstPath = copyResult.get();
         final String actualContent =
                 Files.toString(new File(dstPath.toUri()), StandardCharsets.UTF_8);
-        assertTrue(dstPath.getFileSystem().exists(dstPath));
-        assertEquals(testFileContent, actualContent);
+        assertThat(dstPath.getFileSystem().exists(dstPath)).isTrue();
+        assertThat(actualContent).isEqualTo(testFileContent);
     }
 }

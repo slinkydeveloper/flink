@@ -39,7 +39,6 @@ import org.apache.flink.util.AbstractID;
 import org.apache.flink.util.Collector;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -53,9 +52,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.configuration.CheckpointingOptions.FS_SMALL_FILE_THRESHOLD;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.isIn;
-import static org.junit.Assert.assertThat;
 
 /** Test the savepoint deep copy. */
 @RunWith(value = Parameterized.class)
@@ -162,9 +162,9 @@ public class SavepointDeepCopyTest extends AbstractTestBase {
 
         env.execute("bootstrap savepoint1");
 
-        Assert.assertTrue(
-                "Failed to bootstrap savepoint1 with additional state files",
-                Files.list(Paths.get(savepointPath1)).count() > 1);
+        assertThat(Files.list(Paths.get(savepointPath1)).count() > 1)
+                .as("Failed to bootstrap savepoint1 with additional state files")
+                .isTrue();
 
         Set<String> stateFiles1 =
                 Files.list(Paths.get(savepointPath1))
@@ -182,19 +182,18 @@ public class SavepointDeepCopyTest extends AbstractTestBase {
         savepoint2.withOperator("Operator2", transformation).write(savepointPath2);
         env.execute("create savepoint2");
 
-        Assert.assertTrue(
-                "Failed to create savepoint2 from savepoint1 with additional state files",
-                Files.list(Paths.get(savepointPath2)).count() > 1);
+        assertThat(Files.list(Paths.get(savepointPath2)).count() > 1)
+                .as("Failed to create savepoint2 from savepoint1 with additional state files")
+                .isTrue();
 
         Set<String> stateFiles2 =
                 Files.list(Paths.get(savepointPath2))
                         .map(path -> path.getFileName().toString())
                         .collect(Collectors.toSet());
 
-        assertThat(
-                "At least one state file in savepoint1 are not in savepoint2",
-                stateFiles1,
-                everyItem(isIn(stateFiles2)));
+        assertThat(stateFiles1)
+                .as("At least one state file in savepoint1 are not in savepoint2")
+                .satisfies(matching(everyItem(isIn(stateFiles2))));
 
         // Try to load savepoint2 and read the state of "Operator1" (which has not been
         // touched/changed when savepoint2
@@ -204,9 +203,8 @@ public class SavepointDeepCopyTest extends AbstractTestBase {
                         .readKeyedState("Operator1", new ReadFunction())
                         .count();
         long expectedKeyNum = Arrays.stream(TEXT.split(" ")).distinct().count();
-        Assert.assertEquals(
-                "Unexpected number of keys in the state of Operator1",
-                expectedKeyNum,
-                actuallyKeyNum);
+        assertThat(actuallyKeyNum)
+                .as("Unexpected number of keys in the state of Operator1")
+                .isEqualTo(expectedKeyNum);
     }
 }

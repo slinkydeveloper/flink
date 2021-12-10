@@ -73,7 +73,6 @@ import org.apache.flink.util.TestLogger;
 import org.apache.flink.shaded.guava30.com.google.common.base.Joiner;
 import org.apache.flink.shaded.guava30.com.google.common.collect.Iterables;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -84,9 +83,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -287,7 +285,7 @@ public class WindowOperatorTest extends TestLogger {
         testSlidingEventTimeWindows(operator);
 
         // we close once in the rest...
-        Assert.assertEquals("Close was not called.", 2, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(2);
     }
 
     private void testTumblingEventTimeWindows(
@@ -465,7 +463,7 @@ public class WindowOperatorTest extends TestLogger {
         testTumblingEventTimeWindows(operator);
 
         // we close once in the rest...
-        Assert.assertEquals("Close was not called.", 2, closeCalled.get());
+        assertThat(closeCalled.get()).as("Close was not called.").isEqualTo(2);
     }
 
     @Test
@@ -1587,12 +1585,12 @@ public class WindowOperatorTest extends TestLogger {
                 testHarness.getOutput(),
                 new Tuple2ResultSortComparator());
 
-        assertEquals(expectedOutput.size(), testHarness.getOutput().size());
+        assertThat(testHarness.getOutput().size()).isEqualTo(expectedOutput.size());
         for (Object elem : testHarness.getOutput()) {
             if (elem instanceof StreamRecord) {
                 StreamRecord<Tuple2<String, Integer>> el =
                         (StreamRecord<Tuple2<String, Integer>>) elem;
-                assertTrue(expectedOutput.contains(el));
+                assertThat(expectedOutput.contains(el)).isTrue();
             }
         }
         testHarness.close();
@@ -1942,10 +1940,10 @@ public class WindowOperatorTest extends TestLogger {
         testHarness.processElement(new StreamRecord<>(new Tuple2<>("key2", 1), timestamp));
 
         // the garbage collection timer would wrap-around
-        Assert.assertTrue(window.maxTimestamp() + lateness < window.maxTimestamp());
+        assertThat(window.maxTimestamp() + lateness < window.maxTimestamp()).isTrue();
 
         // and it would prematurely fire with watermark (Long.MAX_VALUE - 1500)
-        Assert.assertTrue(window.maxTimestamp() + lateness < Long.MAX_VALUE - 1500);
+        assertThat(window.maxTimestamp() + lateness < Long.MAX_VALUE - 1500).isTrue();
 
         // if we don't correctly prevent wrap-around in the garbage collection
         // timers this watermark will clean our window state for the just-added
@@ -1953,8 +1951,8 @@ public class WindowOperatorTest extends TestLogger {
         testHarness.processWatermark(new Watermark(Long.MAX_VALUE - 1500));
 
         // this watermark is before the end timestamp of our only window
-        Assert.assertTrue(Long.MAX_VALUE - 1500 < window.maxTimestamp());
-        Assert.assertTrue(window.maxTimestamp() < Long.MAX_VALUE);
+        assertThat(Long.MAX_VALUE - 1500 < window.maxTimestamp()).isTrue();
+        assertThat(window.maxTimestamp() < Long.MAX_VALUE).isTrue();
 
         // push in a watermark that will trigger computation of our window
         testHarness.processWatermark(new Watermark(window.maxTimestamp()));
@@ -2547,7 +2545,7 @@ public class WindowOperatorTest extends TestLogger {
 
         TestHarnessUtil.assertOutputEqualsSorted(
                 "Output was not correct.", expected, actual, new Tuple3ResultSortComparator());
-        assertEquals(null, sideActual);
+        assertThat(sideActual).isEqualTo(null);
 
         testHarness.processWatermark(new Watermark(20000));
 
@@ -2562,7 +2560,7 @@ public class WindowOperatorTest extends TestLogger {
         sideActual = testHarness.getSideOutput(lateOutputTag);
         TestHarnessUtil.assertOutputEqualsSorted(
                 "Output was not correct.", expected, actual, new Tuple3ResultSortComparator());
-        assertEquals(null, sideActual);
+        assertThat(sideActual).isEqualTo(null);
 
         testHarness.close();
     }
@@ -2650,7 +2648,7 @@ public class WindowOperatorTest extends TestLogger {
                 testHarness.getSideOutput(lateOutputTag);
         TestHarnessUtil.assertOutputEqualsSorted(
                 "Output was not correct.", expected, actual, new Tuple3ResultSortComparator());
-        assertEquals(null, sideActual);
+        assertThat(sideActual).isEqualTo(null);
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>("key2", 1), 14500));
         testHarness.processWatermark(new Watermark(20000));
@@ -2666,7 +2664,7 @@ public class WindowOperatorTest extends TestLogger {
         sideActual = testHarness.getSideOutput(lateOutputTag);
         TestHarnessUtil.assertOutputEqualsSorted(
                 "Output was not correct.", expected, actual, new Tuple3ResultSortComparator());
-        assertEquals(null, sideActual);
+        assertThat(sideActual).isEqualTo(null);
 
         testHarness.close();
     }
@@ -2754,7 +2752,7 @@ public class WindowOperatorTest extends TestLogger {
                 testHarness.getSideOutput(lateOutputTag);
         TestHarnessUtil.assertOutputEqualsSorted(
                 "Output was not correct.", expected, actual, new Tuple3ResultSortComparator());
-        assertEquals(null, sideActual);
+        assertThat(sideActual).isEqualTo(null);
 
         testHarness.processElement(new StreamRecord<>(new Tuple2<>("key2", 1), 14500));
         testHarness.processWatermark(new Watermark(20000));
@@ -2770,7 +2768,7 @@ public class WindowOperatorTest extends TestLogger {
 
         TestHarnessUtil.assertOutputEqualsSorted(
                 "Output was not correct.", expected, actual, new Tuple3ResultSortComparator());
-        assertEquals(null, sideActual);
+        assertThat(sideActual).isEqualTo(null);
 
         testHarness.close();
     }

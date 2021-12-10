@@ -28,8 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.util.UUID;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -54,7 +53,7 @@ public class BlockingShutdownTest {
         try {
             blockingProcess.startProcess();
             long pid = blockingProcess.getProcessId();
-            assertTrue("Cannot determine process ID", pid != -1);
+            assertThat(pid != -1).as("Cannot determine process ID").isTrue();
 
             // wait for the marker file to appear, which means the process is up properly
             TestJvmProcess.waitForMarkerFile(markerFile, 30000);
@@ -69,9 +68,9 @@ public class BlockingShutdownTest {
             Thread.sleep(50);
 
             // the process should not go away by itself
-            assertTrue(
-                    "Test broken, process shutdown blocking does not work",
-                    blockingProcess.isAlive());
+            assertThat(blockingProcess.isAlive())
+                    .as("Test broken, process shutdown blocking does not work")
+                    .isTrue();
         } finally {
             blockingProcess.destroy();
 
@@ -96,7 +95,7 @@ public class BlockingShutdownTest {
         try {
             blockingProcess.startProcess();
             long pid = blockingProcess.getProcessId();
-            assertTrue("Cannot determine process ID", pid != -1);
+            assertThat(pid != -1).as("Cannot determine process ID").isTrue();
 
             // wait for the marker file to appear, which means the process is up properly
             TestJvmProcess.waitForMarkerFile(markerFile, 30000);
@@ -109,9 +108,9 @@ public class BlockingShutdownTest {
                 Thread.sleep(50);
             }
 
-            assertFalse(
-                    "shutdown blocking process does not properly terminate itself",
-                    blockingProcess.isAlive());
+            assertThat(blockingProcess.isAlive())
+                    .as("shutdown blocking process does not properly terminate itself")
+                    .isFalse();
         } finally {
             blockingProcess.destroy();
 

@@ -29,8 +29,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.io.IOException;
 
-import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BlobUtils}. */
 public class BlobUtilsTest {
@@ -49,7 +48,7 @@ public class BlobUtilsTest {
         config.setString(CoreOptions.TMP_DIRS, temporaryFolder.newFolder().getAbsolutePath());
 
         File dir = BlobUtils.initLocalStorageDirectory(config);
-        assertThat(dir.getAbsolutePath(), startsWith(blobStorageDir));
+        assertThat(dir.getAbsolutePath()).startsWith(blobStorageDir);
     }
 
     /**
@@ -63,7 +62,7 @@ public class BlobUtilsTest {
         config.setString(CoreOptions.TMP_DIRS, blobStorageDir);
 
         File dir = BlobUtils.initLocalStorageDirectory(config);
-        assertThat(dir.getAbsolutePath(), startsWith(blobStorageDir));
+        assertThat(dir.getAbsolutePath()).startsWith(blobStorageDir);
     }
 
     /**
@@ -80,7 +79,7 @@ public class BlobUtilsTest {
         config.setString(CoreOptions.TMP_DIRS, blobStorageDirs);
 
         File dir = BlobUtils.initLocalStorageDirectory(config);
-        assertThat(dir.getAbsolutePath(), startsWith(temporaryFolder.getRoot().getAbsolutePath()));
+        assertThat(dir.getAbsolutePath()).startsWith(temporaryFolder.getRoot().getAbsolutePath());
     }
 
     /**
@@ -97,7 +96,7 @@ public class BlobUtilsTest {
         config.setString(CoreOptions.TMP_DIRS, blobStorageDirs);
 
         File dir = BlobUtils.initLocalStorageDirectory(config);
-        assertThat(dir.getAbsolutePath(), startsWith(temporaryFolder.getRoot().getAbsolutePath()));
+        assertThat(dir.getAbsolutePath()).startsWith(temporaryFolder.getRoot().getAbsolutePath());
     }
 
     /**
@@ -109,6 +108,6 @@ public class BlobUtilsTest {
         Configuration config = new Configuration();
 
         File dir = BlobUtils.initLocalStorageDirectory(config);
-        assertThat(dir.getAbsolutePath(), startsWith(CoreOptions.TMP_DIRS.defaultValue()));
+        assertThat(dir.getAbsolutePath()).startsWith(CoreOptions.TMP_DIRS.defaultValue());
     }
 }

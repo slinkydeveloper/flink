@@ -28,7 +28,6 @@ import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.Executors;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -39,8 +38,7 @@ import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for the {@link TaskLocalStateStoreImpl}. */
 public class TaskLocalStateStoreImplTest extends TestLogger {
@@ -92,16 +90,15 @@ public class TaskLocalStateStoreImplTest extends TestLogger {
     public void getLocalRecoveryRootDirectoryProvider() {
 
         LocalRecoveryConfig directoryProvider = taskLocalStateStore.getLocalRecoveryConfig();
-        Assert.assertEquals(
-                allocationBaseDirs.length,
-                directoryProvider.getLocalStateDirectoryProvider().allocationBaseDirsCount());
+        assertThat(directoryProvider.getLocalStateDirectoryProvider().allocationBaseDirsCount())
+                .isEqualTo(allocationBaseDirs.length);
 
         for (int i = 0; i < allocationBaseDirs.length; ++i) {
-            Assert.assertEquals(
-                    allocationBaseDirs[i],
-                    directoryProvider
-                            .getLocalStateDirectoryProvider()
-                            .selectAllocationBaseDirectory(i));
+            assertThat(
+                            directoryProvider
+                                    .getLocalStateDirectoryProvider()
+                                    .selectAllocationBaseDirectory(i))
+                    .isEqualTo(allocationBaseDirs[i]);
         }
     }
 
@@ -112,14 +109,14 @@ public class TaskLocalStateStoreImplTest extends TestLogger {
         final int chkCount = 3;
 
         for (int i = 0; i < chkCount; ++i) {
-            Assert.assertNull(taskLocalStateStore.retrieveLocalState(i));
+            assertThat(taskLocalStateStore.retrieveLocalState(i)).isNull();
         }
 
         List<TestingTaskStateSnapshot> taskStateSnapshots = storeStates(chkCount);
 
         checkStoredAsExpected(taskStateSnapshots, 0, chkCount);
 
-        Assert.assertNull(taskLocalStateStore.retrieveLocalState(chkCount + 1));
+        assertThat(taskLocalStateStore.retrieveLocalState(chkCount + 1)).isNull();
     }
 
     /** Test checkpoint pruning. */
@@ -134,7 +131,7 @@ public class TaskLocalStateStoreImplTest extends TestLogger {
         taskLocalStateStore.pruneMatchingCheckpoints((long chk) -> chk != chkCount - 1);
 
         for (int i = 0; i < chkCount - 1; ++i) {
-            Assert.assertNull(taskLocalStateStore.retrieveLocalState(i));
+            assertThat(taskLocalStateStore.retrieveLocalState(i)).isNull();
         }
 
         checkStoredAsExpected(taskStateSnapshots, chkCount - 1, chkCount);
@@ -182,16 +179,16 @@ public class TaskLocalStateStoreImplTest extends TestLogger {
     private void checkStoredAsExpected(List<TestingTaskStateSnapshot> history, int start, int end) {
         for (int i = start; i < end; ++i) {
             TestingTaskStateSnapshot expected = history.get(i);
-            assertTrue(expected == taskLocalStateStore.retrieveLocalState(i));
-            assertFalse(expected.isDiscarded());
+            assertThat(expected == taskLocalStateStore.retrieveLocalState(i)).isTrue();
+            assertThat(expected.isDiscarded()).isFalse();
         }
     }
 
     private void checkPrunedAndDiscarded(
             List<TestingTaskStateSnapshot> history, int start, int end) {
         for (int i = start; i < end; ++i) {
-            Assert.assertNull(taskLocalStateStore.retrieveLocalState(i));
-            assertTrue(history.get(i).isDiscarded());
+            assertThat(taskLocalStateStore.retrieveLocalState(i)).isNull();
+            assertThat(history.get(i).isDiscarded()).isTrue();
         }
     }
 

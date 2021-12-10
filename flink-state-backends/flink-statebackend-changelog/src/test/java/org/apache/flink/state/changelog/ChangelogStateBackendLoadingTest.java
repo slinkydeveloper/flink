@@ -65,10 +65,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Verify Changelog StateBackend is properly loaded. */
 public class ChangelogStateBackendLoadingTest {
@@ -86,7 +83,7 @@ public class ChangelogStateBackendLoadingTest {
         final CheckpointStorage storage =
                 CheckpointStorageLoader.load(null, null, backend, config(), cl, null);
 
-        assertTrue(backend instanceof HashMapStateBackend);
+        assertThat(backend).isInstanceOf(HashMapStateBackend.class);
     }
 
     @Test
@@ -101,9 +98,12 @@ public class ChangelogStateBackendLoadingTest {
 
         assertDelegateStateBackend(
                 backend, MockStateBackend.class, storage, MockStateBackend.class);
-        assertTrue(
-                ((MockStateBackend) (((ChangelogStateBackend) backend).getDelegatedStateBackend()))
-                        .isConfigUpdated());
+        assertThat(
+                        ((MockStateBackend)
+                                        (((ChangelogStateBackend) backend)
+                                                .getDelegatedStateBackend()))
+                                .isConfigUpdated())
+                .isTrue();
     }
 
     @Test
@@ -118,9 +118,12 @@ public class ChangelogStateBackendLoadingTest {
 
         assertDelegateStateBackend(
                 backend, MockStateBackend.class, storage, MockStateBackend.class);
-        assertTrue(
-                ((MockStateBackend) (((ChangelogStateBackend) backend).getDelegatedStateBackend()))
-                        .isConfigUpdated());
+        assertThat(
+                        ((MockStateBackend)
+                                        (((ChangelogStateBackend) backend)
+                                                .getDelegatedStateBackend()))
+                                .isConfigUpdated())
+                .isTrue();
     }
 
     @Test
@@ -141,7 +144,7 @@ public class ChangelogStateBackendLoadingTest {
                 StateBackendLoader.fromApplicationOrConfigOrDefault(
                         null, TernaryBoolean.FALSE, config(true), cl, null);
 
-        assertTrue(backend instanceof HashMapStateBackend);
+        assertThat(backend).isInstanceOf(HashMapStateBackend.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -222,7 +225,7 @@ public class ChangelogStateBackendLoadingTest {
 
         // set back and force
         env.setStateBackend(new MemoryStateBackend());
-        assertTrue(env.getStateBackend() instanceof MemoryStateBackend);
+        assertThat(env.getStateBackend()).isInstanceOf(MemoryStateBackend.class);
         assertStateBackendAndChangelogInEnvironmentAndStreamGraphAndJobGraph(
                 env, TernaryBoolean.UNDEFINED, MemoryStateBackend.class);
         env.enableChangelogStateBackend(true);
@@ -277,11 +280,10 @@ public class ChangelogStateBackendLoadingTest {
             Class<?> delegatedStateBackendClass,
             CheckpointStorage storage,
             Class<?> storageClass) {
-        assertTrue(backend instanceof ChangelogStateBackend);
-        assertSame(
-                ((DelegatingStateBackend) backend).getDelegatedStateBackend().getClass(),
-                delegatedStateBackendClass);
-        assertSame(storage.getClass(), storageClass);
+        assertThat(backend).isInstanceOf(ChangelogStateBackend.class);
+        assertThat(delegatedStateBackendClass)
+                .isSameAs(((DelegatingStateBackend) backend).getDelegatedStateBackend().getClass());
+        assertThat(storageClass).isSameAs(storage.getClass());
     }
 
     private void testLoadingStateBackend(
@@ -343,36 +345,40 @@ public class ChangelogStateBackendLoadingTest {
             TernaryBoolean isChangelogEnabled,
             Class<?> rootStateBackendClass)
             throws Exception {
-        assertEquals(isChangelogEnabled, env.isChangelogStateBackendEnabled());
+        assertThat(env.isChangelogStateBackendEnabled()).isEqualTo(isChangelogEnabled);
         if (rootStateBackendClass == null) {
-            assertNull(env.getStateBackend());
+            assertThat(env.getStateBackend()).isNull();
         } else {
-            assertSame(rootStateBackendClass, env.getStateBackend().getClass());
+            assertThat(env.getStateBackend().getClass()).isSameAs(rootStateBackendClass);
         }
 
         StreamGraph streamGraph = env.getStreamGraph(false);
-        assertEquals(isChangelogEnabled, streamGraph.isChangelogStateBackendEnabled());
+        assertThat(streamGraph.isChangelogStateBackendEnabled()).isEqualTo(isChangelogEnabled);
         if (rootStateBackendClass == null) {
-            assertNull(streamGraph.getStateBackend());
+            assertThat(streamGraph.getStateBackend()).isNull();
         } else {
-            assertSame(rootStateBackendClass, streamGraph.getStateBackend().getClass());
+            assertThat(streamGraph.getStateBackend().getClass()).isSameAs(rootStateBackendClass);
         }
         JobCheckpointingSettings checkpointingSettings =
                 streamGraph.getJobGraph().getCheckpointingSettings();
-        assertEquals(isChangelogEnabled, checkpointingSettings.isChangelogStateBackendEnabled());
+        assertThat(checkpointingSettings.isChangelogStateBackendEnabled())
+                .isEqualTo(isChangelogEnabled);
         if (rootStateBackendClass == null) {
-            assertNull(checkpointingSettings.getDefaultStateBackend());
+            assertThat(checkpointingSettings.getDefaultStateBackend()).isNull();
         } else {
-            assertSame(
-                    rootStateBackendClass,
-                    checkpointingSettings.getDefaultStateBackend().deserializeValue(cl).getClass());
-            assertSame(
-                    rootStateBackendClass,
-                    unwrapFromDelegatingStateBackend(
-                                    checkpointingSettings
-                                            .getDefaultStateBackend()
-                                            .deserializeValue(cl))
-                            .getClass());
+            assertThat(
+                            checkpointingSettings
+                                    .getDefaultStateBackend()
+                                    .deserializeValue(cl)
+                                    .getClass())
+                    .isSameAs(rootStateBackendClass);
+            assertThat(
+                            unwrapFromDelegatingStateBackend(
+                                            checkpointingSettings
+                                                    .getDefaultStateBackend()
+                                                    .deserializeValue(cl))
+                                    .getClass())
+                    .isSameAs(rootStateBackendClass);
         }
     }
 

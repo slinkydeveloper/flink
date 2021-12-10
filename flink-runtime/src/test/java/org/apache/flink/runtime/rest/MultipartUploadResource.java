@@ -65,8 +65,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Test base for verifying support of multipart uploads via REST. */
@@ -142,24 +141,19 @@ public class MultipartUploadResource extends ExternalResource {
                             request.getUploadedFiles().stream()
                                     .map(File::toPath)
                                     .collect(Collectors.toList());
-
-                    assertEquals(expectedFiles.size(), uploadedFiles.size());
-
+                    assertThat(uploadedFiles.size()).isEqualTo(expectedFiles.size());
                     List<Path> expectedList = new ArrayList<>(expectedFiles);
                     List<Path> actualList = new ArrayList<>(uploadedFiles);
                     expectedList.sort(Comparator.comparing(Path::toString));
                     actualList.sort(Comparator.comparing(Path::toString));
-
                     for (int x = 0; x < expectedList.size(); x++) {
                         Path expected = expectedList.get(x);
                         Path actual = actualList.get(x);
-
-                        assertEquals(
-                                expected.getFileName().toString(), actual.getFileName().toString());
-
+                        assertThat(actual.getFileName().toString())
+                                .isEqualTo(expected.getFileName().toString());
                         byte[] originalContent = Files.readAllBytes(expected);
                         byte[] receivedContent = Files.readAllBytes(actual);
-                        assertArrayEquals(originalContent, receivedContent);
+                        assertThat(receivedContent).isEqualTo(originalContent);
                     }
                 });
     }
@@ -239,7 +233,7 @@ public class MultipartUploadResource extends ExternalResource {
             actualUploadDir = files.get(0);
         }
         try (Stream<Path> containedFiles = Files.list(actualUploadDir)) {
-            assertEquals("Not all files were cleaned up.", 0, containedFiles.count());
+            assertThat(containedFiles.count()).as("Not all files were cleaned up.").isEqualTo(0);
         }
     }
 

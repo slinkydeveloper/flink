@@ -41,7 +41,6 @@ import org.apache.flink.util.MutableObjectIterator;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -53,7 +52,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CombiningExternalSorterITCase extends TestLogger {
 
@@ -98,9 +97,9 @@ public class CombiningExternalSorterITCase extends TestLogger {
         this.ioManager.close();
 
         if (this.memoryManager != null) {
-            Assert.assertTrue(
-                    "Memory leak: not all segments have been returned to the memory manager.",
-                    this.memoryManager.verifyEmpty());
+            assertThat(this.memoryManager.verifyEmpty())
+                    .as("Memory leak: not all segments have been returned to the memory manager.")
+                    .isTrue();
             this.memoryManager.shutdown();
             this.memoryManager = null;
         }
@@ -149,13 +148,13 @@ public class CombiningExternalSorterITCase extends TestLogger {
                 getReducingIterator(
                         iterator, serializerFactory2.getSerializer(), comparator2.duplicate());
         while (result.hasNext()) {
-            assertEquals(noKeyCnt, result.next().intValue());
+            assertThat(result.next().intValue()).isEqualTo(noKeyCnt);
         }
 
         merger.close();
 
         // if the combiner was opened, it must have been closed
-        assertEquals(comb.opened, comb.closed);
+        assertThat(comb.closed).isEqualTo(comb.opened);
     }
 
     @Test
@@ -201,13 +200,13 @@ public class CombiningExternalSorterITCase extends TestLogger {
                 getReducingIterator(
                         iterator, serializerFactory2.getSerializer(), comparator2.duplicate());
         while (result.hasNext()) {
-            assertEquals(noKeyCnt, result.next().intValue());
+            assertThat(result.next().intValue()).isEqualTo(noKeyCnt);
         }
 
         merger.close();
 
         // if the combiner was opened, it must have been closed
-        assertEquals(comb.opened, comb.closed);
+        assertThat(comb.closed).isEqualTo(comb.opened);
     }
 
     @Test
@@ -253,7 +252,7 @@ public class CombiningExternalSorterITCase extends TestLogger {
                 getReducingIterator(
                         iterator, serializerFactory2.getSerializer(), comparator2.duplicate());
         while (result.hasNext()) {
-            assertEquals(4950, result.next().intValue());
+            assertThat(result.next().intValue()).isEqualTo(4950);
         }
 
         merger.close();
@@ -300,7 +299,7 @@ public class CombiningExternalSorterITCase extends TestLogger {
         Tuple2<Integer, String> rec = new Tuple2<>();
 
         for (int i = 0; i < NUM_PAIRS; i++) {
-            Assert.assertTrue((rec = generator.next(rec)) != null);
+            assertThat((rec = generator.next(rec)) != null).isTrue();
             final Integer key = rec.f0;
             rec.setField("1", 1);
             reader.emit(rec);
@@ -317,27 +316,27 @@ public class CombiningExternalSorterITCase extends TestLogger {
         Tuple2<Integer, String> rec1 = new Tuple2<>();
         Tuple2<Integer, String> rec2 = new Tuple2<>();
 
-        Assert.assertTrue((rec1 = iterator.next(rec1)) != null);
+        assertThat((rec1 = iterator.next(rec1)) != null).isTrue();
         countTable.put(rec1.f0, countTable.get(rec1.f0) - (Integer.parseInt(rec1.f1)));
 
         while ((rec2 = iterator.next(rec2)) != null) {
             int k1 = rec1.f0;
             int k2 = rec2.f0;
 
-            Assert.assertTrue(keyComparator.compare(k1, k2) <= 0);
+            assertThat(keyComparator.compare(k1, k2) <= 0).isTrue();
             countTable.put(k2, countTable.get(k2) - (Integer.parseInt(rec2.f1)));
 
             rec1 = rec2;
         }
 
         for (Integer cnt : countTable.values()) {
-            assertEquals(0, (int) cnt);
+            assertThat((int) cnt).isEqualTo(0);
         }
 
         merger.close();
 
         // if the combiner was opened, it must have been closed
-        assertEquals(comb.opened, comb.closed);
+        assertThat(comb.closed).isEqualTo(comb.opened);
     }
 
     // --------------------------------------------------------------------------------------------

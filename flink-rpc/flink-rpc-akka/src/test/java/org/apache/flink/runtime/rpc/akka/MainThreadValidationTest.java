@@ -25,7 +25,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests that the {@link AkkaRpcService} runs all RPCs in the {@link AkkaRpcActor}'s main thread.
@@ -36,7 +36,7 @@ public class MainThreadValidationTest extends TestLogger {
     public void failIfNotInMainThread() throws Exception {
         // test if assertions are activated. The test only works if assertions are loaded.
         try {
-            assert false;
+            assertThat(false).isTrue();
             // apparently they are not activated
             return;
         } catch (AssertionError ignored) {
@@ -63,7 +63,7 @@ public class MainThreadValidationTest extends TestLogger {
             } catch (AssertionError e) {
                 exceptionThrown = true;
             }
-            assertTrue("should fail with an assertion error", exceptionThrown);
+            assertThat(exceptionThrown).as("should fail with an assertion error").isTrue();
 
             testEndpoint.closeAsync();
         } finally {

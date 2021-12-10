@@ -39,7 +39,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.RunnableFuture;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests backwards compatibility in the serialization format of heap-based KeyedStateBackends. */
 public class HeapKeyedStateBackendSnapshotMigrationTest extends HeapStateBackendTestBase {
@@ -74,48 +74,48 @@ public class HeapKeyedStateBackendSnapshotMigrationTest extends HeapStateBackend
 
             keyedBackend.setCurrentKey("abc");
             state.setCurrentNamespace(namespace1);
-            assertEquals(33L, (long) state.get(33L));
-            assertEquals(55L, (long) state.get(55L));
-            assertEquals(2, getStateSize(state));
+            assertThat((long) state.get(33L)).isEqualTo(33L);
+            assertThat((long) state.get(55L)).isEqualTo(55L);
+            assertThat(getStateSize(state)).isEqualTo(2);
 
             state.setCurrentNamespace(namespace2);
-            assertEquals(22L, (long) state.get(22L));
-            assertEquals(11L, (long) state.get(11L));
-            assertEquals(2, getStateSize(state));
+            assertThat((long) state.get(22L)).isEqualTo(22L);
+            assertThat((long) state.get(11L)).isEqualTo(11L);
+            assertThat(getStateSize(state)).isEqualTo(2);
 
             state.setCurrentNamespace(namespace3);
-            assertEquals(44L, (long) state.get(44L));
-            assertEquals(1, getStateSize(state));
+            assertThat((long) state.get(44L)).isEqualTo(44L);
+            assertThat(getStateSize(state)).isEqualTo(1);
 
             keyedBackend.setCurrentKey("def");
             state.setCurrentNamespace(namespace1);
-            assertEquals(11L, (long) state.get(11L));
-            assertEquals(44L, (long) state.get(44L));
-            assertEquals(2, getStateSize(state));
+            assertThat((long) state.get(11L)).isEqualTo(11L);
+            assertThat((long) state.get(44L)).isEqualTo(44L);
+            assertThat(getStateSize(state)).isEqualTo(2);
 
             state.setCurrentNamespace(namespace3);
-            assertEquals(22L, (long) state.get(22L));
-            assertEquals(55L, (long) state.get(55L));
-            assertEquals(33L, (long) state.get(33L));
-            assertEquals(3, getStateSize(state));
+            assertThat((long) state.get(22L)).isEqualTo(22L);
+            assertThat((long) state.get(55L)).isEqualTo(55L);
+            assertThat((long) state.get(33L)).isEqualTo(33L);
+            assertThat(getStateSize(state)).isEqualTo(3);
 
             keyedBackend.setCurrentKey("jkl");
             state.setCurrentNamespace(namespace1);
-            assertEquals(11L, (long) state.get(11L));
-            assertEquals(22L, (long) state.get(22L));
-            assertEquals(33L, (long) state.get(33L));
-            assertEquals(44L, (long) state.get(44L));
-            assertEquals(55L, (long) state.get(55L));
-            assertEquals(5, getStateSize(state));
+            assertThat((long) state.get(11L)).isEqualTo(11L);
+            assertThat((long) state.get(22L)).isEqualTo(22L);
+            assertThat((long) state.get(33L)).isEqualTo(33L);
+            assertThat((long) state.get(44L)).isEqualTo(44L);
+            assertThat((long) state.get(55L)).isEqualTo(55L);
+            assertThat(getStateSize(state)).isEqualTo(5);
 
             keyedBackend.setCurrentKey("mno");
             state.setCurrentNamespace(namespace3);
-            assertEquals(11L, (long) state.get(11L));
-            assertEquals(22L, (long) state.get(22L));
-            assertEquals(33L, (long) state.get(33L));
-            assertEquals(44L, (long) state.get(44L));
-            assertEquals(55L, (long) state.get(55L));
-            assertEquals(5, getStateSize(state));
+            assertThat((long) state.get(11L)).isEqualTo(11L);
+            assertThat((long) state.get(22L)).isEqualTo(22L);
+            assertThat((long) state.get(33L)).isEqualTo(33L);
+            assertThat((long) state.get(44L)).isEqualTo(44L);
+            assertThat((long) state.get(55L)).isEqualTo(55L);
+            assertThat(getStateSize(state)).isEqualTo(5);
 
             RunnableFuture<SnapshotResult<KeyedStateHandle>> snapshot =
                     keyedBackend.snapshot(

@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link LatencyTrackingAggregatingState}. */
 public class LatencyTrackingAggregatingStateTest extends LatencyTrackingStateTestBase<Integer> {
@@ -91,23 +91,24 @@ public class LatencyTrackingAggregatingStateTest extends LatencyTrackingStateTes
                     latencyTrackingStateMetric =
                             latencyTrackingState.getLatencyTrackingStateMetric();
 
-            assertEquals(0, latencyTrackingStateMetric.getAddCount());
-            assertEquals(0, latencyTrackingStateMetric.getGetCount());
-            assertEquals(0, latencyTrackingStateMetric.getMergeNamespaceCount());
+            assertThat(latencyTrackingStateMetric.getAddCount()).isEqualTo(0);
+            assertThat(latencyTrackingStateMetric.getGetCount()).isEqualTo(0);
+            assertThat(latencyTrackingStateMetric.getMergeNamespaceCount()).isEqualTo(0);
 
             setCurrentKey(keyedBackend);
             ThreadLocalRandom random = ThreadLocalRandom.current();
             for (int index = 1; index <= SAMPLE_INTERVAL; index++) {
                 int expectedResult = index == SAMPLE_INTERVAL ? 0 : index;
                 latencyTrackingState.add(random.nextLong());
-                assertEquals(expectedResult, latencyTrackingStateMetric.getAddCount());
+                assertThat(latencyTrackingStateMetric.getAddCount()).isEqualTo(expectedResult);
 
                 latencyTrackingState.get();
-                assertEquals(expectedResult, latencyTrackingStateMetric.getGetCount());
+                assertThat(latencyTrackingStateMetric.getGetCount()).isEqualTo(expectedResult);
 
                 latencyTrackingState.mergeNamespaces(
                         VoidNamespace.INSTANCE, Collections.emptyList());
-                assertEquals(expectedResult, latencyTrackingStateMetric.getMergeNamespaceCount());
+                assertThat(latencyTrackingStateMetric.getMergeNamespaceCount())
+                        .isEqualTo(expectedResult);
             }
         } finally {
             if (keyedBackend != null) {

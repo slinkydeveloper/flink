@@ -25,10 +25,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the destruction of a {@link LocalBufferPool}. */
 public class LocalBufferPoolDestroyTest {
@@ -65,8 +63,8 @@ public class LocalBufferPoolDestroyTest {
             localBufferPool = new LocalBufferPool(networkBufferPool, 1);
 
             // Drain buffer pool
-            assertNotNull(localBufferPool.requestBuffer());
-            assertNull(localBufferPool.requestBuffer());
+            assertThat(localBufferPool.requestBuffer()).isNotNull();
+            assertThat(localBufferPool.requestBuffer()).isNull();
 
             // Start request Thread
             Thread thread = new Thread(new BufferRequestTask(localBufferPool, asyncException));
@@ -88,7 +86,7 @@ public class LocalBufferPoolDestroyTest {
             }
 
             // Verify that Thread was in blocking request
-            assertTrue("Did not trigger blocking buffer request.", success);
+            assertThat(success).as("Did not trigger blocking buffer request.").isTrue();
 
             // Destroy the buffer pool
             localBufferPool.lazyDestroy();
@@ -97,8 +95,8 @@ public class LocalBufferPoolDestroyTest {
             thread.join();
 
             // Verify expected Exception
-            assertNotNull("Did not throw expected Exception", asyncException.get());
-            assertTrue(asyncException.get() instanceof CancelTaskException);
+            assertThat(asyncException.get()).as("Did not throw expected Exception").isNotNull();
+            assertThat(asyncException.get()).isInstanceOf(CancelTaskException.class);
         } finally {
             if (localBufferPool != null) {
                 localBufferPool.lazyDestroy();
@@ -146,7 +144,7 @@ public class LocalBufferPoolDestroyTest {
         public void run() {
             try {
                 String msg = "Test assumption violated: expected no available buffer";
-                assertNull(msg, bufferPool.requestBuffer());
+                assertThat(bufferPool.requestBuffer()).as(msg).isNull();
 
                 bufferPool.requestBufferBuilderBlocking();
             } catch (Exception t) {

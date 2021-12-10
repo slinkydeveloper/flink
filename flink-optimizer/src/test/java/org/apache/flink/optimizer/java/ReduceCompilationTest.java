@@ -36,8 +36,8 @@ import org.apache.flink.runtime.operators.DriverStrategy;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class ReduceCompilationTest extends CompilerTestBase implements java.io.Serializable {
@@ -74,13 +74,13 @@ public class ReduceCompilationTest extends CompilerTestBase implements java.io.S
             SinkPlanNode sinkNode = resolver.getNode("sink");
 
             // check wiring
-            assertEquals(sourceNode, reduceNode.getInput().getSource());
-            assertEquals(reduceNode, sinkNode.getInput().getSource());
+            assertThat(reduceNode.getInput().getSource()).isEqualTo(sourceNode);
+            assertThat(sinkNode.getInput().getSource()).isEqualTo(reduceNode);
 
             // check parallelism
-            assertEquals(1, sourceNode.getParallelism());
-            assertEquals(1, reduceNode.getParallelism());
-            assertEquals(1, sinkNode.getParallelism());
+            assertThat(sourceNode.getParallelism()).isEqualTo(1);
+            assertThat(reduceNode.getParallelism()).isEqualTo(1);
+            assertThat(sinkNode.getParallelism()).isEqualTo(1);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -123,18 +123,18 @@ public class ReduceCompilationTest extends CompilerTestBase implements java.io.S
                     (SingleInputPlanNode) reduceNode.getInput().getSource();
 
             // check wiring
-            assertEquals(sourceNode, combineNode.getInput().getSource());
-            assertEquals(reduceNode, sinkNode.getInput().getSource());
+            assertThat(combineNode.getInput().getSource()).isEqualTo(sourceNode);
+            assertThat(sinkNode.getInput().getSource()).isEqualTo(reduceNode);
 
             // check that both reduce and combiner have the same strategy
-            assertEquals(DriverStrategy.ALL_REDUCE, reduceNode.getDriverStrategy());
-            assertEquals(DriverStrategy.ALL_REDUCE, combineNode.getDriverStrategy());
+            assertThat(reduceNode.getDriverStrategy()).isEqualTo(DriverStrategy.ALL_REDUCE);
+            assertThat(combineNode.getDriverStrategy()).isEqualTo(DriverStrategy.ALL_REDUCE);
 
             // check parallelism
-            assertEquals(8, sourceNode.getParallelism());
-            assertEquals(8, combineNode.getParallelism());
-            assertEquals(1, reduceNode.getParallelism());
-            assertEquals(1, sinkNode.getParallelism());
+            assertThat(sourceNode.getParallelism()).isEqualTo(8);
+            assertThat(combineNode.getParallelism()).isEqualTo(8);
+            assertThat(reduceNode.getParallelism()).isEqualTo(1);
+            assertThat(sinkNode.getParallelism()).isEqualTo(1);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -183,23 +183,24 @@ public class ReduceCompilationTest extends CompilerTestBase implements java.io.S
                     (SingleInputPlanNode) reduceNode.getInput().getSource();
 
             // check wiring
-            assertEquals(sourceNode, combineNode.getInput().getSource());
-            assertEquals(reduceNode, sinkNode.getInput().getSource());
+            assertThat(combineNode.getInput().getSource()).isEqualTo(sourceNode);
+            assertThat(sinkNode.getInput().getSource()).isEqualTo(reduceNode);
 
             // check the strategies
-            assertEquals(DriverStrategy.SORTED_REDUCE, reduceNode.getDriverStrategy());
-            assertEquals(DriverStrategy.SORTED_PARTIAL_REDUCE, combineNode.getDriverStrategy());
+            assertThat(reduceNode.getDriverStrategy()).isEqualTo(DriverStrategy.SORTED_REDUCE);
+            assertThat(combineNode.getDriverStrategy())
+                    .isEqualTo(DriverStrategy.SORTED_PARTIAL_REDUCE);
 
             // check the keys
-            assertEquals(new FieldList(1), reduceNode.getKeys(0));
-            assertEquals(new FieldList(1), combineNode.getKeys(0));
-            assertEquals(new FieldList(1), reduceNode.getInput().getLocalStrategyKeys());
+            assertThat(reduceNode.getKeys(0)).isEqualTo(new FieldList(1));
+            assertThat(combineNode.getKeys(0)).isEqualTo(new FieldList(1));
+            assertThat(reduceNode.getInput().getLocalStrategyKeys()).isEqualTo(new FieldList(1));
 
             // check parallelism
-            assertEquals(6, sourceNode.getParallelism());
-            assertEquals(6, combineNode.getParallelism());
-            assertEquals(8, reduceNode.getParallelism());
-            assertEquals(8, sinkNode.getParallelism());
+            assertThat(sourceNode.getParallelism()).isEqualTo(6);
+            assertThat(combineNode.getParallelism()).isEqualTo(6);
+            assertThat(reduceNode.getParallelism()).isEqualTo(8);
+            assertThat(sinkNode.getParallelism()).isEqualTo(8);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -259,26 +260,27 @@ public class ReduceCompilationTest extends CompilerTestBase implements java.io.S
                     (SingleInputPlanNode) sinkNode.getInput().getSource();
 
             // check wiring
-            assertEquals(sourceNode, keyExtractor.getInput().getSource());
-            assertEquals(keyProjector, sinkNode.getInput().getSource());
+            assertThat(keyExtractor.getInput().getSource()).isEqualTo(sourceNode);
+            assertThat(sinkNode.getInput().getSource()).isEqualTo(keyProjector);
 
             // check the strategies
-            assertEquals(DriverStrategy.SORTED_REDUCE, reduceNode.getDriverStrategy());
-            assertEquals(DriverStrategy.SORTED_PARTIAL_REDUCE, combineNode.getDriverStrategy());
+            assertThat(reduceNode.getDriverStrategy()).isEqualTo(DriverStrategy.SORTED_REDUCE);
+            assertThat(combineNode.getDriverStrategy())
+                    .isEqualTo(DriverStrategy.SORTED_PARTIAL_REDUCE);
 
             // check the keys
-            assertEquals(new FieldList(0), reduceNode.getKeys(0));
-            assertEquals(new FieldList(0), combineNode.getKeys(0));
-            assertEquals(new FieldList(0), reduceNode.getInput().getLocalStrategyKeys());
+            assertThat(reduceNode.getKeys(0)).isEqualTo(new FieldList(0));
+            assertThat(combineNode.getKeys(0)).isEqualTo(new FieldList(0));
+            assertThat(reduceNode.getInput().getLocalStrategyKeys()).isEqualTo(new FieldList(0));
 
             // check parallelism
-            assertEquals(6, sourceNode.getParallelism());
-            assertEquals(6, keyExtractor.getParallelism());
-            assertEquals(6, combineNode.getParallelism());
+            assertThat(sourceNode.getParallelism()).isEqualTo(6);
+            assertThat(keyExtractor.getParallelism()).isEqualTo(6);
+            assertThat(combineNode.getParallelism()).isEqualTo(6);
 
-            assertEquals(8, reduceNode.getParallelism());
-            assertEquals(8, keyProjector.getParallelism());
-            assertEquals(8, sinkNode.getParallelism());
+            assertThat(reduceNode.getParallelism()).isEqualTo(8);
+            assertThat(keyProjector.getParallelism()).isEqualTo(8);
+            assertThat(sinkNode.getParallelism()).isEqualTo(8);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -339,26 +341,27 @@ public class ReduceCompilationTest extends CompilerTestBase implements java.io.S
                     (SingleInputPlanNode) sinkNode.getInput().getSource();
 
             // check wiring
-            assertEquals(sourceNode, keyExtractor.getInput().getSource());
-            assertEquals(keyProjector, sinkNode.getInput().getSource());
+            assertThat(keyExtractor.getInput().getSource()).isEqualTo(sourceNode);
+            assertThat(sinkNode.getInput().getSource()).isEqualTo(keyProjector);
 
             // check the strategies
-            assertEquals(DriverStrategy.SORTED_REDUCE, reduceNode.getDriverStrategy());
-            assertEquals(DriverStrategy.HASHED_PARTIAL_REDUCE, combineNode.getDriverStrategy());
+            assertThat(reduceNode.getDriverStrategy()).isEqualTo(DriverStrategy.SORTED_REDUCE);
+            assertThat(combineNode.getDriverStrategy())
+                    .isEqualTo(DriverStrategy.HASHED_PARTIAL_REDUCE);
 
             // check the keys
-            assertEquals(new FieldList(0), reduceNode.getKeys(0));
-            assertEquals(new FieldList(0), combineNode.getKeys(0));
-            assertEquals(new FieldList(0), reduceNode.getInput().getLocalStrategyKeys());
+            assertThat(reduceNode.getKeys(0)).isEqualTo(new FieldList(0));
+            assertThat(combineNode.getKeys(0)).isEqualTo(new FieldList(0));
+            assertThat(reduceNode.getInput().getLocalStrategyKeys()).isEqualTo(new FieldList(0));
 
             // check parallelism
-            assertEquals(6, sourceNode.getParallelism());
-            assertEquals(6, keyExtractor.getParallelism());
-            assertEquals(6, combineNode.getParallelism());
+            assertThat(sourceNode.getParallelism()).isEqualTo(6);
+            assertThat(keyExtractor.getParallelism()).isEqualTo(6);
+            assertThat(combineNode.getParallelism()).isEqualTo(6);
 
-            assertEquals(8, reduceNode.getParallelism());
-            assertEquals(8, keyProjector.getParallelism());
-            assertEquals(8, sinkNode.getParallelism());
+            assertThat(reduceNode.getParallelism()).isEqualTo(8);
+            assertThat(keyProjector.getParallelism()).isEqualTo(8);
+            assertThat(sinkNode.getParallelism()).isEqualTo(8);
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
@@ -406,18 +409,18 @@ public class ReduceCompilationTest extends CompilerTestBase implements java.io.S
         SinkPlanNode sinkNode = resolver.getNode("sink");
 
         // check wiring
-        assertEquals(sourceNode, reduceNode.getInput().getSource());
+        assertThat(reduceNode.getInput().getSource()).isEqualTo(sourceNode);
 
         // check the strategies
-        assertEquals(DriverStrategy.SORTED_REDUCE, reduceNode.getDriverStrategy());
+        assertThat(reduceNode.getDriverStrategy()).isEqualTo(DriverStrategy.SORTED_REDUCE);
 
         // check the keys
-        assertEquals(new FieldList(0), reduceNode.getKeys(0));
-        assertEquals(new FieldList(0), reduceNode.getInput().getLocalStrategyKeys());
+        assertThat(reduceNode.getKeys(0)).isEqualTo(new FieldList(0));
+        assertThat(reduceNode.getInput().getLocalStrategyKeys()).isEqualTo(new FieldList(0));
 
         // check parallelism
-        assertEquals(6, sourceNode.getParallelism());
-        assertEquals(8, reduceNode.getParallelism());
-        assertEquals(8, sinkNode.getParallelism());
+        assertThat(sourceNode.getParallelism()).isEqualTo(6);
+        assertThat(reduceNode.getParallelism()).isEqualTo(8);
+        assertThat(sinkNode.getParallelism()).isEqualTo(8);
     }
 }

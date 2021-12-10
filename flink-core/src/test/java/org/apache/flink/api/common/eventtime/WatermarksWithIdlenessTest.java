@@ -26,8 +26,7 @@ import org.junit.Test;
 import java.time.Duration;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for the {@link WatermarksWithIdleness} class. */
 public class WatermarksWithIdlenessTest {
@@ -47,7 +46,7 @@ public class WatermarksWithIdlenessTest {
         final ManualClock clock = new ManualClock(System.nanoTime());
         final IdlenessTimer timer = new IdlenessTimer(clock, Duration.ofMillis(10));
 
-        assertFalse(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isFalse();
     }
 
     @Test
@@ -57,7 +56,7 @@ public class WatermarksWithIdlenessTest {
         timer.checkIfIdle(); // start timer
 
         clock.advanceTime(11, MILLISECONDS);
-        assertTrue(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isTrue();
     }
 
     @Test
@@ -65,9 +64,9 @@ public class WatermarksWithIdlenessTest {
         final ManualClock clock = new ManualClock(System.nanoTime());
         final IdlenessTimer timer = createTimerAndMakeIdle(clock, Duration.ofMillis(122));
 
-        assertTrue(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isTrue();
         clock.advanceTime(100, MILLISECONDS);
-        assertTrue(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isTrue();
     }
 
     @Test
@@ -76,7 +75,7 @@ public class WatermarksWithIdlenessTest {
         final IdlenessTimer timer = createTimerAndMakeIdle(clock, Duration.ofMillis(10));
 
         timer.activity();
-        assertFalse(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isFalse();
     }
 
     @Test
@@ -86,12 +85,12 @@ public class WatermarksWithIdlenessTest {
 
         // active again
         timer.activity();
-        assertFalse(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isFalse();
 
         // idle again
         timer.checkIfIdle(); // start timer
         clock.advanceTime(Duration.ofMillis(123));
-        assertTrue(timer.checkIfIdle());
+        assertThat(timer.checkIfIdle()).isTrue();
     }
 
     private static IdlenessTimer createTimerAndMakeIdle(ManualClock clock, Duration idleTimeout) {
@@ -99,7 +98,7 @@ public class WatermarksWithIdlenessTest {
 
         timer.checkIfIdle(); // start timer
         clock.advanceTime(Duration.ofMillis(idleTimeout.toMillis() + 1));
-        assertTrue(timer.checkIfIdle()); // rigger timer
+        assertThat(timer.checkIfIdle()).isTrue(); // rigger timer
 
         return timer;
     }

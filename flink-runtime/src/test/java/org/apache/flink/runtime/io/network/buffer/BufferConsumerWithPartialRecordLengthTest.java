@@ -29,9 +29,7 @@ import java.nio.ByteBuffer;
 import static java.util.Objects.requireNonNull;
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderAndConsumerTest.assertContent;
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderAndConsumerTest.toByteBuffer;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BufferConsumerWithPartialRecordLength}. */
 public class BufferConsumerWithPartialRecordLengthTest {
@@ -52,19 +50,19 @@ public class BufferConsumerWithPartialRecordLengthTest {
     public void partialRecordTestCase() {
         writeToBuffer(toByteBuffer(0, 1, 2, 3, 42));
 
-        assertEquals(buffers.size(), 2);
+        assertThat(2).isEqualTo(buffers.size());
 
         // buffer starts with a full record
         BufferConsumerWithPartialRecordLength consumer1 = buffers.poll();
-        assertEquals(0, requireNonNull(consumer1).getPartialRecordLength());
-        assertTrue(consumer1.cleanupPartialRecord());
+        assertThat(requireNonNull(consumer1).getPartialRecordLength()).isEqualTo(0);
+        assertThat(consumer1.cleanupPartialRecord()).isTrue();
         assertContent(consumer1.build(), FreeingBufferRecycler.INSTANCE, 0, 1, 2, 3);
 
         // buffer starts with partial record, partial record ends within the buffer
         // skip the partial record, return an empty buffer
         BufferConsumerWithPartialRecordLength consumer2 = buffers.poll();
-        assertTrue(requireNonNull(consumer2).cleanupPartialRecord());
-        assertEquals(consumer2.build().readableBytes(), 0);
+        assertThat(requireNonNull(consumer2).cleanupPartialRecord()).isTrue();
+        assertThat(0).isEqualTo(consumer2.build().readableBytes());
     }
 
     @Test
@@ -72,17 +70,17 @@ public class BufferConsumerWithPartialRecordLengthTest {
         writeToBuffer(toByteBuffer(0, 1, 2, 3, 4, 5, 6, 7, 42));
         writeToBuffer(toByteBuffer(8, 9));
 
-        assertEquals(buffers.size(), 3);
+        assertThat(3).isEqualTo(buffers.size());
         buffers.poll();
 
         // long partial record spanning over the entire buffer, clean up not successful
         BufferConsumerWithPartialRecordLength consumer2 = buffers.poll();
-        assertEquals(BUFFER_SIZE, requireNonNull(consumer2).getPartialRecordLength());
-        assertFalse(consumer2.cleanupPartialRecord());
-        assertEquals(consumer2.build().readableBytes(), 0);
+        assertThat(requireNonNull(consumer2).getPartialRecordLength()).isEqualTo(BUFFER_SIZE);
+        assertThat(consumer2.cleanupPartialRecord()).isFalse();
+        assertThat(0).isEqualTo(consumer2.build().readableBytes());
 
         BufferConsumerWithPartialRecordLength consumer3 = buffers.poll();
-        assertTrue(requireNonNull(consumer3).cleanupPartialRecord());
+        assertThat(requireNonNull(consumer3).cleanupPartialRecord()).isTrue();
         assertContent(consumer3.build(), FreeingBufferRecycler.INSTANCE, 8, 9);
     }
 
@@ -91,17 +89,17 @@ public class BufferConsumerWithPartialRecordLengthTest {
         writeToBuffer(toByteBuffer(0, 1, 2, 3, 4, 5, 6, 42));
         writeToBuffer(toByteBuffer(8, 9));
 
-        assertEquals(buffers.size(), 3);
+        assertThat(3).isEqualTo(buffers.size());
         buffers.poll();
 
         // long partial record ends at the end of the buffer, clean up not successful
         BufferConsumerWithPartialRecordLength consumer2 = buffers.poll();
-        assertEquals(BUFFER_SIZE, requireNonNull(consumer2).getPartialRecordLength());
-        assertFalse(consumer2.cleanupPartialRecord());
-        assertEquals(consumer2.build().readableBytes(), 0);
+        assertThat(requireNonNull(consumer2).getPartialRecordLength()).isEqualTo(BUFFER_SIZE);
+        assertThat(consumer2.cleanupPartialRecord()).isFalse();
+        assertThat(0).isEqualTo(consumer2.build().readableBytes());
 
         BufferConsumerWithPartialRecordLength consumer3 = buffers.poll();
-        assertTrue(requireNonNull(consumer3).cleanupPartialRecord());
+        assertThat(requireNonNull(consumer3).cleanupPartialRecord()).isTrue();
         assertContent(consumer3.build(), FreeingBufferRecycler.INSTANCE, 8, 9);
     }
 
@@ -109,7 +107,7 @@ public class BufferConsumerWithPartialRecordLengthTest {
     public void readPositionNotAtTheBeginningOfTheBufferTestCase() {
         writeToBuffer(toByteBuffer(0, 1, 2, 3, 42));
 
-        assertEquals(buffers.size(), 2);
+        assertThat(2).isEqualTo(buffers.size());
         buffers.poll();
 
         BufferConsumerWithPartialRecordLength consumer2 = buffers.poll();
@@ -117,8 +115,8 @@ public class BufferConsumerWithPartialRecordLengthTest {
 
         // read not start from the beginning of the buffer
         writeToBuffer(toByteBuffer(8, 9));
-        assertEquals(4, consumer2.getPartialRecordLength());
-        assertTrue(consumer2.cleanupPartialRecord());
+        assertThat(consumer2.getPartialRecordLength()).isEqualTo(4);
+        assertThat(consumer2.cleanupPartialRecord()).isTrue();
         assertContent(consumer2.build(), FreeingBufferRecycler.INSTANCE, 8, 9);
     }
 

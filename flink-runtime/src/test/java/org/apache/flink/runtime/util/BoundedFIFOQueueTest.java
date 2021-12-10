@@ -22,11 +22,11 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.hamcrest.collection.IsIterableWithSize.iterableWithSize;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /** {@code BoundedFIFOQueueTest} tests {@link BoundedFIFOQueue}. */
 public class BoundedFIFOQueueTest extends TestLogger {
@@ -39,24 +39,24 @@ public class BoundedFIFOQueueTest extends TestLogger {
     @Test
     public void testQueueWithMaxSize0() {
         final BoundedFIFOQueue<Integer> testInstance = new BoundedFIFOQueue<>(0);
-        assertThat(testInstance, iterableWithSize(0));
+        assertThat(testInstance).satisfies(matching(iterableWithSize(0)));
         testInstance.add(1);
-        assertThat(testInstance, iterableWithSize(0));
+        assertThat(testInstance).satisfies(matching(iterableWithSize(0)));
     }
 
     @Test
     public void testQueueWithMaxSize2() {
         final BoundedFIFOQueue<Integer> testInstance = new BoundedFIFOQueue<>(2);
-        assertThat(testInstance, iterableWithSize(0));
+        assertThat(testInstance).satisfies(matching(iterableWithSize(0)));
 
         testInstance.add(1);
-        assertThat(testInstance, contains(1));
+        assertThat(testInstance).satisfies(matching(contains(1)));
 
         testInstance.add(2);
-        assertThat(testInstance, contains(1, 2));
+        assertThat(testInstance).satisfies(matching(contains(1, 2)));
 
         testInstance.add(3);
-        assertThat(testInstance, contains(2, 3));
+        assertThat(testInstance).satisfies(matching(contains(2, 3)));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class BoundedFIFOQueueTest extends TestLogger {
             // NullPointerException is expected
         }
 
-        assertThat(testInstance, iterableWithSize(0));
+        assertThat(testInstance).satisfies(matching(iterableWithSize(0)));
     }
 
     /**
@@ -79,10 +79,10 @@ public class BoundedFIFOQueueTest extends TestLogger {
     @Test
     public void testSizeWithMaxSize0() {
         final BoundedFIFOQueue<Integer> testInstance = new BoundedFIFOQueue<>(0);
-        assertThat(testInstance.size(), is(0));
+        assertThat(testInstance.size()).isEqualTo(0);
 
         testInstance.add(1);
-        assertThat(testInstance.size(), is(0));
+        assertThat(testInstance.size()).isEqualTo(0);
     }
 
     /**
@@ -92,16 +92,16 @@ public class BoundedFIFOQueueTest extends TestLogger {
     @Test
     public void testSizeWithMaxSize2() {
         final BoundedFIFOQueue<Integer> testInstance = new BoundedFIFOQueue<>(2);
-        assertThat(testInstance.size(), is(0));
+        assertThat(testInstance.size()).isEqualTo(0);
 
         testInstance.add(5);
-        assertThat(testInstance.size(), is(1));
+        assertThat(testInstance.size()).isEqualTo(1);
 
         testInstance.add(6);
-        assertThat(testInstance.size(), is(2));
+        assertThat(testInstance.size()).isEqualTo(2);
 
         // adding a 3rd element won't increase the size anymore
         testInstance.add(7);
-        assertThat(testInstance.size(), is(2));
+        assertThat(testInstance.size()).isEqualTo(2);
     }
 }

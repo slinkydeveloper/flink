@@ -42,11 +42,8 @@ import java.net.InetSocketAddress;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createRemoteInputChannel;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.createSingleInputGate;
 import static org.apache.flink.runtime.io.network.partition.InputChannelTestUtils.mockConnectionManagerWithPartitionRequestClient;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for {@link NettyPartitionRequestClient}. */
 public class NettyPartitionRequestClientTest {
@@ -80,37 +77,34 @@ public class NettyPartitionRequestClientTest {
             // first subpartition request
             inputChannel.requestSubpartition(0);
 
-            assertTrue(channel.isWritable());
+            assertThat(channel.isWritable()).isTrue();
             Object readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(
-                    inputChannel.getInputChannelId(),
-                    ((PartitionRequest) readFromOutbound).receiverId);
-            assertEquals(numExclusiveBuffers, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(numExclusiveBuffers);
 
             // retrigger subpartition request, e.g. due to failures
             inputGate.retriggerPartitionRequest(inputChannel.getPartitionId().getPartitionId());
             runAllScheduledPendingTasks(channel, deadline);
 
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(
-                    inputChannel.getInputChannelId(),
-                    ((PartitionRequest) readFromOutbound).receiverId);
-            assertEquals(numExclusiveBuffers, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(numExclusiveBuffers);
 
             // retrigger subpartition request once again, e.g. due to failures
             inputGate.retriggerPartitionRequest(inputChannel.getPartitionId().getPartitionId());
             runAllScheduledPendingTasks(channel, deadline);
 
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(
-                    inputChannel.getInputChannelId(),
-                    ((PartitionRequest) readFromOutbound).receiverId);
-            assertEquals(numExclusiveBuffers, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(numExclusiveBuffers);
 
-            assertNull(channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isNull();
         } finally {
             // Release all the buffer resources
             inputGate.close();
@@ -140,15 +134,14 @@ public class NettyPartitionRequestClientTest {
             inputChannel.requestSubpartition(0);
 
             // The input channel should only send one partition request
-            assertTrue(channel.isWritable());
+            assertThat(channel.isWritable()).isTrue();
             Object readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
-            assertEquals(
-                    inputChannel.getInputChannelId(),
-                    ((PartitionRequest) readFromOutbound).receiverId);
-            assertEquals(numExclusiveBuffers, ((PartitionRequest) readFromOutbound).credit);
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
+            assertThat(((PartitionRequest) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
+            assertThat(((PartitionRequest) readFromOutbound).credit).isEqualTo(numExclusiveBuffers);
 
-            assertNull(channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isNull();
         } finally {
             // Release all the buffer resources
             inputGate.close();
@@ -178,15 +171,14 @@ public class NettyPartitionRequestClientTest {
             inputChannel.resumeConsumption();
             channel.runPendingTasks();
             Object readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
 
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(ResumeConsumption.class));
-            assertEquals(
-                    inputChannel.getInputChannelId(),
-                    ((ResumeConsumption) readFromOutbound).receiverId);
+            assertThat(readFromOutbound).isInstanceOf(ResumeConsumption.class);
+            assertThat(((ResumeConsumption) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
 
-            assertNull(channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isNull();
         } finally {
             // Release all the buffer resources
             inputGate.close();
@@ -216,15 +208,15 @@ public class NettyPartitionRequestClientTest {
             inputChannel.acknowledgeAllRecordsProcessed();
             channel.runPendingTasks();
             Object readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(PartitionRequest.class));
+            assertThat(readFromOutbound).isInstanceOf(PartitionRequest.class);
 
             readFromOutbound = channel.readOutbound();
-            assertThat(readFromOutbound, instanceOf(NettyMessage.AckAllUserRecordsProcessed.class));
-            assertEquals(
-                    inputChannel.getInputChannelId(),
-                    ((NettyMessage.AckAllUserRecordsProcessed) readFromOutbound).receiverId);
+            assertThat(readFromOutbound)
+                    .isInstanceOf(NettyMessage.AckAllUserRecordsProcessed.class);
+            assertThat(((NettyMessage.AckAllUserRecordsProcessed) readFromOutbound).receiverId)
+                    .isEqualTo(inputChannel.getInputChannelId());
 
-            assertNull(channel.readOutbound());
+            assertThatObject(channel.readOutbound()).isNull();
         } finally {
             // Release all the buffer resources
             inputGate.close();

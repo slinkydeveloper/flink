@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
 import java.net.URI;
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests that the file system factory picks up the entropy configuration properly. */
 public class S3EntropyFsFactoryTest extends TestLogger {
@@ -47,8 +47,8 @@ public class S3EntropyFsFactoryTest extends TestLogger {
         factory.configure(conf);
 
         FlinkS3FileSystem fs = (FlinkS3FileSystem) factory.create(new URI("s3://test"));
-        assertEquals("__entropy__", fs.getEntropyInjectionKey());
-        assertEquals(7, fs.generateEntropy().length());
+        assertThat(fs.getEntropyInjectionKey()).isEqualTo("__entropy__");
+        assertThat(fs.generateEntropy().length()).isEqualTo(7);
     }
 
     /**
@@ -66,7 +66,7 @@ public class S3EntropyFsFactoryTest extends TestLogger {
         factory.configure(conf);
 
         FlinkS3FileSystem fs = (FlinkS3FileSystem) factory.create(new URI("s3://test"));
-        assertEquals(fs.getLocalTmpDir(), dir1);
+        assertThat(dir1).isEqualTo(fs.getLocalTmpDir());
     }
 
     // ------------------------------------------------------------------------

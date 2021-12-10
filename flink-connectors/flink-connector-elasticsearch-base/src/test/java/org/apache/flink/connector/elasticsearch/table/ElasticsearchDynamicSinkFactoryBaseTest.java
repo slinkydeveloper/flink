@@ -26,13 +26,14 @@ import org.apache.flink.table.catalog.Column;
 import org.apache.flink.table.catalog.ResolvedSchema;
 import org.apache.flink.table.catalog.UniqueConstraint;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 
 import java.util.Arrays;
 import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /** Tests for validation in {@link ElasticsearchDynamicSinkFactoryBase}. */
 @ExtendWith(TestLoggerExtension.class)
@@ -43,8 +44,9 @@ abstract class ElasticsearchDynamicSinkFactoryBaseTest {
     abstract TestContext createPrefilledTestContext();
 
     void assertValidationException(String expectedMessage, Executable executable) {
-        ValidationException thrown = Assertions.assertThrows(ValidationException.class, executable);
-        Assertions.assertEquals(expectedMessage, thrown.getMessage());
+        assertThatThrownBy(executable::execute)
+                .isInstanceOf(ValidationException.class)
+                .hasMessage(expectedMessage);
     }
 
     @Test

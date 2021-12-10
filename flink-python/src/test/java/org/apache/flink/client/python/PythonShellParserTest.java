@@ -18,10 +18,11 @@
 
 package org.apache.flink.client.python;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link PythonShellParser}. */
 public class PythonShellParserTest {
@@ -30,7 +31,7 @@ public class PythonShellParserTest {
         String[] args = {"local"};
         List<String> commandOptions = PythonShellParser.parseLocal(args);
         String[] expectedCommandOptions = {"local"};
-        Assert.assertArrayEquals(expectedCommandOptions, commandOptions.toArray());
+        assertThat(commandOptions.toArray()).isEqualTo(expectedCommandOptions);
     }
 
     @Test
@@ -38,7 +39,7 @@ public class PythonShellParserTest {
         String[] args = {"remote", "localhost", "8081"};
         List<String> commandOptions = PythonShellParser.parseRemote(args);
         String[] expectedCommandOptions = {"remote", "-m", "localhost:8081"};
-        Assert.assertArrayEquals(expectedCommandOptions, commandOptions.toArray());
+        assertThat(commandOptions.toArray()).isEqualTo(expectedCommandOptions);
     }
 
     @Test
@@ -46,7 +47,7 @@ public class PythonShellParserTest {
         String[] args = {"yarn"};
         List<String> commandOptions = PythonShellParser.parseYarn(args);
         String[] expectedCommandOptions = {"yarn", "-m", "yarn-cluster"};
-        Assert.assertArrayEquals(expectedCommandOptions, commandOptions.toArray());
+        assertThat(commandOptions.toArray()).isEqualTo(expectedCommandOptions);
     }
 
     @Test
@@ -56,6 +57,6 @@ public class PythonShellParserTest {
         String[] expectedCommandOptions = {
             "yarn", "-m", "yarn-cluster", "-yjm", "1024m", "-ytm", "4096m"
         };
-        Assert.assertArrayEquals(expectedCommandOptions, commandOptions.toArray());
+        assertThat(commandOptions.toArray()).isEqualTo(expectedCommandOptions);
     }
 }

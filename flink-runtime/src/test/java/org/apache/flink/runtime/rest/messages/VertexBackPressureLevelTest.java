@@ -23,7 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JobVertexBackPressureInfo.VertexBackPressureLevel}. */
 public class VertexBackPressureLevelTest extends TestLogger {
@@ -34,18 +34,20 @@ public class VertexBackPressureLevelTest extends TestLogger {
      */
     @Test
     public void testJsonValue() throws Exception {
-        assertEquals(
-                "\"ok\"",
-                RestMapperUtils.getStrictObjectMapper()
-                        .writeValueAsString(JobVertexBackPressureInfo.VertexBackPressureLevel.OK));
-        assertEquals(
-                "\"low\"",
-                RestMapperUtils.getStrictObjectMapper()
-                        .writeValueAsString(JobVertexBackPressureInfo.VertexBackPressureLevel.LOW));
-        assertEquals(
-                "\"high\"",
-                RestMapperUtils.getStrictObjectMapper()
-                        .writeValueAsString(
-                                JobVertexBackPressureInfo.VertexBackPressureLevel.HIGH));
+        assertThat(
+                        RestMapperUtils.getStrictObjectMapper()
+                                .writeValueAsString(
+                                        JobVertexBackPressureInfo.VertexBackPressureLevel.OK))
+                .isEqualTo("\"ok\"");
+        assertThat(
+                        RestMapperUtils.getStrictObjectMapper()
+                                .writeValueAsString(
+                                        JobVertexBackPressureInfo.VertexBackPressureLevel.LOW))
+                .isEqualTo("\"low\"");
+        assertThat(
+                        RestMapperUtils.getStrictObjectMapper()
+                                .writeValueAsString(
+                                        JobVertexBackPressureInfo.VertexBackPressureLevel.HIGH))
+                .isEqualTo("\"high\"");
     }
 }

@@ -40,7 +40,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unaligned checkpoints cancellation test. */
 @RunWith(Parameterized.class)
@@ -114,9 +114,12 @@ public class UnalignedCheckpointsCancellationTest {
             }
         }
 
-        assertEquals("expectAbortCheckpoint", expectAbortCheckpoint, invokable.checkpointAborted);
-        assertEquals(
-                "expectTriggerCheckpoint", expectTriggerCheckpoint, invokable.checkpointTriggered);
+        assertThat(invokable.checkpointAborted)
+                .as("expectAbortCheckpoint")
+                .isEqualTo(expectAbortCheckpoint);
+        assertThat(invokable.checkpointTriggered)
+                .as("expectTriggerCheckpoint")
+                .isEqualTo(expectTriggerCheckpoint);
     }
 
     private static CheckpointBarrier checkpoint(int checkpointId) {

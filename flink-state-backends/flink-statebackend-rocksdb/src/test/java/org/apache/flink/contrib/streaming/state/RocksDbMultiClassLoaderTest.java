@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 
 import static org.apache.flink.util.FlinkUserCodeClassLoader.NOOP_EXCEPTION_HANDLER;
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This test validates that the RocksDB JNI library loading works properly in the presence of the
@@ -68,8 +68,9 @@ public class RocksDbMultiClassLoaderTest {
 
         final Class<?> clazz1 = Class.forName(className, false, loader1);
         final Class<?> clazz2 = Class.forName(className, false, loader2);
-        assertNotEquals(
-                "Test broken - the two reflectively loaded classes are equal", clazz1, clazz2);
+        assertThat(clazz2)
+                .as("Test broken - the two reflectively loaded classes are equal")
+                .isEqualTo(clazz1);
 
         final Object instance1 =
                 clazz1.getConstructor(String.class).newInstance(tmp.newFolder().toURI().toString());

@@ -47,7 +47,6 @@ import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseSt
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -63,12 +62,8 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the WebFrontend. */
 public class WebFrontendITCase extends TestLogger {
@@ -91,8 +86,8 @@ public class WebFrontendITCase extends TestLogger {
         Configuration config = new Configuration();
         try {
             File logDir = File.createTempFile("TestBaseUtils-logdir", null);
-            assertTrue("Unable to delete temp file", logDir.delete());
-            assertTrue("Unable to create temp directory", logDir.mkdir());
+            assertThat(logDir.delete()).as("Unable to delete temp file").isTrue();
+            assertThat(logDir.mkdir()).as("Unable to create temp directory").isTrue();
             File logFile = new File(logDir, "jobmanager.log");
             File outFile = new File(logDir, "jobmanager.out");
 
@@ -120,7 +115,7 @@ public class WebFrontendITCase extends TestLogger {
     public void getFrontPage() throws Exception {
         String fromHTTP =
                 TestBaseUtils.getFromHTTP("http://localhost:" + getRestPort() + "/index.html");
-        assertThat(fromHTTP, containsString("Apache Flink Web Dashboard"));
+        assertThat(fromHTTP).contains("Apache Flink Web Dashboard");
     }
 
     private int getRestPort() {
@@ -143,9 +138,9 @@ public class WebFrontendITCase extends TestLogger {
         }
 
         // we don't set the content-encoding header
-        Assert.assertNull(taskManagerConnection.getContentEncoding());
-        Assert.assertEquals(
-                "application/json; charset=UTF-8", taskManagerConnection.getContentType());
+        assertThat(taskManagerConnection.getContentEncoding()).isNull();
+        assertThat(taskManagerConnection.getContentType())
+                .isEqualTo("application/json; charset=UTF-8");
 
         // check headers in case of an error
         URL notFoundJobUrl = new URL("http://localhost:" + getRestPort() + "/jobs/dontexist");
@@ -155,9 +150,9 @@ public class WebFrontendITCase extends TestLogger {
         notFoundJobConnection.connect();
         if (notFoundJobConnection.getResponseCode() >= 400) {
             // we don't set the content-encoding header
-            Assert.assertNull(notFoundJobConnection.getContentEncoding());
-            Assert.assertEquals(
-                    "application/json; charset=UTF-8", notFoundJobConnection.getContentType());
+            assertThat(notFoundJobConnection.getContentEncoding()).isNull();
+            assertThat(notFoundJobConnection.getContentType())
+                    .isEqualTo("application/json; charset=UTF-8");
         } else {
             fail("Request for non-existing job did not return an error.");
         }
@@ -172,8 +167,8 @@ public class WebFrontendITCase extends TestLogger {
         JsonNode response = mapper.readTree(json);
         ArrayNode taskManagers = (ArrayNode) response.get("taskmanagers");
 
-        assertNotNull(taskManagers);
-        assertEquals(NUM_TASK_MANAGERS, taskManagers.size());
+        assertThat(taskManagers).isNotNull();
+        assertThat(taskManagers.size()).isEqualTo(NUM_TASK_MANAGERS);
     }
 
     @Test
@@ -185,13 +180,13 @@ public class WebFrontendITCase extends TestLogger {
         JsonNode parsed = mapper.readTree(json);
         ArrayNode taskManagers = (ArrayNode) parsed.get("taskmanagers");
 
-        assertNotNull(taskManagers);
-        assertEquals(NUM_TASK_MANAGERS, taskManagers.size());
+        assertThat(taskManagers).isNotNull();
+        assertThat(taskManagers.size()).isEqualTo(NUM_TASK_MANAGERS);
 
         JsonNode taskManager = taskManagers.get(0);
-        assertNotNull(taskManager);
-        assertEquals(NUM_SLOTS, taskManager.get("slotsNumber").asInt());
-        assertTrue(taskManager.get("freeSlots").asInt() <= NUM_SLOTS);
+        assertThat(taskManager).isNotNull();
+        assertThat(taskManager.get("slotsNumber").asInt()).isEqualTo(NUM_SLOTS);
+        assertThat(taskManager.get("freeSlots").asInt() <= NUM_SLOTS).isTrue();
     }
 
     @Test
@@ -202,13 +197,13 @@ public class WebFrontendITCase extends TestLogger {
         FileUtils.writeStringToFile(logFiles.logFile, "job manager log");
         String logs =
                 TestBaseUtils.getFromHTTP("http://localhost:" + getRestPort() + "/jobmanager/log");
-        assertThat(logs, containsString("job manager log"));
+        assertThat(logs).contains("job manager log");
 
         FileUtils.writeStringToFile(logFiles.stdOutFile, "job manager out");
         logs =
                 TestBaseUtils.getFromHTTP(
                         "http://localhost:" + getRestPort() + "/jobmanager/stdout");
-        assertThat(logs, containsString("job manager out"));
+        assertThat(logs).contains("job manager out");
     }
 
     @Test
@@ -224,7 +219,7 @@ public class WebFrontendITCase extends TestLogger {
         String logs =
                 TestBaseUtils.getFromHTTP(
                         "http://localhost:" + getRestPort() + "/jobmanager/logs/" + customFileName);
-        assertThat(logs, containsString(expectedLogContent));
+        assertThat(logs).contains(expectedLogContent);
     }
 
     @Test
@@ -246,13 +241,13 @@ public class WebFrontendITCase extends TestLogger {
         String logs =
                 TestBaseUtils.getFromHTTP(
                         "http://localhost:" + getRestPort() + "/taskmanagers/" + id + "/log");
-        assertThat(logs, containsString("job manager log"));
+        assertThat(logs).contains("job manager log");
 
         FileUtils.writeStringToFile(logFiles.stdOutFile, "job manager out");
         logs =
                 TestBaseUtils.getFromHTTP(
                         "http://localhost:" + getRestPort() + "/taskmanagers/" + id + "/stdout");
-        assertThat(logs, containsString("job manager out"));
+        assertThat(logs).contains("job manager out");
     }
 
     @Test
@@ -266,13 +261,13 @@ public class WebFrontendITCase extends TestLogger {
         MemorySize actual =
                 MemorySize.parse(conf.get(TaskManagerOptions.MANAGED_MEMORY_SIZE.key()));
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     public void testCancel() throws Exception {
         // this only works if there is no active job at this point
-        assertTrue(getRunningJobs(CLUSTER.getClusterClient()).isEmpty());
+        assertThat(getRunningJobs(CLUSTER.getClusterClient()).isEmpty()).isTrue();
 
         // Create a task
         final JobVertex sender = new JobVertex("Sender");
@@ -306,9 +301,9 @@ public class WebFrontendITCase extends TestLogger {
             HttpTestClient.SimpleHttpResponse response =
                     client.getNextResponse(deadline.timeLeft());
 
-            assertEquals(HttpResponseStatus.ACCEPTED, response.getStatus());
-            assertEquals("application/json; charset=UTF-8", response.getType());
-            assertEquals("{}", response.getContent());
+            assertThat(response.getStatus()).isEqualTo(HttpResponseStatus.ACCEPTED);
+            assertThat(response.getType()).isEqualTo("application/json; charset=UTF-8");
+            assertThat(response.getContent()).isEqualTo("{}");
         }
 
         // wait for cancellation to finish
@@ -322,15 +317,15 @@ public class WebFrontendITCase extends TestLogger {
             client.sendGetRequest("/jobs/" + jid + "/config", timeout);
             HttpTestClient.SimpleHttpResponse response = client.getNextResponse(timeout);
 
-            assertEquals(HttpResponseStatus.OK, response.getStatus());
-            assertEquals("application/json; charset=UTF-8", response.getType());
-            assertEquals(
-                    "{\"jid\":\""
-                            + jid
-                            + "\",\"name\":\"Stoppable streaming test job\","
-                            + "\"execution-config\":{\"execution-mode\":\"PIPELINED\",\"restart-strategy\":\"Cluster level default restart strategy\","
-                            + "\"job-parallelism\":1,\"object-reuse-mode\":false,\"user-config\":{}}}",
-                    response.getContent());
+            assertThat(response.getStatus()).isEqualTo(HttpResponseStatus.OK);
+            assertThat(response.getType()).isEqualTo("application/json; charset=UTF-8");
+            assertThat(response.getContent())
+                    .isEqualTo(
+                            "{\"jid\":\""
+                                    + jid
+                                    + "\",\"name\":\"Stoppable streaming test job\","
+                                    + "\"execution-config\":{\"execution-mode\":\"PIPELINED\",\"restart-strategy\":\"Cluster level default restart strategy\","
+                                    + "\"job-parallelism\":1,\"object-reuse-mode\":false,\"user-config\":{}}}");
         }
 
         BlockingInvokable.reset();
@@ -340,7 +335,7 @@ public class WebFrontendITCase extends TestLogger {
     @Test
     public void testJobOverviewHandler() throws Exception {
         // this only works if there is no active job at this point
-        assertTrue(getRunningJobs(CLUSTER.getClusterClient()).isEmpty());
+        assertThat(getRunningJobs(CLUSTER.getClusterClient()).isEmpty()).isTrue();
 
         // Create a task
         final JobVertex sender = new JobVertex("Sender");
@@ -368,8 +363,10 @@ public class WebFrontendITCase extends TestLogger {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode parsed = mapper.readTree(json);
         ArrayNode jsonJobs = (ArrayNode) parsed.get("jobs");
-        assertEquals(1, jsonJobs.size());
-        assertThat("Duration must be positive", jsonJobs.get(0).get("duration").asInt() > 0);
+        assertThat(jsonJobs.size()).isEqualTo(1);
+        assertThat(jsonJobs.get(0).get("duration").asInt())
+                .as("Duration must be positive")
+                .isGreaterThan(0);
 
         clusterClient.cancel(jobGraph.getJobID()).get();
 
@@ -384,7 +381,7 @@ public class WebFrontendITCase extends TestLogger {
     @Test
     public void testCancelYarn() throws Exception {
         // this only works if there is no active job at this point
-        assertTrue(getRunningJobs(CLUSTER.getClusterClient()).isEmpty());
+        assertThat(getRunningJobs(CLUSTER.getClusterClient()).isEmpty()).isTrue();
 
         // Create a task
         final JobVertex sender = new JobVertex("Sender");
@@ -415,9 +412,9 @@ public class WebFrontendITCase extends TestLogger {
             HttpTestClient.SimpleHttpResponse response =
                     client.getNextResponse(deadline.timeLeft());
 
-            assertEquals(HttpResponseStatus.ACCEPTED, response.getStatus());
-            assertEquals("application/json; charset=UTF-8", response.getType());
-            assertEquals("{}", response.getContent());
+            assertThat(response.getStatus()).isEqualTo(HttpResponseStatus.ACCEPTED);
+            assertThat(response.getType()).isEqualTo("application/json; charset=UTF-8");
+            assertThat(response.getContent()).isEqualTo("{}");
         }
 
         // wait for cancellation to finish

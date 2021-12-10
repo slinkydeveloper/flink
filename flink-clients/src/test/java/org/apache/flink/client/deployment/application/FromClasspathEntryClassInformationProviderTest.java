@@ -23,9 +23,7 @@ import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.TestLogger;
 
 import org.apache.commons.io.FilenameUtils;
-import org.hamcrest.CoreMatchers;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
-import org.hamcrest.core.IsCollectionContaining;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -37,8 +35,8 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * {@code FromClasspathEntryClassInformationProviderTest} tests {@link
@@ -74,11 +72,10 @@ public class FromClasspathEntryClassInformationProviderTest extends TestLogger {
                         singleEntryClassClasspathProvider.getJobClassName(),
                         singleEntryClassClasspathProvider.getURLUserClasspath());
 
-        assertThat(testInstance.getJobClassName().isPresent(), is(true));
-        assertThat(
-                testInstance.getJobClassName().get(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
-        assertThat(testInstance.getJarFile().isPresent(), is(false));
+        assertThat(testInstance.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getJobClassName().get())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
+        assertThat(testInstance.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test(expected = FlinkException.class)
@@ -109,11 +106,10 @@ public class FromClasspathEntryClassInformationProviderTest extends TestLogger {
                 FromClasspathEntryClassInformationProvider.createFromClasspath(
                         singleEntryClassClasspathProvider.getURLUserClasspath());
 
-        assertThat(testInstance.getJobClassName().isPresent(), is(true));
-        assertThat(
-                testInstance.getJobClassName().get(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
-        assertThat(testInstance.getJarFile().isPresent(), is(false));
+        assertThat(testInstance.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getJobClassName().get())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
+        assertThat(testInstance.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test(expected = FlinkException.class)
@@ -140,11 +136,10 @@ public class FromClasspathEntryClassInformationProviderTest extends TestLogger {
         singleEntryClassClasspathProvider.setSystemClasspath();
         FromClasspathEntryClassInformationProvider testInstance =
                 FromClasspathEntryClassInformationProvider.createFromSystemClasspath();
-        assertThat(testInstance.getJobClassName().isPresent(), is(true));
-        assertThat(
-                testInstance.getJobClassName().get(),
-                is(singleEntryClassClasspathProvider.getJobClassName()));
-        assertThat(testInstance.getJarFile().isPresent(), is(false));
+        assertThat(testInstance.getJobClassName().isPresent()).isEqualTo(true);
+        assertThat(testInstance.getJobClassName().get())
+                .isEqualTo(singleEntryClassClasspathProvider.getJobClassName());
+        assertThat(testInstance.getJarFile().isPresent()).isEqualTo(false);
     }
 
     @Test(expected = FlinkException.class)
@@ -165,10 +160,10 @@ public class FromClasspathEntryClassInformationProviderTest extends TestLogger {
         final Iterable<File> systemClasspath =
                 FromClasspathEntryClassInformationProvider.extractSystemClasspath();
         assertThat(
-                StreamSupport.stream(systemClasspath.spliterator(), false)
-                        .map(File::getName)
-                        .collect(Collectors.toList()),
-                IsCollectionContaining.hasItem(CoreMatchers.containsString("junit")));
+                        StreamSupport.stream(systemClasspath.spliterator(), false)
+                                .map(File::getName)
+                                .collect(Collectors.toList()))
+                .contains("junit");
     }
 
     @Test
@@ -192,8 +187,10 @@ public class FromClasspathEntryClassInformationProviderTest extends TestLogger {
                         // we're excluding any non-jar files
                         .filter(name -> name.endsWith("jar"))
                         .collect(Collectors.toList());
-        assertThat(
-                systemClasspath,
-                IsIterableContainingInAnyOrder.containsInAnyOrder(expectedContent.toArray()));
+        assertThat(systemClasspath)
+                .satisfies(
+                        matching(
+                                IsIterableContainingInAnyOrder.containsInAnyOrder(
+                                        expectedContent.toArray())));
     }
 }

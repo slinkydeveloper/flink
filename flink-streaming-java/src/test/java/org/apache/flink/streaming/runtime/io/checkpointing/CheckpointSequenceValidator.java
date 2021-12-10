@@ -28,9 +28,8 @@ import org.apache.flink.runtime.operators.testutils.DummyEnvironment;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** {@link AbstractInvokable} that validates expected order of completed and aborted checkpoints. */
 class CheckpointSequenceValidator extends AbstractInvokable {
@@ -60,16 +59,19 @@ class CheckpointSequenceValidator extends AbstractInvokable {
             CheckpointMetaData checkpointMetaData,
             CheckpointOptions checkpointOptions,
             CheckpointMetricsBuilder checkpointMetrics) {
-        assertTrue(
-                "Unexpected triggerCheckpointOnBarrier("
-                        + checkpointMetaData.getCheckpointId()
-                        + ")",
-                i < checkpointIDs.length);
+        assertThat(i < checkpointIDs.length)
+                .as(
+                        "Unexpected triggerCheckpointOnBarrier("
+                                + checkpointMetaData.getCheckpointId()
+                                + ")")
+                .isTrue();
 
         final long expectedId = checkpointIDs[i++];
         if (expectedId >= 0) {
-            assertEquals("wrong checkpoint id", expectedId, checkpointMetaData.getCheckpointId());
-            assertTrue(checkpointMetaData.getTimestamp() > 0);
+            assertThat(checkpointMetaData.getCheckpointId())
+                    .as("wrong checkpoint id")
+                    .isEqualTo(expectedId);
+            assertThat(checkpointMetaData.getTimestamp() > 0).isTrue();
         } else {
             fail(
                     String.format(
@@ -80,13 +82,15 @@ class CheckpointSequenceValidator extends AbstractInvokable {
 
     @Override
     public void abortCheckpointOnBarrier(long checkpointId, CheckpointException cause) {
-        assertTrue(
-                "Unexpected abortCheckpointOnBarrier(" + checkpointId + ")",
-                i < checkpointIDs.length);
+        assertThat(i < checkpointIDs.length)
+                .as("Unexpected abortCheckpointOnBarrier(" + checkpointId + ")")
+                .isTrue();
 
         final long expectedId = checkpointIDs[i++];
         if (expectedId < 0) {
-            assertEquals("wrong checkpoint id for checkpoint abort", -expectedId, checkpointId);
+            assertThat(checkpointId)
+                    .as("wrong checkpoint id for checkpoint abort")
+                    .isEqualTo(-expectedId);
         } else {
             fail(
                     String.format(

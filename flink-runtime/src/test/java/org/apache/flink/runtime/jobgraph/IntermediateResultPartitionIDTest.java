@@ -24,9 +24,8 @@ import org.apache.flink.shaded.netty4.io.netty.buffer.ByteBuf;
 
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link IntermediateResultPartitionID}. */
 public class IntermediateResultPartitionIDTest {
@@ -40,11 +39,9 @@ public class IntermediateResultPartitionIDTest {
         final ByteBuf byteBuf = ALLOCATOR.directBuffer(byteBufLen, byteBufLen);
         intermediateResultPartitionID.writeTo(byteBuf);
 
-        assertThat(
-                byteBuf.writerIndex(),
-                is(equalTo(IntermediateResultPartitionID.getByteBufLength())));
-        assertThat(
-                IntermediateResultPartitionID.fromByteBuf(byteBuf),
-                is(equalTo(intermediateResultPartitionID)));
+        assertThat(byteBuf.writerIndex())
+                .isEqualTo(equalTo(IntermediateResultPartitionID.getByteBufLength()));
+        assertThat(IntermediateResultPartitionID.fromByteBuf(byteBuf))
+                .isEqualTo(equalTo(intermediateResultPartitionID));
     }
 }

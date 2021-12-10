@@ -27,7 +27,7 @@ import org.junit.rules.TemporaryFolder;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FileBasedOneShotLatch}. */
 public class FileBasedOneShotLatchTest {
@@ -62,7 +62,7 @@ public class FileBasedOneShotLatchTest {
         latchFile.createNewFile();
         thread.join();
 
-        assertTrue(awaitCompleted.get());
+        assertThat(awaitCompleted.get()).isTrue();
     }
 
     @Test

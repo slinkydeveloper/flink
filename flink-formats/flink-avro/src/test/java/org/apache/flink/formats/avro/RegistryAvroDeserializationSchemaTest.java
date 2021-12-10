@@ -35,8 +35,7 @@ import java.io.OutputStream;
 import java.util.Random;
 
 import static org.apache.flink.formats.avro.utils.AvroTestUtils.writeRecord;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RegistryAvroDeserializationSchema}. */
 public class RegistryAvroDeserializationSchemaTest {
@@ -70,9 +69,9 @@ public class RegistryAvroDeserializationSchemaTest {
 
         GenericRecord genericRecord =
                 deserializer.deserialize(writeRecord(address, Address.getClassSchema()));
-        assertEquals(address.getNum(), genericRecord.get("num"));
-        assertEquals(address.getStreet(), genericRecord.get("street").toString());
-        assertNull(genericRecord.get("country"));
+        assertThat(genericRecord.get("num")).isEqualTo(address.getNum());
+        assertThat(genericRecord.get("street").toString()).isEqualTo(address.getStreet());
+        assertThat(genericRecord.get("country")).isNull();
     }
 
     @Test
@@ -111,7 +110,7 @@ public class RegistryAvroDeserializationSchemaTest {
         SimpleRecord simpleRecord =
                 deserializer.deserialize(writeRecord(smallUser, smallerUserSchema));
 
-        assertEquals("someName", simpleRecord.getName().toString());
-        assertNull(simpleRecord.getOptionalField());
+        assertThat(simpleRecord.getName().toString()).isEqualTo("someName");
+        assertThat(simpleRecord.getOptionalField()).isNull();
     }
 }

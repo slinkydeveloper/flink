@@ -24,7 +24,7 @@ import org.apache.flink.streaming.runtime.operators.sink.TestSink;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit test for {@link DataStreamSink}. */
 public class DataStreamSinkTest {
@@ -34,7 +34,7 @@ public class DataStreamSinkTest {
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         final Transformation<Integer> transformation =
                 env.fromElements(1, 2).sinkTo(TestSink.newBuilder().build()).getTransformation();
-        assertTrue(transformation instanceof SinkTransformation);
+        assertThat(transformation).isInstanceOf(SinkTransformation.class);
     }
 
     @Test(expected = UnsupportedOperationException.class)

@@ -51,17 +51,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests of {@link FineGrainedSlotManager}. */
@@ -113,34 +108,32 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     new SlotReport(),
                                                                     DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)));
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture))
+                                    .isEqualTo(true);
+                            assertThat(getSlotManager().getNumberRegisteredSlots())
+                                    .isEqualTo(DEFAULT_NUM_SLOTS_PER_WORKER);
+                            assertThat(getTaskManagerTracker().getRegisteredTaskManagers().size())
+                                    .isEqualTo(1);
                             assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture),
-                                    is(true));
+                                            getTaskManagerTracker()
+                                                    .getRegisteredTaskManager(
+                                                            taskManagerConnection.getInstanceID())
+                                                    .isPresent())
+                                    .isTrue();
                             assertThat(
-                                    getSlotManager().getNumberRegisteredSlots(),
-                                    equalTo(DEFAULT_NUM_SLOTS_PER_WORKER));
+                                            getTaskManagerTracker()
+                                                    .getRegisteredTaskManager(
+                                                            taskManagerConnection.getInstanceID())
+                                                    .get()
+                                                    .getAvailableResource())
+                                    .isEqualTo(DEFAULT_TOTAL_RESOURCE_PROFILE);
                             assertThat(
-                                    getTaskManagerTracker().getRegisteredTaskManagers().size(),
-                                    equalTo(1));
-                            assertTrue(
-                                    getTaskManagerTracker()
-                                            .getRegisteredTaskManager(
-                                                    taskManagerConnection.getInstanceID())
-                                            .isPresent());
-                            assertThat(
-                                    getTaskManagerTracker()
-                                            .getRegisteredTaskManager(
-                                                    taskManagerConnection.getInstanceID())
-                                            .get()
-                                            .getAvailableResource(),
-                                    equalTo(DEFAULT_TOTAL_RESOURCE_PROFILE));
-                            assertThat(
-                                    getTaskManagerTracker()
-                                            .getRegisteredTaskManager(
-                                                    taskManagerConnection.getInstanceID())
-                                            .get()
-                                            .getTotalResource(),
-                                    equalTo(DEFAULT_TOTAL_RESOURCE_PROFILE));
+                                            getTaskManagerTracker()
+                                                    .getRegisteredTaskManager(
+                                                            taskManagerConnection.getInstanceID())
+                                                    .get()
+                                                    .getTotalResource())
+                                    .isEqualTo(DEFAULT_TOTAL_RESOURCE_PROFILE);
                         });
             }
         };
@@ -176,17 +169,14 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     slotReport,
                                                                     DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)));
-                            assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture),
-                                    is(true));
-                            assertThat(
-                                    getTaskManagerTracker().getRegisteredTaskManagers().size(),
-                                    is(1));
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture))
+                                    .isEqualTo(true);
+                            assertThat(getTaskManagerTracker().getRegisteredTaskManagers().size())
+                                    .isEqualTo(1);
                             final Optional<TaskManagerSlotInformation> slot =
                                     getTaskManagerTracker().getAllocatedOrPendingSlot(allocationId);
-                            assertTrue(slot.isPresent());
-                            assertTrue(slot.get().getState() == SlotState.ALLOCATED);
-
+                            assertThat(slot.isPresent()).isTrue();
+                            assertThat(slot.get().getState() == SlotState.ALLOCATED).isTrue();
                             runInMainThread(
                                     () ->
                                             unRegisterTaskManagerFuture.complete(
@@ -195,17 +185,15 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     taskManagerConnection
                                                                             .getInstanceID(),
                                                                     TEST_EXCEPTION)));
-
+                            assertThat(assertFutureCompleteAndReturn(unRegisterTaskManagerFuture))
+                                    .isEqualTo(true);
+                            assertThat(getTaskManagerTracker().getRegisteredTaskManagers())
+                                    .isEqualTo(empty());
                             assertThat(
-                                    assertFutureCompleteAndReturn(unRegisterTaskManagerFuture),
-                                    is(true));
-                            assertThat(
-                                    getTaskManagerTracker().getRegisteredTaskManagers(),
-                                    is(empty()));
-                            assertFalse(
-                                    getTaskManagerTracker()
-                                            .getAllocatedOrPendingSlot(allocationId)
-                                            .isPresent());
+                                            getTaskManagerTracker()
+                                                    .getAllocatedOrPendingSlot(allocationId)
+                                                    .isPresent())
+                                    .isFalse();
                         });
             }
         };
@@ -248,13 +236,10 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                 DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                 DEFAULT_SLOT_RESOURCE_PROFILE));
                                     });
-
-                            assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture1),
-                                    is(true));
-                            assertThat(
-                                    getTaskManagerTracker().getPendingTaskManagers().size(), is(1));
-
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture1))
+                                    .isEqualTo(true);
+                            assertThat(getTaskManagerTracker().getPendingTaskManagers().size())
+                                    .isEqualTo(1);
                             // task manager with mismatched resource cannot deduct
                             // pending task manager
                             runInMainThread(
@@ -266,13 +251,10 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     new SlotReport(),
                                                                     LARGE_TOTAL_RESOURCE_PROFILE,
                                                                     LARGE_SLOT_RESOURCE_PROFILE)));
-
-                            assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture2),
-                                    is(true));
-                            assertThat(
-                                    getTaskManagerTracker().getPendingTaskManagers().size(), is(1));
-
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture2))
+                                    .isEqualTo(true);
+                            assertThat(getTaskManagerTracker().getPendingTaskManagers().size())
+                                    .isEqualTo(1);
                             runInMainThread(
                                     () ->
                                             registerTaskManagerFuture3.complete(
@@ -282,11 +264,10 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     new SlotReport(),
                                                                     DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)));
-                            assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture3),
-                                    is(true));
-                            assertThat(
-                                    getTaskManagerTracker().getPendingTaskManagers().size(), is(0));
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture3))
+                                    .isEqualTo(true);
+                            assertThat(getTaskManagerTracker().getPendingTaskManagers().size())
+                                    .isEqualTo(0);
                         });
             }
         };
@@ -305,8 +286,7 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                 runTest(
                         () -> {
                             // check that we don't have any slots registered
-                            assertThat(getSlotManager().getNumberRegisteredSlots(), is(0));
-
+                            assertThat(getSlotManager().getNumberRegisteredSlots()).isEqualTo(0);
                             // this should not update anything since the instance id is not known to
                             // the slot manager
                             final CompletableFuture<Boolean> reportSlotFuture =
@@ -318,8 +298,8 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                             .reportSlotStatus(
                                                                     unknownInstanceID,
                                                                     unknownSlotReport)));
-                            assertFalse(assertFutureCompleteAndReturn(reportSlotFuture));
-                            assertThat(getSlotManager().getNumberRegisteredSlots(), is(0));
+                            assertThat(assertFutureCompleteAndReturn(reportSlotFuture)).isFalse();
+                            assertThat(getSlotManager().getNumberRegisteredSlots()).isEqualTo(0);
                         });
             }
         };
@@ -384,8 +364,8 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                             String,
                                             ResourceManagerId>
                                     requestSlot = assertFutureCompleteAndReturn(requestSlotFuture);
-                            assertEquals(jobId, requestSlot.f1);
-                            assertEquals(DEFAULT_SLOT_RESOURCE_PROFILE, requestSlot.f3);
+                            assertThat(requestSlot.f1).isEqualTo(jobId);
+                            assertThat(requestSlot.f3).isEqualTo(DEFAULT_SLOT_RESOURCE_PROFILE);
                         });
             }
         };
@@ -492,8 +472,8 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                             String,
                                             ResourceManagerId>
                                     requestSlot = assertFutureCompleteAndReturn(requestSlotFuture);
-                            assertEquals(jobId, requestSlot.f1);
-                            assertEquals(DEFAULT_SLOT_RESOURCE_PROFILE, requestSlot.f3);
+                            assertThat(requestSlot.f1).isEqualTo(jobId);
+                            assertThat(requestSlot.f3).isEqualTo(DEFAULT_SLOT_RESOURCE_PROFILE);
                         });
             }
         };
@@ -536,7 +516,6 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                 runInMainThread(
                                         () -> getSlotManager().setFailUnfulfillableRequest(false));
                             }
-
                             final ResourceRequirements resourceRequirements =
                                     createResourceRequirements(jobId, 1);
                             runInMainThread(
@@ -544,22 +523,21 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                             getSlotManager()
                                                     .processResourceRequirements(
                                                             resourceRequirements));
-
                             if (withNotificationGracePeriod) {
                                 assertFutureNotComplete(notifyNotEnoughResourceFuture);
-                                assertThat(notEnoughResourceNotifications, empty());
-
+                                assertThat(notEnoughResourceNotifications)
+                                        .satisfies(matching(empty()));
                                 // re-enable notifications which should also trigger another
                                 // resource check
                                 runInMainThread(
                                         () -> getSlotManager().setFailUnfulfillableRequest(true));
                             }
-
                             assertFutureCompleteAndReturn(notifyNotEnoughResourceFuture);
-                            assertThat(notEnoughResourceNotifications, hasSize(1));
+                            assertThat(notEnoughResourceNotifications)
+                                    .satisfies(matching(hasSize(1)));
                             final Tuple2<JobID, Collection<ResourceRequirement>> notification =
                                     notEnoughResourceNotifications.get(0);
-                            assertThat(notification.f0, is(jobId));
+                            assertThat(notification.f0).isEqualTo(jobId);
                         });
             }
         };
@@ -677,13 +655,11 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)),
                                                                     DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)));
-                            assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture),
-                                    is(true));
-                            assertEquals(
-                                    getSlotManager().getTaskManagerIdleSince(instanceId),
-                                    Long.MAX_VALUE);
-
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture))
+                                    .isEqualTo(true);
+                            assertThat(Long.MAX_VALUE)
+                                    .isEqualTo(
+                                            getSlotManager().getTaskManagerIdleSince(instanceId));
                             final CompletableFuture<Long> idleSinceFuture =
                                     new CompletableFuture<>();
                             runInMainThread(
@@ -699,20 +675,15 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                 getSlotManager()
                                                         .getTaskManagerIdleSince(instanceId));
                                     });
-
-                            assertThat(
-                                    assertFutureCompleteAndReturn(idleSinceFuture),
-                                    not(equalTo(Long.MAX_VALUE)));
-                            assertThat(
-                                    assertFutureCompleteAndReturn(releaseResourceFuture),
-                                    is(equalTo(instanceId)));
+                            assertThat(assertFutureCompleteAndReturn(idleSinceFuture))
+                                    .isNotEqualTo(Long.MAX_VALUE);
+                            assertThat(assertFutureCompleteAndReturn(releaseResourceFuture))
+                                    .isEqualTo(equalTo(instanceId));
                             // A task manager timeout does not remove the slots from the
                             // SlotManager. The receiver of the callback can then decide what to do
                             // with the TaskManager.
-                            assertEquals(
-                                    DEFAULT_NUM_SLOTS_PER_WORKER,
-                                    getSlotManager().getNumberRegisteredSlots());
-
+                            assertThat(getSlotManager().getNumberRegisteredSlots())
+                                    .isEqualTo(DEFAULT_NUM_SLOTS_PER_WORKER);
                             final CompletableFuture<Boolean> unregisterTaskManagerFuture =
                                     new CompletableFuture<>();
                             runInMainThread(
@@ -723,10 +694,9 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     taskExecutionConnection
                                                                             .getInstanceID(),
                                                                     TEST_EXCEPTION)));
-                            assertThat(
-                                    assertFutureCompleteAndReturn(unregisterTaskManagerFuture),
-                                    is(true));
-                            assertEquals(0, getSlotManager().getNumberRegisteredSlots());
+                            assertThat(assertFutureCompleteAndReturn(unregisterTaskManagerFuture))
+                                    .isEqualTo(true);
+                            assertThat(getSlotManager().getNumberRegisteredSlots()).isEqualTo(0);
                         });
             }
         };
@@ -788,38 +758,39 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                 resourceProfile2.multiply(2),
                                                                 resourceProfile2));
                                     });
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture1))
+                                    .isEqualTo(true);
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture2))
+                                    .isEqualTo(true);
+                            assertThat(getSlotManager().getFreeResource())
+                                    .isEqualTo(resourceProfile1.merge(resourceProfile2));
                             assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture1),
-                                    is(true));
+                                            getSlotManager()
+                                                    .getFreeResourceOf(
+                                                            taskExecutorConnection1
+                                                                    .getInstanceID()))
+                                    .isEqualTo(resourceProfile1);
                             assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture2),
-                                    is(true));
+                                            getSlotManager()
+                                                    .getFreeResourceOf(
+                                                            taskExecutorConnection2
+                                                                    .getInstanceID()))
+                                    .isEqualTo(resourceProfile2);
+                            assertThat(getSlotManager().getRegisteredResource())
+                                    .isEqualTo(
+                                            resourceProfile1.merge(resourceProfile2).multiply(2));
                             assertThat(
-                                    getSlotManager().getFreeResource(),
-                                    equalTo(resourceProfile1.merge(resourceProfile2)));
+                                            getSlotManager()
+                                                    .getRegisteredResourceOf(
+                                                            taskExecutorConnection1
+                                                                    .getInstanceID()))
+                                    .isEqualTo(resourceProfile1.multiply(2));
                             assertThat(
-                                    getSlotManager()
-                                            .getFreeResourceOf(
-                                                    taskExecutorConnection1.getInstanceID()),
-                                    equalTo(resourceProfile1));
-                            assertThat(
-                                    getSlotManager()
-                                            .getFreeResourceOf(
-                                                    taskExecutorConnection2.getInstanceID()),
-                                    equalTo(resourceProfile2));
-                            assertThat(
-                                    getSlotManager().getRegisteredResource(),
-                                    equalTo(resourceProfile1.merge(resourceProfile2).multiply(2)));
-                            assertThat(
-                                    getSlotManager()
-                                            .getRegisteredResourceOf(
-                                                    taskExecutorConnection1.getInstanceID()),
-                                    equalTo(resourceProfile1.multiply(2)));
-                            assertThat(
-                                    getSlotManager()
-                                            .getRegisteredResourceOf(
-                                                    taskExecutorConnection2.getInstanceID()),
-                                    equalTo(resourceProfile2.multiply(2)));
+                                            getSlotManager()
+                                                    .getRegisteredResourceOf(
+                                                            taskExecutorConnection2
+                                                                    .getInstanceID()))
+                                    .isEqualTo(resourceProfile2.multiply(2));
                         });
             }
         };
@@ -915,19 +886,17 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     new SlotReport(),
                                                                     DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)));
-                            assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture1),
-                                    is(true));
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture1))
+                                    .isEqualTo(true);
                             assertFutureNotComplete(releaseResourceFuture);
+                            assertThat(getTaskManagerTracker().getRegisteredTaskManagers().size())
+                                    .isEqualTo(1);
                             assertThat(
-                                    getTaskManagerTracker().getRegisteredTaskManagers().size(),
-                                    equalTo(1));
-                            assertTrue(
-                                    getTaskManagerTracker()
-                                            .getRegisteredTaskManager(
-                                                    taskManagerConnection1.getInstanceID())
-                                            .isPresent());
-
+                                            getTaskManagerTracker()
+                                                    .getRegisteredTaskManager(
+                                                            taskManagerConnection1.getInstanceID())
+                                                    .isPresent())
+                                    .isTrue();
                             runInMainThread(
                                     () ->
                                             registerTaskManagerFuture2.complete(
@@ -937,20 +906,18 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                                                     new SlotReport(),
                                                                     DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                     DEFAULT_SLOT_RESOURCE_PROFILE)));
+                            assertThat(assertFutureCompleteAndReturn(registerTaskManagerFuture2))
+                                    .isEqualTo(false);
+                            assertThat(releaseResourceFuture.get())
+                                    .isEqualTo(taskManagerConnection2.getInstanceID());
+                            assertThat(getTaskManagerTracker().getRegisteredTaskManagers().size())
+                                    .isEqualTo(1);
                             assertThat(
-                                    assertFutureCompleteAndReturn(registerTaskManagerFuture2),
-                                    is(false));
-                            assertThat(
-                                    releaseResourceFuture.get(),
-                                    is(taskManagerConnection2.getInstanceID()));
-                            assertThat(
-                                    getTaskManagerTracker().getRegisteredTaskManagers().size(),
-                                    equalTo(1));
-                            assertFalse(
-                                    getTaskManagerTracker()
-                                            .getRegisteredTaskManager(
-                                                    taskManagerConnection2.getInstanceID())
-                                            .isPresent());
+                                            getTaskManagerTracker()
+                                                    .getRegisteredTaskManager(
+                                                            taskManagerConnection2.getInstanceID())
+                                                    .isPresent())
+                                    .isFalse();
                         });
             }
         };
@@ -982,7 +949,7 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
         context.runTest(
                 () -> {
                     // sanity check to ensure metrics were actually registered
-                    assertThat(registeredMetrics.get(), greaterThan(0));
+                    assertThat(registeredMetrics.get()).isGreaterThan(0);
                     context.runInMainThreadAndWait(
                             () -> {
                                 try {
@@ -991,7 +958,7 @@ public class FineGrainedSlotManagerTest extends FineGrainedSlotManagerTestBase {
                                     fail("Error when closing slot manager.");
                                 }
                             });
-                    assertThat(registeredMetrics.get(), is(0));
+                    assertThat(registeredMetrics.get()).isEqualTo(0);
                 });
     }
 }

@@ -23,7 +23,8 @@ import org.apache.flink.metrics.util.TestMeter;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -37,11 +38,11 @@ public class FlinkMeterWrapperTest {
         Meter meter = new TestMeter();
 
         FlinkMeterWrapper wrapper = new FlinkMeterWrapper(meter);
-        assertEquals(0, wrapper.getMeanRate(), DELTA);
-        assertEquals(5, wrapper.getOneMinuteRate(), DELTA);
-        assertEquals(0, wrapper.getFiveMinuteRate(), DELTA);
-        assertEquals(0, wrapper.getFifteenMinuteRate(), DELTA);
-        assertEquals(100L, wrapper.getCount());
+        assertThat(wrapper.getMeanRate()).isCloseTo(0, within(DELTA));
+        assertThat(wrapper.getOneMinuteRate()).isCloseTo(5, within(DELTA));
+        assertThat(wrapper.getFiveMinuteRate()).isCloseTo(0, within(DELTA));
+        assertThat(wrapper.getFifteenMinuteRate()).isCloseTo(0, within(DELTA));
+        assertThat(wrapper.getCount()).isEqualTo(100L);
     }
 
     @Test

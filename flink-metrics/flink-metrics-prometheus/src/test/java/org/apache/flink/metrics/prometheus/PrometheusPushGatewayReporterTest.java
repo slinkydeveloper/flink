@@ -20,10 +20,11 @@ package org.apache.flink.metrics.prometheus;
 
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link PrometheusPushGatewayReporter}. */
 public class PrometheusPushGatewayReporterTest extends TestLogger {
@@ -32,21 +33,21 @@ public class PrometheusPushGatewayReporterTest extends TestLogger {
     public void testParseGroupingKey() {
         Map<String, String> groupingKey =
                 PrometheusPushGatewayReporterFactory.parseGroupingKey("k1=v1;k2=v2");
-        Assert.assertNotNull(groupingKey);
-        Assert.assertEquals("v1", groupingKey.get("k1"));
-        Assert.assertEquals("v2", groupingKey.get("k2"));
+        assertThat(groupingKey).isNotNull();
+        assertThat(groupingKey.get("k1")).isEqualTo("v1");
+        assertThat(groupingKey.get("k2")).isEqualTo("v2");
     }
 
     @Test
     public void testParseIncompleteGroupingKey() {
         Map<String, String> groupingKey =
                 PrometheusPushGatewayReporterFactory.parseGroupingKey("k1=");
-        Assert.assertTrue(groupingKey.isEmpty());
+        assertThat(groupingKey.isEmpty()).isTrue();
 
         groupingKey = PrometheusPushGatewayReporterFactory.parseGroupingKey("=v1");
-        Assert.assertTrue(groupingKey.isEmpty());
+        assertThat(groupingKey.isEmpty()).isTrue();
 
         groupingKey = PrometheusPushGatewayReporterFactory.parseGroupingKey("k1");
-        Assert.assertTrue(groupingKey.isEmpty());
+        assertThat(groupingKey.isEmpty()).isTrue();
     }
 }

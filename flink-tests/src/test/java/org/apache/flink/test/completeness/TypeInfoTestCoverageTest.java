@@ -29,7 +29,7 @@ import java.lang.reflect.Modifier;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Scans the class path for type information and checks if there is a test for it. */
 public class TypeInfoTestCoverageTest extends TestLogger {

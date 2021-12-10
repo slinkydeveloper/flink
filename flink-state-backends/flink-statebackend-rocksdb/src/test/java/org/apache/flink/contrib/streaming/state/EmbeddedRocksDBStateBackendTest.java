@@ -82,9 +82,8 @@ import java.util.concurrent.RunnableFuture;
 
 import static junit.framework.TestCase.assertNotNull;
 import static org.apache.flink.contrib.streaming.state.RocksDBKeyedStateBackendBuilder.DB_INSTANCE_DIR_STRING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
@@ -372,7 +371,7 @@ public class EmbeddedRocksDBStateBackendTest
             this.keyedStateBackend.dispose();
 
             verify(spyDB, times(1)).close();
-            assertEquals(true, keyedStateBackend.isDisposed());
+            assertThat(keyedStateBackend.isDisposed()).isEqualTo(true);
 
             // Ensure every RocksObjects was closed exactly once
             for (RocksObject rocksCloseable : allCreatedCloseables) {
@@ -420,7 +419,7 @@ public class EmbeddedRocksDBStateBackendTest
             asyncSnapshotThread.start();
             try {
                 snapshot.get();
-                fail();
+                fail("unknown failure");
             } catch (Exception ignored) {
 
             }
@@ -453,12 +452,12 @@ public class EmbeddedRocksDBStateBackendTest
 
             SnapshotResult<KeyedStateHandle> snapshotResult = snapshot.get();
             KeyedStateHandle keyedStateHandle = snapshotResult.getJobManagerOwnedSnapshot();
-            assertNotNull(keyedStateHandle);
-            assertTrue(keyedStateHandle.getStateSize() > 0);
-            assertEquals(2, keyedStateHandle.getKeyGroupRange().getNumberOfKeyGroups());
+            assertThat(keyedStateHandle).isNotNull();
+            assertThat(keyedStateHandle.getStateSize() > 0).isTrue();
+            assertThat(keyedStateHandle.getKeyGroupRange().getNumberOfKeyGroups()).isEqualTo(2);
 
             for (BlockingCheckpointOutputStream stream : testStreamFactory.getAllCreatedStreams()) {
-                assertTrue(stream.isClosed());
+                assertThat(stream.isClosed()).isTrue();
             }
 
             asyncSnapshotThread.join();
@@ -489,13 +488,13 @@ public class EmbeddedRocksDBStateBackendTest
             blocker.trigger(); // allow checkpointing to start writing
 
             for (BlockingCheckpointOutputStream stream : testStreamFactory.getAllCreatedStreams()) {
-                assertTrue(stream.isClosed());
+                assertThat(stream.isClosed()).isTrue();
             }
 
             waiter.await(); // wait for snapshot stream writing to run
             try {
                 snapshot.get();
-                fail();
+                fail("unknown failure");
             } catch (Exception ignored) {
             }
 
@@ -529,7 +528,7 @@ public class EmbeddedRocksDBStateBackendTest
             state.update("Hello");
 
             // more than just the root directory
-            assertTrue(allFilesInDbDir.size() > 1);
+            assertThat(allFilesInDbDir.size() > 1).isTrue();
         } finally {
             IOUtils.closeQuietly(backend);
             backend.dispose();
@@ -539,7 +538,7 @@ public class EmbeddedRocksDBStateBackendTest
                         new File(dbPath), new AcceptAllFilter(), new AcceptAllFilter());
 
         // just the root directory left
-        assertEquals(1, allFilesInDbDir.size());
+        assertThat(allFilesInDbDir.size()).isEqualTo(1);
     }
 
     @Test
@@ -659,7 +658,7 @@ public class EmbeddedRocksDBStateBackendTest
 
         keyedStateBackend.dispose();
         verify(spyDB, times(1)).close();
-        assertEquals(true, keyedStateBackend.isDisposed());
+        assertThat(keyedStateBackend.isDisposed()).isEqualTo(true);
     }
 
     private void verifyRocksDBStateUploaderClosed() {

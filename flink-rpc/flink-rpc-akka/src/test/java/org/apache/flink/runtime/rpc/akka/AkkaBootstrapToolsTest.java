@@ -41,9 +41,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link AkkaBootstrapTools}. */
 public class AkkaBootstrapToolsTest extends TestLogger {
@@ -106,7 +105,8 @@ public class AkkaBootstrapToolsTest extends TestLogger {
                     new Configuration(), "0.0.0.0", String.valueOf(port), LOG);
             fail("Expected to fail with a BindException");
         } catch (Exception e) {
-            assertThat(ExceptionUtils.findThrowable(e, BindException.class).isPresent(), is(true));
+            assertThat(ExceptionUtils.findThrowable(e, BindException.class).isPresent())
+                    .isEqualTo(true);
         } finally {
             portOccupier.close();
         }

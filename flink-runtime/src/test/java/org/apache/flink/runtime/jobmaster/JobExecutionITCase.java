@@ -32,8 +32,7 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for job scheduling. */
 public class JobExecutionITCase extends TestLogger {
@@ -65,7 +64,7 @@ public class JobExecutionITCase extends TestLogger {
             final CompletableFuture<JobResult> jobResultFuture =
                     miniCluster.requestJobResult(jobGraph.getJobID());
 
-            assertThat(jobResultFuture.get().isSuccess(), is(true));
+            assertThat(jobResultFuture.get().isSuccess()).isEqualTo(true);
         }
     }
 

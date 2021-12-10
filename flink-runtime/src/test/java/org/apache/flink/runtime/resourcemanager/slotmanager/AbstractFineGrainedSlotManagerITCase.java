@@ -47,12 +47,9 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 
 /** IT Cases of {@link FineGrainedSlotManager}. */
 public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSlotManagerTestBase {
@@ -166,12 +163,10 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                                 DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                 DEFAULT_SLOT_RESOURCE_PROFILE));
                             }
-
                             runInMainThread(
                                     () ->
                                             getSlotManager()
                                                     .processResourceRequirements(requirements));
-
                             if (scenario
                                     == RequirementDeclarationScenario
                                             .TASK_EXECUTOR_REGISTRATION_AFTER_REQUIREMENT_DECLARATION) {
@@ -184,10 +179,8 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                                 DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                                 DEFAULT_SLOT_RESOURCE_PROFILE));
                             }
-
-                            assertThat(
-                                    assertFutureCompleteAndReturn(requestFuture),
-                                    is(
+                            assertThat(assertFutureCompleteAndReturn(requestFuture))
+                                    .isEqualTo(
                                             equalTo(
                                                     Tuple6.of(
                                                             slotId,
@@ -197,18 +190,16 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                                     .f2,
                                                             DEFAULT_SLOT_RESOURCE_PROFILE,
                                                             targetAddress,
-                                                            getResourceManagerId()))));
-
+                                                            getResourceManagerId())));
                             final TaskManagerSlotInformation slot =
                                     getTaskManagerTracker()
                                             .getAllocatedOrPendingSlot(
                                                     assertFutureCompleteAndReturn(requestFuture).f2)
                                             .get();
-
-                            assertEquals(
-                                    "The slot has not been allocated to the expected allocation id.",
-                                    assertFutureCompleteAndReturn(requestFuture).f2,
-                                    slot.getAllocationId());
+                            assertThat(slot.getAllocationId())
+                                    .as(
+                                            "The slot has not been allocated to the expected allocation id.")
+                                    .isEqualTo(assertFutureCompleteAndReturn(requestFuture).f2);
                         });
             }
         };
@@ -320,19 +311,15 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                         getSlotManager()
                                                 .processResourceRequirements(resourceRequirements1);
                                     });
-
                             final AllocationID allocationId1 =
                                     assertFutureCompleteAndReturn(allocationIdFuture1);
                             TaskManagerSlotInformation slot =
                                     getTaskManagerTracker()
                                             .getAllocatedOrPendingSlot(allocationId1)
                                             .get();
-
-                            assertEquals(
-                                    "The slot has not been allocated to the expected job id.",
-                                    resourceRequirements1.getJobId(),
-                                    slot.getJobId());
-
+                            assertThat(slot.getJobId())
+                                    .as("The slot has not been allocated to the expected job id.")
+                                    .isEqualTo(resourceRequirements1.getJobId());
                             if (secondRequirementDeclarationTime
                                     == SecondRequirementDeclarationTime.BEFORE_FREE) {
                                 runInMainThread(
@@ -341,7 +328,6 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                         .processResourceRequirements(
                                                                 resourceRequirements2));
                             }
-
                             // clear resource requirements first so that the freed slot isn't
                             // immediately re-assigned to the job
                             runInMainThread(
@@ -358,7 +344,6 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                         SlotID.getDynamicSlotID(resourceID),
                                                         allocationId1);
                                     });
-
                             if (secondRequirementDeclarationTime
                                     == SecondRequirementDeclarationTime.AFTER_FREE) {
                                 runInMainThread(
@@ -367,17 +352,15 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                         .processResourceRequirements(
                                                                 resourceRequirements2));
                             }
-
                             slot =
                                     getTaskManagerTracker()
                                             .getAllocatedOrPendingSlot(
                                                     assertFutureCompleteAndReturn(
                                                             allocationIdFuture2))
                                             .get();
-                            assertEquals(
-                                    "The slot has not been allocated to the expected job id.",
-                                    resourceRequirements2.getJobId(),
-                                    slot.getJobId());
+                            assertThat(slot.getJobId())
+                                    .as("The slot has not been allocated to the expected job id.")
+                                    .isEqualTo(resourceRequirements2.getJobId());
                         });
             }
         };
@@ -482,31 +465,26 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                         getSlotManager()
                                                 .processResourceRequirements(resourceRequirements);
                                     });
-
                             final AllocationID firstAllocationId = allocationIds.take();
-                            assertThat(allocationIds, is(empty()));
-
+                            assertThat(allocationIds).isEqualTo(empty());
                             // let the first attempt fail --> this should trigger a second attempt
                             runInMainThread(
                                     () ->
                                             slotRequestFuture1.completeExceptionally(
                                                     new SlotAllocationException(
                                                             "Test exception.")));
-
                             final AllocationID secondAllocationId = allocationIds.take();
-                            assertThat(allocationIds, is(empty()));
-
+                            assertThat(allocationIds).isEqualTo(empty());
                             final TaskManagerSlotInformation slot =
                                     getTaskManagerTracker()
                                             .getAllocatedOrPendingSlot(secondAllocationId)
                                             .get();
-
-                            assertEquals(jobId, slot.getJobId());
-
-                            assertFalse(
-                                    getTaskManagerTracker()
-                                            .getAllocatedOrPendingSlot(firstAllocationId)
-                                            .isPresent());
+                            assertThat(slot.getJobId()).isEqualTo(jobId);
+                            assertThat(
+                                            getTaskManagerTracker()
+                                                    .getAllocatedOrPendingSlot(firstAllocationId)
+                                                    .isPresent())
+                                    .isFalse();
                         });
             }
         };
@@ -562,7 +540,6 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                         DEFAULT_SLOT_RESOURCE_PROFILE);
                                     });
                             assertFutureCompleteAndReturn(slotRequestCallFuture);
-
                             runInMainThread(
                                     () -> {
                                         getSlotManager()
@@ -571,10 +548,8 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                         TEST_EXCEPTION);
                                         slotRequestFuture.complete(Acknowledge.get());
                                     });
-
-                            assertThat(
-                                    trackingSecurityManager.getSystemExitFuture().isDone(),
-                                    is(false));
+                            assertThat(trackingSecurityManager.getSystemExitFuture().isDone())
+                                    .isEqualTo(false);
                         });
             }
         };
@@ -623,7 +598,6 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                         DEFAULT_TOTAL_RESOURCE_PROFILE,
                                                         DEFAULT_SLOT_RESOURCE_PROFILE);
                                     });
-
                             final AllocationID allocationId =
                                     assertFutureCompleteAndReturn(allocationIdFuture);
                             runInMainThread(
@@ -635,10 +609,8 @@ public abstract class AbstractFineGrainedSlotManagerITCase extends FineGrainedSl
                                                                     createAllocatedSlotStatus(
                                                                             allocationId,
                                                                             DEFAULT_SLOT_RESOURCE_PROFILE))));
-
-                            assertThat(
-                                    trackingSecurityManager.getSystemExitFuture().isDone(),
-                                    is(false));
+                            assertThat(trackingSecurityManager.getSystemExitFuture().isDone())
+                                    .isEqualTo(false);
                         });
             }
         };

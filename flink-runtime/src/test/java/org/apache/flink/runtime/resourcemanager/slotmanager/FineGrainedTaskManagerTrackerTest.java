@@ -32,11 +32,8 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the {@link FineGrainedTaskManagerTracker}. */
 public class FineGrainedTaskManagerTrackerTest extends TestLogger {
@@ -49,8 +46,8 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
     public void testInitState() {
         final FineGrainedTaskManagerTracker taskManagerTracker =
                 new FineGrainedTaskManagerTracker();
-        assertThat(taskManagerTracker.getPendingTaskManagers(), is(empty()));
-        assertThat(taskManagerTracker.getRegisteredTaskManagers(), is(empty()));
+        assertThat(taskManagerTracker.getPendingTaskManagers()).isEqualTo(empty());
+        assertThat(taskManagerTracker.getRegisteredTaskManagers()).isEqualTo(empty());
     }
 
     @Test
@@ -61,15 +58,16 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
         // Add task manager
         taskManagerTracker.addTaskManager(
                 TASK_EXECUTOR_CONNECTION, ResourceProfile.ANY, ResourceProfile.ANY);
-        assertThat(taskManagerTracker.getRegisteredTaskManagers().size(), is(1));
-        assertTrue(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .isPresent());
+        assertThat(taskManagerTracker.getRegisteredTaskManagers().size()).isEqualTo(1);
+        assertThat(
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .isPresent())
+                .isTrue();
 
         // Remove task manager
         taskManagerTracker.removeTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID());
-        assertThat(taskManagerTracker.getRegisteredTaskManagers().size(), is(0));
+        assertThat(taskManagerTracker.getRegisteredTaskManagers().size()).isEqualTo(0);
     }
 
     @Test(expected = NullPointerException.class)
@@ -96,33 +94,33 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                 Collections.singletonMap(
                         pendingTaskManager.getPendingTaskManagerId(),
                         Collections.singletonMap(jobId, resourceCounter)));
-        assertThat(taskManagerTracker.getPendingTaskManagers().size(), is(1));
+        assertThat(taskManagerTracker.getPendingTaskManagers().size()).isEqualTo(1);
         assertThat(
-                taskManagerTracker
-                        .getPendingTaskManagersByTotalAndDefaultSlotResourceProfile(
-                                ResourceProfile.ANY, ResourceProfile.ANY)
-                        .size(),
-                is(1));
+                        taskManagerTracker
+                                .getPendingTaskManagersByTotalAndDefaultSlotResourceProfile(
+                                        ResourceProfile.ANY, ResourceProfile.ANY)
+                                .size())
+                .isEqualTo(1);
 
         // Remove pending task manager
         final Map<JobID, ResourceCounter> records =
                 taskManagerTracker.removePendingTaskManager(
                         pendingTaskManager.getPendingTaskManagerId());
-        assertThat(taskManagerTracker.getPendingTaskManagers(), is(empty()));
+        assertThat(taskManagerTracker.getPendingTaskManagers()).isEqualTo(empty());
         assertThat(
-                taskManagerTracker
-                        .getPendingAllocationsOfPendingTaskManager(
-                                pendingTaskManager.getPendingTaskManagerId())
-                        .size(),
-                is(0));
+                        taskManagerTracker
+                                .getPendingAllocationsOfPendingTaskManager(
+                                        pendingTaskManager.getPendingTaskManagerId())
+                                .size())
+                .isEqualTo(0);
         assertThat(
-                taskManagerTracker
-                        .getPendingTaskManagersByTotalAndDefaultSlotResourceProfile(
-                                ResourceProfile.ANY, ResourceProfile.ANY)
-                        .size(),
-                is(0));
-        assertTrue(records.containsKey(jobId));
-        assertThat(records.get(jobId).getResourceCount(ResourceProfile.ANY), is(1));
+                        taskManagerTracker
+                                .getPendingTaskManagersByTotalAndDefaultSlotResourceProfile(
+                                        ResourceProfile.ANY, ResourceProfile.ANY)
+                                .size())
+                .isEqualTo(0);
+        assertThat(records.containsKey(jobId)).isTrue();
+        assertThat(records.get(jobId).getResourceCount(ResourceProfile.ANY)).isEqualTo(1);
     }
 
     @Test(expected = NullPointerException.class)
@@ -149,13 +147,14 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                 TASK_EXECUTOR_CONNECTION.getInstanceID(),
                 ResourceProfile.fromResources(3, 200),
                 SlotState.PENDING);
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent());
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent())
+                .isTrue();
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                is(ResourceProfile.fromResources(7, 800)));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(7, 800));
 
         // Notify pending slot is now allocated
         taskManagerTracker.notifySlotStatus(
@@ -164,13 +163,14 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                 TASK_EXECUTOR_CONNECTION.getInstanceID(),
                 ResourceProfile.fromResources(3, 200),
                 SlotState.ALLOCATED);
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent());
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent())
+                .isTrue();
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                is(ResourceProfile.fromResources(7, 800)));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(7, 800));
 
         // Notify free slot is now allocated
         taskManagerTracker.notifySlotStatus(
@@ -179,13 +179,14 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                 TASK_EXECUTOR_CONNECTION.getInstanceID(),
                 ResourceProfile.fromResources(2, 300),
                 SlotState.ALLOCATED);
-        assertTrue(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent());
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent())
+                .isTrue();
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                is(ResourceProfile.fromResources(5, 500)));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(5, 500));
     }
 
     @Test
@@ -217,13 +218,14 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                 TASK_EXECUTOR_CONNECTION.getInstanceID(),
                 ResourceProfile.fromResources(3, 200),
                 SlotState.FREE);
-        assertFalse(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent());
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId1).isPresent())
+                .isFalse();
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                is(ResourceProfile.fromResources(8, 700)));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(ResourceProfile.fromResources(8, 700));
         // Free allocated slot
         taskManagerTracker.notifySlotStatus(
                 allocationId2,
@@ -231,13 +233,14 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                 TASK_EXECUTOR_CONNECTION.getInstanceID(),
                 ResourceProfile.fromResources(2, 300),
                 SlotState.FREE);
-        assertFalse(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent());
+        assertThat(taskManagerTracker.getAllocatedOrPendingSlot(allocationId2).isPresent())
+                .isFalse();
         assertThat(
-                taskManagerTracker
-                        .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
-                        .get()
-                        .getAvailableResource(),
-                is(totalResource));
+                        taskManagerTracker
+                                .getRegisteredTaskManager(TASK_EXECUTOR_CONNECTION.getInstanceID())
+                                .get()
+                                .getAvailableResource())
+                .isEqualTo(totalResource);
     }
 
     @Test(expected = NullPointerException.class)
@@ -277,23 +280,24 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
                         pendingTaskManager2.getPendingTaskManagerId(),
                         Collections.singletonMap(jobId, resourceCounter)));
         assertThat(
-                taskManagerTracker
-                        .getPendingAllocationsOfPendingTaskManager(
-                                pendingTaskManager1.getPendingTaskManagerId())
-                        .size(),
-                is(0));
-        assertTrue(
-                taskManagerTracker
-                        .getPendingAllocationsOfPendingTaskManager(
-                                pendingTaskManager2.getPendingTaskManagerId())
-                        .containsKey(jobId));
+                        taskManagerTracker
+                                .getPendingAllocationsOfPendingTaskManager(
+                                        pendingTaskManager1.getPendingTaskManagerId())
+                                .size())
+                .isEqualTo(0);
         assertThat(
-                taskManagerTracker
-                        .getPendingAllocationsOfPendingTaskManager(
-                                pendingTaskManager2.getPendingTaskManagerId())
-                        .get(jobId)
-                        .getResourceCount(ResourceProfile.ANY),
-                is(1));
+                        taskManagerTracker
+                                .getPendingAllocationsOfPendingTaskManager(
+                                        pendingTaskManager2.getPendingTaskManagerId())
+                                .containsKey(jobId))
+                .isTrue();
+        assertThat(
+                        taskManagerTracker
+                                .getPendingAllocationsOfPendingTaskManager(
+                                        pendingTaskManager2.getPendingTaskManagerId())
+                                .get(jobId)
+                                .getResourceCount(ResourceProfile.ANY))
+                .isEqualTo(1);
     }
 
     @Test
@@ -322,11 +326,12 @@ public class FineGrainedTaskManagerTrackerTest extends TestLogger {
         taskManagerTracker.addPendingTaskManager(
                 new PendingTaskManager(ResourceProfile.fromResources(4, 200), 1));
 
-        assertThat(taskManagerTracker.getFreeResource(), is(ResourceProfile.fromResources(6, 700)));
-        assertThat(taskManagerTracker.getRegisteredResource(), is(totalResource));
-        assertThat(taskManagerTracker.getNumberRegisteredSlots(), is(10));
-        assertThat(taskManagerTracker.getNumberFreeSlots(), is(8));
-        assertThat(
-                taskManagerTracker.getPendingResource(), is(ResourceProfile.fromResources(4, 200)));
+        assertThat(taskManagerTracker.getFreeResource())
+                .isEqualTo(ResourceProfile.fromResources(6, 700));
+        assertThat(taskManagerTracker.getRegisteredResource()).isEqualTo(totalResource);
+        assertThat(taskManagerTracker.getNumberRegisteredSlots()).isEqualTo(10);
+        assertThat(taskManagerTracker.getNumberFreeSlots()).isEqualTo(8);
+        assertThat(taskManagerTracker.getPendingResource())
+                .isEqualTo(ResourceProfile.fromResources(4, 200));
     }
 }

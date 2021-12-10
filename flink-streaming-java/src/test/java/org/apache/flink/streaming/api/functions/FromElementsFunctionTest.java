@@ -46,15 +46,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link org.apache.flink.streaming.api.functions.source.FromElementsFunction}. */
 public class FromElementsFunctionTest {
@@ -84,7 +79,7 @@ public class FromElementsFunctionTest {
             List<String> result = new ArrayList<String>();
             source.run(new ListSourceContext<String>(result));
 
-            assertEquals(Arrays.asList(data), result);
+            assertThat(result).isEqualTo(Arrays.asList(data));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -103,18 +98,17 @@ public class FromElementsFunctionTest {
     public void testSetOutputTypeWithNoSerializer() throws Exception {
         FromElementsFunction<String> source = new FromElementsFunction<>(STRING_ARRAY_DATA);
 
-        assertNull(source.getSerializer());
+        assertThat(source.getSerializer()).isNull();
 
         source.setOutputType(BasicTypeInfo.STRING_TYPE_INFO, new ExecutionConfig());
 
-        assertNotNull(source.getSerializer());
-        assertEquals(
-                BasicTypeInfo.STRING_TYPE_INFO.createSerializer(new ExecutionConfig()),
-                source.getSerializer());
+        assertThat(source.getSerializer()).isNotNull();
+        assertThat(source.getSerializer())
+                .isEqualTo(BasicTypeInfo.STRING_TYPE_INFO.createSerializer(new ExecutionConfig()));
 
         List<String> result = runSource(source);
 
-        assertEquals(STRING_LIST_DATA, result);
+        assertThat(result).isEqualTo(STRING_LIST_DATA);
     }
 
     @Test
@@ -130,11 +124,11 @@ public class FromElementsFunctionTest {
 
         TypeSerializer<String> newSerializer = source.getSerializer();
 
-        assertEquals(existingSerializer, newSerializer);
+        assertThat(newSerializer).isEqualTo(existingSerializer);
 
         List<String> result = runSource(source);
 
-        assertEquals(STRING_LIST_DATA, result);
+        assertThat(result).isEqualTo(STRING_LIST_DATA);
     }
 
     @Test
@@ -164,12 +158,12 @@ public class FromElementsFunctionTest {
 
         TypeSerializer<DeserializeTooMuchType> newSerializer = source.getSerializer();
 
-        assertNotEquals(existingSerializer, newSerializer);
+        assertThat(newSerializer).isEqualTo(existingSerializer);
 
         List<DeserializeTooMuchType> result = runSource(source);
 
-        assertThat(result, hasSize(1));
-        assertThat(result.get(0), instanceOf(DeserializeTooMuchType.class));
+        assertThat(result).satisfies(matching(hasSize(1)));
+        assertThat(result.get(0)).isInstanceOf(DeserializeTooMuchType.class);
     }
 
     @Test
@@ -205,7 +199,7 @@ public class FromElementsFunctionTest {
 
             List<MyPojo> result = runSource(source);
 
-            assertEquals(Arrays.asList(data), result);
+            assertThat(result).isEqualTo(Arrays.asList(data));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -222,7 +216,7 @@ public class FromElementsFunctionTest {
 
         List<MyPojo> result = runSource(source);
 
-        assertEquals(Arrays.asList(data), result);
+        assertThat(result).isEqualTo(Arrays.asList(data));
     }
 
     @Test
@@ -237,7 +231,8 @@ public class FromElementsFunctionTest {
 
                 fail("should fail with an exception");
             } catch (IOException e) {
-                assertTrue(ExceptionUtils.stringifyException(e).contains("test exception"));
+                assertThat(ExceptionUtils.stringifyException(e).contains("test exception"))
+                        .isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -262,9 +257,10 @@ public class FromElementsFunctionTest {
                                 new ArrayList<DeserializeTooMuchType>()));
                 fail("should fail with an exception");
             } catch (IOException e) {
-                assertTrue(
-                        ExceptionUtils.stringifyException(e)
-                                .contains("user-defined serialization"));
+                assertThat(
+                                ExceptionUtils.stringifyException(e)
+                                        .contains("user-defined serialization"))
+                        .isTrue();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -347,7 +343,7 @@ public class FromElementsFunctionTest {
 
             sourceCopy.run(newCtx);
 
-            assertEquals(data, checkpointData);
+            assertThat(checkpointData).isEqualTo(data);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

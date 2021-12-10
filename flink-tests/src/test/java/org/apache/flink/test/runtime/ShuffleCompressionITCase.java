@@ -47,7 +47,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests network shuffle when data compression is enabled. */
 @RunWith(Parameterized.class)
@@ -177,7 +177,7 @@ public class ShuffleCompressionITCase {
             LongValue value = new LongValue();
             for (int i = 0; i < PARALLELISM * NUM_RECORDS_TO_SEND; ++i) {
                 reader.next(value);
-                assertEquals(RECORD_TO_SEND.getValue(), value.getValue());
+                assertThat(value.getValue()).isEqualTo(RECORD_TO_SEND.getValue());
             }
         }
     }

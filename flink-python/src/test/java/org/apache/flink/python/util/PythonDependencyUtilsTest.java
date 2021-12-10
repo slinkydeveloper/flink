@@ -42,7 +42,7 @@ import static org.apache.flink.python.util.PythonDependencyUtils.PYTHON_FILES;
 import static org.apache.flink.python.util.PythonDependencyUtils.PYTHON_REQUIREMENTS_FILE;
 import static org.apache.flink.python.util.PythonDependencyUtils.configurePythonDependencies;
 import static org.apache.flink.python.util.PythonDependencyUtils.merge;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for PythonDependencyUtils. */
 public class PythonDependencyUtilsTest {
@@ -238,7 +238,7 @@ public class PythonDependencyUtilsTest {
         Map<String, String> actual =
                 cachedFiles.stream().collect(Collectors.toMap(t -> t.f0, t -> t.f1.filePath));
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private void verifyConfiguration(Configuration expected, Configuration actual) {
@@ -246,6 +246,6 @@ public class PythonDependencyUtilsTest {
         actual.addAllToProperties(actualProperties);
         Properties expectedProperties = new Properties();
         expected.addAllToProperties(expectedProperties);
-        assertEquals(expectedProperties, actualProperties);
+        assertThat(actualProperties).isEqualTo(expectedProperties);
     }
 }

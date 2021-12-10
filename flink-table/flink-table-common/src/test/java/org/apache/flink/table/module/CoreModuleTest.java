@@ -20,12 +20,12 @@ package org.apache.flink.table.module;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link CoreModule}. */
 public class CoreModuleTest {
     @Test
     public void testGetNonExistFunction() {
-        assertFalse(CoreModule.INSTANCE.getFunctionDefinition("nonexist").isPresent());
+        assertThat(CoreModule.INSTANCE.getFunctionDefinition("nonexist").isPresent()).isFalse();
     }
 }

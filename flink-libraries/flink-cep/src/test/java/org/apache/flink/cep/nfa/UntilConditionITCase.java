@@ -35,7 +35,7 @@ import java.util.List;
 import static org.apache.flink.cep.utils.NFATestUtilities.comparePatterns;
 import static org.apache.flink.cep.utils.NFATestUtilities.feedNFA;
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Pattern#until(IterativeCondition)}. */
 public class UntilConditionITCase {
@@ -108,8 +108,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, breaking)));
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -174,8 +174,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent3, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, breaking)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -235,8 +235,8 @@ public class UntilConditionITCase {
                 Lists.<List<Event>>newArrayList(
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, breaking)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -297,8 +297,8 @@ public class UntilConditionITCase {
                 resultingPatterns,
                 Lists.<List<Event>>newArrayList(
                         Lists.newArrayList(startEvent, middleEvent1, breaking)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -359,8 +359,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, breaking),
                         Lists.newArrayList(startEvent, breaking)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -427,8 +427,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent3, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, breaking),
                         Lists.newArrayList(startEvent, breaking)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -490,8 +490,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2, breaking),
                         Lists.newArrayList(startEvent, middleEvent1, breaking),
                         Lists.newArrayList(startEvent, breaking)));
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -654,8 +654,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2),
                         Lists.newArrayList(startEvent, middleEvent1)));
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -719,8 +719,8 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1, middleEvent2),
                         Lists.newArrayList(startEvent, middleEvent1)));
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 
     @Test
@@ -785,7 +785,7 @@ public class UntilConditionITCase {
                         Lists.newArrayList(startEvent, middleEvent1),
                         Lists.newArrayList(startEvent)));
 
-        assertEquals(1, nfaState.getPartialMatches().size());
-        assertEquals("start", nfaState.getPartialMatches().peek().getCurrentStateName());
+        assertThat(nfaState.getPartialMatches().size()).isEqualTo(1);
+        assertThat(nfaState.getPartialMatches().peek().getCurrentStateName()).isEqualTo("start");
     }
 }

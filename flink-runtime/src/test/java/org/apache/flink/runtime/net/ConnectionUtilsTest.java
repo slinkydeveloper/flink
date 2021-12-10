@@ -33,9 +33,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the network utilities. */
 @RunWith(PowerMockRunner.class)
@@ -53,13 +51,13 @@ public class ConnectionUtilsTest {
         // check that it did not take forever (max 30 seconds)
         // this check can unfortunately not be too tight, or it will be flaky on some CI
         // infrastructure
-        assertTrue(System.nanoTime() - start < 30_000_000_000L);
+        assertThat(System.nanoTime() - start < 30_000_000_000L).isTrue();
 
         // we should have found a heuristic address
-        assertNotNull(add);
+        assertThat(add).isNotNull();
 
         // make sure that we returned the InetAddress.getLocalHost as a heuristic
-        assertEquals(InetAddress.getLocalHost(), add);
+        assertThat(add).isEqualTo(InetAddress.getLocalHost());
     }
 
     @Test
@@ -94,7 +92,7 @@ public class ConnectionUtilsTest {
                     ConnectionUtils.findConnectingAddress(socketAddress, 2000, 400);
 
             // Make sure we got an address via alternative means
-            assertNotNull(address);
+            assertThat(address).isNotNull();
         }
     }
 }

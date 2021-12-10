@@ -29,7 +29,6 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -38,6 +37,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the multipart functionality of the {@link RestClient}. */
 public class RestClientMultipartTest extends TestLogger {
@@ -84,7 +85,7 @@ public class RestClientMultipartTest extends TestLogger {
                         files);
 
         responseFuture.get();
-        Assert.assertEquals(json, MULTIPART_UPLOAD_RESOURCE.getMixedHandler().lastReceivedRequest);
+        assertThat(MULTIPART_UPLOAD_RESOURCE.getMixedHandler().lastReceivedRequest).isEqualTo(json);
     }
 
     @Test
@@ -101,7 +102,7 @@ public class RestClientMultipartTest extends TestLogger {
                         Collections.emptyList());
 
         responseFuture.get();
-        Assert.assertEquals(json, MULTIPART_UPLOAD_RESOURCE.getJsonHandler().lastReceivedRequest);
+        assertThat(MULTIPART_UPLOAD_RESOURCE.getJsonHandler().lastReceivedRequest).isEqualTo(json);
     }
 
     @Test

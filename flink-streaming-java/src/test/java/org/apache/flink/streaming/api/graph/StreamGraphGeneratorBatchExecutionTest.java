@@ -72,13 +72,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for generating correct properties for sorting inputs in {@link RuntimeExecutionMode#BATCH}
@@ -114,7 +108,7 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
 
         StreamGraph graph = getStreamGraphInBatchMode(sink);
 
-        assertThat(graph.getJobType(), is(JobType.BATCH));
+        assertThat(graph.getJobType()).isEqualTo(JobType.BATCH);
     }
 
     @Test
@@ -132,12 +126,10 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         expectedOperatorWeights.put(
                 ManagedMemoryUseCase.OPERATOR,
                 ExecutionOptions.SORTED_INPUTS_MEMORY.defaultValue().getMebiBytes());
-        assertThat(
-                processNode.getManagedMemoryOperatorScopeUseCaseWeights(),
-                equalTo(expectedOperatorWeights));
-        assertThat(
-                processNode.getManagedMemorySlotScopeUseCases(),
-                equalTo(Collections.singleton(ManagedMemoryUseCase.STATE_BACKEND)));
+        assertThat(processNode.getManagedMemoryOperatorScopeUseCaseWeights())
+                .isEqualTo(expectedOperatorWeights);
+        assertThat(processNode.getManagedMemorySlotScopeUseCases())
+                .isEqualTo(Collections.singleton(ManagedMemoryUseCase.STATE_BACKEND));
     }
 
     @Test
@@ -155,12 +147,10 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
 
         final Map<ManagedMemoryUseCase, Integer> expectedOperatorWeights = new HashMap<>();
         expectedOperatorWeights.put(ManagedMemoryUseCase.OPERATOR, 42);
-        assertThat(
-                processNode.getManagedMemoryOperatorScopeUseCaseWeights(),
-                equalTo(expectedOperatorWeights));
-        assertThat(
-                processNode.getManagedMemorySlotScopeUseCases(),
-                equalTo(Collections.singleton(ManagedMemoryUseCase.STATE_BACKEND)));
+        assertThat(processNode.getManagedMemoryOperatorScopeUseCaseWeights())
+                .isEqualTo(expectedOperatorWeights);
+        assertThat(processNode.getManagedMemorySlotScopeUseCases())
+                .isEqualTo(Collections.singleton(ManagedMemoryUseCase.STATE_BACKEND));
     }
 
     @Test
@@ -174,15 +164,13 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink);
 
         StreamNode processNode = graph.getStreamNode(process.getId());
-        assertThat(
-                processNode.getInputRequirements().get(0),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                processNode.getOperatorFactory().getChainingStrategy(),
-                equalTo(ChainingStrategy.HEAD));
-        assertThat(graph.getStateBackend(), instanceOf(BatchExecutionStateBackend.class));
+        assertThat(processNode.getInputRequirements().get(0))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(processNode.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.HEAD);
+        assertThat(graph.getStateBackend()).isInstanceOf(BatchExecutionStateBackend.class);
         // the provider is passed as a lambda therefore we cannot assert the class of the provider
-        assertThat(graph.getTimerServiceProvider(), notNullValue());
+        assertThat(graph.getTimerServiceProvider()).isNotNull();
     }
 
     @Test
@@ -199,14 +187,12 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink, configuration);
 
         StreamNode processNode = graph.getStreamNode(process.getId());
-        assertThat(
-                processNode.getInputRequirements().get(0),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                processNode.getOperatorFactory().getChainingStrategy(),
-                equalTo(ChainingStrategy.HEAD));
-        assertThat(graph.getStateBackend(), nullValue());
-        assertThat(graph.getTimerServiceProvider(), nullValue());
+        assertThat(processNode.getInputRequirements().get(0))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(processNode.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.HEAD);
+        assertThat(graph.getStateBackend()).isNull();
+        assertThat(graph.getTimerServiceProvider()).isNull();
     }
 
     @Test
@@ -224,9 +210,9 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink, configuration);
 
         StreamNode processNode = graph.getStreamNode(process.getId());
-        assertThat(processNode.getInputRequirements().get(0), nullValue());
-        assertThat(graph.getStateBackend(), nullValue());
-        assertThat(graph.getTimerServiceProvider(), nullValue());
+        assertThat(processNode.getInputRequirements().get(0)).isNull();
+        assertThat(graph.getStateBackend()).isNull();
+        assertThat(graph.getTimerServiceProvider()).isNull();
     }
 
     @Test
@@ -262,18 +248,15 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink);
 
         StreamNode processNode = graph.getStreamNode(process.getId());
-        assertThat(
-                processNode.getInputRequirements().get(0),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                processNode.getInputRequirements().get(1),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                processNode.getOperatorFactory().getChainingStrategy(),
-                equalTo(ChainingStrategy.HEAD));
-        assertThat(graph.getStateBackend(), instanceOf(BatchExecutionStateBackend.class));
+        assertThat(processNode.getInputRequirements().get(0))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(processNode.getInputRequirements().get(1))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(processNode.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.HEAD);
+        assertThat(graph.getStateBackend()).isInstanceOf(BatchExecutionStateBackend.class);
         // the provider is passed as a lambda therefore we cannot assert the class of the provider
-        assertThat(graph.getTimerServiceProvider(), notNullValue());
+        assertThat(graph.getTimerServiceProvider()).isNotNull();
     }
 
     @Test
@@ -295,17 +278,14 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink, configuration);
 
         StreamNode processNode = graph.getStreamNode(process.getId());
-        assertThat(
-                processNode.getInputRequirements().get(0),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                processNode.getInputRequirements().get(1),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                processNode.getOperatorFactory().getChainingStrategy(),
-                equalTo(ChainingStrategy.HEAD));
-        assertThat(graph.getStateBackend(), nullValue());
-        assertThat(graph.getTimerServiceProvider(), nullValue());
+        assertThat(processNode.getInputRequirements().get(0))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(processNode.getInputRequirements().get(1))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(processNode.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.HEAD);
+        assertThat(graph.getStateBackend()).isNull();
+        assertThat(graph.getTimerServiceProvider()).isNull();
     }
 
     @Test
@@ -328,10 +308,10 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink, configuration);
 
         StreamNode processNode = graph.getStreamNode(process.getId());
-        assertThat(processNode.getInputRequirements().get(0), nullValue());
-        assertThat(processNode.getInputRequirements().get(1), nullValue());
-        assertThat(graph.getStateBackend(), nullValue());
-        assertThat(graph.getTimerServiceProvider(), nullValue());
+        assertThat(processNode.getInputRequirements().get(0)).isNull();
+        assertThat(processNode.getInputRequirements().get(1)).isNull();
+        assertThat(graph.getStateBackend()).isNull();
+        assertThat(graph.getTimerServiceProvider()).isNull();
     }
 
     @Test
@@ -413,18 +393,15 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
         StreamGraph graph = getStreamGraphInBatchMode(sink);
 
         StreamNode operatorNode = graph.getStreamNode(multipleInputTransformation.getId());
-        assertThat(
-                operatorNode.getInputRequirements().get(0),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                operatorNode.getInputRequirements().get(1),
-                equalTo(StreamConfig.InputRequirement.SORTED));
-        assertThat(
-                operatorNode.getOperatorFactory().getChainingStrategy(),
-                equalTo(ChainingStrategy.HEAD));
-        assertThat(graph.getStateBackend(), instanceOf(BatchExecutionStateBackend.class));
+        assertThat(operatorNode.getInputRequirements().get(0))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(operatorNode.getInputRequirements().get(1))
+                .isEqualTo(StreamConfig.InputRequirement.SORTED);
+        assertThat(operatorNode.getOperatorFactory().getChainingStrategy())
+                .isEqualTo(ChainingStrategy.HEAD);
+        assertThat(graph.getStateBackend()).isInstanceOf(BatchExecutionStateBackend.class);
         // the provider is passed as a lambda therefore we cannot assert the class of the provider
-        assertThat(graph.getTimerServiceProvider(), notNullValue());
+        assertThat(graph.getTimerServiceProvider()).isNotNull();
     }
 
     @Test
@@ -522,7 +499,7 @@ public class StreamGraphGeneratorBatchExecutionTest extends TestLogger {
 
         StreamGraph graph = streamGraphGenerator.generate();
 
-        assertEquals(expectedStreamExchangeMode, graph.getGlobalStreamExchangeMode());
+        assertThat(graph.getGlobalStreamExchangeMode()).isEqualTo(expectedStreamExchangeMode);
     }
 
     private DataStreamSink<Integer> addDummyPipeline(StreamExecutionEnvironment env) {

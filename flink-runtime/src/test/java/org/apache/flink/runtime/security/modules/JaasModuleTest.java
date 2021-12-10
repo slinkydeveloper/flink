@@ -33,9 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.apache.flink.runtime.security.modules.JaasModule.JAVA_SECURITY_AUTH_LOGIN_CONFIG;
-import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link JaasModule}. */
 public class JaasModuleTest {
@@ -76,7 +74,7 @@ public class JaasModuleTest {
     private Path createSymLinkFolderStructure() throws IOException {
         File baseFolder = folder.newFolder();
         File actualFolder = new File(baseFolder, "actual_folder");
-        assertTrue(actualFolder.mkdirs());
+        assertThat(actualFolder.mkdirs()).isTrue();
 
         Path symlink = new File(baseFolder, "symlink").toPath();
         Files.createSymbolicLink(symlink, actualFolder.toPath());
@@ -119,14 +117,12 @@ public class JaasModuleTest {
                         .toPath()
                         .toRealPath()
                         .toString();
-        assertThat(
-                "The resolved configured directory does not match the expected resolved one.",
-                resolvedActualPathWithFile,
-                startsWith(resolvedExpectedPath));
+        assertThat(resolvedActualPathWithFile)
+                .as("The resolved configured directory does not match the expected resolved one.")
+                .startsWith(resolvedExpectedPath);
 
-        assertThat(
-                "The configured directory does not match the expected one.",
-                System.getProperty(JAVA_SECURITY_AUTH_LOGIN_CONFIG),
-                startsWith(directory));
+        assertThat(System.getProperty(JAVA_SECURITY_AUTH_LOGIN_CONFIG))
+                .as("The configured directory does not match the expected one.")
+                .startsWith(directory);
     }
 }

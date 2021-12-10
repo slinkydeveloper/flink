@@ -45,7 +45,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link JobCancellationHandler}. */
 public class JobCancellationHandlerTest extends TestLogger {
@@ -95,9 +96,11 @@ public class JobCancellationHandlerTest extends TestLogger {
         testResponse(
                 cancelJobFunction,
                 cancellationFuture ->
-                        assertThat(
-                                cancellationFuture,
-                                RestMatchers.respondsWithError(expectedErrorCode)));
+                        assertThat(cancellationFuture)
+                                .satisfies(
+                                        matching(
+                                                RestMatchers.respondsWithError(
+                                                        expectedErrorCode))));
     }
 
     private static void testResponse(

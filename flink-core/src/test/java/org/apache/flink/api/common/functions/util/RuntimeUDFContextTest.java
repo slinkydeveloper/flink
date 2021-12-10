@@ -30,10 +30,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test for the {@link RuntimeUDFContext}. */
 public class RuntimeUDFContextTest {
@@ -52,7 +50,7 @@ public class RuntimeUDFContextTest {
                             new HashMap<>(),
                             UnregisteredMetricsGroup.createOperatorMetricGroup());
 
-            assertFalse(ctx.hasBroadcastVariable("some name"));
+            assertThat(ctx.hasBroadcastVariable("some name")).isFalse();
 
             try {
                 ctx.getBroadcastVariable("some name");
@@ -95,28 +93,28 @@ public class RuntimeUDFContextTest {
             ctx.setBroadcastVariable("name1", Arrays.asList(1, 2, 3, 4));
             ctx.setBroadcastVariable("name2", Arrays.asList(1.0, 2.0, 3.0, 4.0));
 
-            assertTrue(ctx.hasBroadcastVariable("name1"));
-            assertTrue(ctx.hasBroadcastVariable("name2"));
+            assertThat(ctx.hasBroadcastVariable("name1")).isTrue();
+            assertThat(ctx.hasBroadcastVariable("name2")).isTrue();
 
             List<Integer> list1 = ctx.getBroadcastVariable("name1");
             List<Double> list2 = ctx.getBroadcastVariable("name2");
 
-            assertEquals(Arrays.asList(1, 2, 3, 4), list1);
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list2);
+            assertThat(list1).isEqualTo(Arrays.asList(1, 2, 3, 4));
+            assertThat(list2).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
 
             // access again
             List<Integer> list3 = ctx.getBroadcastVariable("name1");
             List<Double> list4 = ctx.getBroadcastVariable("name2");
 
-            assertEquals(Arrays.asList(1, 2, 3, 4), list3);
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list4);
+            assertThat(list3).isEqualTo(Arrays.asList(1, 2, 3, 4));
+            assertThat(list4).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
 
             // and again ;-)
             List<Integer> list5 = ctx.getBroadcastVariable("name1");
             List<Double> list6 = ctx.getBroadcastVariable("name2");
 
-            assertEquals(Arrays.asList(1, 2, 3, 4), list5);
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list6);
+            assertThat(list5).isEqualTo(Arrays.asList(1, 2, 3, 4));
+            assertThat(list6).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -140,17 +138,17 @@ public class RuntimeUDFContextTest {
             // access it the first time with an initializer
             List<Double> list =
                     ctx.getBroadcastVariableWithInitializer("name", new ConvertingInitializer());
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list);
+            assertThat(list).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
 
             // access it the second time with an initializer (which might not get executed)
             List<Double> list2 =
                     ctx.getBroadcastVariableWithInitializer("name", new ConvertingInitializer());
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list2);
+            assertThat(list2).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
 
             // access it the third time without an initializer (should work by "chance", because the
             // result is a list)
             List<Double> list3 = ctx.getBroadcastVariable("name");
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list3);
+            assertThat(list3).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -174,14 +172,14 @@ public class RuntimeUDFContextTest {
             // access it the first time with an initializer
             List<Double> list =
                     ctx.getBroadcastVariableWithInitializer("name", new ConvertingInitializer());
-            assertEquals(Arrays.asList(1.0, 2.0, 3.0, 4.0), list);
+            assertThat(list).isEqualTo(Arrays.asList(1.0, 2.0, 3.0, 4.0));
 
             // set it again to something different
             ctx.setBroadcastVariable("name", Arrays.asList(2, 3, 4, 5));
 
             List<Double> list2 =
                     ctx.getBroadcastVariableWithInitializer("name", new ConvertingInitializer());
-            assertEquals(Arrays.asList(2.0, 3.0, 4.0, 5.0), list2);
+            assertThat(list2).isEqualTo(Arrays.asList(2.0, 3.0, 4.0, 5.0));
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -204,7 +202,7 @@ public class RuntimeUDFContextTest {
 
             // access it the first time with an initializer
             int sum = ctx.getBroadcastVariableWithInitializer("name", new SumInitializer());
-            assertEquals(10, sum);
+            assertThat(sum).isEqualTo(10);
 
             // access it the second time with no initializer -> should fail due to type mismatch
             try {

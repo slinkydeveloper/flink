@@ -31,14 +31,12 @@ import org.apache.flink.runtime.shuffle.PartitionDescriptorBuilder;
 import org.apache.flink.runtime.shuffle.ShuffleDescriptor;
 import org.apache.flink.runtime.util.NettyShuffleDescriptorBuilder;
 
-import org.hamcrest.Matchers;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This class should consolidate all mocking logic for ResultPartitions. While using Mockito
@@ -120,7 +118,7 @@ public enum PartitionTestUtils {
 
             fail("Should throw a PartitionNotFoundException.");
         } catch (PartitionNotFoundException notFound) {
-            assertThat(partitionId, Matchers.is(notFound.getPartitionId()));
+            assertThat(partitionId).isEqualTo(notFound.getPartitionId());
         }
     }
 

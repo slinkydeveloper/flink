@@ -28,8 +28,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests the backwards compatibility of the TypeSerializerConfigSnapshot. */
 @SuppressWarnings({"serial", "deprecation"})
@@ -64,7 +64,7 @@ public class TypeSerializerSnapshotTest {
                         new DataInputDeserializer(out.getCopyOfBuffer()),
                         getClass().getClassLoader());
 
-        assertNotNull(readBack);
+        assertThat(readBack).isNotNull();
 
         try {
             readBack.restoreSerializer();

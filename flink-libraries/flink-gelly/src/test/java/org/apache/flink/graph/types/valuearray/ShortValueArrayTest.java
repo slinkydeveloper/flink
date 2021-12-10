@@ -23,9 +23,8 @@ import org.apache.flink.types.ShortValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for {@link ShortValueArray}. */
 public class ShortValueArrayTest {
@@ -39,39 +38,39 @@ public class ShortValueArrayTest {
 
         // fill the array
         for (int i = 0; i < count; i++) {
-            assertFalse(lva.isFull());
-            assertEquals(i, lva.size());
+            assertThat(lva.isFull()).isFalse();
+            assertThat(lva.size()).isEqualTo(i);
 
-            assertTrue(lva.add(new ShortValue((short) i)));
+            assertThat(lva.add(new ShortValue((short) i))).isTrue();
 
-            assertEquals(i + 1, lva.size());
+            assertThat(lva.size()).isEqualTo(i + 1);
         }
 
         // array is now full
-        assertTrue(lva.isFull());
-        assertEquals(count, lva.size());
+        assertThat(lva.isFull()).isTrue();
+        assertThat(lva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (ShortValue lv : lva) {
-            assertEquals((short) idx++, lv.getValue());
+            assertThat(lv.getValue()).isEqualTo((short) idx++);
         }
 
         // add element past end of array
-        assertFalse(lva.add(new ShortValue((short) count)));
-        assertFalse(lva.addAll(lva));
+        assertThat(lva.add(new ShortValue((short) count))).isFalse();
+        assertThat(lva.addAll(lva)).isFalse();
 
         // test copy
-        assertEquals(lva, lva.copy());
+        assertThatObject(lva.copy()).isEqualTo(lva);
 
         // test copyTo
         ShortValueArray lvaTo = new ShortValueArray();
         lva.copyTo(lvaTo);
-        assertEquals(lva, lvaTo);
+        assertThatObject(lvaTo).isEqualTo(lva);
 
         // test clear
         lva.clear();
-        assertEquals(0, lva.size());
+        assertThat(lva.size()).isEqualTo(0);
     }
 
     @Test
@@ -82,46 +81,46 @@ public class ShortValueArrayTest {
 
         // add several elements
         for (int i = 0; i < count; i++) {
-            assertFalse(lva.isFull());
-            assertEquals(i, lva.size());
+            assertThat(lva.isFull()).isFalse();
+            assertThat(lva.size()).isEqualTo(i);
 
-            assertTrue(lva.add(new ShortValue((short) i)));
+            assertThat(lva.add(new ShortValue((short) i))).isTrue();
 
-            assertEquals(i + 1, lva.size());
+            assertThat(lva.size()).isEqualTo(i + 1);
         }
 
         // array never fills
-        assertFalse(lva.isFull());
-        assertEquals(count, lva.size());
+        assertThat(lva.isFull()).isFalse();
+        assertThat(lva.size()).isEqualTo(count);
 
         // verify the array values
         int idx = 0;
         for (ShortValue lv : lva) {
-            assertEquals((short) idx++, lv.getValue());
+            assertThat(lv.getValue()).isEqualTo((short) idx++);
         }
 
         // add element past end of array
-        assertTrue(lva.add(new ShortValue((short) count)));
-        assertTrue(lva.addAll(lva));
+        assertThat(lva.add(new ShortValue((short) count))).isTrue();
+        assertThat(lva.addAll(lva)).isTrue();
 
         // test copy
-        assertEquals(lva, lva.copy());
+        assertThatObject(lva.copy()).isEqualTo(lva);
 
         // test copyTo
         ShortValueArray lvaTo = new ShortValueArray();
         lva.copyTo(lvaTo);
-        assertEquals(lva, lvaTo);
+        assertThatObject(lvaTo).isEqualTo(lva);
 
         // test mark/reset
         int size = lva.size();
         lva.mark();
-        assertTrue(lva.add(new ShortValue()));
-        assertEquals(size + 1, lva.size());
+        assertThat(lva.add(new ShortValue())).isTrue();
+        assertThat(lva.size()).isEqualTo(size + 1);
         lva.reset();
-        assertEquals(size, lva.size());
+        assertThat(lva.size()).isEqualTo(size);
 
         // test clear
         lva.clear();
-        assertEquals(0, lva.size());
+        assertThat(lva.size()).isEqualTo(0);
     }
 }

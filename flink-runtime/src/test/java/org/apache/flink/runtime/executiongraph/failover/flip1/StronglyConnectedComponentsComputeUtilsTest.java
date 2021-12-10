@@ -32,8 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.runtime.executiongraph.failover.flip1.StronglyConnectedComponentsComputeUtils.computeStronglyConnectedComponents;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link StronglyConnectedComponentsComputeUtils}. */
 public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
@@ -55,7 +54,7 @@ public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
         expected.add(Collections.singleton(3));
         expected.add(Collections.singleton(4));
 
-        assertThat(result, is(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -79,7 +78,7 @@ public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
         expected.add(new HashSet<>(Arrays.asList(5, 6)));
         expected.add(Collections.singleton(7));
 
-        assertThat(result, is(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -102,7 +101,7 @@ public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
         expected.add(new HashSet<>(Arrays.asList(2, 3, 7)));
         expected.add(new HashSet<>(Arrays.asList(5, 6)));
 
-        assertThat(result, is(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -124,7 +123,7 @@ public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
         expected.add(Collections.singleton(3));
         expected.add(Collections.singleton(4));
 
-        assertThat(result, is(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -146,7 +145,7 @@ public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
         expected.add(Collections.singleton(3));
         expected.add(Collections.singleton(4));
 
-        assertThat(result, is(expected));
+        assertThat(result).isEqualTo(expected);
     }
 
     @Test
@@ -162,6 +161,6 @@ public class StronglyConnectedComponentsComputeUtilsTest extends TestLogger {
         final Set<Integer> singleComponent =
                 IntStream.range(0, n).boxed().collect(Collectors.toSet());
 
-        assertThat(result, is(Collections.singleton(singleComponent)));
+        assertThat(result).isEqualTo(Collections.singleton(singleComponent));
     }
 }

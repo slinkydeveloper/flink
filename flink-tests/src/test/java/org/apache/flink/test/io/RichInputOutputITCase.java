@@ -31,7 +31,7 @@ import org.apache.flink.test.util.JavaProgramTestBase;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for rich DataSource and DataSink input output formats accessing RuntimeContext by checking
@@ -62,8 +62,8 @@ public class RichInputOutputITCase extends JavaProgramTestBase {
         Object b = result.getAllAccumulatorResults().get("DATA_SINK_ACCUMULATOR");
         long recordsRead = (Long) a;
         long recordsWritten = (Long) b;
-        assertEquals(recordsRead, readCalls.size());
-        assertEquals(recordsWritten, writeCalls.size());
+        assertThat(readCalls.size()).isEqualTo(recordsRead);
+        assertThat(writeCalls.size()).isEqualTo(recordsWritten);
     }
 
     private static final class TestInputFormat extends TextInputFormat {

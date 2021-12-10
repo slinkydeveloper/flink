@@ -39,13 +39,8 @@ import java.util.function.Consumer;
 
 import static org.apache.flink.runtime.clusterframework.TaskExecutorProcessUtils.TM_LEGACY_HEAP_OPTIONS;
 import static org.apache.flink.runtime.clusterframework.TaskExecutorProcessUtils.TM_PROCESS_MEMORY_OPTIONS;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link TaskExecutorProcessUtils}. */
 public class TaskExecutorProcessUtilsTest
@@ -87,67 +82,59 @@ public class TaskExecutorProcessUtilsTest
         Map<String, String> configs =
                 ConfigurationUtils.parseTmResourceDynamicConfigs(dynamicConfigsStr);
 
+        assertThat(new CPUResource(Double.valueOf(configs.get(TaskManagerOptions.CPU_CORES.key()))))
+                .isEqualTo(TM_RESOURCE_SPEC.getCpuCores());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.FRAMEWORK_HEAP_MEMORY.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getFrameworkHeapSize());
         assertThat(
-                new CPUResource(Double.valueOf(configs.get(TaskManagerOptions.CPU_CORES.key()))),
-                is(TM_RESOURCE_SPEC.getCpuCores()));
+                        MemorySize.parse(
+                                configs.get(TaskManagerOptions.FRAMEWORK_OFF_HEAP_MEMORY.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getFrameworkOffHeapMemorySize());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.TASK_HEAP_MEMORY.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getTaskHeapSize());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.TASK_OFF_HEAP_MEMORY.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getTaskOffHeapSize());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.NETWORK_MEMORY_MAX.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getNetworkMemSize());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.NETWORK_MEMORY_MIN.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getNetworkMemSize());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.MANAGED_MEMORY_SIZE.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getManagedMemorySize());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.JVM_METASPACE.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getJvmMetaspaceAndOverhead().getMetaspace());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.JVM_OVERHEAD_MIN.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getJvmMetaspaceAndOverhead().getOverhead());
+        assertThat(MemorySize.parse(configs.get(TaskManagerOptions.JVM_OVERHEAD_MAX.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getJvmMetaspaceAndOverhead().getOverhead());
+        assertThat(Integer.valueOf(configs.get(TaskManagerOptions.NUM_TASK_SLOTS.key())))
+                .isEqualTo(TM_RESOURCE_SPEC.getNumSlots());
+        assertThat(configs.get(ExternalResourceOptions.EXTERNAL_RESOURCE_LIST.key()))
+                .isEqualTo(
+                        '"'
+                                + String.join(";", TM_RESOURCE_SPEC.getExtendedResources().keySet())
+                                + '"');
         assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.FRAMEWORK_HEAP_MEMORY.key())),
-                is(TM_RESOURCE_SPEC.getFrameworkHeapSize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.FRAMEWORK_OFF_HEAP_MEMORY.key())),
-                is(TM_RESOURCE_SPEC.getFrameworkOffHeapMemorySize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.TASK_HEAP_MEMORY.key())),
-                is(TM_RESOURCE_SPEC.getTaskHeapSize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.TASK_OFF_HEAP_MEMORY.key())),
-                is(TM_RESOURCE_SPEC.getTaskOffHeapSize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.NETWORK_MEMORY_MAX.key())),
-                is(TM_RESOURCE_SPEC.getNetworkMemSize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.NETWORK_MEMORY_MIN.key())),
-                is(TM_RESOURCE_SPEC.getNetworkMemSize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.MANAGED_MEMORY_SIZE.key())),
-                is(TM_RESOURCE_SPEC.getManagedMemorySize()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.JVM_METASPACE.key())),
-                is(TM_RESOURCE_SPEC.getJvmMetaspaceAndOverhead().getMetaspace()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.JVM_OVERHEAD_MIN.key())),
-                is(TM_RESOURCE_SPEC.getJvmMetaspaceAndOverhead().getOverhead()));
-        assertThat(
-                MemorySize.parse(configs.get(TaskManagerOptions.JVM_OVERHEAD_MAX.key())),
-                is(TM_RESOURCE_SPEC.getJvmMetaspaceAndOverhead().getOverhead()));
-        assertThat(
-                Integer.valueOf(configs.get(TaskManagerOptions.NUM_TASK_SLOTS.key())),
-                is(TM_RESOURCE_SPEC.getNumSlots()));
-        assertThat(
-                configs.get(ExternalResourceOptions.EXTERNAL_RESOURCE_LIST.key()),
-                is('"' + String.join(";", TM_RESOURCE_SPEC.getExtendedResources().keySet()) + '"'));
-        assertThat(
-                configs.get(
-                        ExternalResourceOptions.getAmountConfigOptionForResource(
-                                EXTERNAL_RESOURCE_NAME_1)),
-                is(
+                        configs.get(
+                                ExternalResourceOptions.getAmountConfigOptionForResource(
+                                        EXTERNAL_RESOURCE_NAME_1)))
+                .isEqualTo(
                         String.valueOf(
                                 TM_RESOURCE_SPEC
                                         .getExtendedResources()
                                         .get(EXTERNAL_RESOURCE_NAME_1)
                                         .getValue()
-                                        .longValue())));
+                                        .longValue()));
         assertThat(
-                configs.get(
-                        ExternalResourceOptions.getAmountConfigOptionForResource(
-                                EXTERNAL_RESOURCE_NAME_2)),
-                is(
+                        configs.get(
+                                ExternalResourceOptions.getAmountConfigOptionForResource(
+                                        EXTERNAL_RESOURCE_NAME_2)))
+                .isEqualTo(
                         String.valueOf(
                                 TM_RESOURCE_SPEC
                                         .getExtendedResources()
                                         .get(EXTERNAL_RESOURCE_NAME_2)
                                         .getValue()
-                                        .longValue())));
+                                        .longValue()));
     }
 
     @Test
@@ -165,22 +152,20 @@ public class TaskExecutorProcessUtilsTest
         final TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromWorkerResourceSpec(
                         new Configuration(), workerResourceSpec);
-        assertEquals(workerResourceSpec.getCpuCores(), taskExecutorProcessSpec.getCpuCores());
-        assertEquals(
-                workerResourceSpec.getTaskHeapSize(), taskExecutorProcessSpec.getTaskHeapSize());
-        assertEquals(
-                workerResourceSpec.getTaskOffHeapSize(),
-                taskExecutorProcessSpec.getTaskOffHeapSize());
-        assertEquals(
-                workerResourceSpec.getNetworkMemSize(),
-                taskExecutorProcessSpec.getNetworkMemSize());
-        assertEquals(
-                workerResourceSpec.getManagedMemSize(),
-                taskExecutorProcessSpec.getManagedMemorySize());
-        assertEquals(workerResourceSpec.getNumSlots(), taskExecutorProcessSpec.getNumSlots());
-        assertEquals(
-                workerResourceSpec.getExtendedResources(),
-                taskExecutorProcessSpec.getExtendedResources());
+        assertThat(taskExecutorProcessSpec.getCpuCores())
+                .isEqualTo(workerResourceSpec.getCpuCores());
+        assertThat(taskExecutorProcessSpec.getTaskHeapSize())
+                .isEqualTo(workerResourceSpec.getTaskHeapSize());
+        assertThat(taskExecutorProcessSpec.getTaskOffHeapSize())
+                .isEqualTo(workerResourceSpec.getTaskOffHeapSize());
+        assertThat(taskExecutorProcessSpec.getNetworkMemSize())
+                .isEqualTo(workerResourceSpec.getNetworkMemSize());
+        assertThat(taskExecutorProcessSpec.getManagedMemorySize())
+                .isEqualTo(workerResourceSpec.getManagedMemSize());
+        assertThat(taskExecutorProcessSpec.getNumSlots())
+                .isEqualTo(workerResourceSpec.getNumSlots());
+        assertThat(taskExecutorProcessSpec.getExtendedResources())
+                .isEqualTo(workerResourceSpec.getExtendedResources());
     }
 
     @Test
@@ -193,9 +178,8 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getCpuCores(),
-                                is(new CPUResource(cpuCores))));
+                        assertThat(taskExecutorProcessSpec.getCpuCores())
+                                .isEqualTo(new CPUResource(cpuCores)));
     }
 
     @Test
@@ -205,8 +189,8 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getCpuCores(), is(new CPUResource(3.0))));
+                        assertThat(taskExecutorProcessSpec.getCpuCores())
+                                .isEqualTo(new CPUResource(3.0)));
     }
 
     @Test
@@ -226,9 +210,8 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getFrameworkHeapSize(),
-                                is(frameworkHeapSize)));
+                        assertThat(taskExecutorProcessSpec.getFrameworkHeapSize())
+                                .isEqualTo(frameworkHeapSize));
     }
 
     @Test
@@ -241,9 +224,8 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getFrameworkOffHeapMemorySize(),
-                                is(frameworkOffHeapSize)));
+                        assertThat(taskExecutorProcessSpec.getFrameworkOffHeapMemorySize())
+                                .isEqualTo(frameworkOffHeapSize));
     }
 
     @Test
@@ -258,7 +240,8 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigurationsWithoutExplicitTaskHeapMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(taskExecutorProcessSpec.getTaskHeapSize(), is(taskHeapSize)));
+                        assertThat(taskExecutorProcessSpec.getTaskHeapSize())
+                                .isEqualTo(taskHeapSize));
     }
 
     @Test
@@ -271,8 +254,8 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getTaskOffHeapSize(), is(taskOffHeapSize)));
+                        assertThat(taskExecutorProcessSpec.getTaskOffHeapSize())
+                                .isEqualTo(taskOffHeapSize));
     }
 
     @Test
@@ -287,12 +270,10 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec -> {
-                    assertThat(
-                            taskExecutorProcessSpec.getNetworkMemSize().getBytes(),
-                            greaterThanOrEqualTo(networkMin.getBytes()));
-                    assertThat(
-                            taskExecutorProcessSpec.getNetworkMemSize().getBytes(),
-                            lessThanOrEqualTo(networkMax.getBytes()));
+                    assertThat(taskExecutorProcessSpec.getNetworkMemSize().getBytes())
+                            .isGreaterThanOrEqualTo(networkMin.getBytes());
+                    assertThat(taskExecutorProcessSpec.getNetworkMemSize().getBytes())
+                            .isLessThanOrEqualTo(networkMax.getBytes());
                 });
     }
 
@@ -376,9 +357,8 @@ public class TaskExecutorProcessUtilsTest
 
         final TaskExecutorProcessSpec adjusteedTaskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(conf);
-        assertThat(
-                adjusteedTaskExecutorProcessSpec.getNetworkMemSize().getMebiBytes(),
-                is(networkMemorySizeToDeriveMb));
+        assertThat(adjusteedTaskExecutorProcessSpec.getNetworkMemSize().getMebiBytes())
+                .isEqualTo(networkMemorySizeToDeriveMb);
 
         return conf;
     }
@@ -413,12 +393,11 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigWithExplicitTaskHeapAndManagedMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getNetworkMemSize(),
-                                is(
+                        assertThat(taskExecutorProcessSpec.getNetworkMemSize())
+                                .isEqualTo(
                                         taskExecutorProcessSpec
                                                 .getTotalFlinkMemorySize()
-                                                .multiply(fraction))));
+                                                .multiply(fraction)));
     }
 
     @Test
@@ -455,12 +434,10 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec -> {
-                    assertThat(
-                            taskExecutorProcessSpec.getNetworkMemSize().getBytes(),
-                            greaterThanOrEqualTo(networkMin.getBytes()));
-                    assertThat(
-                            taskExecutorProcessSpec.getNetworkMemSize().getBytes(),
-                            lessThanOrEqualTo(networkMax.getBytes()));
+                    assertThat(taskExecutorProcessSpec.getNetworkMemSize().getBytes())
+                            .isGreaterThanOrEqualTo(networkMin.getBytes());
+                    assertThat(taskExecutorProcessSpec.getNetworkMemSize().getBytes())
+                            .isLessThanOrEqualTo(networkMax.getBytes());
                 });
 
         conf.setString(legacyOptionMin, "0m");
@@ -470,12 +447,11 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigWithExplicitTaskHeapAndManagedMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getNetworkMemSize(),
-                                is(
+                        assertThat(taskExecutorProcessSpec.getNetworkMemSize())
+                                .isEqualTo(
                                         taskExecutorProcessSpec
                                                 .getTotalFlinkMemorySize()
-                                                .multiply(fraction))));
+                                                .multiply(fraction)));
     }
 
     @Test
@@ -499,11 +475,13 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigWithExplicitTaskHeapAndManagedMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(taskExecutorProcessSpec.getNetworkMemSize(), is(networkSize)));
+                        assertThat(taskExecutorProcessSpec.getNetworkMemSize())
+                                .isEqualTo(networkSize));
         validateInConfigurationsWithoutExplicitTaskHeapMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(taskExecutorProcessSpec.getNetworkMemSize(), is(networkSize)));
+                        assertThat(taskExecutorProcessSpec.getNetworkMemSize())
+                                .isEqualTo(networkSize));
     }
 
     @Test
@@ -518,9 +496,8 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigurationsWithoutExplicitManagedMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getManagedMemorySize(),
-                                is(managedMemSize)));
+                        assertThat(taskExecutorProcessSpec.getManagedMemorySize())
+                                .isEqualTo(managedMemSize));
     }
 
     @Test
@@ -538,9 +515,8 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigurationsWithoutExplicitManagedMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getManagedMemorySize(),
-                                is(managedMemSize)));
+                        assertThat(taskExecutorProcessSpec.getManagedMemorySize())
+                                .isEqualTo(managedMemSize));
     }
 
     @Test
@@ -555,12 +531,11 @@ public class TaskExecutorProcessUtilsTest
         validateInConfigurationsWithoutExplicitManagedMem(
                 conf,
                 taskExecutorProcessSpec ->
-                        assertThat(
-                                taskExecutorProcessSpec.getManagedMemorySize(),
-                                is(
+                        assertThat(taskExecutorProcessSpec.getManagedMemorySize())
+                                .isEqualTo(
                                         taskExecutorProcessSpec
                                                 .getTotalFlinkMemorySize()
-                                                .multiply(fraction))));
+                                                .multiply(fraction)));
     }
 
     @Test
@@ -621,7 +596,8 @@ public class TaskExecutorProcessUtilsTest
 
         TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(conf);
-        assertThat(taskExecutorProcessSpec.getTotalProcessMemorySize(), is(totalProcessMemorySize));
+        assertThat(taskExecutorProcessSpec.getTotalProcessMemorySize())
+                .isEqualTo(totalProcessMemorySize);
     }
 
     @Test
@@ -629,12 +605,10 @@ public class TaskExecutorProcessUtilsTest
         try {
             TaskExecutorProcessUtils.processSpecFromConfig(new Configuration());
         } catch (final IllegalConfigurationException e) {
-            assertThat(e.getMessage(), containsString(TaskManagerOptions.TASK_HEAP_MEMORY.key()));
-            assertThat(
-                    e.getMessage(), containsString(TaskManagerOptions.MANAGED_MEMORY_SIZE.key()));
-            assertThat(e.getMessage(), containsString(TaskManagerOptions.TOTAL_FLINK_MEMORY.key()));
-            assertThat(
-                    e.getMessage(), containsString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key()));
+            assertThat(e.getMessage()).contains(TaskManagerOptions.TASK_HEAP_MEMORY.key());
+            assertThat(e.getMessage()).contains(TaskManagerOptions.MANAGED_MEMORY_SIZE.key());
+            assertThat(e.getMessage()).contains(TaskManagerOptions.TOTAL_FLINK_MEMORY.key());
+            assertThat(e.getMessage()).contains(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
         }
     }
 
@@ -648,7 +622,7 @@ public class TaskExecutorProcessUtilsTest
         validateInAllConfigurations(
                 conf,
                 taskExecutorProcessSpec -> {
-                    assertThat(taskExecutorProcessSpec.getNumSlots(), is(numSlots));
+                    assertThat(taskExecutorProcessSpec.getNumSlots()).isEqualTo(numSlots);
                 });
     }
 
@@ -663,14 +637,14 @@ public class TaskExecutorProcessUtilsTest
         config.set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(4096));
         final TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(config);
-        assertThat(taskExecutorProcessSpec.getExtendedResources().size(), is(1));
+        assertThat(taskExecutorProcessSpec.getExtendedResources().size()).isEqualTo(1);
         assertThat(
-                taskExecutorProcessSpec
-                        .getExtendedResources()
-                        .get(EXTERNAL_RESOURCE_NAME_1)
-                        .getValue()
-                        .longValue(),
-                is(1L));
+                        taskExecutorProcessSpec
+                                .getExtendedResources()
+                                .get(EXTERNAL_RESOURCE_NAME_1)
+                                .getValue()
+                                .longValue())
+                .isEqualTo(1L);
     }
 
     @Override
@@ -720,8 +694,8 @@ public class TaskExecutorProcessUtilsTest
         config.addAll(customConfig);
         TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(config);
-        assertThat(taskExecutorProcessSpec.getTaskHeapSize(), is(TASK_HEAP_SIZE));
-        assertThat(taskExecutorProcessSpec.getManagedMemorySize(), is(MANAGED_MEM_SIZE));
+        assertThat(taskExecutorProcessSpec.getTaskHeapSize()).isEqualTo(TASK_HEAP_SIZE);
+        assertThat(taskExecutorProcessSpec.getManagedMemorySize()).isEqualTo(MANAGED_MEM_SIZE);
         validateFunc.accept(taskExecutorProcessSpec);
     }
 
@@ -741,7 +715,8 @@ public class TaskExecutorProcessUtilsTest
         config.addAll(customConfig);
         TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(config);
-        assertThat(taskExecutorProcessSpec.getTotalFlinkMemorySize(), is(TOTAL_FLINK_MEM_SIZE));
+        assertThat(taskExecutorProcessSpec.getTotalFlinkMemorySize())
+                .isEqualTo(TOTAL_FLINK_MEM_SIZE);
         validateFunc.accept(taskExecutorProcessSpec);
     }
 
@@ -760,8 +735,9 @@ public class TaskExecutorProcessUtilsTest
         config.addAll(customConfig);
         TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(config);
-        assertThat(taskExecutorProcessSpec.getTotalFlinkMemorySize(), is(TOTAL_FLINK_MEM_SIZE));
-        assertThat(taskExecutorProcessSpec.getTaskHeapSize(), is(TASK_HEAP_SIZE));
+        assertThat(taskExecutorProcessSpec.getTotalFlinkMemorySize())
+                .isEqualTo(TOTAL_FLINK_MEM_SIZE);
+        assertThat(taskExecutorProcessSpec.getTaskHeapSize()).isEqualTo(TASK_HEAP_SIZE);
         validateFunc.accept(taskExecutorProcessSpec);
     }
 
@@ -781,8 +757,9 @@ public class TaskExecutorProcessUtilsTest
         config.addAll(customConfig);
         TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(config);
-        assertThat(taskExecutorProcessSpec.getTotalFlinkMemorySize(), is(TOTAL_FLINK_MEM_SIZE));
-        assertThat(taskExecutorProcessSpec.getManagedMemorySize(), is(MANAGED_MEM_SIZE));
+        assertThat(taskExecutorProcessSpec.getTotalFlinkMemorySize())
+                .isEqualTo(TOTAL_FLINK_MEM_SIZE);
+        assertThat(taskExecutorProcessSpec.getManagedMemorySize()).isEqualTo(MANAGED_MEM_SIZE);
         validateFunc.accept(taskExecutorProcessSpec);
     }
 
@@ -802,7 +779,8 @@ public class TaskExecutorProcessUtilsTest
         config.addAll(customConfig);
         TaskExecutorProcessSpec taskExecutorProcessSpec =
                 TaskExecutorProcessUtils.processSpecFromConfig(config);
-        assertThat(taskExecutorProcessSpec.getTotalProcessMemorySize(), is(TOTAL_PROCESS_MEM_SIZE));
+        assertThat(taskExecutorProcessSpec.getTotalProcessMemorySize())
+                .isEqualTo(TOTAL_PROCESS_MEM_SIZE);
         validateFunc.accept(taskExecutorProcessSpec);
     }
 

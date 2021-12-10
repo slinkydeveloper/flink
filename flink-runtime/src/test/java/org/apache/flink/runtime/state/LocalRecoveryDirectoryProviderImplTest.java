@@ -23,7 +23,6 @@ import org.apache.flink.core.fs.Path;
 import org.apache.flink.runtime.jobgraph.JobVertexID;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -31,6 +30,9 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link LocalRecoveryDirectoryProvider}. */
 public class LocalRecoveryDirectoryProviderImplTest extends TestLogger {
@@ -56,63 +58,62 @@ public class LocalRecoveryDirectoryProviderImplTest extends TestLogger {
     @Test
     public void allocationBaseDir() {
         for (int i = 0; i < 10; ++i) {
-            Assert.assertEquals(
-                    allocBaseFolders[i % allocBaseFolders.length],
-                    directoryProvider.allocationBaseDirectory(i));
+            assertThat(directoryProvider.allocationBaseDirectory(i))
+                    .isEqualTo(allocBaseFolders[i % allocBaseFolders.length]);
         }
     }
 
     @Test
     public void selectAllocationBaseDir() {
         for (int i = 0; i < allocBaseFolders.length; ++i) {
-            Assert.assertEquals(
-                    allocBaseFolders[i], directoryProvider.selectAllocationBaseDirectory(i));
+            assertThat(directoryProvider.selectAllocationBaseDirectory(i))
+                    .isEqualTo(allocBaseFolders[i]);
         }
     }
 
     @Test
     public void allocationBaseDirectoriesCount() {
-        Assert.assertEquals(allocBaseFolders.length, directoryProvider.allocationBaseDirsCount());
+        assertThat(directoryProvider.allocationBaseDirsCount()).isEqualTo(allocBaseFolders.length);
     }
 
     @Test
     public void subtaskSpecificDirectory() {
         for (int i = 0; i < 10; ++i) {
-            Assert.assertEquals(
-                    new File(
-                            directoryProvider.allocationBaseDirectory(i),
-                            directoryProvider.subtaskDirString()),
-                    directoryProvider.subtaskBaseDirectory(i));
+            assertThat(directoryProvider.subtaskBaseDirectory(i))
+                    .isEqualTo(
+                            new File(
+                                    directoryProvider.allocationBaseDirectory(i),
+                                    directoryProvider.subtaskDirString()));
         }
     }
 
     @Test
     public void subtaskCheckpointSpecificDirectory() {
         for (int i = 0; i < 10; ++i) {
-            Assert.assertEquals(
-                    new File(
-                            directoryProvider.subtaskBaseDirectory(i),
-                            directoryProvider.checkpointDirString(i)),
-                    directoryProvider.subtaskSpecificCheckpointDirectory(i));
+            assertThat(directoryProvider.subtaskSpecificCheckpointDirectory(i))
+                    .isEqualTo(
+                            new File(
+                                    directoryProvider.subtaskBaseDirectory(i),
+                                    directoryProvider.checkpointDirString(i)));
         }
     }
 
     @Test
     public void testPathStringConstants() {
 
-        Assert.assertEquals(
-                directoryProvider.subtaskDirString(),
-                "jid_"
-                        + JOB_ID
-                        + Path.SEPARATOR
-                        + "vtx_"
-                        + JOB_VERTEX_ID
-                        + "_sti_"
-                        + SUBTASK_INDEX);
+        assertThat(
+                        "jid_"
+                                + JOB_ID
+                                + Path.SEPARATOR
+                                + "vtx_"
+                                + JOB_VERTEX_ID
+                                + "_sti_"
+                                + SUBTASK_INDEX)
+                .isEqualTo(directoryProvider.subtaskDirString());
 
         final long checkpointId = 42;
-        Assert.assertEquals(
-                directoryProvider.checkpointDirString(checkpointId), "chk_" + checkpointId);
+        assertThat("chk_" + checkpointId)
+                .isEqualTo(directoryProvider.checkpointDirString(checkpointId));
     }
 
     @Test
@@ -120,7 +121,7 @@ public class LocalRecoveryDirectoryProviderImplTest extends TestLogger {
         try {
             new LocalRecoveryDirectoryProviderImpl(
                     new File[] {null}, JOB_ID, JOB_VERTEX_ID, SUBTASK_INDEX);
-            Assert.fail();
+            fail("unknown failure");
         } catch (NullPointerException ignore) {
         }
     }

@@ -42,8 +42,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A simple test that runs a streaming topology with checkpointing enabled. This differs from {@link
@@ -71,7 +70,7 @@ public class CoStreamCheckpointingITCase extends AbstractTestBase {
      */
     @Test
     public void testCoStreamCheckpointingProgram() throws Exception {
-        assertTrue("Broken test setup", NUM_STRINGS % 40 == 0);
+        assertThat(NUM_STRINGS % 40 == 0).as("Broken test setup").isTrue();
 
         StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(PARALLELISM);
@@ -131,10 +130,10 @@ public class CoStreamCheckpointingITCase extends AbstractTestBase {
         }
 
         // verify that we counted exactly right
-        assertEquals(NUM_STRINGS, filterSum);
-        assertEquals(NUM_STRINGS, coMapSum);
-        assertEquals(NUM_STRINGS, mapSum);
-        assertEquals(NUM_STRINGS, countSum);
+        assertThat(filterSum).isEqualTo(NUM_STRINGS);
+        assertThat(coMapSum).isEqualTo(NUM_STRINGS);
+        assertThat(mapSum).isEqualTo(NUM_STRINGS);
+        assertThat(countSum).isEqualTo(NUM_STRINGS);
     }
 
     // --------------------------------------------------------------------------------------------

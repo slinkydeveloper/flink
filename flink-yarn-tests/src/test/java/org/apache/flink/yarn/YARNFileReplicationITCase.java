@@ -46,11 +46,8 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.CLASSPATH_INCLUDE_USER_JAR;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * Test cases for the deployment of Yarn Flink clusters with customized file replication numbers.
@@ -116,7 +113,7 @@ public class YARNFileReplicationITCase extends YarnTestBase {
 
                 final JobResult jobResult = jobResultCompletableFuture.get();
 
-                assertThat(jobResult, is(notNullValue()));
+                assertThat(jobResult).isEqualTo(notNullValue());
                 jobResult
                         .getSerializedThrowable()
                         .ifPresent(
@@ -164,11 +161,12 @@ public class YARNFileReplicationITCase extends YarnTestBase {
 
         Path uberJarHDFSPath = new Path(fs.getHomeDirectory(), suffix);
 
-        assertTrue(
-                "The Flink uber jar needs to exist. If it does not exist, then this "
-                        + "indicates that the Flink cluster has already terminated and Yarn has "
-                        + "already deleted the working directory.",
-                fs.exists(uberJarHDFSPath));
+        assertThat(fs.exists(uberJarHDFSPath))
+                .as(
+                        "The Flink uber jar needs to exist. If it does not exist, then this "
+                                + "indicates that the Flink cluster has already terminated and Yarn has "
+                                + "already deleted the working directory.")
+                .isTrue();
 
         FileStatus fsStatus = fs.getFileStatus(uberJarHDFSPath);
 
@@ -181,6 +179,6 @@ public class YARNFileReplicationITCase extends YarnTestBase {
         // If YarnConfigOptions.FILE_REPLICATION is not set. The replication number should equals to
         // yarn configuration value.
         int expectedReplication = flinkFileReplication > 0 ? flinkFileReplication : replication;
-        assertEquals(expectedReplication, fsStatus.getReplication());
+        assertThat(fsStatus.getReplication()).isEqualTo(expectedReplication);
     }
 }

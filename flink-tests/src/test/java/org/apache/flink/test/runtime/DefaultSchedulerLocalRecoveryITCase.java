@@ -53,9 +53,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.flink.configuration.JobManagerOptions.EXECUTION_FAILOVER_STRATEGY;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT case to test local recovery using {@link DefaultScheduler}. */
 public class DefaultSchedulerLocalRecoveryITCase extends TestLogger {
@@ -98,13 +96,13 @@ public class DefaultSchedulerLocalRecoveryITCase extends TestLogger {
             AllocationID currentAllocation =
                     vertex.getCurrentExecutionAttempt().getAssignedAllocationID();
 
-            assertNotNull(priorAllocation);
-            assertNotNull(currentAllocation);
+            assertThat(priorAllocation).isNotNull();
+            assertThat(currentAllocation).isNotNull();
             if (!currentAllocation.equals(priorAllocation)) {
                 nonLocalRecoveredTasks++;
             }
         }
-        assertThat(nonLocalRecoveredTasks, is(expected));
+        assertThat(nonLocalRecoveredTasks).isEqualTo(expected);
     }
 
     private ArchivedExecutionGraph executeSchedulingTest(

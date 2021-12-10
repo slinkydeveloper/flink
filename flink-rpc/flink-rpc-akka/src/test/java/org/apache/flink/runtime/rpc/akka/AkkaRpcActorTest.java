@@ -44,7 +44,6 @@ import org.apache.flink.util.concurrent.FutureUtils;
 
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
-import org.hamcrest.core.Is;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -65,15 +64,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for the {@link AkkaRpcActor}. */
 public class AkkaRpcActorTest extends TestLogger {
@@ -116,7 +111,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
         DummyRpcGateway rpcGateway = futureRpcGateway.get(timeout.getSize(), timeout.getUnit());
 
-        assertEquals(rpcEndpoint.getAddress(), rpcGateway.getAddress());
+        assertThat(rpcGateway.getAddress()).isEqualTo(rpcEndpoint.getAddress());
     }
 
     /**
@@ -134,7 +129,7 @@ public class AkkaRpcActorTest extends TestLogger {
             fail("The rpc connection resolution should have failed.");
         } catch (ExecutionException exception) {
             // we're expecting a RpcConnectionException
-            assertTrue(exception.getCause() instanceof RpcConnectionException);
+            assertThat(exception.getCause()).isInstanceOf(RpcConnectionException.class);
         }
     }
 
@@ -158,7 +153,7 @@ public class AkkaRpcActorTest extends TestLogger {
             fail("Expected an AkkaRpcException.");
         } catch (ExecutionException ee) {
             // expected this exception, because the endpoint has not been started
-            assertTrue(ee.getCause() instanceof AkkaRpcException);
+            assertThat(ee.getCause()).isInstanceOf(AkkaRpcException.class);
         }
 
         // set a new value which we expect to be returned
@@ -174,10 +169,9 @@ public class AkkaRpcActorTest extends TestLogger {
             // now we should receive a result :-)
             Integer actualValue = result.get(timeout.getSize(), timeout.getUnit());
 
-            assertThat(
-                    "The new foobar value should have been returned.",
-                    actualValue,
-                    Is.is(expectedValue));
+            assertThat(actualValue)
+                    .as("The new foobar value should have been returned.")
+                    .isEqualTo(expectedValue);
         } finally {
             RpcUtils.terminateRpcEndpoint(rpcEndpoint, timeout);
         }
@@ -196,7 +190,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
         CompletableFuture<Void> terminationFuture = rpcEndpoint.getTerminationFuture();
 
-        assertFalse(terminationFuture.isDone());
+        assertThat(terminationFuture.isDone()).isFalse();
 
         CompletableFuture.runAsync(rpcEndpoint::closeAsync, akkaRpcService.getScheduledExecutor());
 
@@ -217,8 +211,8 @@ public class AkkaRpcActorTest extends TestLogger {
             fail("this should fail with an exception");
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            assertEquals(RuntimeException.class, cause.getClass());
-            assertEquals("my super specific test exception", cause.getMessage());
+            assertThat(cause.getClass()).isEqualTo(RuntimeException.class);
+            assertThat(cause.getMessage()).isEqualTo("my super specific test exception");
         }
     }
 
@@ -235,8 +229,8 @@ public class AkkaRpcActorTest extends TestLogger {
             fail("this should fail with an exception");
         } catch (ExecutionException e) {
             Throwable cause = e.getCause();
-            assertEquals(Exception.class, cause.getClass());
-            assertEquals("some test", cause.getMessage());
+            assertThat(cause.getClass()).isEqualTo(Exception.class);
+            assertThat(cause.getMessage()).isEqualTo("some test");
         }
     }
 
@@ -277,10 +271,11 @@ public class AkkaRpcActorTest extends TestLogger {
                             .connect(rpcGateway.getAddress(), DeserializatonFailingGateway.class)
                             .get();
 
-            assertThat(
-                    connect.doStuff(),
-                    FlinkMatchers.futureWillCompleteExceptionally(
-                            RpcException.class, Duration.ofHours(1)));
+            assertThat(connect.doStuff())
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            RpcException.class, Duration.ofHours(1))));
         } finally {
             RpcUtils.terminateRpcService(clientAkkaRpcService, timeout);
             RpcUtils.terminateRpcService(serverAkkaRpcService, timeout);
@@ -299,7 +294,7 @@ public class AkkaRpcActorTest extends TestLogger {
         try {
             terminationFuture.get();
         } catch (ExecutionException e) {
-            assertTrue(e.getCause() instanceof FailingOnStopEndpoint.OnStopException);
+            assertThat(e.getCause()).isInstanceOf(FailingOnStopEndpoint.OnStopException.class);
         }
     }
 
@@ -358,7 +353,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
             final CompletableFuture<Void> terminationFuture = endpoint.closeAsync();
 
-            assertFalse(terminationFuture.isDone());
+            assertThat(terminationFuture.isDone()).isFalse();
 
             onStopFuture.complete(null);
 
@@ -404,7 +399,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
             final CompletableFuture<Void> terminationFuture = endpoint.closeAsync();
 
-            assertThat(terminationFuture.isDone(), is(false));
+            assertThat(terminationFuture.isDone()).isEqualTo(false);
 
             final CompletableFuture<Integer> firstAsyncOperationFuture =
                     asyncOperationGateway.asyncOperation(timeout);
@@ -419,19 +414,21 @@ public class AkkaRpcActorTest extends TestLogger {
 
             // we can only complete the termination after the first async operation has been
             // completed
-            assertThat(terminationFuture.isDone(), is(false));
+            assertThat(terminationFuture.isDone()).isEqualTo(false);
 
             endpoint.triggerUnblockAsyncOperation();
 
-            assertThat(firstAsyncOperationFuture.get(), is(42));
+            assertThat(firstAsyncOperationFuture.get()).isEqualTo(42);
 
             terminationFuture.get();
 
-            assertThat(endpoint.getNumberAsyncOperationCalls(), is(1));
-            assertThat(
-                    secondAsyncOperationFuture,
-                    FlinkMatchers.futureWillCompleteExceptionally(
-                            RecipientUnreachableException.class, TimeUtils.toDuration(timeout)));
+            assertThat(endpoint.getNumberAsyncOperationCalls()).isEqualTo(1);
+            assertThat(secondAsyncOperationFuture)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.futureWillCompleteExceptionally(
+                                            RecipientUnreachableException.class,
+                                            TimeUtils.toDuration(timeout))));
         } finally {
             RpcUtils.terminateRpcEndpoint(endpoint, timeout);
         }
@@ -467,9 +464,10 @@ public class AkkaRpcActorTest extends TestLogger {
             fail("Expected that the rpc endpoint failed onStart and thus has terminated.");
         } catch (ExecutionException ee) {
             assertThat(
-                    ExceptionUtils.findThrowable(ee, exception -> exception.equals(testException))
-                            .isPresent(),
-                    is(true));
+                            ExceptionUtils.findThrowable(
+                                            ee, exception -> exception.equals(testException))
+                                    .isPresent())
+                    .isEqualTo(true);
         }
     }
 
@@ -499,7 +497,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
             endpoint.getTerminationFuture().get();
 
-            assertThat(endpoint.getNumOnStopCalls(), is(1));
+            assertThat(endpoint.getNumOnStopCalls()).isEqualTo(1);
         } finally {
             onStopFuture.complete(null);
             RpcUtils.terminateRpcEndpoint(endpoint, timeout);
@@ -520,9 +518,8 @@ public class AkkaRpcActorTest extends TestLogger {
                     new SimpleRpcEndpoint(akkaRpcService, endpointName)) {
                 simpleRpcEndpoint2.start();
 
-                assertThat(
-                        simpleRpcEndpoint2.getAddress(),
-                        is(equalTo(simpleRpcEndpoint1.getAddress())));
+                assertThat(simpleRpcEndpoint2.getAddress())
+                        .isEqualTo(equalTo(simpleRpcEndpoint1.getAddress()));
             }
         }
     }
@@ -562,7 +559,7 @@ public class AkkaRpcActorTest extends TestLogger {
             final RpcGateway rpcGateway =
                     akkaRpcService.connect(wildcardAddress, RpcGateway.class).join();
 
-            assertThat(rpcGateway.getAddress(), is(equalTo(simpleRpcEndpoint2.getAddress())));
+            assertThat(rpcGateway.getAddress()).isEqualTo(equalTo(simpleRpcEndpoint2.getAddress()));
         }
     }
 
@@ -581,7 +578,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
             final CompletableFuture<Integer> nullValuedResponseFuture = selfGateway.foobar();
 
-            assertThat(nullValuedResponseFuture.join(), is(nullValue()));
+            assertThat(nullValuedResponseFuture.join()).isEqualTo(nullValue());
         }
     }
 
@@ -596,7 +593,7 @@ public class AkkaRpcActorTest extends TestLogger {
 
             final Integer value = selfGateway.synchronousFoobar();
 
-            assertThat(value, is(nullValue()));
+            assertThat(value).isEqualTo(nullValue());
         }
     }
 
@@ -609,16 +606,14 @@ public class AkkaRpcActorTest extends TestLogger {
             final SerializedValueRespondingGateway selfGateway =
                     endpoint.getSelfGateway(SerializedValueRespondingGateway.class);
 
-            assertThat(
-                    selfGateway.getSerializedValueSynchronously(),
-                    equalTo(SerializedValueRespondingEndpoint.SERIALIZED_VALUE));
+            assertThat(selfGateway.getSerializedValueSynchronously())
+                    .isEqualTo(SerializedValueRespondingEndpoint.SERIALIZED_VALUE);
 
             final CompletableFuture<SerializedValue<String>> responseFuture =
                     selfGateway.getSerializedValue();
 
-            assertThat(
-                    responseFuture.get(),
-                    equalTo(SerializedValueRespondingEndpoint.SERIALIZED_VALUE));
+            assertThat(responseFuture.get())
+                    .isEqualTo(SerializedValueRespondingEndpoint.SERIALIZED_VALUE);
         }
     }
 
@@ -653,16 +648,14 @@ public class AkkaRpcActorTest extends TestLogger {
         final long scheduleTime = System.nanoTime();
         gateway.schedule(scheduleRunnableFuture, scheduleCallableFuture, executeFuture);
 
-        assertThat(
-                scheduleRunnableFuture.thenApply(ignored -> System.nanoTime()).get(),
-                greaterThanOrEqualTo(
+        assertThat(scheduleRunnableFuture.thenApply(ignored -> System.nanoTime()).get())
+                .isGreaterThanOrEqualTo(
                         scheduleTime
-                                + Duration.ofMillis(SchedulingRpcEndpoint.DELAY_MILLIS).toNanos()));
-        assertThat(
-                scheduleCallableFuture.thenApply(ignored -> System.nanoTime()).get(),
-                greaterThanOrEqualTo(
+                                + Duration.ofMillis(SchedulingRpcEndpoint.DELAY_MILLIS).toNanos());
+        assertThat(scheduleCallableFuture.thenApply(ignored -> System.nanoTime()).get())
+                .isGreaterThanOrEqualTo(
                         scheduleTime
-                                + Duration.ofMillis(SchedulingRpcEndpoint.DELAY_MILLIS).toNanos()));
+                                + Duration.ofMillis(SchedulingRpcEndpoint.DELAY_MILLIS).toNanos());
         // execute() calls don't have a delay attached, so we just check that it was run at all
         executeFuture.get();
     }

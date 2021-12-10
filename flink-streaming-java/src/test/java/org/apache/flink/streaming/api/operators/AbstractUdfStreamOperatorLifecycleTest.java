@@ -41,7 +41,6 @@ import org.apache.flink.streaming.runtime.tasks.SourceStreamTask;
 import org.apache.flink.streaming.runtime.tasks.StreamTask;
 import org.apache.flink.streaming.runtime.tasks.StreamTaskTest;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.Serializable;
@@ -51,7 +50,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** This test secures the lifecycle of AbstractUdfStreamOperator, including it's UDF handling. */
 public class AbstractUdfStreamOperatorLifecycleTest {
@@ -118,13 +118,13 @@ public class AbstractUdfStreamOperatorLifecycleTest {
                     method.getName() + Arrays.toString(method.getParameterTypes()));
         }
         Collections.sort(methodsWithSignatureString);
-        Assert.assertEquals(
-                "It seems like new methods have been introduced to "
-                        + StreamOperator.class
-                        + ". Please register them with this test and ensure to document their position in the lifecycle "
-                        + "(if applicable).",
-                ALL_METHODS_STREAM_OPERATOR,
-                methodsWithSignatureString.toString());
+        assertThat(methodsWithSignatureString.toString())
+                .as(
+                        "It seems like new methods have been introduced to "
+                                + StreamOperator.class
+                                + ". Please register them with this test and ensure to document their position in the lifecycle "
+                                + "(if applicable).")
+                .isEqualTo(ALL_METHODS_STREAM_OPERATOR);
 
         methodsWithSignatureString = new ArrayList<>();
         for (Method method : RichFunction.class.getMethods()) {
@@ -132,13 +132,13 @@ public class AbstractUdfStreamOperatorLifecycleTest {
                     method.getName() + Arrays.toString(method.getParameterTypes()));
         }
         Collections.sort(methodsWithSignatureString);
-        Assert.assertEquals(
-                "It seems like new methods have been introduced to "
-                        + RichFunction.class
-                        + ". Please register them with this test and ensure to document their position in the lifecycle "
-                        + "(if applicable).",
-                ALL_METHODS_RICH_FUNCTION,
-                methodsWithSignatureString.toString());
+        assertThat(methodsWithSignatureString.toString())
+                .as(
+                        "It seems like new methods have been introduced to "
+                                + RichFunction.class
+                                + ". Please register them with this test and ensure to document their position in the lifecycle "
+                                + "(if applicable).")
+                .isEqualTo(ALL_METHODS_RICH_FUNCTION);
     }
 
     @Test
@@ -164,8 +164,8 @@ public class AbstractUdfStreamOperatorLifecycleTest {
 
             // wait for clean termination
             task.getExecutingThread().join();
-            assertEquals(ExecutionState.FINISHED, task.getExecutionState());
-            assertEquals(EXPECTED_CALL_ORDER_FULL, ACTUAL_ORDER_TRACKING);
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FINISHED);
+            assertThat(ACTUAL_ORDER_TRACKING).isEqualTo(EXPECTED_CALL_ORDER_FULL);
         }
     }
 
@@ -193,8 +193,8 @@ public class AbstractUdfStreamOperatorLifecycleTest {
 
             // wait for clean termination
             task.getExecutingThread().join();
-            assertEquals(ExecutionState.CANCELED, task.getExecutionState());
-            assertEquals(EXPECTED_CALL_ORDER_CANCEL_RUNNING, ACTUAL_ORDER_TRACKING);
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+            assertThat(ACTUAL_ORDER_TRACKING).isEqualTo(EXPECTED_CALL_ORDER_CANCEL_RUNNING);
         }
     }
 
@@ -287,7 +287,7 @@ public class AbstractUdfStreamOperatorLifecycleTest {
                                     }
                                 } catch (Exception e) {
                                     e.printStackTrace();
-                                    Assert.fail();
+                                    fail("unknown failure");
                                 }
                             }
                         };

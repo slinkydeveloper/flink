@@ -22,7 +22,8 @@ import org.junit.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 public class StatsSummaryTest {
 
@@ -31,11 +32,11 @@ public class StatsSummaryTest {
     public void testInitialState() throws Exception {
         StatsSummary mma = new StatsSummary();
 
-        assertEquals(0, mma.getMinimum());
-        assertEquals(0, mma.getMaximum());
-        assertEquals(0, mma.getSum());
-        assertEquals(0, mma.getCount());
-        assertEquals(0, mma.getAverage());
+        assertThat(mma.getMinimum()).isEqualTo(0);
+        assertThat(mma.getMaximum()).isEqualTo(0);
+        assertThat(mma.getSum()).isEqualTo(0);
+        assertThat(mma.getCount()).isEqualTo(0);
+        assertThat(mma.getAverage()).isEqualTo(0);
     }
 
     /** Test that non-positive numbers are not counted. */
@@ -44,19 +45,19 @@ public class StatsSummaryTest {
         StatsSummary mma = new StatsSummary();
         mma.add(-1);
 
-        assertEquals(0, mma.getMinimum());
-        assertEquals(0, mma.getMaximum());
-        assertEquals(0, mma.getSum());
-        assertEquals(0, mma.getCount());
-        assertEquals(0, mma.getAverage());
+        assertThat(mma.getMinimum()).isEqualTo(0);
+        assertThat(mma.getMaximum()).isEqualTo(0);
+        assertThat(mma.getSum()).isEqualTo(0);
+        assertThat(mma.getCount()).isEqualTo(0);
+        assertThat(mma.getAverage()).isEqualTo(0);
 
         mma.add(0);
 
-        assertEquals(0, mma.getMinimum());
-        assertEquals(0, mma.getMaximum());
-        assertEquals(0, mma.getSum());
-        assertEquals(1, mma.getCount());
-        assertEquals(0, mma.getAverage());
+        assertThat(mma.getMinimum()).isEqualTo(0);
+        assertThat(mma.getMaximum()).isEqualTo(0);
+        assertThat(mma.getSum()).isEqualTo(0);
+        assertThat(mma.getCount()).isEqualTo(1);
+        assertThat(mma.getAverage()).isEqualTo(0);
     }
 
     /** Test sequence of random numbers. */
@@ -80,11 +81,11 @@ public class StatsSummaryTest {
             mma.add(number);
         }
 
-        assertEquals(min, mma.getMinimum());
-        assertEquals(max, mma.getMaximum());
-        assertEquals(sum, mma.getSum());
-        assertEquals(count, mma.getCount());
-        assertEquals(sum / count, mma.getAverage());
+        assertThat(mma.getMinimum()).isEqualTo(min);
+        assertThat(mma.getMaximum()).isEqualTo(max);
+        assertThat(mma.getSum()).isEqualTo(sum);
+        assertThat(mma.getCount()).isEqualTo(count);
+        assertThat(mma.getAverage()).isEqualTo(sum / count);
     }
 
     @Test
@@ -98,7 +99,7 @@ public class StatsSummaryTest {
         }
         StatsSummarySnapshot snapshot = summary.createSnapshot();
         for (double q = 0.01; q <= 1; q++) {
-            assertEquals(q, snapshot.getQuantile(q), 1);
+            assertThat(snapshot.getQuantile(q)).isCloseTo(q, within(1d));
         }
     }
 }

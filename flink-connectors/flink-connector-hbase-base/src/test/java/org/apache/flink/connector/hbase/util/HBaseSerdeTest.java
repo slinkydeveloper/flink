@@ -37,9 +37,7 @@ import static org.apache.flink.table.api.DataTypes.FIELD;
 import static org.apache.flink.table.api.DataTypes.INT;
 import static org.apache.flink.table.api.DataTypes.ROW;
 import static org.apache.flink.table.api.DataTypes.STRING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link HBaseSerde}. */
 public class HBaseSerdeTest {
@@ -71,12 +69,12 @@ public class HBaseSerdeTest {
         }
 
         // this verifies RowData is not reused
-        assertFalse(resultRowDatas.get(0) == resultRowDatas.get(1));
+        assertThat(resultRowDatas.get(0) == resultRowDatas.get(1)).isFalse();
 
         List<String> expected = new ArrayList<>();
         expected.add("+I(1,+I(10),+I(Hello-1,100),+I(1.01,false,Welt-1))");
         expected.add("+I(2,+I(20),+I(Hello-2,200),+I(2.02,true,Welt-2))");
-        assertEquals(expected, resultRowDataStr);
+        assertThat(resultRowDataStr).isEqualTo(expected);
     }
 
     @Test
@@ -92,12 +90,12 @@ public class HBaseSerdeTest {
         }
 
         // this verifies RowData is reused
-        assertTrue(resultRowDatas.get(0) == resultRowDatas.get(1));
+        assertThat(resultRowDatas.get(0) == resultRowDatas.get(1)).isTrue();
 
         List<String> expected = new ArrayList<>();
         expected.add("+I(1,+I(10),+I(Hello-1,100),+I(1.01,false,Welt-1))");
         expected.add("+I(2,+I(20),+I(Hello-2,200),+I(2.02,true,Welt-2))");
-        assertEquals(expected, resultRowDataStr);
+        assertThat(resultRowDataStr).isEqualTo(expected);
     }
 
     private HBaseSerde createHBaseSerde() {

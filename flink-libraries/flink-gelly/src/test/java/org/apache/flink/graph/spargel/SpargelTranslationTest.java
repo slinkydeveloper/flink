@@ -34,9 +34,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test the creation of a {@link ScatterGatherIteration} program. */
 @SuppressWarnings("serial")
@@ -106,46 +104,48 @@ public class SpargelTranslationTest {
 
         // ------------- validate the java program ----------------
 
-        assertTrue(result instanceof DeltaIterationResultSet);
+        assertThat(result).isInstanceOf(DeltaIterationResultSet.class);
 
         DeltaIterationResultSet<?, ?> resultSet = (DeltaIterationResultSet<?, ?>) result;
         DeltaIteration<?, ?> iteration = resultSet.getIterationHead();
 
         // check the basic iteration properties
-        assertEquals(NUM_ITERATIONS, resultSet.getMaxIterations());
-        assertArrayEquals(new int[] {0}, resultSet.getKeyPositions());
-        assertEquals(ITERATION_parallelism, iteration.getParallelism());
-        assertEquals(ITERATION_NAME, iteration.getName());
+        assertThat(resultSet.getMaxIterations()).isEqualTo(NUM_ITERATIONS);
+        assertThat(resultSet.getKeyPositions()).isEqualTo(new int[] {0});
+        assertThat(iteration.getParallelism()).isEqualTo(ITERATION_parallelism);
+        assertThat(iteration.getName()).isEqualTo(ITERATION_NAME);
 
-        assertEquals(
-                AGGREGATOR_NAME,
-                iteration
-                        .getAggregators()
-                        .getAllRegisteredAggregators()
-                        .iterator()
-                        .next()
-                        .getName());
+        assertThat(
+                        iteration
+                                .getAggregators()
+                                .getAllRegisteredAggregators()
+                                .iterator()
+                                .next()
+                                .getName())
+                .isEqualTo(AGGREGATOR_NAME);
 
         // validate that the semantic properties are set as they should
         TwoInputUdfOperator<?, ?, ?, ?> solutionSetJoin =
                 (TwoInputUdfOperator<?, ?, ?, ?>) resultSet.getNextWorkset();
-        assertTrue(
-                solutionSetJoin
-                        .getSemanticProperties()
-                        .getForwardingTargetFields(0, 0)
-                        .contains(0));
-        assertTrue(
-                solutionSetJoin
-                        .getSemanticProperties()
-                        .getForwardingTargetFields(1, 0)
-                        .contains(0));
+        assertThat(
+                        solutionSetJoin
+                                .getSemanticProperties()
+                                .getForwardingTargetFields(0, 0)
+                                .contains(0))
+                .isTrue();
+        assertThat(
+                        solutionSetJoin
+                                .getSemanticProperties()
+                                .getForwardingTargetFields(1, 0)
+                                .contains(0))
+                .isTrue();
 
         TwoInputUdfOperator<?, ?, ?, ?> edgesJoin =
                 (TwoInputUdfOperator<?, ?, ?, ?>) solutionSetJoin.getInput1();
 
         // validate that the broadcast sets are forwarded
-        assertEquals(bcUpdate, solutionSetJoin.getBroadcastSets().get(BC_SET_UPDATES_NAME));
-        assertEquals(bcMessaging, edgesJoin.getBroadcastSets().get(BC_SET_MESSAGES_NAME));
+        assertThat(solutionSetJoin.getBroadcastSets().get(BC_SET_UPDATES_NAME)).isEqualTo(bcUpdate);
+        assertThat(edgesJoin.getBroadcastSets().get(BC_SET_MESSAGES_NAME)).isEqualTo(bcMessaging);
     }
 
     @Test
@@ -199,46 +199,48 @@ public class SpargelTranslationTest {
 
         // ------------- validate the java program ----------------
 
-        assertTrue(result instanceof DeltaIterationResultSet);
+        assertThat(result).isInstanceOf(DeltaIterationResultSet.class);
 
         DeltaIterationResultSet<?, ?> resultSet = (DeltaIterationResultSet<?, ?>) result;
         DeltaIteration<?, ?> iteration = resultSet.getIterationHead();
 
         // check the basic iteration properties
-        assertEquals(NUM_ITERATIONS, resultSet.getMaxIterations());
-        assertArrayEquals(new int[] {0}, resultSet.getKeyPositions());
-        assertEquals(ITERATION_parallelism, iteration.getParallelism());
-        assertEquals(ITERATION_NAME, iteration.getName());
+        assertThat(resultSet.getMaxIterations()).isEqualTo(NUM_ITERATIONS);
+        assertThat(resultSet.getKeyPositions()).isEqualTo(new int[] {0});
+        assertThat(iteration.getParallelism()).isEqualTo(ITERATION_parallelism);
+        assertThat(iteration.getName()).isEqualTo(ITERATION_NAME);
 
-        assertEquals(
-                AGGREGATOR_NAME,
-                iteration
-                        .getAggregators()
-                        .getAllRegisteredAggregators()
-                        .iterator()
-                        .next()
-                        .getName());
+        assertThat(
+                        iteration
+                                .getAggregators()
+                                .getAllRegisteredAggregators()
+                                .iterator()
+                                .next()
+                                .getName())
+                .isEqualTo(AGGREGATOR_NAME);
 
         // validate that the semantic properties are set as they should
         TwoInputUdfOperator<?, ?, ?, ?> solutionSetJoin =
                 (TwoInputUdfOperator<?, ?, ?, ?>) resultSet.getNextWorkset();
-        assertTrue(
-                solutionSetJoin
-                        .getSemanticProperties()
-                        .getForwardingTargetFields(0, 0)
-                        .contains(0));
-        assertTrue(
-                solutionSetJoin
-                        .getSemanticProperties()
-                        .getForwardingTargetFields(1, 0)
-                        .contains(0));
+        assertThat(
+                        solutionSetJoin
+                                .getSemanticProperties()
+                                .getForwardingTargetFields(0, 0)
+                                .contains(0))
+                .isTrue();
+        assertThat(
+                        solutionSetJoin
+                                .getSemanticProperties()
+                                .getForwardingTargetFields(1, 0)
+                                .contains(0))
+                .isTrue();
 
         TwoInputUdfOperator<?, ?, ?, ?> edgesJoin =
                 (TwoInputUdfOperator<?, ?, ?, ?>) solutionSetJoin.getInput1();
 
         // validate that the broadcast sets are forwarded
-        assertEquals(bcVar, solutionSetJoin.getBroadcastSets().get(BC_SET_UPDATES_NAME));
-        assertEquals(bcVar, edgesJoin.getBroadcastSets().get(BC_SET_MESSAGES_NAME));
+        assertThat(solutionSetJoin.getBroadcastSets().get(BC_SET_UPDATES_NAME)).isEqualTo(bcVar);
+        assertThat(edgesJoin.getBroadcastSets().get(BC_SET_MESSAGES_NAME)).isEqualTo(bcVar);
     }
 
     // --------------------------------------------------------------------------------------------

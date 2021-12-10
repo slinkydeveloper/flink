@@ -38,10 +38,9 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link SlotSharingSlotAllocator}. */
 public class SlotSharingSlotAllocatorTest extends TestLogger {
@@ -76,12 +75,12 @@ public class SlotSharingSlotAllocatorTest extends TestLogger {
         final ResourceCounter resourceCounter =
                 slotAllocator.calculateRequiredSlots(Arrays.asList(vertex1, vertex2, vertex3));
 
-        assertThat(resourceCounter.getResources(), contains(ResourceProfile.UNKNOWN));
-        assertThat(
-                resourceCounter.getResourceCount(ResourceProfile.UNKNOWN),
-                is(
+        assertThat(resourceCounter.getResources())
+                .satisfies(matching(contains(ResourceProfile.UNKNOWN)));
+        assertThat(resourceCounter.getResourceCount(ResourceProfile.UNKNOWN))
+                .isEqualTo(
                         Math.max(vertex1.getParallelism(), vertex2.getParallelism())
-                                + vertex3.getParallelism()));
+                                + vertex3.getParallelism());
     }
 
     @Test
@@ -101,9 +100,9 @@ public class SlotSharingSlotAllocatorTest extends TestLogger {
         final Map<JobVertexID, Integer> maxParallelismForVertices =
                 slotSharingAssignments.getMaxParallelismForVertices();
 
-        assertThat(maxParallelismForVertices.get(vertex1.getJobVertexID()), is(1));
-        assertThat(maxParallelismForVertices.get(vertex2.getJobVertexID()), is(1));
-        assertThat(maxParallelismForVertices.get(vertex3.getJobVertexID()), is(1));
+        assertThat(maxParallelismForVertices.get(vertex1.getJobVertexID())).isEqualTo(1);
+        assertThat(maxParallelismForVertices.get(vertex2.getJobVertexID())).isEqualTo(1);
+        assertThat(maxParallelismForVertices.get(vertex3.getJobVertexID())).isEqualTo(1);
     }
 
     @Test
@@ -123,15 +122,12 @@ public class SlotSharingSlotAllocatorTest extends TestLogger {
         final Map<JobVertexID, Integer> maxParallelismForVertices =
                 slotSharingAssignments.getMaxParallelismForVertices();
 
-        assertThat(
-                maxParallelismForVertices.get(vertex1.getJobVertexID()),
-                is(vertex1.getParallelism()));
-        assertThat(
-                maxParallelismForVertices.get(vertex2.getJobVertexID()),
-                is(vertex2.getParallelism()));
-        assertThat(
-                maxParallelismForVertices.get(vertex3.getJobVertexID()),
-                is(vertex3.getParallelism()));
+        assertThat(maxParallelismForVertices.get(vertex1.getJobVertexID()))
+                .isEqualTo(vertex1.getParallelism());
+        assertThat(maxParallelismForVertices.get(vertex2.getJobVertexID()))
+                .isEqualTo(vertex2.getParallelism());
+        assertThat(maxParallelismForVertices.get(vertex3.getJobVertexID()))
+                .isEqualTo(vertex3.getParallelism());
     }
 
     @Test
@@ -148,7 +144,7 @@ public class SlotSharingSlotAllocatorTest extends TestLogger {
         final Optional<VertexParallelismWithSlotSharing> slotSharingAssignments =
                 slotAllocator.determineParallelism(jobInformation, getSlots(1));
 
-        assertThat(slotSharingAssignments.isPresent(), is(false));
+        assertThat(slotSharingAssignments.isPresent()).isEqualTo(false);
     }
 
     @Test
@@ -186,7 +182,7 @@ public class SlotSharingSlotAllocatorTest extends TestLogger {
 
             final SlotInfo backingSlot = expectedAssignment.getValue();
 
-            assertThat(assignedSlot.getAllocationId(), is(backingSlot.getAllocationId()));
+            assertThat(assignedSlot.getAllocationId()).isEqualTo(backingSlot.getAllocationId());
         }
     }
 
@@ -205,7 +201,7 @@ public class SlotSharingSlotAllocatorTest extends TestLogger {
         final Optional<? extends ReservedSlots> reservedSlots =
                 slotSharingSlotAllocator.tryReserveResources(slotAssignments);
 
-        assertFalse(reservedSlots.isPresent());
+        assertThat(reservedSlots.isPresent()).isFalse();
     }
 
     private static Collection<SlotInfo> getSlots(int count) {

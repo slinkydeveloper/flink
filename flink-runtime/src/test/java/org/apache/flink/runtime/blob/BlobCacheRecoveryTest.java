@@ -43,7 +43,7 @@ import static org.apache.flink.runtime.blob.BlobKeyTest.verifyKeyDifferentHashEq
 import static org.apache.flink.runtime.blob.BlobServerGetTest.verifyDeleted;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.verifyContents;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the recovery of files of a {@link BlobCacheService} from a HA store. */
 public class BlobCacheRecoveryTest extends TestLogger {
@@ -135,7 +135,9 @@ public class BlobCacheRecoveryTest extends TestLogger {
             // check that the storage directory exists
             final Path blobServerPath = new Path(storagePath, "blob");
             FileSystem fs = blobServerPath.getFileSystem();
-            assertTrue("Unknown storage dir: " + blobServerPath, fs.exists(blobServerPath));
+            assertThat(fs.exists(blobServerPath))
+                    .as("Unknown storage dir: " + blobServerPath)
+                    .isTrue();
 
             // Verify HA requests from cache1 (connected to server1) with no immediate access to the
             // file

@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Simple test for the {@link ErrorInfo}. */
 public class ErrorInfoTest {
@@ -36,9 +36,9 @@ public class ErrorInfoTest {
                 new ErrorInfo(new ExceptionWithCustomClassLoader(), System.currentTimeMillis());
         final ErrorInfo copy = CommonTestUtils.createCopySerializable(error);
 
-        assertEquals(error.getTimestamp(), copy.getTimestamp());
-        assertEquals(error.getExceptionAsString(), copy.getExceptionAsString());
-        assertEquals(error.getException().getMessage(), copy.getException().getMessage());
+        assertThat(copy.getTimestamp()).isEqualTo(error.getTimestamp());
+        assertThat(copy.getExceptionAsString()).isEqualTo(error.getExceptionAsString());
+        assertThat(copy.getException().getMessage()).isEqualTo(error.getException().getMessage());
     }
 
     // ------------------------------------------------------------------------

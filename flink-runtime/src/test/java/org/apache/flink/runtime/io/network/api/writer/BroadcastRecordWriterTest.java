@@ -40,7 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link BroadcastRecordWriter}. */
 public class BroadcastRecordWriterTest extends RecordWriterTest {
@@ -94,11 +94,11 @@ public class BroadcastRecordWriterTest extends RecordWriterTest {
                 partition.getBufferPool().bestEffortGetNumOfUsedBuffers();
         // verify the expected number of requested buffers, and it would always request a new buffer
         // while random emitting
-        assertEquals(2 * numberOfRecords, numberOfCreatedBuffers);
+        assertThat(numberOfCreatedBuffers).isEqualTo(2 * numberOfRecords);
 
         for (int i = 0; i < numberOfChannels; i++) {
             // every channel would queue the number of above crated buffers
-            assertEquals(numberOfRecords + 1, partition.getNumberOfQueuedBuffers(i));
+            assertThat(partition.getNumberOfQueuedBuffers(i)).isEqualTo(numberOfRecords + 1);
 
             final int excessRandomRecords = i < numberOfRecords % numberOfChannels ? 1 : 0;
             final int numberOfRandomRecords =
@@ -132,35 +132,35 @@ public class BroadcastRecordWriterTest extends RecordWriterTest {
         List<Buffer> buffers =
                 Arrays.asList(bufferPool.requestBuffer(), bufferPool.requestBuffer());
         buffers.forEach(Buffer::recycleBuffer);
-        assertEquals(3, bufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(bufferPool.getNumberOfAvailableMemorySegments()).isEqualTo(3);
 
         // fill first buffer
         writer.broadcastEmit(new IntType(1));
         writer.broadcastEmit(new IntType(2));
-        assertEquals(2, bufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(bufferPool.getNumberOfAvailableMemorySegments()).isEqualTo(2);
 
         // simulate consumption of first buffer consumer; this should not free buffers
-        assertEquals(1, partition.getNumberOfQueuedBuffers(0));
+        assertThat(partition.getNumberOfQueuedBuffers(0)).isEqualTo(1);
         ResultSubpartitionView view0 =
                 partition.createSubpartitionView(0, new NoOpBufferAvailablityListener());
         closeConsumer(view0, 2 * recordSize);
-        assertEquals(2, bufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(bufferPool.getNumberOfAvailableMemorySegments()).isEqualTo(2);
 
         // use second buffer
         writer.emit(new IntType(3), 0);
-        assertEquals(1, bufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(bufferPool.getNumberOfAvailableMemorySegments()).isEqualTo(1);
 
         // fully free first buffer
-        assertEquals(1, partition.getNumberOfQueuedBuffers(1));
+        assertThat(partition.getNumberOfQueuedBuffers(1)).isEqualTo(1);
         ResultSubpartitionView view1 =
                 partition.createSubpartitionView(1, new NoOpBufferAvailablityListener());
         closeConsumer(view1, 2 * recordSize);
-        assertEquals(2, bufferPool.getNumberOfAvailableMemorySegments());
+        assertThat(bufferPool.getNumberOfAvailableMemorySegments()).isEqualTo(2);
     }
 
     public void closeConsumer(ResultSubpartitionView view, int expectedSize) throws IOException {
         Buffer buffer = view.getNextBuffer().buffer();
-        assertEquals(expectedSize, buffer.getSize());
+        assertThat(buffer.getSize()).isEqualTo(expectedSize);
         buffer.recycleBuffer();
     }
 }

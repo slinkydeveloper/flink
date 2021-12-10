@@ -29,7 +29,7 @@ import org.junit.Test;
 import java.util.function.Supplier;
 
 import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.BLOCKING;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link DefaultResultPartition}. */
 public class DefaultResultPartitionTest extends TestLogger {
@@ -54,7 +54,7 @@ public class DefaultResultPartitionTest extends TestLogger {
     public void testGetPartitionState() {
         for (ResultPartitionState state : ResultPartitionState.values()) {
             resultPartitionState.setResultPartitionState(state);
-            assertEquals(state, resultPartition.getState());
+            assertThat(resultPartition.getState()).isEqualTo(state);
         }
     }
 

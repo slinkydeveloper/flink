@@ -37,7 +37,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
 /** Tests the failure handling logic of the {@link RestartPipelinedRegionFailoverStrategy}. */
@@ -363,12 +364,13 @@ public class RestartPipelinedRegionFailoverStrategyTest extends TestLogger {
         }
 
         private void restarts(SchedulingExecutionVertex... expectedResult) {
-            assertThat(
-                    strategy.getTasksNeedingRestart(executionVertex.getId(), cause),
-                    containsInAnyOrder(
-                            Stream.of(expectedResult)
-                                    .map(SchedulingExecutionVertex::getId)
-                                    .toArray()));
+            assertThat(strategy.getTasksNeedingRestart(executionVertex.getId(), cause))
+                    .satisfies(
+                            matching(
+                                    containsInAnyOrder(
+                                            Stream.of(expectedResult)
+                                                    .map(SchedulingExecutionVertex::getId)
+                                                    .toArray())));
         }
     }
 

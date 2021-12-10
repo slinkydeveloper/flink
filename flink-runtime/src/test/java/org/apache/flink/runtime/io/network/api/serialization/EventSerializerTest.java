@@ -39,10 +39,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link EventSerializer}. */
 public class EventSerializerTest {
@@ -91,13 +88,13 @@ public class EventSerializerTest {
     public void testSerializeDeserializeEvent() throws Exception {
         for (AbstractEvent evt : events) {
             ByteBuffer serializedEvent = EventSerializer.toSerializedEvent(evt);
-            assertTrue(serializedEvent.hasRemaining());
+            assertThat(serializedEvent.hasRemaining()).isTrue();
 
             AbstractEvent deserialized =
                     EventSerializer.fromSerializedEvent(
                             serializedEvent, getClass().getClassLoader());
-            assertNotNull(deserialized);
-            assertEquals(evt, deserialized);
+            assertThat(deserialized).isNotNull();
+            assertThat(deserialized).isEqualTo(evt);
         }
     }
 
@@ -106,15 +103,16 @@ public class EventSerializerTest {
         for (AbstractEvent evt : events) {
             BufferConsumer bufferConsumer = EventSerializer.toBufferConsumer(evt, false);
 
-            assertFalse(bufferConsumer.isBuffer());
-            assertTrue(bufferConsumer.isFinished());
-            assertTrue(bufferConsumer.isDataAvailable());
-            assertFalse(bufferConsumer.isRecycled());
+            assertThat(bufferConsumer.isBuffer()).isFalse();
+            assertThat(bufferConsumer.isFinished()).isTrue();
+            assertThat(bufferConsumer.isDataAvailable()).isTrue();
+            assertThat(bufferConsumer.isRecycled()).isFalse();
 
             if (evt instanceof CheckpointBarrier) {
-                assertTrue(bufferConsumer.build().getDataType().isBlockingUpstream());
+                assertThat(bufferConsumer.build().getDataType().isBlockingUpstream()).isTrue();
             } else {
-                assertEquals(Buffer.DataType.EVENT_BUFFER, bufferConsumer.build().getDataType());
+                assertThat(bufferConsumer.build().getDataType())
+                        .isEqualTo(Buffer.DataType.EVENT_BUFFER);
             }
         }
     }
@@ -124,14 +122,14 @@ public class EventSerializerTest {
         for (AbstractEvent evt : events) {
             Buffer buffer = EventSerializer.toBuffer(evt, false);
 
-            assertFalse(buffer.isBuffer());
-            assertTrue(buffer.readableBytes() > 0);
-            assertFalse(buffer.isRecycled());
+            assertThat(buffer.isBuffer()).isFalse();
+            assertThat(buffer.readableBytes() > 0).isTrue();
+            assertThat(buffer.isRecycled()).isFalse();
 
             if (evt instanceof CheckpointBarrier) {
-                assertTrue(buffer.getDataType().isBlockingUpstream());
+                assertThat(buffer.getDataType().isBlockingUpstream()).isTrue();
             } else {
-                assertEquals(Buffer.DataType.EVENT_BUFFER, buffer.getDataType());
+                assertThat(buffer.getDataType()).isEqualTo(Buffer.DataType.EVENT_BUFFER);
             }
         }
     }

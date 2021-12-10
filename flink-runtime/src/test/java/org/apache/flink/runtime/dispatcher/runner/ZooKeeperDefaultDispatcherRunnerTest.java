@@ -75,9 +75,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.emptyArray;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the interaction between the {@link DefaultDispatcherRunner} and ZooKeeper. */
 public class ZooKeeperDefaultDispatcherRunnerTest extends TestLogger {
@@ -206,7 +205,7 @@ public class ZooKeeperDefaultDispatcherRunnerTest extends TestLogger {
                 // a successful cancellation should eventually remove all job information
                 final JobResult jobResult = jobResultFuture.get();
 
-                assertThat(jobResult.getApplicationStatus(), is(ApplicationStatus.CANCELED));
+                assertThat(jobResult.getApplicationStatus()).isEqualTo(ApplicationStatus.CANCELED);
 
                 dispatcherLeaderElectionService.notLeader();
 
@@ -221,7 +220,7 @@ public class ZooKeeperDefaultDispatcherRunnerTest extends TestLogger {
         }
 
         // check resource clean up
-        assertThat(clusterHaStorageDir.listFiles(), is(emptyArray()));
+        assertThat(clusterHaStorageDir.listFiles()).isEqualTo(emptyArray());
     }
 
     private DispatcherRunner createDispatcherRunner(

@@ -40,9 +40,8 @@ import java.util.Map;
 
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSink;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSource;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test for {@link JdbcDynamicTableSource} and {@link JdbcDynamicTableSink} created by {@link
@@ -92,7 +91,7 @@ public class JdbcDynamicTableFactoryTest {
                         JdbcReadOptions.builder().build(),
                         lookupOptions,
                         SCHEMA.toPhysicalRowDataType());
-        assertEquals(expectedSource, actualSource);
+        assertThat(actualSource).isEqualTo(expectedSource);
 
         // validation for sink
         DynamicTableSink actualSink = createTableSink(SCHEMA, properties);
@@ -113,7 +112,7 @@ public class JdbcDynamicTableFactoryTest {
         JdbcDynamicTableSink expectedSink =
                 new JdbcDynamicTableSink(
                         options, executionOptions, dmlOptions, SCHEMA.toPhysicalRowDataType());
-        assertEquals(expectedSink, actualSink);
+        assertThat(actualSink).isEqualTo(expectedSink);
     }
 
     @Test
@@ -152,7 +151,7 @@ public class JdbcDynamicTableFactoryTest {
                 new JdbcDynamicTableSource(
                         options, readOptions, lookupOptions, SCHEMA.toPhysicalRowDataType());
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -182,7 +181,7 @@ public class JdbcDynamicTableFactoryTest {
                         lookupOptions,
                         SCHEMA.toPhysicalRowDataType());
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -217,7 +216,7 @@ public class JdbcDynamicTableFactoryTest {
                 new JdbcDynamicTableSink(
                         options, executionOptions, dmlOptions, SCHEMA.toPhysicalRowDataType());
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -251,7 +250,7 @@ public class JdbcDynamicTableFactoryTest {
                 new JdbcDynamicTableSink(
                         options, executionOptions, dmlOptions, SCHEMA.toPhysicalRowDataType());
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -264,12 +263,13 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "Either all or none of the following options should be provided:\n"
-                                            + "username\npassword")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "Either all or none of the following options should be provided:\n"
+                                                    + "username\npassword")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // read partition properties not complete
@@ -282,15 +282,16 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "Either all or none of the following options should be provided:\n"
-                                            + "scan.partition.column\n"
-                                            + "scan.partition.num\n"
-                                            + "scan.partition.lower-bound\n"
-                                            + "scan.partition.upper-bound")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "Either all or none of the following options should be provided:\n"
+                                                    + "scan.partition.column\n"
+                                                    + "scan.partition.num\n"
+                                                    + "scan.partition.lower-bound\n"
+                                                    + "scan.partition.upper-bound")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // read partition lower-bound > upper-bound
@@ -304,12 +305,13 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "'scan.partition.lower-bound'='100' must not be larger than "
-                                            + "'scan.partition.upper-bound'='-10'.")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "'scan.partition.lower-bound'='100' must not be larger than "
+                                                    + "'scan.partition.upper-bound'='-10'.")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // lookup cache properties not complete
@@ -320,13 +322,14 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "Either all or none of the following options should be provided:\n"
-                                            + "lookup.cache.max-rows\n"
-                                            + "lookup.cache.ttl")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "Either all or none of the following options should be provided:\n"
+                                                    + "lookup.cache.max-rows\n"
+                                                    + "lookup.cache.ttl")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // lookup cache properties not complete
@@ -337,13 +340,14 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "Either all or none of the following options should be provided:\n"
-                                            + "lookup.cache.max-rows\n"
-                                            + "lookup.cache.ttl")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "Either all or none of the following options should be provided:\n"
+                                                    + "lookup.cache.max-rows\n"
+                                                    + "lookup.cache.ttl")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // lookup retries shouldn't be negative
@@ -353,11 +357,12 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "The value of 'lookup.max-retries' option shouldn't be negative, but is -1.")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "The value of 'lookup.max-retries' option shouldn't be negative, but is -1.")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // sink retries shouldn't be negative
@@ -367,11 +372,12 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "The value of 'sink.max-retries' option shouldn't be negative, but is -1.")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "The value of 'sink.max-retries' option shouldn't be negative, but is -1.")
+                                    .isPresent())
+                    .isTrue();
         }
 
         // connection.max-retry-timeout shouldn't be smaller than 1 second
@@ -381,11 +387,12 @@ public class JdbcDynamicTableFactoryTest {
             createTableSource(SCHEMA, properties);
             fail("exception expected");
         } catch (Throwable t) {
-            assertTrue(
-                    ExceptionUtils.findThrowableWithMessage(
-                                    t,
-                                    "The value of 'connection.max-retry-timeout' option must be in second granularity and shouldn't be smaller than 1 second, but is 100ms.")
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowableWithMessage(
+                                            t,
+                                            "The value of 'connection.max-retry-timeout' option must be in second granularity and shouldn't be smaller than 1 second, but is 100ms.")
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -418,7 +425,7 @@ public class JdbcDynamicTableFactoryTest {
                         lookupOptions,
                         SCHEMA.toPhysicalRowDataType());
 
-        assertEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private Map<String, String> getAllOptions() {

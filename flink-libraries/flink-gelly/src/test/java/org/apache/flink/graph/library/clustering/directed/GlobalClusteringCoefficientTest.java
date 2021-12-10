@@ -27,7 +27,7 @@ import org.apache.flink.types.NullValue;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GlobalClusteringCoefficient}. */
 public class GlobalClusteringCoefficientTest extends AsmTestBase {
@@ -47,8 +47,8 @@ public class GlobalClusteringCoefficientTest extends AsmTestBase {
         Result result =
                 new GlobalClusteringCoefficient<T, NullValue, NullValue>().run(graph).execute();
 
-        assertEquals(tripletCount, result.getNumberOfTriplets());
-        assertEquals(triangleCount, result.getNumberOfTriangles());
+        assertThat(result.getNumberOfTriplets()).isEqualTo(tripletCount);
+        assertThat(result.getNumberOfTriangles()).isEqualTo(triangleCount);
     }
 
     @Test

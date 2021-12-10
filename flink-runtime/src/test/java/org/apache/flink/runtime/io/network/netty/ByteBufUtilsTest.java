@@ -25,9 +25,7 @@ import org.apache.flink.shaded.netty4.io.netty.buffer.Unpooled;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the methods in {@link ByteBufUtils}. */
 public class ByteBufUtilsTest extends TestLogger {
@@ -49,8 +47,8 @@ public class ByteBufUtilsTest extends TestLogger {
                 ByteBufUtils.accumulate(
                         target, src, expectedAccumulationSize, target.readableBytes());
 
-        assertSame(src, accumulated);
-        assertEquals(sourceReaderIndex, src.readerIndex());
+        assertThat(accumulated).isSameAs(src);
+        assertThat(src.readerIndex()).isEqualTo(sourceReaderIndex);
         verifyBufferContent(src, sourceReaderIndex, expectedAccumulationSize);
     }
 
@@ -76,9 +74,9 @@ public class ByteBufUtilsTest extends TestLogger {
         ByteBuf accumulated =
                 ByteBufUtils.accumulate(
                         target, firstSource, expectedAccumulationSize, target.readableBytes());
-        assertNull(accumulated);
-        assertEquals(sourceLength, firstSource.readerIndex());
-        assertEquals(firstAccumulationSize, target.readableBytes());
+        assertThat(accumulated).isNull();
+        assertThat(firstSource.readerIndex()).isEqualTo(sourceLength);
+        assertThat(target.readableBytes()).isEqualTo(firstAccumulationSize);
 
         // The remaining data will be copied from the second buffer, and the target buffer will be
         // returned
@@ -86,9 +84,10 @@ public class ByteBufUtilsTest extends TestLogger {
         accumulated =
                 ByteBufUtils.accumulate(
                         target, secondSource, expectedAccumulationSize, target.readableBytes());
-        assertSame(target, accumulated);
-        assertEquals(secondSourceReaderIndex + secondAccumulationSize, secondSource.readerIndex());
-        assertEquals(expectedAccumulationSize, target.readableBytes());
+        assertThat(accumulated).isSameAs(target);
+        assertThat(secondSource.readerIndex())
+                .isEqualTo(secondSourceReaderIndex + secondAccumulationSize);
+        assertThat(target.readableBytes()).isEqualTo(expectedAccumulationSize);
 
         verifyBufferContent(accumulated, 0, expectedAccumulationSize);
     }
@@ -125,10 +124,9 @@ public class ByteBufUtilsTest extends TestLogger {
     private void verifyBufferContent(ByteBuf buf, int start, int length) {
         for (int i = 0; i < length; ++i) {
             byte b = buf.getByte(start + i);
-            assertEquals(
-                    String.format("The byte at position %d is not right.", start + i),
-                    ACCUMULATION_BYTE,
-                    b);
+            assertThat(b)
+                    .as(String.format("The byte at position %d is not right.", start + i))
+                    .isEqualTo(ACCUMULATION_BYTE);
         }
     }
 }

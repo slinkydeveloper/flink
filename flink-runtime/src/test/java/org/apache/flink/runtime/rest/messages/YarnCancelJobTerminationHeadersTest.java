@@ -23,9 +23,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link YarnCancelJobTerminationHeaders}. */
 public class YarnCancelJobTerminationHeadersTest extends TestLogger {
@@ -36,11 +34,11 @@ public class YarnCancelJobTerminationHeadersTest extends TestLogger {
 
     @Test
     public void testMethod() {
-        assertThat(instance.getHttpMethod(), is(HttpMethodWrapper.GET));
+        assertThat(instance.getHttpMethod()).isEqualTo(HttpMethodWrapper.GET);
     }
 
     @Test
     public void testURL() {
-        assertThat(instance.getTargetRestEndpointURL(), endsWith("yarn-cancel"));
+        assertThat(instance.getTargetRestEndpointURL()).endsWith("yarn-cancel");
     }
 }

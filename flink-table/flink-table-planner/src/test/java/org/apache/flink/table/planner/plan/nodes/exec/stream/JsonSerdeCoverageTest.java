@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test to check whether all {@link StreamExecNode}s have been implemented json
@@ -67,27 +67,30 @@ public class JsonSerdeCoverageTest {
                 classesWithoutJsonCreator.add(className);
             }
         }
-        assertTrue(
-                String.format(
-                        "%s do not support json serialization/deserialization, "
-                                + "please refer the implementation of the other StreamExecNodes.",
-                        String.join(",", classesWithoutJsonCreator)),
-                classesWithoutJsonCreator.isEmpty());
-        assertTrue(
-                String.format(
-                        "%s have support json serialization/deserialization, "
-                                + "but still in UNSUPPORTED_JSON_SERDE_CLASSES list. "
-                                + "please move them from UNSUPPORTED_JSON_SERDE_CLASSES.",
-                        String.join(",", classesWithJsonCreatorInUnsupportedList)),
-                classesWithJsonCreatorInUnsupportedList.isEmpty());
+        assertThat(classesWithoutJsonCreator.isEmpty())
+                .as(
+                        String.format(
+                                "%s do not support json serialization/deserialization, "
+                                        + "please refer the implementation of the other StreamExecNodes.",
+                                String.join(",", classesWithoutJsonCreator)))
+                .isTrue();
+        assertThat(classesWithJsonCreatorInUnsupportedList.isEmpty())
+                .as(
+                        String.format(
+                                "%s have support json serialization/deserialization, "
+                                        + "but still in UNSUPPORTED_JSON_SERDE_CLASSES list. "
+                                        + "please move them from UNSUPPORTED_JSON_SERDE_CLASSES.",
+                                String.join(",", classesWithJsonCreatorInUnsupportedList)))
+                .isTrue();
         List<String> notExistingClasses =
                 UNSUPPORTED_JSON_SERDE_CLASSES.stream()
                         .filter(c -> !classes.contains(c))
                         .collect(Collectors.toList());
-        assertTrue(
-                String.format(
-                        "%s do not exist any more, please remove them from UNSUPPORTED_JSON_SERDE_CLASSES.",
-                        String.join(",", notExistingClasses)),
-                notExistingClasses.isEmpty());
+        assertThat(notExistingClasses.isEmpty())
+                .as(
+                        String.format(
+                                "%s do not exist any more, please remove them from UNSUPPORTED_JSON_SERDE_CLASSES.",
+                                String.join(",", notExistingClasses)))
+                .isTrue();
     }
 }

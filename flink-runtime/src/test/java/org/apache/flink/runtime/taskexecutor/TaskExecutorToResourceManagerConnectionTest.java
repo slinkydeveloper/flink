@@ -44,9 +44,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link TaskExecutorToResourceManagerConnection}. */
 public class TaskExecutorToResourceManagerConnectionTest extends TestLogger {
@@ -96,15 +95,13 @@ public class TaskExecutorToResourceManagerConnectionTest extends TestLogger {
                             taskExecutorRegistration.getHardwareDescription();
                     final TaskExecutorMemoryConfiguration actualMemoryConfiguration =
                             taskExecutorRegistration.getMemoryConfiguration();
-
-                    assertThat(actualAddress, is(equalTo(TASK_MANAGER_ADDRESS)));
-                    assertThat(actualResourceId, is(equalTo(TASK_MANAGER_RESOURCE_ID)));
-                    assertThat(actualDataPort, is(equalTo(TASK_MANAGER_DATA_PORT)));
-                    assertThat(
-                            actualHardwareDescription,
-                            is(equalTo(TASK_MANAGER_HARDWARE_DESCRIPTION)));
-                    assertThat(actualMemoryConfiguration, is(TASK_MANAGER_MEMORY_CONFIGURATION));
-
+                    assertThat(actualAddress).isEqualTo(equalTo(TASK_MANAGER_ADDRESS));
+                    assertThat(actualResourceId).isEqualTo(equalTo(TASK_MANAGER_RESOURCE_ID));
+                    assertThat(actualDataPort).isEqualTo(equalTo(TASK_MANAGER_DATA_PORT));
+                    assertThat(actualHardwareDescription)
+                            .isEqualTo(equalTo(TASK_MANAGER_HARDWARE_DESCRIPTION));
+                    assertThat(actualMemoryConfiguration)
+                            .isEqualTo(TASK_MANAGER_MEMORY_CONFIGURATION);
                     return CompletableFuture.completedFuture(successfulRegistration());
                 });
 

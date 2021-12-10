@@ -27,7 +27,6 @@ import org.apache.flink.contrib.streaming.state.iterator.RocksStateKeysAndNamesp
 import org.apache.flink.core.memory.DataOutputSerializer;
 import org.apache.flink.runtime.state.CompositeKeySerializationUtils;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -37,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RocksDBRocksStateKeysAndNamespacesIterator. */
 public class RocksDBRocksStateKeysAndNamespacesIteratorTest {
@@ -120,11 +121,11 @@ public class RocksDBRocksStateKeysAndNamespacesIteratorTest {
                 }
 
                 fetchedKeys.sort(Comparator.comparingInt(a -> a.f0));
-                Assert.assertEquals(1000, fetchedKeys.size());
+                assertThat(fetchedKeys.size()).isEqualTo(1000);
 
                 for (int i = 0; i < 1000; ++i) {
-                    Assert.assertEquals(i, fetchedKeys.get(i).f0.intValue());
-                    Assert.assertEquals(namespace, fetchedKeys.get(i).f1);
+                    assertThat(fetchedKeys.get(i).f0.intValue()).isEqualTo(i);
+                    assertThat(fetchedKeys.get(i).f1).isEqualTo(namespace);
                 }
             }
         }

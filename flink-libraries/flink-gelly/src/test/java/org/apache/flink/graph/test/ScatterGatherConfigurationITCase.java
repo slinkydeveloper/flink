@@ -36,13 +36,14 @@ import org.apache.flink.graph.utils.VertexToTuple2Map;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.types.LongValue;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.HashSet;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ScatterGatherConfiguration}. */
 @RunWith(Parameterized.class)
@@ -110,10 +111,10 @@ public class ScatterGatherConfigurationITCase extends MultipleProgramsTestBase {
 
         iteration.configure(parameters);
 
-        Assert.assertEquals("gelly iteration", iteration.getIterationConfiguration().getName(""));
-        Assert.assertEquals(2, iteration.getIterationConfiguration().getParallelism());
-        Assert.assertEquals(
-                true, iteration.getIterationConfiguration().isSolutionSetUnmanagedMemory());
+        assertThat(iteration.getIterationConfiguration().getName("")).isEqualTo("gelly iteration");
+        assertThat(iteration.getIterationConfiguration().getParallelism()).isEqualTo(2);
+        assertThat(iteration.getIterationConfiguration().isSolutionSetUnmanagedMemory())
+                .isEqualTo(true);
 
         DataSet<Vertex<Long, Long>> data =
                 TestGraphUtils.getLongLongVertexData(env).runOperation(iteration);
@@ -527,19 +528,19 @@ public class ScatterGatherConfigurationITCase extends MultipleProgramsTestBase {
             // test bcast variable
             @SuppressWarnings("unchecked")
             List<Integer> bcastSet = (List<Integer>) (List<?>) getBroadcastSet("messagingBcastSet");
-            Assert.assertEquals(4, bcastSet.get(0).intValue());
-            Assert.assertEquals(5, bcastSet.get(1).intValue());
-            Assert.assertEquals(6, bcastSet.get(2).intValue());
+            assertThat(bcastSet.get(0).intValue()).isEqualTo(4);
+            assertThat(bcastSet.get(1).intValue()).isEqualTo(5);
+            assertThat(bcastSet.get(2).intValue()).isEqualTo(6);
 
             // test number of vertices
-            Assert.assertEquals(5, getNumberOfVertices());
+            assertThat(getNumberOfVertices()).isEqualTo(5);
 
             // test aggregator
             if (getSuperstepNumber() == 2) {
                 long aggrValue =
                         ((LongValue) getPreviousIterationAggregate("superstepAggregator"))
                                 .getValue();
-                Assert.assertEquals(5, aggrValue);
+                assertThat(aggrValue).isEqualTo(5);
             }
         }
 
@@ -557,11 +558,11 @@ public class ScatterGatherConfigurationITCase extends MultipleProgramsTestBase {
         @Override
         public void sendMessages(Vertex<Long, Long> vertex) {
             // test number of vertices
-            Assert.assertEquals(-1, getNumberOfVertices());
+            assertThat(getNumberOfVertices()).isEqualTo(-1);
 
             // test degrees
-            Assert.assertEquals(-1, getInDegree());
-            Assert.assertEquals(-1, getOutDegree());
+            assertThat(getInDegree()).isEqualTo(-1);
+            assertThat(getOutDegree()).isEqualTo(-1);
             // send message to keep vertices active
             sendMessageToAllNeighbors(vertex.getValue());
         }
@@ -578,15 +579,15 @@ public class ScatterGatherConfigurationITCase extends MultipleProgramsTestBase {
             // test bcast variable
             @SuppressWarnings("unchecked")
             List<Integer> bcastSet = (List<Integer>) (List<?>) getBroadcastSet("updateBcastSet");
-            Assert.assertEquals(1, bcastSet.get(0).intValue());
-            Assert.assertEquals(2, bcastSet.get(1).intValue());
-            Assert.assertEquals(3, bcastSet.get(2).intValue());
+            assertThat(bcastSet.get(0).intValue()).isEqualTo(1);
+            assertThat(bcastSet.get(1).intValue()).isEqualTo(2);
+            assertThat(bcastSet.get(2).intValue()).isEqualTo(3);
 
             // test aggregator
             aggregator = getIterationAggregator("superstepAggregator");
 
             // test number of vertices
-            Assert.assertEquals(5, getNumberOfVertices());
+            assertThat(getNumberOfVertices()).isEqualTo(5);
         }
 
         @Override
@@ -605,11 +606,11 @@ public class ScatterGatherConfigurationITCase extends MultipleProgramsTestBase {
         public void updateVertex(Vertex<Long, Long> vertex, MessageIterator<Long> inMessages) {
 
             // test number of vertices
-            Assert.assertEquals(-1, getNumberOfVertices());
+            assertThat(getNumberOfVertices()).isEqualTo(-1);
 
             // test degrees
-            Assert.assertEquals(-1, getInDegree());
-            Assert.assertEquals(-1, getOutDegree());
+            assertThat(getInDegree()).isEqualTo(-1);
+            assertThat(getOutDegree()).isEqualTo(-1);
 
             setNewVertexValue(vertex.getValue() + 1);
         }
@@ -650,11 +651,11 @@ public class ScatterGatherConfigurationITCase extends MultipleProgramsTestBase {
         @Override
         public void sendMessages(Vertex<Long, Long> vertex) {
             if (vertex.getId() == 1) {
-                Assert.assertEquals(2, getOutDegree());
-                Assert.assertEquals(1, getInDegree());
+                assertThat(getOutDegree()).isEqualTo(2);
+                assertThat(getInDegree()).isEqualTo(1);
             } else if (vertex.getId() == 3) {
-                Assert.assertEquals(2, getOutDegree());
-                Assert.assertEquals(2, getInDegree());
+                assertThat(getOutDegree()).isEqualTo(2);
+                assertThat(getInDegree()).isEqualTo(2);
             }
             // send message to keep vertices active
             sendMessageToAllNeighbors(vertex.getValue());

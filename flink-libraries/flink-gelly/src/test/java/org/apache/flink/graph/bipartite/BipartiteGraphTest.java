@@ -30,7 +30,7 @@ import org.junit.Test;
 import java.util.Arrays;
 
 import static org.apache.flink.graph.generator.TestUtils.compareGraph;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link BipartiteGraph}. */
 public class BipartiteGraphTest {
@@ -40,10 +40,12 @@ public class BipartiteGraphTest {
         BipartiteGraph<Integer, Integer, String, String, String> bipartiteGraph =
                 createBipartiteGraph();
 
-        assertEquals(
-                Arrays.asList(
-                        new Vertex<>(4, "top4"), new Vertex<>(5, "top5"), new Vertex<>(6, "top6")),
-                bipartiteGraph.getTopVertices().collect());
+        assertThat(bipartiteGraph.getTopVertices().collect())
+                .isEqualTo(
+                        Arrays.asList(
+                                new Vertex<>(4, "top4"),
+                                new Vertex<>(5, "top5"),
+                                new Vertex<>(6, "top6")));
     }
 
     @Test
@@ -51,12 +53,12 @@ public class BipartiteGraphTest {
         BipartiteGraph<Integer, Integer, String, String, String> bipartiteGraph =
                 createBipartiteGraph();
 
-        assertEquals(
-                Arrays.asList(
-                        new Vertex<>(1, "bottom1"),
-                        new Vertex<>(2, "bottom2"),
-                        new Vertex<>(3, "bottom3")),
-                bipartiteGraph.getBottomVertices().collect());
+        assertThat(bipartiteGraph.getBottomVertices().collect())
+                .isEqualTo(
+                        Arrays.asList(
+                                new Vertex<>(1, "bottom1"),
+                                new Vertex<>(2, "bottom2"),
+                                new Vertex<>(3, "bottom3")));
     }
 
     @Test

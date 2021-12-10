@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(Parameterized.class)
 public class DefaultFilterTest {
@@ -62,7 +62,8 @@ public class DefaultFilterTest {
     public void test() {
         FilePathFilter defaultFilter = FilePathFilter.createDefaultFilter();
         Path path = new Path(filePath);
-        assertEquals(
-                String.format("File: %s", filePath), shouldFilter, defaultFilter.filterPath(path));
+        assertThat(defaultFilter.filterPath(path))
+                .as(String.format("File: %s", filePath))
+                .isEqualTo(shouldFilter);
     }
 }

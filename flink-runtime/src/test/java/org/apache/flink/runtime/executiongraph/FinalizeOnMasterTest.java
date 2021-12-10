@@ -29,7 +29,8 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Test;
 
 import static org.apache.flink.runtime.scheduler.SchedulerTestingUtils.createScheduler;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -59,18 +60,18 @@ public class FinalizeOnMasterTest extends TestLogger {
 
         final ExecutionGraph eg = scheduler.getExecutionGraph();
 
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
 
         ExecutionGraphTestUtils.switchAllVerticesToRunning(eg);
 
         // move all vertices to finished state
         ExecutionGraphTestUtils.finishAllVertices(eg);
-        assertEquals(JobStatus.FINISHED, eg.waitUntilTerminal());
+        assertThat(eg.waitUntilTerminal()).isEqualTo(JobStatus.FINISHED);
 
         verify(vertex1, times(1)).finalizeOnMaster(any(ClassLoader.class));
         verify(vertex2, times(1)).finalizeOnMaster(any(ClassLoader.class));
 
-        assertEquals(0, eg.getRegisteredExecutions().size());
+        assertThat(eg.getRegisteredExecutions().size()).isEqualTo(0);
     }
 
     @Test
@@ -87,19 +88,19 @@ public class FinalizeOnMasterTest extends TestLogger {
 
         final ExecutionGraph eg = scheduler.getExecutionGraph();
 
-        assertEquals(JobStatus.RUNNING, eg.getState());
+        assertThat(eg.getState()).isEqualTo(JobStatus.RUNNING);
 
         ExecutionGraphTestUtils.switchAllVerticesToRunning(eg);
 
         // fail the execution
         final Execution exec =
                 eg.getJobVertex(vertex.getID()).getTaskVertices()[0].getCurrentExecutionAttempt();
-        exec.fail(new Exception("test"));
+        fail("unknown failure", new Exception("test"));
 
-        assertEquals(JobStatus.FAILED, eg.waitUntilTerminal());
+        assertThat(eg.waitUntilTerminal()).isEqualTo(JobStatus.FAILED);
 
         verify(vertex, times(0)).finalizeOnMaster(any(ClassLoader.class));
 
-        assertEquals(0, eg.getRegisteredExecutions().size());
+        assertThat(eg.getRegisteredExecutions().size()).isEqualTo(0);
     }
 }

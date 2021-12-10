@@ -24,8 +24,7 @@ import org.apache.flink.api.common.resources.ExternalResource;
 
 import org.junit.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SlotSharingGroupUtils}. */
 public class SlotSharingGroupUtilsTest {
@@ -48,9 +47,9 @@ public class SlotSharingGroupUtilsTest {
                         .build();
         final SlotSharingGroup slotSharingGroup2 = SlotSharingGroup.newBuilder("ssg").build();
 
-        assertThat(SlotSharingGroupUtils.extractResourceSpec(slotSharingGroup1), is(resourceSpec));
-        assertThat(
-                SlotSharingGroupUtils.extractResourceSpec(slotSharingGroup2),
-                is(ResourceSpec.UNKNOWN));
+        assertThat(SlotSharingGroupUtils.extractResourceSpec(slotSharingGroup1))
+                .isEqualTo(resourceSpec);
+        assertThat(SlotSharingGroupUtils.extractResourceSpec(slotSharingGroup2))
+                .isEqualTo(ResourceSpec.UNKNOWN);
     }
 }

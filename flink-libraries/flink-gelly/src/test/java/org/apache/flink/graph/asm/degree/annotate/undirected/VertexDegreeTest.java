@@ -30,7 +30,7 @@ import org.apache.flink.types.NullValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link VertexDegree}. */
 public class VertexDegreeTest extends AsmTestBase {
@@ -64,7 +64,7 @@ public class VertexDegreeTest extends AsmTestBase {
                                 .setReduceOnTargetId(false));
 
         for (Vertex<LongValue, LongValue> vertex : degreeOnSourceId.collect()) {
-            assertEquals(expectedDegree, vertex.getValue().getValue());
+            assertThat(vertex.getValue().getValue()).isEqualTo(expectedDegree);
         }
 
         DataSet<Vertex<LongValue, LongValue>> degreeOnTargetId =
@@ -73,7 +73,7 @@ public class VertexDegreeTest extends AsmTestBase {
                                 .setReduceOnTargetId(true));
 
         for (Vertex<LongValue, LongValue> vertex : degreeOnTargetId.collect()) {
-            assertEquals(expectedDegree, vertex.getValue().getValue());
+            assertThat(vertex.getValue().getValue()).isEqualTo(expectedDegree);
         }
     }
 
@@ -86,7 +86,7 @@ public class VertexDegreeTest extends AsmTestBase {
                         new VertexDegree<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(false));
 
-        assertEquals(0, degree.collect().size());
+        assertThat(degree.collect().size()).isEqualTo(0);
 
         degree =
                 emptyGraphWithVertices.run(
@@ -107,14 +107,14 @@ public class VertexDegreeTest extends AsmTestBase {
                         new VertexDegree<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(false));
 
-        assertEquals(0, degree.collect().size());
+        assertThat(degree.collect().size()).isEqualTo(0);
 
         degree =
                 emptyGraphWithoutVertices.run(
                         new VertexDegree<LongValue, NullValue, NullValue>()
                                 .setIncludeZeroDegreeVertices(true));
 
-        assertEquals(0, degree.collect().size());
+        assertThat(degree.collect().size()).isEqualTo(0);
     }
 
     @Test
@@ -130,8 +130,8 @@ public class VertexDegreeTest extends AsmTestBase {
                         .run(degreeOnSourceId)
                         .execute();
 
-        assertEquals(902, checksumOnSourceId.getCount());
-        assertEquals(0x0000000000e1fb30L, checksumOnSourceId.getChecksum());
+        assertThat(checksumOnSourceId.getCount()).isEqualTo(902);
+        assertThat(checksumOnSourceId.getChecksum()).isEqualTo(0x0000000000e1fb30L);
 
         DataSet<Vertex<LongValue, LongValue>> degreeOnTargetId =
                 undirectedRMatGraph(10, 16)
@@ -144,6 +144,6 @@ public class VertexDegreeTest extends AsmTestBase {
                         .run(degreeOnTargetId)
                         .execute();
 
-        assertEquals(checksumOnSourceId, checksumOnTargetId);
+        assertThat(checksumOnTargetId).isEqualTo(checksumOnSourceId);
     }
 }

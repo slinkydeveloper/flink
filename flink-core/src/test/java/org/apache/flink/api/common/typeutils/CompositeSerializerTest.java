@@ -28,7 +28,6 @@ import org.apache.flink.api.java.typeutils.TypeExtractor;
 import org.apache.flink.core.memory.DataInputView;
 import org.apache.flink.core.memory.DataOutputView;
 
-import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -40,6 +39,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test suite for {@link CompositeSerializer}. */
 public class CompositeSerializerTest {
@@ -134,7 +135,7 @@ public class CompositeSerializerTest {
         } catch (Exception e) {
             System.err.println(e.getMessage());
             e.printStackTrace();
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 

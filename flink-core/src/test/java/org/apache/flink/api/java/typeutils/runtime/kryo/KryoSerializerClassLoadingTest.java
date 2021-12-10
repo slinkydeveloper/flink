@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import java.io.Serializable;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test validates that the Kryo-based serializer handles classes with custom class loaders

@@ -50,11 +50,10 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.EnumSet.complementOf;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Declarative tests for {@link DefaultCheckpointPlanCalculator}.
@@ -190,10 +189,9 @@ public class DefaultCheckpointPlanCalculatorTest {
                                 + " state");
             } catch (ExecutionException e) {
                 Throwable cause = e.getCause();
-                assertThat(cause, instanceOf(CheckpointException.class));
-                assertEquals(
-                        CheckpointFailureReason.NOT_ALL_REQUIRED_TASKS_RUNNING,
-                        ((CheckpointException) cause).getCheckpointFailureReason());
+                assertThat(cause).isInstanceOf(CheckpointException.class);
+                assertThat(((CheckpointException) cause).getCheckpointFailureReason())
+                        .isEqualTo(CheckpointFailureReason.NOT_ALL_REQUIRED_TASKS_RUNNING);
             }
         }
     }
@@ -380,13 +378,14 @@ public class DefaultCheckpointPlanCalculatorTest {
 
     private <T> void assertSameInstancesWithoutOrder(
             String comment, Collection<T> expected, Collection<T> actual) {
-        assertThat(
-                comment,
-                expected,
-                containsInAnyOrder(
-                        actual.stream()
-                                .map(CoreMatchers::sameInstance)
-                                .collect(Collectors.toList())));
+        assertThat(expected)
+                .as(comment)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        actual.stream()
+                                                .map(CoreMatchers::sameInstance)
+                                                .collect(Collectors.toList()))));
     }
 
     private List<ExecutionVertex> chooseTasks(

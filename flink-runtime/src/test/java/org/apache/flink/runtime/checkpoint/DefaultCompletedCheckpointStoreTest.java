@@ -52,12 +52,11 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.apache.flink.runtime.checkpoint.CheckpointRetentionPolicy.NEVER_RETAIN_AFTER_TERMINATION;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link DefaultCompletedCheckpointStore}. */
 public class DefaultCompletedCheckpointStoreTest extends TestLogger {
@@ -131,7 +130,7 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
             completedCheckpointStore.addCheckpointAndSubsumeOldestOne(
                     c, new CheckpointsCleaner(), () -> {});
         }
-        assertEquals(expectedRetained, completedCheckpointStore.getAllCheckpoints());
+        assertThat(completedCheckpointStore.getAllCheckpoints()).isEqualTo(expectedRetained);
     }
 
     /**
@@ -147,12 +146,12 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
                 createCompletedCheckpointStore(stateHandleStore);
         final List<CompletedCheckpoint> recoveredCompletedCheckpoint =
                 completedCheckpointStore.getAllCheckpoints();
-        assertThat(recoveredCompletedCheckpoint.size(), is(3));
+        assertThat(recoveredCompletedCheckpoint.size()).isEqualTo(3);
         final List<Long> checkpointIds =
                 recoveredCompletedCheckpoint.stream()
                         .map(CompletedCheckpoint::getCheckpointID)
                         .collect(Collectors.toList());
-        assertThat(checkpointIds, contains(1L, 2L, 3L));
+        assertThat(checkpointIds).satisfies(matching(contains(1L, 2L, 3L)));
     }
 
     /** We got an {@link IOException} when retrieving checkpoint 2. It should NOT be skipped. */
@@ -177,7 +176,7 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
             }
             throw e;
         }
-        fail();
+        fail("unknown failure");
     }
 
     @Test
@@ -195,8 +194,9 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
         final CompletedCheckpointStore completedCheckpointStore =
                 createCompletedCheckpointStore(stateHandleStore);
 
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(num));
-        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID(), is(1L));
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(num);
+        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID())
+                .isEqualTo(1L);
 
         final long ckpId = 100L;
         final CompletedCheckpoint ckp =
@@ -206,12 +206,12 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
 
         // We should persist the completed checkpoint to state handle store.
         final CompletedCheckpoint addedCkp = addFuture.get(timeout, TimeUnit.MILLISECONDS);
-        assertThat(addedCkp.getCheckpointID(), is(ckpId));
+        assertThat(addedCkp.getCheckpointID()).isEqualTo(ckpId);
 
         // Check the old checkpoint is removed and new one is added.
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(num));
-        assertThat(
-                completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID(), is(ckpId));
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(num);
+        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID())
+                .isEqualTo(ckpId);
     }
 
     @Test
@@ -228,8 +228,9 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
         final CompletedCheckpointStore completedCheckpointStore =
                 createCompletedCheckpointStore(stateHandleStore);
 
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(num));
-        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID(), is(1L));
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(num);
+        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID())
+                .isEqualTo(1L);
 
         final long ckpId = 100L;
         final CompletedCheckpoint ckp =
@@ -240,11 +241,12 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
                     ckp, new CheckpointsCleaner(), () -> {});
             fail("We should get an exception when add checkpoint to failed..");
         } catch (FlinkException ex) {
-            assertThat(ex, FlinkMatchers.containsMessage(errMsg));
+            assertThat(ex).satisfies(matching(FlinkMatchers.containsMessage(errMsg)));
         }
         // Check the old checkpoint still exists.
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(num));
-        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID(), is(1L));
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(num);
+        assertThat(completedCheckpointStore.getAllCheckpoints().get(0).getCheckpointID())
+                .isEqualTo(1L);
     }
 
     @Test
@@ -265,12 +267,12 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
         final CompletedCheckpointStore completedCheckpointStore =
                 createCompletedCheckpointStore(stateHandleStore);
 
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(num));
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(num);
 
         completedCheckpointStore.shutdown(JobStatus.CANCELED, new CheckpointsCleaner());
-        assertThat(removeCalledNum.get(), is(num));
-        assertThat(clearEntriesAllFuture.isDone(), is(true));
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(0));
+        assertThat(removeCalledNum.get()).isEqualTo(num);
+        assertThat(clearEntriesAllFuture.isDone()).isEqualTo(true);
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(0);
     }
 
     @Test
@@ -292,7 +294,7 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
         final CompletedCheckpointStore completedCheckpointStore =
                 createCompletedCheckpointStore(stateHandleStore);
 
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(3));
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(3);
 
         completedCheckpointStore.shutdown(JobStatus.CANCELLING, new CheckpointsCleaner());
         try {
@@ -301,10 +303,10 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
         } catch (TimeoutException ex) {
             // expected
         }
-        assertThat(removeCalledNum.get(), is(0));
-        assertThat(removeAllFuture.isDone(), is(false));
-        assertThat(releaseAllFuture.isDone(), is(true));
-        assertThat(completedCheckpointStore.getAllCheckpoints().size(), is(0));
+        assertThat(removeCalledNum.get()).isEqualTo(0);
+        assertThat(removeAllFuture.isDone()).isEqualTo(false);
+        assertThat(releaseAllFuture.isDone()).isEqualTo(true);
+        assertThat(completedCheckpointStore.getAllCheckpoints().size()).isEqualTo(0);
     }
 
     @Test
@@ -314,16 +316,16 @@ public class DefaultCompletedCheckpointStoreTest extends TestLogger {
             final CompletedCheckpointStore completedCheckpointStore =
                     createCompletedCheckpointStore(builder.build());
             completedCheckpointStore.shutdown(status, checkpointsCleaner);
-            assertThrows(
-                    IllegalStateException.class,
-                    () ->
-                            completedCheckpointStore.addCheckpointAndSubsumeOldestOne(
-                                    CompletedCheckpointStoreTest.createCheckpoint(
-                                            0L, new SharedStateRegistry()),
-                                    checkpointsCleaner,
-                                    () -> {
-                                        // No-op.
-                                    }));
+            assertThatThrownBy(
+                            () ->
+                                    completedCheckpointStore.addCheckpointAndSubsumeOldestOne(
+                                            CompletedCheckpointStoreTest.createCheckpoint(
+                                                    0L, new SharedStateRegistry()),
+                                            checkpointsCleaner,
+                                            () -> {
+                                                // No-op.
+                                            }))
+                    .isInstanceOf(IllegalStateException.class);
         }
     }
 

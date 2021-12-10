@@ -30,12 +30,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatObject;
 
 /** Tests for the {@link AkkaRpcSerializedValue}. */
 public class AkkaRpcSerializedValueTest extends TestLogger {
@@ -43,21 +39,21 @@ public class AkkaRpcSerializedValueTest extends TestLogger {
     @Test
     public void testNullValue() throws Exception {
         AkkaRpcSerializedValue serializedValue = AkkaRpcSerializedValue.valueOf(null);
-        assertThat(serializedValue.getSerializedData(), nullValue());
-        assertThat(serializedValue.getSerializedDataLength(), equalTo(0));
-        assertThat(serializedValue.deserializeValue(getClass().getClassLoader()), nullValue());
+        assertThat(serializedValue.getSerializedData()).isNull();
+        assertThat(serializedValue.getSerializedDataLength()).isEqualTo(0);
+        assertThatObject(serializedValue.deserializeValue(getClass().getClassLoader())).isNull();
 
         AkkaRpcSerializedValue otherSerializedValue = AkkaRpcSerializedValue.valueOf(null);
-        assertThat(otherSerializedValue, equalTo(serializedValue));
-        assertThat(otherSerializedValue.hashCode(), equalTo(serializedValue.hashCode()));
+        assertThat(otherSerializedValue).isEqualTo(serializedValue);
+        assertThat(otherSerializedValue.hashCode()).isEqualTo(serializedValue.hashCode());
 
         AkkaRpcSerializedValue clonedSerializedValue = InstantiationUtil.clone(serializedValue);
-        assertThat(clonedSerializedValue.getSerializedData(), nullValue());
-        assertThat(clonedSerializedValue.getSerializedDataLength(), equalTo(0));
-        assertThat(
-                clonedSerializedValue.deserializeValue(getClass().getClassLoader()), nullValue());
-        assertThat(clonedSerializedValue, equalTo(serializedValue));
-        assertThat(clonedSerializedValue.hashCode(), equalTo(serializedValue.hashCode()));
+        assertThat(clonedSerializedValue.getSerializedData()).isNull();
+        assertThat(clonedSerializedValue.getSerializedDataLength()).isEqualTo(0);
+        assertThatObject(clonedSerializedValue.deserializeValue(getClass().getClassLoader()))
+                .isNull();
+        assertThat(clonedSerializedValue).isEqualTo(serializedValue);
+        assertThat(clonedSerializedValue.hashCode()).isEqualTo(serializedValue.hashCode());
     }
 
     @Test
@@ -82,40 +78,36 @@ public class AkkaRpcSerializedValueTest extends TestLogger {
         AkkaRpcSerializedValue previousSerializedValue = null;
         for (Object value : values) {
             AkkaRpcSerializedValue serializedValue = AkkaRpcSerializedValue.valueOf(value);
-            assertThat(value.toString(), serializedValue.getSerializedData(), notNullValue());
-            assertThat(value.toString(), serializedValue.getSerializedDataLength(), greaterThan(0));
-            assertThat(
-                    value.toString(),
-                    serializedValue.deserializeValue(getClass().getClassLoader()),
-                    equalTo(value));
+            assertThat(serializedValue.getSerializedData()).as(value.toString()).isNotNull();
+            assertThat(serializedValue.getSerializedDataLength())
+                    .as(value.toString())
+                    .isGreaterThan(0);
+            assertThatObject(serializedValue.deserializeValue(getClass().getClassLoader()))
+                    .as(value.toString())
+                    .isEqualTo(value);
 
             AkkaRpcSerializedValue otherSerializedValue = AkkaRpcSerializedValue.valueOf(value);
-            assertThat(value.toString(), otherSerializedValue, equalTo(serializedValue));
-            assertThat(
-                    value.toString(),
-                    otherSerializedValue.hashCode(),
-                    equalTo(serializedValue.hashCode()));
+            assertThat(otherSerializedValue).as(value.toString()).isEqualTo(serializedValue);
+            assertThat(otherSerializedValue.hashCode())
+                    .as(value.toString())
+                    .isEqualTo(serializedValue.hashCode());
 
             AkkaRpcSerializedValue clonedSerializedValue = InstantiationUtil.clone(serializedValue);
-            assertThat(
-                    value.toString(),
-                    clonedSerializedValue.getSerializedData(),
-                    equalTo(serializedValue.getSerializedData()));
-            assertThat(
-                    value.toString(),
-                    clonedSerializedValue.deserializeValue(getClass().getClassLoader()),
-                    equalTo(value));
-            assertThat(value.toString(), clonedSerializedValue, equalTo(serializedValue));
-            assertThat(
-                    value.toString(),
-                    clonedSerializedValue.hashCode(),
-                    equalTo(serializedValue.hashCode()));
+            assertThat(clonedSerializedValue.getSerializedData())
+                    .as(value.toString())
+                    .isEqualTo(serializedValue.getSerializedData());
+            assertThatObject(clonedSerializedValue.deserializeValue(getClass().getClassLoader()))
+                    .as(value.toString())
+                    .isEqualTo(value);
+            assertThat(clonedSerializedValue).as(value.toString()).isEqualTo(serializedValue);
+            assertThat(clonedSerializedValue.hashCode())
+                    .as(value.toString())
+                    .isEqualTo(serializedValue.hashCode());
 
             if (previousValue != null && !previousValue.equals(value)) {
-                assertThat(
-                        value.toString() + " " + previousValue.toString(),
-                        serializedValue,
-                        not(equalTo(previousSerializedValue)));
+                assertThat(serializedValue)
+                        .as(value.toString() + " " + previousValue.toString())
+                        .isNotEqualTo(previousSerializedValue);
             }
 
             previousValue = value;

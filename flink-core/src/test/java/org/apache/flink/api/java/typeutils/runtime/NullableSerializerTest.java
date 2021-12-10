@@ -31,8 +31,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for {@link NullableSerializer}. */
 @RunWith(Parameterized.class)
@@ -76,17 +75,18 @@ public class NullableSerializerTest extends SerializerTestBase<Integer> {
 
     @Test
     public void testWrappingNotNeeded() {
-        assertEquals(
-                NullableSerializer.wrapIfNullIsNotSupported(
-                        StringSerializer.INSTANCE, padNullValue),
-                StringSerializer.INSTANCE);
+        assertThat(StringSerializer.INSTANCE)
+                .isEqualTo(
+                        NullableSerializer.wrapIfNullIsNotSupported(
+                                StringSerializer.INSTANCE, padNullValue));
     }
 
     @Test
     public void testWrappingNeeded() {
-        assertTrue(nullableSerializer instanceof NullableSerializer);
-        assertEquals(
-                NullableSerializer.wrapIfNullIsNotSupported(nullableSerializer, padNullValue),
-                nullableSerializer);
+        assertThat(nullableSerializer).isInstanceOf(NullableSerializer.class);
+        assertThat(nullableSerializer)
+                .isEqualTo(
+                        NullableSerializer.wrapIfNullIsNotSupported(
+                                nullableSerializer, padNullValue));
     }
 }

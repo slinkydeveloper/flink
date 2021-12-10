@@ -40,8 +40,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /** {@link PartitionRequestClientFactory} test. */
@@ -198,10 +198,10 @@ public class PartitionRequestClientFactoryTest extends TestLogger {
                     NettyPartitionRequestClient client;
                     try {
                         client = runnableFuture.get();
-                        assertNotNull(client);
+                        assertThat(client).isNotNull();
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
-                        fail();
+                        fail("unknown failure");
                     }
                 });
 

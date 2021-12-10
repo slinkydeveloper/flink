@@ -34,12 +34,7 @@ import java.util.stream.IntStream;
 import static org.apache.flink.configuration.CheckpointingOptions.SAVEPOINT_DIRECTORY;
 import static org.apache.flink.configuration.JobManagerOptions.JOB_MANAGER_HEAP_MEMORY_MB;
 import static org.apache.flink.configuration.TaskManagerOptions.CPU_CORES;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeNoException;
 import static org.junit.Assume.assumeNotNull;
@@ -63,16 +58,16 @@ public class PseudoRandomValueSelectorTest extends TestLogger {
             final Double selectedValue = selectValue(valueSelector, CPU_CORES, alternatives);
             uniqueValues.add(selectedValue);
         }
-        assertThat(uniqueValues.size(), greaterThan(1));
+        assertThat(uniqueValues.size()).isGreaterThan(1);
     }
 
     private <T> T selectValue(
             PseudoRandomValueSelector valueSelector, ConfigOption<T> option, T... alternatives) {
         final Configuration configuration = new Configuration();
-        assertNull(configuration.get(option));
+        assertThat(configuration.get(option)).isNull();
         valueSelector.select(configuration, option, alternatives);
         final T selected = configuration.get(option);
-        assertNotNull(selected);
+        assertThat(selected).isNotNull();
         return selected;
     }
 
@@ -87,7 +82,7 @@ public class PseudoRandomValueSelectorTest extends TestLogger {
             final PseudoRandomValueSelector selector = PseudoRandomValueSelector.create("test" + i);
             uniqueValues.add(selectValue(selector, CPU_CORES, alternatives));
         }
-        assertThat(uniqueValues.size(), greaterThan(1));
+        assertThat(uniqueValues.size()).isGreaterThan(1);
     }
 
     /** Tests that the selector produces the same value for the same seed. */
@@ -108,7 +103,7 @@ public class PseudoRandomValueSelectorTest extends TestLogger {
                             selectValue(selector, JOB_MANAGER_HEAP_MEMORY_MB, numbers),
                             selectValue(selector, SAVEPOINT_DIRECTORY, strings)));
         }
-        assertEquals(1, uniqueValues.size());
+        assertThat(uniqueValues.size()).isEqualTo(1);
     }
 
     /**
@@ -130,7 +125,7 @@ public class PseudoRandomValueSelectorTest extends TestLogger {
         }
 
         final Optional<String> gitCommitId = PseudoRandomValueSelector.getGitCommitId();
-        assertTrue(gitCommitId.isPresent());
-        assertEquals(envCommitId, gitCommitId.get());
+        assertThat(gitCommitId.isPresent()).isTrue();
+        assertThat(gitCommitId.get()).isEqualTo(envCommitId);
     }
 }

@@ -45,20 +45,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.core.IsCollectionContaining.hasItem;
-import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests for {@link NetworkBufferPool}. */
 public class NetworkBufferPoolTest extends TestLogger {
@@ -74,11 +66,11 @@ public class NetworkBufferPoolTest extends TestLogger {
             final int numBuffers = 10;
 
             NetworkBufferPool globalPool = new NetworkBufferPool(numBuffers, bufferSize);
-            assertThat(globalPool.getNumberOfRegisteredBufferPools(), is(0));
+            assertThat(globalPool.getNumberOfRegisteredBufferPools()).isEqualTo(0);
 
             globalPool.destroy();
 
-            assertTrue(globalPool.isDestroyed());
+            assertThat(globalPool.isDestroyed()).isTrue();
 
             try {
                 globalPool.createBufferPool(2, 2);
@@ -113,13 +105,13 @@ public class NetworkBufferPoolTest extends TestLogger {
 
         NetworkBufferPool globalPool = new NetworkBufferPool(numBuffers, bufferSize);
 
-        assertThat(globalPool.getTotalNumberOfMemorySegments(), is(numBuffers));
-        assertThat(globalPool.getNumberOfAvailableMemorySegments(), is(numBuffers));
-        assertThat(globalPool.getNumberOfUsedMemorySegments(), is(0));
+        assertThat(globalPool.getTotalNumberOfMemorySegments()).isEqualTo(numBuffers);
+        assertThat(globalPool.getNumberOfAvailableMemorySegments()).isEqualTo(numBuffers);
+        assertThat(globalPool.getNumberOfUsedMemorySegments()).isEqualTo(0);
 
-        assertThat(globalPool.getTotalMemory(), is((long) numBuffers * bufferSize));
-        assertThat(globalPool.getAvailableMemory(), is((long) numBuffers * bufferSize));
-        assertThat(globalPool.getUsedMemory(), is(0L));
+        assertThat(globalPool.getTotalMemory()).isEqualTo((long) numBuffers * bufferSize);
+        assertThat(globalPool.getAvailableMemory()).isEqualTo((long) numBuffers * bufferSize);
+        assertThat(globalPool.getUsedMemory()).isEqualTo(0L);
     }
 
     @Test
@@ -130,15 +122,15 @@ public class NetworkBufferPoolTest extends TestLogger {
         NetworkBufferPool globalPool = new NetworkBufferPool(numBuffers, bufferSize);
 
         MemorySegment segment = globalPool.requestMemorySegment();
-        assertThat(segment, is(notNullValue()));
+        assertThat(segment).isEqualTo(notNullValue());
 
-        assertThat(globalPool.getTotalNumberOfMemorySegments(), is(numBuffers));
-        assertThat(globalPool.getNumberOfAvailableMemorySegments(), is(numBuffers - 1));
-        assertThat(globalPool.getNumberOfUsedMemorySegments(), is(1));
+        assertThat(globalPool.getTotalNumberOfMemorySegments()).isEqualTo(numBuffers);
+        assertThat(globalPool.getNumberOfAvailableMemorySegments()).isEqualTo(numBuffers - 1);
+        assertThat(globalPool.getNumberOfUsedMemorySegments()).isEqualTo(1);
 
-        assertThat(globalPool.getTotalMemory(), is((long) numBuffers * bufferSize));
-        assertThat(globalPool.getAvailableMemory(), is((long) (numBuffers - 1) * bufferSize));
-        assertThat(globalPool.getUsedMemory(), is((long) bufferSize));
+        assertThat(globalPool.getTotalMemory()).isEqualTo((long) numBuffers * bufferSize);
+        assertThat(globalPool.getAvailableMemory()).isEqualTo((long) (numBuffers - 1) * bufferSize);
+        assertThat(globalPool.getUsedMemory()).isEqualTo((long) bufferSize);
     }
 
     @Test
@@ -150,13 +142,13 @@ public class NetworkBufferPoolTest extends TestLogger {
 
         globalPool.destroy();
 
-        assertThat(globalPool.getTotalNumberOfMemorySegments(), is(0));
-        assertThat(globalPool.getNumberOfAvailableMemorySegments(), is(0));
-        assertThat(globalPool.getNumberOfUsedMemorySegments(), is(0));
+        assertThat(globalPool.getTotalNumberOfMemorySegments()).isEqualTo(0);
+        assertThat(globalPool.getNumberOfAvailableMemorySegments()).isEqualTo(0);
+        assertThat(globalPool.getNumberOfUsedMemorySegments()).isEqualTo(0);
 
-        assertThat(globalPool.getTotalMemory(), is(0L));
-        assertThat(globalPool.getAvailableMemory(), is(0L));
-        assertThat(globalPool.getUsedMemory(), is(0L));
+        assertThat(globalPool.getTotalMemory()).isEqualTo(0L);
+        assertThat(globalPool.getAvailableMemory()).isEqualTo(0L);
+        assertThat(globalPool.getUsedMemory()).isEqualTo(0L);
     }
 
     @Test
@@ -167,9 +159,9 @@ public class NetworkBufferPoolTest extends TestLogger {
         BufferPool boundedPool = globalPool.createBufferPool(1, 1);
         BufferPool nonFixedPool = globalPool.createBufferPool(5, Integer.MAX_VALUE);
 
-        assertEquals(2, fixedPool.getNumberOfRequiredMemorySegments());
-        assertEquals(1, boundedPool.getNumberOfRequiredMemorySegments());
-        assertEquals(5, nonFixedPool.getNumberOfRequiredMemorySegments());
+        assertThat(fixedPool.getNumberOfRequiredMemorySegments()).isEqualTo(2);
+        assertThat(boundedPool.getNumberOfRequiredMemorySegments()).isEqualTo(1);
+        assertThat(nonFixedPool.getNumberOfRequiredMemorySegments()).isEqualTo(5);
 
         // actually, the buffer pool sizes may be different due to rounding and based on the
         // internal order of
@@ -183,40 +175,39 @@ public class NetworkBufferPoolTest extends TestLogger {
             for (BufferPool bp : new BufferPool[] {fixedPool, boundedPool, nonFixedPool}) {
                 Buffer buffer = bp.requestBuffer();
                 if (buffer != null) {
-                    assertNotNull(buffer.getMemorySegment());
+                    assertThat(buffer.getMemorySegment()).isNotNull();
                     buffers.add(buffer);
                     continue collectBuffers;
                 }
             }
         }
 
-        assertEquals(globalPool.getTotalNumberOfMemorySegments(), buffers.size());
+        assertThat(buffers.size()).isEqualTo(globalPool.getTotalNumberOfMemorySegments());
 
-        assertNull(fixedPool.requestBuffer());
-        assertNull(boundedPool.requestBuffer());
-        assertNull(nonFixedPool.requestBuffer());
+        assertThat(fixedPool.requestBuffer()).isNull();
+        assertThat(boundedPool.requestBuffer()).isNull();
+        assertThat(nonFixedPool.requestBuffer()).isNull();
 
         // destroy all allocated ones
         globalPool.destroyAllBufferPools();
 
         // check the destroyed status
-        assertFalse(globalPool.isDestroyed());
-        assertTrue(fixedPool.isDestroyed());
-        assertTrue(boundedPool.isDestroyed());
-        assertTrue(nonFixedPool.isDestroyed());
+        assertThat(globalPool.isDestroyed()).isFalse();
+        assertThat(fixedPool.isDestroyed()).isTrue();
+        assertThat(boundedPool.isDestroyed()).isTrue();
+        assertThat(nonFixedPool.isDestroyed()).isTrue();
 
-        assertEquals(0, globalPool.getNumberOfRegisteredBufferPools());
+        assertThat(globalPool.getNumberOfRegisteredBufferPools()).isEqualTo(0);
 
         // buffers are not yet recycled
-        assertEquals(0, globalPool.getNumberOfAvailableMemorySegments());
+        assertThat(globalPool.getNumberOfAvailableMemorySegments()).isEqualTo(0);
 
         // the recycled buffers should go to the global pool
         for (Buffer b : buffers) {
             b.recycleBuffer();
         }
-        assertEquals(
-                globalPool.getTotalNumberOfMemorySegments(),
-                globalPool.getNumberOfAvailableMemorySegments());
+        assertThat(globalPool.getNumberOfAvailableMemorySegments())
+                .isEqualTo(globalPool.getTotalNumberOfMemorySegments());
 
         // can request no more buffers
         try {
@@ -241,7 +232,7 @@ public class NetworkBufferPoolTest extends TestLogger {
         }
 
         // can create a new pool now
-        assertNotNull(globalPool.createBufferPool(10, Integer.MAX_VALUE));
+        assertThat(globalPool.createBufferPool(10, Integer.MAX_VALUE)).isNotNull();
     }
 
     /**
@@ -257,11 +248,11 @@ public class NetworkBufferPoolTest extends TestLogger {
         List<MemorySegment> memorySegments = Collections.emptyList();
         try {
             memorySegments = globalPool.requestMemorySegments(numBuffers / 2);
-            assertEquals(memorySegments.size(), numBuffers / 2);
+            assertThat(numBuffers / 2).isEqualTo(memorySegments.size());
 
             globalPool.recycleMemorySegments(memorySegments);
             memorySegments.clear();
-            assertEquals(globalPool.getNumberOfAvailableMemorySegments(), numBuffers);
+            assertThat(numBuffers).isEqualTo(globalPool.getNumberOfAvailableMemorySegments());
         } finally {
             globalPool.recycleMemorySegments(memorySegments); // just in case
             globalPool.destroy();
@@ -282,7 +273,7 @@ public class NetworkBufferPoolTest extends TestLogger {
             globalPool.requestMemorySegments(numBuffers + 1);
             fail("Should throw an IOException");
         } catch (IOException e) {
-            assertEquals(globalPool.getNumberOfAvailableMemorySegments(), numBuffers);
+            assertThat(numBuffers).isEqualTo(globalPool.getNumberOfAvailableMemorySegments());
         } finally {
             globalPool.destroy();
         }
@@ -324,7 +315,7 @@ public class NetworkBufferPoolTest extends TestLogger {
             for (int i = 0; i < numBuffers; ++i) {
                 Buffer buffer = lbp1.requestBuffer();
                 buffers.add(buffer);
-                assertNotNull(buffer);
+                assertThat(buffer).isNotNull();
             }
 
             // requestMemorySegments() below will wait for buffers
@@ -348,7 +339,7 @@ public class NetworkBufferPoolTest extends TestLogger {
             // take more buffers than are freely available at the moment via requestMemorySegments()
             isRunning.await();
             memorySegments = networkBufferPool.requestMemorySegments(numBuffers / 2);
-            assertThat(memorySegments, not(hasItem(nullValue())));
+            assertThat(memorySegments).doesNotContainNull();
         } finally {
             if (bufferRecycler != null) {
                 bufferRecycler.join();
@@ -371,7 +362,7 @@ public class NetworkBufferPoolTest extends TestLogger {
 
         NetworkBufferPool globalPool = new NetworkBufferPool(numBuffers, 128);
         MemorySegment segment = globalPool.requestMemorySegment();
-        assertNotNull(segment);
+        assertThat(segment).isNotNull();
 
         final OneShotLatch isRunning = new OneShotLatch();
         CheckedThread asyncRequest =
@@ -412,7 +403,7 @@ public class NetworkBufferPoolTest extends TestLogger {
 
         NetworkBufferPool globalPool = new NetworkBufferPool(numBuffers, 128);
         MemorySegment segment = globalPool.requestMemorySegment();
-        assertNotNull(segment);
+        assertThat(segment).isNotNull();
 
         final OneShotLatch isRunning = new OneShotLatch();
         CheckedThread asyncRequest =
@@ -437,7 +428,9 @@ public class NetworkBufferPoolTest extends TestLogger {
         try {
             asyncRequest.sync();
         } catch (IOException e) {
-            assertThat(e, hasProperty("cause", instanceOf(InterruptedException.class)));
+            assertThat(e)
+                    .satisfies(
+                            matching(hasProperty("cause", instanceOf(InterruptedException.class))));
 
             // test indirectly for NetworkBufferPool#numTotalRequiredBuffers being correct:
             // -> creating a new buffer pool should not fail
@@ -465,7 +458,7 @@ public class NetworkBufferPoolTest extends TestLogger {
             localBufferPool.requestBuffer();
         }
 
-        assertEquals(0, globalPool.getNumberOfAvailableMemorySegments());
+        assertThat(globalPool.getNumberOfAvailableMemorySegments()).isEqualTo(0);
 
         CheckedThread asyncRequest =
                 new CheckedThread() {
@@ -501,26 +494,26 @@ public class NetworkBufferPoolTest extends TestLogger {
 
         try {
             // the global pool should be in available state initially
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
             // request the first segment
             final MemorySegment segment1 = checkNotNull(globalPool.requestMemorySegment());
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
             // request the second segment
             final MemorySegment segment2 = checkNotNull(globalPool.requestMemorySegment());
-            assertFalse(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isFalse();
 
             final CompletableFuture<?> availableFuture = globalPool.getAvailableFuture();
 
             // recycle the first segment
             globalPool.recycle(segment1);
-            assertTrue(availableFuture.isDone());
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(availableFuture.isDone()).isTrue();
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
             // recycle the second segment
             globalPool.recycle(segment2);
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
         } finally {
             globalPool.destroy();
@@ -543,19 +536,19 @@ public class NetworkBufferPoolTest extends TestLogger {
 
         try {
             // the global pool should be in available state initially
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
             // request 5 segments
             List<MemorySegment> segments1 =
                     globalPool.requestMemorySegments(numberOfSegmentsToRequest);
-            assertTrue(globalPool.getAvailableFuture().isDone());
-            assertEquals(numberOfSegmentsToRequest, segments1.size());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
+            assertThat(segments1.size()).isEqualTo(numberOfSegmentsToRequest);
 
             // request another 5 segments
             List<MemorySegment> segments2 =
                     globalPool.requestMemorySegments(numberOfSegmentsToRequest);
-            assertFalse(globalPool.getAvailableFuture().isDone());
-            assertEquals(numberOfSegmentsToRequest, segments2.size());
+            assertThat(globalPool.getAvailableFuture().isDone()).isFalse();
+            assertThat(segments2.size()).isEqualTo(numberOfSegmentsToRequest);
 
             // request another 5 segments
             final CountDownLatch latch = new CountDownLatch(1);
@@ -575,20 +568,20 @@ public class NetworkBufferPoolTest extends TestLogger {
             // recycle 5 segments
             CompletableFuture<?> availableFuture = globalPool.getAvailableFuture();
             globalPool.recycleMemorySegments(segments1);
-            assertTrue(availableFuture.isDone());
+            assertThat(availableFuture.isDone()).isTrue();
 
             // wait util the third request is fulfilled
             latch.await();
-            assertFalse(globalPool.getAvailableFuture().isDone());
-            assertEquals(numberOfSegmentsToRequest, segments3.size());
+            assertThat(globalPool.getAvailableFuture().isDone()).isFalse();
+            assertThat(segments3.size()).isEqualTo(numberOfSegmentsToRequest);
 
             // recycle another 5 segments
             globalPool.recycleMemorySegments(segments2);
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
             // recycle the last 5 segments
             globalPool.recycleMemorySegments(segments3);
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
 
         } finally {
             globalPool.destroy();
@@ -618,7 +611,7 @@ public class NetworkBufferPoolTest extends TestLogger {
                 final BufferPool localPool =
                         globalPool.createBufferPool(localPoolRequiredSize, localPoolMaxSize);
                 localBufferPools.add(localPool);
-                assertTrue(localPool.getAvailableFuture().isDone());
+                assertThat(localPool.getAvailableFuture().isDone()).isTrue();
             }
 
             // request some segments from the global pool in two different ways
@@ -629,9 +622,9 @@ public class NetworkBufferPoolTest extends TestLogger {
             final List<MemorySegment> exclusiveSegments =
                     globalPool.requestMemorySegments(
                             globalPool.getNumberOfAvailableMemorySegments() - 1);
-            assertTrue(globalPool.getAvailableFuture().isDone());
+            assertThat(globalPool.getAvailableFuture().isDone()).isTrue();
             for (final BufferPool localPool : localBufferPools) {
-                assertTrue(localPool.getAvailableFuture().isDone());
+                assertThat(localPool.getAvailableFuture().isDone()).isTrue();
             }
 
             // blocking request buffers form local buffer pools
@@ -658,18 +651,18 @@ public class NetworkBufferPoolTest extends TestLogger {
             while (segmentsRequested.size() + segments.size() + exclusiveSegments.size()
                     < numBuffers) {
                 Thread.sleep(100);
-                assertNull(cause.get());
+                assertThat(cause.get()).isNull();
             }
 
             final CompletableFuture<?> globalPoolAvailableFuture = globalPool.getAvailableFuture();
-            assertFalse(globalPoolAvailableFuture.isDone());
+            assertThat(globalPoolAvailableFuture.isDone()).isFalse();
 
             final List<CompletableFuture<?>> localPoolAvailableFutures =
                     new ArrayList<>(numLocalBufferPool);
             for (BufferPool localPool : localBufferPools) {
                 CompletableFuture<?> localPoolAvailableFuture = localPool.getAvailableFuture();
                 localPoolAvailableFutures.add(localPoolAvailableFuture);
-                assertFalse(localPoolAvailableFuture.isDone());
+                assertThat(localPoolAvailableFuture.isDone()).isFalse();
             }
 
             // recycle the previously requested segments
@@ -678,20 +671,20 @@ public class NetworkBufferPoolTest extends TestLogger {
             }
             globalPool.recycleMemorySegments(exclusiveSegments);
 
-            assertTrue(globalPoolAvailableFuture.isDone());
+            assertThat(globalPoolAvailableFuture.isDone()).isTrue();
             for (CompletableFuture<?> localPoolAvailableFuture : localPoolAvailableFutures) {
-                assertTrue(localPoolAvailableFuture.isDone());
+                assertThat(localPoolAvailableFuture.isDone()).isTrue();
             }
 
             // wait until all blocking buffer requests finish
             latch.await();
 
-            assertNull(cause.get());
-            assertEquals(0, globalPool.getNumberOfAvailableMemorySegments());
-            assertFalse(globalPool.getAvailableFuture().isDone());
+            assertThat(cause.get()).isNull();
+            assertThat(globalPool.getNumberOfAvailableMemorySegments()).isEqualTo(0);
+            assertThat(globalPool.getAvailableFuture().isDone()).isFalse();
             for (BufferPool localPool : localBufferPools) {
-                assertFalse(localPool.getAvailableFuture().isDone());
-                assertEquals(localPoolMaxSize, localPool.bestEffortGetNumOfUsedBuffers());
+                assertThat(localPool.getAvailableFuture().isDone()).isFalse();
+                assertThat(localPool.bestEffortGetNumOfUsedBuffers()).isEqualTo(localPoolMaxSize);
             }
 
             // recycle all the requested buffers

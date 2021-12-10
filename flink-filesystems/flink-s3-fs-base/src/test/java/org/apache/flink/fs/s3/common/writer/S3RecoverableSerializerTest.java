@@ -29,7 +29,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link S3RecoverableSerializer}. */
 public class S3RecoverableSerializerTest {
@@ -51,7 +52,7 @@ public class S3RecoverableSerializerTest {
         byte[] serializedRecoverable = serializer.serialize(originalEmptyRecoverable);
         S3Recoverable copiedEmptyRecoverable = serializer.deserialize(1, serializedRecoverable);
 
-        assertThat(originalEmptyRecoverable, isEqualTo(copiedEmptyRecoverable));
+        assertThat(originalEmptyRecoverable).satisfies(matching(isEqualTo(copiedEmptyRecoverable)));
     }
 
     @Test
@@ -62,8 +63,8 @@ public class S3RecoverableSerializerTest {
         S3Recoverable copiedNoIncompletePartRecoverable =
                 serializer.deserialize(1, serializedRecoverable);
 
-        assertThat(
-                originalNoIncompletePartRecoverable, isEqualTo(copiedNoIncompletePartRecoverable));
+        assertThat(originalNoIncompletePartRecoverable)
+                .satisfies(matching(isEqualTo(copiedNoIncompletePartRecoverable)));
     }
 
     @Test
@@ -74,9 +75,8 @@ public class S3RecoverableSerializerTest {
         S3Recoverable copiedOnlyIncompletePartRecoverable =
                 serializer.deserialize(1, serializedRecoverable);
 
-        assertThat(
-                originalOnlyIncompletePartRecoverable,
-                isEqualTo(copiedOnlyIncompletePartRecoverable));
+        assertThat(originalOnlyIncompletePartRecoverable)
+                .satisfies(matching(isEqualTo(copiedOnlyIncompletePartRecoverable)));
     }
 
     @Test
@@ -86,7 +86,7 @@ public class S3RecoverableSerializerTest {
         byte[] serializedRecoverable = serializer.serialize(originalFullRecoverable);
         S3Recoverable copiedFullRecoverable = serializer.deserialize(1, serializedRecoverable);
 
-        assertThat(originalFullRecoverable, isEqualTo(copiedFullRecoverable));
+        assertThat(originalFullRecoverable).satisfies(matching(isEqualTo(copiedFullRecoverable)));
     }
 
     // --------------------------------- Matchers ---------------------------------

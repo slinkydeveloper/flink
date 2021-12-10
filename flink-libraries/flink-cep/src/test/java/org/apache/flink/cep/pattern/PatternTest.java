@@ -30,11 +30,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for constructing {@link Pattern}. */
@@ -47,13 +43,13 @@ public class PatternTest extends TestLogger {
         Pattern<Object, ?> previous;
         Pattern<Object, ?> previous2;
 
-        assertNotNull(previous = pattern.getPrevious());
-        assertNotNull(previous2 = previous.getPrevious());
-        assertNull(previous2.getPrevious());
+        assertThat(previous = pattern.getPrevious()).isNotNull();
+        assertThat(previous2 = previous.getPrevious()).isNotNull();
+        assertThat(previous2.getPrevious()).isNull();
 
-        assertEquals(pattern.getName(), "end");
-        assertEquals(previous.getName(), "next");
-        assertEquals(previous2.getName(), "start");
+        assertThat("end").isEqualTo(pattern.getName());
+        assertThat("next").isEqualTo(previous.getName());
+        assertThat("start").isEqualTo(previous2.getName());
     }
 
     @Test
@@ -62,18 +58,18 @@ public class PatternTest extends TestLogger {
         Pattern<Object, ?> previous;
         Pattern<Object, ?> previous2;
 
-        assertNotNull(previous = pattern.getPrevious());
-        assertNotNull(previous2 = previous.getPrevious());
-        assertNull(previous2.getPrevious());
+        assertThat(previous = pattern.getPrevious()).isNotNull();
+        assertThat(previous2 = previous.getPrevious()).isNotNull();
+        assertThat(previous2.getPrevious()).isNull();
 
-        assertEquals(
-                ConsumingStrategy.SKIP_TILL_NEXT, pattern.getQuantifier().getConsumingStrategy());
-        assertEquals(
-                ConsumingStrategy.SKIP_TILL_NEXT, previous.getQuantifier().getConsumingStrategy());
+        assertThat(pattern.getQuantifier().getConsumingStrategy())
+                .isEqualTo(ConsumingStrategy.SKIP_TILL_NEXT);
+        assertThat(previous.getQuantifier().getConsumingStrategy())
+                .isEqualTo(ConsumingStrategy.SKIP_TILL_NEXT);
 
-        assertEquals(pattern.getName(), "end");
-        assertEquals(previous.getName(), "next");
-        assertEquals(previous2.getName(), "start");
+        assertThat("end").isEqualTo(pattern.getName());
+        assertThat("next").isEqualTo(previous.getName());
+        assertThat("start").isEqualTo(previous2.getName());
     }
 
     @Test
@@ -106,17 +102,17 @@ public class PatternTest extends TestLogger {
         Pattern<Event, ?> previous;
         Pattern<Event, ?> previous2;
 
-        assertNotNull(previous = pattern.getPrevious());
-        assertNotNull(previous2 = previous.getPrevious());
-        assertNull(previous2.getPrevious());
+        assertThat(previous = pattern.getPrevious()).isNotNull();
+        assertThat(previous2 = previous.getPrevious()).isNotNull();
+        assertThat(previous2.getPrevious()).isNull();
 
-        assertNotNull(pattern.getCondition());
-        assertNotNull(previous.getCondition());
-        assertNotNull(previous2.getCondition());
+        assertThat(pattern.getCondition()).isNotNull();
+        assertThat(previous.getCondition()).isNotNull();
+        assertThat(previous2.getCondition()).isNotNull();
 
-        assertEquals(pattern.getName(), "end");
-        assertEquals(previous.getName(), "next");
-        assertEquals(previous2.getName(), "start");
+        assertThat("end").isEqualTo(pattern.getName());
+        assertThat("next").isEqualTo(previous.getName());
+        assertThat("start").isEqualTo(previous2.getName());
     }
 
     @Test
@@ -130,16 +126,16 @@ public class PatternTest extends TestLogger {
         Pattern<Event, ?> previous;
         Pattern<Event, ?> previous2;
 
-        assertNotNull(previous = pattern.getPrevious());
-        assertNotNull(previous2 = previous.getPrevious());
-        assertNull(previous2.getPrevious());
+        assertThat(previous = pattern.getPrevious()).isNotNull();
+        assertThat(previous2 = previous.getPrevious()).isNotNull();
+        assertThat(previous2.getPrevious()).isNull();
 
-        assertNotNull(previous.getCondition());
-        assertTrue(previous.getCondition() instanceof SubtypeCondition);
+        assertThat(previous.getCondition()).isNotNull();
+        assertThat(previous.getCondition()).isInstanceOf(SubtypeCondition.class);
 
-        assertEquals(pattern.getName(), "end");
-        assertEquals(previous.getName(), "subevent");
-        assertEquals(previous2.getName(), "start");
+        assertThat("end").isEqualTo(pattern.getName());
+        assertThat("subevent").isEqualTo(previous.getName());
+        assertThat("start").isEqualTo(previous2.getName());
     }
 
     @Test
@@ -163,17 +159,17 @@ public class PatternTest extends TestLogger {
         Pattern<Event, ?> previous;
         Pattern<Event, ?> previous2;
 
-        assertNotNull(previous = pattern.getPrevious());
-        assertNotNull(previous2 = previous.getPrevious());
-        assertNull(previous2.getPrevious());
+        assertThat(previous = pattern.getPrevious()).isNotNull();
+        assertThat(previous2 = previous.getPrevious()).isNotNull();
+        assertThat(previous2.getPrevious()).isNull();
 
-        assertEquals(
-                ConsumingStrategy.SKIP_TILL_NEXT, pattern.getQuantifier().getConsumingStrategy());
-        assertNotNull(previous.getCondition());
+        assertThat(pattern.getQuantifier().getConsumingStrategy())
+                .isEqualTo(ConsumingStrategy.SKIP_TILL_NEXT);
+        assertThat(previous.getCondition()).isNotNull();
 
-        assertEquals(pattern.getName(), "end");
-        assertEquals(previous.getName(), "subevent");
-        assertEquals(previous2.getName(), "start");
+        assertThat("end").isEqualTo(pattern.getName());
+        assertThat("subevent").isEqualTo(previous.getName());
+        assertThat("start").isEqualTo(previous2.getName());
     }
 
     @Test
@@ -216,18 +212,18 @@ public class PatternTest extends TestLogger {
         Pattern<Event, ?> previous;
         Pattern<Event, ?> previous2;
 
-        assertNotNull(previous = pattern.getPrevious());
-        assertNotNull(previous2 = previous.getPrevious());
-        assertNull(previous2.getPrevious());
+        assertThat(previous = pattern.getPrevious()).isNotNull();
+        assertThat(previous2 = previous.getPrevious()).isNotNull();
+        assertThat(previous2.getPrevious()).isNull();
 
-        assertEquals(
-                ConsumingStrategy.SKIP_TILL_NEXT, pattern.getQuantifier().getConsumingStrategy());
-        assertFalse(previous.getCondition() instanceof RichOrCondition);
-        assertTrue(previous2.getCondition() instanceof RichOrCondition);
+        assertThat(pattern.getQuantifier().getConsumingStrategy())
+                .isEqualTo(ConsumingStrategy.SKIP_TILL_NEXT);
+        assertThat(previous.getCondition()).isNotInstanceOf(RichOrCondition.class);
+        assertThat(previous2.getCondition()).isInstanceOf(RichOrCondition.class);
 
-        assertEquals(pattern.getName(), "end");
-        assertEquals(previous.getName(), "or");
-        assertEquals(previous2.getName(), "start");
+        assertThat("end").isEqualTo(pattern.getName());
+        assertThat("or").isEqualTo(previous.getName());
+        assertThat("start").isEqualTo(previous2.getName());
     }
 
     @Test
@@ -239,8 +235,8 @@ public class PatternTest extends TestLogger {
                         .followedBy("end")
                         .where(mock(IterativeCondition.class))
                         .or(mock(IterativeCondition.class));
-        assertTrue(pattern.getCondition() instanceof RichOrCondition);
-        assertTrue(pattern.getPrevious().getCondition() instanceof RichAndCondition);
+        assertThat(pattern.getCondition()).isInstanceOf(RichOrCondition.class);
+        assertThat(pattern.getPrevious().getCondition()).isInstanceOf(RichAndCondition.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

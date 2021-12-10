@@ -31,9 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.apache.flink.runtime.io.network.partition.PartitionTestUtils.createView;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests for the availability handling of the BoundedBlockingSubpartitions with not constant
@@ -54,7 +52,7 @@ public class BoundedBlockingSubpartitionAvailabilityTest {
         final ResultSubpartitionView subpartitionView = createView(subpartition, listener);
 
         // assert
-        assertEquals(0, listener.numNotifications);
+        assertThat(listener.numNotifications).isEqualTo(0);
 
         // cleanup
         subpartitionView.releaseAllResources();
@@ -72,8 +70,8 @@ public class BoundedBlockingSubpartitionAvailabilityTest {
         final List<BufferAndBacklog> data = drainAvailableData(reader);
 
         // assert
-        assertFalse(reader.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable());
-        assertFalse(data.get(data.size() - 1).isDataAvailable());
+        assertThat(reader.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable()).isFalse();
+        assertThat(data.get(data.size() - 1).isDataAvailable()).isFalse();
 
         // cleanup
         reader.releaseAllResources();
@@ -93,8 +91,8 @@ public class BoundedBlockingSubpartitionAvailabilityTest {
         data.get(1).buffer().recycleBuffer();
 
         // assert
-        assertTrue(reader.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable());
-        assertEquals(1, listener.numNotifications);
+        assertThat(reader.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable()).isTrue();
+        assertThat(listener.numNotifications).isEqualTo(1);
 
         // cleanup
         reader.releaseAllResources();
@@ -112,7 +110,7 @@ public class BoundedBlockingSubpartitionAvailabilityTest {
         drainAllData(reader);
 
         // assert
-        assertFalse(reader.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable());
+        assertThat(reader.getAvailabilityAndBacklog(Integer.MAX_VALUE).isAvailable()).isFalse();
 
         // cleanup
         reader.releaseAllResources();

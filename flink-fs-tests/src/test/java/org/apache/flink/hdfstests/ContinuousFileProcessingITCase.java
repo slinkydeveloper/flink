@@ -40,7 +40,6 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,7 +55,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * IT cases for the {@link ContinuousFileMonitoringFunction} and {@link
@@ -137,7 +137,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
 
         // the monitor has always DOP 1
         DataStream<TimestampedFileInputSplit> splits = env.addSource(monitoringFunction);
-        Assert.assertEquals(1, splits.getParallelism());
+        assertThat(splits.getParallelism()).isEqualTo(1);
 
         TypeInformation<String> typeInfo = TypeExtractor.getInputFormatTypes(format);
 
@@ -147,7 +147,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
                         "FileSplitReader",
                         typeInfo,
                         new ContinuousFileReaderOperatorFactory<>(format));
-        Assert.assertEquals(PARALLELISM, content.getParallelism());
+        assertThat(content.getParallelism()).isEqualTo(PARALLELISM);
 
         // finally for the sink we set the parallelism to 1 so that we can verify the output
         TestingSinkFunction sink = new TestingSinkFunction();
@@ -200,7 +200,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
 
             org.apache.hadoop.fs.Path file = new org.apache.hadoop.fs.Path(hdfsURI + "/file" + i);
             hdfs.rename(tmpFile.f0, file);
-            Assert.assertTrue(hdfs.exists(file));
+            assertThat(hdfs.exists(file)).isTrue();
         }
 
         jobFuture.get();
@@ -216,7 +216,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
         @Override
         public void open(Configuration parameters) throws Exception {
             // this sink can only work with DOP 1
-            assertEquals(1, getRuntimeContext().getNumberOfParallelSubtasks());
+            assertThat(getRuntimeContext().getNumberOfParallelSubtasks()).isEqualTo(1);
 
             comparator =
                     new Comparator<String>() {
@@ -238,7 +238,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
             }
 
             if (!content.add(value + "\n")) {
-                Assert.fail("Duplicate line: " + value);
+                fail("Duplicate line: " + value);
                 System.exit(0);
             }
 
@@ -251,9 +251,9 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
         @Override
         public void close() {
             // check if the data that we collected are the ones they are supposed to be.
-            Assert.assertEquals(expectedContents.size(), actualContent.size());
+            assertThat(actualContent.size()).isEqualTo(expectedContents.size());
             for (Integer fileIdx : expectedContents.keySet()) {
-                Assert.assertTrue(actualContent.keySet().contains(fileIdx));
+                assertThat(actualContent.keySet().contains(fileIdx)).isTrue();
 
                 List<String> cntnt = new ArrayList<>(actualContent.get(fileIdx));
                 Collections.sort(cntnt, comparator);
@@ -262,7 +262,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
                 for (String line : cntnt) {
                     cntntStr.append(line);
                 }
-                Assert.assertEquals(expectedContents.get(fileIdx), cntntStr.toString());
+                assertThat(cntntStr.toString()).isEqualTo(expectedContents.get(fileIdx));
             }
             expectedContents.clear();
         }
@@ -283,7 +283,7 @@ public class ContinuousFileProcessingITCase extends AbstractTestBase {
             String base, String fileName, int fileIdx, String sampleLine)
             throws IOException, InterruptedException {
 
-        assert (hdfs != null);
+        assertThat((hdfs != null)).isTrue();
 
         org.apache.hadoop.fs.Path tmp =
                 new org.apache.hadoop.fs.Path(base + "/." + fileName + fileIdx);

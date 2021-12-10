@@ -34,7 +34,6 @@ import org.apache.flink.runtime.state.internal.InternalMapState;
 import org.apache.flink.runtime.state.internal.InternalReducingState;
 import org.apache.flink.runtime.state.internal.InternalValueState;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,6 +42,7 @@ import org.junit.runners.Parameterized.Parameters;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link LatencyTrackingStateFactory}. */
@@ -74,9 +74,9 @@ public class LatencyTrackingStateFactoryTest {
                 LatencyTrackingStateFactory.createStateAndWrapWithLatencyTrackingIfEnabled(
                         valueState, valueStateDescriptor, getLatencyTrackingStateConfig());
         if (enableLatencyTracking) {
-            Assert.assertTrue(latencyTrackingState instanceof LatencyTrackingValueState);
+            assertThat(latencyTrackingState).isInstanceOf(LatencyTrackingValueState.class);
         } else {
-            Assert.assertEquals(valueState, latencyTrackingState);
+            assertThat(latencyTrackingState).isEqualTo(valueState);
         }
     }
 
@@ -90,9 +90,9 @@ public class LatencyTrackingStateFactoryTest {
                 LatencyTrackingStateFactory.createStateAndWrapWithLatencyTrackingIfEnabled(
                         listState, listStateDescriptor, getLatencyTrackingStateConfig());
         if (enableLatencyTracking) {
-            Assert.assertTrue(latencyTrackingState instanceof LatencyTrackingListState);
+            assertThat(latencyTrackingState).isInstanceOf(LatencyTrackingListState.class);
         } else {
-            Assert.assertEquals(listState, latencyTrackingState);
+            assertThat(latencyTrackingState).isEqualTo(listState);
         }
     }
 
@@ -106,9 +106,9 @@ public class LatencyTrackingStateFactoryTest {
                 LatencyTrackingStateFactory.createStateAndWrapWithLatencyTrackingIfEnabled(
                         mapState, mapStateDescriptor, getLatencyTrackingStateConfig());
         if (enableLatencyTracking) {
-            Assert.assertTrue(latencyTrackingState instanceof LatencyTrackingMapState);
+            assertThat(latencyTrackingState).isInstanceOf(LatencyTrackingMapState.class);
         } else {
-            Assert.assertEquals(mapState, latencyTrackingState);
+            assertThat(latencyTrackingState).isEqualTo(mapState);
         }
     }
 
@@ -122,9 +122,9 @@ public class LatencyTrackingStateFactoryTest {
                 LatencyTrackingStateFactory.createStateAndWrapWithLatencyTrackingIfEnabled(
                         reducingState, reducingStateDescriptor, getLatencyTrackingStateConfig());
         if (enableLatencyTracking) {
-            Assert.assertTrue(latencyTrackingState instanceof LatencyTrackingReducingState);
+            assertThat(latencyTrackingState).isInstanceOf(LatencyTrackingReducingState.class);
         } else {
-            Assert.assertEquals(reducingState, latencyTrackingState);
+            assertThat(latencyTrackingState).isEqualTo(reducingState);
         }
     }
 
@@ -166,9 +166,9 @@ public class LatencyTrackingStateFactoryTest {
                         aggregatingStateDescriptor,
                         getLatencyTrackingStateConfig());
         if (enableLatencyTracking) {
-            Assert.assertTrue(latencyTrackingState instanceof LatencyTrackingAggregatingState);
+            assertThat(latencyTrackingState).isInstanceOf(LatencyTrackingAggregatingState.class);
         } else {
-            Assert.assertEquals(aggregatingState, latencyTrackingState);
+            assertThat(latencyTrackingState).isEqualTo(aggregatingState);
         }
     }
 }

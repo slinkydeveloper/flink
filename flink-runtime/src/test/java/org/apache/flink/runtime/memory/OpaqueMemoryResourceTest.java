@@ -22,7 +22,7 @@ import org.apache.flink.util.function.ThrowingRunnable;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link OpaqueMemoryResource}. */
 public class OpaqueMemoryResourceTest {
@@ -36,7 +36,7 @@ public class OpaqueMemoryResourceTest {
         resource.close();
         resource.close();
 
-        assertEquals(1, disposer.count);
+        assertThat(disposer.count).isEqualTo(1);
     }
 
     private static final class CountingCloseable implements ThrowingRunnable<Exception> {

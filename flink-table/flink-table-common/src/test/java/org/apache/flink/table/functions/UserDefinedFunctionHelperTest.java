@@ -38,8 +38,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link UserDefinedFunctionHelper}. */
 @RunWith(Parameterized.class)
@@ -95,18 +94,17 @@ public class UserDefinedFunctionHelperTest {
     public void testInstantiation() {
         if (testSpec.functionClass != null) {
             testErrorMessage();
-            assertThat(
-                    UserDefinedFunctionHelper.instantiateFunction(testSpec.functionClass),
-                    notNullValue());
+            assertThat(UserDefinedFunctionHelper.instantiateFunction(testSpec.functionClass))
+                    .isNotNull();
         } else if (testSpec.catalogFunction != null) {
             testErrorMessage();
             assertThat(
-                    UserDefinedFunctionHelper.instantiateFunction(
-                            UserDefinedFunctionHelperTest.class.getClassLoader(),
-                            new Configuration(),
-                            "f",
-                            testSpec.catalogFunction),
-                    notNullValue());
+                            UserDefinedFunctionHelper.instantiateFunction(
+                                    UserDefinedFunctionHelperTest.class.getClassLoader(),
+                                    new Configuration(),
+                                    "f",
+                                    testSpec.catalogFunction))
+                    .isNotNull();
         }
     }
 

@@ -30,8 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Collect}. */
 public class CollectTest {
@@ -53,7 +52,7 @@ public class CollectTest {
 
         List<Long> collected = new Collect<Long>().run(dataset).execute();
 
-        assertArrayEquals(list.toArray(), collected.toArray());
+        assertThat(collected.toArray()).isEqualTo(list.toArray());
     }
 
     @Test
@@ -62,6 +61,6 @@ public class CollectTest {
 
         List<Long> collected = new Collect<Long>().run(dataset).execute();
 
-        assertEquals(0, collected.size());
+        assertThat(collected.size()).isEqualTo(0);
     }
 }

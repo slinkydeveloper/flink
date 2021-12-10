@@ -45,7 +45,6 @@ import org.apache.flink.util.StateMigrationException;
 import org.apache.flink.util.TestLogger;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -59,8 +58,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.RunnableFuture;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for the {@link KeyedStateBackend} and {@link OperatorStateBackend} as produced by various
@@ -145,9 +144,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed");
         } catch (Exception expected) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -195,15 +195,15 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             // make sure that reading and writing each key state works with the new serializer
             backend.setCurrentKey(1);
-            assertEquals(new TestType("foo", 1456), valueState.value());
+            assertThat(valueState.value()).isEqualTo(new TestType("foo", 1456));
             valueState.update(new TestType("newValue1", 751));
 
             backend.setCurrentKey(2);
-            assertEquals(new TestType("bar", 478), valueState.value());
+            assertThat(valueState.value()).isEqualTo(new TestType("bar", 478));
             valueState.update(new TestType("newValue2", 167));
 
             backend.setCurrentKey(3);
-            assertEquals(new TestType("hello", 189), valueState.value());
+            assertThat(valueState.value()).isEqualTo(new TestType("hello", 189));
             valueState.update(new TestType("newValue3", 444));
 
             // do another snapshot to verify the snapshot logic after migration
@@ -262,9 +262,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed");
         } catch (Exception expected) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -318,23 +319,23 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             // make sure that reading and writing each key state works with the new serializer
             backend.setCurrentKey(1);
             Iterator<TestType> iterable1 = listState.get().iterator();
-            assertEquals(new TestType("key-1", 1), iterable1.next());
-            assertEquals(new TestType("key-1", 2), iterable1.next());
-            assertEquals(new TestType("key-1", 3), iterable1.next());
-            Assert.assertFalse(iterable1.hasNext());
+            assertThat(iterable1.next()).isEqualTo(new TestType("key-1", 1));
+            assertThat(iterable1.next()).isEqualTo(new TestType("key-1", 2));
+            assertThat(iterable1.next()).isEqualTo(new TestType("key-1", 3));
+            assertThat(iterable1.hasNext()).isFalse();
             listState.add(new TestType("new-key-1", 123));
 
             backend.setCurrentKey(2);
             Iterator<TestType> iterable2 = listState.get().iterator();
-            assertEquals(new TestType("key-2", 1), iterable2.next());
-            Assert.assertFalse(iterable2.hasNext());
+            assertThat(iterable2.next()).isEqualTo(new TestType("key-2", 1));
+            assertThat(iterable2.hasNext()).isFalse();
             listState.add(new TestType("new-key-2", 456));
 
             backend.setCurrentKey(3);
             Iterator<TestType> iterable3 = listState.get().iterator();
-            assertEquals(new TestType("key-3", 1), iterable3.next());
-            assertEquals(new TestType("key-3", 2), iterable3.next());
-            Assert.assertFalse(iterable3.hasNext());
+            assertThat(iterable3.next()).isEqualTo(new TestType("key-3", 1));
+            assertThat(iterable3.next()).isEqualTo(new TestType("key-3", 2));
+            assertThat(iterable3.hasNext()).isFalse();
             listState.add(new TestType("new-key-3", 777));
 
             // do another snapshot to verify the snapshot logic after migration
@@ -411,9 +412,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
                             new TestType.IncompatibleTestTypeSerializer()));
             fail("should have failed");
         } catch (Exception expected) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -467,18 +469,18 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             backend.setCurrentKey(1);
             Iterator<Map.Entry<Integer, TestType>> iterable1 = mapState.iterator();
             Map.Entry<Integer, TestType> actual = iterable1.next();
-            assertEquals((Integer) 1, actual.getKey());
-            assertEquals(new TestType("key-1", 1), actual.getValue());
+            assertThat(actual.getKey()).isEqualTo((Integer) 1);
+            assertThat(actual.getValue()).isEqualTo(new TestType("key-1", 1));
 
             actual = iterable1.next();
-            assertEquals((Integer) 2, actual.getKey());
-            assertEquals(new TestType("key-1", 2), actual.getValue());
+            assertThat(actual.getKey()).isEqualTo((Integer) 2);
+            assertThat(actual.getValue()).isEqualTo(new TestType("key-1", 2));
 
             actual = iterable1.next();
-            assertEquals((Integer) 3, actual.getKey());
-            assertEquals(new TestType("key-1", 3), actual.getValue());
+            assertThat(actual.getKey()).isEqualTo((Integer) 3);
+            assertThat(actual.getValue()).isEqualTo(new TestType("key-1", 3));
 
-            Assert.assertFalse(iterable1.hasNext());
+            assertThat(iterable1.hasNext()).isFalse();
 
             mapState.put(123, new TestType("new-key-1", 123));
 
@@ -486,9 +488,9 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             Iterator<Map.Entry<Integer, TestType>> iterable2 = mapState.iterator();
 
             actual = iterable2.next();
-            assertEquals((Integer) 1, actual.getKey());
-            assertEquals(new TestType("key-2", 1), actual.getValue());
-            Assert.assertFalse(iterable2.hasNext());
+            assertThat(actual.getKey()).isEqualTo((Integer) 1);
+            assertThat(actual.getValue()).isEqualTo(new TestType("key-2", 1));
+            assertThat(iterable2.hasNext()).isFalse();
 
             mapState.put(456, new TestType("new-key-2", 456));
 
@@ -496,14 +498,14 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             Iterator<Map.Entry<Integer, TestType>> iterable3 = mapState.iterator();
 
             actual = iterable3.next();
-            assertEquals((Integer) 1, actual.getKey());
-            assertEquals(new TestType("key-3", 1), actual.getValue());
+            assertThat(actual.getKey()).isEqualTo((Integer) 1);
+            assertThat(actual.getValue()).isEqualTo(new TestType("key-3", 1));
 
             actual = iterable3.next();
-            assertEquals((Integer) 2, actual.getKey());
-            assertEquals(new TestType("key-3", 2), actual.getValue());
+            assertThat(actual.getKey()).isEqualTo((Integer) 2);
+            assertThat(actual.getValue()).isEqualTo(new TestType("key-3", 2));
 
-            Assert.assertFalse(iterable3.hasNext());
+            assertThat(iterable3.hasNext()).isFalse();
             mapState.put(777, new TestType("new-key-3", 777));
 
             // do another snapshot to verify the snapshot logic after migration
@@ -557,8 +559,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed");
         } catch (Exception e) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent())
+                    .isTrue();
         } finally {
             backend.dispose();
         }
@@ -577,9 +579,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             fail("should have failed");
         } catch (Exception expected) {
             // the new key serializer requires migration; this should fail the restore
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -601,9 +604,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             fail("should have failed");
         } catch (Exception expected) {
             // the new key serializer is incompatible; this should fail the restore
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -648,9 +652,9 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             // access and check previous state
             backend.setCurrentKey(new TestType("foo", 123));
-            assertEquals(1, valueState.value().intValue());
+            assertThat(valueState.value().intValue()).isEqualTo(1);
             backend.setCurrentKey(new TestType("bar", 456));
-            assertEquals(5, valueState.value().intValue());
+            assertThat(valueState.value().intValue()).isEqualTo(5);
 
             // do another snapshot to verify the snapshot logic after migration
             snapshot =
@@ -681,9 +685,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             fail("should have failed");
         } catch (Exception expected) {
             // the new namespace serializer requires migration; this should fail the restore
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -706,9 +711,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             fail("should have failed");
         } catch (Exception expected) {
             // the new namespace serializer is incompatible; this should fail the restore
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(expected, StateMigrationException.class)
-                            .isPresent());
+            assertThat(
+                            ExceptionUtils.findThrowable(expected, StateMigrationException.class)
+                                    .isPresent())
+                    .isTrue();
         }
     }
 
@@ -756,10 +762,10 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             // access and check previous state
             backend.setCurrentKey(1);
-            assertEquals(10, valueState.value().intValue());
+            assertThat(valueState.value().intValue()).isEqualTo(10);
             valueState.update(10);
             backend.setCurrentKey(5);
-            assertEquals(50, valueState.value().intValue());
+            assertThat(valueState.value().intValue()).isEqualTo(50);
 
             // do another snapshot to verify the snapshot logic after migration
             snapshot =
@@ -819,8 +825,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed.");
         } catch (Exception e) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent())
+                    .isTrue();
         }
     }
 
@@ -854,9 +860,9 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             // make sure that reading and writing each state partition works with the new serializer
             Iterator<TestType> iterator = state.get().iterator();
-            assertEquals(new TestType("foo", 13), iterator.next());
-            assertEquals(new TestType("bar", 278), iterator.next());
-            Assert.assertFalse(iterator.hasNext());
+            assertThat(iterator.next()).isEqualTo(new TestType("foo", 13));
+            assertThat(iterator.next()).isEqualTo(new TestType("bar", 278));
+            assertThat(iterator.hasNext()).isFalse();
             state.add(new TestType("new-entry", 777));
         } finally {
             backend.dispose();
@@ -905,8 +911,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed.");
         } catch (Exception e) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent())
+                    .isTrue();
         }
     }
 
@@ -942,9 +948,9 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             // migration;
             // make sure that reading and writing each state partition works with the new serializer
             Iterator<TestType> iterator = state.get().iterator();
-            assertEquals(new TestType("foo", 13), iterator.next());
-            assertEquals(new TestType("bar", 278), iterator.next());
-            Assert.assertFalse(iterator.hasNext());
+            assertThat(iterator.next()).isEqualTo(new TestType("foo", 13));
+            assertThat(iterator.next()).isEqualTo(new TestType("bar", 278));
+            assertThat(iterator.hasNext()).isFalse();
             state.add(new TestType("new-entry", 777));
         } finally {
             backend.dispose();
@@ -1027,8 +1033,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed.");
         } catch (Exception e) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent())
+                    .isTrue();
         }
     }
 
@@ -1048,8 +1054,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
 
             fail("should have failed.");
         } catch (Exception e) {
-            Assert.assertTrue(
-                    ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent());
+            assertThat(ExceptionUtils.findThrowable(e, StateMigrationException.class).isPresent())
+                    .isTrue();
         }
     }
 
@@ -1084,8 +1090,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             // the state backend should have decided whether or not it needs to perform state
             // migration;
             // make sure that reading and writing each broadcast entry works with the new serializer
-            assertEquals(new TestType("foo", 13), state.get(3));
-            assertEquals(new TestType("bar", 278), state.get(5));
+            assertThat(state.get(3)).isEqualTo(new TestType("foo", 13));
+            assertThat(state.get(5)).isEqualTo(new TestType("bar", 278));
             state.put(17, new TestType("new-entry", 777));
         } finally {
             backend.dispose();
@@ -1124,8 +1130,8 @@ public abstract class StateBackendMigrationTestBase<B extends AbstractStateBacke
             // the state backend should have decided whether or not it needs to perform state
             // migration;
             // make sure that reading and writing each broadcast entry works with the new serializer
-            assertEquals((Integer) 3, state.get(new TestType("foo", 13)));
-            assertEquals((Integer) 5, state.get(new TestType("bar", 278)));
+            assertThat(state.get(new TestType("foo", 13))).isEqualTo((Integer) 3);
+            assertThat(state.get(new TestType("bar", 278))).isEqualTo((Integer) 5);
             state.put(new TestType("new-entry", 777), 17);
         } finally {
             backend.dispose();

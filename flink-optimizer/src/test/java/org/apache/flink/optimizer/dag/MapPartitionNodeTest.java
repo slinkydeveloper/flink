@@ -25,7 +25,7 @@ import org.apache.flink.api.common.operators.util.FieldSet;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,14 +47,14 @@ public class MapPartitionNodeTest {
 
         SemanticProperties filteredProps = node.getSemanticPropertiesForLocalPropertyFiltering();
 
-        assertTrue(filteredProps.getForwardingTargetFields(0, 0).size() == 0);
-        assertTrue(filteredProps.getForwardingTargetFields(0, 2).size() == 0);
-        assertTrue(filteredProps.getForwardingSourceField(0, 1) < 0);
-        assertTrue(filteredProps.getForwardingSourceField(0, 2) < 0);
-        assertTrue(filteredProps.getReadFields(0).size() == 4);
-        assertTrue(filteredProps.getReadFields(0).contains(0));
-        assertTrue(filteredProps.getReadFields(0).contains(2));
-        assertTrue(filteredProps.getReadFields(0).contains(4));
-        assertTrue(filteredProps.getReadFields(0).contains(7));
+        assertThat(filteredProps.getForwardingTargetFields(0, 0).size() == 0).isTrue();
+        assertThat(filteredProps.getForwardingTargetFields(0, 2).size() == 0).isTrue();
+        assertThat(filteredProps.getForwardingSourceField(0, 1) < 0).isTrue();
+        assertThat(filteredProps.getForwardingSourceField(0, 2) < 0).isTrue();
+        assertThat(filteredProps.getReadFields(0).size() == 4).isTrue();
+        assertThat(filteredProps.getReadFields(0).contains(0)).isTrue();
+        assertThat(filteredProps.getReadFields(0).contains(2)).isTrue();
+        assertThat(filteredProps.getReadFields(0).contains(4)).isTrue();
+        assertThat(filteredProps.getReadFields(0).contains(7)).isTrue();
     }
 }

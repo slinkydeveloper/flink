@@ -24,7 +24,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link RestHandlerConfiguration}. */
 public class RestHandlerConfigurationTest extends TestLogger {
@@ -55,7 +55,7 @@ public class RestHandlerConfigurationTest extends TestLogger {
 
         RestHandlerConfiguration restHandlerConfiguration =
                 RestHandlerConfiguration.fromConfiguration(config);
-        assertEquals(webSubmitEnabled, restHandlerConfiguration.isWebSubmitEnabled());
+        assertThat(restHandlerConfiguration.isWebSubmitEnabled()).isEqualTo(webSubmitEnabled);
     }
 
     private static void testWebCancelFeatureFlag(boolean webCancelEnabled) {
@@ -64,6 +64,6 @@ public class RestHandlerConfigurationTest extends TestLogger {
 
         RestHandlerConfiguration restHandlerConfiguration =
                 RestHandlerConfiguration.fromConfiguration(config);
-        assertEquals(webCancelEnabled, restHandlerConfiguration.isWebCancelEnabled());
+        assertThat(restHandlerConfiguration.isWebCancelEnabled()).isEqualTo(webCancelEnabled);
     }
 }

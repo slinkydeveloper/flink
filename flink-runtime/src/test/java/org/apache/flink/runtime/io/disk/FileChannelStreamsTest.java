@@ -36,7 +36,8 @@ import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FileChannelStreamsTest {
 
@@ -56,14 +57,14 @@ public class FileChannelStreamsTest {
 
             // close for the first time, make sure all memory returns
             out.close();
-            assertTrue(memMan.verifyEmpty());
+            assertThat(memMan.verifyEmpty()).isTrue();
 
             // close again, should not cause an exception
             out.close();
 
             // delete, make sure file is removed
             out.closeAndDelete();
-            assertFalse(new File(channel.getPath()).exists());
+            assertThat(new File(channel.getPath()).exists()).isFalse();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -92,14 +93,14 @@ public class FileChannelStreamsTest {
 
             // close for the first time, make sure all memory returns
             in.close();
-            assertTrue(memMan.verifyEmpty());
+            assertThat(memMan.verifyEmpty()).isTrue();
 
             // close again, should not cause an exception
             in.close();
 
             // delete, make sure file is removed
             in.closeAndDelete();
-            assertFalse(new File(channel.getPath()).exists());
+            assertThat(new File(channel.getPath()).exists()).isFalse();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

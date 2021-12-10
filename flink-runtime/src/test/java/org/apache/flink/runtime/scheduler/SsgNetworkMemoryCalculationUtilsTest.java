@@ -42,7 +42,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SsgNetworkMemoryCalculationUtils}. */
 public class SsgNetworkMemoryCalculationUtilsTest {
@@ -66,15 +66,16 @@ public class SsgNetworkMemoryCalculationUtilsTest {
                         SsgNetworkMemoryCalculationUtils.enrichNetworkMemory(
                                 ssg, executionGraph.getAllVertices()::get, SHUFFLE_MASTER));
 
-        assertEquals(
-                new MemorySize(
-                        TestShuffleMaster.computeRequiredShuffleMemoryBytes(0, 2)
-                                + TestShuffleMaster.computeRequiredShuffleMemoryBytes(1, 6)),
-                slotSharingGroups.get(0).getResourceProfile().getNetworkMemory());
+        assertThat(slotSharingGroups.get(0).getResourceProfile().getNetworkMemory())
+                .isEqualTo(
+                        new MemorySize(
+                                TestShuffleMaster.computeRequiredShuffleMemoryBytes(0, 2)
+                                        + TestShuffleMaster.computeRequiredShuffleMemoryBytes(
+                                                1, 6)));
 
-        assertEquals(
-                new MemorySize(TestShuffleMaster.computeRequiredShuffleMemoryBytes(5, 0)),
-                slotSharingGroups.get(1).getResourceProfile().getNetworkMemory());
+        assertThat(slotSharingGroups.get(1).getResourceProfile().getNetworkMemory())
+                .isEqualTo(
+                        new MemorySize(TestShuffleMaster.computeRequiredShuffleMemoryBytes(5, 0)));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class SsgNetworkMemoryCalculationUtilsTest {
                                 ssg, executionGraph.getAllVertices()::get, SHUFFLE_MASTER));
 
         for (SlotSharingGroup slotSharingGroup : slotSharingGroups) {
-            assertEquals(ResourceProfile.UNKNOWN, slotSharingGroup.getResourceProfile());
+            assertThat(slotSharingGroup.getResourceProfile()).isEqualTo(ResourceProfile.UNKNOWN);
         }
     }
 

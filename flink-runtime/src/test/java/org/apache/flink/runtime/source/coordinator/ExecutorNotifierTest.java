@@ -29,8 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for ExecutorNotifier. */
 public class ExecutorNotifierTest {
@@ -78,7 +77,7 @@ public class ExecutorNotifierTest {
                 });
         latch.await();
         closeExecutorToNotify();
-        assertEquals(1234, result.get());
+        assertThat(result.get()).isEqualTo(1234);
     }
 
     @Test
@@ -89,8 +88,8 @@ public class ExecutorNotifierTest {
                     throw exception;
                 },
                 (v, e) -> {
-                    assertEquals(exception, e);
-                    assertNull(v);
+                    assertThat(e).isEqualTo(exception);
+                    assertThat(v).isNull();
                 });
     }
 
@@ -104,8 +103,8 @@ public class ExecutorNotifierTest {
                     throw exception1;
                 },
                 (v, e) -> {
-                    assertEquals(exception1, e);
-                    assertNull(v);
+                    assertThat(e).isEqualTo(exception1);
+                    assertThat(v).isNull();
                     latch.countDown();
                     throw exception2;
                 });
@@ -114,7 +113,7 @@ public class ExecutorNotifierTest {
         // The uncaught exception handler may fire after the executor has shutdown.
         // We need to wait on the countdown latch here.
         exceptionInHandlerLatch.await(10000L, TimeUnit.MILLISECONDS);
-        assertEquals(exception2, exceptionInHandler);
+        assertThat(exceptionInHandler).isEqualTo(exception2);
     }
 
     @Test
@@ -132,7 +131,7 @@ public class ExecutorNotifierTest {
         // The uncaught exception handler may fire after the executor has shutdown.
         // We need to wait on the countdown latch here.
         exceptionInHandlerLatch.await(10000L, TimeUnit.MILLISECONDS);
-        assertEquals(exception, exceptionInHandler);
+        assertThat(exceptionInHandler).isEqualTo(exception);
     }
 
     private void closeExecutorToNotify() throws InterruptedException {

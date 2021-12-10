@@ -47,7 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests of {@link SubtaskExecutionAttemptAccumulatorsHandler}. */
 public class SubtaskExecutionAttemptAccumulatorsHandlerTest extends TestLogger {
@@ -124,6 +124,6 @@ public class SubtaskExecutionAttemptAccumulatorsHandlerTest extends TestLogger {
                         userAccumulatorList);
 
         // Verify.
-        assertEquals(expected, accumulatorsInfo);
+        assertThat(accumulatorsInfo).isEqualTo(expected);
     }
 }

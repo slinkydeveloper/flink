@@ -39,10 +39,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.apache.flink.runtime.io.disk.iomanager.BufferFileWriterReaderTest.fillBufferWithAscendingNumbers;
 import static org.apache.flink.runtime.io.disk.iomanager.BufferFileWriterReaderTest.verifyBufferFilledWithAscendingNumbers;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class BufferFileWriterFileSegmentReaderTest {
 
@@ -124,7 +122,7 @@ public class BufferFileWriterFileSegmentReaderTest {
 
         // Read buffers back in...
         for (int i = 0; i < numBuffers; i++) {
-            assertFalse(reader.hasReachedEndOfFile());
+            assertThat(reader.hasReachedEndOfFile()).isFalse();
             reader.read();
         }
 
@@ -142,10 +140,12 @@ public class BufferFileWriterFileSegmentReaderTest {
             sync.await();
         }
 
-        assertTrue(reader.hasReachedEndOfFile());
+        assertThat(reader.hasReachedEndOfFile()).isTrue();
 
         // Verify that the content is the same
-        assertEquals("Read less buffers than written.", numBuffers, returnedFileSegments.size());
+        assertThat(returnedFileSegments.size())
+                .as("Read less buffers than written.")
+                .isEqualTo(numBuffers);
 
         currentNumber = 0;
         FileSegment fileSegment;

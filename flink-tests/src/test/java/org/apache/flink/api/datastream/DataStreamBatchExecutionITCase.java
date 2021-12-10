@@ -66,9 +66,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.apache.flink.util.CollectionUtil.iteratorToList;
-import static org.hamcrest.CoreMatchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 /**
  * Integration test for {@link RuntimeExecutionMode#BATCH} execution on the DataStream API.
@@ -110,9 +110,8 @@ public class DataStreamBatchExecutionITCase {
 
             // only the operators after the key-by "barrier" are restarted and will have the
             // "attempt 1" suffix
-            assertThat(
-                    iteratorToList(result),
-                    containsInAnyOrder("foo-a0-b0-c1-d1", "bar-a0-b0-c1-d1"));
+            assertThat(iteratorToList(result))
+                    .satisfies(matching(containsInAnyOrder("foo-a0-b0-c1-d1", "bar-a0-b0-c1-d1")));
         }
     }
 
@@ -139,9 +138,8 @@ public class DataStreamBatchExecutionITCase {
 
             // only the operators after the rebalance "barrier" are restarted and will have the
             // "attempt 1" suffix
-            assertThat(
-                    iteratorToList(result),
-                    containsInAnyOrder("foo-a0-b0-c1-d1", "bar-a0-b0-c1-d1"));
+            assertThat(iteratorToList(result))
+                    .satisfies(matching(containsInAnyOrder("foo-a0-b0-c1-d1", "bar-a0-b0-c1-d1")));
         }
     }
 
@@ -171,9 +169,8 @@ public class DataStreamBatchExecutionITCase {
 
             // only the operators after the rescale "barrier" are restarted and will have the
             // "attempt 1" suffix
-            assertThat(
-                    iteratorToList(result),
-                    containsInAnyOrder("foo-a0-b0-c1-d1", "bar-a0-b0-c1-d1"));
+            assertThat(iteratorToList(result))
+                    .satisfies(matching(containsInAnyOrder("foo-a0-b0-c1-d1", "bar-a0-b0-c1-d1")));
         }
     }
 
@@ -188,7 +185,7 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<Long> sumsIterator = sums.executeAndCollect()) {
             List<Long> results = CollectionUtil.iteratorToList(sumsIterator);
-            assertThat(results, equalTo(Arrays.asList(30L, 25L)));
+            assertThat(results).isEqualTo(Arrays.asList(30L, 25L));
         }
     }
 
@@ -203,7 +200,7 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<Long> sumsIterator = sums.executeAndCollect()) {
             List<Long> results = CollectionUtil.iteratorToList(sumsIterator);
-            assertThat(results, equalTo(Arrays.asList(30L, 25L)));
+            assertThat(results).isEqualTo(Arrays.asList(30L, 25L));
         }
     }
 
@@ -249,9 +246,8 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<String> resultIterator = result.executeAndCollect()) {
             List<String> results = CollectionUtil.iteratorToList(resultIterator);
-            assertThat(
-                    results,
-                    equalTo(
+            assertThat(results)
+                    .isEqualTo(
                             Arrays.asList(
                                     "(regular4,4)",
                                     "(regular3,3)",
@@ -260,7 +256,7 @@ public class DataStreamBatchExecutionITCase {
                                     "(regular1,2)",
                                     "(regular1,3)",
                                     "(regular2,1)",
-                                    "(regular2,4)")));
+                                    "(regular2,4)"));
         }
     }
 
@@ -305,9 +301,8 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<String> resultIterator = result.executeAndCollect()) {
             List<String> results = CollectionUtil.iteratorToList(resultIterator);
-            assertThat(
-                    results,
-                    equalTo(
+            assertThat(results)
+                    .isEqualTo(
                             Arrays.asList(
                                     "(regular4,4)",
                                     "(regular3,3)",
@@ -316,7 +311,7 @@ public class DataStreamBatchExecutionITCase {
                                     "(regular1,2)",
                                     "(regular1,3)",
                                     "(regular2,1)",
-                                    "(regular2,4)")));
+                                    "(regular2,4)"));
         }
     }
 
@@ -360,9 +355,8 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<String> resultIterator = result.executeAndCollect()) {
             List<String> results = CollectionUtil.iteratorToList(resultIterator);
-            assertThat(
-                    results,
-                    equalTo(
+            assertThat(results)
+                    .isEqualTo(
                             Arrays.asList(
                                     "(regular1,1): [bc2=bc2, bc1=bc1, bc3=bc3]",
                                     "(regular1,2): [bc2=bc2, bc1=bc1, bc3=bc3]",
@@ -373,7 +367,7 @@ public class DataStreamBatchExecutionITCase {
                                     "(regular1,5): [bc2=bc2, bc1=bc1, bc3=bc3]",
                                     "(regular2,2): [bc2=bc2, bc1=bc1, bc3=bc3]",
                                     "(regular2,3): [bc2=bc2, bc1=bc1, bc3=bc3]",
-                                    "(regular2,5): [bc2=bc2, bc1=bc1, bc3=bc3]")));
+                                    "(regular2,5): [bc2=bc2, bc1=bc1, bc3=bc3]"));
         }
     }
 
@@ -413,9 +407,8 @@ public class DataStreamBatchExecutionITCase {
             List<String> results = CollectionUtil.iteratorToList(resultIterator);
             // regular, that is non-keyed input is not sorted by timestamp. For keyed inputs
             // this is a by-product of the grouping/sorting we use to get the keyed groups.
-            assertThat(
-                    results,
-                    equalTo(
+            assertThat(results)
+                    .isEqualTo(
                             Arrays.asList(
                                     "(regular1,1): [bc2=bc2, bc1=bc1, bc3=bc3]",
                                     "(regular1,2): [bc2=bc2, bc1=bc1, bc3=bc3]",
@@ -423,7 +416,7 @@ public class DataStreamBatchExecutionITCase {
                                     "(regular1,4): [bc2=bc2, bc1=bc1, bc3=bc3]",
                                     "(regular1,3): [bc2=bc2, bc1=bc1, bc3=bc3]",
                                     "(regular1,5): [bc2=bc2, bc1=bc1, bc3=bc3]",
-                                    "(regular1,3): [bc2=bc2, bc1=bc1, bc3=bc3]")));
+                                    "(regular1,3): [bc2=bc2, bc1=bc1, bc3=bc3]"));
         }
     }
 
@@ -471,9 +464,8 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<String> resultIterator = result.executeAndCollect()) {
             List<String> results = CollectionUtil.iteratorToList(resultIterator);
-            assertThat(
-                    results,
-                    equalTo(
+            assertThat(results)
+                    .isEqualTo(
                             Arrays.asList(
                                     "(regular1,1): [bc3, bc2, bc1]",
                                     "(regular1,2): [bc3, bc2, bc1]",
@@ -481,7 +473,7 @@ public class DataStreamBatchExecutionITCase {
                                     "(regular1,3): [bc3, bc2, bc1]",
                                     "(regular1,4): [bc3, bc2, bc1]",
                                     "(regular2,3): [bc3, bc2, bc1]",
-                                    "(regular2,5): [bc3, bc2, bc1]")));
+                                    "(regular2,5): [bc3, bc2, bc1]"));
         }
     }
 
@@ -533,9 +525,8 @@ public class DataStreamBatchExecutionITCase {
 
         try (CloseableIterator<String> resultIterator = result.executeAndCollect()) {
             List<String> results = CollectionUtil.iteratorToList(resultIterator);
-            assertThat(
-                    results,
-                    equalTo(
+            assertThat(results)
+                    .isEqualTo(
                             Arrays.asList(
                                     "(regular1,1): [bc3, bc2, bc1]",
                                     "(regular1,2): [bc3, bc2, bc1]",
@@ -543,7 +534,7 @@ public class DataStreamBatchExecutionITCase {
                                     "(regular1,3): [bc3, bc2, bc1]",
                                     "(regular1,4): [bc3, bc2, bc1]",
                                     "(regular2,3): [bc3, bc2, bc1]",
-                                    "(regular2,5): [bc3, bc2, bc1]")));
+                                    "(regular2,5): [bc3, bc2, bc1]"));
         }
     }
 

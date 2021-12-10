@@ -29,7 +29,7 @@ import java.util.Random;
 
 import static org.apache.flink.runtime.state.filesystem.AbstractFsCheckpointStorageAccess.decodePathFromReference;
 import static org.apache.flink.runtime.state.filesystem.AbstractFsCheckpointStorageAccess.encodePathAsReference;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the encoding / decoding of storage location references. */
 public class FsStorageLocationReferenceTest extends TestLogger {
@@ -42,7 +42,7 @@ public class FsStorageLocationReferenceTest extends TestLogger {
             CheckpointStorageLocationReference ref = encodePathAsReference(path);
             Path decoded = decodePathFromReference(ref);
 
-            assertEquals(path, decoded);
+            assertThat(decoded).isEqualTo(path);
         } catch (Exception | Error e) {
             // if something goes wrong, help by printing the problematic path
             log.error("ERROR FOR PATH " + path);

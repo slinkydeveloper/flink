@@ -35,7 +35,6 @@ import org.apache.flink.util.function.CheckedSupplier;
 import org.apache.flink.shaded.netty4.io.netty.channel.ConnectTimeoutException;
 import org.apache.flink.shaded.netty4.io.netty.handler.codec.http.HttpResponseStatus;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,9 +46,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link RestClient}. */
 public class RestClientTest extends TestLogger {
@@ -73,8 +71,8 @@ public class RestClientTest extends TestLogger {
                     .get(60, TimeUnit.SECONDS);
         } catch (final ExecutionException e) {
             final Throwable throwable = ExceptionUtils.stripExecutionException(e);
-            assertThat(throwable, instanceOf(ConnectTimeoutException.class));
-            assertThat(throwable.getMessage(), containsString(unroutableIp));
+            assertThat(throwable).isInstanceOf(ConnectTimeoutException.class);
+            assertThat(throwable.getMessage()).contains(unroutableIp);
         }
     }
 
@@ -91,7 +89,7 @@ public class RestClientTest extends TestLogger {
                             EmptyRequestBody.getInstance(),
                             Collections.emptyList(),
                             RestAPIVersion.V0);
-            Assert.fail("The request should have been rejected due to a version mismatch.");
+            fail("The request should have been rejected due to a version mismatch.");
         } catch (IllegalArgumentException e) {
             // expected
         }

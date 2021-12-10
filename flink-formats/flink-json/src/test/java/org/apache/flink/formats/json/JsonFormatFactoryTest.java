@@ -45,7 +45,7 @@ import static org.apache.flink.table.factories.utils.FactoryMocks.PHYSICAL_TYPE;
 import static org.apache.flink.table.factories.utils.FactoryMocks.SCHEMA;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSink;
 import static org.apache.flink.table.factories.utils.FactoryMocks.createTableSource;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link JsonFormatFactory}. */
 public class JsonFormatFactoryTest extends TestLogger {
@@ -148,7 +148,7 @@ public class JsonFormatFactoryTest extends TestLogger {
                         TimestampFormat.ISO_8601);
 
         final DynamicTableSource actualSource = createTableSource(SCHEMA, options);
-        assert actualSource instanceof TestDynamicTableFactory.DynamicTableSourceMock;
+        assertThat(actualSource).isInstanceOf(TestDynamicTableFactory.DynamicTableSourceMock.class);
         TestDynamicTableFactory.DynamicTableSourceMock scanSourceMock =
                 (TestDynamicTableFactory.DynamicTableSourceMock) actualSource;
 
@@ -156,7 +156,7 @@ public class JsonFormatFactoryTest extends TestLogger {
                 scanSourceMock.valueFormat.createRuntimeDecoder(
                         ScanRuntimeProviderContext.INSTANCE, SCHEMA.toPhysicalRowDataType());
 
-        assertEquals(expectedDeser, actualDeser);
+        assertThat(actualDeser).isEqualTo(expectedDeser);
     }
 
     private void testSchemaSerializationSchema(Map<String, String> options) {
@@ -169,7 +169,7 @@ public class JsonFormatFactoryTest extends TestLogger {
                         true);
 
         final DynamicTableSink actualSink = createTableSink(SCHEMA, options);
-        assert actualSink instanceof TestDynamicTableFactory.DynamicTableSinkMock;
+        assertThat(actualSink).isInstanceOf(TestDynamicTableFactory.DynamicTableSinkMock.class);
         TestDynamicTableFactory.DynamicTableSinkMock sinkMock =
                 (TestDynamicTableFactory.DynamicTableSinkMock) actualSink;
 
@@ -177,7 +177,7 @@ public class JsonFormatFactoryTest extends TestLogger {
                 sinkMock.valueFormat.createRuntimeEncoder(
                         new SinkRuntimeProviderContext(false), PHYSICAL_DATA_TYPE);
 
-        assertEquals(expectedSer, actualSer);
+        assertThat(actualSer).isEqualTo(expectedSer);
     }
 
     /**

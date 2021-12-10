@@ -37,11 +37,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Tests the synchronous checkpoint execution at the {@link StreamTask}. */
 public class SynchronousCheckpointTest {
@@ -72,19 +70,19 @@ public class SynchronousCheckpointTest {
                         Executors.newSingleThreadExecutor());
 
         // Wait until task has been initialized.
-        assertThat(eventQueue.take(), is(Event.TASK_INITIALIZED));
+        assertThat(eventQueue.take()).isEqualTo(Event.TASK_INITIALIZED);
     }
 
     @Test(timeout = 10_000)
     public void cancelShouldAlsoCancelPendingSynchronousCheckpoint() throws Throwable {
         launchSynchronousSavepointAndWaitForSyncSavepointIdToBeSet();
-        assertTrue(streamTaskUnderTest.getSynchronousSavepointId().isPresent());
+        assertThat(streamTaskUnderTest.getSynchronousSavepointId().isPresent()).isTrue();
 
         streamTaskUnderTest.cancel();
 
         waitUntilMainExecutionThreadIsFinished();
 
-        assertTrue(streamTaskUnderTest.isCanceled());
+        assertThat(streamTaskUnderTest.isCanceled()).isTrue();
     }
 
     private void launchSynchronousSavepointAndWaitForSyncSavepointIdToBeSet()
@@ -101,7 +99,7 @@ public class SynchronousCheckpointTest {
         try {
             taskInvocation.get();
         } catch (Exception e) {
-            assertThat(e.getCause(), is(instanceOf(CancelTaskException.class)));
+            assertThat(e.getCause()).isEqualTo(instanceOf(CancelTaskException.class));
         }
     }
 

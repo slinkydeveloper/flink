@@ -34,9 +34,10 @@ import org.junit.Test;
 import java.util.List;
 import java.util.stream.LongStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 /**
  * An integration test for the sources based on iterators.
@@ -70,7 +71,11 @@ public class NumberSequenceSourceITCase extends TestLogger {
                         "iterator source");
 
         final List<Long> result = stream.executeAndCollect(10000);
-        assertThat(result, containsInAnyOrder(LongStream.rangeClosed(1, 1000).boxed().toArray()));
+        assertThat(result)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        LongStream.rangeClosed(1, 1000).boxed().toArray())));
     }
 
     @Test
@@ -89,7 +94,8 @@ public class NumberSequenceSourceITCase extends TestLogger {
                                     return x;
                                 });
         List<Long> result = stream.executeAndCollect(1000);
-        assertThat(result, contains(LongStream.rangeClosed(0, 100).boxed().toArray()));
+        assertThat(result)
+                .satisfies(matching(contains(LongStream.rangeClosed(0, 100).boxed().toArray())));
     }
 
     @Test
@@ -99,6 +105,10 @@ public class NumberSequenceSourceITCase extends TestLogger {
         int n = PARALLELISM - 2;
         DataStream<Long> stream = env.fromSequence(0, n).map(l -> l);
         List<Long> result = stream.executeAndCollect(100);
-        assertThat(result, containsInAnyOrder(LongStream.rangeClosed(0, n).boxed().toArray()));
+        assertThat(result)
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        LongStream.rangeClosed(0, n).boxed().toArray())));
     }
 }

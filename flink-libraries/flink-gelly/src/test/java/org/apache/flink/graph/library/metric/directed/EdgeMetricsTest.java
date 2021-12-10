@@ -26,7 +26,7 @@ import org.apache.flink.types.NullValue;
 import org.apache.commons.math3.util.CombinatoricsUtils;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link EdgeMetrics}. */
 public class EdgeMetricsTest extends AsmTestBase {
@@ -43,7 +43,7 @@ public class EdgeMetricsTest extends AsmTestBase {
             Graph<T, NullValue, NullValue> graph, Result result) throws Exception {
         Result edgeMetrics = new EdgeMetrics<T, NullValue, NullValue>().run(graph).execute();
 
-        assertEquals(result, edgeMetrics);
+        assertThat(edgeMetrics).isEqualTo(result);
     }
 
     @Test

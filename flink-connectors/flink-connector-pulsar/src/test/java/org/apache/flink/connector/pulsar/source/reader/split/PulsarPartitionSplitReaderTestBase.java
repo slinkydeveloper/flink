@@ -57,7 +57,7 @@ import static org.apache.flink.connector.pulsar.source.enumerator.topic.TopicRan
 import static org.apache.flink.core.testutils.CommonTestUtils.waitUtil;
 import static org.apache.flink.util.Preconditions.checkNotNull;
 import static org.apache.pulsar.client.api.Schema.STRING;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test utils for split readers. */
 public abstract class PulsarPartitionSplitReaderTestBase extends PulsarTestSuiteBase {
@@ -110,7 +110,7 @@ public abstract class PulsarPartitionSplitReaderTestBase extends PulsarTestSuite
 
         // Poll once with a null message
         PulsarMessage<String> message1 = fetchedMessage(splitReader);
-        assertNull(message1);
+        assertThat(message1).isNull();
 
         // Send a message to pulsar
         String topic = topicNameWithPartition(topicName, 0);

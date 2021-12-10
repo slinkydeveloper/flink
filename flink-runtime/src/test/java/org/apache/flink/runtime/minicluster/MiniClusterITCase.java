@@ -58,10 +58,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apache.flink.util.ExceptionUtils.findThrowable;
 import static org.apache.flink.util.ExceptionUtils.findThrowableWithMessage;
-import static org.hamcrest.core.StringStartsWith.startsWith;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Integration test cases for the {@link MiniCluster}. */
 public class MiniClusterITCase extends TestLogger {
@@ -128,8 +127,13 @@ public class MiniClusterITCase extends TestLogger {
 
             fail("Job should fail.");
         } catch (JobExecutionException e) {
-            assertThat(e, FlinkMatchers.containsMessage("Job execution failed"));
-            assertThat(e, FlinkMatchers.containsCause(NoResourceAvailableException.class));
+            assertThat(e)
+                    .satisfies(matching(FlinkMatchers.containsMessage("Job execution failed")));
+            assertThat(e)
+                    .satisfies(
+                            matching(
+                                    FlinkMatchers.containsCause(
+                                            NoResourceAvailableException.class)));
         }
     }
 
@@ -255,8 +259,9 @@ public class MiniClusterITCase extends TestLogger {
 
                 fail("Job should fail.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, ArrayIndexOutOfBoundsException.class).isPresent());
-                assertTrue(findThrowableWithMessage(e, "2").isPresent());
+                assertThat(findThrowable(e, ArrayIndexOutOfBoundsException.class).isPresent())
+                        .isTrue();
+                assertThat(findThrowableWithMessage(e, "2").isPresent()).isTrue();
             }
         }
     }
@@ -374,8 +379,8 @@ public class MiniClusterITCase extends TestLogger {
 
                 fail("Job should fail.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, Exception.class).isPresent());
-                assertTrue(findThrowableWithMessage(e, "Test exception").isPresent());
+                assertThat(findThrowable(e, Exception.class).isPresent()).isTrue();
+                assertThat(findThrowableWithMessage(e, "Test exception").isPresent()).isTrue();
             }
         }
     }
@@ -422,8 +427,8 @@ public class MiniClusterITCase extends TestLogger {
 
                 fail("Job should fail.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, Exception.class).isPresent());
-                assertTrue(findThrowableWithMessage(e, "Test exception").isPresent());
+                assertThat(findThrowable(e, Exception.class).isPresent()).isTrue();
+                assertThat(findThrowableWithMessage(e, "Test exception").isPresent()).isTrue();
             }
         }
     }
@@ -460,8 +465,8 @@ public class MiniClusterITCase extends TestLogger {
 
                 fail("Job should fail.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, Exception.class).isPresent());
-                assertTrue(findThrowableWithMessage(e, "Test exception").isPresent());
+                assertThat(findThrowable(e, Exception.class).isPresent()).isTrue();
+                assertThat(findThrowableWithMessage(e, "Test exception").isPresent()).isTrue();
             }
         }
     }
@@ -498,9 +503,9 @@ public class MiniClusterITCase extends TestLogger {
 
                 fail("Job should fail.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, Exception.class).isPresent());
-                assertTrue(
-                        findThrowableWithMessage(e, "Test exception in constructor").isPresent());
+                assertThat(findThrowable(e, Exception.class).isPresent()).isTrue();
+                assertThat(findThrowableWithMessage(e, "Test exception in constructor").isPresent())
+                        .isTrue();
             }
         }
     }
@@ -547,9 +552,9 @@ public class MiniClusterITCase extends TestLogger {
 
                 fail("Job should fail.");
             } catch (JobExecutionException e) {
-                assertTrue(findThrowable(e, Exception.class).isPresent());
-                assertTrue(
-                        findThrowableWithMessage(e, "Test exception in constructor").isPresent());
+                assertThat(findThrowable(e, Exception.class).isPresent()).isTrue();
+                assertThat(findThrowableWithMessage(e, "Test exception in constructor").isPresent())
+                        .isTrue();
             }
         }
     }
@@ -593,7 +598,7 @@ public class MiniClusterITCase extends TestLogger {
 
             jobResultFuture.get().toJobExecutionResult(getClass().getClassLoader());
 
-            assertTrue(WaitOnFinalizeJobVertex.finalizedOnMaster.get());
+            assertThat(WaitOnFinalizeJobVertex.finalizedOnMaster.get()).isTrue();
         }
     }
 
@@ -628,13 +633,14 @@ public class MiniClusterITCase extends TestLogger {
             try {
                 jobResultFuture.get().toJobExecutionResult(getClass().getClassLoader());
             } catch (JobExecutionException e) {
-                assertThat(e, FlinkMatchers.containsCause(OutOfMemoryError.class));
+                assertThat(e)
+                        .satisfies(matching(FlinkMatchers.containsCause(OutOfMemoryError.class)));
                 assertThat(
-                        findThrowable(e, OutOfMemoryError.class)
-                                .map(OutOfMemoryError::getMessage)
-                                .get(),
-                        startsWith(
-                                "Java heap space. A heap space-related out-of-memory error has occurred."));
+                                findThrowable(e, OutOfMemoryError.class)
+                                        .map(OutOfMemoryError::getMessage)
+                                        .get())
+                        .startsWith(
+                                "Java heap space. A heap space-related out-of-memory error has occurred.");
             }
         }
     }
@@ -677,11 +683,13 @@ public class MiniClusterITCase extends TestLogger {
             try {
                 jobResultFuture.get();
             } catch (ExecutionException e) {
-                assertThat(e, FlinkMatchers.containsCause(OutOfMemoryError.class));
-                assertThat(
-                        e,
-                        FlinkMatchers.containsMessage(
-                                "Java heap space. A heap space-related out-of-memory error has occurred."));
+                assertThat(e)
+                        .satisfies(matching(FlinkMatchers.containsCause(OutOfMemoryError.class)));
+                assertThat(e)
+                        .satisfies(
+                                matching(
+                                        FlinkMatchers.containsMessage(
+                                                "Java heap space. A heap space-related out-of-memory error has occurred.")));
             }
         }
     }

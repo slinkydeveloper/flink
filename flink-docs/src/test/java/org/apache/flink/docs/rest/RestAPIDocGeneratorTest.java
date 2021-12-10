@@ -36,9 +36,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RestAPIDocGenerator}. */
 public class RestAPIDocGeneratorTest extends TestLogger {
@@ -50,22 +48,17 @@ public class RestAPIDocGeneratorTest extends TestLogger {
                 new TestExcludeDocumentingRestEndpoint(), RestAPIVersion.V0, file.toPath());
         String actual = FileUtils.readFile(file, "UTF-8");
 
-        assertThat(actual, containsString("/test/empty1"));
-        assertThat(actual, containsString("This is a testing REST API."));
-        assertThat(actual, containsString("/test/empty2"));
-        assertThat(actual, containsString("This is another testing REST API."));
-        assertThat(actual, not(containsString("/test/exclude1")));
-        assertThat(
-                actual,
-                not(
-                        containsString(
-                                "This REST API should not appear in the generated documentation.")));
-        assertThat(actual, not(containsString("/test/exclude2")));
-        assertThat(
-                actual,
-                not(
-                        containsString(
-                                "This REST API should also not appear in the generated documentation.")));
+        assertThat(actual).contains("/test/empty1");
+        assertThat(actual).contains("This is a testing REST API.");
+        assertThat(actual).contains("/test/empty2");
+        assertThat(actual).contains("This is another testing REST API.");
+        assertThat(actual).doesNotContain("/test/exclude1");
+        assertThat(actual)
+                .doesNotContain("This REST API should not appear in the generated documentation.");
+        assertThat(actual).doesNotContain("/test/exclude2");
+        assertThat(actual)
+                .doesNotContain(
+                        "This REST API should also not appear in the generated documentation.");
     }
 
     private static class TestExcludeDocumentingRestEndpoint implements DocumentingRestEndpoint {

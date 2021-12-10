@@ -35,7 +35,6 @@ import org.apache.flink.testutils.serialization.types.Util;
 import org.apache.flink.util.CloseableIterator;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -53,6 +52,7 @@ import java.util.Random;
 
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils.buildSingleBuffer;
 import static org.apache.flink.runtime.io.network.buffer.BufferBuilderTestUtils.createFilledBufferBuilder;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link SpillingAdaptiveSpanningRecordDeserializer}. */
 public class SpanningRecordSerializationTest extends TestLogger {
@@ -173,7 +173,7 @@ public class SpanningRecordSerializationTest extends TestLogger {
                     deserializer.setNextBuffer(serializationResult.buildBuffer());
                 }
             }
-            Assert.assertFalse(serializedRecord.hasRemaining());
+            assertThat(serializedRecord.hasRemaining()).isFalse();
         }
 
         // deserialize left over records
@@ -185,13 +185,13 @@ public class SpanningRecordSerializationTest extends TestLogger {
             SerializationTestType actual = expected.getClass().newInstance();
             RecordDeserializer.DeserializationResult result = deserializer.getNextRecord(actual);
 
-            Assert.assertTrue(result.isFullRecord());
-            Assert.assertEquals(expected, actual);
+            assertThat(result.isFullRecord()).isTrue();
+            assertThat(actual).isEqualTo(expected);
             numRecords--;
         }
 
         // assert that all records have been serialized and deserialized
-        Assert.assertEquals(0, numRecords);
+        assertThat(numRecords).isEqualTo(0);
     }
 
     @Test
@@ -308,12 +308,12 @@ public class SpanningRecordSerializationTest extends TestLogger {
     private static void assertUnconsumedBuffer(
             ByteArrayOutputStream expected, CloseableIterator<Buffer> actual) throws Exception {
         if (!actual.hasNext()) {
-            Assert.assertEquals(expected.size(), 0);
+            assertThat(0).isEqualTo(expected.size());
         }
 
         ByteBuffer expectedByteBuffer = ByteBuffer.wrap(expected.toByteArray());
         ByteBuffer actualByteBuffer = actual.next().getNioBufferReadable();
-        Assert.assertEquals(expectedByteBuffer, actualByteBuffer);
+        assertThat(actualByteBuffer).isEqualTo(expectedByteBuffer);
         actual.close();
     }
 

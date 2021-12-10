@@ -25,7 +25,6 @@ import org.apache.flink.core.fs.CloseableRegistry;
 import org.apache.flink.core.memory.ByteArrayOutputStreamWithPos;
 import org.apache.flink.util.IOUtils;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +41,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RocksStatesPerKeyGroupMergeIterator. */
 public class RocksKeyGroupsRocksSingleStateIteratorTest {
@@ -64,19 +65,19 @@ public class RocksKeyGroupsRocksSingleStateIteratorTest {
                         Collections.emptyList(),
                         Collections.emptyList(),
                         2);
-        Assert.assertFalse(emptyIterator.isValid());
+        assertThat(emptyIterator.isValid()).isFalse();
     }
 
     @Test
     public void testMergeIteratorByte() throws Exception {
-        Assert.assertTrue(MAX_NUM_KEYS <= Byte.MAX_VALUE);
+        assertThat(MAX_NUM_KEYS <= Byte.MAX_VALUE).isTrue();
 
         testMergeIterator(Byte.MAX_VALUE);
     }
 
     @Test
     public void testMergeIteratorShort() throws Exception {
-        Assert.assertTrue(MAX_NUM_KEYS <= Byte.MAX_VALUE);
+        assertThat(MAX_NUM_KEYS <= Byte.MAX_VALUE).isTrue();
 
         testMergeIterator(Short.MAX_VALUE);
     }
@@ -151,12 +152,11 @@ public class RocksKeyGroupsRocksSingleStateIteratorTest {
                     int keyGroup = maxParallelism > Byte.MAX_VALUE ? bb.getShort() : bb.get();
                     int key = bb.getInt();
 
-                    Assert.assertTrue(keyGroup >= prevKeyGroup);
-                    Assert.assertTrue(key >= prevKey);
-                    Assert.assertEquals(prevKeyGroup != keyGroup, mergeIterator.isNewKeyGroup());
-                    Assert.assertEquals(
-                            prevKVState != mergeIterator.kvStateId(),
-                            mergeIterator.isNewKeyValueState());
+                    assertThat(keyGroup >= prevKeyGroup).isTrue();
+                    assertThat(key >= prevKey).isTrue();
+                    assertThat(mergeIterator.isNewKeyGroup()).isEqualTo(prevKeyGroup != keyGroup);
+                    assertThat(mergeIterator.isNewKeyValueState())
+                            .isEqualTo(prevKVState != mergeIterator.kvStateId());
 
                     prevKeyGroup = keyGroup;
                     prevKVState = mergeIterator.kvStateId();
@@ -165,7 +165,7 @@ public class RocksKeyGroupsRocksSingleStateIteratorTest {
                     ++totalKeysActual;
                 }
 
-                Assert.assertEquals(totalKeysExpected, totalKeysActual);
+                assertThat(totalKeysActual).isEqualTo(totalKeysExpected);
             }
 
             IOUtils.closeQuietly(rocksDB.getDefaultColumnFamily());

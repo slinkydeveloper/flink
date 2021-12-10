@@ -57,16 +57,12 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.apache.flink.streaming.runtime.io.checkpointing.UnalignedCheckpointsTest.addSequence;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Tests for the behavior of the barrier tracker. */
 public class CheckpointBarrierTrackerTest {
@@ -77,8 +73,8 @@ public class CheckpointBarrierTrackerTest {
 
     @After
     public void ensureEmpty() throws Exception {
-        assertFalse(inputGate.pollNext().isPresent());
-        assertTrue(inputGate.isFinished());
+        assertThat(inputGate.pollNext().isPresent()).isFalse();
+        assertThat(inputGate.isFinished()).isTrue();
     }
 
     @Test
@@ -87,7 +83,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(1, sequence);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -107,7 +103,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(4, sequence);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -135,7 +131,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(1, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -160,7 +156,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(1, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -199,7 +195,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -242,7 +238,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -341,7 +337,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -363,12 +359,11 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(2, sequence, validator, manualClock);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
             manualClock.advanceTime(Duration.ofSeconds(1));
         }
-        assertEquals(
-                Duration.ofSeconds(2).toNanos(),
-                validator.lastAlignmentDurationNanos.get().longValue());
+        assertThat(validator.lastAlignmentDurationNanos.get().longValue())
+                .isEqualTo(Duration.ofSeconds(2).toNanos());
     }
 
     @Test
@@ -389,7 +384,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(1, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -452,7 +447,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -475,7 +470,7 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
     }
 
@@ -526,19 +521,18 @@ public class CheckpointBarrierTrackerTest {
         long startDelay = System.currentTimeMillis() - checkpointBarrierCreation;
         long alignmentDuration = System.nanoTime() - alignmentStartNanos;
 
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                is(both(greaterThanOrEqualTo(sleepTime)).and(lessThanOrEqualTo(startDelay))));
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isEqualTo(
+                        both(greaterThanOrEqualTo(sleepTime)).and(lessThanOrEqualTo(startDelay)));
 
-        assertTrue(handler.getLastAlignmentDurationNanos().isDone());
-        assertThat(
-                handler.getLastAlignmentDurationNanos().get() / 1_000_000,
-                is(
+        assertThat(handler.getLastAlignmentDurationNanos().isDone()).isTrue();
+        assertThat(handler.getLastAlignmentDurationNanos().get() / 1_000_000)
+                .isEqualTo(
                         both(greaterThanOrEqualTo(sleepTime))
-                                .and(lessThanOrEqualTo(alignmentDuration))));
+                                .and(lessThanOrEqualTo(alignmentDuration)));
 
-        assertTrue(handler.getLastBytesProcessedDuringAlignment().isDone());
-        assertThat(handler.getLastBytesProcessedDuringAlignment().get(), equalTo(3L * bufferSize));
+        assertThat(handler.getLastBytesProcessedDuringAlignment().isDone()).isTrue();
+        assertThat(handler.getLastBytesProcessedDuringAlignment().get()).isEqualTo(3L * bufferSize);
     }
 
     @Test
@@ -568,18 +562,16 @@ public class CheckpointBarrierTrackerTest {
 
         long startDelay = System.currentTimeMillis() - checkpointBarrierCreation;
 
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                greaterThanOrEqualTo(sleepTime));
-        assertThat(
-                inputGate.getCheckpointStartDelayNanos() / 1_000_000,
-                lessThanOrEqualTo(startDelay));
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isGreaterThanOrEqualTo(sleepTime);
+        assertThat(inputGate.getCheckpointStartDelayNanos() / 1_000_000)
+                .isLessThanOrEqualTo(startDelay);
 
-        assertTrue(handler.getLastAlignmentDurationNanos().isDone());
-        assertThat(handler.getLastAlignmentDurationNanos().get(), equalTo(0L));
+        assertThat(handler.getLastAlignmentDurationNanos().isDone()).isTrue();
+        assertThat(handler.getLastAlignmentDurationNanos().get()).isEqualTo(0L);
 
-        assertTrue(handler.getLastBytesProcessedDuringAlignment().isDone());
-        assertThat(handler.getLastBytesProcessedDuringAlignment().get(), equalTo(0L));
+        assertThat(handler.getLastBytesProcessedDuringAlignment().isDone()).isTrue();
+        assertThat(handler.getLastBytesProcessedDuringAlignment().get()).isEqualTo(0L);
     }
 
     @Test
@@ -602,14 +594,15 @@ public class CheckpointBarrierTrackerTest {
                 (CheckpointBarrierTracker) inputGate.getCheckpointBarrierHandler();
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
         // Only checkpoints 4 is triggered and the previous checkpoints are ignored.
-        assertThat(validator.triggeredCheckpoints, contains(4L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
-        assertThat(checkpointBarrierTracker.getPendingCheckpointIds(), contains(5L));
-        assertEquals(2, checkpointBarrierTracker.getNumOpenChannels());
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(4L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
+        assertThat(checkpointBarrierTracker.getPendingCheckpointIds())
+                .satisfies(matching(contains(5L)));
+        assertThat(checkpointBarrierTracker.getNumOpenChannels()).isEqualTo(2);
     }
 
     @Test
@@ -625,16 +618,16 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (int i = 0; i <= 2; ++i) {
-            assertEquals(sequence[i], inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(sequence[i]);
         }
 
         // Here the checkpoint should not be triggered.
-        assertEquals(0, validator.getTriggeredCheckpointCounter());
-        assertEquals(0, validator.getAbortedCheckpointCounter());
+        assertThat(validator.getTriggeredCheckpointCounter()).isEqualTo(0);
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
 
         // The last barrier aligned the pending checkpoint 2.
-        assertEquals(sequence[3], inputGate.pollNext().get());
-        assertThat(validator.triggeredCheckpoints, contains(2L));
+        assertThat(inputGate.pollNext().get()).isEqualTo(sequence[3]);
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(2L)));
     }
 
     @Test
@@ -652,11 +645,11 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertThat(validator.triggeredCheckpoints, contains(6L, 7L));
-        assertEquals(0, validator.getAbortedCheckpointCounter());
+        assertThat(validator.triggeredCheckpoints).satisfies(matching(contains(6L, 7L)));
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(0);
     }
 
     @Test
@@ -669,12 +662,12 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(2, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
         // The last barrier should finish the pending checkpoint instead of trigger a "new" one.
-        assertEquals(1, validator.getTriggeredCheckpointCounter());
-        assertFalse(inputGate.getCheckpointBarrierHandler().isCheckpointPending());
+        assertThat(validator.getTriggeredCheckpointCounter()).isEqualTo(1);
+        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending()).isFalse();
     }
 
     @Test
@@ -693,14 +686,15 @@ public class CheckpointBarrierTrackerTest {
                 (CheckpointBarrierTracker) inputGate.getCheckpointBarrierHandler();
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertEquals(1, validator.getAbortedCheckpointCounter());
-        assertEquals(4L, validator.getLastCanceledCheckpointId());
-        assertEquals(0, validator.getTriggeredCheckpointCounter());
-        assertThat(checkpointBarrierTracker.getPendingCheckpointIds(), contains(5L));
-        assertEquals(2, checkpointBarrierTracker.getNumOpenChannels());
+        assertThat(validator.getAbortedCheckpointCounter()).isEqualTo(1);
+        assertThat(validator.getLastCanceledCheckpointId()).isEqualTo(4L);
+        assertThat(validator.getTriggeredCheckpointCounter()).isEqualTo(0);
+        assertThat(checkpointBarrierTracker.getPendingCheckpointIds())
+                .satisfies(matching(contains(5L)));
+        assertThat(checkpointBarrierTracker.getNumOpenChannels()).isEqualTo(2);
     }
 
     @Test
@@ -718,11 +712,11 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(3, sequence, validator);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertThat(validator.abortedCheckpoints, contains(5L, 6L, 7L));
-        assertEquals(0, validator.getTriggeredCheckpointCounter());
+        assertThat(validator.abortedCheckpoints).satisfies(matching(contains(5L, 6L, 7L)));
+        assertThat(validator.getTriggeredCheckpointCounter()).isEqualTo(0);
     }
 
     @Test
@@ -735,12 +729,12 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(2, sequence, checkpointHandler);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
         }
 
-        assertEquals(1, checkpointHandler.getLastCanceledCheckpointId());
+        assertThat(checkpointHandler.getLastCanceledCheckpointId()).isEqualTo(1);
         // If go with the fast path, the pending checkpoint would not be removed normally.
-        assertFalse(inputGate.getCheckpointBarrierHandler().isCheckpointPending());
+        assertThat(inputGate.getCheckpointBarrierHandler().isCheckpointPending()).isFalse();
     }
 
     @Test
@@ -761,12 +755,11 @@ public class CheckpointBarrierTrackerTest {
         inputGate = createCheckpointedInputGate(2, sequence, validator, manualClock);
 
         for (BufferOrEvent boe : sequence) {
-            assertEquals(boe, inputGate.pollNext().get());
+            assertThat(inputGate.pollNext().get()).isEqualTo(boe);
             manualClock.advanceTime(Duration.ofSeconds(1));
         }
-        assertEquals(
-                Duration.ofSeconds(2).toNanos(),
-                validator.lastAlignmentDurationNanos.get().longValue());
+        assertThat(validator.lastAlignmentDurationNanos.get().longValue())
+                .isEqualTo(Duration.ofSeconds(2).toNanos());
     }
 
     // ------------------------------------------------------------------------

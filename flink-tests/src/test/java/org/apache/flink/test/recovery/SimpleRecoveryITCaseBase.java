@@ -32,8 +32,8 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * A series of tests (reusing one MiniCluster) where tasks fail (one or more time) and the recovery
@@ -91,7 +91,7 @@ public abstract class SimpleRecoveryITCaseBase extends TestLogger {
                 for (long l : resultCollection) {
                     sum += l;
                 }
-                assertEquals(55, sum);
+                assertThat(sum).isEqualTo(55);
             }
 
         } finally {
@@ -118,7 +118,7 @@ public abstract class SimpleRecoveryITCaseBase extends TestLogger {
             for (long l : resultCollection) {
                 sum += l;
             }
-            assertEquals(55, sum);
+            assertThat(sum).isEqualTo(55);
         } finally {
             FailingMapper2.failuresBeforeSuccess = 1;
         }
@@ -142,7 +142,7 @@ public abstract class SimpleRecoveryITCaseBase extends TestLogger {
             for (long l : resultCollection) {
                 sum += l;
             }
-            assertEquals(55, sum);
+            assertThat(sum).isEqualTo(55);
         } finally {
             FailingMapper3.failuresBeforeSuccess = 3;
         }

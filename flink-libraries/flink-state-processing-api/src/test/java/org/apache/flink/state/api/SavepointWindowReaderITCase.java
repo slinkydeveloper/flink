@@ -47,10 +47,12 @@ import org.apache.flink.streaming.runtime.operators.windowing.TimestampedValue;
 import org.apache.flink.util.Collector;
 
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** IT Case for reading window operator state. */
 public abstract class SavepointWindowReaderITCase<B extends StateBackend>
@@ -89,10 +91,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .reduce(uid, new ReduceSum(), Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -126,10 +127,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .reduce(uid, new ReduceSum(), Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -161,10 +161,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .aggregate(uid, new AggregateSum(), Types.INT, Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -198,10 +197,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .aggregate(uid, new AggregateSum(), Types.INT, Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -233,10 +231,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .process(uid, new BasicReaderFunction(), Types.INT, Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -270,10 +267,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .process(uid, new BasicReaderFunction(), Types.INT, Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -305,10 +301,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .process(uid, new BasicReaderFunction(), Types.INT, Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -342,10 +337,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                         .process(uid, new BasicReaderFunction(), Types.INT, Types.INT, Types.INT)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from keyed state",
-                results,
-                Matchers.containsInAnyOrder(numbers));
+        assertThat(results)
+                .as("Unexpected results from keyed state")
+                .satisfies(matching(Matchers.containsInAnyOrder(numbers)));
     }
 
     @Test
@@ -381,8 +375,9 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                                 Types.LONG)
                         .collect();
 
-        Assert.assertThat(
-                "Unexpected results from trigger state", results, Matchers.contains(1L, 1L, 1L));
+        assertThat(results)
+                .as("Unexpected results from trigger state")
+                .satisfies(matching(Matchers.contains(1L, 1L, 1L)));
     }
 
     private static class NoOpProcessWindowFunction
@@ -417,11 +412,10 @@ public abstract class SavepointWindowReaderITCase<B extends StateBackend>
                 Iterable<Integer> elements,
                 Collector<Integer> out)
                 throws Exception {
-            Assert.assertEquals("Unexpected window", new TimeWindow(0, 10), context.window());
-            Assert.assertThat(
-                    "Unexpected registered timers",
-                    context.registeredEventTimeTimers(),
-                    Matchers.contains(9L));
+            assertThat(context.window()).as("Unexpected window").isEqualTo(new TimeWindow(0, 10));
+            assertThat(context.registeredEventTimeTimers())
+                    .as("Unexpected registered timers")
+                    .satisfies(matching(Matchers.contains(9L)));
 
             out.collect(elements.iterator().next());
         }

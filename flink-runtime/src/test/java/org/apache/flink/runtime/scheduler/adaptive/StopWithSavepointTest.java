@@ -39,8 +39,8 @@ import static org.apache.flink.core.testutils.FlinkMatchers.containsCause;
 import static org.apache.flink.runtime.scheduler.adaptive.ExecutingTest.createFailingStateTransition;
 import static org.apache.flink.runtime.scheduler.adaptive.WaitingForResourcesTest.assertNonNull;
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link StopWithSavepoint} state. */
 public class StopWithSavepointTest extends TestLogger {
@@ -62,7 +62,7 @@ public class StopWithSavepointTest extends TestLogger {
             savepointFuture.complete(SAVEPOINT_PATH);
             ctx.triggerExecutors();
 
-            assertThat(sws.getOperationFuture().get(), is(SAVEPOINT_PATH));
+            assertThat(sws.getOperationFuture().get()).isEqualTo(SAVEPOINT_PATH);
         }
     }
 
@@ -77,19 +77,17 @@ public class StopWithSavepointTest extends TestLogger {
 
             ctx.setExpectFailing(
                     failingArguments -> {
-                        assertThat(
-                                failingArguments.getExecutionGraph().getState(),
-                                is(JobStatus.FAILED));
-                        assertThat(
-                                failingArguments.getFailureCause(),
-                                containsCause(FlinkException.class));
+                        assertThat(failingArguments.getExecutionGraph().getState())
+                                .isEqualTo(JobStatus.FAILED);
+                        assertThat(failingArguments.getFailureCause())
+                                .satisfies(matching(containsCause(FlinkException.class)));
                     });
 
             // fail job:
             mockExecutionGraph.completeTerminationFuture(JobStatus.FAILED);
             ctx.triggerExecutors();
 
-            assertThat(sws.getOperationFuture().isCompletedExceptionally(), is(true));
+            assertThat(sws.getOperationFuture().isCompletedExceptionally()).isEqualTo(true);
         }
     }
 
@@ -106,12 +104,10 @@ public class StopWithSavepointTest extends TestLogger {
 
             ctx.setExpectFailing(
                     failingArguments -> {
-                        assertThat(
-                                failingArguments.getExecutionGraph().getState(),
-                                is(JobStatus.FAILED));
-                        assertThat(
-                                failingArguments.getFailureCause(),
-                                containsCause(FlinkException.class));
+                        assertThat(failingArguments.getExecutionGraph().getState())
+                                .isEqualTo(JobStatus.FAILED);
+                        assertThat(failingArguments.getFailureCause())
+                                .satisfies(matching(containsCause(FlinkException.class)));
                     });
 
             // fail job:
@@ -119,7 +115,7 @@ public class StopWithSavepointTest extends TestLogger {
             savepointFuture.completeExceptionally(new RuntimeException());
             ctx.triggerExecutors();
 
-            assertThat(sws.getOperationFuture().isCompletedExceptionally(), is(true));
+            assertThat(sws.getOperationFuture().isCompletedExceptionally()).isEqualTo(true);
         }
     }
 
@@ -140,7 +136,7 @@ public class StopWithSavepointTest extends TestLogger {
             savepointFuture.complete(SAVEPOINT_PATH);
             ctx.triggerExecutors();
 
-            assertThat(sws.getOperationFuture().get(), is(SAVEPOINT_PATH));
+            assertThat(sws.getOperationFuture().get()).isEqualTo(SAVEPOINT_PATH);
         }
     }
 
@@ -161,7 +157,8 @@ public class StopWithSavepointTest extends TestLogger {
             StopWithSavepoint sws = createStopWithSavepoint(ctx);
             ctx.setExpectFinished(
                     archivedExecutionGraph -> {
-                        assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED));
+                        assertThat(archivedExecutionGraph.getState())
+                                .isEqualTo(JobStatus.SUSPENDED);
                     });
 
             sws.suspend(new RuntimeException());
@@ -192,9 +189,8 @@ public class StopWithSavepointTest extends TestLogger {
 
             ctx.setExpectFailing(
                     failingArguments -> {
-                        assertThat(
-                                failingArguments.getFailureCause(),
-                                containsCause(RuntimeException.class));
+                        assertThat(failingArguments.getFailureCause())
+                                .satisfies(matching(containsCause(RuntimeException.class)));
                     });
 
             sws.handleGlobalFailure(new RuntimeException());
@@ -212,12 +208,12 @@ public class StopWithSavepointTest extends TestLogger {
 
             ctx.setExpectFailing(
                     failingArguments -> {
-                        assertThat(
-                                failingArguments.getFailureCause(),
-                                containsCause(RuntimeException.class));
+                        assertThat(failingArguments.getFailureCause())
+                                .satisfies(matching(containsCause(RuntimeException.class)));
                     });
 
-            assertThat(sws.updateTaskExecutionState(createFailingStateTransition()), is(true));
+            assertThat(sws.updateTaskExecutionState(createFailingStateTransition()))
+                    .isEqualTo(true);
         }
     }
 
@@ -233,7 +229,8 @@ public class StopWithSavepointTest extends TestLogger {
 
             ctx.setExpectRestarting(assertNonNull());
 
-            assertThat(sws.updateTaskExecutionState(createFailingStateTransition()), is(true));
+            assertThat(sws.updateTaskExecutionState(createFailingStateTransition()))
+                    .isEqualTo(true);
         }
     }
 
@@ -247,7 +244,7 @@ public class StopWithSavepointTest extends TestLogger {
         sws.onLeave(Canceling.class);
 
         ctx.close();
-        assertThat(sws.getOperationFuture().isCompletedExceptionally(), is(true));
+        assertThat(sws.getOperationFuture().isCompletedExceptionally()).isEqualTo(true);
     }
 
     @Test
@@ -264,7 +261,7 @@ public class StopWithSavepointTest extends TestLogger {
         savepointFuture.completeExceptionally(new RuntimeException("Test error"));
 
         ctx.close();
-        assertThat(sws.getOperationFuture().isCompletedExceptionally(), is(true));
+        assertThat(sws.getOperationFuture().isCompletedExceptionally()).isEqualTo(true);
     }
 
     @Test
@@ -277,14 +274,13 @@ public class StopWithSavepointTest extends TestLogger {
         ctx.setStopWithSavepoint(sws);
         ctx.setExpectExecuting(
                 executingArguments ->
-                        assertThat(
-                                executingArguments.getExecutionGraph().getState(),
-                                is(JobStatus.RUNNING)));
+                        assertThat(executingArguments.getExecutionGraph().getState())
+                                .isEqualTo(JobStatus.RUNNING));
 
         savepointFuture.completeExceptionally(new RuntimeException("Test error"));
 
         ctx.close();
-        assertThat(sws.getOperationFuture().isCompletedExceptionally(), is(true));
+        assertThat(sws.getOperationFuture().isCompletedExceptionally()).isEqualTo(true);
     }
 
     @Test
@@ -306,7 +302,8 @@ public class StopWithSavepointTest extends TestLogger {
             ctx.triggerExecutors();
 
             // 2. fail task
-            assertThat(sws.updateTaskExecutionState(createFailingStateTransition()), is(true));
+            assertThat(sws.updateTaskExecutionState(createFailingStateTransition()))
+                    .isEqualTo(true);
         }
     }
 
@@ -316,7 +313,8 @@ public class StopWithSavepointTest extends TestLogger {
             MockCheckpointScheduling mockStopWithSavepointOperations =
                     new MockCheckpointScheduling();
 
-            assertThat(mockStopWithSavepointOperations.isCheckpointSchedulerStarted(), is(false));
+            assertThat(mockStopWithSavepointOperations.isCheckpointSchedulerStarted())
+                    .isEqualTo(false);
 
             CompletableFuture<String> savepointFuture = new CompletableFuture<>();
             StopWithSavepoint sws =
@@ -327,7 +325,8 @@ public class StopWithSavepointTest extends TestLogger {
             // a failure should start the scheduler again
             savepointFuture.completeExceptionally(new RuntimeException("Test error"));
             ctx.triggerExecutors();
-            assertThat(mockStopWithSavepointOperations.isCheckpointSchedulerStarted(), is(true));
+            assertThat(mockStopWithSavepointOperations.isCheckpointSchedulerStarted())
+                    .isEqualTo(true);
         }
     }
 

@@ -34,8 +34,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.function.Consumer;
 
 import static org.apache.flink.runtime.scheduler.adaptive.WaitingForResourcesTest.assertNonNull;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link Restarting} state of the {@link AdaptiveScheduler}. */
 public class RestartingTest extends TestLogger {
@@ -47,7 +46,7 @@ public class RestartingTest extends TestLogger {
                     new StateTrackingMockExecutionGraph();
             createRestartingState(ctx, mockExecutionGraph);
 
-            assertThat(mockExecutionGraph.getState(), is(JobStatus.CANCELLING));
+            assertThat(mockExecutionGraph.getState()).isEqualTo(JobStatus.CANCELLING);
         }
     }
 
@@ -75,7 +74,8 @@ public class RestartingTest extends TestLogger {
             Restarting restarting = createRestartingState(ctx);
             ctx.setExpectFinished(
                     archivedExecutionGraph ->
-                            assertThat(archivedExecutionGraph.getState(), is(JobStatus.SUSPENDED)));
+                            assertThat(archivedExecutionGraph.getState())
+                                    .isEqualTo(JobStatus.SUSPENDED));
             final Throwable cause = new RuntimeException("suspend");
             restarting.suspend(cause);
         }
@@ -102,11 +102,11 @@ public class RestartingTest extends TestLogger {
             mockExecutionGraph.completeTerminationFuture(JobStatus.CANCELED);
 
             // this is just a sanity check for the test
-            assertThat(restarting.getExecutionGraph().getState(), is(JobStatus.CANCELED));
+            assertThat(restarting.getExecutionGraph().getState()).isEqualTo(JobStatus.CANCELED);
 
-            assertThat(restarting.getJobStatus(), is(JobStatus.RESTARTING));
-            assertThat(restarting.getJob().getState(), is(JobStatus.RESTARTING));
-            assertThat(restarting.getJob().getStatusTimestamp(JobStatus.CANCELED), is(0L));
+            assertThat(restarting.getJobStatus()).isEqualTo(JobStatus.RESTARTING);
+            assertThat(restarting.getJob().getState()).isEqualTo(JobStatus.RESTARTING);
+            assertThat(restarting.getJob().getStatusTimestamp(JobStatus.CANCELED)).isEqualTo(0L);
         }
     }
 

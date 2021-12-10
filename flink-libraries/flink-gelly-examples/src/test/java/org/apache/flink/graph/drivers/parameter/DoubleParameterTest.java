@@ -21,11 +21,12 @@ package org.apache.flink.graph.drivers.parameter;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.client.program.ProgramParametrizationException;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link DoubleParameter}. */
 public class DoubleParameterTest extends ParameterTestBase {
@@ -142,34 +143,34 @@ public class DoubleParameterTest extends ParameterTestBase {
     @Test
     public void testWithDefaultWithParameter() {
         parameter.setDefaultValue(43.21);
-        Assert.assertEquals("[--test TEST]", parameter.getUsage());
+        assertThat(parameter.getUsage()).isEqualTo("[--test TEST]");
 
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "12.34"}));
-        Assert.assertEquals(new Double(12.34), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(12.34));
     }
 
     @Test
     public void testWithDefaultWithoutParameter() {
         parameter.setDefaultValue(43.21);
-        Assert.assertEquals("[--test TEST]", parameter.getUsage());
+        assertThat(parameter.getUsage()).isEqualTo("[--test TEST]");
 
         parameter.configure(ParameterTool.fromArgs(new String[] {}));
-        Assert.assertEquals(new Double(43.21), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(43.21));
     }
 
     // Without default
 
     @Test
     public void testWithoutDefaultWithParameter() {
-        Assert.assertEquals("--test TEST", parameter.getUsage());
+        assertThat(parameter.getUsage()).isEqualTo("--test TEST");
 
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "12.34"}));
-        Assert.assertEquals(new Double(12.34), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(12.34));
     }
 
     @Test
     public void testWithoutDefaultWithoutParameter() {
-        Assert.assertEquals("--test TEST", parameter.getUsage());
+        assertThat(parameter.getUsage()).isEqualTo("--test TEST");
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("No data for required key 'test'");
@@ -183,14 +184,14 @@ public class DoubleParameterTest extends ParameterTestBase {
     public void testMinInRange() {
         parameter.setMinimumValue(0, false);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "1"}));
-        Assert.assertEquals(new Double(1), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(1));
     }
 
     @Test
     public void testMinAtRangeInclusive() {
         parameter.setMinimumValue(0, true);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "0"}));
-        Assert.assertEquals(new Double(0), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(0));
     }
 
     @Test
@@ -229,14 +230,14 @@ public class DoubleParameterTest extends ParameterTestBase {
     public void testMaxInRange() {
         parameter.setMaximumValue(0, false);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "-1"}));
-        Assert.assertEquals(new Double(-1), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(-1));
     }
 
     @Test
     public void testMaxAtRangeInclusive() {
         parameter.setMaximumValue(0, true);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "0"}));
-        Assert.assertEquals(new Double(0), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(0));
     }
 
     @Test
@@ -298,7 +299,7 @@ public class DoubleParameterTest extends ParameterTestBase {
         parameter.setMinimumValue(-1, true);
         parameter.setMaximumValue(1, true);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "-1"}));
-        Assert.assertEquals(new Double(-1), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(-1));
     }
 
     @Test
@@ -306,7 +307,7 @@ public class DoubleParameterTest extends ParameterTestBase {
         parameter.setMinimumValue(-1, false);
         parameter.setMaximumValue(1, false);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "0"}));
-        Assert.assertEquals(new Double(0), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(0));
     }
 
     @Test
@@ -314,7 +315,7 @@ public class DoubleParameterTest extends ParameterTestBase {
         parameter.setMinimumValue(-1, true);
         parameter.setMaximumValue(1, true);
         parameter.configure(ParameterTool.fromArgs(new String[] {"--test", "1"}));
-        Assert.assertEquals(new Double(1), parameter.getValue());
+        assertThat(parameter.getValue()).isEqualTo(new Double(1));
     }
 
     @Test

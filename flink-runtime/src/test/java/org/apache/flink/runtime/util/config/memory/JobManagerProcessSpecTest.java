@@ -24,9 +24,9 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 /** Tests for {@link JobManagerProcessSpec}. */
 public class JobManagerProcessSpecTest extends TestLogger {
@@ -46,7 +46,7 @@ public class JobManagerProcessSpecTest extends TestLogger {
                         MemorySize.parse("3m"),
                         MemorySize.parse("4m"));
 
-        assertThat(spec1, is(spec2));
+        assertThat(spec1).isEqualTo(spec2);
     }
 
     @Test
@@ -62,6 +62,6 @@ public class JobManagerProcessSpecTest extends TestLogger {
                 new JobManagerProcessSpec(
                         MemorySize.ZERO, MemorySize.ZERO, MemorySize.ZERO, MemorySize.ZERO);
 
-        assertThat(spec1, not(spec2));
+        assertThat(spec1).satisfies(matching(not(spec2)));
     }
 }

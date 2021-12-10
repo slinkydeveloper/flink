@@ -41,7 +41,6 @@ import org.apache.flink.testutils.TestingUtils;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.concurrent.FutureUtils;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 
@@ -53,7 +52,7 @@ import java.time.Duration;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests to verify JMX reporter functionality on the JobManager. */
 public class JMXJobManagerMetricTest extends TestLogger {
@@ -128,8 +127,8 @@ public class JMXJobManagerMetricTest extends TestLogger {
                             new ObjectName(
                                     "org.apache.flink.jobmanager.job.lastCheckpointSize:job_name=TestingJob,*"),
                             null);
-            Assert.assertEquals(1, nameSet.size());
-            assertEquals(-1L, mBeanServer.getAttribute(nameSet.iterator().next(), "Value"));
+            assertThat(nameSet.size()).isEqualTo(1);
+            assertThat(mBeanServer.getAttribute(nameSet.iterator().next(), "Value")).isEqualTo(-1L);
 
             BlockingInvokable.unblock();
         } finally {

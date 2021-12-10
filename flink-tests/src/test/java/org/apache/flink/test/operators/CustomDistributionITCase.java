@@ -40,7 +40,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Integration tests for custom {@link DataDistribution}. */
 @SuppressWarnings("serial")

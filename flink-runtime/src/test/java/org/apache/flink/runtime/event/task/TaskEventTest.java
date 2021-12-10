@@ -24,9 +24,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This class contains serialization tests concerning task events derived from {@link
@@ -41,9 +40,9 @@ public class TaskEventTest {
             final IntegerTaskEvent orig = new IntegerTaskEvent(11);
             final IntegerTaskEvent copy = InstantiationUtil.createCopyWritable(orig);
 
-            assertEquals(orig.getInteger(), copy.getInteger());
-            assertEquals(orig.hashCode(), copy.hashCode());
-            assertTrue(orig.equals(copy));
+            assertThat(copy.getInteger()).isEqualTo(orig.getInteger());
+            assertThat(copy.hashCode()).isEqualTo(orig.hashCode());
+            assertThat(orig.equals(copy)).isTrue();
 
         } catch (IOException ioe) {
             fail(ioe.getMessage());
@@ -59,9 +58,9 @@ public class TaskEventTest {
             final StringTaskEvent orig = new StringTaskEvent("Test");
             final StringTaskEvent copy = InstantiationUtil.createCopyWritable(orig);
 
-            assertEquals(orig.getString(), copy.getString());
-            assertEquals(orig.hashCode(), copy.hashCode());
-            assertTrue(orig.equals(copy));
+            assertThat(copy.getString()).isEqualTo(orig.getString());
+            assertThat(copy.hashCode()).isEqualTo(orig.hashCode());
+            assertThat(orig.equals(copy)).isTrue();
 
         } catch (IOException ioe) {
             fail(ioe.getMessage());

@@ -26,8 +26,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the "info" command. */
 public class CliFrontendInfoTest extends CliFrontendTestBase {
@@ -67,7 +67,7 @@ public class CliFrontendInfoTest extends CliFrontendTestBase {
             CliFrontend testFrontend =
                     new CliFrontend(configuration, Collections.singletonList(getCli()));
             testFrontend.info(parameters);
-            assertTrue(buffer.toString().contains("\"parallelism\" : 4"));
+            assertThat(buffer.toString().contains("\"parallelism\" : 4")).isTrue();
         } finally {
             restoreStdOut();
         }
@@ -84,7 +84,7 @@ public class CliFrontendInfoTest extends CliFrontendTestBase {
             CliFrontend testFrontend =
                     new CliFrontend(configuration, Collections.singletonList(getCli()));
             testFrontend.info(parameters);
-            assertTrue(buffer.toString().contains("\"parallelism\" : 17"));
+            assertThat(buffer.toString().contains("\"parallelism\" : 17")).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail("Program caused an exception: " + e.getMessage());

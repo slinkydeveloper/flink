@@ -41,9 +41,8 @@ import java.util.List;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class InnerJoinOperatorBaseTest implements Serializable {
@@ -87,8 +86,8 @@ public class InnerJoinOperatorBaseTest implements Serializable {
             List<Integer> resultRegular =
                     base.executeOnCollections(inputData1, inputData2, null, executionConfig);
 
-            assertEquals(expected, resultSafe);
-            assertEquals(expected, resultRegular);
+            assertThat(resultSafe).isEqualTo(expected);
+            assertThat(resultRegular).isEqualTo(expected);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -106,8 +105,8 @@ public class InnerJoinOperatorBaseTest implements Serializable {
                     @Override
                     public void open(Configuration parameters) throws Exception {
                         opened.compareAndSet(false, true);
-                        assertEquals(0, getRuntimeContext().getIndexOfThisSubtask());
-                        assertEquals(1, getRuntimeContext().getNumberOfParallelSubtasks());
+                        assertThat(getRuntimeContext().getIndexOfThisSubtask()).isEqualTo(0);
+                        assertThat(getRuntimeContext().getNumberOfParallelSubtasks()).isEqualTo(1);
                     }
 
                     @Override
@@ -181,14 +180,14 @@ public class InnerJoinOperatorBaseTest implements Serializable {
                                     UnregisteredMetricsGroup.createOperatorMetricGroup()),
                             executionConfig);
 
-            assertEquals(expected, resultSafe);
-            assertEquals(expected, resultRegular);
+            assertThat(resultSafe).isEqualTo(expected);
+            assertThat(resultRegular).isEqualTo(expected);
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
         }
 
-        assertTrue(opened.get());
-        assertTrue(closed.get());
+        assertThat(opened.get()).isTrue();
+        assertThat(closed.get()).isTrue();
     }
 }

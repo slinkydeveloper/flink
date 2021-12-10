@@ -27,8 +27,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests concerning type extraction of Parametrized Pojo and its superclasses. */
 public class PojoParametrizedTypeExtractionTest {
@@ -37,7 +36,7 @@ public class PojoParametrizedTypeExtractionTest {
         final TypeInformation<ParameterizedParentImpl> directTypeInfo =
                 TypeExtractor.createTypeInfo(ParameterizedParentImpl.class);
 
-        assertThat(directTypeInfo, equalTo(getParameterizedParentTypeInformation()));
+        assertThat(directTypeInfo).isEqualTo(getParameterizedParentTypeInformation());
     }
 
     @Test
@@ -48,7 +47,7 @@ public class PojoParametrizedTypeExtractionTest {
         TypeInformation<ParameterizedParentImpl> mapReturnTypeInfo =
                 TypeExtractor.getMapReturnTypes(new ConcreteMapFunction(), Types.INT);
 
-        assertThat(mapReturnTypeInfo, equalTo(expectedTypeInfo));
+        assertThat(mapReturnTypeInfo).isEqualTo(expectedTypeInfo);
     }
 
     private TypeInformation<ParameterizedParentImpl> getParameterizedParentTypeInformation() {

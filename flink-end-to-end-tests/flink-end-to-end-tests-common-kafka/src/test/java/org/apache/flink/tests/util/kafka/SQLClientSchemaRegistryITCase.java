@@ -56,8 +56,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** End-to-end test for SQL client using Avro Confluent Registry format. */
 @Category(value = {TravisGroup1.class})
@@ -172,7 +171,7 @@ public class SQLClientSchemaRegistryITCase {
         List<String> categories =
                 kafkaClient.readMessages(
                         1, "test-group", testResultsTopic, new StringDeserializer());
-        assertThat(categories, equalTo(Collections.singletonList("1,electronics,null")));
+        assertThat(categories).isEqualTo(Collections.singletonList("1,electronics,null"));
     }
 
     @Test
@@ -208,7 +207,7 @@ public class SQLClientSchemaRegistryITCase {
         executeSqlStatements(sqlLines);
 
         List<Integer> versions = getAllVersions(behaviourSubject);
-        assertThat(versions.size(), equalTo(1));
+        assertThat(versions.size()).isEqualTo(1);
         List<Object> userBehaviors =
                 kafkaClient.readMessages(
                         1,
@@ -220,9 +219,8 @@ public class SQLClientSchemaRegistryITCase {
                 registryClient.getByVersion(behaviourSubject, versions.get(0), false).getSchema();
         Schema userBehaviorSchema = new Schema.Parser().parse(schemaString);
         GenericRecordBuilder recordBuilder = new GenericRecordBuilder(userBehaviorSchema);
-        assertThat(
-                userBehaviors,
-                equalTo(
+        assertThat(userBehaviors)
+                .isEqualTo(
                         Collections.singletonList(
                                 recordBuilder
                                         .set("user_id", 1L)
@@ -230,7 +228,7 @@ public class SQLClientSchemaRegistryITCase {
                                         .set("category_id", 1L)
                                         .set("behavior", "buy")
                                         .set("ts", 1234000L)
-                                        .build())));
+                                        .build()));
     }
 
     private List<Integer> getAllVersions(String behaviourSubject) throws Exception {

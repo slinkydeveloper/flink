@@ -26,12 +26,10 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.Collections;
 
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertFalse;
 
 /** Tests for the {@link PartitionTable}. */
 public class PartitionTableTest extends TestLogger {
@@ -46,10 +44,10 @@ public class PartitionTableTest extends TestLogger {
         // an empty table should always return an empty collection
         Collection<ResultPartitionID> partitionsForNonExistingJob =
                 table.stopTrackingPartitions(JOB_ID);
-        assertNotNull(partitionsForNonExistingJob);
-        assertThat(partitionsForNonExistingJob, empty());
+        assertThat(partitionsForNonExistingJob).isNotNull();
+        assertThat(partitionsForNonExistingJob).satisfies(matching(empty()));
 
-        assertFalse(table.hasTrackedPartitions(JOB_ID));
+        assertThat(table.hasTrackedPartitions(JOB_ID)).isFalse();
     }
 
     @Test
@@ -58,7 +56,7 @@ public class PartitionTableTest extends TestLogger {
 
         table.startTrackingPartitions(JOB_ID, Collections.singletonList(PARTITION_ID));
 
-        assertTrue(table.hasTrackedPartitions(JOB_ID));
+        assertThat(table.hasTrackedPartitions(JOB_ID)).isTrue();
     }
 
     @Test
@@ -67,7 +65,7 @@ public class PartitionTableTest extends TestLogger {
 
         table.startTrackingPartitions(JOB_ID, Collections.emptyList());
 
-        assertFalse(table.hasTrackedPartitions(JOB_ID));
+        assertThat(table.hasTrackedPartitions(JOB_ID)).isFalse();
     }
 
     @Test
@@ -77,8 +75,8 @@ public class PartitionTableTest extends TestLogger {
         table.startTrackingPartitions(JOB_ID, Collections.singletonList(PARTITION_ID));
 
         Collection<ResultPartitionID> storedPartitions = table.stopTrackingPartitions(JOB_ID);
-        assertThat(storedPartitions, contains(PARTITION_ID));
-        assertFalse(table.hasTrackedPartitions(JOB_ID));
+        assertThat(storedPartitions).satisfies(matching(contains(PARTITION_ID)));
+        assertThat(table.hasTrackedPartitions(JOB_ID)).isFalse();
     }
 
     @Test
@@ -90,10 +88,10 @@ public class PartitionTableTest extends TestLogger {
         table.startTrackingPartitions(JOB_ID, Collections.singletonList(partitionId2));
 
         table.stopTrackingPartitions(JOB_ID, Collections.singletonList(partitionId2));
-        assertTrue(table.hasTrackedPartitions(JOB_ID));
+        assertThat(table.hasTrackedPartitions(JOB_ID)).isTrue();
 
         Collection<ResultPartitionID> storedPartitions = table.stopTrackingPartitions(JOB_ID);
-        assertThat(storedPartitions, contains(PARTITION_ID));
-        assertFalse(table.hasTrackedPartitions(JOB_ID));
+        assertThat(storedPartitions).satisfies(matching(contains(PARTITION_ID)));
+        assertThat(table.hasTrackedPartitions(JOB_ID)).isFalse();
     }
 }

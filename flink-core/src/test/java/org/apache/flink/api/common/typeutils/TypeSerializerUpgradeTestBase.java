@@ -38,8 +38,9 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
 /**
@@ -309,10 +310,11 @@ public abstract class TypeSerializerUpgradeTestBase<PreviousElementT, UpgradedEl
             TypeSerializerSchemaCompatibility<UpgradedElementT> upgradeCompatibility =
                     restoredSerializerSnapshot.resolveSchemaCompatibility(upgradedSerializer);
 
-            assertThat(
-                    upgradeCompatibility,
-                    testSpecification.verifier.schemaCompatibilityMatcher(
-                            testSpecification.migrationVersion));
+            assertThat(upgradeCompatibility)
+                    .satisfies(
+                            matching(
+                                    testSpecification.verifier.schemaCompatibilityMatcher(
+                                            testSpecification.migrationVersion)));
         }
     }
 
@@ -553,7 +555,7 @@ public abstract class TypeSerializerUpgradeTestBase<PreviousElementT, UpgradedEl
             throws IOException {
 
         T data = readSerializer.deserialize(originalDataInput);
-        assertThat(data, testDataMatcher);
+        assertThat(data).satisfies(matching(testDataMatcher));
 
         DataOutputSerializer out = new DataOutputSerializer(INITIAL_OUTPUT_BUFFER_SIZE);
         writeSerializer.serialize(data, out);

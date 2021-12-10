@@ -23,13 +23,12 @@ import org.junit.Test;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /** Unit tests for the {@link IncompleteFuturesTracker}. */
 public class IncompleteFuturesTrackerTest {
@@ -41,7 +40,7 @@ public class IncompleteFuturesTrackerTest {
 
         tracker.trackFutureWhileIncomplete(future);
 
-        assertThat(tracker.getCurrentIncompleteAndReset(), contains(future));
+        assertThat(tracker.getCurrentIncompleteAndReset()).satisfies(matching(contains(future)));
     }
 
     @Test
@@ -52,7 +51,8 @@ public class IncompleteFuturesTrackerTest {
         tracker.trackFutureWhileIncomplete(future);
         future.complete(null);
 
-        assertThat(tracker.getCurrentIncompleteAndReset(), not(contains(future)));
+        assertThat(tracker.getCurrentIncompleteAndReset())
+                .satisfies(matching(not(contains(future))));
     }
 
     @Test
@@ -63,7 +63,8 @@ public class IncompleteFuturesTrackerTest {
         future.complete(null);
         tracker.trackFutureWhileIncomplete(future);
 
-        assertThat(tracker.getCurrentIncompleteAndReset(), not(contains(future)));
+        assertThat(tracker.getCurrentIncompleteAndReset())
+                .satisfies(matching(not(contains(future))));
     }
 
     @Test
@@ -76,12 +77,12 @@ public class IncompleteFuturesTrackerTest {
         final Exception expectedException = new Exception();
         tracker.failAllFutures(expectedException);
 
-        assertTrue(future.isCompletedExceptionally());
+        assertThat(future.isCompletedExceptionally()).isTrue();
         try {
             future.get();
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
-            assertSame(expectedException, e.getCause());
+            assertThat(e.getCause()).isSameAs(expectedException);
         }
     }
 
@@ -95,12 +96,12 @@ public class IncompleteFuturesTrackerTest {
 
         tracker.trackFutureWhileIncomplete(future);
 
-        assertTrue(future.isCompletedExceptionally());
+        assertThat(future.isCompletedExceptionally()).isTrue();
         try {
             future.get();
-            fail();
+            fail("unknown failure");
         } catch (ExecutionException e) {
-            assertSame(expectedException, e.getCause());
+            assertThat(e.getCause()).isSameAs(expectedException);
         }
     }
 
@@ -112,6 +113,6 @@ public class IncompleteFuturesTrackerTest {
         tracker.trackFutureWhileIncomplete(future);
         tracker.getCurrentIncompleteAndReset();
 
-        assertThat(tracker.getCurrentIncompleteAndReset(), empty());
+        assertThat(tracker.getCurrentIncompleteAndReset()).satisfies(matching(empty()));
     }
 }

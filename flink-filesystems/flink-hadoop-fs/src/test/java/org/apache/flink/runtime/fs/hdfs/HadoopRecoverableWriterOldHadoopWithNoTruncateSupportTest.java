@@ -42,9 +42,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static junit.framework.TestCase.assertEquals;
-import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 /**
@@ -137,14 +135,14 @@ public class HadoopRecoverableWriterOldHadoopWithNoTruncateSupportTest {
         final RecoverableFsDataOutputStream stream =
                 writerUnderTest.open(new Path(basePath, "test-2"));
         final RecoverableWriter.ResumeRecoverable recoverable = stream.persist();
-        assertNotNull(recoverable);
+        assertThat(recoverable).isNotNull();
 
         try {
             writerUnderTest.recover(recoverable);
         } catch (IOException e) {
             // this is the expected exception and we check also if the root cause is the hadoop <
             // 2.7 version
-            assertTrue(e.getCause() instanceof IllegalStateException);
+            assertThat(e.getCause()).isInstanceOf(IllegalStateException.class);
         }
     }
 
@@ -175,7 +173,7 @@ public class HadoopRecoverableWriterOldHadoopWithNoTruncateSupportTest {
                 BufferedReader reader = new BufferedReader(ir)) {
 
             final String line = reader.readLine();
-            assertEquals(expectedContent, line);
+            assertThat(line).isEqualTo(expectedContent);
         }
     }
 }

@@ -26,7 +26,6 @@ import org.apache.flink.streaming.util.OneInputStreamOperatorTestHarness;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -36,6 +35,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link StreamingFileSink} with {@link BulkWriter}. */
 public class BulkWriterTest extends TestLogger {
@@ -142,15 +143,15 @@ public class BulkWriterTest extends TestLogger {
         for (Map.Entry<File, String> fileContents : contents.entrySet()) {
             if (fileContents.getKey().getName().contains(partFileName1)) {
                 fileCounter++;
-                Assert.assertEquals("test1@1\n", fileContents.getValue());
+                assertThat(fileContents.getValue()).isEqualTo("test1@1\n");
             } else if (fileContents.getKey().getName().contains(partFileName2)) {
                 fileCounter++;
-                Assert.assertEquals("test1@2\ntest1@3\n", fileContents.getValue());
+                assertThat(fileContents.getValue()).isEqualTo("test1@2\ntest1@3\n");
             }
             // check bucket name
-            Assert.assertEquals("test1", fileContents.getKey().getParentFile().getName());
+            assertThat(fileContents.getKey().getParentFile().getName()).isEqualTo("test1");
         }
-        Assert.assertEquals(2L, fileCounter);
+        assertThat(fileCounter).isEqualTo(2L);
 
         // we acknowledge the latest checkpoint, so everything should be published.
         testHarness.notifyOfCompletedCheckpoint(2L);
@@ -190,19 +191,19 @@ public class BulkWriterTest extends TestLogger {
         for (Map.Entry<File, String> fileContents : contents.entrySet()) {
             if (fileContents.getKey().getName().contains(partFileName1)) {
                 fileCounter++;
-                Assert.assertEquals("test1@1\n", fileContents.getValue());
-                Assert.assertEquals("1", fileContents.getKey().getParentFile().getName());
+                assertThat(fileContents.getValue()).isEqualTo("test1@1\n");
+                assertThat(fileContents.getKey().getParentFile().getName()).isEqualTo("1");
             } else if (fileContents.getKey().getName().contains(partFileName2)) {
                 fileCounter++;
-                Assert.assertEquals("test1@2\n", fileContents.getValue());
-                Assert.assertEquals("2", fileContents.getKey().getParentFile().getName());
+                assertThat(fileContents.getValue()).isEqualTo("test1@2\n");
+                assertThat(fileContents.getKey().getParentFile().getName()).isEqualTo("2");
             } else if (fileContents.getKey().getName().contains(partFileName3)) {
                 fileCounter++;
-                Assert.assertEquals("test1@3\n", fileContents.getValue());
-                Assert.assertEquals("3", fileContents.getKey().getParentFile().getName());
+                assertThat(fileContents.getValue()).isEqualTo("test1@3\n");
+                assertThat(fileContents.getKey().getParentFile().getName()).isEqualTo("3");
             }
         }
-        Assert.assertEquals(3L, fileCounter);
+        assertThat(fileCounter).isEqualTo(3L);
 
         // we acknowledge the latest checkpoint, so everything should be published.
         testHarness.notifyOfCompletedCheckpoint(2L);

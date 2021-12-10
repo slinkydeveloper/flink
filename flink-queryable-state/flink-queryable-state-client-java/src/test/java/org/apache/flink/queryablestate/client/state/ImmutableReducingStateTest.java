@@ -29,7 +29,7 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the {@link ImmutableReducingState}. */
 public class ImmutableReducingStateTest {
@@ -53,7 +53,7 @@ public class ImmutableReducingStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testUpdate() throws Exception {
         long value = reduceState.get();
-        assertEquals(42L, value);
+        assertThat(value).isEqualTo(42L);
 
         reduceState.add(54L);
     }
@@ -61,7 +61,7 @@ public class ImmutableReducingStateTest {
     @Test(expected = UnsupportedOperationException.class)
     public void testClear() throws Exception {
         long value = reduceState.get();
-        assertEquals(42L, value);
+        assertThat(value).isEqualTo(42L);
 
         reduceState.clear();
     }

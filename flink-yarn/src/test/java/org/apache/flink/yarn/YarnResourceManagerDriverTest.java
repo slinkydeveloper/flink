@@ -80,13 +80,7 @@ import static org.apache.flink.yarn.YarnConfigKeys.ENV_HADOOP_USER_NAME;
 import static org.apache.flink.yarn.YarnConfigKeys.FLINK_DIST_JAR;
 import static org.apache.flink.yarn.YarnConfigKeys.FLINK_YARN_FILES;
 import static org.apache.flink.yarn.YarnResourceManagerDriver.ERROR_MESSAGE_ON_SHUTDOWN_REQUEST;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link YarnResourceManagerDriver}. */
 public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase<YarnWorkerNode> {
@@ -143,14 +137,13 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
                                                             testingTaskExecutorProcessSpec));
                             resourceManagerClientCallbackHandler.onContainersAllocated(
                                     ImmutableList.of(testingContainer));
-
                             Throwable t =
                                     throwableCompletableFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS);
                             final Optional<RuntimeException> optionalCause =
                                     ExceptionUtils.findThrowable(t, RuntimeException.class);
-
-                            assertTrue(optionalCause.isPresent());
-                            assertThat(optionalCause.get().getMessage(), is(exceptionMessage));
+                            assertThat(optionalCause.isPresent()).isTrue();
+                            assertThat(optionalCause.get().getMessage())
+                                    .isEqualTo(exceptionMessage);
                         });
             }
         };
@@ -167,19 +160,20 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
                 runTest(
                         () -> {
                             resourceManagerClientCallbackHandler.onShutdownRequest();
-
                             Throwable throwable =
                                     throwableCompletableFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS);
                             assertThat(
-                                    ExceptionUtils.findThrowable(
-                                                    throwable, ResourceManagerException.class)
-                                            .isPresent(),
-                                    is(true));
+                                            ExceptionUtils.findThrowable(
+                                                            throwable,
+                                                            ResourceManagerException.class)
+                                                    .isPresent())
+                                    .isEqualTo(true);
                             assertThat(
-                                    ExceptionUtils.findThrowableWithMessage(
-                                                    throwable, ERROR_MESSAGE_ON_SHUTDOWN_REQUEST)
-                                            .isPresent(),
-                                    is(true));
+                                            ExceptionUtils.findThrowableWithMessage(
+                                                            throwable,
+                                                            ERROR_MESSAGE_ON_SHUTDOWN_REQUEST)
+                                                    .isPresent())
+                                    .isEqualTo(true);
                         });
             }
         };
@@ -198,9 +192,9 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
                 runTest(
                         () -> {
                             getDriver().deregisterApplication(ApplicationStatus.SUCCEEDED, null);
-                            assertFalse(
-                                    "YARN application directory was not removed",
-                                    Files.exists(applicationDir.toPath()));
+                            assertThat(Files.exists(applicationDir.toPath()))
+                                    .as("YARN application directory was not removed")
+                                    .isFalse();
                         });
             }
         };
@@ -395,7 +389,7 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
                                 final AMRMClient.ContainerRequest request =
                                         addContainerRequestFuture.getNow(null);
                                 if (request != null && priority.equals(request.getPriority())) {
-                                    assertThat(tuple.f2, is(request.getCapability()));
+                                    assertThat(tuple.f2).isEqualTo(request.getCapability());
                                     matchingRequests.add(request);
                                 }
                             }
@@ -414,39 +408,32 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
                                             .get();
                             // Make sure two worker resource spec will be normalized to different
                             // container resources
-                            assertNotEquals(containerResource1, containerResource2);
-
+                            assertThat(containerResource2).isEqualTo(containerResource1);
                             runInMainThread(
                                     () -> getDriver().requestResource(taskExecutorProcessSpec1));
                             runInMainThread(
                                     () -> getDriver().requestResource(taskExecutorProcessSpec2));
-
                             // Verify both containers requested
                             verifyFutureCompleted(addContainerRequestFutures.get(0));
                             verifyFutureCompleted(addContainerRequestFutures.get(1));
-
                             // Mock that container 1 is allocated
                             Container container1 =
                                     createTestingContainerWithResource(containerResource1);
                             resourceManagerClientCallbackHandler.onContainersAllocated(
                                     Collections.singletonList(container1));
-
                             // Verify that only worker with spec1 is started.
                             verifyFutureCompleted(startContainerAsyncCommandFuture1);
-                            assertFalse(startContainerAsyncCommandFuture2.isDone());
-
+                            assertThat(startContainerAsyncCommandFuture2.isDone()).isFalse();
                             // Mock that container 1 is completed, while the worker is still pending
                             ContainerStatus testingContainerStatus =
                                     createTestingContainerCompletedStatus(container1.getId());
                             resourceManagerClientCallbackHandler.onContainersCompleted(
                                     Collections.singletonList(testingContainerStatus));
-
                             // Verify that only container 1 is requested again
                             verifyFutureCompleted(addContainerRequestFutures.get(2));
-                            assertThat(
-                                    addContainerRequestFutures.get(2).get().getCapability(),
-                                    is(containerResource1));
-                            assertFalse(addContainerRequestFutures.get(3).isDone());
+                            assertThat(addContainerRequestFutures.get(2).get().getCapability())
+                                    .isEqualTo(containerResource1);
+                            assertThat(addContainerRequestFutures.get(3).isDone()).isFalse();
                         });
             }
         };
@@ -558,7 +545,7 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
             File root = folder.getRoot();
             File home = new File(root, "home");
             boolean created = home.mkdir();
-            assertTrue(created);
+            assertThat(created).isTrue();
 
             env.put(ENV_APP_ID, "foo");
             env.put(ENV_CLIENT_HOME_DIR, home.getAbsolutePath());
@@ -601,8 +588,8 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
 
         @Override
         protected void validateInitialization() throws Exception {
-            assertNotNull(testingYarnAMRMClientAsync);
-            assertNotNull(testingYarnNMClientAsync);
+            assertThat(testingYarnAMRMClientAsync).isNotNull();
+            assertThat(testingYarnNMClientAsync).isNotNull();
             verifyFutureCompleted(nodeManagerClientInitFuture);
             verifyFutureCompleted(nodeManagerClientStartFuture);
             verifyFutureCompleted(resourceManagerClientInitFuture);
@@ -613,10 +600,10 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
         protected void validateWorkersRecoveredFromPreviousAttempt(
                 Collection<YarnWorkerNode> workers) {
             Assume.assumeTrue(HadoopUtils.isMinHadoopVersion(2, 2));
-            assertThat(workers.size(), is(1));
+            assertThat(workers.size()).isEqualTo(1);
 
             final ResourceID resourceId = workers.iterator().next().getResourceID();
-            assertThat(resourceId.toString(), is(testingContainer.getId().toString()));
+            assertThat(resourceId.toString()).isEqualTo(testingContainer.getId().toString());
         }
 
         @Override
@@ -633,26 +620,24 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
         @Override
         protected void validateRequestedResources(
                 Collection<TaskExecutorProcessSpec> taskExecutorProcessSpecs) throws Exception {
-            assertThat(taskExecutorProcessSpecs.size(), is(1));
+            assertThat(taskExecutorProcessSpecs.size()).isEqualTo(1);
             final TaskExecutorProcessSpec taskExecutorProcessSpec =
                     taskExecutorProcessSpecs.iterator().next();
 
             final Resource resource =
                     createTaskManagerContainerFuture.get(TIMEOUT_SEC, TimeUnit.SECONDS);
 
-            assertThat(
-                    resource.getMemory(),
-                    is(taskExecutorProcessSpec.getTotalProcessMemorySize().getMebiBytes()));
-            assertThat(
-                    resource.getVirtualCores(),
-                    is(taskExecutorProcessSpec.getCpuCores().getValue().intValue()));
+            assertThat(resource.getMemory())
+                    .isEqualTo(taskExecutorProcessSpec.getTotalProcessMemorySize().getMebiBytes());
+            assertThat(resource.getVirtualCores())
+                    .isEqualTo(taskExecutorProcessSpec.getCpuCores().getValue().intValue());
             verifyFutureCompleted(removeContainerRequestFuture);
         }
 
         @Override
         protected void validateReleaseResources(Collection<YarnWorkerNode> workerNodes)
                 throws Exception {
-            assertThat(workerNodes.size(), is(1));
+            assertThat(workerNodes.size()).isEqualTo(1);
             verifyFutureCompleted(stopContainerAsyncFuture);
             verifyFutureCompleted(releaseAssignedContainerFuture);
         }
@@ -805,7 +790,7 @@ public class YarnResourceManagerDriverTest extends ResourceManagerDriverTestBase
             ContainerStatus containerStatus, String expectedCompletedCause) {
         final String containerCompletedCause =
                 YarnResourceManagerDriver.getContainerCompletedCause(containerStatus);
-        assertThat(containerCompletedCause, containsString(expectedCompletedCause));
-        assertThat(containerCompletedCause, containsString(containerStatus.getDiagnostics()));
+        assertThat(containerCompletedCause).contains(expectedCompletedCause);
+        assertThat(containerCompletedCause).contains(containerStatus.getDiagnostics());
     }
 }

@@ -33,8 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /**
  * Abstract test base for {@link ArrowReader} and {@link ArrowWriter}.
@@ -72,10 +73,12 @@ public abstract class ArrowReaderWriterTestBase<T> {
                     createArrowReader(new ByteArrayInputStream(baos.toByteArray()));
             for (int i = 0; i < testData.length; i++) {
                 RowData deserialized = arrowReader.read(i);
-                assertThat(
-                        "Deserialized value is wrong.",
-                        deserialized,
-                        CustomEqualityMatcher.deeplyEquals(testData[i]).withChecker(checker));
+                assertThat(deserialized)
+                        .as("Deserialized value is wrong.")
+                        .satisfies(
+                                matching(
+                                        CustomEqualityMatcher.deeplyEquals(testData[i])
+                                                .withChecker(checker)));
             }
         } catch (Exception e) {
             System.err.println(e.getMessage());

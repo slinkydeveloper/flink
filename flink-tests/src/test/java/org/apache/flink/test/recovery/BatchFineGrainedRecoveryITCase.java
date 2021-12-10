@@ -93,8 +93,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.apache.flink.runtime.executiongraph.failover.flip1.FailoverStrategyFactoryLoader.PIPELINED_REGION_RESTART_STRATEGY_NAME;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * IT case for fine-grained recovery of batch jobs.
@@ -226,7 +225,7 @@ public class BatchFineGrainedRecoveryITCase extends TestLogger {
                             .name(TASK_NAME_PREFIX + trackingIndex);
         }
 
-        assertThat(input.collect(), is(EXPECTED_JOB_OUTPUT));
+        assertThat(input.collect()).isEqualTo(EXPECTED_JOB_OUTPUT);
         failureTracker.verify(getMapperAttempts());
     }
 
@@ -528,7 +527,7 @@ public class BatchFineGrainedRecoveryITCase extends TestLogger {
                             "Test failed due to unexpected exception.", unexpectedFailure);
                 }
             }
-            assertThat(mapAttemptNumbers, is(EXPECTED_MAP_ATTEMPT_NUMBERS));
+            assertThat(mapAttemptNumbers).isEqualTo(EXPECTED_MAP_ATTEMPT_NUMBERS);
         }
     }
 

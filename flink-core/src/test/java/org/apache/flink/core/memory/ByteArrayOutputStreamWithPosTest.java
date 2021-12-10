@@ -20,7 +20,6 @@ package org.apache.flink.core.memory;
 
 import org.apache.flink.configuration.ConfigConstants;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,6 +27,8 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ByteArrayOutputStreamWithPos}. */
 public class ByteArrayOutputStreamWithPosTest {
@@ -49,15 +50,15 @@ public class ByteArrayOutputStreamWithPosTest {
         stream.write(new byte[BUFFER_SIZE]);
 
         // check whether the buffer is filled fully
-        Assert.assertEquals(BUFFER_SIZE, stream.getBuf().length);
+        assertThat(stream.getBuf().length).isEqualTo(BUFFER_SIZE);
 
         // check current position is the end of the buffer
-        Assert.assertEquals(BUFFER_SIZE, stream.getPosition());
+        assertThat(stream.getPosition()).isEqualTo(BUFFER_SIZE);
 
         stream.setPosition(BUFFER_SIZE);
 
         // confirm current position is at where we expect.
-        Assert.assertEquals(BUFFER_SIZE, stream.getPosition());
+        assertThat(stream.getPosition()).isEqualTo(BUFFER_SIZE);
     }
 
     /** Test setting negative position. */
@@ -75,12 +76,12 @@ public class ByteArrayOutputStreamWithPosTest {
     public void testSetPositionLargerThanBufferSize() throws Exception {
         // fully fill the buffer
         stream.write(new byte[BUFFER_SIZE]);
-        Assert.assertEquals(BUFFER_SIZE, stream.getBuf().length);
+        assertThat(stream.getBuf().length).isEqualTo(BUFFER_SIZE);
 
         // expand the buffer by setting position beyond the buffer length
         stream.setPosition(BUFFER_SIZE + 1);
-        Assert.assertEquals(BUFFER_SIZE * 2, stream.getBuf().length);
-        Assert.assertEquals(BUFFER_SIZE + 1, stream.getPosition());
+        assertThat(stream.getBuf().length).isEqualTo(BUFFER_SIZE * 2);
+        assertThat(stream.getPosition()).isEqualTo(BUFFER_SIZE + 1);
     }
 
     /** Test that toString returns a substring of the buffer with range(0, position). */
@@ -91,19 +92,17 @@ public class ByteArrayOutputStreamWithPosTest {
         ByteArrayOutputStreamWithPos stream = new ByteArrayOutputStreamWithPos(data.length);
 
         stream.write(data);
-        Assert.assertArrayEquals(data, stream.toString().getBytes(ConfigConstants.DEFAULT_CHARSET));
+        assertThat(stream.toString().getBytes(ConfigConstants.DEFAULT_CHARSET)).isEqualTo(data);
 
         for (int i = 0; i < data.length; i++) {
             stream.setPosition(i);
-            Assert.assertArrayEquals(
-                    Arrays.copyOf(data, i),
-                    stream.toString().getBytes(ConfigConstants.DEFAULT_CHARSET));
+            assertThat(stream.toString().getBytes(ConfigConstants.DEFAULT_CHARSET))
+                    .isEqualTo(Arrays.copyOf(data, i));
         }
 
         // validate that the stored bytes are still tracked properly even when expanding array
         stream.setPosition(data.length + 1);
-        Assert.assertArrayEquals(
-                Arrays.copyOf(data, data.length + 1),
-                stream.toString().getBytes(ConfigConstants.DEFAULT_CHARSET));
+        assertThat(stream.toString().getBytes(ConfigConstants.DEFAULT_CHARSET))
+                .isEqualTo(Arrays.copyOf(data, data.length + 1));
     }
 }

@@ -24,13 +24,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Resource}. */
 public class ResourceTest extends TestLogger {
@@ -54,22 +48,22 @@ public class ResourceTest extends TestLogger {
         final Resource v1 = new TestResource(0.1);
         final Resource v2 = new TestResource(0.1);
         final Resource v3 = new TestResource(0.2);
-        assertTrue(v1.equals(v2));
-        assertFalse(v1.equals(v3));
+        assertThat(v1.equals(v2)).isTrue();
+        assertThat(v1.equals(v3)).isFalse();
     }
 
     @Test
     public void testEqualsIgnoringScale() {
         final Resource v1 = new TestResource(new BigDecimal("0.1"));
         final Resource v2 = new TestResource(new BigDecimal("0.10"));
-        assertTrue(v1.equals(v2));
+        assertThat(v1.equals(v2)).isTrue();
     }
 
     @Test
     public void testHashCodeIgnoringScale() {
         final Resource v1 = new TestResource(new BigDecimal("0.1"));
         final Resource v2 = new TestResource(new BigDecimal("0.10"));
-        assertTrue(v1.hashCode() == v2.hashCode());
+        assertThat(v1.hashCode() == v2.hashCode()).isTrue();
     }
 
     @Test
@@ -168,8 +162,8 @@ public class ResourceTest extends TestLogger {
         final Resource resource1 = new TestResource(0.0);
         final Resource resource2 = new TestResource(1.0);
 
-        assertTrue(resource1.isZero());
-        assertFalse(resource2.isZero());
+        assertThat(resource1.isZero()).isTrue();
+        assertThat(resource2.isZero()).isFalse();
     }
 
     @Test
@@ -178,10 +172,10 @@ public class ResourceTest extends TestLogger {
         final Resource resource2 = new TestResource(0.0);
         final Resource resource3 = new TestResource(1.0);
 
-        assertThat(resource1.compareTo(resource1), is(0));
-        assertThat(resource1.compareTo(resource2), is(0));
-        assertThat(resource1.compareTo(resource3), lessThan(0));
-        assertThat(resource3.compareTo(resource1), greaterThan(0));
+        assertThat(resource1.compareTo(resource1)).isEqualTo(0);
+        assertThat(resource1.compareTo(resource2)).isEqualTo(0);
+        assertThat(resource1.compareTo(resource3)).isLessThan(0);
+        assertThat(resource3.compareTo(resource1)).isGreaterThan(0);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -218,10 +212,10 @@ public class ResourceTest extends TestLogger {
     @Test
     public void testStripTrailingZeros() {
         final Resource v = new TestResource(0.25).multiply(2);
-        assertThat(v.getValue().toString(), is("0.5"));
+        assertThat(v.getValue().toString()).isEqualTo("0.5");
     }
 
     private static void assertTestResourceValueEquals(final double value, final Resource resource) {
-        assertEquals(new TestResource(value), resource);
+        assertThat(resource).isEqualTo(new TestResource(value));
     }
 }

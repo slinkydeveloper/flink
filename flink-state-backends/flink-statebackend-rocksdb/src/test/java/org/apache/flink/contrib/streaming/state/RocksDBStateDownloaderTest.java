@@ -43,9 +43,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Test class for {@link RocksDBStateDownloader}. */
 public class RocksDBStateDownloaderTest extends TestLogger {
@@ -75,9 +74,9 @@ public class RocksDBStateDownloaderTest extends TestLogger {
                     incrementalKeyedStateHandle,
                     temporaryFolder.newFolder().toPath(),
                     new CloseableRegistry());
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
-            assertEquals(expectedException, e);
+            assertThat(e).isEqualTo(expectedException);
         }
     }
 
@@ -128,7 +127,7 @@ public class RocksDBStateDownloaderTest extends TestLogger {
 
     private void assertStateContentEqual(byte[] expected, Path path) throws IOException {
         byte[] actual = Files.readAllBytes(Paths.get(path.toUri()));
-        assertArrayEquals(expected, actual);
+        assertThat(actual).isEqualTo(expected);
     }
 
     private static class SpecifiedException extends IOException {

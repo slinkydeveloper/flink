@@ -28,7 +28,6 @@ import org.apache.flink.runtime.state.StateObject;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -46,6 +45,7 @@ import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNew
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.createNewResultSubpartitionStateHandle;
 import static org.apache.flink.runtime.checkpoint.StateHandleDummyUtil.deepDummyCopy;
 import static org.apache.flink.runtime.checkpoint.StateObjectCollection.singleton;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** {@link PrioritizedOperatorSubtaskState} test. */
 public class PrioritizedOperatorSubtaskStateTest extends TestLogger {
@@ -97,41 +97,49 @@ public class PrioritizedOperatorSubtaskStateTest extends TestLogger {
                 OperatorSubtaskState[] onlyPrimary =
                         new OperatorSubtaskState[] {primaryAndFallback};
 
-                Assert.assertTrue(
-                        checkResultAsExpected(
-                                OperatorSubtaskState::getManagedOperatorState,
-                                PrioritizedOperatorSubtaskState::getPrioritizedManagedOperatorState,
-                                prioritizedOperatorSubtaskState,
-                                primaryAndFallback.getManagedOperatorState().size() == 1
-                                        ? validAlternatives
-                                        : onlyPrimary));
+                assertThat(
+                                checkResultAsExpected(
+                                        OperatorSubtaskState::getManagedOperatorState,
+                                        PrioritizedOperatorSubtaskState
+                                                ::getPrioritizedManagedOperatorState,
+                                        prioritizedOperatorSubtaskState,
+                                        primaryAndFallback.getManagedOperatorState().size() == 1
+                                                ? validAlternatives
+                                                : onlyPrimary))
+                        .isTrue();
 
-                Assert.assertTrue(
-                        checkResultAsExpected(
-                                OperatorSubtaskState::getManagedKeyedState,
-                                PrioritizedOperatorSubtaskState::getPrioritizedManagedKeyedState,
-                                prioritizedOperatorSubtaskState,
-                                primaryAndFallback.getManagedKeyedState().size() == 1
-                                        ? validAlternatives
-                                        : onlyPrimary));
+                assertThat(
+                                checkResultAsExpected(
+                                        OperatorSubtaskState::getManagedKeyedState,
+                                        PrioritizedOperatorSubtaskState
+                                                ::getPrioritizedManagedKeyedState,
+                                        prioritizedOperatorSubtaskState,
+                                        primaryAndFallback.getManagedKeyedState().size() == 1
+                                                ? validAlternatives
+                                                : onlyPrimary))
+                        .isTrue();
 
-                Assert.assertTrue(
-                        checkResultAsExpected(
-                                OperatorSubtaskState::getRawOperatorState,
-                                PrioritizedOperatorSubtaskState::getPrioritizedRawOperatorState,
-                                prioritizedOperatorSubtaskState,
-                                primaryAndFallback.getRawOperatorState().size() == 1
-                                        ? validAlternatives
-                                        : onlyPrimary));
+                assertThat(
+                                checkResultAsExpected(
+                                        OperatorSubtaskState::getRawOperatorState,
+                                        PrioritizedOperatorSubtaskState
+                                                ::getPrioritizedRawOperatorState,
+                                        prioritizedOperatorSubtaskState,
+                                        primaryAndFallback.getRawOperatorState().size() == 1
+                                                ? validAlternatives
+                                                : onlyPrimary))
+                        .isTrue();
 
-                Assert.assertTrue(
-                        checkResultAsExpected(
-                                OperatorSubtaskState::getRawKeyedState,
-                                PrioritizedOperatorSubtaskState::getPrioritizedRawKeyedState,
-                                prioritizedOperatorSubtaskState,
-                                primaryAndFallback.getRawKeyedState().size() == 1
-                                        ? validAlternatives
-                                        : onlyPrimary));
+                assertThat(
+                                checkResultAsExpected(
+                                        OperatorSubtaskState::getRawKeyedState,
+                                        PrioritizedOperatorSubtaskState
+                                                ::getPrioritizedRawKeyedState,
+                                        prioritizedOperatorSubtaskState,
+                                        primaryAndFallback.getRawKeyedState().size() == 1
+                                                ? validAlternatives
+                                                : onlyPrimary))
+                        .isTrue();
             }
         }
     }

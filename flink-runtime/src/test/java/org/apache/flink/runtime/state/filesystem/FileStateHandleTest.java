@@ -30,8 +30,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link FileStateHandle}. */
 public class FileStateHandleTest {
@@ -42,11 +41,11 @@ public class FileStateHandleTest {
     public void testDisposeDeletesFile() throws Exception {
         File file = tempFolder.newFile();
         writeTestData(file);
-        assertTrue(file.exists());
+        assertThat(file.exists()).isTrue();
 
         FileStateHandle handle = new FileStateHandle(Path.fromLocalFile(file), file.length());
         handle.discardState();
-        assertFalse(file.exists());
+        assertThat(file.exists()).isFalse();
     }
 
     /**
@@ -58,16 +57,16 @@ public class FileStateHandleTest {
     @Test
     public void testDisposeDoesNotDeleteParentDirectory() throws Exception {
         File parentDir = tempFolder.newFolder();
-        assertTrue(parentDir.exists());
+        assertThat(parentDir.exists()).isTrue();
 
         File file = new File(parentDir, "test");
         writeTestData(file);
-        assertTrue(file.exists());
+        assertThat(file.exists()).isTrue();
 
         FileStateHandle handle = new FileStateHandle(Path.fromLocalFile(file), file.length());
         handle.discardState();
-        assertFalse(file.exists());
-        assertTrue(parentDir.exists());
+        assertThat(file.exists()).isFalse();
+        assertThat(parentDir.exists()).isTrue();
     }
 
     private static void writeTestData(File file) throws IOException {

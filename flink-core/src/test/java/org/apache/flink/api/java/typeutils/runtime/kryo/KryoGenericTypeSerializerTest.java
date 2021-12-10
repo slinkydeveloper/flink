@@ -33,9 +33,8 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("unchecked")
 public class KryoGenericTypeSerializerTest extends AbstractGenericTypeSerializerTest {
@@ -137,7 +136,7 @@ public class KryoGenericTypeSerializerTest extends AbstractGenericTypeSerializer
 
             for (int i = 0; i < numElements; i++) {
                 int value = serializer.deserialize(source);
-                assertEquals(i, value);
+                assertThat(value).isEqualTo(i);
             }
 
             try {
@@ -161,6 +160,6 @@ public class KryoGenericTypeSerializerTest extends AbstractGenericTypeSerializer
         KryoSerializer<String> serializer =
                 new KryoSerializer<>(String.class, new ExecutionConfig());
         Kryo kryo = serializer.getKryo();
-        assertTrue(kryo.getReferences());
+        assertThat(kryo.getReferences()).isTrue();
     }
 }

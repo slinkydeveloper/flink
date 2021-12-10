@@ -55,7 +55,6 @@ import org.apache.flink.util.SerializedThrowable;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -69,6 +68,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** IT Test for writing savepoints to the {@code WindowOperator}. */
 @SuppressWarnings("unchecked")
@@ -190,7 +193,9 @@ public class SavepointWriterWindowITCase extends AbstractTestBase {
         submitJob(savepointPath, sEnv);
 
         Collection<Tuple2<String, Integer>> results = future.get();
-        Assert.assertThat("Incorrect results from bootstrapped windows", results, STANDARD_MATCHER);
+        assertThat(results)
+                .as("Incorrect results from bootstrapped windows")
+                .satisfies(matching(STANDARD_MATCHER));
     }
 
     @Test
@@ -228,7 +233,9 @@ public class SavepointWriterWindowITCase extends AbstractTestBase {
         submitJob(savepointPath, sEnv);
 
         Collection<Tuple2<String, Integer>> results = future.get();
-        Assert.assertThat("Incorrect results from bootstrapped windows", results, EVICTOR_MATCHER);
+        assertThat(results)
+                .as("Incorrect results from bootstrapped windows")
+                .satisfies(matching(EVICTOR_MATCHER));
     }
 
     @Test
@@ -269,8 +276,10 @@ public class SavepointWriterWindowITCase extends AbstractTestBase {
         submitJob(savepointPath, sEnv);
 
         Collection<Tuple2<String, Integer>> results = future.get();
-        Assert.assertEquals("Incorrect number of results", 15, results.size());
-        Assert.assertThat("Incorrect bootstrap state", new HashSet<>(results), STANDARD_MATCHER);
+        assertThat(results.size()).as("Incorrect number of results").isEqualTo(15);
+        assertThat(new HashSet<>(results))
+                .as("Incorrect bootstrap state")
+                .satisfies(matching(STANDARD_MATCHER));
     }
 
     @Test
@@ -313,8 +322,10 @@ public class SavepointWriterWindowITCase extends AbstractTestBase {
         submitJob(savepointPath, sEnv);
 
         Collection<Tuple2<String, Integer>> results = future.get();
-        Assert.assertEquals("Incorrect number of results", 15, results.size());
-        Assert.assertThat("Incorrect bootstrap state", new HashSet<>(results), EVICTOR_MATCHER);
+        assertThat(results.size()).as("Incorrect number of results").isEqualTo(15);
+        assertThat(new HashSet<>(results))
+                .as("Incorrect bootstrap state")
+                .satisfies(matching(EVICTOR_MATCHER));
     }
 
     private void submitJob(String savepointPath, StreamExecutionEnvironment sEnv) {
@@ -328,9 +339,9 @@ public class SavepointWriterWindowITCase extends AbstractTestBase {
                             .thenCompose(client::requestJobResult)
                             .get()
                             .getSerializedThrowable();
-            Assert.assertFalse(serializedThrowable.isPresent());
+            assertThat(serializedThrowable.isPresent()).isFalse();
         } catch (Throwable t) {
-            Assert.fail("Failed to submit job");
+            fail("Failed to submit job");
         }
     }
 

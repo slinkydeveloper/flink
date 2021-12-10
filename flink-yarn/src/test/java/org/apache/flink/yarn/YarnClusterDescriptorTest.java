@@ -43,7 +43,6 @@ import org.apache.hadoop.yarn.api.ApplicationConstants;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -62,14 +61,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.apache.flink.core.testutils.CommonTestUtils.assertThrows;
 import static org.apache.flink.runtime.jobmanager.JobManagerProcessUtils.createDefaultJobManagerProcessSpec;
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.CLASSPATH_INCLUDE_USER_JAR;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link YarnClusterDescriptor}. */
 public class YarnClusterDescriptorTest extends TestLogger {
@@ -197,198 +193,210 @@ public class YarnClusterDescriptorTest extends TestLogger {
 
         try {
             // no logging, with/out krb5
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + ""
-                            + // jvmOpts
-                            ""
-                            + // logging
-                            " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(
-                                    mainClass, false, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, false, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + ""
+                                    + // jvmOpts
+                                    ""
+                                    + // logging
+                                    " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            ""
-                            + // logging
-                            " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    ""
+                                    + // logging
+                                    " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             // logback only, with/out krb5
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOGBACK_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + ""
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(
-                                    mainClass, false, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, false, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + ""
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOGBACK_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             // log4j, with/out krb5
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOG4J_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + ""
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + log4j
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(
-                                    mainClass, false, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, false, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + ""
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + log4j
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOG4J_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + log4j
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + log4j
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             // logback, with/out krb5
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOGBACK_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + ""
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(
-                                    mainClass, false, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, false, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + ""
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOGBACK_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             // logback, with/out krb5, different JVM opts
             // IMPORTANT: Be aware that we are using side effects here to modify the created
@@ -399,54 +407,57 @@ public class YarnClusterDescriptorTest extends TestLogger {
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOGBACK_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + jvmOpts
-                            + " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(
-                                    mainClass, false, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, false, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + jvmOpts
+                                    + " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOGBACK_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + jvmOpts
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + jvmOpts
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             // log4j, with/out krb5, different JVM opts
             // IMPORTANT: Be aware that we are using side effects here to modify the created
@@ -455,58 +466,61 @@ public class YarnClusterDescriptorTest extends TestLogger {
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOG4J_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + jvmOpts
-                            + " "
-                            + jmJvmOpts
-                            + " "
-                            + logfile
-                            + " "
-                            + log4j
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(
-                                    mainClass, false, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, false, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + jvmOpts
+                                    + " "
+                                    + jmJvmOpts
+                                    + " "
+                                    + logfile
+                                    + " "
+                                    + log4j
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
                     YarnLogConfigUtil.CONFIG_FILE_LOG4J_NAME);
-            assertEquals(
-                    java
-                            + " "
-                            + jvmmem
-                            + " "
-                            + jvmOpts
-                            + " "
-                            + jmJvmOpts
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " "
-                            + logfile
-                            + " "
-                            + log4j
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + jvmmem
+                                    + " "
+                                    + jvmOpts
+                                    + " "
+                                    + jmJvmOpts
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " "
+                                    + logfile
+                                    + " "
+                                    + log4j
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
 
             // now try some configurations with different yarn.container-start-command-template
             // IMPORTANT: Be aware that we are using side effects here to modify the created
@@ -517,31 +531,33 @@ public class YarnClusterDescriptorTest extends TestLogger {
             cfg.setString(
                     ConfigConstants.YARN_CONTAINER_START_COMMAND_TEMPLATE,
                     "%java% 1 %jvmmem% 2 %jvmopts% 3 %logging% 4 %class% 5 %args% 6 %redirects%");
-            assertEquals(
-                    java
-                            + " 1 "
-                            + jvmmem
-                            + " 2 "
-                            + jvmOpts
-                            + " "
-                            + jmJvmOpts
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " 3 "
-                            + logfile
-                            + " "
-                            + logback
-                            + " 4 "
-                            + mainClass
-                            + " 5 "
-                            + dynamicParameters
-                            + " 6 "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " 1 "
+                                    + jvmmem
+                                    + " 2 "
+                                    + jvmOpts
+                                    + " "
+                                    + jmJvmOpts
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " 3 "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " 4 "
+                                    + mainClass
+                                    + " 5 "
+                                    + dynamicParameters
+                                    + " 6 "
+                                    + redirects);
 
             cfg.set(
                     YarnConfigOptionsInternal.APPLICATION_LOG_CONFIG_FILE,
@@ -551,31 +567,33 @@ public class YarnClusterDescriptorTest extends TestLogger {
                     "%java% %logging% %jvmopts% %jvmmem% %class% %args% %redirects%");
             // IMPORTANT: Be aware that we are using side effects here to modify the created
             // YarnClusterDescriptor
-            assertEquals(
-                    java
-                            + " "
-                            + logfile
-                            + " "
-                            + logback
-                            + " "
-                            + jvmOpts
-                            + " "
-                            + jmJvmOpts
-                            + " "
-                            + krb5
-                            + // jvmOpts
-                            " "
-                            + jvmmem
-                            + " "
-                            + mainClass
-                            + " "
-                            + dynamicParameters
-                            + " "
-                            + redirects,
-                    clusterDescriptor
-                            .setupApplicationMasterContainer(mainClass, true, jobManagerProcessSpec)
-                            .getCommands()
-                            .get(0));
+            assertThat(
+                            clusterDescriptor
+                                    .setupApplicationMasterContainer(
+                                            mainClass, true, jobManagerProcessSpec)
+                                    .getCommands()
+                                    .get(0))
+                    .isEqualTo(
+                            java
+                                    + " "
+                                    + logfile
+                                    + " "
+                                    + logback
+                                    + " "
+                                    + jvmOpts
+                                    + " "
+                                    + jmJvmOpts
+                                    + " "
+                                    + krb5
+                                    + // jvmOpts
+                                    " "
+                                    + jvmmem
+                                    + " "
+                                    + mainClass
+                                    + " "
+                                    + dynamicParameters
+                                    + " "
+                                    + redirects);
         } finally {
             clusterDescriptor.close();
         }
@@ -590,8 +608,8 @@ public class YarnClusterDescriptorTest extends TestLogger {
             File libFile = temporaryFolder.newFile("libFile.jar");
             File libFolder = temporaryFolder.newFolder().getAbsoluteFile();
 
-            Assert.assertFalse(descriptor.getShipFiles().contains(libFile));
-            Assert.assertFalse(descriptor.getShipFiles().contains(libFolder));
+            assertThat(descriptor.getShipFiles().contains(libFile)).isFalse();
+            assertThat(descriptor.getShipFiles().contains(libFolder)).isFalse();
 
             List<File> shipFiles = new ArrayList<>();
             shipFiles.add(libFile);
@@ -599,17 +617,17 @@ public class YarnClusterDescriptorTest extends TestLogger {
 
             descriptor.addShipFiles(shipFiles);
 
-            Assert.assertTrue(descriptor.getShipFiles().contains(libFile));
-            Assert.assertTrue(descriptor.getShipFiles().contains(libFolder));
+            assertThat(descriptor.getShipFiles().contains(libFile)).isTrue();
+            assertThat(descriptor.getShipFiles().contains(libFolder)).isTrue();
 
             // only execute part of the deployment to test for shipped files
             Set<File> effectiveShipFiles = new HashSet<>();
             descriptor.addLibFoldersToShipFiles(effectiveShipFiles);
 
-            Assert.assertEquals(0, effectiveShipFiles.size());
-            Assert.assertEquals(2, descriptor.getShipFiles().size());
-            Assert.assertTrue(descriptor.getShipFiles().contains(libFile));
-            Assert.assertTrue(descriptor.getShipFiles().contains(libFolder));
+            assertThat(effectiveShipFiles.size()).isEqualTo(0);
+            assertThat(descriptor.getShipFiles().size()).isEqualTo(2);
+            assertThat(descriptor.getShipFiles().contains(libFile)).isTrue();
+            assertThat(descriptor.getShipFiles().contains(libFolder)).isTrue();
         }
     }
 
@@ -628,7 +646,7 @@ public class YarnClusterDescriptorTest extends TestLogger {
         try (YarnClusterDescriptor descriptor = createYarnClusterDescriptor()) {
             File libFolder = temporaryFolder.newFolder().getAbsoluteFile();
             File libFile = new File(libFolder, "libFile.jar");
-            assertTrue(libFile.createNewFile());
+            assertThat(libFile.createNewFile()).isTrue();
 
             Set<File> effectiveShipFiles = new HashSet<>();
 
@@ -648,10 +666,10 @@ public class YarnClusterDescriptorTest extends TestLogger {
             }
 
             // only add the ship the folder, not the contents
-            Assert.assertFalse(effectiveShipFiles.contains(libFile));
-            Assert.assertTrue(effectiveShipFiles.contains(libFolder));
-            Assert.assertFalse(descriptor.getShipFiles().contains(libFile));
-            Assert.assertFalse(descriptor.getShipFiles().contains(libFolder));
+            assertThat(effectiveShipFiles.contains(libFile)).isFalse();
+            assertThat(effectiveShipFiles.contains(libFolder)).isTrue();
+            assertThat(descriptor.getShipFiles().contains(libFile)).isFalse();
+            assertThat(descriptor.getShipFiles().contains(libFolder)).isFalse();
         }
     }
 
@@ -676,7 +694,7 @@ public class YarnClusterDescriptorTest extends TestLogger {
                 CommonTestUtils.setEnv(oldEnv);
             }
 
-            assertTrue(effectiveShipFiles.isEmpty());
+            assertThat(effectiveShipFiles.isEmpty()).isTrue();
         }
     }
 
@@ -692,10 +710,9 @@ public class YarnClusterDescriptorTest extends TestLogger {
             yarnClusterDescriptor.addShipFiles(
                     Collections.singletonList(
                             temporaryFolder.newFolder(ConfigConstants.DEFAULT_FLINK_USR_LIB_DIR)));
-            fail();
+            fail("unknown failure");
         } catch (IllegalArgumentException exception) {
-            assertThat(
-                    exception.getMessage(), containsString("This is an illegal ship directory :"));
+            assertThat(exception.getMessage()).contains("This is an illegal ship directory :");
         }
     }
 
@@ -706,7 +723,7 @@ public class YarnClusterDescriptorTest extends TestLogger {
 
         yarnClusterDescriptor.close();
 
-        assertTrue(yarnClient.isInState(Service.STATE.STARTED));
+        assertThat(yarnClient.isInState(Service.STATE.STARTED)).isTrue();
 
         final YarnClient closableYarnClient = YarnClient.createYarnClient();
         closableYarnClient.init(yarnConfiguration);
@@ -722,7 +739,7 @@ public class YarnClusterDescriptorTest extends TestLogger {
 
         yarnClusterDescriptor.close();
 
-        assertTrue(closableYarnClient.isInState(Service.STATE.STOPPED));
+        assertThat(closableYarnClient.isInState(Service.STATE.STOPPED)).isTrue();
     }
 
     @Test
@@ -733,12 +750,12 @@ public class YarnClusterDescriptorTest extends TestLogger {
         flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName());
         try (final YarnClusterDescriptor yarnClusterDescriptor =
                 createYarnClusterDescriptor(flinkConfig)) {
-            assertThrows(
-                    "Expected deployment.target=yarn-application",
-                    ClusterDeploymentException.class,
-                    () ->
-                            yarnClusterDescriptor.deployApplicationCluster(
-                                    clusterSpecification, appConfig));
+            assertThatThrownBy(
+                            () ->
+                                    yarnClusterDescriptor.deployApplicationCluster(
+                                            clusterSpecification, appConfig))
+                    .as("Expected deployment.target=yarn-application")
+                    .isInstanceOf(ClusterDeploymentException.class);
         }
     }
 
@@ -749,8 +766,8 @@ public class YarnClusterDescriptorTest extends TestLogger {
             yarnConfig.set("fs.defaultFS", "file://tmp");
             FileSystem defaultFileSystem = FileSystem.get(yarnConfig);
             Path stagingDir = yarnClusterDescriptor.getStagingDir(defaultFileSystem);
-            assertEquals("file", defaultFileSystem.getScheme());
-            assertEquals("file", stagingDir.getFileSystem(yarnConfig).getScheme());
+            assertThat(defaultFileSystem.getScheme()).isEqualTo("file");
+            assertThat(stagingDir.getFileSystem(yarnConfig).getScheme()).isEqualTo("file");
         }
     }
 
@@ -767,8 +784,8 @@ public class YarnClusterDescriptorTest extends TestLogger {
 
             Path stagingDir = yarnClusterDescriptor.getStagingDir(defaultFileSystem);
 
-            assertEquals("viewfs", defaultFileSystem.getScheme());
-            assertEquals("file", stagingDir.getFileSystem(yarnConfig).getScheme());
+            assertThat(defaultFileSystem.getScheme()).isEqualTo("viewfs");
+            assertThat(stagingDir.getFileSystem(yarnConfig).getScheme()).isEqualTo("file");
         }
     }
 
@@ -781,12 +798,12 @@ public class YarnClusterDescriptorTest extends TestLogger {
         flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName());
         try (final YarnClusterDescriptor yarnClusterDescriptor =
                 createYarnClusterDescriptor(flinkConfig)) {
-            assertThrows(
-                    "Should only have one jar",
-                    IllegalArgumentException.class,
-                    () ->
-                            yarnClusterDescriptor.deployApplicationCluster(
-                                    clusterSpecification, appConfig));
+            assertThatThrownBy(
+                            () ->
+                                    yarnClusterDescriptor.deployApplicationCluster(
+                                            clusterSpecification, appConfig))
+                    .as("Should only have one jar")
+                    .isInstanceOf(IllegalArgumentException.class);
         }
     }
 

@@ -30,8 +30,7 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests the methods that bring elements back to the client driver program. */
 @RunWith(Parameterized.class)
@@ -51,11 +50,11 @@ public class CountCollectITCase extends MultipleProgramsTestBase {
 
         // count
         long numEntries = data.count();
-        assertEquals(10, numEntries);
+        assertThat(numEntries).isEqualTo(10);
 
         // collect
         ArrayList<Integer> list = (ArrayList<Integer>) data.collect();
-        assertArrayEquals(input, list.toArray());
+        assertThat(list.toArray()).isEqualTo(input);
     }
 
     @Test
@@ -70,7 +69,7 @@ public class CountCollectITCase extends MultipleProgramsTestBase {
 
         // count
         long numEntries = data3.count();
-        assertEquals(100, numEntries);
+        assertThat(numEntries).isEqualTo(100);
 
         // collect
         ArrayList<Tuple2<Integer, Integer>> list =
@@ -88,7 +87,7 @@ public class CountCollectITCase extends MultipleProgramsTestBase {
         // check if all entries are contained in the hash map
         for (int i = 0; i < 100; i++) {
             Tuple2<Integer, Integer> element = list.get(i);
-            assertEquals(expected.get(element), true);
+            assertThat(true).isEqualTo(expected.get(element));
             expected.remove(element);
         }
     }

@@ -26,10 +26,9 @@ import org.junit.Test;
 
 import java.util.concurrent.CompletableFuture;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /** Unit tests for the {@link OperatorEventValve}. */
 public class OperatorEventValveTest {
@@ -43,8 +42,8 @@ public class OperatorEventValveTest {
         final CompletableFuture<Acknowledge> future = new CompletableFuture<>();
         valve.sendEvent(sender.createSendAction(event, 11), future);
 
-        assertThat(sender.events, contains(new EventWithSubtask(event, 11)));
-        assertTrue(future.isDone());
+        assertThat(sender.events).satisfies(matching(contains(new EventWithSubtask(event, 11))));
+        assertThat(future.isDone()).isTrue();
     }
 
     @Test
@@ -54,7 +53,7 @@ public class OperatorEventValveTest {
         valve.markForCheckpoint(200L);
         final boolean shut = valve.tryShutValve(200L);
 
-        assertTrue(shut);
+        assertThat(shut).isTrue();
     }
 
     @Test
@@ -63,7 +62,7 @@ public class OperatorEventValveTest {
 
         final boolean shut = valve.tryShutValve(123L);
 
-        assertFalse(shut);
+        assertThat(shut).isFalse();
     }
 
     @Test
@@ -73,7 +72,7 @@ public class OperatorEventValveTest {
         valve.markForCheckpoint(100L);
         final boolean shut = valve.tryShutValve(123L);
 
-        assertFalse(shut);
+        assertThat(shut).isFalse();
     }
 
     @Test
@@ -87,8 +86,8 @@ public class OperatorEventValveTest {
         final CompletableFuture<Acknowledge> future = new CompletableFuture<>();
         valve.sendEvent(sender.createSendAction(new TestOperatorEvent(), 1), future);
 
-        assertTrue(sender.events.isEmpty());
-        assertFalse(future.isDone());
+        assertThat(sender.events.isEmpty()).isTrue();
+        assertThat(future.isDone()).isFalse();
     }
 
     @Test
@@ -108,11 +107,14 @@ public class OperatorEventValveTest {
 
         valve.openValveAndUnmarkCheckpoint();
 
-        assertThat(
-                sender.events,
-                contains(new EventWithSubtask(event1, 3), new EventWithSubtask(event2, 0)));
-        assertTrue(future1.isDone());
-        assertTrue(future2.isDone());
+        assertThat(sender.events)
+                .satisfies(
+                        matching(
+                                contains(
+                                        new EventWithSubtask(event1, 3),
+                                        new EventWithSubtask(event2, 0))));
+        assertThat(future1.isDone()).isTrue();
+        assertThat(future2.isDone()).isTrue();
     }
 
     @Test
@@ -128,6 +130,6 @@ public class OperatorEventValveTest {
         valve.sendEvent(sender.createSendAction(new TestOperatorEvent(), 10), future);
         valve.openValveAndUnmarkCheckpoint();
 
-        assertTrue(future.isCompletedExceptionally());
+        assertThat(future.isCompletedExceptionally()).isTrue();
     }
 }

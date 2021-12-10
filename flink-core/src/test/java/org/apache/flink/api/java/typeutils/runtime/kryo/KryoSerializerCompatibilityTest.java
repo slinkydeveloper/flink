@@ -41,11 +41,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests related to configuration snapshotting and reconfiguring for the {@link KryoSerializer}. */
 public class KryoSerializerCompatibilityTest {
@@ -71,7 +67,7 @@ public class KryoSerializerCompatibilityTest {
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<TestClass> compatResult =
                 kryoSerializerConfigSnapshot.resolveSchemaCompatibility(kryoSerializerForA);
-        assertTrue(compatResult.isCompatibleAsIs());
+        assertThat(compatResult.isCompatibleAsIs()).isTrue();
     }
 
     @Test
@@ -88,8 +84,8 @@ public class KryoSerializerCompatibilityTest {
                             inView, getClass().getClassLoader());
         }
 
-        assertNotNull(serializer);
-        assertTrue(serializer instanceof KryoSerializer);
+        assertThat(serializer).isNotNull();
+        assertThat(serializer).isInstanceOf(KryoSerializer.class);
     }
 
     /** Verifies that reconfiguration result is INCOMPATIBLE if data type has changed. */
@@ -125,7 +121,7 @@ public class KryoSerializerCompatibilityTest {
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<TestClassB> compatResult =
                 kryoSerializerConfigSnapshot.resolveSchemaCompatibility(kryoSerializerForB);
-        assertTrue(compatResult.isIncompatible());
+        assertThat(compatResult.isIncompatible()).isTrue();
     }
 
     @Test
@@ -239,9 +235,9 @@ public class KryoSerializerCompatibilityTest {
 
                 FakeClass myTestClass = kryoSerializer.deserialize(inputView);
 
-                assertThat(myTestClass.array.get(0), is(10));
-                assertThat(myTestClass.array.get(1), is(20));
-                assertThat(myTestClass.array.get(2), is(30));
+                assertThat(myTestClass.array.get(0)).isEqualTo(10);
+                assertThat(myTestClass.array.get(1)).isEqualTo(20);
+                assertThat(myTestClass.array.get(2)).isEqualTo(30);
             }
         }
     }
@@ -297,15 +293,15 @@ public class KryoSerializerCompatibilityTest {
         @SuppressWarnings("unchecked")
         TypeSerializerSchemaCompatibility<TestClass> compatResult =
                 kryoSerializerConfigSnapshot.resolveSchemaCompatibility(kryoSerializer);
-        assertTrue(compatResult.isCompatibleWithReconfiguredSerializer());
+        assertThat(compatResult.isCompatibleWithReconfiguredSerializer()).isTrue();
 
         kryoSerializer = (KryoSerializer<TestClass>) compatResult.getReconfiguredSerializer();
-        assertEquals(
-                testClassId, kryoSerializer.getKryo().getRegistration(TestClass.class).getId());
-        assertEquals(
-                testClassAId, kryoSerializer.getKryo().getRegistration(TestClassA.class).getId());
-        assertEquals(
-                testClassBId, kryoSerializer.getKryo().getRegistration(TestClassB.class).getId());
+        assertThat(kryoSerializer.getKryo().getRegistration(TestClass.class).getId())
+                .isEqualTo(testClassId);
+        assertThat(kryoSerializer.getKryo().getRegistration(TestClassA.class).getId())
+                .isEqualTo(testClassAId);
+        assertThat(kryoSerializer.getKryo().getRegistration(TestClassB.class).getId())
+                .isEqualTo(testClassBId);
     }
 
     private static class TestClass {}

@@ -29,8 +29,8 @@ import java.io.DataOutputStream;
 import java.nio.ByteBuffer;
 import java.util.function.BiConsumer;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Various tests with freed memory segments for {@link MemorySegment} (in both heap and off-heap
@@ -133,7 +133,7 @@ public class OperationsOnFreedSegmentTest {
 
     private void testOpsOnFreedSegment(MemorySegment segment) throws Exception {
         segment.free();
-        assertTrue(segment.isFreed());
+        assertThat(segment.isFreed()).isTrue();
 
         // --------- bytes -----------
 

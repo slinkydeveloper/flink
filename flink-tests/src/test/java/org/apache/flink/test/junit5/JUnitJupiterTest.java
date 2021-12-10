@@ -29,8 +29,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /** Temporary JUnit 5 tests for validating JUnit jupiter engine truly works. */
@@ -39,14 +38,14 @@ public class JUnitJupiterTest {
     @DisplayName("Assumption and Assertion Test")
     public void assumptionAssertionTest() {
         assumeTrue(true, "This case is absolutely true");
-        assertTrue(true, "This case is absolutely true");
+        assertThat(true).as("This case is absolutely true").isTrue();
     }
 
     @ParameterizedTest
     @DisplayName("Parameterized Test")
     @ValueSource(strings = {"racecar", "radar", "able was I ere I saw elba"})
     public void parameterizedTest(String word) {
-        assertTrue(isPalindrome(word), "The string in parameter should be palindrome");
+        assertThat(isPalindrome(word)).as("The string in parameter should be palindrome").isTrue();
     }
 
     @TestFactory
@@ -55,9 +54,10 @@ public class JUnitJupiterTest {
         String word = "madam";
         String anotherWord = "flink";
         return Arrays.asList(
-                DynamicTest.dynamicTest("1st dynamic test", () -> assertTrue(isPalindrome(word))),
                 DynamicTest.dynamicTest(
-                        "2nd dynamic test", () -> assertFalse(isPalindrome(anotherWord))));
+                        "1st dynamic test", () -> assertThat(isPalindrome(word)).isTrue()),
+                DynamicTest.dynamicTest(
+                        "2nd dynamic test", () -> assertThat(isPalindrome(anotherWord)).isFalse()));
     }
 
     private boolean isPalindrome(String word) {

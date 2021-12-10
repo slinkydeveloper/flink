@@ -34,11 +34,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GlueSchemaRegistryAvroSerializationSchema}. */
 public class GlueSchemaRegistryAvroSerializationSchemaTest extends TestLogger {
@@ -87,26 +83,26 @@ public class GlueSchemaRegistryAvroSerializationSchemaTest extends TestLogger {
     @Test
     public void testForGeneric_withValidParams_succeeds() {
         assertThat(
-                GlueSchemaRegistryAvroSerializationSchema.forGeneric(
-                        userSchema, testTopic, configs),
-                notNullValue());
+                        GlueSchemaRegistryAvroSerializationSchema.forGeneric(
+                                userSchema, testTopic, configs))
+                .isNotNull();
         assertThat(
-                GlueSchemaRegistryAvroSerializationSchema.forGeneric(
-                        userSchema, testTopic, configs),
-                instanceOf(GlueSchemaRegistryAvroSerializationSchema.class));
+                        GlueSchemaRegistryAvroSerializationSchema.forGeneric(
+                                userSchema, testTopic, configs))
+                .isInstanceOf(GlueSchemaRegistryAvroSerializationSchema.class);
     }
 
     /** Test whether forSpecific method works. */
     @Test
     public void testForSpecific_withValidParams_succeeds() {
         assertThat(
-                GlueSchemaRegistryAvroSerializationSchema.forSpecific(
-                        User.class, testTopic, configs),
-                notNullValue());
+                        GlueSchemaRegistryAvroSerializationSchema.forSpecific(
+                                User.class, testTopic, configs))
+                .isNotNull();
         assertThat(
-                GlueSchemaRegistryAvroSerializationSchema.forSpecific(
-                        User.class, testTopic, configs),
-                instanceOf(GlueSchemaRegistryAvroSerializationSchema.class));
+                        GlueSchemaRegistryAvroSerializationSchema.forSpecific(
+                                User.class, testTopic, configs))
+                .isInstanceOf(GlueSchemaRegistryAvroSerializationSchema.class);
     }
 
     /** Test whether serialize method when compression is not enabled works. */
@@ -127,7 +123,7 @@ public class GlueSchemaRegistryAvroSerializationSchemaTest extends TestLogger {
 
         byte[] serializedData =
                 glueSchemaRegistryAvroSerializationSchema.serialize(userDefinedPojo);
-        assertThat(serializedData, equalTo(specificBytes));
+        assertThat(serializedData).isEqualTo(specificBytes);
     }
 
     /** Test whether serialize method when compression is enabled works. */
@@ -148,7 +144,7 @@ public class GlueSchemaRegistryAvroSerializationSchemaTest extends TestLogger {
 
         byte[] serializedData =
                 glueSchemaRegistryAvroSerializationSchema.serialize(userDefinedPojo);
-        assertThat(serializedData, equalTo(specificBytes));
+        assertThat(serializedData).isEqualTo(specificBytes);
     }
 
     /** Test whether serialize method returns null when input object is null. */
@@ -157,7 +153,7 @@ public class GlueSchemaRegistryAvroSerializationSchemaTest extends TestLogger {
         GlueSchemaRegistryAvroSerializationSchema glueSchemaRegistryAvroSerializationSchema =
                 GlueSchemaRegistryAvroSerializationSchema.forSpecific(
                         User.class, testTopic, configs);
-        assertThat(glueSchemaRegistryAvroSerializationSchema.serialize(null), nullValue());
+        assertThat(glueSchemaRegistryAvroSerializationSchema.serialize(null)).isNull();
     }
 
     private static class MockGlueSchemaRegistrySerializationFacade

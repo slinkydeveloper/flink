@@ -35,9 +35,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertThat;
 
 /**
  * Tests for the {@link DefaultSlotTracker.SlotStatusStateReconciler}. Tests all state transitions
@@ -69,17 +69,15 @@ public class SlotStatusReconcilerTest extends TestLogger {
                         TASK_EXECUTOR_CONNECTION);
 
         // free -> free
-        assertThat(reconciler.executeStateTransition(slot, null), is(false));
-        assertThat(stateTransitionTracker.stateTransitions, empty());
+        assertThat(reconciler.executeStateTransition(slot, null)).isEqualTo(false);
+        assertThat(stateTransitionTracker.stateTransitions).satisfies(matching(empty()));
 
         // free -> allocated
-        assertThat(reconciler.executeStateTransition(slot, jobId1), is(true));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.PENDING, jobId1)));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId1)));
+        assertThat(reconciler.executeStateTransition(slot, jobId1)).isEqualTo(true);
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.PENDING, jobId1));
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId1));
     }
 
     @Test
@@ -99,14 +97,13 @@ public class SlotStatusReconcilerTest extends TestLogger {
 
         // pending vs. free; should not trigger any transition because we are expecting a slot
         // allocation in the future
-        assertThat(reconciler.executeStateTransition(slot, null), is(false));
-        assertThat(stateTransitionTracker.stateTransitions, empty());
+        assertThat(reconciler.executeStateTransition(slot, null)).isEqualTo(false);
+        assertThat(stateTransitionTracker.stateTransitions).satisfies(matching(empty()));
 
         // pending -> allocated
-        assertThat(reconciler.executeStateTransition(slot, jobId1), is(true));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId1)));
+        assertThat(reconciler.executeStateTransition(slot, jobId1)).isEqualTo(true);
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId1));
     }
 
     @Test
@@ -126,16 +123,13 @@ public class SlotStatusReconcilerTest extends TestLogger {
         slot.startAllocation(jobId1);
 
         // pending(job1) -> free -> pending(job2) -> allocated(job2)
-        assertThat(reconciler.executeStateTransition(slot, jobId2), is(true));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.FREE, jobId1)));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.PENDING, jobId2)));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId2)));
+        assertThat(reconciler.executeStateTransition(slot, jobId2)).isEqualTo(true);
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.FREE, jobId1));
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.PENDING, jobId2));
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId2));
     }
 
     @Test
@@ -155,14 +149,13 @@ public class SlotStatusReconcilerTest extends TestLogger {
         slot.completeAllocation();
 
         // allocated -> allocated
-        assertThat(reconciler.executeStateTransition(slot, jobId1), is(false));
-        assertThat(stateTransitionTracker.stateTransitions, empty());
+        assertThat(reconciler.executeStateTransition(slot, jobId1)).isEqualTo(false);
+        assertThat(stateTransitionTracker.stateTransitions).satisfies(matching(empty()));
 
         // allocated -> free
-        assertThat(reconciler.executeStateTransition(slot, null), is(true));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.FREE, jobId1)));
+        assertThat(reconciler.executeStateTransition(slot, null)).isEqualTo(true);
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.FREE, jobId1));
     }
 
     @Test
@@ -183,16 +176,13 @@ public class SlotStatusReconcilerTest extends TestLogger {
         slot.completeAllocation();
 
         // allocated(job1) -> free -> pending(job2) -> allocated(job2)
-        assertThat(reconciler.executeStateTransition(slot, jobId2), is(true));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.FREE, jobId1)));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.PENDING, jobId2)));
-        assertThat(
-                stateTransitionTracker.stateTransitions.remove(),
-                is(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId2)));
+        assertThat(reconciler.executeStateTransition(slot, jobId2)).isEqualTo(true);
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.FREE, jobId1));
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.PENDING, jobId2));
+        assertThat(stateTransitionTracker.stateTransitions.remove())
+                .isEqualTo(transitionWithTargetStateForJob(SlotState.ALLOCATED, jobId2));
     }
 
     private static class StateTransitionTracker {

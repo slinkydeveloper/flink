@@ -24,7 +24,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the RetryOnFailure annotation. */
 @ExtendWith(RetryExtension.class)
@@ -40,8 +40,8 @@ public class RetryOnFailureExtensionTest {
 
     @AfterAll
     public static void verify() throws Exception {
-        assertEquals(NUMBER_OF_RUNS + 1, numberOfFailedRuns);
-        assertEquals(3, numberOfSuccessfulRuns);
+        assertThat(numberOfFailedRuns).isEqualTo(NUMBER_OF_RUNS + 1);
+        assertThat(numberOfSuccessfulRuns).isEqualTo(3);
     }
 
     @TestTemplate

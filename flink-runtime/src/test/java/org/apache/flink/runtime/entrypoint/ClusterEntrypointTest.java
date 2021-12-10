@@ -65,10 +65,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests for the {@link ClusterEntrypoint}. */
@@ -115,11 +113,10 @@ public class ClusterEntrypointTest extends TestLogger {
                 startClusterEntrypoint(testingEntryPoint);
 
         testingEntryPoint.closeAsync();
-        assertThat(
-                appStatusFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS),
-                is(ApplicationStatus.UNKNOWN));
-        assertThat(closeFuture.isDone(), is(true));
-        assertThat(closeAndCleanupAllDataFuture.isDone(), is(false));
+        assertThat(appStatusFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS))
+                .isEqualTo(ApplicationStatus.UNKNOWN);
+        assertThat(closeFuture.isDone()).isEqualTo(true);
+        assertThat(closeAndCleanupAllDataFuture.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -140,10 +137,9 @@ public class ClusterEntrypointTest extends TestLogger {
                 startClusterEntrypoint(testingEntryPoint);
 
         testingEntryPoint.closeAsync();
-        assertThat(
-                appStatusFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS),
-                is(ApplicationStatus.UNKNOWN));
-        assertThat(deregisterFuture.isDone(), is(false));
+        assertThat(appStatusFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS))
+                .isEqualTo(ApplicationStatus.UNKNOWN);
+        assertThat(deregisterFuture.isDone()).isEqualTo(false);
     }
 
     @Test
@@ -182,11 +178,10 @@ public class ClusterEntrypointTest extends TestLogger {
         final CompletableFuture<ApplicationStatus> appStatusFuture =
                 startClusterEntrypoint(testingEntryPoint);
 
-        assertThat(
-                appStatusFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS),
-                is(ApplicationStatus.SUCCEEDED));
-        assertThat(deregisterFuture.isDone(), is(true));
-        assertThat(closeAndCleanupAllDataFuture.isDone(), is(true));
+        assertThat(appStatusFuture.get(TIMEOUT_MS, TimeUnit.MILLISECONDS))
+                .isEqualTo(ApplicationStatus.SUCCEEDED);
+        assertThat(deregisterFuture.isDone()).isEqualTo(true);
+        assertThat(closeAndCleanupAllDataFuture.isDone()).isEqualTo(true);
     }
 
     @Test
@@ -203,7 +198,7 @@ public class ClusterEntrypointTest extends TestLogger {
         boolean success = false;
         try {
             final long pid = clusterEntrypointProcess.getProcessId();
-            assertTrue("Cannot determine process ID", pid != -1);
+            assertThat(pid != -1).as("Cannot determine process ID").isTrue();
 
             // wait for the marker file to appear, which means the process is up properly
             TestJvmProcess.waitForMarkerFile(markerFile, 30000);
@@ -212,14 +207,12 @@ public class ClusterEntrypointTest extends TestLogger {
 
             final boolean exited =
                     clusterEntrypointProcess.waitFor(TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            assertThat(
-                    String.format("Process %s does not exit within %s ms", pid, TIMEOUT_MS),
-                    exited,
-                    is(true));
-            assertThat(
-                    "markerFile should be deleted in closeAsync shutdownHook",
-                    markerFile.exists(),
-                    is(false));
+            assertThat(exited)
+                    .as(String.format("Process %s does not exit within %s ms", pid, TIMEOUT_MS))
+                    .isEqualTo(true);
+            assertThat(markerFile.exists())
+                    .as("markerFile should be deleted in closeAsync shutdownHook")
+                    .isEqualTo(false);
             success = true;
         } finally {
             if (!success) {

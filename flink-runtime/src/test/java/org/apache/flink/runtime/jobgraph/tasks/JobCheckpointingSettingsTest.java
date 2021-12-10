@@ -25,9 +25,7 @@ import org.apache.flink.util.SerializedValue;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JobCheckpointingSettingsTest {
 
@@ -49,14 +47,14 @@ public class JobCheckpointingSettingsTest {
                         new SerializedValue<>(new MemoryStateBackend()));
 
         JobCheckpointingSettings copy = CommonTestUtils.createCopySerializable(settings);
-        assertEquals(
-                settings.getCheckpointCoordinatorConfiguration(),
-                copy.getCheckpointCoordinatorConfiguration());
-        assertNotNull(copy.getDefaultStateBackend());
-        assertTrue(
-                copy.getDefaultStateBackend()
-                                .deserializeValue(this.getClass().getClassLoader())
-                                .getClass()
-                        == MemoryStateBackend.class);
+        assertThat(copy.getCheckpointCoordinatorConfiguration())
+                .isEqualTo(settings.getCheckpointCoordinatorConfiguration());
+        assertThat(copy.getDefaultStateBackend()).isNotNull();
+        assertThat(
+                        copy.getDefaultStateBackend()
+                                        .deserializeValue(this.getClass().getClassLoader())
+                                        .getClass()
+                                == MemoryStateBackend.class)
+                .isTrue();
     }
 }

@@ -48,7 +48,7 @@ import java.util.Map;
 import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.BLOCKING;
 import static org.apache.flink.runtime.io.network.partition.ResultPartitionType.PIPELINED_BOUNDED;
 import static org.apache.flink.runtime.util.NettyShuffleDescriptorBuilder.createRemoteWithIdAndLocation;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link NettyShuffleUtils}. */
 public class NettyShuffleUtilsTest extends TestLogger {
@@ -120,7 +120,7 @@ public class NettyShuffleUtilsTest extends TestLogger {
                         + calculateBuffersConsumption(resultPartition1)
                         + calculateBuffersConsumption(resultPartition2)
                         + calculateBuffersConsumption(resultPartition3);
-        assertEquals(expected, numTotalBuffers);
+        assertThat(numTotalBuffers).isEqualTo(expected);
 
         inputGate1.close();
         inputGate2.close();

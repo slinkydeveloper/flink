@@ -27,12 +27,13 @@ import org.apache.flink.state.api.runtime.OperatorIDGenerator;
 import org.apache.flink.state.api.runtime.SavepointLoader;
 import org.apache.flink.streaming.util.MockStreamingRuntimeContext;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.util.Collections;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for writing output savepoint metadata. */
 public class SavepointOutputFormatTest {
@@ -60,20 +61,17 @@ public class SavepointOutputFormatTest {
 
         CheckpointMetadata metadataOnDisk = SavepointLoader.loadSavepointMetadata(path.getPath());
 
-        Assert.assertEquals(
-                "Incorrect checkpoint id",
-                metadata.getCheckpointId(),
-                metadataOnDisk.getCheckpointId());
+        assertThat(metadataOnDisk.getCheckpointId())
+                .as("Incorrect checkpoint id")
+                .isEqualTo(metadata.getCheckpointId());
 
-        Assert.assertEquals(
-                "Incorrect number of operator states in savepoint",
-                metadata.getOperatorStates().size(),
-                metadataOnDisk.getOperatorStates().size());
+        assertThat(metadataOnDisk.getOperatorStates().size())
+                .as("Incorrect number of operator states in savepoint")
+                .isEqualTo(metadata.getOperatorStates().size());
 
-        Assert.assertEquals(
-                "Incorrect operator state in savepoint",
-                metadata.getOperatorStates().iterator().next(),
-                metadataOnDisk.getOperatorStates().iterator().next());
+        assertThat(metadataOnDisk.getOperatorStates().iterator().next())
+                .as("Incorrect operator state in savepoint")
+                .isEqualTo(metadata.getOperatorStates().iterator().next());
     }
 
     private CheckpointMetadata createSavepoint() {

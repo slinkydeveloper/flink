@@ -39,7 +39,7 @@ import java.io.File;
 import java.util.Random;
 import java.util.UUID;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for data sinks. */
 @SuppressWarnings("serial")
@@ -354,7 +354,7 @@ public class DataSinkITCase extends MultipleProgramsTestBase {
             long cmp = Long.MIN_VALUE;
             while (br.ready()) {
                 long cur = Long.parseLong(br.readLine());
-                assertTrue("Invalid order of sorted output", cmp <= cur);
+                assertThat(cmp <= cur).as("Invalid order of sorted output").isTrue();
                 cmp = cur;
             }
             br.close();

@@ -20,7 +20,7 @@ package org.apache.flink.runtime.checkpoint;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RestoredCheckpointStatsTest {
 
@@ -38,9 +38,9 @@ public class RestoredCheckpointStatsTest {
         RestoredCheckpointStats restored =
                 new RestoredCheckpointStats(checkpointId, props, restoreTimestamp, externalPath);
 
-        assertEquals(checkpointId, restored.getCheckpointId());
-        assertEquals(props, restored.getProperties());
-        assertEquals(restoreTimestamp, restored.getRestoreTimestamp());
-        assertEquals(externalPath, restored.getExternalPath());
+        assertThat(restored.getCheckpointId()).isEqualTo(checkpointId);
+        assertThat(restored.getProperties()).isEqualTo(props);
+        assertThat(restored.getRestoreTimestamp()).isEqualTo(restoreTimestamp);
+        assertThat(restored.getExternalPath()).isEqualTo(externalPath);
     }
 }

@@ -27,8 +27,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link AbstractPartitionTracker}. */
 public class AbstractPartitionTrackerTest extends TestLogger {
@@ -40,28 +39,25 @@ public class AbstractPartitionTrackerTest extends TestLogger {
         final ResourceID executorWithTrackedPartition = new ResourceID("tracked");
         final ResourceID executorWithoutTrackedPartition = new ResourceID("untracked");
 
-        assertThat(
-                partitionTracker.isTrackingPartitionsFor(executorWithTrackedPartition), is(false));
-        assertThat(
-                partitionTracker.isTrackingPartitionsFor(executorWithoutTrackedPartition),
-                is(false));
+        assertThat(partitionTracker.isTrackingPartitionsFor(executorWithTrackedPartition))
+                .isEqualTo(false);
+        assertThat(partitionTracker.isTrackingPartitionsFor(executorWithoutTrackedPartition))
+                .isEqualTo(false);
 
         partitionTracker.startTrackingPartition(
                 executorWithTrackedPartition, new ResultPartitionID());
 
-        assertThat(
-                partitionTracker.isTrackingPartitionsFor(executorWithTrackedPartition), is(true));
-        assertThat(
-                partitionTracker.isTrackingPartitionsFor(executorWithoutTrackedPartition),
-                is(false));
+        assertThat(partitionTracker.isTrackingPartitionsFor(executorWithTrackedPartition))
+                .isEqualTo(true);
+        assertThat(partitionTracker.isTrackingPartitionsFor(executorWithoutTrackedPartition))
+                .isEqualTo(false);
 
         partitionTracker.stopTrackingPartitionsFor(executorWithTrackedPartition);
 
-        assertThat(
-                partitionTracker.isTrackingPartitionsFor(executorWithTrackedPartition), is(false));
-        assertThat(
-                partitionTracker.isTrackingPartitionsFor(executorWithoutTrackedPartition),
-                is(false));
+        assertThat(partitionTracker.isTrackingPartitionsFor(executorWithTrackedPartition))
+                .isEqualTo(false);
+        assertThat(partitionTracker.isTrackingPartitionsFor(executorWithoutTrackedPartition))
+                .isEqualTo(false);
     }
 
     public static ResultPartitionDeploymentDescriptor createResultPartitionDeploymentDescriptor(

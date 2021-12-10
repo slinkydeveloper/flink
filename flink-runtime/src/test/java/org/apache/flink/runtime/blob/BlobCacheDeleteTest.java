@@ -51,9 +51,7 @@ import static org.apache.flink.runtime.blob.BlobServerDeleteTest.delete;
 import static org.apache.flink.runtime.blob.BlobServerGetTest.verifyDeleted;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.verifyContents;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 /** Tests how DELETE requests behave. */
@@ -118,23 +116,23 @@ public class BlobCacheDeleteTest extends TestLogger {
 
             // put first BLOB
             TransientBlobKey key1 = (TransientBlobKey) put(server, jobId1, data, TRANSIENT_BLOB);
-            assertNotNull(key1);
+            assertThat(key1).isNotNull();
 
             // put two more BLOBs (same key, other key) for another job ID
             TransientBlobKey key2a = (TransientBlobKey) put(server, jobId2, data, TRANSIENT_BLOB);
-            assertNotNull(key2a);
+            assertThat(key2a).isNotNull();
             BlobKeyTest.verifyKeyDifferentHashEquals(key1, key2a);
             TransientBlobKey key2b = (TransientBlobKey) put(server, jobId2, data2, TRANSIENT_BLOB);
-            assertNotNull(key2b);
+            assertThat(key2b).isNotNull();
             BlobKeyTest.verifyKeyDifferentHashDifferent(key1, key2b);
 
             // issue a DELETE request
-            assertTrue(delete(cache, jobId1, key1));
+            assertThat(delete(cache, jobId1, key1)).isTrue();
 
             // delete only works on local cache!
-            assertTrue(server.getStorageLocation(jobId1, key1).exists());
+            assertThat(server.getStorageLocation(jobId1, key1).exists()).isTrue();
             // delete on server so that the cache cannot re-download
-            assertTrue(server.deleteInternal(jobId1, key1));
+            assertThat(server.deleteInternal(jobId1, key1)).isTrue();
             verifyDeleted(cache, jobId1, key1);
             // deleting one BLOB should not affect another BLOB with a different key
             // (and keys are always different now)
@@ -142,20 +140,20 @@ public class BlobCacheDeleteTest extends TestLogger {
             verifyContents(server, jobId2, key2b, data2);
 
             // delete first file of second job
-            assertTrue(delete(cache, jobId2, key2a));
+            assertThat(delete(cache, jobId2, key2a)).isTrue();
             // delete only works on local cache
-            assertTrue(server.getStorageLocation(jobId2, key2a).exists());
+            assertThat(server.getStorageLocation(jobId2, key2a).exists()).isTrue();
             // delete on server so that the cache cannot re-download
-            assertTrue(server.deleteInternal(jobId2, key2a));
+            assertThat(server.deleteInternal(jobId2, key2a)).isTrue();
             verifyDeleted(cache, jobId2, key2a);
             verifyContents(server, jobId2, key2b, data2);
 
             // delete second file of second job
-            assertTrue(delete(cache, jobId2, key2b));
+            assertThat(delete(cache, jobId2, key2b)).isTrue();
             // delete only works on local cache
-            assertTrue(server.getStorageLocation(jobId2, key2b).exists());
+            assertThat(server.getStorageLocation(jobId2, key2b).exists()).isTrue();
             // delete on server so that the cache cannot re-download
-            assertTrue(server.deleteInternal(jobId2, key2b));
+            assertThat(server.deleteInternal(jobId2, key2b)).isTrue();
             verifyDeleted(cache, jobId2, key2b);
         }
     }
@@ -196,17 +194,17 @@ public class BlobCacheDeleteTest extends TestLogger {
 
             // put BLOB
             TransientBlobKey key = (TransientBlobKey) put(server, jobId, data, TRANSIENT_BLOB);
-            assertNotNull(key);
+            assertThat(key).isNotNull();
 
             File blobFile = server.getStorageLocation(jobId, key);
-            assertTrue(blobFile.delete());
+            assertThat(blobFile.delete()).isTrue();
 
             // DELETE operation should not fail if file is already deleted
-            assertTrue(delete(cache, jobId, key));
+            assertThat(delete(cache, jobId, key)).isTrue();
             verifyDeleted(cache, jobId, key);
 
             // one more delete call that should not fail
-            assertTrue(delete(cache, jobId, key));
+            assertThat(delete(cache, jobId, key)).isTrue();
             verifyDeleted(cache, jobId, key);
         }
     }
@@ -253,7 +251,7 @@ public class BlobCacheDeleteTest extends TestLogger {
 
                 // put BLOB
                 TransientBlobKey key = (TransientBlobKey) put(server, jobId, data, TRANSIENT_BLOB);
-                assertNotNull(key);
+                assertThat(key).isNotNull();
 
                 // access from cache once to have it available there
                 verifyContents(cache, jobId, key, data);
@@ -261,11 +259,11 @@ public class BlobCacheDeleteTest extends TestLogger {
                 blobFile = cache.getTransientBlobService().getStorageLocation(jobId, key);
                 directory = blobFile.getParentFile();
 
-                assertTrue(blobFile.setWritable(false, false));
-                assertTrue(directory.setWritable(false, false));
+                assertThat(blobFile.setWritable(false, false)).isTrue();
+                assertThat(directory.setWritable(false, false)).isTrue();
 
                 // issue a DELETE request
-                assertFalse(delete(cache, jobId, key));
+                assertThat(delete(cache, jobId, key)).isFalse();
 
                 // the file should still be there on the cache
                 verifyContents(cache, jobId, key, data);
@@ -332,21 +330,24 @@ public class BlobCacheDeleteTest extends TestLogger {
             final TransientBlobKey blobKey =
                     (TransientBlobKey) put(server, jobId, data, TRANSIENT_BLOB);
 
-            assertTrue(server.getStorageLocation(jobId, blobKey).exists());
+            assertThat(server.getStorageLocation(jobId, blobKey).exists()).isTrue();
 
             for (int i = 0; i < concurrentDeleteOperations; i++) {
                 CompletableFuture<Void> deleteFuture =
                         CompletableFuture.supplyAsync(
                                 () -> {
                                     try {
-                                        assertTrue(delete(cache, jobId, blobKey));
-                                        assertFalse(
-                                                cache.getTransientBlobService()
-                                                        .getStorageLocation(jobId, blobKey)
-                                                        .exists());
+                                        assertThat(delete(cache, jobId, blobKey)).isTrue();
+                                        assertThat(
+                                                        cache.getTransientBlobService()
+                                                                .getStorageLocation(jobId, blobKey)
+                                                                .exists())
+                                                .isFalse();
                                         // delete only works on local cache!
-                                        assertTrue(
-                                                server.getStorageLocation(jobId, blobKey).exists());
+                                        assertThat(
+                                                        server.getStorageLocation(jobId, blobKey)
+                                                                .exists())
+                                                .isTrue();
                                         return null;
                                     } catch (IOException e) {
                                         throw new CompletionException(
@@ -365,7 +366,7 @@ public class BlobCacheDeleteTest extends TestLogger {
             waitFuture.get();
 
             // delete only works on local cache!
-            assertTrue(server.getStorageLocation(jobId, blobKey).exists());
+            assertThat(server.getStorageLocation(jobId, blobKey).exists()).isTrue();
 
         } finally {
             executor.shutdownNow();

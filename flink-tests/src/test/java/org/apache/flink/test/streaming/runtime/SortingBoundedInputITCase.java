@@ -64,7 +64,6 @@ import org.apache.flink.util.Collector;
 import org.apache.flink.util.OutputTag;
 import org.apache.flink.util.SplittableIterator;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -77,10 +76,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.Matchers.greaterThanOrEqualTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** An end to end test for sorted inputs for a keyed operator with bounded inputs. */
 public class SortingBoundedInputITCase extends AbstractTestBase {
@@ -113,7 +110,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                         .mapToLong(l -> l)
                         .sum();
 
-        assertThat(sum, equalTo(numberOfRecords));
+        assertThat(sum).isEqualTo(numberOfRecords);
     }
 
     @Test
@@ -152,7 +149,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                         .mapToLong(l -> l)
                         .sum();
 
-        assertThat(sum, equalTo(numberOfRecords * 2));
+        assertThat(sum).isEqualTo(numberOfRecords * 2);
     }
 
     @Test
@@ -207,7 +204,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                         .mapToLong(l -> l)
                         .sum();
 
-        assertThat(sum, equalTo(numberOfRecords * 3));
+        assertThat(sum).isEqualTo(numberOfRecords * 3);
     }
 
     @Test
@@ -249,6 +246,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                         Integer, Integer, Tuple3<Long, Integer, Integer>>() {
 
                                     private MapState<Long, Integer> countState;
+
                                     private ValueState<Long> previousTimestampState;
 
                                     @Override
@@ -277,11 +275,9 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                             Context ctx,
                                             Collector<Tuple3<Long, Integer, Integer>> out)
                                             throws Exception {
-
                                         Long elementTimestamp = ctx.timestamp();
                                         long nextTen = ((elementTimestamp + 10) / 10) * 10;
                                         ctx.timerService().registerEventTimeTimer(nextTen);
-
                                         if (elementTimestamp
                                                 < ctx.timerService().currentWatermark()) {
                                             ctx.output(lateElements, value);
@@ -290,11 +286,9 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                                     Optional.ofNullable(
                                                                     previousTimestampState.value())
                                                             .orElse(0L);
-                                            assertThat(
-                                                    elementTimestamp,
-                                                    greaterThanOrEqualTo(previousTimestamp));
+                                            assertThat(elementTimestamp)
+                                                    .isGreaterThanOrEqualTo(previousTimestamp);
                                             previousTimestampState.update(elementTimestamp);
-
                                             Integer currentCount =
                                                     Optional.ofNullable(countState.get(nextTen))
                                                             .orElse(0);
@@ -314,7 +308,6 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                                         ctx.getCurrentKey(),
                                                         countState.get(timestamp)));
                                         countState.remove(timestamp);
-
                                         // this would go in infinite loop if we did not quiesce the
                                         // timer service.
                                         ctx.timerService().registerEventTimeTimer(timestamp + 1);
@@ -327,15 +320,14 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
         List<Tuple3<Long, Integer, Integer>> sumsCollected =
                 CollectionUtil.iteratorToList(DataStreamUtils.collect(sums));
 
-        assertTrue(lateRecordsCollected.isEmpty());
-        assertThat(
-                sumsCollected,
-                equalTo(
+        assertThat(lateRecordsCollected.isEmpty()).isTrue();
+        assertThat(sumsCollected)
+                .isEqualTo(
                         Arrays.asList(
                                 Tuple3.of(10L, 1, 4),
                                 Tuple3.of(20L, 1, 3),
                                 Tuple3.of(10L, 2, 2),
-                                Tuple3.of(20L, 2, 1))));
+                                Tuple3.of(20L, 2, 1)));
     }
 
     @Test
@@ -400,6 +392,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                         Tuple3<Long, Integer, Integer>>() {
 
                                     private MapState<Long, Integer> countState;
+
                                     private ValueState<Long> previousTimestampState;
 
                                     @Override
@@ -453,11 +446,9 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                                     Optional.ofNullable(
                                                                     previousTimestampState.value())
                                                             .orElse(0L);
-                                            assertThat(
-                                                    elementTimestamp,
-                                                    greaterThanOrEqualTo(previousTimestamp));
+                                            assertThat(elementTimestamp)
+                                                    .isGreaterThanOrEqualTo(previousTimestamp);
                                             previousTimestampState.update(elementTimestamp);
-
                                             Integer currentCount =
                                                     Optional.ofNullable(countState.get(nextTen))
                                                             .orElse(0);
@@ -477,7 +468,6 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
                                                         ctx.getCurrentKey(),
                                                         countState.get(timestamp)));
                                         countState.remove(timestamp);
-
                                         // this would go in infinite loop if we did not quiesce the
                                         // timer service.
                                         ctx.timerService().registerEventTimeTimer(timestamp + 1);
@@ -490,15 +480,14 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
         List<Tuple3<Long, Integer, Integer>> sumsCollected =
                 CollectionUtil.iteratorToList(DataStreamUtils.collect(sums));
 
-        assertTrue(lateRecordsCollected.isEmpty());
-        assertThat(
-                sumsCollected,
-                equalTo(
+        assertThat(lateRecordsCollected.isEmpty()).isTrue();
+        assertThat(sumsCollected)
+                .isEqualTo(
                         Arrays.asList(
                                 Tuple3.of(10L, 1, 8),
                                 Tuple3.of(20L, 1, 6),
                                 Tuple3.of(10L, 2, 4),
-                                Tuple3.of(20L, 2, 2))));
+                                Tuple3.of(20L, 2, 2)));
     }
 
     private static final WatermarkGenerator<Tuple2<Integer, Integer>>
@@ -532,7 +521,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
             Integer incomingKey = element.getValue().f0;
             if (!Objects.equals(incomingKey, currentKey)) {
                 if (!seenKeys.add(incomingKey)) {
-                    Assert.fail("Received an out of order key: " + incomingKey);
+                    fail("Received an out of order key: " + incomingKey);
                 }
                 this.currentKey = incomingKey;
             }
@@ -569,7 +558,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
             Integer incomingKey = element.getValue().f0;
             if (!Objects.equals(incomingKey, currentKey)) {
                 if (!seenKeys.add(incomingKey)) {
-                    Assert.fail("Received an out of order key: " + incomingKey);
+                    fail("Received an out of order key: " + incomingKey);
                 }
                 this.currentKey = incomingKey;
             }
@@ -603,7 +592,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
         public AssertingThreeInputOperator(
                 StreamOperatorParameters<Long> parameters, int numberOfInputs) {
             super(parameters, 3);
-            assert numberOfInputs == 3;
+            assertThat(numberOfInputs).isEqualTo(3);
         }
 
         private void processElement(Tuple2<Integer, byte[]> element) {
@@ -611,7 +600,7 @@ public class SortingBoundedInputITCase extends AbstractTestBase {
             Integer incomingKey = element.f0;
             if (!Objects.equals(incomingKey, currentKey)) {
                 if (!seenKeys.add(incomingKey)) {
-                    Assert.fail("Received an out of order key: " + incomingKey);
+                    fail("Received an out of order key: " + incomingKey);
                 }
                 this.currentKey = incomingKey;
             }

@@ -40,8 +40,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the recovery of task failures. */
 public class JobRecoveryITCase extends TestLogger {
@@ -76,7 +75,7 @@ public class JobRecoveryITCase extends TestLogger {
         final CompletableFuture<JobResult> jobResultFuture =
                 miniCluster.requestJobResult(jobGraph.getJobID());
 
-        assertThat(jobResultFuture.get().isSuccess(), is(true));
+        assertThat(jobResultFuture.get().isSuccess()).isEqualTo(true);
     }
 
     private JobGraph createjobGraph(boolean slotSharingEnabled) throws IOException {

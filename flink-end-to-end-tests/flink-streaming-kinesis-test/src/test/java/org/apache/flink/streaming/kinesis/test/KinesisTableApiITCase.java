@@ -55,7 +55,8 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** End-to-end test for Kinesis Table API using Kinesalite. */
 @Category(value = {TravisGroup1.class})
@@ -127,7 +128,8 @@ public class KinesisTableApiITCase extends TestLogger {
 
         // result order is not guaranteed
         List<Order> result = readAllOrdersFromKinesis(kinesisClient);
-        assertThat(result, Matchers.containsInAnyOrder(expected.toArray(new Order[0])));
+        assertThat(result)
+                .satisfies(matching(Matchers.containsInAnyOrder(expected.toArray(new Order[0]))));
     }
 
     private List<Order> readAllOrdersFromKinesis(final KinesisPubsubClient client)

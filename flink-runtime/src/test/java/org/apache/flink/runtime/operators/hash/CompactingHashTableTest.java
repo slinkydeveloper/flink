@@ -39,7 +39,8 @@ import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class CompactingHashTableTest extends MutableHashTableTestBase {
 
@@ -119,14 +120,14 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
                 MutableObjectIterator<Tuple2<Long, String>> iter = table.getEntryIterator();
                 Tuple2<Long, String> next;
                 while ((next = iter.next()) != null) {
-                    assertNotNull(next.f0);
-                    assertNotNull(next.f1);
-                    assertEquals(next.f0.longValue(), Long.parseLong(next.f1));
+                    assertThat(next.f0).isNotNull();
+                    assertThat(next.f1).isNotNull();
+                    assertThat(Long.parseLong(next.f1)).isEqualTo(next.f0.longValue());
 
                     bitSet.set(next.f0.intValue());
                 }
 
-                assertEquals(numElements, bitSet.cardinality());
+                assertThat(bitSet.cardinality()).isEqualTo(numElements);
             }
 
             // make sure all entries are contained via the prober
@@ -135,8 +136,8 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
                         table.getProber(probeComparator, pairComparator);
 
                 for (long i = 0; i < numElements; i++) {
-                    assertNotNull(proper.getMatchFor(i));
-                    assertNull(proper.getMatchFor(i + numElements));
+                    assertThat(proper.getMatchFor(i)).isNotNull();
+                    assertThat(proper.getMatchFor(i + numElements)).isNull();
                 }
             }
         } catch (Exception e) {
@@ -178,14 +179,14 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
                 MutableObjectIterator<Tuple2<Long, String>> iter = table.getEntryIterator();
                 Tuple2<Long, String> next;
                 while ((next = iter.next()) != null) {
-                    assertNotNull(next.f0);
-                    assertNotNull(next.f1);
-                    assertEquals(next.f0.longValue(), Long.parseLong(next.f1));
+                    assertThat(next.f0).isNotNull();
+                    assertThat(next.f1).isNotNull();
+                    assertThat(Long.parseLong(next.f1)).isEqualTo(next.f0.longValue());
 
                     bitSet.set(next.f0.intValue());
                 }
 
-                assertEquals(numElements, bitSet.cardinality());
+                assertThat(bitSet.cardinality()).isEqualTo(numElements);
             }
 
             // make sure all entries are contained via the prober
@@ -194,8 +195,8 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
                         table.getProber(probeComparator, pairComparator);
 
                 for (long i = 0; i < numElements; i++) {
-                    assertNotNull(proper.getMatchFor(i));
-                    assertNull(proper.getMatchFor(i + numElements));
+                    assertThat(proper.getMatchFor(i)).isNotNull();
+                    assertThat(proper.getMatchFor(i + numElements)).isNull();
                 }
             }
 
@@ -251,8 +252,9 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
                             new SameTypePairComparator<>(tuple2LongStringComparator));
             Tuple2<Long, String> reuse = new Tuple2<>();
             for (long i = 0; i < numElements; i++) {
-                assertNotNull(prober.getMatchFor(Tuple2.of(i, longString), reuse));
-                assertNotNull(prober.getMatchFor(Tuple2.of(i + numElements, longString), reuse));
+                assertThat(prober.getMatchFor(Tuple2.of(i, longString), reuse)).isNotNull();
+                assertThat(prober.getMatchFor(Tuple2.of(i + numElements, longString), reuse))
+                        .isNotNull();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,25 +285,26 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
             IntPair target = new IntPair();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(ADDITIONAL_MEM));
             Boolean b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(
-                        pairs[i].getKey() + " " + pairs[i].getValue(),
-                        prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target))
+                        .as(pairs[i].getKey() + " " + pairs[i].getValue())
+                        .isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             table.close();
-            assertEquals(
-                    "Memory lost", NUM_MEM_PAGES + ADDITIONAL_MEM, table.getFreeMemory().size());
+            assertThat(table.getFreeMemory().size())
+                    .as("Memory lost")
+                    .isEqualTo(NUM_MEM_PAGES + ADDITIONAL_MEM);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());
@@ -331,39 +334,38 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
             IntPair target = new IntPair();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(ADDITIONAL_MEM));
             Boolean b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(
-                        pairs[i].getKey() + " " + pairs[i].getValue(),
-                        prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target))
+                        .as(pairs[i].getKey() + " " + pairs[i].getValue())
+                        .isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(ADDITIONAL_MEM));
             b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(
-                        pairs[i].getKey() + " " + pairs[i].getValue(),
-                        prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target))
+                        .as(pairs[i].getKey() + " " + pairs[i].getValue())
+                        .isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             table.close();
-            assertEquals(
-                    "Memory lost",
-                    NUM_MEM_PAGES + ADDITIONAL_MEM + ADDITIONAL_MEM,
-                    table.getFreeMemory().size());
+            assertThat(table.getFreeMemory().size())
+                    .as("Memory lost")
+                    .isEqualTo(NUM_MEM_PAGES + ADDITIONAL_MEM + ADDITIONAL_MEM);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());
@@ -393,51 +395,50 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
             IntPair target = new IntPair();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(ADDITIONAL_MEM));
             Boolean b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(
-                        pairs[i].getKey() + " " + pairs[i].getValue(),
-                        prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target))
+                        .as(pairs[i].getKey() + " " + pairs[i].getValue())
+                        .isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(ADDITIONAL_MEM));
             b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(
-                        pairs[i].getKey() + " " + pairs[i].getValue(),
-                        prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target))
+                        .as(pairs[i].getKey() + " " + pairs[i].getValue())
+                        .isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(2 * ADDITIONAL_MEM));
             b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_PAIRS; i++) {
-                assertNotNull(
-                        pairs[i].getKey() + " " + pairs[i].getValue(),
-                        prober.getMatchFor(pairs[i], target));
-                assertEquals(pairs[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(pairs[i], target))
+                        .as(pairs[i].getKey() + " " + pairs[i].getValue())
+                        .isNotNull();
+                assertThat(target.getValue()).isEqualTo(pairs[i].getValue());
             }
 
             table.close();
-            assertEquals(
-                    "Memory lost",
-                    NUM_MEM_PAGES + 4 * ADDITIONAL_MEM,
-                    table.getFreeMemory().size());
+            assertThat(table.getFreeMemory().size())
+                    .as("Memory lost")
+                    .isEqualTo(NUM_MEM_PAGES + 4 * ADDITIONAL_MEM);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());
@@ -467,18 +468,18 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
             IntList target = new IntList();
 
             for (int i = 0; i < NUM_LISTS; i++) {
-                assertNotNull(prober.getMatchFor(lists[i], target));
-                assertArrayEquals(lists[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(lists[i].getValue());
             }
 
             // make sure there is enough memory for resize
             memory.addAll(getMemory(ADDITIONAL_MEM));
             Boolean b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_LISTS; i++) {
-                assertNotNull(prober.getMatchFor(lists[i], target));
-                assertArrayEquals(lists[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(lists[i], target)).isNotNull();
+                assertThat(target.getValue()).isEqualTo(lists[i].getValue());
             }
 
             final IntList[] overwriteLists = getRandomizedIntLists(NUM_LISTS, rnd);
@@ -500,18 +501,17 @@ public class CompactingHashTableTest extends MutableHashTableTestBase {
             // make sure there is enough memory for resize
             memory.addAll(getMemory(2 * ADDITIONAL_MEM));
             b = Whitebox.<Boolean>invokeMethod(table, "resizeHashTable");
-            assertTrue(b);
+            assertThat(b).isTrue();
 
             for (int i = 0; i < NUM_LISTS; i++) {
-                assertNotNull("" + i, prober.getMatchFor(overwriteLists[i], target));
-                assertArrayEquals(overwriteLists[i].getValue(), target.getValue());
+                assertThat(prober.getMatchFor(overwriteLists[i], target)).as("" + i).isNotNull();
+                assertThat(target.getValue()).isEqualTo(overwriteLists[i].getValue());
             }
 
             table.close();
-            assertEquals(
-                    "Memory lost",
-                    NUM_MEM_PAGES + 3 * ADDITIONAL_MEM,
-                    table.getFreeMemory().size());
+            assertThat(table.getFreeMemory().size())
+                    .as("Memory lost")
+                    .isEqualTo(NUM_MEM_PAGES + 3 * ADDITIONAL_MEM);
         } catch (Exception e) {
             e.printStackTrace();
             fail("Error: " + e.getMessage());

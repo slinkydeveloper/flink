@@ -48,9 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.instanceOf;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link GlueSchemaRegistryInputStreamDeserializer}. */
 public class GlueSchemaRegistryInputStreamDeserializerTest extends TestLogger {
@@ -96,9 +94,8 @@ public class GlueSchemaRegistryInputStreamDeserializerTest extends TestLogger {
     public void testConstructor_withConfigs_succeeds() {
         GlueSchemaRegistryInputStreamDeserializer glueSchemaRegistryInputStreamDeserializer =
                 new GlueSchemaRegistryInputStreamDeserializer(configs);
-        assertThat(
-                glueSchemaRegistryInputStreamDeserializer,
-                instanceOf(GlueSchemaRegistryInputStreamDeserializer.class));
+        assertThat(glueSchemaRegistryInputStreamDeserializer)
+                .isInstanceOf(GlueSchemaRegistryInputStreamDeserializer.class);
     }
 
     /** Test whether constructor works with AWS de-serializer input. */
@@ -107,9 +104,8 @@ public class GlueSchemaRegistryInputStreamDeserializerTest extends TestLogger {
         GlueSchemaRegistryInputStreamDeserializer glueSchemaRegistryInputStreamDeserializer =
                 new GlueSchemaRegistryInputStreamDeserializer(
                         glueSchemaRegistryDeserializationFacade);
-        assertThat(
-                glueSchemaRegistryInputStreamDeserializer,
-                instanceOf(GlueSchemaRegistryInputStreamDeserializer.class));
+        assertThat(glueSchemaRegistryInputStreamDeserializer)
+                .isInstanceOf(GlueSchemaRegistryInputStreamDeserializer.class);
     }
 
     /** Test whether getSchemaAndDeserializedStream method when compression is not enabled works. */
@@ -149,7 +145,7 @@ public class GlueSchemaRegistryInputStreamDeserializerTest extends TestLogger {
                 glueSchemaRegistryInputStreamDeserializer.getSchemaAndDeserializedStream(
                         mutableByteArrayInputStream);
 
-        assertThat(resultSchema.toString(), equalTo(glueSchema.getSchemaDefinition()));
+        assertThat(resultSchema.toString()).isEqualTo(glueSchema.getSchemaDefinition());
     }
 
     /** Test whether getSchemaAndDeserializedStream method when compression is enabled works. */
@@ -188,7 +184,7 @@ public class GlueSchemaRegistryInputStreamDeserializerTest extends TestLogger {
                 glueSchemaRegistryInputStreamDeserializer.getSchemaAndDeserializedStream(
                         mutableByteArrayInputStream);
 
-        assertThat(resultSchema.toString(), equalTo(glueSchema.getSchemaDefinition()));
+        assertThat(resultSchema.toString()).isEqualTo(glueSchema.getSchemaDefinition());
     }
 
     /** Test whether getSchemaAndDeserializedStream method throws exception with invalid schema. */

@@ -51,12 +51,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.Collections.emptyList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -100,12 +96,12 @@ public class CheckpointCoordinatorFailureTest extends TestLogger {
 
         manuallyTriggeredScheduledExecutor.triggerAll();
 
-        assertEquals(1, coord.getNumberOfPendingCheckpoints());
+        assertThat(coord.getNumberOfPendingCheckpoints()).isEqualTo(1);
 
         PendingCheckpoint pendingCheckpoint =
                 coord.getPendingCheckpoints().values().iterator().next();
 
-        assertFalse(pendingCheckpoint.isDisposed());
+        assertThat(pendingCheckpoint.isDisposed()).isFalse();
 
         final long checkpointId = coord.getPendingCheckpoints().keySet().iterator().next();
 
@@ -163,7 +159,7 @@ public class CheckpointCoordinatorFailureTest extends TestLogger {
         }
 
         // make sure that the pending checkpoint has been discarded after we could not complete it
-        assertTrue(pendingCheckpoint.isDisposed());
+        assertThat(pendingCheckpoint.isDisposed()).isTrue();
 
         // make sure that the subtask state has been discarded after we could not complete it.
         verify(operatorSubtaskState).discardState();
@@ -241,12 +237,11 @@ public class CheckpointCoordinatorFailureTest extends TestLogger {
                     "unknown location");
             fail("CheckpointException should have been thrown.");
         } catch (CheckpointException e) {
-            assertThat(
-                    e.getCheckpointFailureReason(),
-                    is(CheckpointFailureReason.FINALIZE_CHECKPOINT_FAILURE));
+            assertThat(e.getCheckpointFailureReason())
+                    .isEqualTo(CheckpointFailureReason.FINALIZE_CHECKPOINT_FAILURE);
         }
 
-        assertThat(cleanupCallCount.get(), is(expectedCleanupCalls));
+        assertThat(cleanupCallCount.get()).isEqualTo(expectedCleanupCalls);
     }
 
     private static final class FailingCompletedCheckpointStore

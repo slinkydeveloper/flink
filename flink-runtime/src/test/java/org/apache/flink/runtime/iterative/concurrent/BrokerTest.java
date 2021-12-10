@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link Broker}. */
 public class BrokerTest {
@@ -64,12 +64,12 @@ public class BrokerTest {
             for (Future<StringPair> future : executorService.invokeAll(tasks)) {
                 StringPair stringPair = future.get();
                 if (stringPair != null) {
-                    assertEquals("value" + stringPair.getFirst(), stringPair.getSecond());
+                    assertThat(stringPair.getSecond()).isEqualTo("value" + stringPair.getFirst());
                     numSuccessfulHandovers++;
                 }
             }
 
-            assertEquals(subtasks, numSuccessfulHandovers);
+            assertThat(numSuccessfulHandovers).isEqualTo(subtasks);
         } finally {
             executorService.shutdownNow();
         }

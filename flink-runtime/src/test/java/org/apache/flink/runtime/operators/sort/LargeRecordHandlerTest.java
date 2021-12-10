@@ -40,9 +40,8 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class LargeRecordHandlerTest {
 
@@ -81,11 +80,11 @@ public class LargeRecordHandlerTest {
                             128,
                             owner.getExecutionConfig());
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             handler.close();
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             handler.close();
 
@@ -96,7 +95,7 @@ public class LargeRecordHandlerTest {
                 // expected
             }
 
-            assertTrue(memMan.verifyEmpty());
+            assertThat(memMan.verifyEmpty()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -141,7 +140,7 @@ public class LargeRecordHandlerTest {
                             128,
                             owner.getExecutionConfig());
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             // add the test data
             Random rnd = new Random();
@@ -149,7 +148,7 @@ public class LargeRecordHandlerTest {
             for (int i = 0; i < NUM_RECORDS; i++) {
                 long val = rnd.nextLong();
                 handler.addRecord(new Tuple2<Long, String>(val, String.valueOf(val)));
-                assertTrue(handler.hasData());
+                assertThat(handler.hasData()).isTrue();
             }
 
             MutableObjectIterator<Tuple2<Long, String>> sorted =
@@ -167,18 +166,18 @@ public class LargeRecordHandlerTest {
 
             while ((next = sorted.next(null)) != null) {
                 // key and value must be equal
-                assertTrue(next.f0.equals(Long.parseLong(next.f1)));
+                assertThat(next.f0.equals(Long.parseLong(next.f1))).isTrue();
 
                 // order must be correct
                 if (previous != null) {
-                    assertTrue(previous.f0 <= next.f0);
+                    assertThat(previous.f0 <= next.f0).isTrue();
                 }
                 previous = next;
             }
 
             handler.close();
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             handler.close();
 
@@ -189,7 +188,7 @@ public class LargeRecordHandlerTest {
                 // expected
             }
 
-            assertTrue(memMan.verifyEmpty());
+            assertThat(memMan.verifyEmpty()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
@@ -234,7 +233,7 @@ public class LargeRecordHandlerTest {
                             128,
                             owner.getExecutionConfig());
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             // add the test data
             Random rnd = new Random();
@@ -243,7 +242,7 @@ public class LargeRecordHandlerTest {
                 long val = rnd.nextLong();
                 handler.addRecord(
                         new Tuple3<Long, String, Byte>(val, String.valueOf(val), (byte) val));
-                assertTrue(handler.hasData());
+                assertThat(handler.hasData()).isTrue();
             }
 
             MutableObjectIterator<Tuple3<Long, String, Byte>> sorted =
@@ -261,22 +260,23 @@ public class LargeRecordHandlerTest {
 
             while ((next = sorted.next(null)) != null) {
                 // key and value must be equal
-                assertTrue(next.f0.equals(Long.parseLong(next.f1)));
-                assertTrue(next.f0.byteValue() == next.f2);
+                assertThat(next.f0.equals(Long.parseLong(next.f1))).isTrue();
+                assertThat(next.f0.byteValue() == next.f2).isTrue();
 
                 // order must be correct
                 if (previous != null) {
-                    assertTrue(previous.f2 <= next.f2);
-                    assertTrue(
-                            previous.f2.byteValue() != next.f2.byteValue()
-                                    || previous.f0 <= next.f0);
+                    assertThat(previous.f2 <= next.f2).isTrue();
+                    assertThat(
+                                    previous.f2.byteValue() != next.f2.byteValue()
+                                            || previous.f0 <= next.f0)
+                            .isTrue();
                 }
                 previous = next;
             }
 
             handler.close();
 
-            assertFalse(handler.hasData());
+            assertThat(handler.hasData()).isFalse();
 
             handler.close();
 
@@ -287,7 +287,7 @@ public class LargeRecordHandlerTest {
                 // expected
             }
 
-            assertTrue(memMan.verifyEmpty());
+            assertThat(memMan.verifyEmpty()).isTrue();
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());

@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.facebook.presto.hive.s3.S3ConfigurationUpdater.S3_USE_INSTANCE_CREDENTIALS;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Unit tests for the S3 file system support via Presto's {@link
@@ -74,7 +74,7 @@ public class PrestoS3FileSystemITCase extends AbstractHadoopFileSystemITTest {
 
         // check for uniqueness of the test directory
         // directory must not yet exist
-        assertFalse(fs.exists(basePath));
+        assertThat(fs.exists(basePath)).isFalse();
     }
 
     @Test

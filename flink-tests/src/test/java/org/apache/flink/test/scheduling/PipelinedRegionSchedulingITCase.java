@@ -55,9 +55,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** IT case for pipelined region scheduling. */
 public class PipelinedRegionSchedulingITCase extends TestLogger {
@@ -65,13 +63,13 @@ public class PipelinedRegionSchedulingITCase extends TestLogger {
     @Test
     public void testSuccessWithSlotsNoFewerThanTheMaxRegionRequired() throws Exception {
         final JobResult jobResult = executeSchedulingTest(2);
-        assertThat(jobResult.getSerializedThrowable().isPresent(), is(false));
+        assertThat(jobResult.getSerializedThrowable().isPresent()).isEqualTo(false);
     }
 
     @Test
     public void testFailsOnInsufficientSlots() throws Exception {
         final JobResult jobResult = executeSchedulingTest(1);
-        assertThat(jobResult.getSerializedThrowable().isPresent(), is(true));
+        assertThat(jobResult.getSerializedThrowable().isPresent()).isEqualTo(true);
 
         final Throwable jobFailure =
                 jobResult
@@ -81,9 +79,8 @@ public class PipelinedRegionSchedulingITCase extends TestLogger {
 
         final Optional<NoResourceAvailableException> cause =
                 ExceptionUtils.findThrowable(jobFailure, NoResourceAvailableException.class);
-        assertThat(cause.isPresent(), is(true));
-        assertThat(
-                cause.get().getMessage(), containsString("Slot request bulk is not fulfillable!"));
+        assertThat(cause.isPresent()).isEqualTo(true);
+        assertThat(cause.get().getMessage()).contains("Slot request bulk is not fulfillable!");
     }
 
     @Test(timeout = 120000)
@@ -96,7 +93,7 @@ public class PipelinedRegionSchedulingITCase extends TestLogger {
 
         final JobResult jobResult =
                 executeSchedulingTest(createJobGraphWithThreeStages(2), 2, configuration);
-        assertThat(jobResult.getSerializedThrowable().isPresent(), is(false));
+        assertThat(jobResult.getSerializedThrowable().isPresent()).isEqualTo(false);
     }
 
     private JobResult executeSchedulingTest(int numSlots) throws Exception {

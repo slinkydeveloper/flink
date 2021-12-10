@@ -35,8 +35,8 @@ import org.apache.flink.util.Collector;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Tests for handling missing type information either by calling {@code returns()} or having an
@@ -51,7 +51,7 @@ public class TypeFillTest {
 
         try {
             env.addSource(new TestSource<Integer>()).print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
@@ -59,50 +59,50 @@ public class TypeFillTest {
 
         try {
             source.map(new TestMap<Long, Long>()).print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.flatMap(new TestFlatMap<Long, Long>()).print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.connect(source).map(new TestCoMap<Long, Long, Integer>()).print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.connect(source).flatMap(new TestCoFlatMap<Long, Long, Integer>()).print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.keyBy(new TestKeySelector<Long, String>()).print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.connect(source)
                     .keyBy(new TestKeySelector<Long, String>(), new TestKeySelector<>());
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.coGroup(source).where(new TestKeySelector<>()).equalTo(new TestKeySelector<>());
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
         try {
             source.join(source).where(new TestKeySelector<>()).equalTo(new TestKeySelector<>());
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
@@ -112,7 +112,7 @@ public class TypeFillTest {
                     .between(Time.milliseconds(10L), Time.milliseconds(10L))
                     .process(new TestProcessJoinFunction<>())
                     .print();
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
 
@@ -145,9 +145,8 @@ public class TypeFillTest {
                 .between(Time.milliseconds(10L), Time.milliseconds(10L))
                 .process(new TestProcessJoinFunction<>(), Types.STRING);
 
-        assertEquals(
-                BasicTypeInfo.LONG_TYPE_INFO,
-                source.map(new TestMap<Long, Long>()).returns(Long.class).getType());
+        assertThat(source.map(new TestMap<Long, Long>()).returns(Long.class).getType())
+                .isEqualTo(BasicTypeInfo.LONG_TYPE_INFO);
 
         SingleOutputStreamOperator<String> map =
                 source.map(
@@ -162,7 +161,7 @@ public class TypeFillTest {
         map.print();
         try {
             map.returns(String.class);
-            fail();
+            fail("unknown failure");
         } catch (Exception ignored) {
         }
     }

@@ -55,9 +55,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link RemoteStreamEnvironment}. */
 public class RemoteStreamEnvironmentTest extends TestLogger {
@@ -87,9 +85,9 @@ public class RemoteStreamEnvironmentTest extends TestLogger {
 
         JobExecutionResult actualResult = env.execute("fakeJobName");
         TestClusterClient testClient = testExecutorServiceLoader.getCreatedClusterClient();
-        assertThat(actualResult.getJobID(), is(jobId));
-        assertThat(testClient.getConfiguration().getString(RestOptions.ADDRESS), is(host));
-        assertThat(testClient.getConfiguration().getInteger(RestOptions.PORT), is(99));
+        assertThat(actualResult.getJobID()).isEqualTo(jobId);
+        assertThat(testClient.getConfiguration().getString(RestOptions.ADDRESS)).isEqualTo(host);
+        assertThat(testClient.getConfiguration().getInteger(RestOptions.PORT)).isEqualTo(99);
     }
 
     @Test
@@ -111,9 +109,9 @@ public class RemoteStreamEnvironmentTest extends TestLogger {
         env.fromElements(1).map(x -> x * 2);
 
         JobExecutionResult actualResult = env.execute("fakeJobName");
-        assertThat(actualResult.getJobID(), is(jobID));
-        assertThat(
-                testExecutorServiceLoader.getActualSavepointRestoreSettings(), is(restoreSettings));
+        assertThat(actualResult.getJobID()).isEqualTo(jobID);
+        assertThat(testExecutorServiceLoader.getActualSavepointRestoreSettings())
+                .isEqualTo(restoreSettings);
     }
 
     private static final class TestExecutorServiceLoader implements PipelineExecutorServiceLoader {
@@ -152,7 +150,7 @@ public class RemoteStreamEnvironmentTest extends TestLogger {
                 @Override
                 public PipelineExecutor getExecutor(@Nonnull Configuration configuration) {
                     return (pipeline, config, classLoader) -> {
-                        assertTrue(pipeline instanceof StreamGraph);
+                        assertThat(pipeline).isInstanceOf(StreamGraph.class);
 
                         actualSavepointRestoreSettings =
                                 SavepointRestoreSettings.fromConfiguration(config);
@@ -189,7 +187,7 @@ public class RemoteStreamEnvironmentTest extends TestLogger {
 
         @Override
         public CompletableFuture<JobResult> requestJobResult(@Nonnull JobID jobId) {
-            assertThat(jobId, is(this.jobId));
+            assertThat(jobId).isEqualTo(this.jobId);
             JobResult jobResult =
                     new Builder()
                             .jobId(this.jobId)

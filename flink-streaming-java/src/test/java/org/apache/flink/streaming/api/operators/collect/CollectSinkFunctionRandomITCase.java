@@ -27,8 +27,6 @@ import org.apache.flink.util.OptionalFailure;
 import org.apache.flink.util.TestLogger;
 import org.apache.flink.util.function.RunnableWithException;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -42,6 +40,7 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import static org.apache.flink.streaming.api.operators.collect.utils.CollectSinkFunctionTestWrapper.ACCUMULATOR_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Random IT cases for {@link CollectSinkFunction}. It will perform random insert, random checkpoint
@@ -124,7 +123,7 @@ public class CollectSinkFunctionRandomITCase extends TestLogger {
     private void assertResultsEqualAfterSort(List<Integer> expected, List<Integer> actual) {
         Collections.sort(expected);
         Collections.sort(actual);
-        Assert.assertThat(actual, CoreMatchers.is(expected));
+        assertThat(actual).isEqualTo(expected);
     }
 
     /**

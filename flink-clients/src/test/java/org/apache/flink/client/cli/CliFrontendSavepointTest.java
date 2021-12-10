@@ -30,7 +30,6 @@ import org.apache.flink.util.FlinkException;
 import org.apache.flink.util.Preconditions;
 import org.apache.flink.util.concurrent.FutureUtils;
 
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -43,10 +42,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
 import java.util.zip.ZipOutputStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -87,7 +84,7 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
 
             verify(clusterClient, times(1)).triggerSavepoint(eq(jobId), isNull(String.class));
 
-            assertTrue(buffer.toString().contains(savepointPath));
+            assertThat(buffer.toString().contains(savepointPath)).isTrue();
         } finally {
             clusterClient.close();
             restoreStdOutAndStdErr();
@@ -115,9 +112,10 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
 
                 fail("Savepoint should have failed.");
             } catch (FlinkException e) {
-                assertTrue(
-                        ExceptionUtils.findThrowableWithMessage(e, expectedTestException)
-                                .isPresent());
+                assertThat(
+                                ExceptionUtils.findThrowableWithMessage(e, expectedTestException)
+                                        .isPresent())
+                        .isTrue();
             }
         } finally {
             clusterClient.close();
@@ -140,7 +138,7 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
                 frontend.savepoint(parameters);
                 fail("Should have failed.");
             } catch (CliArgsException e) {
-                assertThat(e.getMessage(), Matchers.containsString("Cannot parse JobID"));
+                assertThat(e.getMessage()).contains("Cannot parse JobID");
             }
         } finally {
             restoreStdOutAndStdErr();
@@ -169,7 +167,7 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
 
             verify(clusterClient, times(1)).triggerSavepoint(eq(jobId), eq(savepointDirectory));
 
-            assertTrue(buffer.toString().contains(savepointDirectory));
+            assertThat(buffer.toString().contains(savepointDirectory)).isTrue();
         } finally {
             clusterClient.close();
 
@@ -200,8 +198,8 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
             frontend.savepoint(parameters);
 
             String outMsg = buffer.toString();
-            assertTrue(outMsg.contains(savepointPath));
-            assertTrue(outMsg.contains("disposed"));
+            assertThat(outMsg.contains(savepointPath)).isTrue();
+            assertThat(outMsg.contains("disposed")).isTrue();
         } finally {
             clusterClient.close();
             restoreStdOutAndStdErr();
@@ -238,7 +236,7 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
 
             final String actualSavepointPath = disposeSavepointFuture.get();
 
-            assertEquals(disposePath, actualSavepointPath);
+            assertThat(actualSavepointPath).isEqualTo(disposePath);
         } finally {
             clusterClient.close();
             restoreStdOutAndStdErr();
@@ -268,9 +266,11 @@ public class CliFrontendSavepointTest extends CliFrontendTestBase {
 
                 fail("Savepoint should have failed.");
             } catch (Exception e) {
-                assertTrue(
-                        ExceptionUtils.findThrowableWithMessage(e, testException.getMessage())
-                                .isPresent());
+                assertThat(
+                                ExceptionUtils.findThrowableWithMessage(
+                                                e, testException.getMessage())
+                                        .isPresent())
+                        .isTrue();
             }
         } finally {
             clusterClient.close();

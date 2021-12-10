@@ -64,11 +64,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  * ITCases testing the stop with savepoint functionality. This includes checking both SUSPEND and
@@ -108,18 +108,19 @@ public class JobMasterStopWithSavepointITCase extends AbstractTestBase {
             throws Exception {
         setUpJobGraph(ExceptionOnCallbackStreamTask.class, RestartStrategies.noRestart());
 
-        assertThat(getJobStatus(), equalTo(JobStatus.RUNNING));
+        assertThat(getJobStatus()).isEqualTo(JobStatus.RUNNING);
 
         try {
             stopWithSavepoint(terminate).get();
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
         }
 
         // verifying that we actually received a synchronous checkpoint
-        assertTrue(syncSavepointId.get() > 0);
-        assertThat(
-                getJobStatus(), either(equalTo(JobStatus.FAILED)).or(equalTo(JobStatus.FAILING)));
+        assertThat(syncSavepointId.get() > 0).isTrue();
+        assertThat(getJobStatus())
+                .satisfies(
+                        matching(either(equalTo(JobStatus.FAILED)).or(equalTo(JobStatus.FAILING))));
     }
 
     @Test
@@ -145,33 +146,38 @@ public class JobMasterStopWithSavepointITCase extends AbstractTestBase {
         setUpJobGraph(
                 ExceptionOnCallbackStreamTask.class,
                 RestartStrategies.fixedDelayRestart(15, Time.milliseconds(10)));
-        assertThat(getJobStatus(), equalTo(JobStatus.RUNNING));
+        assertThat(getJobStatus()).isEqualTo(JobStatus.RUNNING);
         try {
             stopWithSavepoint(terminate).get(50, TimeUnit.MILLISECONDS);
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
             // expected
         }
 
         // wait until we restart at least 2 times and until we see at least 10 checkpoints.
-        assertTrue(numberOfRestarts.await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
-        assertTrue(
-                checkpointsToWaitFor.await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS));
+        assertThat(numberOfRestarts.await(deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                .isTrue();
+        assertThat(
+                        checkpointsToWaitFor.await(
+                                deadline.timeLeft().toMillis(), TimeUnit.MILLISECONDS))
+                .isTrue();
 
         // verifying that we actually received a synchronous checkpoint
-        assertTrue(syncSavepointId.get() > 0);
+        assertThat(syncSavepointId.get() > 0).isTrue();
 
-        assertThat(getJobStatus(), equalTo(JobStatus.RUNNING));
+        assertThat(getJobStatus()).isEqualTo(JobStatus.RUNNING);
 
         // make sure that we saw the synchronous savepoint and
         // that after that we saw more checkpoints due to restarts.
         final long syncSavepoint = syncSavepointId.get();
-        assertTrue(syncSavepoint > 0 && syncSavepoint < numberOfCheckpointsToExpect);
+        assertThat(syncSavepoint > 0 && syncSavepoint < numberOfCheckpointsToExpect).isTrue();
 
         clusterClient.cancel(jobGraph.getJobID()).get();
-        assertThat(
-                getJobStatus(),
-                either(equalTo(JobStatus.CANCELLING)).or(equalTo(JobStatus.CANCELED)));
+        assertThat(getJobStatus())
+                .satisfies(
+                        matching(
+                                either(equalTo(JobStatus.CANCELLING))
+                                        .or(equalTo(JobStatus.CANCELED))));
     }
 
     @Test
@@ -186,7 +192,7 @@ public class JobMasterStopWithSavepointITCase extends AbstractTestBase {
 
         try {
             stopWithSavepoint(true).get();
-            fail();
+            fail("unknown failure");
         } catch (Exception e) {
             Optional<CheckpointException> checkpointExceptionOptional =
                     ExceptionUtils.findThrowable(e, CheckpointException.class);
@@ -194,17 +200,17 @@ public class JobMasterStopWithSavepointITCase extends AbstractTestBase {
                 throw e;
             }
             String exceptionMessage = checkpointExceptionOptional.get().getMessage();
-            assertTrue(
-                    "Stop with savepoint failed because of another cause " + exceptionMessage,
-                    exceptionMessage.contains(CheckpointFailureReason.IO_EXCEPTION.message()));
+            assertThat(exceptionMessage.contains(CheckpointFailureReason.IO_EXCEPTION.message()))
+                    .as("Stop with savepoint failed because of another cause " + exceptionMessage)
+                    .isTrue();
         }
 
         final JobStatus jobStatus =
                 clusterClient.getJobStatus(jobGraph.getJobID()).get(60, TimeUnit.SECONDS);
-        assertThat(jobStatus, equalTo(JobStatus.RUNNING));
+        assertThat(jobStatus).isEqualTo(JobStatus.RUNNING);
         // assert that checkpoints are continued to be triggered
         checkpointsToWaitFor = new CountDownLatch(1);
-        assertTrue(checkpointsToWaitFor.await(60L, TimeUnit.SECONDS));
+        assertThat(checkpointsToWaitFor.await(60L, TimeUnit.SECONDS)).isTrue();
     }
 
     private CompletableFuture<String> stopWithSavepoint(boolean terminate) {
@@ -271,7 +277,7 @@ public class JobMasterStopWithSavepointITCase extends AbstractTestBase {
                         .build();
 
         clusterClient.submitJob(jobGraph).get();
-        assertTrue(invokeLatch.await(60, TimeUnit.SECONDS));
+        assertThat(invokeLatch.await(60, TimeUnit.SECONDS)).isTrue();
         waitForJob();
     }
 

@@ -29,7 +29,6 @@ import org.apache.flink.util.function.FunctionWithException;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -54,7 +53,8 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.UUID;
 
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 
 /** Tests for the {@link S3RecoverableFsDataOutputStream}. */
 public class S3RecoverableFsDataOutputStreamTest {
@@ -94,7 +94,8 @@ public class S3RecoverableFsDataOutputStreamTest {
         RecoverableFsDataOutputStream.Committer committer = streamUnderTest.closeForCommit();
         committer.commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello world")));
+        assertThat(multipartUploadUnderTest)
+                .satisfies(matching(hasContent(bytesOf("hello world"))));
     }
 
     @Test
@@ -102,7 +103,7 @@ public class S3RecoverableFsDataOutputStreamTest {
         RecoverableFsDataOutputStream.Committer committer = streamUnderTest.closeForCommit();
         committer.commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(new byte[0]));
+        assertThat(multipartUploadUnderTest).satisfies(matching(hasContent(new byte[0])));
     }
 
     @Test
@@ -111,7 +112,7 @@ public class S3RecoverableFsDataOutputStreamTest {
 
         streamUnderTest.close();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("")));
+        assertThat(multipartUploadUnderTest).satisfies(matching(hasContent(bytesOf(""))));
     }
 
     @Test
@@ -122,7 +123,8 @@ public class S3RecoverableFsDataOutputStreamTest {
 
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello world")));
+        assertThat(multipartUploadUnderTest)
+                .satisfies(matching(hasContent(bytesOf("hello world"))));
     }
 
     @Test
@@ -134,7 +136,7 @@ public class S3RecoverableFsDataOutputStreamTest {
         }
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(testDataBuffers));
+        assertThat(multipartUploadUnderTest).satisfies(matching(hasContent(testDataBuffers)));
     }
 
     @Test
@@ -146,7 +148,7 @@ public class S3RecoverableFsDataOutputStreamTest {
         streamUnderTest = reopenStreamUnderTestAfterRecovery();
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello")));
+        assertThat(multipartUploadUnderTest).satisfies(matching(hasContent(bytesOf("hello"))));
     }
 
     @Test
@@ -163,7 +165,8 @@ public class S3RecoverableFsDataOutputStreamTest {
 
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello world")));
+        assertThat(multipartUploadUnderTest)
+                .satisfies(matching(hasContent(bytesOf("hello world"))));
     }
 
     @Test
@@ -184,7 +187,7 @@ public class S3RecoverableFsDataOutputStreamTest {
 
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("abcde")));
+        assertThat(multipartUploadUnderTest).satisfies(matching(hasContent(bytesOf("abcde"))));
     }
 
     @Test
@@ -197,7 +200,7 @@ public class S3RecoverableFsDataOutputStreamTest {
         }
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(testDataBuffers));
+        assertThat(multipartUploadUnderTest).satisfies(matching(hasContent(testDataBuffers)));
     }
 
     @Test
@@ -211,7 +214,8 @@ public class S3RecoverableFsDataOutputStreamTest {
         streamUnderTest.write(bytesOf("world"));
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello world")));
+        assertThat(multipartUploadUnderTest)
+                .satisfies(matching(hasContent(bytesOf("hello world"))));
     }
 
     @Test
@@ -226,7 +230,8 @@ public class S3RecoverableFsDataOutputStreamTest {
         streamUnderTest.write(bytesOf(" world"));
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello world")));
+        assertThat(multipartUploadUnderTest)
+                .satisfies(matching(hasContent(bytesOf("hello world"))));
     }
 
     @Test
@@ -240,7 +245,8 @@ public class S3RecoverableFsDataOutputStreamTest {
         streamUnderTest.write(bytesOf(" world"));
         streamUnderTest.closeForCommit().commit();
 
-        assertThat(multipartUploadUnderTest, hasContent(bytesOf("hello world")));
+        assertThat(multipartUploadUnderTest)
+                .satisfies(matching(hasContent(bytesOf("hello world"))));
     }
 
     @Test
@@ -318,7 +324,7 @@ public class S3RecoverableFsDataOutputStreamTest {
         long bytesRead =
                 new FileInputStream(inputFile)
                         .read(content, 0, MathUtils.checkedDownCast(inputFile.length()));
-        Assert.assertEquals(file.getPos(), bytesRead);
+        assertThat(bytesRead).isEqualTo(file.getPos());
         return content;
     }
 

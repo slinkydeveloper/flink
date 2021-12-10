@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Collections.sort;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** IT case that tests the different stream partitioning schemes. */
 @SuppressWarnings("serial")
@@ -177,7 +177,7 @@ public class PartitionerITCase extends AbstractTestBase {
             if (subtaskIndex == null) {
                 verifier.put(elem.f1, elem.f0);
             } else if (!Objects.equals(subtaskIndex, elem.f0)) {
-                fail();
+                fail("unknown failure");
             }
         }
     }
@@ -186,9 +186,9 @@ public class PartitionerITCase extends AbstractTestBase {
             List<Tuple2<Integer, String>> customPartitionResult) {
         for (Tuple2<Integer, String> stringWithSubtask : customPartitionResult) {
             if (stringWithSubtask.f1.equals("c")) {
-                assertEquals(new Integer(2), stringWithSubtask.f0);
+                assertThat(stringWithSubtask.f0).isEqualTo(new Integer(2));
             } else {
-                assertEquals(new Integer(0), stringWithSubtask.f0);
+                assertThat(stringWithSubtask.f0).isEqualTo(new Integer(0));
             }
         }
     }
@@ -203,7 +203,7 @@ public class PartitionerITCase extends AbstractTestBase {
                                                 .mapToObj(i -> Tuple2.of(i, input)))
                         .collect(Collectors.toSet());
 
-        assertEquals(expectedResult, new HashSet<>(broadcastPartitionResult));
+        assertThat(new HashSet<>(broadcastPartitionResult)).isEqualTo(expectedResult);
     }
 
     private static void verifyRebalancePartitioning(
@@ -220,7 +220,7 @@ public class PartitionerITCase extends AbstractTestBase {
                                         Tuple2.of((offset + index) % PARALLELISM, INPUT.get(index)))
                         .collect(Collectors.toList());
 
-        assertEquals(expected, rebalancePartitionResult);
+        assertThat(rebalancePartitionResult).isEqualTo(expected);
     }
 
     private static void verifyGlobalPartitioning(
@@ -228,7 +228,7 @@ public class PartitionerITCase extends AbstractTestBase {
         final List<Tuple2<Integer, String>> expected =
                 INPUT.stream().map(i -> Tuple2.of(0, i)).collect(Collectors.toList());
 
-        assertEquals(expected, globalPartitionResult);
+        assertThat(globalPartitionResult).isEqualTo(expected);
     }
 
     private static class SubtaskIndexAssigner

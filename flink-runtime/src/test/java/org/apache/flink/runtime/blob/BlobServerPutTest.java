@@ -64,10 +64,7 @@ import static org.apache.flink.runtime.blob.BlobKey.BlobType.PERMANENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.TRANSIENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobKeyTest.verifyKeyDifferentHashEquals;
 import static org.apache.flink.runtime.blob.BlobServerGetTest.get;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -217,14 +214,14 @@ public class BlobServerPutTest extends TestLogger {
 
             // put data for jobId1 and verify
             BlobKey key1a = put(server, jobId1, data, blobType);
-            assertNotNull(key1a);
+            assertThat(key1a).isNotNull();
             // second upload of same data should yield a different BlobKey
             BlobKey key1a2 = put(server, jobId1, data, blobType);
-            assertNotNull(key1a2);
+            assertThat(key1a2).isNotNull();
             verifyKeyDifferentHashEquals(key1a, key1a2);
 
             BlobKey key1b = put(server, jobId1, data2, blobType);
-            assertNotNull(key1b);
+            assertThat(key1b).isNotNull();
 
             verifyContents(server, jobId1, key1a, data);
             verifyContents(server, jobId1, key1a2, data);
@@ -232,11 +229,11 @@ public class BlobServerPutTest extends TestLogger {
 
             // now put data for jobId2 and verify that both are ok
             BlobKey key2a = put(server, jobId2, data, blobType);
-            assertNotNull(key2a);
+            assertThat(key2a).isNotNull();
             verifyKeyDifferentHashEquals(key1a, key2a);
 
             BlobKey key2b = put(server, jobId2, data2, blobType);
-            assertNotNull(key2b);
+            assertThat(key2b).isNotNull();
             verifyKeyDifferentHashEquals(key1b, key2b);
 
             // verify the accessibility and the BLOB contents
@@ -306,14 +303,14 @@ public class BlobServerPutTest extends TestLogger {
 
             // put data for jobId1 and verify
             BlobKey key1a = put(server, jobId1, new ByteArrayInputStream(data), blobType);
-            assertNotNull(key1a);
+            assertThat(key1a).isNotNull();
             // second upload of same data should yield a different BlobKey
             BlobKey key1a2 = put(server, jobId1, new ByteArrayInputStream(data), blobType);
-            assertNotNull(key1a2);
+            assertThat(key1a2).isNotNull();
             verifyKeyDifferentHashEquals(key1a, key1a2);
 
             BlobKey key1b = put(server, jobId1, new ByteArrayInputStream(data2), blobType);
-            assertNotNull(key1b);
+            assertThat(key1b).isNotNull();
 
             verifyContents(server, jobId1, key1a, data);
             verifyContents(server, jobId1, key1a2, data);
@@ -321,11 +318,11 @@ public class BlobServerPutTest extends TestLogger {
 
             // now put data for jobId2 and verify that both are ok
             BlobKey key2a = put(server, jobId2, new ByteArrayInputStream(data), blobType);
-            assertNotNull(key2a);
+            assertThat(key2a).isNotNull();
             verifyKeyDifferentHashEquals(key1a, key2a);
 
             BlobKey key2b = put(server, jobId2, new ByteArrayInputStream(data2), blobType);
-            assertNotNull(key2b);
+            assertThat(key2b).isNotNull();
             verifyKeyDifferentHashEquals(key1b, key2b);
 
             // verify the accessibility and the BLOB contents
@@ -395,14 +392,14 @@ public class BlobServerPutTest extends TestLogger {
 
             // put data for jobId1 and verify
             BlobKey key1a = put(server, jobId1, new ChunkedInputStream(data, 19), blobType);
-            assertNotNull(key1a);
+            assertThat(key1a).isNotNull();
             // second upload of same data should yield a different BlobKey
             BlobKey key1a2 = put(server, jobId1, new ChunkedInputStream(data, 19), blobType);
-            assertNotNull(key1a2);
+            assertThat(key1a2).isNotNull();
             verifyKeyDifferentHashEquals(key1a, key1a2);
 
             BlobKey key1b = put(server, jobId1, new ChunkedInputStream(data2, 19), blobType);
-            assertNotNull(key1b);
+            assertThat(key1b).isNotNull();
 
             verifyContents(server, jobId1, key1a, data);
             verifyContents(server, jobId1, key1a2, data);
@@ -410,11 +407,11 @@ public class BlobServerPutTest extends TestLogger {
 
             // now put data for jobId2 and verify that both are ok
             BlobKey key2a = put(server, jobId2, new ChunkedInputStream(data, 19), blobType);
-            assertNotNull(key2a);
+            assertThat(key2a).isNotNull();
             verifyKeyDifferentHashEquals(key1a, key2a);
 
             BlobKey key2b = put(server, jobId2, new ChunkedInputStream(data2, 19), blobType);
-            assertNotNull(key2b);
+            assertThat(key2b).isNotNull();
             verifyKeyDifferentHashEquals(key1b, key2b);
 
             // verify the accessibility and the BLOB contents
@@ -470,9 +467,9 @@ public class BlobServerPutTest extends TestLogger {
 
             // make sure the blob server cannot create any files in its storage dir
             tempFileDir = server.createTemporaryFilename().getParentFile().getParentFile();
-            assertTrue(tempFileDir.setExecutable(true, false));
-            assertTrue(tempFileDir.setReadable(true, false));
-            assertTrue(tempFileDir.setWritable(false, false));
+            assertThat(tempFileDir.setExecutable(true, false)).isTrue();
+            assertThat(tempFileDir.setReadable(true, false)).isTrue();
+            assertThat(tempFileDir.setWritable(false, false)).isTrue();
 
             byte[] data = new byte[2000000];
             rnd.nextBytes(data);
@@ -528,9 +525,9 @@ public class BlobServerPutTest extends TestLogger {
 
             // make sure the blob server cannot create any files in its storage dir
             tempFileDir = server.createTemporaryFilename().getParentFile();
-            assertTrue(tempFileDir.setExecutable(true, false));
-            assertTrue(tempFileDir.setReadable(true, false));
-            assertTrue(tempFileDir.setWritable(false, false));
+            assertThat(tempFileDir.setExecutable(true, false)).isTrue();
+            assertThat(tempFileDir.setReadable(true, false)).isTrue();
+            assertThat(tempFileDir.setWritable(false, false)).isTrue();
 
             byte[] data = new byte[2000000];
             rnd.nextBytes(data);
@@ -544,7 +541,7 @@ public class BlobServerPutTest extends TestLogger {
             } finally {
                 File storageDir = tempFileDir.getParentFile();
                 // only the incoming directory should exist (no job directory!)
-                assertArrayEquals(new String[] {"incoming"}, storageDir.list());
+                assertThat(storageDir.list()).isEqualTo(new String[] {"incoming"});
             }
         } finally {
             // set writable again to make sure we can remove the directory
@@ -593,9 +590,9 @@ public class BlobServerPutTest extends TestLogger {
             // make sure the blob server cannot create any files in its storage dir
             jobStoreDir =
                     server.getStorageLocation(jobId, BlobKey.createKey(blobType)).getParentFile();
-            assertTrue(jobStoreDir.setExecutable(true, false));
-            assertTrue(jobStoreDir.setReadable(true, false));
-            assertTrue(jobStoreDir.setWritable(false, false));
+            assertThat(jobStoreDir.setExecutable(true, false)).isTrue();
+            assertThat(jobStoreDir.setReadable(true, false)).isTrue();
+            assertThat(jobStoreDir.setWritable(false, false)).isTrue();
 
             byte[] data = new byte[2000000];
             rnd.nextBytes(data);
@@ -608,10 +605,10 @@ public class BlobServerPutTest extends TestLogger {
             } finally {
                 // there should be no remaining incoming files
                 File incomingFileDir = new File(jobStoreDir.getParent(), "incoming");
-                assertArrayEquals(new String[] {}, incomingFileDir.list());
+                assertThat(incomingFileDir.list()).isEqualTo(new String[] {});
 
                 // there should be no files in the job directory
-                assertArrayEquals(new String[] {}, jobStoreDir.list());
+                assertThat(jobStoreDir.list()).isEqualTo(new String[] {});
             }
         } finally {
             // set writable again to make sure we can remove the directory
@@ -699,7 +696,7 @@ public class BlobServerPutTest extends TestLogger {
 
             Iterator<BlobKey> blobKeyIterator = blobKeys.iterator();
 
-            assertTrue(blobKeyIterator.hasNext());
+            assertThat(blobKeyIterator.hasNext()).isTrue();
 
             BlobKey blobKey = blobKeyIterator.next();
 
@@ -776,7 +773,7 @@ public class BlobServerPutTest extends TestLogger {
                             Collections.singletonList(new Path(tmpFile.getAbsolutePath()));
                     List<PermanentBlobKey> keys =
                             BlobClient.uploadFiles(serverAddress, clientConfig, jobId, jars);
-                    assertEquals(1, keys.size());
+                    assertThat(keys.size()).isEqualTo(1);
                     return keys.get(0);
                 } finally {
                     //noinspection ResultOfMethodCallIgnored

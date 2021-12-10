@@ -39,8 +39,7 @@ import java.util.Random;
 import static org.apache.flink.runtime.blob.BlobKey.BlobType.PERMANENT_BLOB;
 import static org.apache.flink.runtime.blob.BlobServerGetTest.get;
 import static org.apache.flink.runtime.blob.BlobServerPutTest.put;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Tests how GET requests react to corrupt files when downloaded via a {@link BlobServer}.
@@ -106,11 +105,11 @@ public class BlobServerCorruptionTest extends TestLogger {
 
             // put content addressable (like libraries)
             BlobKey key = put(server, jobId, data, PERMANENT_BLOB);
-            assertNotNull(key);
+            assertThat(key).isNotNull();
 
             // delete local file to make sure that the GET requests downloads from HA
             File blobFile = server.getStorageLocation(jobId, key);
-            assertTrue(blobFile.delete());
+            assertThat(blobFile.delete()).isTrue();
 
             // change HA store file contents to make sure that GET requests fail
             byte[] data2 = Arrays.copyOf(data, data.length);

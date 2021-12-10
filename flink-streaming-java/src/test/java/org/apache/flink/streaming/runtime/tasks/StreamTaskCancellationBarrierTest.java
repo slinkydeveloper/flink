@@ -34,9 +34,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.Timeout;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -92,10 +90,11 @@ public class StreamTaskCancellationBarrierTest {
 
         // a cancellation barrier should be downstream
         Object result = testHarness.getOutput().poll();
-        assertNotNull("nothing emitted", result);
-        assertTrue("wrong type emitted", result instanceof CancelCheckpointMarker);
-        assertEquals(
-                "wrong checkpoint id", 2L, ((CancelCheckpointMarker) result).getCheckpointId());
+        assertThat(result).as("nothing emitted").isNotNull();
+        assertThat(result).as("wrong type emitted").isInstanceOf(CancelCheckpointMarker.class);
+        assertThat(((CancelCheckpointMarker) result).getCheckpointId())
+                .as("wrong checkpoint id")
+                .isEqualTo(2L);
 
         // cancel and shutdown
         testHarness.endInput();
@@ -145,10 +144,11 @@ public class StreamTaskCancellationBarrierTest {
 
         // a cancellation barrier should be downstream
         Object result = testHarness.getOutput().poll();
-        assertNotNull("nothing emitted", result);
-        assertTrue("wrong type emitted", result instanceof CancelCheckpointMarker);
-        assertEquals(
-                "wrong checkpoint id", 2L, ((CancelCheckpointMarker) result).getCheckpointId());
+        assertThat(result).as("nothing emitted").isNotNull();
+        assertThat(result).as("wrong type emitted").isInstanceOf(CancelCheckpointMarker.class);
+        assertThat(((CancelCheckpointMarker) result).getCheckpointId())
+                .as("wrong checkpoint id")
+                .isEqualTo(2L);
 
         // cancel and shutdown
         testHarness.endInput();

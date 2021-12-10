@@ -25,8 +25,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Unit tests for the {@link FileSourceSplitState}. */
 public class FileSourceSplitStateTest {
@@ -38,7 +37,7 @@ public class FileSourceSplitStateTest {
 
         final FileSourceSplit resultSplit = state.toFileSourceSplit();
 
-        assertEquals(split.getReaderPosition(), resultSplit.getReaderPosition());
+        assertThat(resultSplit.getReaderPosition()).isEqualTo(split.getReaderPosition());
     }
 
     @Test
@@ -46,8 +45,8 @@ public class FileSourceSplitStateTest {
         final FileSourceSplit split = getTestSplit(new CheckpointedPosition(123L, 456L));
         final FileSourceSplitState state = new FileSourceSplitState(split);
 
-        assertEquals(123L, state.getOffset());
-        assertEquals(456L, state.getRecordsToSkipAfterOffset());
+        assertThat(state.getOffset()).isEqualTo(123L);
+        assertThat(state.getRecordsToSkipAfterOffset()).isEqualTo(456L);
     }
 
     @Test
@@ -59,8 +58,8 @@ public class FileSourceSplitStateTest {
         final Optional<CheckpointedPosition> position =
                 state.toFileSourceSplit().getReaderPosition();
 
-        assertTrue(position.isPresent());
-        assertEquals(new CheckpointedPosition(1234L, 7566L), position.get());
+        assertThat(position.isPresent()).isTrue();
+        assertThat(position.get()).isEqualTo(new CheckpointedPosition(1234L, 7566L));
     }
 
     // ------------------------------------------------------------------------

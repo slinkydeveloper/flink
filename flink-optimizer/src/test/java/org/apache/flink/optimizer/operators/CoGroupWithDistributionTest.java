@@ -25,14 +25,17 @@ import org.apache.flink.api.java.ExecutionEnvironment;
 import org.apache.flink.api.java.io.DiscardingOutputFormat;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.api.java.utils.DataSetUtils;
-import org.apache.flink.optimizer.plan.*;
+import org.apache.flink.optimizer.plan.Channel;
+import org.apache.flink.optimizer.plan.DualInputPlanNode;
+import org.apache.flink.optimizer.plan.OptimizedPlan;
+import org.apache.flink.optimizer.plan.SinkPlanNode;
 import org.apache.flink.optimizer.util.CompilerTestBase;
 import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 import org.apache.flink.util.Collector;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CoGroupWithDistributionTest extends CompilerTestBase {
 
@@ -62,8 +65,8 @@ public class CoGroupWithDistributionTest extends CompilerTestBase {
         DualInputPlanNode coGroup = (DualInputPlanNode) sink.getInput().getSource();
         Channel input1 = coGroup.getInput1();
         Channel input2 = coGroup.getInput2();
-        assertEquals(ShipStrategyType.FORWARD, input1.getShipStrategy());
-        assertEquals(ShipStrategyType.FORWARD, input2.getShipStrategy());
+        assertThat(input1.getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
+        assertThat(input2.getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
     }
 
     @Test
@@ -92,8 +95,8 @@ public class CoGroupWithDistributionTest extends CompilerTestBase {
         DualInputPlanNode coGroup = (DualInputPlanNode) sink.getInput().getSource();
         Channel input1 = coGroup.getInput1();
         Channel input2 = coGroup.getInput2();
-        assertEquals(ShipStrategyType.PARTITION_HASH, input1.getShipStrategy());
-        assertEquals(ShipStrategyType.PARTITION_HASH, input2.getShipStrategy());
+        assertThat(input1.getShipStrategy()).isEqualTo(ShipStrategyType.PARTITION_HASH);
+        assertThat(input2.getShipStrategy()).isEqualTo(ShipStrategyType.PARTITION_HASH);
     }
 
     public static class CoGroupFunc

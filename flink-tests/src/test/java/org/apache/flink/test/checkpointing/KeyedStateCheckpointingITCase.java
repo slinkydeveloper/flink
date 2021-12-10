@@ -54,8 +54,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * A simple test that runs a streaming topology with checkpointing enabled.
@@ -145,7 +145,7 @@ public class KeyedStateCheckpointingITCase extends TestLogger {
     // ------------------------------------------------------------------------
 
     protected void testProgramWithBackend(AbstractStateBackend stateBackend) throws Exception {
-        assertEquals("Broken test setup", 0, (NUM_STRINGS / 2) % NUM_KEYS);
+        assertThat((NUM_STRINGS / 2) % NUM_KEYS).as("Broken test setup").isEqualTo(0);
 
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
         env.setParallelism(PARALLELISM);
@@ -175,14 +175,15 @@ public class KeyedStateCheckpointingITCase extends TestLogger {
         env.execute();
 
         // verify that we counted exactly right
-        assertEquals(NUM_KEYS, CounterSink.ALL_COUNTS.size());
-        assertEquals(NUM_KEYS, OnceFailingPartitionedSum.ALL_SUMS.size());
+        assertThat(CounterSink.ALL_COUNTS.size()).isEqualTo(NUM_KEYS);
+        assertThat(OnceFailingPartitionedSum.ALL_SUMS.size()).isEqualTo(NUM_KEYS);
 
         for (Entry<Integer, Long> sum : OnceFailingPartitionedSum.ALL_SUMS.entrySet()) {
-            assertEquals((long) sum.getKey() * NUM_STRINGS / NUM_KEYS, sum.getValue().longValue());
+            assertThat(sum.getValue().longValue())
+                    .isEqualTo((long) sum.getKey() * NUM_STRINGS / NUM_KEYS);
         }
         for (long count : CounterSink.ALL_COUNTS.values()) {
-            assertEquals(NUM_STRINGS / NUM_KEYS, count);
+            assertThat(count).isEqualTo(NUM_STRINGS / NUM_KEYS);
         }
     }
 
@@ -260,7 +261,9 @@ public class KeyedStateCheckpointingITCase extends TestLogger {
 
         @Override
         public void restoreState(List<Integer> state) throws Exception {
-            assertEquals("Test failed due to unexpected recovered state size", 1, state.size());
+            assertThat(state.size())
+                    .as("Test failed due to unexpected recovered state size")
+                    .isEqualTo(1);
             lastEmitted = state.get(0);
             checkpointHappened = true;
         }
@@ -321,7 +324,9 @@ public class KeyedStateCheckpointingITCase extends TestLogger {
 
         @Override
         public void restoreState(List<Integer> state) throws Exception {
-            assertEquals("Test failed due to unexpected recovered state size", 1, state.size());
+            assertThat(state.size())
+                    .as("Test failed due to unexpected recovered state size")
+                    .isEqualTo(1);
             count = state.get(0);
             shouldFail = false;
         }
@@ -357,7 +362,7 @@ public class KeyedStateCheckpointingITCase extends TestLogger {
             final long ac = acRaw == null ? 0L : acRaw.value;
             final long bc = bcRaw == null ? 0L : bcRaw;
 
-            assertEquals(ac, bc);
+            assertThat(bc).isEqualTo(ac);
 
             long currentCount = ac + 1;
             aCounts.update(NonSerializableLong.of(currentCount));

@@ -25,11 +25,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 
 /** Tests for {@link MetricCollectionResponseBody}. */
 public class MetricCollectionResponseBodyTest
@@ -54,11 +52,11 @@ public class MetricCollectionResponseBodyTest
     protected void assertOriginalEqualsToUnmarshalled(
             MetricCollectionResponseBody expected, MetricCollectionResponseBody actual) {
 
-        assertThat(actual.getMetrics(), hasSize(1));
+        assertThat(actual.getMetrics()).satisfies(matching(hasSize(1)));
 
         final Metric metric = actual.getMetrics().iterator().next();
-        assertThat(metric.getId(), equalTo(TEST_METRIC_NAME));
-        assertThat(metric.getValue(), equalTo(TEST_METRIC_VALUE));
+        assertThat(metric.getId()).isEqualTo(TEST_METRIC_NAME);
+        assertThat(metric.getValue()).isEqualTo(TEST_METRIC_VALUE);
     }
 
     @Test
@@ -69,7 +67,7 @@ public class MetricCollectionResponseBodyTest
                                 new MetricCollectionResponseBody(
                                         Collections.singleton(new Metric(TEST_METRIC_NAME))));
 
-        assertThat(json, not(containsString("\"value\"")));
-        assertThat(json, not(containsString("\"metrics\"")));
+        assertThat(json).doesNotContain("\"value\"");
+        assertThat(json).doesNotContain("\"metrics\"");
     }
 }

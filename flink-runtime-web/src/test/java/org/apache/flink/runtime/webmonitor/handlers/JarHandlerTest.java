@@ -23,7 +23,6 @@ import org.apache.flink.runtime.webmonitor.TestingDispatcherGateway;
 import org.apache.flink.util.ExceptionUtils;
 import org.apache.flink.util.TestLogger;
 
-import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -33,8 +32,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link JarRunHandler} and {@link JarPlanHandler}. */
 public class JarHandlerTest extends TestLogger {
@@ -64,23 +63,22 @@ public class JarHandlerTest extends TestLogger {
 
         try {
             JarHandlers.showPlan(handlers.planHandler, storedJarName, restfulGateway);
-            Assert.fail("Should have failed with an exception.");
+            fail("Should have failed with an exception.");
         } catch (Exception e) {
             Optional<ProgramInvocationException> expected =
                     ExceptionUtils.findThrowable(e, ProgramInvocationException.class);
             if (expected.isPresent()) {
                 String message = expected.get().getMessage();
                 // original cause is preserved in stack trace
-                assertThat(
-                        message,
-                        containsString(
-                                "The program plan could not be fetched - the program aborted pre-maturely"));
+                assertThat(message)
+                        .contains(
+                                "The program plan could not be fetched - the program aborted pre-maturely");
                 // implies the jar was registered for the job graph (otherwise the jar name would
                 // not occur in the exception)
-                assertThat(message, containsString(JAR_NAME));
+                assertThat(message).contains(JAR_NAME);
                 // ensure that no stdout/stderr has been captured
-                assertThat(message, containsString("System.out: " + expectedCapturedStdOut));
-                assertThat(message, containsString("System.err: " + expectedCapturedStdErr));
+                assertThat(message).contains("System.out: " + expectedCapturedStdOut);
+                assertThat(message).contains("System.err: " + expectedCapturedStdErr);
             } else {
                 throw e;
             }

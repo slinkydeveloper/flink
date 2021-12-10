@@ -44,11 +44,8 @@ import java.util.stream.Collectors;
 
 import static org.apache.flink.runtime.io.network.partition.PartitionTestUtils.createPartition;
 import static org.apache.flink.util.Preconditions.checkNotNull;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Behavior tests for the {@link BoundedBlockingSubpartition} and the {@link
@@ -122,7 +119,7 @@ public class BoundedBlockingSubpartitionTest extends SubpartitionTestBase {
 
         bbspr.releaseAllResources();
 
-        assertTrue(reader.closed);
+        assertThat(reader.closed).isTrue();
     }
 
     @Test
@@ -147,16 +144,16 @@ public class BoundedBlockingSubpartitionTest extends SubpartitionTestBase {
                 // expected
             }
 
-            assertFalse(consumer.isRecycled());
+            assertThat(consumer.isRecycled()).isFalse();
 
-            assertNotNull(subpartition.getCurrentBuffer());
-            assertFalse(subpartition.getCurrentBuffer().isRecycled());
+            assertThat(subpartition.getCurrentBuffer()).isNotNull();
+            assertThat(subpartition.getCurrentBuffer().isRecycled()).isFalse();
         } finally {
             subpartition.release();
 
-            assertTrue(consumer.isRecycled());
+            assertThat(consumer.isRecycled()).isTrue();
 
-            assertNull(subpartition.getCurrentBuffer());
+            assertThat(subpartition.getCurrentBuffer()).isNull();
         }
     }
 

@@ -22,7 +22,7 @@ import org.apache.flink.api.java.tuple.Tuple2;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ConcatenatedExtract}. */
 public class ConcatenatedExtractTest {
@@ -58,9 +58,9 @@ public class ConcatenatedExtractTest {
                 new ConcatenatedExtract(new FieldFromTuple(0), new FieldFromTuple(1))
                         .add(new FieldsFromArray(Integer.class, 2, 1, 0));
         int[] expected = {testIntArray3[2], testIntArray3[1], testIntArray3[0]};
-        assertEquals(new Integer(expected[0]), ((Integer[]) ext.extract(testData))[0]);
-        assertEquals(new Integer(expected[1]), ((Integer[]) ext.extract(testData))[1]);
-        assertEquals(new Integer(expected[2]), ((Integer[]) ext.extract(testData))[2]);
+        assertThat(((Integer[]) ext.extract(testData))[0]).isEqualTo(new Integer(expected[0]));
+        assertThat(((Integer[]) ext.extract(testData))[1]).isEqualTo(new Integer(expected[1]));
+        assertThat(((Integer[]) ext.extract(testData))[2]).isEqualTo(new Integer(expected[2]));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -76,6 +76,6 @@ public class ConcatenatedExtractTest {
                         .add(new FieldFromArray(1)); // String
 
         String expected2 = testStringArray2[1];
-        assertEquals(expected2, ext.extract(testData));
+        assertThat(ext.extract(testData)).isEqualTo(expected2);
     }
 }

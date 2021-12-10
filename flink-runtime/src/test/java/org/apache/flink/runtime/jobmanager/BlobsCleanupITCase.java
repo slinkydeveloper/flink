@@ -61,11 +61,10 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Small test to check that the {@link org.apache.flink.runtime.blob.BlobServer} cleanup is executed
@@ -170,7 +169,7 @@ public class BlobsCleanupITCase extends TestLogger {
                         configuration,
                         jid,
                         Collections.singletonList(new Path(tempBlob.getAbsolutePath())));
-        assertThat(keys, hasSize(1));
+        assertThat(keys).satisfies(matching(hasSize(1)));
         jobGraph.addUserJarBlobKey(keys.get(0));
 
         if (testCase == TestCase.JOB_SUBMISSION_FAILS) {
@@ -187,13 +186,14 @@ public class BlobsCleanupITCase extends TestLogger {
                 fail("Expected job submission failure.");
             } catch (ExecutionException e) {
                 assertThat(
-                        ExceptionUtils.findThrowable(e, JobSubmissionException.class).isPresent(),
-                        is(true));
+                                ExceptionUtils.findThrowable(e, JobSubmissionException.class)
+                                        .isPresent())
+                        .isEqualTo(true);
             }
         } else {
             final JobSubmissionResult jobSubmissionResult = submissionFuture.get();
 
-            assertThat(jobSubmissionResult.getJobID(), is(jid));
+            assertThat(jobSubmissionResult.getJobID()).isEqualTo(jid);
 
             final CompletableFuture<JobResult> resultFuture = miniCluster.requestJobResult(jid);
 
@@ -205,15 +205,15 @@ public class BlobsCleanupITCase extends TestLogger {
                 // job will get restarted, BlobCache may re-download the BLOB if already deleted
                 // then the tasks will fail again and the restart strategy will finalise the job
                 final JobResult jobResult = resultFuture.get();
-                assertThat(jobResult.isSuccess(), is(false));
-                assertThat(jobResult.getApplicationStatus(), is(ApplicationStatus.FAILED));
+                assertThat(jobResult.isSuccess()).isEqualTo(false);
+                assertThat(jobResult.getApplicationStatus()).isEqualTo(ApplicationStatus.FAILED);
             } else if (testCase == TestCase.JOB_IS_CANCELLED) {
 
                 miniCluster.cancelJob(jid);
 
                 final JobResult jobResult = resultFuture.get();
-                assertThat(jobResult.isSuccess(), is(false));
-                assertThat(jobResult.getApplicationStatus(), is(ApplicationStatus.CANCELED));
+                assertThat(jobResult.isSuccess()).isEqualTo(false);
+                assertThat(jobResult.getApplicationStatus()).isEqualTo(ApplicationStatus.CANCELED);
             } else {
                 final JobResult jobResult = resultFuture.get();
                 Throwable cause =
@@ -224,15 +224,16 @@ public class BlobsCleanupITCase extends TestLogger {
                                                 throwable.deserializeError(
                                                         getClass().getClassLoader()))
                                 .orElse(null);
-                assertThat(
-                        ExceptionUtils.stringifyException(cause), jobResult.isSuccess(), is(true));
+                assertThat(jobResult.isSuccess())
+                        .as(ExceptionUtils.stringifyException(cause))
+                        .isEqualTo(true);
             }
         }
 
         // both BlobServer and BlobCache should eventually delete all files
 
         File[] blobDirs = blobBaseDir.listFiles((dir, name) -> name.startsWith("blobStore-"));
-        assertNotNull(blobDirs);
+        assertThat(blobDirs).isNotNull();
         for (File blobDir : blobDirs) {
             waitForEmptyBlobDir(blobDir, timeout.timeLeft());
         }

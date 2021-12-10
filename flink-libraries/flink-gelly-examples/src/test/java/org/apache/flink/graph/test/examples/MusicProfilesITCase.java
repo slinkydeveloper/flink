@@ -25,7 +25,6 @@ import org.apache.flink.test.util.TestBaseUtils;
 import org.apache.flink.util.FileUtils;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -36,6 +35,8 @@ import org.junit.runners.Parameterized;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link MusicProfiles}. */
 @RunWith(Parameterized.class)
@@ -96,19 +97,16 @@ public class MusicProfilesITCase extends MultipleProgramsTestBase {
         Arrays.sort(result);
 
         // check that user_1 and user_2 are in the same community
-        Assert.assertEquals(
-                "users 1 and 2 are not in the same community",
-                result[0].substring(7),
-                result[1].substring(7));
+        assertThat(result[1].substring(7))
+                .as("users 1 and 2 are not in the same community")
+                .isEqualTo(result[0].substring(7));
 
         // check that user_3, user_4 and user_5 are in the same community
-        Assert.assertEquals(
-                "users 3 and 4 are not in the same community",
-                result[2].substring(7),
-                result[3].substring(7));
-        Assert.assertEquals(
-                "users 4 and 5 are not in the same community",
-                result[3].substring(7),
-                result[4].substring(7));
+        assertThat(result[3].substring(7))
+                .as("users 3 and 4 are not in the same community")
+                .isEqualTo(result[2].substring(7));
+        assertThat(result[4].substring(7))
+                .as("users 4 and 5 are not in the same community")
+                .isEqualTo(result[3].substring(7));
     }
 }

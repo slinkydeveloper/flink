@@ -53,8 +53,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.apache.flink.runtime.testutils.CommonTestUtils.getJavaCommandPath;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Abstract base for tests verifying the behavior of the recovery in the case when a TaskManager
@@ -196,7 +196,7 @@ public abstract class AbstractTaskManagerProcessFailureRecoveryTest extends Test
             programTrigger.join(300000);
 
             // check that the program really finished
-            assertFalse("The program did not finish in time", programTrigger.isAlive());
+            assertThat(programTrigger.isAlive()).as("The program did not finish in time").isFalse();
 
             // check whether the program encountered an error
             if (errorRef.get() != null) {

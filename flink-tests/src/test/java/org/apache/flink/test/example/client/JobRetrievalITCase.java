@@ -43,8 +43,8 @@ import org.junit.Test;
 import java.util.Optional;
 import java.util.concurrent.Semaphore;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests retrieval of a job from a running Flink cluster. */
 public class JobRetrievalITCase extends TestLogger {
@@ -97,7 +97,7 @@ public class JobRetrievalITCase extends TestLogger {
                 new CheckedThread("Flink-Job-Retriever") {
                     @Override
                     public void go() throws Exception {
-                        assertNotNull(client.requestJobResult(jobId).get());
+                        assertThat(client.requestJobResult(jobId).get()).isNotNull();
                     }
                 };
 
@@ -126,7 +126,7 @@ public class JobRetrievalITCase extends TestLogger {
 
         try {
             client.requestJobResult(jobID).get();
-            fail();
+            fail("unknown failure");
         } catch (Exception exception) {
             Optional<Throwable> expectedCause =
                     ExceptionUtils.findThrowable(

@@ -18,12 +18,11 @@
 
 package org.apache.flink.core.memory;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ByteArrayInputStreamWithPos}. */
 public class ByteArrayInputStreamWithPosTest {
@@ -43,7 +42,7 @@ public class ByteArrayInputStreamWithPosTest {
     @Test
     public void testGetWithNegativeLength() {
         int read = stream.read(new byte[0], 0, -1);
-        assertEquals(0, read);
+        assertThat(read).isEqualTo(0);
     }
 
     @Test
@@ -56,33 +55,33 @@ public class ByteArrayInputStreamWithPosTest {
     public void testGetWithEOF() {
         drainStream(stream);
         int read = stream.read(new byte[1], 0, 1);
-        assertEquals(-1, read);
+        assertThat(read).isEqualTo(-1);
     }
 
     @Test
     public void testGetMoreThanAvailable() {
         int read = stream.read(new byte[20], 0, 20);
-        assertEquals(10, read);
-        assertEquals(-1, stream.read()); // exhausted now
+        assertThat(read).isEqualTo(10);
+        assertThat(stream.read()).isEqualTo(-1); // exhausted now
     }
 
     /** Test setting position on a {@link ByteArrayInputStreamWithPos}. */
     @Test
     public void testSetPosition() throws Exception {
-        Assert.assertEquals(data.length, stream.available());
-        Assert.assertEquals('0', stream.read());
+        assertThat(stream.available()).isEqualTo(data.length);
+        assertThat(stream.read()).isEqualTo('0');
 
         stream.setPosition(1);
-        Assert.assertEquals(data.length - 1, stream.available());
-        Assert.assertEquals('1', stream.read());
+        assertThat(stream.available()).isEqualTo(data.length - 1);
+        assertThat(stream.read()).isEqualTo('1');
 
         stream.setPosition(3);
-        Assert.assertEquals(data.length - 3, stream.available());
-        Assert.assertEquals('3', stream.read());
+        assertThat(stream.available()).isEqualTo(data.length - 3);
+        assertThat(stream.read()).isEqualTo('3');
 
         stream.setPosition(data.length);
-        Assert.assertEquals(0, stream.available());
-        Assert.assertEquals(-1, stream.read());
+        assertThat(stream.available()).isEqualTo(0);
+        assertThat(stream.read()).isEqualTo(-1);
     }
 
     /** Test that the expected position exceeds the capacity of the byte array. */
@@ -104,15 +103,15 @@ public class ByteArrayInputStreamWithPosTest {
     @Test
     public void testSetBuffer() {
         ByteArrayInputStreamWithPos in = new ByteArrayInputStreamWithPos();
-        Assert.assertEquals(-1, in.read());
+        assertThat(in.read()).isEqualTo(-1);
         byte[] testData = new byte[] {0x42, 0x43, 0x44, 0x45};
         int off = 1;
         int len = 2;
         in.setBuffer(testData, off, len);
         for (int i = 0; i < len; ++i) {
-            Assert.assertEquals(testData[i + off], in.read());
+            assertThat(in.read()).isEqualTo(testData[i + off]);
         }
-        Assert.assertEquals(-1, in.read());
+        assertThat(in.read()).isEqualTo(-1);
     }
 
     private static int drainStream(ByteArrayInputStreamWithPos stream) {

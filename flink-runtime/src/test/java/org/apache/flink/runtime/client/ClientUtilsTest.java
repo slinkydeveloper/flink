@@ -44,7 +44,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link ClientUtils}. */
 public class ClientUtilsTest extends TestLogger {
@@ -81,8 +81,8 @@ public class ClientUtilsTest extends TestLogger {
 
         jars.forEach(jobGraph::addJar);
 
-        assertEquals(jars.size(), jobGraph.getUserJars().size());
-        assertEquals(0, jobGraph.getUserJarBlobKeys().size());
+        assertThat(jobGraph.getUserJars().size()).isEqualTo(jars.size());
+        assertThat(jobGraph.getUserJarBlobKeys().size()).isEqualTo(0);
 
         ClientUtils.extractAndUploadJobGraphFiles(
                 jobGraph,
@@ -91,9 +91,10 @@ public class ClientUtilsTest extends TestLogger {
                                 new InetSocketAddress("localhost", blobServer.getPort()),
                                 new Configuration()));
 
-        assertEquals(jars.size(), jobGraph.getUserJars().size());
-        assertEquals(jars.size(), jobGraph.getUserJarBlobKeys().size());
-        assertEquals(jars.size(), jobGraph.getUserJarBlobKeys().stream().distinct().count());
+        assertThat(jobGraph.getUserJars().size()).isEqualTo(jars.size());
+        assertThat(jobGraph.getUserJarBlobKeys().size()).isEqualTo(jars.size());
+        assertThat(jobGraph.getUserJarBlobKeys().stream().distinct().count())
+                .isEqualTo(jars.size());
 
         for (PermanentBlobKey blobKey : jobGraph.getUserJarBlobKeys()) {
             blobServer.getFile(jobGraph.getJobID(), blobKey);
@@ -130,12 +131,12 @@ public class ClientUtilsTest extends TestLogger {
 
         final int totalNumArtifacts = localArtifacts.size() + distributedArtifacts.size();
 
-        assertEquals(totalNumArtifacts, jobGraph.getUserArtifacts().size());
-        assertEquals(
-                0,
-                jobGraph.getUserArtifacts().values().stream()
-                        .filter(entry -> entry.blobKey != null)
-                        .count());
+        assertThat(jobGraph.getUserArtifacts().size()).isEqualTo(totalNumArtifacts);
+        assertThat(
+                        jobGraph.getUserArtifacts().values().stream()
+                                .filter(entry -> entry.blobKey != null)
+                                .count())
+                .isEqualTo(0);
 
         ClientUtils.extractAndUploadJobGraphFiles(
                 jobGraph,
@@ -144,24 +145,24 @@ public class ClientUtilsTest extends TestLogger {
                                 new InetSocketAddress("localhost", blobServer.getPort()),
                                 new Configuration()));
 
-        assertEquals(totalNumArtifacts, jobGraph.getUserArtifacts().size());
-        assertEquals(
-                localArtifacts.size(),
-                jobGraph.getUserArtifacts().values().stream()
-                        .filter(entry -> entry.blobKey != null)
-                        .count());
-        assertEquals(
-                distributedArtifacts.size(),
-                jobGraph.getUserArtifacts().values().stream()
-                        .filter(entry -> entry.blobKey == null)
-                        .count());
+        assertThat(jobGraph.getUserArtifacts().size()).isEqualTo(totalNumArtifacts);
+        assertThat(
+                        jobGraph.getUserArtifacts().values().stream()
+                                .filter(entry -> entry.blobKey != null)
+                                .count())
+                .isEqualTo(localArtifacts.size());
+        assertThat(
+                        jobGraph.getUserArtifacts().values().stream()
+                                .filter(entry -> entry.blobKey == null)
+                                .count())
+                .isEqualTo(distributedArtifacts.size());
         // 1 unique key for each local artifact, and null for distributed artifacts
-        assertEquals(
-                localArtifacts.size() + 1,
-                jobGraph.getUserArtifacts().values().stream()
-                        .map(entry -> entry.blobKey)
-                        .distinct()
-                        .count());
+        assertThat(
+                        jobGraph.getUserArtifacts().values().stream()
+                                .map(entry -> entry.blobKey)
+                                .distinct()
+                                .count())
+                .isEqualTo(localArtifacts.size() + 1);
         for (DistributedCache.DistributedCacheEntry original : localArtifacts) {
             assertState(
                     original,
@@ -184,10 +185,10 @@ public class ClientUtilsTest extends TestLogger {
             boolean isBlobKeyNull,
             JobID jobId)
             throws Exception {
-        assertEquals(original.isZipped, actual.isZipped);
-        assertEquals(original.isExecutable, actual.isExecutable);
-        assertEquals(original.filePath, actual.filePath);
-        assertEquals(isBlobKeyNull, actual.blobKey == null);
+        assertThat(actual.isZipped).isEqualTo(original.isZipped);
+        assertThat(actual.isExecutable).isEqualTo(original.isExecutable);
+        assertThat(actual.filePath).isEqualTo(original.filePath);
+        assertThat(actual.blobKey == null).isEqualTo(isBlobKeyNull);
         if (!isBlobKeyNull) {
             blobServer.getFile(
                     jobId,

@@ -26,7 +26,8 @@ import org.slf4j.Logger;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class EnvironmentInformationTest extends TestLogger {
 
@@ -36,15 +37,15 @@ public class EnvironmentInformationTest extends TestLogger {
             long fullHeap = EnvironmentInformation.getMaxJvmHeapMemory();
             long freeWithGC = EnvironmentInformation.getSizeOfFreeHeapMemoryWithDefrag();
 
-            assertTrue(fullHeap > 0);
-            assertTrue(freeWithGC >= 0);
+            assertThat(fullHeap > 0).isTrue();
+            assertThat(freeWithGC >= 0).isTrue();
 
             try {
                 long free = EnvironmentInformation.getSizeOfFreeHeapMemory();
-                assertTrue(free >= 0);
+                assertThat(free >= 0).isTrue();
             } catch (RuntimeException e) {
                 // this may only occur if the Xmx is not set
-                assertEquals(Long.MAX_VALUE, EnvironmentInformation.getMaxJvmHeapMemory());
+                assertThat(EnvironmentInformation.getMaxJvmHeapMemory()).isEqualTo(Long.MAX_VALUE);
             }
 
             // we cannot make these assumptions, because the test JVM may grow / shrink during the
@@ -60,21 +61,21 @@ public class EnvironmentInformationTest extends TestLogger {
     @Test
     public void testEnvironmentMethods() {
         try {
-            assertNotNull(EnvironmentInformation.getJvmStartupOptions());
-            assertNotNull(EnvironmentInformation.getJvmStartupOptionsArray());
-            assertNotNull(EnvironmentInformation.getJvmVersion());
-            assertNotNull(EnvironmentInformation.getRevisionInformation());
-            assertNotNull(EnvironmentInformation.getVersion());
-            assertNotNull(EnvironmentInformation.getScalaVersion());
-            assertNotNull(EnvironmentInformation.getBuildTime());
-            assertNotNull(EnvironmentInformation.getBuildTimeString());
-            assertNotNull(EnvironmentInformation.getGitCommitId());
-            assertNotNull(EnvironmentInformation.getGitCommitIdAbbrev());
-            assertNotNull(EnvironmentInformation.getGitCommitTime());
-            assertNotNull(EnvironmentInformation.getGitCommitTimeString());
+            assertThat(EnvironmentInformation.getJvmStartupOptions()).isNotNull();
+            assertThat(EnvironmentInformation.getJvmStartupOptionsArray()).isNotNull();
+            assertThat(EnvironmentInformation.getJvmVersion()).isNotNull();
+            assertThat(EnvironmentInformation.getRevisionInformation()).isNotNull();
+            assertThat(EnvironmentInformation.getVersion()).isNotNull();
+            assertThat(EnvironmentInformation.getScalaVersion()).isNotNull();
+            assertThat(EnvironmentInformation.getBuildTime()).isNotNull();
+            assertThat(EnvironmentInformation.getBuildTimeString()).isNotNull();
+            assertThat(EnvironmentInformation.getGitCommitId()).isNotNull();
+            assertThat(EnvironmentInformation.getGitCommitIdAbbrev()).isNotNull();
+            assertThat(EnvironmentInformation.getGitCommitTime()).isNotNull();
+            assertThat(EnvironmentInformation.getGitCommitTimeString()).isNotNull();
             EnvironmentInformation.getHadoopVersionString();
-            assertNotNull(EnvironmentInformation.getHadoopUser());
-            assertTrue(EnvironmentInformation.getOpenFileHandlesLimit() >= -1);
+            assertThat(EnvironmentInformation.getHadoopUser()).isNotNull();
+            assertThat(EnvironmentInformation.getOpenFileHandlesLimit() >= -1).isTrue();
 
             if (log.isInfoEnabled()) {
                 // Visual inspection of the available Environment variables

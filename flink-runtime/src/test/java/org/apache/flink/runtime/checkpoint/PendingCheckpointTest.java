@@ -41,7 +41,6 @@ import org.apache.flink.runtime.state.filesystem.FsCheckpointStorageLocation;
 import org.apache.flink.runtime.state.memory.ByteStreamStateHandle;
 import org.apache.flink.util.concurrent.Executors;
 
-import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -65,13 +64,11 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledFuture;
 
 import static org.apache.flink.util.Preconditions.checkNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.HamcrestCondition.matching;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -123,7 +120,7 @@ public class PendingCheckpointTest {
                 new CheckpointProperties(
                         true, CheckpointType.SAVEPOINT, false, false, false, false, false);
         PendingCheckpoint pending = createPendingCheckpoint(forced);
-        assertFalse(pending.canBeSubsumed());
+        assertThat(pending.canBeSubsumed()).isFalse();
 
         try {
             abort(pending, CheckpointFailureReason.CHECKPOINT_SUBSUMED);
@@ -137,7 +134,7 @@ public class PendingCheckpointTest {
                 new CheckpointProperties(
                         false, CheckpointType.SAVEPOINT, false, false, false, false, false);
         pending = createPendingCheckpoint(subsumed);
-        assertFalse(pending.canBeSubsumed());
+        assertThat(pending.canBeSubsumed()).isFalse();
     }
 
     @Test
@@ -145,7 +142,7 @@ public class PendingCheckpointTest {
         // Forced checkpoints cannot be subsumed
         CheckpointProperties forced = CheckpointProperties.forSyncSavepoint(true, false);
         PendingCheckpoint pending = createPendingCheckpoint(forced);
-        assertFalse(pending.canBeSubsumed());
+        assertThat(pending.canBeSubsumed()).isFalse();
 
         try {
             abort(pending, CheckpointFailureReason.CHECKPOINT_SUBSUMED);
@@ -169,42 +166,42 @@ public class PendingCheckpointTest {
         PendingCheckpoint pending = createPendingCheckpoint(props);
         CompletableFuture<CompletedCheckpoint> future = pending.getCompletionFuture();
 
-        assertFalse(future.isDone());
+        assertThat(future.isDone()).isFalse();
         abort(pending, CheckpointFailureReason.CHECKPOINT_DECLINED);
-        assertTrue(future.isDone());
+        assertThat(future.isDone()).isTrue();
 
         // Abort expired
         pending = createPendingCheckpoint(props);
         future = pending.getCompletionFuture();
 
-        assertFalse(future.isDone());
+        assertThat(future.isDone()).isFalse();
         abort(pending, CheckpointFailureReason.CHECKPOINT_DECLINED);
-        assertTrue(future.isDone());
+        assertThat(future.isDone()).isTrue();
 
         // Abort subsumed
         pending = createPendingCheckpoint(props);
         future = pending.getCompletionFuture();
 
-        assertFalse(future.isDone());
+        assertThat(future.isDone()).isFalse();
         abort(pending, CheckpointFailureReason.CHECKPOINT_DECLINED);
-        assertTrue(future.isDone());
+        assertThat(future.isDone()).isTrue();
 
         // Finalize (all ACK'd)
         pending = createPendingCheckpoint(props);
         future = pending.getCompletionFuture();
 
-        assertFalse(future.isDone());
+        assertThat(future.isDone()).isFalse();
         pending.acknowledgeTask(ATTEMPT_ID, null, new CheckpointMetrics(), null);
-        assertTrue(pending.areTasksFullyAcknowledged());
+        assertThat(pending.areTasksFullyAcknowledged()).isTrue();
         pending.finalizeCheckpoint(
                 new CheckpointsCleaner(), () -> {}, Executors.directExecutor(), null);
-        assertTrue(future.isDone());
+        assertThat(future.isDone()).isTrue();
 
         // Finalize (missing ACKs)
         pending = createPendingCheckpoint(props);
         future = pending.getCompletionFuture();
 
-        assertFalse(future.isDone());
+        assertThat(future.isDone()).isFalse();
         try {
             pending.finalizeCheckpoint(
                     new CheckpointsCleaner(), () -> {}, Executors.directExecutor(), null);
@@ -352,8 +349,8 @@ public class PendingCheckpointTest {
         pending.acknowledgeTask(ATTEMPT_ID, null, mock(CheckpointMetrics.class), null);
         final OperatorState expectedState =
                 new OperatorState(OPERATOR_ID, PARALLELISM, MAX_PARALLELISM);
-        Assert.assertEquals(
-                Collections.singletonMap(OPERATOR_ID, expectedState), pending.getOperatorStates());
+        assertThat(pending.getOperatorStates())
+                .isEqualTo(Collections.singletonMap(OPERATOR_ID, expectedState));
     }
 
     /**
@@ -371,7 +368,7 @@ public class PendingCheckpointTest {
                                 CheckpointRetentionPolicy.NEVER_RETAIN_AFTER_TERMINATION));
         pending.acknowledgeTask(
                 ATTEMPT_ID, mock(TaskStateSnapshot.class), mock(CheckpointMetrics.class), null);
-        Assert.assertFalse(pending.getOperatorStates().isEmpty());
+        assertThat(pending.getOperatorStates().isEmpty()).isFalse();
     }
 
     @Test
@@ -382,13 +379,13 @@ public class PendingCheckpointTest {
 
         PendingCheckpoint aborted = createPendingCheckpoint(props);
         abort(aborted, CheckpointFailureReason.CHECKPOINT_DECLINED);
-        assertTrue(aborted.isDisposed());
-        assertFalse(aborted.setCancellerHandle(mock(ScheduledFuture.class)));
+        assertThat(aborted.isDisposed()).isTrue();
+        assertThat(aborted.setCancellerHandle(mock(ScheduledFuture.class))).isFalse();
 
         PendingCheckpoint pending = createPendingCheckpoint(props);
         ScheduledFuture<?> canceller = mock(ScheduledFuture.class);
 
-        assertTrue(pending.setCancellerHandle(canceller));
+        assertThat(pending.setCancellerHandle(canceller)).isTrue();
         abort(pending, CheckpointFailureReason.CHECKPOINT_DECLINED);
         verify(canceller).cancel(false);
     }
@@ -414,19 +411,19 @@ public class PendingCheckpointTest {
                         .get();
 
         pending.acknowledgeMasterState(masterHook.getIdentifier(), masterState);
-        assertTrue(pending.areMasterStatesFullyAcknowledged());
-        assertFalse(pending.areTasksFullyAcknowledged());
+        assertThat(pending.areMasterStatesFullyAcknowledged()).isTrue();
+        assertThat(pending.areTasksFullyAcknowledged()).isFalse();
 
         pending.acknowledgeTask(ATTEMPT_ID, null, new CheckpointMetrics(), null);
-        assertTrue(pending.areTasksFullyAcknowledged());
+        assertThat(pending.areTasksFullyAcknowledged()).isTrue();
 
         final List<MasterState> resultMasterStates = pending.getMasterStates();
-        assertEquals(1, resultMasterStates.size());
+        assertThat(resultMasterStates.size()).isEqualTo(1);
         final String deserializedState =
                 masterHook
                         .createCheckpointDataSerializer()
                         .deserialize(StringSerializer.VERSION, resultMasterStates.get(0).bytes());
-        assertEquals("state", deserializedState);
+        assertThat(deserializedState).isEqualTo("state");
     }
 
     @Test
@@ -457,7 +454,7 @@ public class PendingCheckpointTest {
                         .get();
 
         pending.acknowledgeMasterState(masterHook.getIdentifier(), masterStateNormal);
-        assertFalse(pending.areMasterStatesFullyAcknowledged());
+        assertThat(pending.areMasterStatesFullyAcknowledged()).isFalse();
 
         final MasterState masterStateNull =
                 MasterHooks.triggerHook(
@@ -467,19 +464,19 @@ public class PendingCheckpointTest {
                                 Executors.directExecutor())
                         .get();
         pending.acknowledgeMasterState(nullableMasterHook.getIdentifier(), masterStateNull);
-        assertTrue(pending.areMasterStatesFullyAcknowledged());
-        assertFalse(pending.areTasksFullyAcknowledged());
+        assertThat(pending.areMasterStatesFullyAcknowledged()).isTrue();
+        assertThat(pending.areTasksFullyAcknowledged()).isFalse();
 
         pending.acknowledgeTask(ATTEMPT_ID, null, new CheckpointMetrics(), null);
-        assertTrue(pending.areTasksFullyAcknowledged());
+        assertThat(pending.areTasksFullyAcknowledged()).isTrue();
 
         final List<MasterState> resultMasterStates = pending.getMasterStates();
-        assertEquals(1, resultMasterStates.size());
+        assertThat(resultMasterStates.size()).isEqualTo(1);
         final String deserializedState =
                 masterHook
                         .createCheckpointDataSerializer()
                         .deserialize(StringSerializer.VERSION, resultMasterStates.get(0).bytes());
-        assertEquals("state", deserializedState);
+        assertThat(deserializedState).isEqualTo("state");
     }
 
     @Test
@@ -488,8 +485,8 @@ public class PendingCheckpointTest {
                 createPendingCheckpointWithCoordinators(
                         new TestingOperatorInfo(), new TestingOperatorInfo());
 
-        assertEquals(2, checkpoint.getNumberOfNonAcknowledgedOperatorCoordinators());
-        assertFalse(checkpoint.isFullyAcknowledged());
+        assertThat(checkpoint.getNumberOfNonAcknowledgedOperatorCoordinators()).isEqualTo(2);
+        assertThat(checkpoint.isFullyAcknowledged()).isFalse();
     }
 
     @Test
@@ -503,13 +500,15 @@ public class PendingCheckpointTest {
                 checkpoint.acknowledgeCoordinatorState(coord1, new TestingStreamStateHandle());
         final TaskAcknowledgeResult ack2 = checkpoint.acknowledgeCoordinatorState(coord2, null);
 
-        assertEquals(TaskAcknowledgeResult.SUCCESS, ack1);
-        assertEquals(TaskAcknowledgeResult.SUCCESS, ack2);
-        assertEquals(0, checkpoint.getNumberOfNonAcknowledgedOperatorCoordinators());
-        assertTrue(checkpoint.isFullyAcknowledged());
-        assertThat(
-                checkpoint.getOperatorStates().keySet(),
-                containsInAnyOrder(OPERATOR_ID, coord1.operatorId(), coord2.operatorId()));
+        assertThat(ack1).isEqualTo(TaskAcknowledgeResult.SUCCESS);
+        assertThat(ack2).isEqualTo(TaskAcknowledgeResult.SUCCESS);
+        assertThat(checkpoint.getNumberOfNonAcknowledgedOperatorCoordinators()).isEqualTo(0);
+        assertThat(checkpoint.isFullyAcknowledged()).isTrue();
+        assertThat(checkpoint.getOperatorStates().keySet())
+                .satisfies(
+                        matching(
+                                containsInAnyOrder(
+                                        OPERATOR_ID, coord1.operatorId(), coord2.operatorId())));
     }
 
     @Test
@@ -521,7 +520,7 @@ public class PendingCheckpointTest {
         final TaskAcknowledgeResult secondAck =
                 checkpoint.acknowledgeCoordinatorState(coordinator, null);
 
-        assertEquals(TaskAcknowledgeResult.DUPLICATE, secondAck);
+        assertThat(secondAck).isEqualTo(TaskAcknowledgeResult.DUPLICATE);
     }
 
     @Test
@@ -532,7 +531,7 @@ public class PendingCheckpointTest {
         final TaskAcknowledgeResult ack =
                 checkpoint.acknowledgeCoordinatorState(new TestingOperatorInfo(), null);
 
-        assertEquals(TaskAcknowledgeResult.UNKNOWN, ack);
+        assertThat(ack).isEqualTo(TaskAcknowledgeResult.UNKNOWN);
     }
 
     @Test
@@ -544,8 +543,8 @@ public class PendingCheckpointTest {
 
         abort(checkpoint, CheckpointFailureReason.CHECKPOINT_EXPIRED);
 
-        assertTrue(handle1.isDisposed());
-        assertTrue(handle2.isDisposed());
+        assertThat(handle1.isDisposed()).isTrue();
+        assertThat(handle2.isDisposed()).isTrue();
     }
 
     @Test
@@ -558,9 +557,8 @@ public class PendingCheckpointTest {
                 TaskStateSnapshot.FINISHED_ON_RESTORE,
                 new CheckpointMetrics(),
                 null);
-        assertThat(
-                recordCheckpointPlan.getReportedFinishedOnRestoreTasks(),
-                contains(ACK_TASKS.get(0).getVertex()));
+        assertThat(recordCheckpointPlan.getReportedFinishedOnRestoreTasks())
+                .satisfies(matching(contains(ACK_TASKS.get(0).getVertex())));
     }
 
     @Test
@@ -573,9 +571,8 @@ public class PendingCheckpointTest {
                 new TaskStateSnapshot(10, true),
                 new CheckpointMetrics(),
                 null);
-        assertThat(
-                recordCheckpointPlan.getReportedOperatorsFinishedTasks(),
-                contains(ACK_TASKS.get(0).getVertex()));
+        assertThat(recordCheckpointPlan.getReportedOperatorsFinishedTasks())
+                .satisfies(matching(contains(ACK_TASKS.get(0).getVertex())));
     }
 
     // ------------------------------------------------------------------------

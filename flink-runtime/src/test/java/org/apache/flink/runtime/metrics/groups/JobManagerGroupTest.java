@@ -29,9 +29,7 @@ import org.apache.flink.util.TestLogger;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the {@link JobManagerMetricGroup}. */
 public class JobManagerGroupTest extends TestLogger {
@@ -58,19 +56,19 @@ public class JobManagerGroupTest extends TestLogger {
         JobManagerJobMetricGroup jmJobGroup12 = group.addJob(jid1, jobName1);
         JobManagerJobMetricGroup jmJobGroup21 = group.addJob(jid2, jobName2);
 
-        assertEquals(jmJobGroup11, jmJobGroup12);
+        assertThat(jmJobGroup12).isEqualTo(jmJobGroup11);
 
-        assertEquals(2, group.numRegisteredJobMetricGroups());
+        assertThat(group.numRegisteredJobMetricGroups()).isEqualTo(2);
 
         group.removeJob(jid1);
 
-        assertTrue(jmJobGroup11.isClosed());
-        assertEquals(1, group.numRegisteredJobMetricGroups());
+        assertThat(jmJobGroup11.isClosed()).isTrue();
+        assertThat(group.numRegisteredJobMetricGroups()).isEqualTo(1);
 
         group.removeJob(jid2);
 
-        assertTrue(jmJobGroup21.isClosed());
-        assertEquals(0, group.numRegisteredJobMetricGroups());
+        assertThat(jmJobGroup21.isClosed()).isTrue();
+        assertThat(group.numRegisteredJobMetricGroups()).isEqualTo(0);
 
         registry.shutdown().get();
     }
@@ -94,8 +92,8 @@ public class JobManagerGroupTest extends TestLogger {
 
         group.close();
 
-        assertTrue(jmJobGroup11.isClosed());
-        assertTrue(jmJobGroup21.isClosed());
+        assertThat(jmJobGroup11.isClosed()).isTrue();
+        assertThat(jmJobGroup21.isClosed()).isTrue();
 
         registry.shutdown().get();
     }
@@ -112,8 +110,8 @@ public class JobManagerGroupTest extends TestLogger {
         JobManagerMetricGroup group =
                 JobManagerMetricGroup.createJobManagerMetricGroup(registry, "localhost");
 
-        assertArrayEquals(new String[] {"localhost", "jobmanager"}, group.getScopeComponents());
-        assertEquals("localhost.jobmanager.name", group.getMetricIdentifier("name"));
+        assertThat(group.getScopeComponents()).isEqualTo(new String[] {"localhost", "jobmanager"});
+        assertThat(group.getMetricIdentifier("name")).isEqualTo("localhost.jobmanager.name");
 
         registry.shutdown().get();
     }
@@ -128,9 +126,9 @@ public class JobManagerGroupTest extends TestLogger {
         JobManagerMetricGroup group =
                 JobManagerMetricGroup.createJobManagerMetricGroup(registry, "host");
 
-        assertArrayEquals(
-                new String[] {"constant", "host", "foo", "host"}, group.getScopeComponents());
-        assertEquals("constant.host.foo.host.name", group.getMetricIdentifier("name"));
+        assertThat(group.getScopeComponents())
+                .isEqualTo(new String[] {"constant", "host", "foo", "host"});
+        assertThat(group.getMetricIdentifier("name")).isEqualTo("constant.host.foo.host.name");
 
         registry.shutdown().get();
     }
@@ -145,6 +143,6 @@ public class JobManagerGroupTest extends TestLogger {
 
         QueryScopeInfo.JobManagerQueryScopeInfo info =
                 jm.createQueryServiceMetricInfo(new DummyCharacterFilter());
-        assertEquals("", info.scope);
+        assertThat(info.scope).isEqualTo("");
     }
 }

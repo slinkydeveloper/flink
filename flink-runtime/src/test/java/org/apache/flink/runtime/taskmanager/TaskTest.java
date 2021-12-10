@@ -74,17 +74,9 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.CoreMatchers.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -126,13 +118,13 @@ public class TaskTest extends TestLogger {
     @Test
     public void testCleanupWhenRestoreFails() throws Exception {
         createTaskBuilder().setInvokable(InvokableWithExceptionInRestore.class).build().run();
-        assertTrue(wasCleanedUp);
+        assertThat(wasCleanedUp).isTrue();
     }
 
     @Test
     public void testCleanupWhenInvokeFails() throws Exception {
         createTaskBuilder().setInvokable(InvokableWithExceptionInInvoke.class).build().run();
-        assertTrue(wasCleanedUp);
+        assertThat(wasCleanedUp).isTrue();
     }
 
     @Test
@@ -142,13 +134,13 @@ public class TaskTest extends TestLogger {
         awaitLatch.await();
         task.cancelExecution();
         task.getExecutingThread().join();
-        assertTrue(wasCleanedUp);
+        assertThat(wasCleanedUp).isTrue();
     }
 
     @Test
     public void testCleanupWhenAfterInvokeSucceeded() throws Exception {
         createTaskBuilder().setInvokable(TestInvokableCorrect.class).build().run();
-        assertTrue(wasCleanedUp);
+        assertThat(wasCleanedUp).isTrue();
     }
 
     @Test
@@ -168,7 +160,7 @@ public class TaskTest extends TestLogger {
                         })
                 .build()
                 .run();
-        assertTrue(wasCleanedUp);
+        assertThat(wasCleanedUp).isTrue();
     }
 
     @Test
@@ -181,19 +173,19 @@ public class TaskTest extends TestLogger {
                         .build();
 
         // task should be new and perfect
-        assertEquals(ExecutionState.CREATED, task.getExecutionState());
-        assertFalse(task.isCanceledOrFailed());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CREATED);
+        assertThat(task.isCanceledOrFailed()).isFalse();
+        assertThat(task.getFailureCause()).isNull();
 
         // go into the run method. we should switch to DEPLOYING, RUNNING, then
         // FINISHED, and all should be good
         task.run();
 
         // verify final state
-        assertEquals(ExecutionState.FINISHED, task.getExecutionState());
-        assertFalse(task.isCanceledOrFailed());
-        assertNull(task.getFailureCause());
-        assertNull(task.getInvokable());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FINISHED);
+        assertThat(task.isCanceledOrFailed()).isFalse();
+        assertThat(task.getFailureCause()).isNull();
+        assertThat(task.getInvokable()).isNull();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -205,14 +197,14 @@ public class TaskTest extends TestLogger {
         final Task task = createTaskBuilder().build();
         task.cancelExecution();
 
-        assertEquals(ExecutionState.CANCELING, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELING);
 
         task.run();
 
         // verify final state
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
 
-        assertNull(task.getInvokable());
+        assertThat(task.getInvokable()).isNull();
     }
 
     @Test
@@ -220,12 +212,12 @@ public class TaskTest extends TestLogger {
         final Task task = createTaskBuilder().build();
         task.failExternally(new Exception("fail externally"));
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
 
         task.run();
 
         // verify final state
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
     }
 
     @Test
@@ -245,19 +237,19 @@ public class TaskTest extends TestLogger {
                         .build();
 
         // task should be new and perfect
-        assertEquals(ExecutionState.CREATED, task.getExecutionState());
-        assertFalse(task.isCanceledOrFailed());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CREATED);
+        assertThat(task.isCanceledOrFailed()).isFalse();
+        assertThat(task.getFailureCause()).isNull();
 
         // should fail
         task.run();
 
         // verify final state
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertThat(task.getFailureCause(), is(testException));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause()).isEqualTo(testException);
 
-        assertNull(task.getInvokable());
+        assertThat(task.getInvokable()).isNull();
 
         taskManagerActions.validateListenerMessage(ExecutionState.FAILED, task, testException);
     }
@@ -317,9 +309,9 @@ public class TaskTest extends TestLogger {
         task.run();
 
         // verify final state
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertTrue(task.getFailureCause().getMessage().contains(errorMessage));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage().contains(errorMessage)).isTrue();
 
         taskManagerActions.validateListenerMessage(
                 ExecutionState.FAILED, task, new IllegalStateException(errorMessage));
@@ -338,9 +330,9 @@ public class TaskTest extends TestLogger {
         task.run();
 
         // verify final state
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertTrue(task.getFailureCause().getMessage().contains("instantiate"));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage().contains("instantiate")).isTrue();
 
         taskManagerActions.validateListenerMessage(
                 ExecutionState.FAILED,
@@ -359,11 +351,11 @@ public class TaskTest extends TestLogger {
 
         task.run();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertNotNull(task.getFailureCause());
-        assertNotNull(task.getFailureCause().getMessage());
-        assertThat(task.getFailureCause().getMessage(), containsString(RESTORE_EXCEPTION_MSG));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause()).isNotNull();
+        assertThat(task.getFailureCause().getMessage()).isNotNull();
+        assertThat(task.getFailureCause().getMessage()).contains(RESTORE_EXCEPTION_MSG);
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(
@@ -381,11 +373,11 @@ public class TaskTest extends TestLogger {
 
         task.run();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertNotNull(task.getFailureCause());
-        assertNotNull(task.getFailureCause().getMessage());
-        assertTrue(task.getFailureCause().getMessage().contains("test"));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause()).isNotNull();
+        assertThat(task.getFailureCause().getMessage()).isNotNull();
+        assertThat(task.getFailureCause().getMessage().contains("test")).isTrue();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -404,11 +396,11 @@ public class TaskTest extends TestLogger {
 
         task.run();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
 
         final Throwable cause = task.getFailureCause();
-        assertTrue(cause instanceof IOException);
+        assertThat(cause).isInstanceOf(IOException.class);
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -432,15 +424,16 @@ public class TaskTest extends TestLogger {
         awaitLatch.await();
 
         task.cancelExecution();
-        assertTrue(
-                task.getExecutionState() == ExecutionState.CANCELING
-                        || task.getExecutionState() == ExecutionState.CANCELED);
+        assertThat(
+                        task.getExecutionState() == ExecutionState.CANCELING
+                                || task.getExecutionState() == ExecutionState.CANCELED)
+                .isTrue();
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause()).isNull();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.CANCELED, task, null);
@@ -462,15 +455,16 @@ public class TaskTest extends TestLogger {
         awaitLatch.await();
 
         task.cancelExecution();
-        assertTrue(
-                task.getExecutionState() == ExecutionState.CANCELING
-                        || task.getExecutionState() == ExecutionState.CANCELED);
+        assertThat(
+                        task.getExecutionState() == ExecutionState.CANCELING
+                                || task.getExecutionState() == ExecutionState.CANCELED)
+                .isTrue();
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause()).isNull();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -496,9 +490,9 @@ public class TaskTest extends TestLogger {
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertThat(task.getFailureCause().getMessage(), containsString(RESTORE_EXCEPTION_MSG));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage()).contains(RESTORE_EXCEPTION_MSG);
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(
@@ -524,9 +518,9 @@ public class TaskTest extends TestLogger {
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertTrue(task.getFailureCause().getMessage().contains("test"));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage().contains("test")).isTrue();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -548,9 +542,9 @@ public class TaskTest extends TestLogger {
         // this should not overwrite the failure state
         task.cancelExecution();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertTrue(task.getFailureCause().getMessage().contains("test"));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage().contains("test")).isTrue();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -574,7 +568,7 @@ public class TaskTest extends TestLogger {
         awaitLatch.await();
 
         task.cancelExecution();
-        assertEquals(ExecutionState.CANCELING, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELING);
 
         // this causes an exception
         triggerLatch.trigger();
@@ -582,9 +576,9 @@ public class TaskTest extends TestLogger {
         task.getExecutingThread().join();
 
         // we should still be in state canceled
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertNull(task.getFailureCause());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause()).isNull();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -607,16 +601,16 @@ public class TaskTest extends TestLogger {
         awaitLatch.await();
 
         task.failExternally(new Exception("external"));
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
 
         // this causes an exception
         triggerLatch.trigger();
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertTrue(task.getFailureCause().getMessage().contains("external"));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage().contains("external")).isTrue();
 
         taskManagerActions.validateListenerMessage(ExecutionState.INITIALIZING, task, null);
         taskManagerActions.validateListenerMessage(ExecutionState.RUNNING, task, null);
@@ -636,7 +630,7 @@ public class TaskTest extends TestLogger {
 
         task.run();
 
-        assertEquals(ExecutionState.CANCELED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELED);
     }
 
     @Test
@@ -652,7 +646,7 @@ public class TaskTest extends TestLogger {
         awaitLatch.await();
 
         task.failExternally(new Exception("external"));
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
 
         // Either we cause the CancelTaskException or the TaskCanceler
         // by interrupting the invokable.
@@ -660,9 +654,9 @@ public class TaskTest extends TestLogger {
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.FAILED, task.getExecutionState());
-        assertTrue(task.isCanceledOrFailed());
-        assertTrue(task.getFailureCause().getMessage().contains("external"));
+        assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
+        assertThat(task.isCanceledOrFailed()).isTrue();
+        assertThat(task.getFailureCause().getMessage().contains("external")).isTrue();
     }
 
     @Test
@@ -717,10 +711,10 @@ public class TaskTest extends TestLogger {
 
             ExecutionState newTaskState = task.getExecutionState();
 
-            assertEquals(expected.get(state), newTaskState);
+            assertThat(newTaskState).isEqualTo(expected.get(state));
         }
 
-        assertEquals(5, producingStateCounter);
+        assertThat(producingStateCounter).isEqualTo(5);
     }
 
     /** Tests the trigger partition state update future completions. */
@@ -765,12 +759,12 @@ public class TaskTest extends TestLogger {
                     partitionId,
                     checkResult ->
                             assertThat(
-                                    remoteChannelStateChecker.isProducerReadyOrAbortConsumption(
-                                            checkResult),
-                                    is(false)));
+                                            remoteChannelStateChecker
+                                                    .isProducerReadyOrAbortConsumption(checkResult))
+                                    .isEqualTo(false));
 
             promise.completeExceptionally(new PartitionProducerDisposedException(partitionId));
-            assertEquals(ExecutionState.CANCELING, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.CANCELING);
         }
 
         {
@@ -797,13 +791,13 @@ public class TaskTest extends TestLogger {
                     partitionId,
                     checkResult ->
                             assertThat(
-                                    remoteChannelStateChecker.isProducerReadyOrAbortConsumption(
-                                            checkResult),
-                                    is(false)));
+                                            remoteChannelStateChecker
+                                                    .isProducerReadyOrAbortConsumption(checkResult))
+                                    .isEqualTo(false));
 
             promise.completeExceptionally(new RuntimeException("Any other exception"));
 
-            assertEquals(ExecutionState.FAILED, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.FAILED);
         }
 
         {
@@ -843,9 +837,9 @@ public class TaskTest extends TestLogger {
 
                 promise.completeExceptionally(new TimeoutException());
 
-                assertEquals(ExecutionState.RUNNING, task.getExecutionState());
+                assertThat(task.getExecutionState()).isEqualTo(ExecutionState.RUNNING);
 
-                assertEquals(1, callCount.get());
+                assertThat(callCount.get()).isEqualTo(1);
             } finally {
                 task.getExecutingThread().interrupt();
                 task.getExecutingThread().join();
@@ -888,9 +882,9 @@ public class TaskTest extends TestLogger {
 
                 promise.complete(ExecutionState.RUNNING);
 
-                assertEquals(ExecutionState.RUNNING, task.getExecutionState());
+                assertThat(task.getExecutionState()).isEqualTo(ExecutionState.RUNNING);
 
-                assertEquals(1, callCount.get());
+                assertThat(callCount.get()).isEqualTo(1);
             } finally {
                 task.getExecutingThread().interrupt();
                 task.getExecutingThread().join();
@@ -985,7 +979,7 @@ public class TaskTest extends TestLogger {
 
             // wait for the notification of notifyFatalError
             final Throwable fatalError = fatalErrorFuture.join();
-            assertThat(fatalError, is(notNullValue()));
+            assertThat(fatalError).isEqualTo(notNullValue());
         } finally {
             // Interrupt again to clean up Thread
             triggerLatch.trigger();
@@ -1030,7 +1024,7 @@ public class TaskTest extends TestLogger {
 
             // wait for the notification of notifyFatalError
             final Throwable fatalError = fatalErrorFuture.join();
-            assertThat(fatalError, instanceOf(fatalErrorType));
+            assertThat(fatalError).isInstanceOf(fatalErrorType);
         } finally {
             triggerLatch.trigger();
         }
@@ -1057,17 +1051,17 @@ public class TaskTest extends TestLogger {
                         .setExecutionConfig(executionConfig)
                         .build();
 
-        assertEquals(interval, task.getTaskCancellationInterval());
-        assertEquals(timeout, task.getTaskCancellationTimeout());
+        assertThat(task.getTaskCancellationInterval()).isEqualTo(interval);
+        assertThat(task.getTaskCancellationTimeout()).isEqualTo(timeout);
 
         task.startTaskThread();
 
         awaitLatch.await();
 
-        assertEquals(
-                executionConfig.getTaskCancellationInterval(), task.getTaskCancellationInterval());
-        assertEquals(
-                executionConfig.getTaskCancellationTimeout(), task.getTaskCancellationTimeout());
+        assertThat(task.getTaskCancellationInterval())
+                .isEqualTo(executionConfig.getTaskCancellationInterval());
+        assertThat(task.getTaskCancellationTimeout())
+                .isEqualTo(executionConfig.getTaskCancellationTimeout());
 
         task.getExecutingThread().interrupt();
         task.getExecutingThread().join();
@@ -1087,13 +1081,13 @@ public class TaskTest extends TestLogger {
         // wait till the task is in invoke
         awaitLatch.await();
 
-        assertFalse(task.getTerminationFuture().isDone());
+        assertThat(task.getTerminationFuture().isDone()).isFalse();
 
         triggerLatch.trigger();
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.FINISHED, task.getTerminationFuture().getNow(null));
+        assertThat(task.getTerminationFuture().getNow(null)).isEqualTo(ExecutionState.FINISHED);
     }
 
     @Test
@@ -1106,14 +1100,14 @@ public class TaskTest extends TestLogger {
 
         task.cancelExecution();
 
-        assertFalse(task.getTerminationFuture().isDone());
+        assertThat(task.getTerminationFuture().isDone()).isFalse();
 
         // run the task asynchronous
         task.startTaskThread();
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.CANCELED, task.getTerminationFuture().getNow(null));
+        assertThat(task.getTerminationFuture().getNow(null)).isEqualTo(ExecutionState.CANCELED);
     }
 
     @Test
@@ -1129,13 +1123,13 @@ public class TaskTest extends TestLogger {
 
         task.getExecutingThread().join();
 
-        assertEquals(ExecutionState.FAILED, task.getTerminationFuture().getNow(null));
+        assertThat(task.getTerminationFuture().getNow(null)).isEqualTo(ExecutionState.FAILED);
     }
 
     @Test
     public void testNoBackPressureIfTaskNotStarted() throws Exception {
         final Task task = createTaskBuilder().build();
-        assertFalse(task.isBackPressured());
+        assertThat(task.isBackPressured()).isFalse();
     }
 
     @Test
@@ -1155,7 +1149,7 @@ public class TaskTest extends TestLogger {
         task.startTaskThread();
         try {
             awaitLatch.await();
-            assertEquals(ExecutionState.RUNNING, task.getExecutionState());
+            assertThat(task.getExecutionState()).isEqualTo(ExecutionState.RUNNING);
 
             assertCheckpointDeclined(
                     task,
@@ -1176,7 +1170,7 @@ public class TaskTest extends TestLogger {
             triggerLatch.trigger();
             task.getExecutingThread().join();
         }
-        assertEquals(ExecutionState.FINISHED, task.getTerminationFuture().getNow(null));
+        assertThat(task.getTerminationFuture().getNow(null)).isEqualTo(ExecutionState.FINISHED);
     }
 
     private void assertCheckpointDeclined(
@@ -1189,16 +1183,16 @@ public class TaskTest extends TestLogger {
                         CheckpointType.CHECKPOINT, CheckpointStorageLocationReference.getDefault());
         task.triggerCheckpointBarrier(checkpointId, 1, checkpointOptions);
 
-        assertEquals(1, testCheckpointResponder.getDeclineReports().size());
-        assertEquals(
-                checkpointId, testCheckpointResponder.getDeclineReports().get(0).getCheckpointId());
-        assertEquals(
-                failureReason,
-                testCheckpointResponder
-                        .getDeclineReports()
-                        .get(0)
-                        .getCause()
-                        .getCheckpointFailureReason());
+        assertThat(testCheckpointResponder.getDeclineReports().size()).isEqualTo(1);
+        assertThat(testCheckpointResponder.getDeclineReports().get(0).getCheckpointId())
+                .isEqualTo(checkpointId);
+        assertThat(
+                        testCheckpointResponder
+                                .getDeclineReports()
+                                .get(0)
+                                .getCause()
+                                .getCheckpointFailureReason())
+                .isEqualTo(failureReason);
 
         testCheckpointResponder.clear();
     }
@@ -1221,16 +1215,16 @@ public class TaskTest extends TestLogger {
                 // we may have to wait for a bit to give the actors time to receive the message
                 // and put it into the queue
                 final TaskExecutionState taskState = queue.take();
-                assertNotNull("There is no additional listener message", state);
+                assertThat(state).as("There is no additional listener message").isNotNull();
 
-                assertEquals(task.getExecutionId(), taskState.getID());
-                assertEquals(state, taskState.getExecutionState());
+                assertThat(taskState.getID()).isEqualTo(task.getExecutionId());
+                assertThat(taskState.getExecutionState()).isEqualTo(state);
 
                 final Throwable t = taskState.getError(getClass().getClassLoader());
                 if (error == null) {
-                    assertNull(t);
+                    assertThat(t).isNull();
                 } else {
-                    assertEquals(error.toString(), t.toString());
+                    assertThat(t.toString()).isEqualTo(error.toString());
                 }
             } catch (InterruptedException e) {
                 fail("interrupted");

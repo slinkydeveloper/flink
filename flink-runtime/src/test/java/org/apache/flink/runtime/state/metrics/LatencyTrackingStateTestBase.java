@@ -43,7 +43,7 @@ import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test base for latency tracking state. */
 public abstract class LatencyTrackingStateTestBase<K> {
@@ -115,13 +115,13 @@ public abstract class LatencyTrackingStateTestBase<K> {
             StateLatencyMetricBase latencyTrackingStateMetric =
                     latencyTrackingState.getLatencyTrackingStateMetric();
 
-            assertEquals(0, latencyTrackingStateMetric.getClearCount());
+            assertThat(latencyTrackingStateMetric.getClearCount()).isEqualTo(0);
 
             setCurrentKey(keyedBackend);
             for (int index = 1; index <= SAMPLE_INTERVAL; index++) {
                 int expectedResult = index == SAMPLE_INTERVAL ? 0 : index;
                 latencyTrackingState.clear();
-                assertEquals(expectedResult, latencyTrackingStateMetric.getClearCount());
+                assertThat(latencyTrackingStateMetric.getClearCount()).isEqualTo(expectedResult);
             }
         } finally {
             if (keyedBackend != null) {

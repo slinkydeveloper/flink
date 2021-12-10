@@ -35,11 +35,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.event.Level;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.hasItem;
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Test for {@link Slf4jReporter}. */
 public class Slf4jReporterTest extends TestLogger {
@@ -73,7 +69,7 @@ public class Slf4jReporterTest extends TestLogger {
         SimpleCounter counter = new SimpleCounter();
         reporter.notifyOfAddedMetric(counter, counterName, metricGroup);
 
-        assertTrue(reporter.getCounters().containsKey(counter));
+        assertThat(reporter.getCounters().containsKey(counter)).isTrue();
 
         String expectedCounterReport =
                 reporter.filterCharacters(SCOPE)
@@ -82,8 +78,7 @@ public class Slf4jReporterTest extends TestLogger {
                         + ": 0";
 
         reporter.report();
-        assertThat(
-                testLoggerResource.getMessages(), hasItem(containsString(expectedCounterReport)));
+        assertThat(testLoggerResource.getMessages()).contains(expectedCounterReport);
     }
 
     @Test
@@ -92,7 +87,7 @@ public class Slf4jReporterTest extends TestLogger {
 
         Gauge<Long> gauge = () -> null;
         reporter.notifyOfAddedMetric(gauge, gaugeName, metricGroup);
-        assertTrue(reporter.getGauges().containsKey(gauge));
+        assertThat(reporter.getGauges().containsKey(gauge)).isTrue();
 
         String expectedGaugeReport =
                 reporter.filterCharacters(SCOPE)
@@ -101,7 +96,7 @@ public class Slf4jReporterTest extends TestLogger {
                         + ": null";
 
         reporter.report();
-        assertThat(testLoggerResource.getMessages(), hasItem(containsString(expectedGaugeReport)));
+        assertThat(testLoggerResource.getMessages()).contains(expectedGaugeReport);
     }
 
     @Test
@@ -110,7 +105,7 @@ public class Slf4jReporterTest extends TestLogger {
 
         Meter meter = new MeterView(5);
         reporter.notifyOfAddedMetric(meter, meterName, metricGroup);
-        assertTrue(reporter.getMeters().containsKey(meter));
+        assertThat(reporter.getMeters().containsKey(meter)).isTrue();
 
         String expectedMeterReport =
                 reporter.filterCharacters(SCOPE)
@@ -119,7 +114,7 @@ public class Slf4jReporterTest extends TestLogger {
                         + ": 0.0";
 
         reporter.report();
-        assertThat(testLoggerResource.getMessages(), hasItem(containsString(expectedMeterReport)));
+        assertThat(testLoggerResource.getMessages()).contains(expectedMeterReport);
     }
 
     @Test
@@ -128,7 +123,7 @@ public class Slf4jReporterTest extends TestLogger {
 
         Histogram histogram = new TestHistogram();
         reporter.notifyOfAddedMetric(histogram, histogramName, metricGroup);
-        assertTrue(reporter.getHistograms().containsKey(histogram));
+        assertThat(reporter.getHistograms().containsKey(histogram)).isTrue();
 
         String expectedHistogramName =
                 reporter.filterCharacters(SCOPE)
@@ -136,14 +131,13 @@ public class Slf4jReporterTest extends TestLogger {
                         + reporter.filterCharacters(histogramName);
 
         reporter.report();
-        assertThat(
-                testLoggerResource.getMessages(), hasItem(containsString(expectedHistogramName)));
+        assertThat(testLoggerResource.getMessages()).contains(expectedHistogramName);
     }
 
     @Test
     public void testFilterCharacters() throws Exception {
-        assertThat(reporter.filterCharacters(""), equalTo(""));
-        assertThat(reporter.filterCharacters("abc"), equalTo("abc"));
-        assertThat(reporter.filterCharacters("a:b$%^::"), equalTo("a:b$%^::"));
+        assertThat(reporter.filterCharacters("")).isEqualTo("");
+        assertThat(reporter.filterCharacters("abc")).isEqualTo("abc");
+        assertThat(reporter.filterCharacters("a:b$%^::")).isEqualTo("a:b$%^::");
     }
 }

@@ -33,13 +33,14 @@ import org.apache.flink.test.operators.util.CollectionDataSets;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The GroupCombine operator is not easy to test because it is essentially just a combiner. The
@@ -289,10 +290,9 @@ public class GroupCombineITCase extends MultipleProgramsTestBase {
         }
         Arrays.sort(resultAsStringArray);
 
-        Assert.assertEquals(
-                "The two arrays were identical.",
-                false,
-                Arrays.equals(localExpected, resultAsStringArray));
+        assertThat(Arrays.equals(localExpected, resultAsStringArray))
+                .as("The two arrays were identical.")
+                .isEqualTo(false);
     }
 
     @Test

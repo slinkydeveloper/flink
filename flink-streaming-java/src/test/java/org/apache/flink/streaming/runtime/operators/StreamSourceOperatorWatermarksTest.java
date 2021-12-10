@@ -51,9 +51,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
 /** Tests for {@link StreamSource} operators. */
@@ -69,8 +68,8 @@ public class StreamSourceOperatorWatermarksTest {
         testHarness.invoke();
         testHarness.waitForTaskCompletion();
 
-        assertEquals(1, testHarness.getOutput().size());
-        assertEquals(Watermark.MAX_WATERMARK, testHarness.getOutput().peek());
+        assertThat(testHarness.getOutput().size()).isEqualTo(1);
+        assertThat(testHarness.getOutput().peek()).isEqualTo(Watermark.MAX_WATERMARK);
     }
 
     @Test
@@ -84,12 +83,12 @@ public class StreamSourceOperatorWatermarksTest {
         testHarness.waitForTaskCompletion();
 
         // sent by source function
-        assertEquals(Watermark.MAX_WATERMARK, testHarness.getOutput().poll());
+        assertThat(testHarness.getOutput().poll()).isEqualTo(Watermark.MAX_WATERMARK);
 
         // sent by framework
-        assertEquals(Watermark.MAX_WATERMARK, testHarness.getOutput().poll());
+        assertThat(testHarness.getOutput().poll()).isEqualTo(Watermark.MAX_WATERMARK);
 
-        assertTrue(testHarness.getOutput().isEmpty());
+        assertThat(testHarness.getOutput().isEmpty()).isTrue();
     }
 
     @Test
@@ -107,7 +106,7 @@ public class StreamSourceOperatorWatermarksTest {
                 throw t;
             }
         }
-        assertTrue(testHarness.getOutput().isEmpty());
+        assertThat(testHarness.getOutput().isEmpty()).isTrue();
     }
 
     @Test
@@ -127,7 +126,7 @@ public class StreamSourceOperatorWatermarksTest {
                 throw t;
             }
         }
-        assertTrue(testHarness.getOutput().isEmpty());
+        assertThat(testHarness.getOutput().isEmpty()).isTrue();
     }
 
     @Test
@@ -167,13 +166,13 @@ public class StreamSourceOperatorWatermarksTest {
             processingTimeService.setCurrentTime(i);
         }
 
-        assertEquals(9, output.size());
+        assertThat(output.size()).isEqualTo(9);
 
         long nextWatermark = 0;
         for (StreamElement el : output) {
             nextWatermark += watermarkInterval;
             Watermark wm = (Watermark) el;
-            assertEquals(wm.getTimestamp(), nextWatermark);
+            assertThat(nextWatermark).isEqualTo(wm.getTimestamp());
         }
     }
 

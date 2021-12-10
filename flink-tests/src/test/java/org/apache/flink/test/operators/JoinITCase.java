@@ -43,7 +43,6 @@ import org.apache.flink.test.operators.util.CollectionDataSets.POJO;
 import org.apache.flink.test.util.MultipleProgramsTestBase;
 import org.apache.flink.util.Collector;
 
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -51,6 +50,8 @@ import org.junit.runners.Parameterized;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Integration tests for {@link JoinFunction} and {@link FlatJoinFunction}. */
 @SuppressWarnings("serial")
@@ -469,7 +470,7 @@ public class JoinITCase extends MultipleProgramsTestBase {
         } catch (InvalidProgramException ex) {
             correctExceptionTriggered = (ex.getCause() instanceof java.io.NotSerializableException);
         }
-        Assert.assertTrue(correctExceptionTriggered);
+        assertThat(correctExceptionTriggered).isTrue();
     }
 
     private static class KeySelector5 implements KeySelector<CustomType, Integer> {

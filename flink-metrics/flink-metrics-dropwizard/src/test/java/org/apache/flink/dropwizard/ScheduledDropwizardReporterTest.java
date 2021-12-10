@@ -36,8 +36,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for the ScheduledDropwizardReporter. */
 public class ScheduledDropwizardReporterTest {
@@ -52,9 +51,9 @@ public class ScheduledDropwizardReporterTest {
                     }
                 };
 
-        assertEquals("abc", reporter.filterCharacters("abc"));
-        assertEquals("a--b-c-", reporter.filterCharacters("a..b.c."));
-        assertEquals("ab-c", reporter.filterCharacters("a\"b.c"));
+        assertThat(reporter.filterCharacters("abc")).isEqualTo("abc");
+        assertThat(reporter.filterCharacters("a..b.c.")).isEqualTo("a--b-c-");
+        assertThat(reporter.filterCharacters("a\"b.c")).isEqualTo("ab-c");
     }
 
     /** Tests that the registered metrics' names don't contain invalid characters. */
@@ -84,17 +83,17 @@ public class ScheduledDropwizardReporterTest {
         reporter.notifyOfAddedMetric(meterWrapper, "meter", metricGroup);
 
         Map<Counter, String> counters = reporter.getCounters();
-        assertTrue(counters.containsKey(myCounter));
+        assertThat(counters.containsKey(myCounter)).isTrue();
 
         Map<Meter, String> meters = reporter.getMeters();
-        assertTrue(meters.containsKey(meterWrapper));
+        assertThat(meters.containsKey(meterWrapper)).isTrue();
 
         String expectedCounterName =
                 reporter.filterCharacters(scope)
                         + delimiter
                         + reporter.filterCharacters(counterName);
 
-        assertEquals(expectedCounterName, counters.get(myCounter));
+        assertThat(counters.get(myCounter)).isEqualTo(expectedCounterName);
     }
 
     /**
@@ -113,36 +112,36 @@ public class ScheduledDropwizardReporterTest {
         Gauge<?> g = () -> null;
 
         rep.notifyOfAddedMetric(c, "counter", mp);
-        assertEquals(1, rep.getCounters().size());
-        assertEquals(1, rep.registry.getCounters().size());
+        assertThat(rep.getCounters().size()).isEqualTo(1);
+        assertThat(rep.registry.getCounters().size()).isEqualTo(1);
 
         rep.notifyOfAddedMetric(m, "meter", mp);
-        assertEquals(1, rep.getMeters().size());
-        assertEquals(1, rep.registry.getMeters().size());
+        assertThat(rep.getMeters().size()).isEqualTo(1);
+        assertThat(rep.registry.getMeters().size()).isEqualTo(1);
 
         rep.notifyOfAddedMetric(h, "histogram", mp);
-        assertEquals(1, rep.getHistograms().size());
-        assertEquals(1, rep.registry.getHistograms().size());
+        assertThat(rep.getHistograms().size()).isEqualTo(1);
+        assertThat(rep.registry.getHistograms().size()).isEqualTo(1);
 
         rep.notifyOfAddedMetric(g, "gauge", mp);
-        assertEquals(1, rep.getGauges().size());
-        assertEquals(1, rep.registry.getGauges().size());
+        assertThat(rep.getGauges().size()).isEqualTo(1);
+        assertThat(rep.registry.getGauges().size()).isEqualTo(1);
 
         rep.notifyOfRemovedMetric(c, "counter", mp);
-        assertEquals(0, rep.getCounters().size());
-        assertEquals(0, rep.registry.getCounters().size());
+        assertThat(rep.getCounters().size()).isEqualTo(0);
+        assertThat(rep.registry.getCounters().size()).isEqualTo(0);
 
         rep.notifyOfRemovedMetric(m, "meter", mp);
-        assertEquals(0, rep.getMeters().size());
-        assertEquals(0, rep.registry.getMeters().size());
+        assertThat(rep.getMeters().size()).isEqualTo(0);
+        assertThat(rep.registry.getMeters().size()).isEqualTo(0);
 
         rep.notifyOfRemovedMetric(h, "histogram", mp);
-        assertEquals(0, rep.getHistograms().size());
-        assertEquals(0, rep.registry.getHistograms().size());
+        assertThat(rep.getHistograms().size()).isEqualTo(0);
+        assertThat(rep.registry.getHistograms().size()).isEqualTo(0);
 
         rep.notifyOfRemovedMetric(g, "gauge", mp);
-        assertEquals(0, rep.getGauges().size());
-        assertEquals(0, rep.registry.getGauges().size());
+        assertThat(rep.getGauges().size()).isEqualTo(0);
+        assertThat(rep.registry.getGauges().size()).isEqualTo(0);
     }
 
     /** Dummy test reporter. */

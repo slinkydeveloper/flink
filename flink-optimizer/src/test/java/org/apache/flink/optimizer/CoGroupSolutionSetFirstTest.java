@@ -36,8 +36,10 @@ import org.apache.flink.runtime.operators.shipping.ShipStrategyType;
 import org.apache.flink.util.Collector;
 import org.apache.flink.util.Visitor;
 
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings("serial")
 public class CoGroupSolutionSetFirstTest extends CompilerTestBase {
@@ -83,35 +85,35 @@ public class CoGroupSolutionSetFirstTest extends CompilerTestBase {
         try {
             oPlan = compileNoStats(plan);
         } catch (CompilerException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
 
         oPlan.accept(
                 new Visitor<PlanNode>() {
+
                     @Override
                     public boolean preVisit(PlanNode visitable) {
                         if (visitable instanceof WorksetIterationPlanNode) {
                             PlanNode deltaNode =
                                     ((WorksetIterationPlanNode) visitable)
                                             .getSolutionSetDeltaPlanNode();
-
                             // get the CoGroup
                             DualInputPlanNode dpn =
                                     (DualInputPlanNode)
                                             deltaNode.getInputs().iterator().next().getSource();
                             Channel in1 = dpn.getInput1();
                             Channel in2 = dpn.getInput2();
-
-                            Assert.assertTrue(in1.getLocalProperties().getOrdering() == null);
-                            Assert.assertTrue(in2.getLocalProperties().getOrdering() != null);
-                            Assert.assertTrue(
-                                    in2.getLocalProperties()
-                                            .getOrdering()
-                                            .getInvolvedIndexes()
-                                            .contains(0));
-                            Assert.assertTrue(in1.getShipStrategy() == ShipStrategyType.FORWARD);
-                            Assert.assertTrue(
-                                    in2.getShipStrategy() == ShipStrategyType.PARTITION_HASH);
+                            assertThat(in1.getLocalProperties().getOrdering() == null).isTrue();
+                            assertThat(in2.getLocalProperties().getOrdering() != null).isTrue();
+                            assertThat(
+                                            in2.getLocalProperties()
+                                                    .getOrdering()
+                                                    .getInvolvedIndexes()
+                                                    .contains(0))
+                                    .isTrue();
+                            assertThat(in1.getShipStrategy() == ShipStrategyType.FORWARD).isTrue();
+                            assertThat(in2.getShipStrategy() == ShipStrategyType.PARTITION_HASH)
+                                    .isTrue();
                             return false;
                         }
                         return true;

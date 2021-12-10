@@ -35,7 +35,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link JaccardIndex}. */
 public class JaccardIndexTest extends AsmTestBase {
@@ -113,11 +113,12 @@ public class JaccardIndexTest extends AsmTestBase {
 
         List<Result<T>> results = ji.collect();
 
-        assertEquals(count, results.size());
+        assertThat(results.size()).isEqualTo(count);
 
         for (Result<T> result : results) {
-            assertEquals(distinctNeighborCount, result.getDistinctNeighborCount().getValue());
-            assertEquals(sharedNeighborCount, result.getSharedNeighborCount().getValue());
+            assertThat(result.getDistinctNeighborCount().getValue())
+                    .isEqualTo(distinctNeighborCount);
+            assertThat(result.getSharedNeighborCount().getValue()).isEqualTo(sharedNeighborCount);
         }
     }
 
@@ -178,7 +179,7 @@ public class JaccardIndexTest extends AsmTestBase {
 
         Checksum checksum = new ChecksumHashCode<Result<LongValue>>().run(ji).execute();
 
-        assertEquals(13954, checksum.getCount());
-        assertEquals(0x00001b1a1f7a9d0bL, checksum.getChecksum());
+        assertThat(checksum.getCount()).isEqualTo(13954);
+        assertThat(checksum.getChecksum()).isEqualTo(0x00001b1a1f7a9d0bL);
     }
 }

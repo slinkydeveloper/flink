@@ -25,8 +25,7 @@ import org.apache.flink.util.TestLogger;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.equalTo;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link SettableLeaderRetrievalService}. */
 public class SettableLeaderRetrievalServiceTest extends TestLogger {
@@ -47,9 +46,9 @@ public class SettableLeaderRetrievalServiceTest extends TestLogger {
         final TestingListener listener = new TestingListener();
         settableLeaderRetrievalService.start(listener);
 
-        assertThat(listener.getAddress(), equalTo(localhost));
-        assertThat(
-                listener.getLeaderSessionID(), equalTo(HighAvailabilityServices.DEFAULT_LEADER_ID));
+        assertThat(listener.getAddress()).isEqualTo(localhost);
+        assertThat(listener.getLeaderSessionID())
+                .isEqualTo(HighAvailabilityServices.DEFAULT_LEADER_ID);
     }
 
     @Test
@@ -61,8 +60,8 @@ public class SettableLeaderRetrievalServiceTest extends TestLogger {
         settableLeaderRetrievalService.notifyListener(
                 localhost, HighAvailabilityServices.DEFAULT_LEADER_ID);
 
-        assertThat(listener.getAddress(), equalTo(localhost));
-        assertThat(
-                listener.getLeaderSessionID(), equalTo(HighAvailabilityServices.DEFAULT_LEADER_ID));
+        assertThat(listener.getAddress()).isEqualTo(localhost);
+        assertThat(listener.getLeaderSessionID())
+                .isEqualTo(HighAvailabilityServices.DEFAULT_LEADER_ID);
     }
 }

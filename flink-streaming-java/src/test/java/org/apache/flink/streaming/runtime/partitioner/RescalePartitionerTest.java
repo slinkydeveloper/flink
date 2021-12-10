@@ -44,9 +44,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link RescalePartitioner}. */
 @SuppressWarnings("serial")
@@ -55,7 +54,7 @@ public class RescalePartitionerTest extends StreamPartitionerTest {
     @Override
     public StreamPartitioner<Tuple> createPartitioner() {
         StreamPartitioner<Tuple> partitioner = new RescalePartitioner<>();
-        assertFalse(partitioner.isBroadcast());
+        assertThat(partitioner.isBroadcast()).isFalse();
         return partitioner;
     }
 
@@ -113,9 +112,9 @@ public class RescalePartitionerTest extends StreamPartitionerTest {
         JobVertex mapVertex = jobVertices.get(1);
         JobVertex sinkVertex = jobVertices.get(2);
 
-        assertEquals(2, sourceVertex.getParallelism());
-        assertEquals(4, mapVertex.getParallelism());
-        assertEquals(2, sinkVertex.getParallelism());
+        assertThat(sourceVertex.getParallelism()).isEqualTo(2);
+        assertThat(mapVertex.getParallelism()).isEqualTo(4);
+        assertThat(sinkVertex.getParallelism()).isEqualTo(2);
 
         ExecutionGraph eg =
                 TestingDefaultExecutionGraphBuilder.newBuilder()
@@ -134,27 +133,27 @@ public class RescalePartitionerTest extends StreamPartitionerTest {
         ExecutionJobVertex execMapVertex = eg.getJobVertex(mapVertex.getID());
         ExecutionJobVertex execSinkVertex = eg.getJobVertex(sinkVertex.getID());
 
-        assertEquals(0, execSourceVertex.getInputs().size());
+        assertThat(execSourceVertex.getInputs().size()).isEqualTo(0);
 
-        assertEquals(1, execMapVertex.getInputs().size());
-        assertEquals(4, execMapVertex.getParallelism());
+        assertThat(execMapVertex.getInputs().size()).isEqualTo(1);
+        assertThat(execMapVertex.getParallelism()).isEqualTo(4);
         ExecutionVertex[] mapTaskVertices = execMapVertex.getTaskVertices();
 
         // verify that we have each parallel input partition exactly twice, i.e. that one source
         // sends to two unique mappers
         Map<Integer, Integer> mapInputPartitionCounts = new HashMap<>();
         for (ExecutionVertex mapTaskVertex : mapTaskVertices) {
-            assertEquals(1, mapTaskVertex.getNumberOfInputs());
-            assertEquals(1, mapTaskVertex.getConsumedPartitionGroup(0).size());
+            assertThat(mapTaskVertex.getNumberOfInputs()).isEqualTo(1);
+            assertThat(mapTaskVertex.getConsumedPartitionGroup(0).size()).isEqualTo(1);
             IntermediateResultPartitionID consumedPartitionId =
                     mapTaskVertex.getConsumedPartitionGroup(0).getFirst();
-            assertEquals(
-                    sourceVertex.getID(),
-                    mapTaskVertex
-                            .getExecutionGraphAccessor()
-                            .getResultPartitionOrThrow(consumedPartitionId)
-                            .getProducer()
-                            .getJobvertexId());
+            assertThat(
+                            mapTaskVertex
+                                    .getExecutionGraphAccessor()
+                                    .getResultPartitionOrThrow(consumedPartitionId)
+                                    .getProducer()
+                                    .getJobvertexId())
+                    .isEqualTo(sourceVertex.getID());
             int inputPartition = consumedPartitionId.getPartitionNumber();
             if (!mapInputPartitionCounts.containsKey(inputPartition)) {
                 mapInputPartitionCounts.put(inputPartition, 1);
@@ -164,13 +163,13 @@ public class RescalePartitionerTest extends StreamPartitionerTest {
             }
         }
 
-        assertEquals(2, mapInputPartitionCounts.size());
+        assertThat(mapInputPartitionCounts.size()).isEqualTo(2);
         for (int count : mapInputPartitionCounts.values()) {
-            assertEquals(2, count);
+            assertThat(count).isEqualTo(2);
         }
 
-        assertEquals(1, execSinkVertex.getInputs().size());
-        assertEquals(2, execSinkVertex.getParallelism());
+        assertThat(execSinkVertex.getInputs().size()).isEqualTo(1);
+        assertThat(execSinkVertex.getParallelism()).isEqualTo(2);
         ExecutionVertex[] sinkTaskVertices = execSinkVertex.getTaskVertices();
         InternalExecutionGraphAccessor executionGraphAccessor = execSinkVertex.getGraph();
 
@@ -178,19 +177,20 @@ public class RescalePartitionerTest extends StreamPartitionerTest {
         // only occurs in one unique input edge
         Set<Integer> mapSubpartitions = new HashSet<>();
         for (ExecutionVertex sinkTaskVertex : sinkTaskVertices) {
-            assertEquals(1, sinkTaskVertex.getNumberOfInputs());
-            assertEquals(2, sinkTaskVertex.getConsumedPartitionGroup(0).size());
+            assertThat(sinkTaskVertex.getNumberOfInputs()).isEqualTo(1);
+            assertThat(sinkTaskVertex.getConsumedPartitionGroup(0).size()).isEqualTo(2);
             for (IntermediateResultPartitionID consumedPartitionId :
                     sinkTaskVertex.getConsumedPartitionGroup(0)) {
                 IntermediateResultPartition consumedPartition =
                         executionGraphAccessor.getResultPartitionOrThrow(consumedPartitionId);
-                assertEquals(mapVertex.getID(), consumedPartition.getProducer().getJobvertexId());
+                assertThat(consumedPartition.getProducer().getJobvertexId())
+                        .isEqualTo(mapVertex.getID());
                 int partitionNumber = consumedPartition.getPartitionNumber();
-                assertFalse(mapSubpartitions.contains(partitionNumber));
+                assertThat(mapSubpartitions.contains(partitionNumber)).isFalse();
                 mapSubpartitions.add(partitionNumber);
             }
         }
 
-        assertEquals(4, mapSubpartitions.size());
+        assertThat(mapSubpartitions.size()).isEqualTo(4);
     }
 }

@@ -50,7 +50,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.apache.flink.table.api.Expressions.row;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test unsigned type conversion between Flink and JDBC driver mysql, the test underlying use
@@ -146,14 +146,15 @@ public class UnsignedTypeConversionITCase extends AbstractTestBase {
                                 TABLE_NAME));
         ResultSet resultSet = query.executeQuery();
         while (resultSet.next()) {
-            assertEquals(Integer.valueOf(127), resultSet.getObject("tiny_c"));
-            assertEquals(Integer.valueOf(255), resultSet.getObject("tiny_un_c"));
-            assertEquals(Integer.valueOf(32767), resultSet.getObject("small_c"));
-            assertEquals(Integer.valueOf(65535), resultSet.getObject("small_un_c"));
-            assertEquals(Integer.valueOf(2147483647), resultSet.getObject("int_c"));
-            assertEquals(Long.valueOf(4294967295L), resultSet.getObject("int_un_c"));
-            assertEquals(Long.valueOf(9223372036854775807L), resultSet.getObject("big_c"));
-            assertEquals(new BigInteger("18446744073709551615"), resultSet.getObject("big_un_c"));
+            assertThat(resultSet.getObject("tiny_c")).isEqualTo(Integer.valueOf(127));
+            assertThat(resultSet.getObject("tiny_un_c")).isEqualTo(Integer.valueOf(255));
+            assertThat(resultSet.getObject("small_c")).isEqualTo(Integer.valueOf(32767));
+            assertThat(resultSet.getObject("small_un_c")).isEqualTo(Integer.valueOf(65535));
+            assertThat(resultSet.getObject("int_c")).isEqualTo(Integer.valueOf(2147483647));
+            assertThat(resultSet.getObject("int_un_c")).isEqualTo(Long.valueOf(4294967295L));
+            assertThat(resultSet.getObject("big_c")).isEqualTo(Long.valueOf(9223372036854775807L));
+            assertThat(resultSet.getObject("big_un_c"))
+                    .isEqualTo(new BigInteger("18446744073709551615"));
         }
 
         // read data from db using flink and compare
@@ -170,7 +171,7 @@ public class UnsignedTypeConversionITCase extends AbstractTestBase {
         List<String> expected =
                 Collections.singletonList(
                         "+I[127, 255, 32767, 65535, 2147483647, 4294967295, 9223372036854775807, 18446744073709551615]");
-        assertEquals(expected, result);
+        assertThat(result).isEqualTo(expected);
     }
 
     private void createMysqlTable() throws SQLException {

@@ -30,10 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 
 /** Tests for the {@link ConfigurationUtils}. */
 public class ConfigurationUtilsTest extends TestLogger {
@@ -50,10 +48,11 @@ public class ConfigurationUtilsTest extends TestLogger {
         final Configuration configuration = ConfigurationUtils.createConfiguration(properties);
 
         for (String key : properties.stringPropertyNames()) {
-            assertThat(configuration.getString(key, ""), is(equalTo(properties.getProperty(key))));
+            assertThat(configuration.getString(key, ""))
+                    .isEqualTo(equalTo(properties.getProperty(key)));
         }
 
-        assertThat(configuration.toMap().size(), is(properties.size()));
+        assertThat(configuration.toMap().size()).isEqualTo(properties.size());
     }
 
     @Test
@@ -74,7 +73,7 @@ public class ConfigurationUtilsTest extends TestLogger {
         final Map<String, String> hiddenSensitiveValues =
                 ConfigurationUtils.hideSensitiveValues(keyValuePairs);
 
-        assertThat(hiddenSensitiveValues, is(equalTo(expectedKeyValuePairs)));
+        assertThat(hiddenSensitiveValues).isEqualTo(equalTo(expectedKeyValuePairs));
     }
 
     @Test
@@ -94,31 +93,34 @@ public class ConfigurationUtilsTest extends TestLogger {
         final Map<String, String> resultKeyValuePairs =
                 ConfigurationUtils.getPrefixedKeyValuePairs(prefix, configuration);
 
-        assertThat(resultKeyValuePairs, is(equalTo(expectedKeyValuePairs)));
+        assertThat(resultKeyValuePairs).isEqualTo(equalTo(expectedKeyValuePairs));
     }
 
     @Test
     public void testConvertToString() {
         // String
-        assertEquals("Simple String", ConfigurationUtils.convertToString("Simple String"));
+        assertThat(ConfigurationUtils.convertToString("Simple String")).isEqualTo("Simple String");
 
         // Duration
-        assertEquals("0 ms", ConfigurationUtils.convertToString(Duration.ZERO));
-        assertEquals("123 ms", ConfigurationUtils.convertToString(Duration.ofMillis(123L)));
-        assertEquals("1234 s", ConfigurationUtils.convertToString(Duration.ofMillis(1_234_000L)));
-        assertEquals("25 h", ConfigurationUtils.convertToString(Duration.ofHours(25L)));
+        assertThat(ConfigurationUtils.convertToString(Duration.ZERO)).isEqualTo("0 ms");
+        assertThat(ConfigurationUtils.convertToString(Duration.ofMillis(123L))).isEqualTo("123 ms");
+        assertThat(ConfigurationUtils.convertToString(Duration.ofMillis(1_234_000L)))
+                .isEqualTo("1234 s");
+        assertThat(ConfigurationUtils.convertToString(Duration.ofHours(25L))).isEqualTo("25 h");
 
         // List
         final List<Object> listElements = new ArrayList<>();
         listElements.add("Test;String");
         listElements.add(Duration.ZERO);
         listElements.add(42);
-        assertEquals("'Test;String';0 ms;42", ConfigurationUtils.convertToString(listElements));
+        assertThat(ConfigurationUtils.convertToString(listElements))
+                .isEqualTo("'Test;String';0 ms;42");
 
         // Map
         final Map<Object, Object> mapElements = new HashMap<>();
         mapElements.put("A:,B", "C:,D");
         mapElements.put(10, 20);
-        assertEquals("'''A:,B'':''C:,D''',10:20", ConfigurationUtils.convertToString(mapElements));
+        assertThat(ConfigurationUtils.convertToString(mapElements))
+                .isEqualTo("'''A:,B'':''C:,D''',10:20");
     }
 }

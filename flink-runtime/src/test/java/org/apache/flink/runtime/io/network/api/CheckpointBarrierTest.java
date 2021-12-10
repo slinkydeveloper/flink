@@ -24,7 +24,7 @@ import org.apache.flink.runtime.checkpoint.CheckpointOptions;
 
 import org.junit.Test;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for the {@link CheckpointBarrier} type. */
 public class CheckpointBarrierTest {

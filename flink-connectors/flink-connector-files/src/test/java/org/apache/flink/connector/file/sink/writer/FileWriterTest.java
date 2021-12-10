@@ -42,7 +42,6 @@ import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.OnCheckpointRollingPolicy;
 import org.apache.flink.util.ExceptionUtils;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -60,10 +59,7 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link FileWriter}. */
 public class FileWriterTest {
@@ -93,7 +89,7 @@ public class FileWriterTest {
         fileWriter.write("test3", new ContextImpl());
 
         List<FileSinkCommittable> committables = fileWriter.prepareCommit(false);
-        assertEquals(3, committables.size());
+        assertThat(committables.size()).isEqualTo(3);
     }
 
     @Test
@@ -110,11 +106,11 @@ public class FileWriterTest {
         fileWriter.write("test1", new ContextImpl());
         fileWriter.write("test2", new ContextImpl());
         fileWriter.write("test3", new ContextImpl());
-        assertEquals(3, fileWriter.getActiveBuckets().size());
+        assertThat(fileWriter.getActiveBuckets().size()).isEqualTo(3);
 
         fileWriter.prepareCommit(false);
         List<FileWriterBucketState> states = fileWriter.snapshotState(1L);
-        assertEquals(3, states.size());
+        assertThat(states.size()).isEqualTo(3);
 
         fileWriter =
                 restoreWriter(
@@ -122,11 +118,12 @@ public class FileWriterTest {
                         path,
                         OnCheckpointRollingPolicy.build(),
                         new OutputFileConfig("part-", ""));
-        assertEquals(
-                fileWriter.getActiveBuckets().keySet(),
-                new HashSet<>(Arrays.asList("test1", "test2", "test3")));
+        assertThat(new HashSet<>(Arrays.asList("test1", "test2", "test3")))
+                .isEqualTo(fileWriter.getActiveBuckets().keySet());
         for (FileWriterBucket<String> bucket : fileWriter.getActiveBuckets().values()) {
-            assertNotNull("The in-progress file should be recovered", bucket.getInProgressPart());
+            assertThat(bucket.getInProgressPart())
+                    .as("The in-progress file should be recovered")
+                    .isNotNull();
         }
     }
 
@@ -170,20 +167,24 @@ public class FileWriterTest {
                         path,
                         DefaultRollingPolicy.builder().build(),
                         new OutputFileConfig("part-", ""));
-        assertEquals(3, restoredWriter.getActiveBuckets().size());
+        assertThat(restoredWriter.getActiveBuckets().size()).isEqualTo(3);
 
         // Merged buckets
         for (String bucketId : Arrays.asList("test1", "test2")) {
             FileWriterBucket<String> bucket = restoredWriter.getActiveBuckets().get(bucketId);
-            assertNotNull("The in-progress file should be recovered", bucket.getInProgressPart());
-            assertEquals(1, bucket.getPendingFiles().size());
+            assertThat(bucket.getInProgressPart())
+                    .as("The in-progress file should be recovered")
+                    .isNotNull();
+            assertThat(bucket.getPendingFiles().size()).isEqualTo(1);
         }
 
         // Not merged buckets
         for (String bucketId : Collections.singletonList("test3")) {
             FileWriterBucket<String> bucket = restoredWriter.getActiveBuckets().get(bucketId);
-            assertNotNull("The in-progress file should be recovered", bucket.getInProgressPart());
-            assertEquals(0, bucket.getPendingFiles().size());
+            assertThat(bucket.getInProgressPart())
+                    .as("The in-progress file should be recovered")
+                    .isNotNull();
+            assertThat(bucket.getPendingFiles().size()).isEqualTo(0);
         }
     }
 
@@ -203,7 +204,7 @@ public class FileWriterTest {
         // No more records and another call to prepareCommit will makes it inactive
         fileWriter.prepareCommit(false);
 
-        assertTrue(fileWriter.getActiveBuckets().isEmpty());
+        assertThat(fileWriter.getActiveBuckets().isEmpty()).isTrue();
     }
 
     @Test
@@ -235,15 +236,16 @@ public class FileWriterTest {
         processingTimeService.advanceTo(20);
 
         FileWriterBucket<String> test1Bucket = fileWriter.getActiveBuckets().get("test1");
-        assertNull(
-                "The in-progress part of test1 should be rolled", test1Bucket.getInProgressPart());
-        assertEquals(1, test1Bucket.getPendingFiles().size());
+        assertThat(test1Bucket.getInProgressPart())
+                .as("The in-progress part of test1 should be rolled")
+                .isNull();
+        assertThat(test1Bucket.getPendingFiles().size()).isEqualTo(1);
 
         FileWriterBucket<String> test2Bucket = fileWriter.getActiveBuckets().get("test2");
-        assertNotNull(
-                "The in-progress part of test2 should not be rolled",
-                test2Bucket.getInProgressPart());
-        assertEquals(0, test2Bucket.getPendingFiles().size());
+        assertThat(test2Bucket.getInProgressPart())
+                .as("The in-progress part of test2 should not be rolled")
+                .isNotNull();
+        assertThat(test2Bucket.getPendingFiles().size()).isEqualTo(0);
 
         // Close, pre-commit & clear all the pending records.
         processingTimeService.advanceTo(30);
@@ -256,15 +258,16 @@ public class FileWriterTest {
         processingTimeService.advanceTo(40);
 
         test1Bucket = fileWriter.getActiveBuckets().get("test1");
-        assertNull(
-                "The in-progress part of test1 should be rolled", test1Bucket.getInProgressPart());
-        assertEquals(1, test1Bucket.getPendingFiles().size());
+        assertThat(test1Bucket.getInProgressPart())
+                .as("The in-progress part of test1 should be rolled")
+                .isNull();
+        assertThat(test1Bucket.getPendingFiles().size()).isEqualTo(1);
 
         test2Bucket = fileWriter.getActiveBuckets().get("test2");
-        assertNotNull(
-                "The in-progress part of test2 should not be rolled",
-                test2Bucket.getInProgressPart());
-        assertEquals(0, test2Bucket.getPendingFiles().size());
+        assertThat(test2Bucket.getInProgressPart())
+                .as("The in-progress part of test2 should not be rolled")
+                .isNotNull();
+        assertThat(test2Bucket.getPendingFiles().size()).isEqualTo(0);
     }
 
     @Test
@@ -292,12 +295,12 @@ public class FileWriterTest {
                         new OutputFileConfig("part-", ""),
                         operatorIOMetricGroup);
 
-        assertEquals(0, recordsCounter.getCount());
+        assertThat(recordsCounter.getCount()).isEqualTo(0);
         fileWriter.write("1", context);
-        assertEquals(1, recordsCounter.getCount());
+        assertThat(recordsCounter.getCount()).isEqualTo(1);
         fileWriter.write("2", context);
         fileWriter.write("3", context);
-        assertEquals(3, recordsCounter.getCount());
+        assertThat(recordsCounter.getCount()).isEqualTo(3);
     }
 
     private void testCorrectTimestampPassingInContext(
@@ -411,9 +414,9 @@ public class FileWriterTest {
             long watermark = context.currentWatermark();
             long processingTime = context.currentProcessingTime();
 
-            Assert.assertEquals(expectedTimestamp, elementTimestamp);
-            Assert.assertEquals(expectedProcessingTime, processingTime);
-            Assert.assertEquals(expectedWatermark, watermark);
+            assertThat(elementTimestamp).isEqualTo(expectedTimestamp);
+            assertThat(processingTime).isEqualTo(expectedProcessingTime);
+            assertThat(watermark).isEqualTo(expectedWatermark);
 
             return element;
         }

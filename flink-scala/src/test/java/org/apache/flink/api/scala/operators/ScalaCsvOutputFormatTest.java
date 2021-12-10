@@ -22,7 +22,6 @@ import org.apache.flink.api.common.io.FileOutputFormat;
 import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.core.fs.Path;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -35,7 +34,8 @@ import java.util.List;
 
 import scala.Tuple3;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /** Tests for {@link ScalaCsvOutputFormat}. */
 public class ScalaCsvOutputFormatTest {
@@ -63,10 +63,10 @@ public class ScalaCsvOutputFormatTest {
             csvOutputFormat.close();
         }
         java.nio.file.Path p = Paths.get(path);
-        Assert.assertTrue(Files.exists(p));
+        assertThat(Files.exists(p)).isTrue();
         List<String> lines = Files.readAllLines(Paths.get(path), StandardCharsets.UTF_8);
-        Assert.assertEquals(1, lines.size());
-        Assert.assertEquals("One,,8", lines.get(0));
+        assertThat(lines.size()).isEqualTo(1);
+        assertThat(lines.get(0)).isEqualTo("One,,8");
     }
 
     @Test

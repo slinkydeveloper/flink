@@ -34,9 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 /** Tests for {@link ManagedMemoryUtils}. */
 public class ManagedMemoryUtilsTest extends TestLogger {
@@ -114,7 +113,7 @@ public class ManagedMemoryUtilsTest extends TestLogger {
                 ManagedMemoryUtils.getManagedMemoryUseCaseWeightsFromConfig(
                         CONFIG_WITH_ALL_USE_CASES);
 
-        assertThat(configuredWeights, is(expectedWeights));
+        assertThat(configuredWeights).isEqualTo(expectedWeights);
     }
 
     @Test
@@ -132,7 +131,7 @@ public class ManagedMemoryUtilsTest extends TestLogger {
                 ManagedMemoryUtils.getManagedMemoryUseCaseWeightsFromConfig(
                         CONFIG_WITH_LEGACY_USE_CASES);
 
-        assertThat(configuredWeights, is(expectedWeights));
+        assertThat(configuredWeights).isEqualTo(expectedWeights);
     }
 
     @Test(expected = IllegalConfigurationException.class)
@@ -171,7 +170,8 @@ public class ManagedMemoryUtilsTest extends TestLogger {
                         Optional.of(true),
                         ClassLoader.getSystemClassLoader());
 
-        assertEquals(fractionOfUseCase * OPERATOR_WEIGHT / TOTAL_WEIGHT, fractionOfSlot, DELTA);
+        assertThat(fractionOfSlot)
+                .isCloseTo(fractionOfUseCase * OPERATOR_WEIGHT / TOTAL_WEIGHT, within(DELTA));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class ManagedMemoryUtilsTest extends TestLogger {
                         Optional.of(true),
                         ClassLoader.getSystemClassLoader());
 
-        assertEquals(0.0, fractionOfSlot, DELTA);
+        assertThat(fractionOfSlot).isCloseTo(0.0, within(DELTA));
     }
 
     @Test
@@ -262,9 +262,9 @@ public class ManagedMemoryUtilsTest extends TestLogger {
                         Optional.of(stateBackendUsesManagedMemory),
                         ClassLoader.getSystemClassLoader());
 
-        assertEquals(expectedOperatorFractionOfSlot, opFractionOfSlot, DELTA);
-        assertEquals(expectedStateFractionOfSlot, stateFractionOfSlot, DELTA);
-        assertEquals(expectedPythonFractionOfSlot, pythonFractionOfSlot, DELTA);
+        assertThat(opFractionOfSlot).isCloseTo(expectedOperatorFractionOfSlot, within(DELTA));
+        assertThat(stateFractionOfSlot).isCloseTo(expectedStateFractionOfSlot, within(DELTA));
+        assertThat(pythonFractionOfSlot).isCloseTo(expectedPythonFractionOfSlot, within(DELTA));
     }
 
     @Test

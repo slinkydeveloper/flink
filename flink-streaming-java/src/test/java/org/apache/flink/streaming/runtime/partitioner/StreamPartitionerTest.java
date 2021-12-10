@@ -28,7 +28,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for different {@link StreamPartitioner} implementations. */
 public abstract class StreamPartitionerTest extends TestLogger {
@@ -47,7 +47,7 @@ public abstract class StreamPartitionerTest extends TestLogger {
 
     protected void assertSelectedChannel(int expectedChannel) {
         int actualResult = streamPartitioner.selectChannel(serializationDelegate);
-        assertEquals(expectedChannel, actualResult);
+        assertThat(actualResult).isEqualTo(expectedChannel);
     }
 
     protected void assertSelectedChannelWithSetup(int expectedChannel, int numberOfChannels) {
@@ -58,6 +58,6 @@ public abstract class StreamPartitionerTest extends TestLogger {
     @Test
     public void testSerializable() throws IOException, ClassNotFoundException {
         final StreamPartitioner<Tuple> clone = InstantiationUtil.clone(streamPartitioner);
-        assertEquals(streamPartitioner, clone);
+        assertThat(clone).isEqualTo(streamPartitioner);
     }
 }

@@ -45,10 +45,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.apache.flink.cep.utils.NFAUtils.compile;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /** Tests for {@link NFACompiler}. */
 public class NFACompilerTest extends TestLogger {
@@ -142,44 +139,46 @@ public class NFACompilerTest extends TestLogger {
         NFA<Event> nfa = compile(pattern, false);
 
         Collection<State<Event>> states = nfa.getStates();
-        assertEquals(4, states.size());
+        assertThat(states.size()).isEqualTo(4);
 
         Map<String, State<Event>> stateMap = new HashMap<>();
         for (State<Event> state : states) {
             stateMap.put(state.getName(), state);
         }
 
-        assertTrue(stateMap.containsKey("start"));
+        assertThat(stateMap.containsKey("start")).isTrue();
         State<Event> startState = stateMap.get("start");
-        assertTrue(startState.isStart());
+        assertThat(startState.isStart()).isTrue();
         final Set<Tuple2<String, StateTransitionAction>> startTransitions =
                 unfoldTransitions(startState);
-        assertEquals(
-                Sets.newHashSet(Tuple2.of("middle", StateTransitionAction.TAKE)), startTransitions);
+        assertThat(startTransitions)
+                .isEqualTo(Sets.newHashSet(Tuple2.of("middle", StateTransitionAction.TAKE)));
 
-        assertTrue(stateMap.containsKey("middle"));
+        assertThat(stateMap.containsKey("middle")).isTrue();
         State<Event> middleState = stateMap.get("middle");
         final Set<Tuple2<String, StateTransitionAction>> middleTransitions =
                 unfoldTransitions(middleState);
-        assertEquals(
-                Sets.newHashSet(
-                        Tuple2.of("middle", StateTransitionAction.IGNORE),
-                        Tuple2.of("end", StateTransitionAction.TAKE)),
-                middleTransitions);
+        assertThat(middleTransitions)
+                .isEqualTo(
+                        Sets.newHashSet(
+                                Tuple2.of("middle", StateTransitionAction.IGNORE),
+                                Tuple2.of("end", StateTransitionAction.TAKE)));
 
-        assertTrue(stateMap.containsKey("end"));
+        assertThat(stateMap.containsKey("end")).isTrue();
         State<Event> endState = stateMap.get("end");
         final Set<Tuple2<String, StateTransitionAction>> endTransitions =
                 unfoldTransitions(endState);
-        assertEquals(
-                Sets.newHashSet(
-                        Tuple2.of(NFACompiler.ENDING_STATE_NAME, StateTransitionAction.TAKE)),
-                endTransitions);
+        assertThat(endTransitions)
+                .isEqualTo(
+                        Sets.newHashSet(
+                                Tuple2.of(
+                                        NFACompiler.ENDING_STATE_NAME,
+                                        StateTransitionAction.TAKE)));
 
-        assertTrue(stateMap.containsKey(NFACompiler.ENDING_STATE_NAME));
+        assertThat(stateMap.containsKey(NFACompiler.ENDING_STATE_NAME)).isTrue();
         State<Event> endingState = stateMap.get(NFACompiler.ENDING_STATE_NAME);
-        assertTrue(endingState.isFinal());
-        assertEquals(0, endingState.getStateTransitions().size());
+        assertThat(endingState.isFinal()).isTrue();
+        assertThat(endingState.getStateTransitions().size()).isEqualTo(0);
     }
 
     @Test
@@ -206,7 +205,7 @@ public class NFACompilerTest extends TestLogger {
             }
         }
 
-        assertEquals(1, endStateCount);
+        assertThat(endStateCount).isEqualTo(1);
     }
 
     @Test
@@ -260,21 +259,22 @@ public class NFACompilerTest extends TestLogger {
 
     @Test
     public void testCheckingEmptyMatches() {
-        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a").optional()), is(true));
+        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a").optional()))
+                .isEqualTo(true);
+        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a").oneOrMore().optional()))
+                .isEqualTo(true);
         assertThat(
-                NFACompiler.canProduceEmptyMatches(Pattern.begin("a").oneOrMore().optional()),
-                is(true));
-        assertThat(
-                NFACompiler.canProduceEmptyMatches(
-                        Pattern.begin("a").oneOrMore().optional().next("b").optional()),
-                is(true));
+                        NFACompiler.canProduceEmptyMatches(
+                                Pattern.begin("a").oneOrMore().optional().next("b").optional()))
+                .isEqualTo(true);
 
-        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a")), is(false));
-        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a").oneOrMore()), is(false));
+        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a"))).isEqualTo(false);
+        assertThat(NFACompiler.canProduceEmptyMatches(Pattern.begin("a").oneOrMore()))
+                .isEqualTo(false);
         assertThat(
-                NFACompiler.canProduceEmptyMatches(
-                        Pattern.begin("a").oneOrMore().next("b").optional()),
-                is(false));
+                        NFACompiler.canProduceEmptyMatches(
+                                Pattern.begin("a").oneOrMore().next("b").optional()))
+                .isEqualTo(false);
     }
 
     @Test
@@ -290,7 +290,7 @@ public class NFACompilerTest extends TestLogger {
         NFACompiler.NFAFactoryCompiler<Event> factory =
                 new NFACompiler.NFAFactoryCompiler<>(pattern);
         factory.compileFactory();
-        assertEquals(10000, factory.getWindowTime());
+        assertThat(factory.getWindowTime()).isEqualTo(10000);
     }
 
     @Test
@@ -306,6 +306,6 @@ public class NFACompilerTest extends TestLogger {
         NFACompiler.NFAFactoryCompiler<Event> factory =
                 new NFACompiler.NFAFactoryCompiler<>(pattern);
         factory.compileFactory();
-        assertEquals(0, factory.getWindowTime());
+        assertThat(factory.getWindowTime()).isEqualTo(0);
     }
 }
