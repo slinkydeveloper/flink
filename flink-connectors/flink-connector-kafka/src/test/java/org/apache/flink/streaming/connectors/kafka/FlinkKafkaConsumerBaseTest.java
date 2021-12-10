@@ -548,10 +548,7 @@ public class FlinkKafkaConsumerBaseTest extends TestLogger {
         }
 
         assertThat(snapshot1).isEqualTo(state1);
-        assertThat(
-                        consumer.getPendingOffsetsToCommit()
-                                . // pending offsets to commit should not be updated
-                                size())
+        assertThat(consumer.getPendingOffsetsToCommit().size())
                 .isEqualTo(0); // pending offsets to commit should not be updated
 
         // checkpoint 2
@@ -566,10 +563,7 @@ public class FlinkKafkaConsumerBaseTest extends TestLogger {
         }
 
         assertThat(snapshot2).isEqualTo(state2);
-        assertThat(
-                        consumer.getPendingOffsetsToCommit()
-                                . // pending offsets to commit should not be updated
-                                size())
+        assertThat(consumer.getPendingOffsetsToCommit().size())
                 .isEqualTo(0); // pending offsets to commit should not be updated
 
         // ack checkpoint 1
@@ -590,10 +584,7 @@ public class FlinkKafkaConsumerBaseTest extends TestLogger {
         }
 
         assertThat(snapshot3).isEqualTo(state3);
-        assertThat(
-                        consumer.getPendingOffsetsToCommit()
-                                . // pending offsets to commit should not be updated
-                                size())
+        assertThat(consumer.getPendingOffsetsToCommit().size())
                 .isEqualTo(0); // pending offsets to commit should not be updated
 
         // ack checkpoint 3, subsumes number 2

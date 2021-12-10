@@ -313,8 +313,7 @@ public class LocalStreamingFileSinkTest extends TestLogger {
                     bucketCounter++;
                 }
             }
-            assertThat( // verifies that we have 2 buckets, "test1" and "test2"
-                            bucketCounter)
+            assertThat(bucketCounter)
                     .isEqualTo(2L); // verifies that we have 2 buckets, "test1" and "test2"
 
             testHarness.setProcessingTime(101L); // put them in pending

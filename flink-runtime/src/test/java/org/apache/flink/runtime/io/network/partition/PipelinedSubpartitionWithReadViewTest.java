@@ -122,9 +122,7 @@ public class PipelinedSubpartitionWithReadViewTest {
         subpartition.add(bufferBuilder.createBufferConsumer());
 
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(1);
-        assertThat(
-                        availablityListener. // notification from finishing previous buffer.
-                                getNumNotifications())
+        assertThat(availablityListener.getNumNotifications())
                 .isEqualTo(1); // notification from finishing previous buffer.
         assertThat(readView.getNextBuffer()).isNull();
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
@@ -240,8 +238,7 @@ public class PipelinedSubpartitionWithReadViewTest {
         // Empty => should return null
         assertThat(readView.getAvailabilityAndBacklog(0).isAvailable()).isFalse();
         assertNoNextBuffer(readView);
-        assertThat( // also after getNextBuffer()
-                        readView.getAvailabilityAndBacklog(0).isAvailable())
+        assertThat(readView.getAvailabilityAndBacklog(0).isAvailable())
                 .isFalse(); // also after getNextBuffer()
         assertThat(availablityListener.getNumNotifications()).isEqualTo(0);
 
@@ -251,16 +248,14 @@ public class PipelinedSubpartitionWithReadViewTest {
 
         assertThat(subpartition.getTotalNumberOfBuffers()).isEqualTo(1);
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(0); // only updated when getting the buffer
 
         assertThat(availablityListener.getNumNotifications()).isEqualTo(0);
 
         // ...and one available result
         assertNextBuffer(readView, BUFFER_SIZE, false, 0, false, true);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(BUFFER_SIZE); // only updated when getting the buffer
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
         assertNoNextBuffer(readView);
@@ -272,14 +267,12 @@ public class PipelinedSubpartitionWithReadViewTest {
 
         assertThat(subpartition.getTotalNumberOfBuffers()).isEqualTo(2);
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(BUFFER_SIZE); // only updated when getting the buffer
         assertThat(availablityListener.getNumNotifications()).isEqualTo(0);
 
         assertNextBuffer(readView, BUFFER_SIZE, false, 0, false, true);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(2 * BUFFER_SIZE); // only updated when getting the buffer
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
         assertNoNextBuffer(readView);
@@ -296,32 +289,27 @@ public class PipelinedSubpartitionWithReadViewTest {
         assertThat(readView.getAvailabilityAndBacklog(0).isAvailable()).isFalse();
 
         assertThat(subpartition.getTotalNumberOfBuffers()).isEqualTo(5);
-        assertThat( // two buffers (events don't count)
-                        subpartition.getBuffersInBacklogUnsafe())
+        assertThat(subpartition.getBuffersInBacklogUnsafe())
                 .isEqualTo(1); // two buffers (events don't count)
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(2 * BUFFER_SIZE); // only updated when getting the buffer
         assertThat(availablityListener.getNumNotifications()).isEqualTo(1);
 
         // the first buffer
         assertNextBuffer(readView, BUFFER_SIZE, true, 0, true, true);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(3 * BUFFER_SIZE); // only updated when getting the buffer
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
 
         // the event
         assertNextEvent(readView, BUFFER_SIZE, null, false, 0, false, true);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(4 * BUFFER_SIZE); // only updated when getting the buffer
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
 
         // the remaining buffer
         assertNextBuffer(readView, BUFFER_SIZE, false, 0, false, true);
-        assertThat( // only updated when getting the buffer
-                        subpartition.getTotalNumberOfBytes())
+        assertThat(subpartition.getTotalNumberOfBytes())
                 .isEqualTo(5 * BUFFER_SIZE); // only updated when getting the buffer
         assertThat(subpartition.getBuffersInBacklogUnsafe()).isEqualTo(0);
 

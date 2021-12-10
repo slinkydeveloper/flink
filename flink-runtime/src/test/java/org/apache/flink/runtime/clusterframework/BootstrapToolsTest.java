@@ -214,7 +214,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 false,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + "" + // logging
                                 "" + " " + mainClass + " " + args + " " + redirects);
 
@@ -230,7 +230,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + " " + krb5 + // logging
                                 "" + " " + mainClass + " " + args + " " + redirects);
 
@@ -246,7 +246,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 false,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + "" + " " + logfile + " " + logback + " " + mainClass
                                 + " " + args + " " + redirects);
 
@@ -261,7 +261,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + " " + krb5 + " " + logfile + " " + logback + " "
                                 + mainClass + " " + args + " " + redirects);
 
@@ -277,7 +277,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 false,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + "" + " " + logfile + " " + log4j + " " + mainClass
                                 + " " + args + " " + redirects);
 
@@ -292,7 +292,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + " " + krb5 + " " + logfile + " " + log4j + " "
                                 + mainClass + " " + args + " " + redirects);
 
@@ -308,7 +308,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 false,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + "" + " " + logfile + " " + logback + " " + log4j + " "
                                 + mainClass + " " + args + " " + redirects);
 
@@ -323,7 +323,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + " " + krb5 + " " + logfile + " " + logback + " "
                                 + log4j + " " + mainClass + " " + args + " " + redirects);
 
@@ -355,7 +355,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + " " + jvmOpts + " " + krb5 + " " + logfile + " "
                                 + logback + " " + log4j + " " + mainClass + " " + args + " "
                                 + redirects);
@@ -389,7 +389,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " " + jvmmem + " " + jvmOpts + " " + tmJvmOpts + " " + krb5 + " "
                                 + logfile + " " + logback + " " + log4j + " " + mainClass + " "
                                 + args + " " + redirects);
@@ -410,7 +410,7 @@ public class BootstrapToolsTest extends TestLogger {
                                 true,
                                 this.getClass(),
                                 mainArgs))
-                .isEqualTo( // jvmOpts
+                .isEqualTo(
                         java + " 1 " + jvmmem + " 2 " + jvmOpts + " " + tmJvmOpts + " " + krb5
                                 + " 3 " + logfile + " " + logback + " " + log4j + " 4 " + mainClass
                                 + " 5 " + args + " 6 " + redirects);

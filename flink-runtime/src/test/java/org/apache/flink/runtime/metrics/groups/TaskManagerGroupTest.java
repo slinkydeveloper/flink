@@ -116,8 +116,7 @@ public class TaskManagerGroupTest extends TestLogger {
 
         TaskMetricGroup tmGroup13 =
                 group.addJob(jid1, jobName1).addTask(vertex13, execution13, "test", 0, 0);
-        assertThat( // should use the same TaskManagerJobMetricGroup
-                        tmGroup13.parent())
+        assertThat(tmGroup13.parent())
                 .isSameAs(tmGroup11.parent()); // should use the same TaskManagerJobMetricGroup
         tmGroup12.close();
         tmGroup13.close();

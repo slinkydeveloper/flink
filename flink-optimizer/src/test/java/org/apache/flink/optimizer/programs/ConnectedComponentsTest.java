@@ -105,11 +105,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
                 .isEqualTo(ShipStrategyType.PARTITION_HASH);
         assertThat(iter.getInitialWorksetInput().getShipStrategyKeys()).isEqualTo(set0);
 
-        assertThat( // workset
-                        neighborsJoin.getInput1().getShipStrategy())
+        assertThat(neighborsJoin.getInput1().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // workset
-        assertThat( // edges
-                        neighborsJoin.getInput2().getShipStrategy())
+        assertThat(neighborsJoin.getInput2().getShipStrategy())
                 .isEqualTo(ShipStrategyType.PARTITION_HASH); // edges
         assertThat(neighborsJoin.getInput2().getShipStrategyKeys()).isEqualTo(set0);
 
@@ -118,11 +116,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
         assertThat(minIdReducer.getInput().getShipStrategyKeys()).isEqualTo(set0);
         assertThat(minIdCombiner.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
 
-        assertThat( // min id
-                        updatingMatch.getInput1().getShipStrategy())
+        assertThat(updatingMatch.getInput1().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // min id
-        assertThat( // solution set
-                        updatingMatch.getInput2().getShipStrategy())
+        assertThat(updatingMatch.getInput2().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // solution set
 
         // test all the local strategies
@@ -131,11 +127,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
                 .isEqualTo(LocalStrategy.NONE);
         assertThat(iter.getInitialWorksetInput().getLocalStrategy()).isEqualTo(LocalStrategy.NONE);
 
-        assertThat( // workset
-                        neighborsJoin.getInput1().getLocalStrategy())
+        assertThat(neighborsJoin.getInput1().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // workset
-        assertThat( // edges
-                        neighborsJoin.getInput2().getLocalStrategy())
+        assertThat(neighborsJoin.getInput2().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // edges
 
         assertThat(minIdReducer.getInput().getLocalStrategy())
@@ -143,11 +137,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
         assertThat(minIdReducer.getInput().getLocalStrategyKeys()).isEqualTo(set0);
         assertThat(minIdCombiner.getInput().getLocalStrategy()).isEqualTo(LocalStrategy.NONE);
 
-        assertThat( // min id
-                        updatingMatch.getInput1().getLocalStrategy())
+        assertThat(updatingMatch.getInput1().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // min id
-        assertThat( // solution set
-                        updatingMatch.getInput2().getLocalStrategy())
+        assertThat(updatingMatch.getInput2().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // solution set
 
         // check the dams
@@ -207,11 +199,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
                 .isEqualTo(ShipStrategyType.PARTITION_HASH);
         assertThat(iter.getInitialWorksetInput().getShipStrategyKeys()).isEqualTo(set0);
 
-        assertThat( // workset
-                        neighborsJoin.getInput1().getShipStrategy())
+        assertThat(neighborsJoin.getInput1().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // workset
-        assertThat( // edges
-                        neighborsJoin.getInput2().getShipStrategy())
+        assertThat(neighborsJoin.getInput2().getShipStrategy())
                 .isEqualTo(ShipStrategyType.PARTITION_HASH); // edges
         assertThat(neighborsJoin.getInput2().getShipStrategyKeys()).isEqualTo(set0);
 
@@ -220,11 +210,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
         assertThat(minIdReducer.getInput().getShipStrategyKeys()).isEqualTo(set0);
         assertThat(minIdCombiner.getInput().getShipStrategy()).isEqualTo(ShipStrategyType.FORWARD);
 
-        assertThat( // solution set
-                        updatingMatch.getInput1().getShipStrategy())
+        assertThat(updatingMatch.getInput1().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // solution set
-        assertThat( // min id
-                        updatingMatch.getInput2().getShipStrategy())
+        assertThat(updatingMatch.getInput2().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // min id
 
         // test all the local strategies
@@ -233,11 +221,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
                 .isEqualTo(LocalStrategy.NONE);
         assertThat(iter.getInitialWorksetInput().getLocalStrategy()).isEqualTo(LocalStrategy.NONE);
 
-        assertThat( // workset
-                        neighborsJoin.getInput1().getLocalStrategy())
+        assertThat(neighborsJoin.getInput1().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // workset
-        assertThat( // edges
-                        neighborsJoin.getInput2().getLocalStrategy())
+        assertThat(neighborsJoin.getInput2().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // edges
 
         assertThat(minIdReducer.getInput().getLocalStrategy())
@@ -245,11 +231,9 @@ public class ConnectedComponentsTest extends CompilerTestBase {
         assertThat(minIdReducer.getInput().getLocalStrategyKeys()).isEqualTo(set0);
         assertThat(minIdCombiner.getInput().getLocalStrategy()).isEqualTo(LocalStrategy.NONE);
 
-        assertThat( // min id
-                        updatingMatch.getInput1().getLocalStrategy())
+        assertThat(updatingMatch.getInput1().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // min id
-        assertThat( // solution set
-                        updatingMatch.getInput2().getLocalStrategy())
+        assertThat(updatingMatch.getInput2().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // solution set
 
         // check the dams

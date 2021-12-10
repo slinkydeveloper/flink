@@ -72,7 +72,7 @@ public class BucketTest {
         bucketUnderTest.onSuccessfulCompletionOfCheckpoint(0L);
         assertThat(recoverableWriter)
                 .satisfies(
-                        matching( // it did not discard as this is still valid.
+                        matching(
                                 hasCalledDiscard(0))); // it did not discard as this is still valid.
     }
 

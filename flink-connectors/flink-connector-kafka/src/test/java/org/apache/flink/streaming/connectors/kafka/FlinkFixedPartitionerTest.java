@@ -52,8 +52,7 @@ public class FlinkFixedPartitionerTest {
 
         part.open(2, 4);
         assertThat(part.partition("abc3", null, null, null, partitions)).isEqualTo(0);
-        assertThat( // check if it is changing ;)
-                        part.partition("abc3", null, null, null, partitions))
+        assertThat(part.partition("abc3", null, null, null, partitions))
                 .isEqualTo(0); // check if it is changing ;)
 
         part.open(3, 4);

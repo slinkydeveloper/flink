@@ -174,11 +174,7 @@ public class TwoPhaseCommitSinkFunctionTest {
         harness.notifyOfCompletedCheckpoint(1);
 
         assertExactlyOnce(Arrays.asList("42", "43"));
-        assertThat(
-                        tmpDirectory
-                                .listFiles()
-                                . // one for checkpointId 2 and second for the currentTransaction
-                                size())
+        assertThat(tmpDirectory.listFiles().size())
                 .isEqualTo(2); // one for checkpointId 2 and second for the currentTransaction
     }
 

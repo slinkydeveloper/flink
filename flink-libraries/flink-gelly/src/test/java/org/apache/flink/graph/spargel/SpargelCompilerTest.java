@@ -98,7 +98,8 @@ public class SpargelCompilerTest extends CompilerTestBase {
         // check the solution set join and the delta
         PlanNode ssDelta = iteration.getSolutionSetDeltaPlanNode();
         assertThat(ssDelta)
-                .isInstanceOf( // this is only true if the update functions preserves
+                // this is only true if the update functions preserves
+                .isInstanceOf(
                         DualInputPlanNode
                                 .class); // this is only true if the update functions preserves
         // the partitioning
@@ -188,7 +189,8 @@ public class SpargelCompilerTest extends CompilerTestBase {
         // check the solution set join and the delta
         PlanNode ssDelta = iteration.getSolutionSetDeltaPlanNode();
         assertThat(ssDelta)
-                .isInstanceOf( // this is only true if the update functions preserves
+                // this is only true if the update functions preserves
+                .isInstanceOf(
                         DualInputPlanNode
                                 .class); // this is only true if the update functions preserves
         // the partitioning

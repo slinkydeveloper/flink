@@ -117,20 +117,16 @@ public class ConnectedComponentsCoGroupTest extends CompilerTestBase {
                 .isEqualTo(ShipStrategyType.PARTITION_HASH);
         assertThat(iter.getInitialWorksetInput().getShipStrategyKeys()).isEqualTo(set0);
 
-        assertThat( // workset
-                        neighborsJoin.getInput1().getShipStrategy())
+        assertThat(neighborsJoin.getInput1().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // workset
-        assertThat( // edges
-                        neighborsJoin.getInput2().getShipStrategy())
+        assertThat(neighborsJoin.getInput2().getShipStrategy())
                 .isEqualTo(ShipStrategyType.PARTITION_HASH); // edges
         assertThat(neighborsJoin.getInput2().getShipStrategyKeys()).isEqualTo(set0);
         assertThat(neighborsJoin.getInput2().getTempMode().isCached()).isTrue();
 
-        assertThat( // min id
-                        cogroup.getInput1().getShipStrategy())
+        assertThat(cogroup.getInput1().getShipStrategy())
                 .isEqualTo(ShipStrategyType.PARTITION_HASH); // min id
-        assertThat( // solution set
-                        cogroup.getInput2().getShipStrategy())
+        assertThat(cogroup.getInput2().getShipStrategy())
                 .isEqualTo(ShipStrategyType.FORWARD); // solution set
 
         // test all the local strategies
@@ -140,16 +136,13 @@ public class ConnectedComponentsCoGroupTest extends CompilerTestBase {
 
         // the sort for the neighbor join in the first iteration is pushed out of the loop
         assertThat(iter.getInitialWorksetInput().getLocalStrategy()).isEqualTo(LocalStrategy.SORT);
-        assertThat( // workset
-                        neighborsJoin.getInput1().getLocalStrategy())
+        assertThat(neighborsJoin.getInput1().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // workset
-        assertThat( // edges
-                        neighborsJoin.getInput2().getLocalStrategy())
+        assertThat(neighborsJoin.getInput2().getLocalStrategy())
                 .isEqualTo(LocalStrategy.SORT); // edges
 
         assertThat(cogroup.getInput1().getLocalStrategy()).isEqualTo(LocalStrategy.SORT);
-        assertThat( // solution set
-                        cogroup.getInput2().getLocalStrategy())
+        assertThat(cogroup.getInput2().getLocalStrategy())
                 .isEqualTo(LocalStrategy.NONE); // solution set
 
         // check the caches

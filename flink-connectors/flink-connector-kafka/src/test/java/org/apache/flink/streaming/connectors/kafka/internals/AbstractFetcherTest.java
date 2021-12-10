@@ -120,15 +120,9 @@ public class AbstractFetcherTest {
 
         // emit no records
         fetcher.emitRecordsWithTimestamps(emptyQueue(), partitionStateHolder, 3L, Long.MIN_VALUE);
-        assertThat(
-                        sourceContext
-                                .getLatestElement()
-                                .getValue()
-                                . // the null record should be skipped
-                                longValue())
+        assertThat(sourceContext.getLatestElement().getValue().longValue())
                 .isEqualTo(2L); // the null record should be skipped
-        assertThat( // the offset in state still should have advanced
-                        partitionStateHolder.getOffset())
+        assertThat(partitionStateHolder.getOffset())
                 .isEqualTo(3L); // the offset in state still should have advanced
     }
 

@@ -593,8 +593,7 @@ public class PojoTypeExtractionTest {
             String name = field.getField().getName();
             if (name.equals("field1")) {
                 assertThat(field.getTypeInformation())
-                        .isInstanceOf( // From tuple is pojo (not tuple type!)
-                                PojoTypeInfo.class); // From tuple is pojo (not tuple type!)
+                        .isInstanceOf(PojoTypeInfo.class); // From tuple is pojo (not tuple type!)
             } else if (name.equals("field2")) {
                 assertThat(field.getTypeInformation()).isInstanceOf(TupleTypeInfo.class);
                 assertThat(

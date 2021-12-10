@@ -223,7 +223,6 @@ public class RMQSourceTest {
                                     .isEqualTo(
                                             "Error while closing RMQ source with queueDummy at hostDummy");
                         });
-        ;
         Mockito.verify(rmqSource.channel, Mockito.atLeastOnce()).basicCancel(any());
         Mockito.verify(rmqSource.channel, Mockito.atLeastOnce()).close();
         Mockito.verify(rmqSource.connection, Mockito.atLeastOnce()).close();

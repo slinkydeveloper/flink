@@ -109,10 +109,9 @@ public abstract class KubernetesFactoryWithPodTemplateTestBase extends Kubernete
     @Test
     public void testVolumesFromPodTemplate() {
         assertThat(resultPod.getSpec().getVolumes())
-                .satisfies(
-                        matching( // The expected volume is defined in the
-                                  // test/resources/testing-pod-template.yaml.
-                                hasItems(KubernetesPodTemplateTestUtils.createVolumes())));
+                // The expected volume is defined in the
+                // test/resources/testing-pod-template.yaml.
+                .satisfies(matching(hasItems(KubernetesPodTemplateTestUtils.createVolumes())));
     }
 
     @Test
@@ -121,16 +120,16 @@ public abstract class KubernetesFactoryWithPodTemplateTestBase extends Kubernete
                 KubernetesPodTemplateTestUtils.getContainerWithName(
                         resultPod.getSpec(), Constants.MAIN_CONTAINER_NAME);
         assertThat(mainContainer.getVolumeMounts())
-                .satisfies(
-                        matching( // test/resources/testing-pod-template.yaml.
-                                hasItems(KubernetesPodTemplateTestUtils.createVolumeMount())));
+                // test/resources/testing-pod-template.yaml.
+                .satisfies(matching(hasItems(KubernetesPodTemplateTestUtils.createVolumeMount())));
     }
 
     @Test
     public void testAnnotationsFromPodTemplate() {
         assertThat(resultPod.getMetadata().getAnnotations())
+                // test/resources/testing-pod-template.yaml.
                 .satisfies(
-                        matching( // test/resources/testing-pod-template.yaml.
+                        matching(
                                 hasEntry(
                                         "annotation-key-of-pod-template",
                                         "annotation-value-of-pod-template")));
@@ -139,9 +138,10 @@ public abstract class KubernetesFactoryWithPodTemplateTestBase extends Kubernete
     @Test
     public void testLabelsFromPodTemplate() {
         assertThat(resultPod.getMetadata().getLabels())
+                // The expected label is defined in the
+                // test/resources/testing-pod-template.yaml.
                 .satisfies(
-                        matching( // The expected label is defined in the
-                                  // test/resources/testing-pod-template.yaml.
+                        matching(
                                 hasEntry(
                                         "label-key-of-pod-template",
                                         "label-value-of-pod-template")));
@@ -153,16 +153,16 @@ public abstract class KubernetesFactoryWithPodTemplateTestBase extends Kubernete
                         resultPod.getSpec().getImagePullSecrets().stream()
                                 .map(LocalObjectReference::getName)
                                 .collect(Collectors.toList()))
-                .satisfies(
-                        matching( // test/resources/testing-pod-template.yaml.
-                                hasItems("image-pull-secret-of-pod-template")));
+                // test/resources/testing-pod-template.yaml.
+                .satisfies(matching(hasItems("image-pull-secret-of-pod-template")));
     }
 
     @Test
     public void testNodeSelectorsFromPodTemplate() {
         assertThat(resultPod.getSpec().getNodeSelector())
+                // test/resources/testing-pod-template.yaml.
                 .satisfies(
-                        matching( // test/resources/testing-pod-template.yaml.
+                        matching(
                                 hasEntry(
                                         "node-selector-key-of-pod-template",
                                         "node-selector-value-of-pod-template")));
@@ -174,9 +174,8 @@ public abstract class KubernetesFactoryWithPodTemplateTestBase extends Kubernete
                         resultPod.getSpec().getTolerations().stream()
                                 .map(Toleration::getKey)
                                 .collect(Collectors.toList()))
-                .satisfies(
-                        matching( // test/resources/testing-pod-template.yaml.
-                                hasItems("key2-of-pod-template")));
+                // test/resources/testing-pod-template.yaml.
+                .satisfies(matching(hasItems("key2-of-pod-template")));
     }
 
     @Test
@@ -185,9 +184,10 @@ public abstract class KubernetesFactoryWithPodTemplateTestBase extends Kubernete
                 KubernetesPodTemplateTestUtils.getContainerWithName(
                         resultPod.getSpec(), Constants.MAIN_CONTAINER_NAME);
         assertThat(mainContainer.getEnv())
+                // The expected env is defined in the
+                // test/resources/testing-pod-template.yaml.
                 .satisfies(
-                        matching( // The expected env is defined in the
-                                  // test/resources/testing-pod-template.yaml.
+                        matching(
                                 hasItems(
                                         new EnvVarBuilder()
                                                 .withName("ENV_OF_POD_TEMPLATE")

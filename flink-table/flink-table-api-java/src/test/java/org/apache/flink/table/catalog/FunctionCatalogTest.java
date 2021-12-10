@@ -390,7 +390,7 @@ public class FunctionCatalogTest {
                                 returnsFunction(
                                         FunctionIdentifier.of(
                                                 IDENTIFIER), // temporary function hides catalog
-                                                             // function
+                                        // function
                                         FUNCTION_1))); // temporary function hides catalog function
 
         // dropping catalog functions is not possible in this state

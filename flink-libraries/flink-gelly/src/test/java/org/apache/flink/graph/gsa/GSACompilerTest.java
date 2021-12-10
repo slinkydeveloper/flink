@@ -89,7 +89,7 @@ public class GSACompilerTest extends CompilerTestBase {
         // check the solution set join and the delta
         PlanNode ssDelta = iteration.getSolutionSetDeltaPlanNode();
         assertThat(ssDelta)
-                .isInstanceOf( // this is only true if the update function preserves
+                .isInstanceOf(
                         DualInputPlanNode
                                 .class); // this is only true if the update function preserves
         // the partitioning

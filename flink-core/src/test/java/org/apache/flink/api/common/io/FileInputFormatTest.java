@@ -607,8 +607,7 @@ public class FileInputFormatTest {
             FileInputSplit[] splits = format.createInputSplits(2);
             assertThat(splits.length).isEqualTo(4);
             for (FileInputSplit split : splits) {
-                assertThat( // unsplittable deflate files have this size as a
-                                split.getLength())
+                assertThat(split.getLength())
                         .isEqualTo(-1L); // unsplittable deflate files have this size as a
                 // flag for "read whole file"
                 assertThat(split.getStart()).isEqualTo(0L); // always read from the beginning.
@@ -626,8 +625,7 @@ public class FileInputFormatTest {
             assertThat(splitsMixed.length).isEqualTo(5);
             for (FileInputSplit split : splitsMixed) {
                 if (split.getPath().getName().endsWith(".deflate")) {
-                    assertThat( // unsplittable deflate files have this size as a
-                                    split.getLength())
+                    assertThat(split.getLength())
                             .isEqualTo(-1L); // unsplittable deflate files have this size as a
                     // flag for "read whole file"
                     assertThat(split.getStart()).isEqualTo(0L); // always read from the beginning.

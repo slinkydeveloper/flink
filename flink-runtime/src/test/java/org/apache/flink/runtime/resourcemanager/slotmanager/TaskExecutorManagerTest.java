@@ -156,8 +156,8 @@ public class TaskExecutorManagerTest extends TestLogger {
                                 return newTaskExecutorId;
                             },
                             mainThreadExecutor)
-                    . // wait for the timeout to occur
-                    thenCombine(
+                    // wait for the timeout to occur
+                    .thenCombine(
                             releaseResourceFuture,
                             (registeredInstance, releasedInstance) -> {
                                 assertThat(registeredInstance).isEqualTo(releasedInstance);
@@ -213,8 +213,8 @@ public class TaskExecutorManagerTest extends TestLogger {
                                 return taskExecutorId;
                             },
                             mainThreadExecutor)
-                    . // wait for the timeout to occur
-                    thenAcceptBoth(
+                    // wait for the timeout to occur
+                    .thenAcceptBoth(
                             releaseResourceFuture,
                             (registeredInstance, releasedInstance) ->
                                     assertThat(registeredInstance).isEqualTo(releasedInstance))

@@ -164,11 +164,11 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
         final long numElements = 100000L;
         final DataSet<Long> result =
                 env.generateSequence(1, numElements)
-                        . // make sure every mapper is involved (no one is skipped because of lazy
+                        // make sure every mapper is involved (no one is skipped because of lazy
                         // split assignment)
-                        rebalance()
-                        . // the majority of the behavior is in the MapFunction
-                        map(
+                        .rebalance()
+                        // the majority of the behavior is in the MapFunction
+                        .map(
                                 new RichMapFunction<Long, Long>() {
 
                                     private final File proceedFile =
@@ -209,10 +209,9 @@ public class JobManagerHAProcessFailureRecoveryITCase extends TestLogger {
                                         return value1 + value2;
                                     }
                                 })
-                        . // The check is done in the mapper, because the client can currently not
-                        // handle
-                        // job manager losses/reconnects.
-                        flatMap(
+                        // The check is done in the mapper, because the client can currently not
+                        // handle job manager losses/reconnects.
+                        .flatMap(
                                 new RichFlatMapFunction<Long, Long>() {
 
                                     @Override

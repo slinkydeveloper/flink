@@ -159,9 +159,8 @@ public abstract class BuiltInFunctionTestBase {
 
             assertThat(Row.of(row.getField(i)))
                     .as("Result for spec [" + i + "] of test [" + testItem + "] doesn't match.")
-                    .isEqualTo( // Use Row.equals() to enable equality for complex structure, i.e.
-                                // byte[]
-                            Row.of(testItem.results.get(i)));
+                    // Use Row.equals() to enable equality for complex structure, i.e. byte[]
+                    .isEqualTo(Row.of(testItem.results.get(i)));
         }
     }
 
