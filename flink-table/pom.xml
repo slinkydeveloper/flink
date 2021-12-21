@@ -48,6 +48,7 @@ under the License.
 		<module>flink-sql-parser-hive</module>
 		<module>flink-table-code-splitter</module>
 		<module>flink-table-test-utils</module>
+		<module>flink-table-tests</module>
 	</modules>
 
 	<dependencyManagement>
