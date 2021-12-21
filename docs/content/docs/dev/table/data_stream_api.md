@@ -421,7 +421,7 @@ corresponding language-specific DataStream API module.
 ```xml
 <dependency>
   <groupId>org.apache.flink</groupId>
-  <artifactId>flink-table-api-java-bridge{{< scala_version >}}</artifactId>
+  <artifactId>flink-table-api-java-bridge</artifactId>
   <version>{{< version >}}</version>
   <scope>provided</scope>
 </dependency>
@@ -433,7 +433,6 @@ corresponding language-specific DataStream API module.
   <groupId>org.apache.flink</groupId>
   <artifactId>flink-table-api-scala-bridge{{< scala_version >}}</artifactId>
   <version>{{< version >}}</version>
-  <scope>provided</scope>
 </dependency>
 ```
 {{< /tab >}}

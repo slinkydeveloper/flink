@@ -38,7 +38,7 @@ You can easily switch between all APIs and libraries which build upon them.
 For instance, you can detect patterns from a table using [`MATCH_RECOGNIZE` clause]({{< ref "docs/dev/table/sql/queries/match_recognize" >}})
 and later use the DataStream API to build alerting based on the matched patterns.
 
-## Table Program Dependencies
+## Getting started
 
 Depending on the target programming language, you need to add the Java or Scala API to a project
 in order to use the Table API & SQL for defining pipelines.
@@ -48,7 +48,7 @@ in order to use the Table API & SQL for defining pipelines.
 ```xml
 <dependency>
   <groupId>org.apache.flink</groupId>
-  <artifactId>flink-table-api-java-bridge{{< scala_version >}}</artifactId>
+  <artifactId>flink-table-api-java</artifactId>
   <version>{{< version >}}</version>
   <scope>provided</scope>
 </dependency>
@@ -58,9 +58,8 @@ in order to use the Table API & SQL for defining pipelines.
 ```xml
 <dependency>
   <groupId>org.apache.flink</groupId>
-  <artifactId>flink-table-api-scala-bridge{{< scala_version >}}</artifactId>
+  <artifactId>flink-table-api-scala{{< scala_version >}}</artifactId>
   <version>{{< version >}}</version>
-  <scope>provided</scope>
 </dependency>
 ```
 {{< /tab >}}
@@ -78,28 +77,49 @@ $ python -m pip install apache-flink
 {{< /tab >}}
 {{< /tabs >}}
 
-Additionally, if you want to run the Table API & SQL programs locally within your IDE, you must add the
-following set of modules.
+If you need to use Table API together with DataStream API, use the following package instead:
 
+{{< tabs "94f8aceb-507f-4c8f-977e-df00fe903203" >}}
+{{< tab "Java" >}}
 ```xml
 <dependency>
   <groupId>org.apache.flink</groupId>
-  <artifactId>flink-table-planner{{< scala_version >}}</artifactId>
-  <version>{{< version >}}</version>
-  <scope>provided</scope>
-</dependency>
-<dependency>
-  <groupId>org.apache.flink</groupId>
-  <artifactId>flink-streaming-scala{{< scala_version >}}</artifactId>
+  <artifactId>flink-table-api-java-bridge</artifactId>
   <version>{{< version >}}</version>
   <scope>provided</scope>
 </dependency>
 ```
+{{< /tab >}}
+{{< tab "Scala" >}}
+```xml
+<dependency>
+  <groupId>org.apache.flink</groupId>
+  <artifactId>flink-table-api-scala-bridge{{< scala_version >}}</artifactId>
+  <version>{{< version >}}</version>
+</dependency>
+```
+{{< /tab >}}
+{{< tab "Python" >}}
+{{< stable >}}
+```bash
+$ python -m pip install apache-flink {{< version >}}
+```
+{{< /stable >}}
+{{< unstable >}}
+```bash
+$ python -m pip install apache-flink
+```
+{{< /unstable >}}
+{{< /tab >}}
+{{< /tabs >}}
+
+For more details on a complete configuration of the project, 
+including how to test your pipelines locally and how to create an uber Job JAR with your dependencies, 
+check out [Project configuration]({{< ref "docs/dev/table/project-configuration" >}}). <!-- This page doesn't exist, create it -->
 
 ### Extension Dependencies
 
-If you want to implement a [custom format or connector]({{< ref "docs/dev/table/sourcesSinks" >}}) 
-for (de)serializing rows or a set of [user-defined functions]({{< ref "docs/dev/table/functions/udfs" >}}),
+If you want to implement a set of [user-defined functions]({{< ref "docs/dev/table/functions/udfs" >}}),
 the following dependency is sufficient and can be used for JAR files for the SQL Client:
 
 ```xml
@@ -111,7 +131,48 @@ the following dependency is sufficient and can be used for JAR files for the SQL
 </dependency>
 ```
 
+For implementation of custom formats or connectors, refer to [User-defined Sources & Sinks]({{< ref "docs/dev/table/sourcesSinks" >}}).
+
 {{< top >}}
+
+### Testing
+
+If you want to test the Table API & SQL programs locally within your IDE, you can add the following dependency:
+
+```xml
+<dependency>
+    <groupId>org.apache.flink</groupId>
+    <artifactId>flink-table-test-utils</artifactId>
+    <version>{{< version >}}</version>
+    <scope>test</scope>
+</dependency>
+```
+
+This will automatically bring in the query planner and the runtime, required respectively to plan and execute the queries.
+
+<!-- Advanced topics -->
+
+### Distribution
+
+The Flink distribution contains by default the required JARs to execute Flink SQL Jobs in `/lib`, in particular:
+
+* `flink-table-api-java-uber-{{< version >}}.jar` containing all the Java APIs
+* `flink-table-runtime-{{< version >}}.jar` containing the runtime
+* `flink-table-planner-loader-{{< version >}}.jar` containing the query planner
+
+For Scala APIs, formats and connectors you need to either download and manually include the JARs in the `/lib` folder (recommended), or you need to shade them in the uber JAR of your Flink SQL Jobs.
+For more details, check out [Connect to External Systems]({{< ref "docs/connectors/table/overview" >}}).
+
+#### Planner and Planner loader
+
+Starting from Flink 1.15, the distribution contains two planners:
+
+* `flink-table-planner{{< scala_version >}}-{{< version >}}.jar`, in `/opt`, contains the query planner.
+* `flink-table-planner-loader-{{< version >}}.jar`, loaded by default in `/lib`, contains the query planner hidden behind an isolated classpath. That is, you won't be able to address directly any `io.apache.flink.table.planner`.
+
+If you need to access and use the internals of the query planner, you can swap the two JARs, but be aware that you will be constrained to use the Scala version of the Flink distribution you're using.
+
+Note: the two planners cannot co-exist at the same time in the classpath, that is if you load both of them in `/lib` your Table Jobs will fail.
 
 Where to go next?
 -----------------

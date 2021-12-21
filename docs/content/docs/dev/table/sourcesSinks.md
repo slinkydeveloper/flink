@@ -55,6 +55,36 @@ the translation process.
 
 {{< img width="90%" src="/fig/table_connectors.svg" alt="Translation of table connectors" >}}
 
+### Project configuration
+
+If you want to implement a custom format the following dependency is usually sufficient and can be used for JAR files for the SQL Client:
+
+```xml
+<dependency>
+  <groupId>org.apache.flink</groupId>
+  <artifactId>flink-table-common</artifactId>
+  <version>{{< version >}}</version>
+  <scope>provided</scope>
+</dependency>
+```
+
+If you want to develop a connector that needs to bridge with DataStream APIs, 
+for example if you have a DataStream connector you want to adapt to Table API, you also need this dependency:
+
+```xml
+<dependency>
+  <groupId>org.apache.flink</groupId>
+  <artifactId>flink-table-api-java-bridge</artifactId>
+  <version>{{< version >}}</version>
+  <scope>provided</scope>
+</dependency>
+```
+
+When shipping the connector/format, we suggest providing both a thin jar and an uber jar, 
+so that users can easily load the uber jar in SQL client or in the flink distribution and start using it. 
+Be aware that none of the table dependencies described above should to be packaged in the uber jar, 
+as they are already provided by the flink distribution.
+
 ### Metadata
 
 Both Table API and SQL are declarative APIs. This includes the declaration of tables. Thus, executing
