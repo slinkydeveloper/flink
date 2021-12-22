@@ -18,7 +18,7 @@
 
 package org.apache.flink.table.planner.codegen.calls
 
-import org.apache.flink.table.api.ValidationException
+import org.apache.flink.table.api.{DataTypes, ValidationException}
 import org.apache.flink.table.api.config.ExecutionConfigOptions
 import org.apache.flink.table.data.binary.BinaryArrayData
 import org.apache.flink.table.data.util.MapDataUtil
@@ -45,6 +45,7 @@ import org.apache.flink.util.Preconditions.checkArgument
 
 import java.time.ZoneId
 import java.util.Arrays.asList
+
 import scala.collection.JavaConversions._
 
 /**
@@ -2133,6 +2134,8 @@ object ScalarOperatorGens {
         ctx.addReusableLocalVariable(ty, variablePrefix)
       override def declareTypeSerializer(ty: LogicalType): String =
         ctx.addReusableTypeSerializer(ty)
+      override def declareDataStructureConverter(logicalType: LogicalType): String =
+        ctx.addReusableConverter(DataTypes.of(logicalType))
       override def declareClassField(ty: String, field: String, init: String): String = {
         ctx.addReusableMember(s"private $ty $field = $init;")
         field

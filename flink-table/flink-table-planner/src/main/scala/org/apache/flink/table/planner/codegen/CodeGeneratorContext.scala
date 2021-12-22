@@ -20,7 +20,7 @@ package org.apache.flink.table.planner.codegen
 
 import org.apache.flink.api.common.functions.{Function, RuntimeContext}
 import org.apache.flink.api.common.typeutils.TypeSerializer
-import org.apache.flink.table.api.TableConfig
+import org.apache.flink.table.api.{DataTypes, TableConfig}
 import org.apache.flink.table.data.GenericRowData
 import org.apache.flink.table.data.conversion.{DataStructureConverter, DataStructureConverters}
 import org.apache.flink.table.functions.{FunctionContext, UserDefinedFunction}

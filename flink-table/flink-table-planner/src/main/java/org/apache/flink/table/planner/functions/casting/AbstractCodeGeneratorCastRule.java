@@ -19,7 +19,10 @@
 package org.apache.flink.table.planner.functions.casting;
 
 import org.apache.flink.api.common.typeutils.TypeSerializer;
+import org.apache.flink.table.api.DataTypes;
 import org.apache.flink.table.api.TableException;
+import org.apache.flink.table.data.conversion.DataStructureConverter;
+import org.apache.flink.table.data.conversion.DataStructureConverters;
 import org.apache.flink.table.data.utils.CastExecutor;
 import org.apache.flink.table.planner.codegen.CodeGenUtils;
 import org.apache.flink.table.runtime.generated.CompileUtils;
@@ -38,6 +41,7 @@ import java.util.stream.Stream;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.className;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.cast;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
+import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.strLiteral;
 
 /**
@@ -74,36 +78,30 @@ abstract class AbstractCodeGeneratorCastRule<IN, OUT> extends AbstractCastRule<I
                         ctx, inputTerm, inputIsNullTerm, inputLogicalType, targetLogicalType);
 
         // Class fields can contain type serializers
-        final String classFieldDecls =
-                Stream.concat(
-                                ctx.typeSerializers.values().stream()
-                                        .map(
-                                                entry ->
-                                                        "private final "
-                                                                + className(
-                                                                        entry.getValue().getClass())
-                                                                + " "
-                                                                + entry.getKey()
-                                                                + ";"),
-                                ctx.getClassFields().stream())
-                        .collect(Collectors.joining("\n"));
+        final String classFieldDecls = String.join("\n", ctx.getClassFields());
 
+        final Stream<String> constructorArgsDeclaration =
+                Stream.concat(
+                        Stream.of("ClassLoader classLoader"),
+                        ctx.constructorArguments.stream()
+                                .map(e -> className(e.getValue().getClass()) + " " + e.getKey()));
         final String constructorSignature =
                 "public "
                         + castExecutorClassName
                         + "("
-                        + ctx.typeSerializers.values().stream()
-                                .map(
-                                        entry ->
-                                                className(entry.getValue().getClass())
-                                                        + " "
-                                                        + entry.getKey())
-                                .collect(Collectors.joining(", "))
+                        + constructorArgsDeclaration.collect(Collectors.joining(", "))
                         + ")";
-        final String constructorBody =
-                ctx.getDeclaredTypeSerializers().stream()
-                        .map(name -> "this." + name + " = " + name + ";\n")
-                        .collect(Collectors.joining());
+        final CastRuleUtils.CodeWriter constructorBodyWriter = new CastRuleUtils.CodeWriter();
+        // Assign constructor arguments
+        ctx.constructorArguments.forEach(
+                e -> constructorBodyWriter.assignStmt("this." + e.getKey(), e.getKey()));
+        // Invoke open for DataStructureConverter
+        ctx.dataStructureConverters.values().stream()
+                .map(Map.Entry::getKey)
+                .forEach(
+                        converterTerm ->
+                                constructorBodyWriter.stmt(
+                                        methodCall(converterTerm, "open", "classLoader")));
 
         // Because janino doesn't support generics, we need to manually cast the input variable of
         // the cast method
@@ -146,7 +144,7 @@ abstract class AbstractCodeGeneratorCastRule<IN, OUT> extends AbstractCastRule<I
                         + "\n"
                         + constructorSignature
                         + " {\n"
-                        + constructorBody
+                        + constructorBodyWriter
                         + "}\n"
                         + functionSignature
                         + " {\n"
@@ -155,7 +153,10 @@ abstract class AbstractCodeGeneratorCastRule<IN, OUT> extends AbstractCastRule<I
 
         try {
             Object[] constructorArgs =
-                    ctx.getTypeSerializersInstances().toArray(new TypeSerializer[0]);
+                    Stream.concat(
+                                    Stream.of(castRuleContext.getClassLoader()),
+                                    ctx.constructorArguments.stream().map(Map.Entry::getValue))
+                            .toArray(Object[]::new);
             return (CastExecutor<IN, OUT>)
                     CompileUtils.compile(
                                     castRuleContext.getClassLoader(),
@@ -178,6 +179,10 @@ abstract class AbstractCodeGeneratorCastRule<IN, OUT> extends AbstractCastRule<I
 
         private final Map<LogicalType, Map.Entry<String, TypeSerializer<?>>> typeSerializers =
                 new LinkedHashMap<>();
+        private final Map<LogicalType, Map.Entry<String, DataStructureConverter<Object, Object>>>
+                dataStructureConverters = new LinkedHashMap<>();
+
+        private final List<Map.Entry<String, Object>> constructorArguments = new ArrayList<>();
         private final List<String> variableDeclarationStatements = new ArrayList<>();
         private final List<String> classFields = new ArrayList<>();
         private int variableIndex = 0;
@@ -208,36 +213,59 @@ abstract class AbstractCodeGeneratorCastRule<IN, OUT> extends AbstractCastRule<I
 
         @Override
         public String declareTypeSerializer(LogicalType type) {
-            return typeSerializers
-                    .computeIfAbsent(
-                            type,
-                            t -> {
-                                Map.Entry<String, TypeSerializer<?>> e =
-                                        new SimpleImmutableEntry<>(
-                                                "typeSerializer$" + variableIndex,
-                                                InternalSerializers.create(t));
-                                variableIndex++;
-                                return e;
-                            })
-                    .getKey();
+            return "this."
+                    + typeSerializers
+                            .computeIfAbsent(
+                                    type,
+                                    t -> {
+                                        String term = "typeSerializer$" + variableIndex;
+                                        TypeSerializer<?> serializer =
+                                                InternalSerializers.create(t);
+                                        this.classFields.add(
+                                                "private final "
+                                                        + className(serializer.getClass())
+                                                        + " "
+                                                        + term
+                                                        + ";");
+                                        this.constructorArguments.add(
+                                                new SimpleImmutableEntry<>(term, serializer));
+
+                                        variableIndex++;
+                                        return new SimpleImmutableEntry<>(term, serializer);
+                                    })
+                            .getKey();
+        }
+
+        @Override
+        public String declareDataStructureConverter(LogicalType logicalType) {
+            return "this."
+                    + dataStructureConverters
+                            .computeIfAbsent(
+                                    logicalType,
+                                    t -> {
+                                        String term = "dataStructureConverter$" + variableIndex;
+                                        DataStructureConverter<Object, Object> converter =
+                                                DataStructureConverters.getConverter(
+                                                        DataTypes.of(t));
+                                        this.classFields.add(
+                                                "private final "
+                                                        + className(converter.getClass())
+                                                        + " "
+                                                        + term
+                                                        + ";");
+                                        this.constructorArguments.add(
+                                                new SimpleImmutableEntry<>(term, converter));
+
+                                        variableIndex++;
+                                        return new SimpleImmutableEntry<>(term, converter);
+                                    })
+                            .getKey();
         }
 
         @Override
         public String declareClassField(String type, String name, String initialization) {
             this.classFields.add(type + " " + name + " = " + initialization + ";");
             return "this." + name;
-        }
-
-        public List<String> getDeclaredTypeSerializers() {
-            return this.typeSerializers.values().stream()
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
-        }
-
-        public List<TypeSerializer<?>> getTypeSerializersInstances() {
-            return this.typeSerializers.values().stream()
-                    .map(Map.Entry::getValue)
-                    .collect(Collectors.toList());
         }
 
         public List<String> getClassFields() {

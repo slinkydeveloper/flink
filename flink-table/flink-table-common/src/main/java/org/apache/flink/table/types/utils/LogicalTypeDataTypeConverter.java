@@ -212,7 +212,10 @@ public final class LogicalTypeDataTypeConverter {
                     structuredType.getAttributes().stream()
                             .map(a -> a.getType().accept(this))
                             .collect(Collectors.toList());
-            return new FieldsDataType(structuredType, attributeDataTypes);
+            return new FieldsDataType(
+                    structuredType,
+                    structuredType.getImplementationClass().orElse(null),
+                    attributeDataTypes);
         }
 
         @Override
