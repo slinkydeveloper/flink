@@ -40,7 +40,7 @@ We recommend packaging the application code and all its required dependencies in
 we refer to as the *application jar*. The application jar can be submitted to an already running Flink cluster,
 or added to a Flink application container image.
 
-Projects created from the `Java Project Template` or `Scala Project Template` are configured to automatically include
+Projects created from the `Java Project Template` or `Scala Project Template` and gradle are configured to automatically include
 the application dependencies into the application jar when running `mvn clean package`. For projects that are
 not set up from those templates, we recommend adding the Maven Shade Plugin (as listed in the Appendix below)
 to build the application jar with all required dependencies.

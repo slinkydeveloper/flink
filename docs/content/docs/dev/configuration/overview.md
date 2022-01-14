@@ -206,10 +206,6 @@ becomes excessively large, because it also contains all Flink core dependencies.
 is that the Flink core dependencies that are added to the application's JAR file clash with some of
 your own dependency versions (which is normally avoided through inverted classloading).
 
-**Note on IntelliJ:** To make the applications run within IntelliJ IDEA, it is necessary to tick the
-`Include dependencies with "Provided" scope` box in the run configuration. If this option is not available
-(possibly due to using an older IntelliJ IDEA version), then a workaround is to create a test that
-calls the application's `main()` method.
 
 ## Which dependencies do you need?
 
