@@ -50,7 +50,8 @@ class ProjectionAndCalcPersistedPlanTest {
                                 .savepointPhaseOutput(Row.of("a", "b", "c"))
                                 .savepointPhaseInput("MyInputTable", Row.of("d", "e", "f"))
                                 .savepointPhaseOutput(Row.of("d", "e", "f"))
-                                .build())
+                                .build(),
+                        new InsertIntoSelectAsteriskTestCase('f'))
                 .flatMap(
                         p ->
                                 PersistedPlanTestExecutor.forAllVersions(p)
