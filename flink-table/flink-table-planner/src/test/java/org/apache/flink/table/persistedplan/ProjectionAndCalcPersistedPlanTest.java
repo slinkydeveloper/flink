@@ -19,7 +19,8 @@
 package org.apache.flink.table.persistedplan;
 
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
-import org.apache.flink.table.persistedplan.infra.PersistedPlanTestExecutor;
+import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase;
+import org.apache.flink.table.persistedplan.infra.RestoreTestExecutor;
 import org.apache.flink.table.persistedplan.infra.SQLPipeline;
 import org.apache.flink.test.util.SharedMiniClusterWithClientExtension;
 import org.apache.flink.types.Row;
@@ -28,6 +29,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLPipelineDefinition.DEFAULT_OUTPUT_TABLE_NAME;
@@ -39,22 +42,37 @@ class ProjectionAndCalcPersistedPlanTest {
             new SharedMiniClusterWithClientExtension(
                     new MiniClusterResourceConfiguration.Builder().build());
 
+    private static List<PersistedPlanTestCase> testCases =
+            Stream.of(
+                            SQLPipeline.builder()
+                                    .savepointPhaseInput("MyInputTable", Row.of("a", "b", "c"))
+                                    .setInsertSql(
+                                            "INSERT INTO %s SELECT * FROM MyInputTable",
+                                            DEFAULT_OUTPUT_TABLE_NAME)
+                                    .savepointPhaseOutput(Row.of("a", "b", "c"))
+                                    .executionPhaseInput("MyInputTable", Row.of("d", "e", "f"))
+                                    .executionPhaseOutput(Row.of("d", "e", "f"))
+                                    .build(),
+                            new InsertIntoSelectAsteriskTestCase('f'),
+                            new InsertIntoSelectAsteriskTestCase('h'))
+                    .collect(Collectors.toList());
+
     @TestFactory
-    Stream<DynamicTest> tests() {
-        return Stream.of(
-                        SQLPipeline.builder()
-                                .savepointPhaseInput("MyInputTable", Row.of("a", "b", "c"))
-                                .setInsertSql(
-                                        "INSERT INTO %s SELECT * FROM MyInputTable",
-                                        DEFAULT_OUTPUT_TABLE_NAME)
-                                .savepointPhaseOutput(Row.of("a", "b", "c"))
-                                .savepointPhaseInput("MyInputTable", Row.of("d", "e", "f"))
-                                .savepointPhaseOutput(Row.of("d", "e", "f"))
-                                .build(),
-                        new InsertIntoSelectAsteriskTestCase('f'))
+    Stream<DynamicTest> restoreTest() {
+        return testCases.stream()
                 .flatMap(
                         p ->
-                                PersistedPlanTestExecutor.forAllVersions(p)
+                                RestoreTestExecutor.forAllVersions(p)
+                                        .withClusterClient(MINI_CLUSTER.getClusterClient())
+                                        .build());
+    }
+
+    @TestFactory
+    Stream<DynamicTest> anotherTest() {
+        return testCases.stream()
+                .flatMap(
+                        p ->
+                                AnotherTestExecutor.forAllVersions(p)
                                         .withClusterClient(MINI_CLUSTER.getClusterClient())
                                         .build());
     }

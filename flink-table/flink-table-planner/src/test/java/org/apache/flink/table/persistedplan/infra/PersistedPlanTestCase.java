@@ -70,7 +70,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *   <li>(Optional) Restore tables in the catalog implementing {@link RestoreTables}. By default the
  *       implementation will try to invoke {@link CreateTables#createTables(Context,
  *       TableEnvironment)}, if available.
- *   <li>(Optional) Modify the plan an.d/or assert it before starting its execution implementing
+ *   <li>(Optional) Modify the plan and/or assert it before starting its execution implementing
  *       {@link ModifyPlanBeforeExecution}
  *   <li>Set a terminating condition implementing {@link StopExecutionCondition}.
  *   <li>(Optional) Add an assertion phase after the execution is done and the task is stopped with
