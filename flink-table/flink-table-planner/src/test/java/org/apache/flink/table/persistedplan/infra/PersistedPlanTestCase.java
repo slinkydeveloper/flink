@@ -25,6 +25,8 @@ import org.apache.flink.table.api.internal.TableEnvironmentInternal;
 import org.apache.flink.table.catalog.ObjectIdentifier;
 import org.apache.flink.table.catalog.UnresolvedIdentifier;
 import org.apache.flink.table.planner.plan.nodes.exec.ExecNodeGraph;
+import org.apache.flink.table.test.pipeline.PipelineSink;
+import org.apache.flink.table.test.pipeline.PipelineSource;
 import org.apache.flink.types.Row;
 
 import org.junit.jupiter.api.DynamicTest;
@@ -80,8 +82,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <h2>Test versions and test directory structure</h2>
  *
  * Each test case can have multiple versions, with a different persisted plan and its associated
- * savepoint. Versions are named with an integer starting from 1, and the latest version is always
- * identified as {@code latest}.
+ * savepoint. Versions are named with an integer starting from {@code 1}, and the latest version is
+ * always identified as {@code latest}.
  *
  * <p>Each test has an associated directory in the resources, named after the result of {@link
  * #getName()}, and this directory contains an associated subdirectory for each version. For
@@ -104,7 +106,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  *         └── savepoint.dat
  * </code>
  *
- * <p>When the test case is run the first time, or in general if the directory {@code latest} is
+ * <p>When the test case runs the first time, or in general if the directory {@code latest} is
  * missing, a new {@code latest} directory will be generated and will be filled with the plan and
  * the savepoint.
  *
@@ -233,8 +235,8 @@ public interface PersistedPlanTestCase {
     // --- Helpers to define pipelines
 
     /**
-     * This interface provides a helper to simplify the development of a test with a static input
-     * and output for a single {@code INSERT INTO} query.
+     * This interface provides a helper to simplify the development of a test with a static set of
+     * sources and sink for a single {@code INSERT INTO} query.
      *
      * <p>Both savepoint and execution will stop when the record count is reached and the assertions
      * will check the equality, minus order, of the output list of rows.
@@ -244,7 +246,8 @@ public interface PersistedPlanTestCase {
      * #afterExecutionPhase(Context, TableEnvironmentInternal, Map)}.
      */
     interface SQLPipelineDefinition
-            extends CreateTables,
+            extends PersistedPlanTestCase,
+                    CreateTables,
                     RestoreTables,
                     TriggerSavepointCondition,
                     TablePipelineDefinition,
@@ -252,21 +255,15 @@ public interface PersistedPlanTestCase {
                     AfterSavepointCreationPhase,
                     AfterExecutionPhase {
 
-        String DEFAULT_OUTPUT_TABLE_NAME = "OutputTable";
+        List<PipelineSource> savepointPhaseSources(Context context);
 
-        Map<String, List<Row>> savepointPhaseInput(Context context);
+        String pipeline(Context context);
 
-        String definePipeline(Context context);
+        PipelineSink savepointPhaseSink(Context context);
 
-        default String outputTableName(Context context) {
-            return DEFAULT_OUTPUT_TABLE_NAME;
-        }
+        List<PipelineSource> sources(Context context);
 
-        List<Row> savepointPhaseOutput(Context context);
-
-        Map<String, List<Row>> executionPhaseInput(Context context);
-
-        List<Row> executionPhaseOutput(Context context);
+        PipelineSink sink(Context context);
 
         @Override
         default void createTables(Context context, TableEnvironment tableEnv) throws Exception {
@@ -275,7 +272,7 @@ public interface PersistedPlanTestCase {
 
         @Override
         default String definePipeline(Context context, TableEnvironment tableEnv) throws Exception {
-            return definePipeline(context);
+            return pipeline(context);
         }
 
         @Override
@@ -285,8 +282,10 @@ public interface PersistedPlanTestCase {
                 Map<ObjectIdentifier, List<Row>> sinkTablesState) {
             ObjectIdentifier identifier =
                     tableEnv.getCatalogManager()
-                            .qualifyIdentifier(UnresolvedIdentifier.of(outputTableName(context)));
-            return sinkTablesState.get(identifier).size() >= savepointPhaseOutput(context).size();
+                            .qualifyIdentifier(
+                                    UnresolvedIdentifier.of(savepointPhaseSink(context).getName()));
+            return sinkTablesState.get(identifier).size()
+                    >= savepointPhaseSink(context).getRows().size();
         }
 
         @Override
@@ -297,10 +296,11 @@ public interface PersistedPlanTestCase {
                 throws Exception {
             ObjectIdentifier identifier =
                     tableEnv.getCatalogManager()
-                            .qualifyIdentifier(UnresolvedIdentifier.of(outputTableName(context)));
+                            .qualifyIdentifier(
+                                    UnresolvedIdentifier.of(savepointPhaseSink(context).getName()));
             assertThat(sinkTablesState).containsOnlyKeys(identifier);
             assertThat(sinkTablesState.get(identifier))
-                    .containsExactlyInAnyOrderElementsOf(savepointPhaseOutput(context));
+                    .containsExactlyInAnyOrderElementsOf(savepointPhaseSink(context).getRows());
         }
 
         @Override
@@ -310,8 +310,8 @@ public interface PersistedPlanTestCase {
                 Map<ObjectIdentifier, List<Row>> sinkTablesState) {
             ObjectIdentifier identifier =
                     tableEnv.getCatalogManager()
-                            .qualifyIdentifier(UnresolvedIdentifier.of(outputTableName(context)));
-            return sinkTablesState.get(identifier).size() >= executionPhaseOutput(context).size();
+                            .qualifyIdentifier(UnresolvedIdentifier.of(sink(context).getName()));
+            return sinkTablesState.get(identifier).size() >= sink(context).getRows().size();
         }
 
         @Override
@@ -322,10 +322,10 @@ public interface PersistedPlanTestCase {
                 throws Exception {
             ObjectIdentifier identifier =
                     tableEnv.getCatalogManager()
-                            .qualifyIdentifier(UnresolvedIdentifier.of(outputTableName(context)));
+                            .qualifyIdentifier(UnresolvedIdentifier.of(sink(context).getName()));
             assertThat(sinkTablesState).containsOnlyKeys(identifier);
             assertThat(sinkTablesState.get(identifier))
-                    .containsExactlyInAnyOrderElementsOf(executionPhaseOutput(context));
+                    .containsExactlyInAnyOrderElementsOf(sink(context).getRows());
         }
     }
 
@@ -342,7 +342,8 @@ public interface PersistedPlanTestCase {
      * #afterExecutionPhase(Context, TableEnvironmentInternal, Map)}.
      */
     interface SQLSetPipelineDefinition
-            extends CreateTables,
+            extends PersistedPlanTestCase,
+                    CreateTables,
                     RestoreTables,
                     TriggerSavepointCondition,
                     StatementSetPipelineDefinition,
@@ -350,15 +351,15 @@ public interface PersistedPlanTestCase {
                     AfterSavepointCreationPhase,
                     AfterExecutionPhase {
 
-        Map<String, List<Row>> savepointPhaseInput(Context context);
+        List<PipelineSource> savepointPhaseSources(Context context);
 
-        List<String> definePipeline(Context context);
+        List<String> pipeline(Context context);
 
-        Map<String, List<Row>> savepointPhaseOutput(Context context);
+        List<PipelineSource> savepointPhaseSinks(Context context);
 
-        Map<String, List<Row>> executionPhaseInput(Context context);
+        List<PipelineSource> sources(Context context);
 
-        Map<String, List<Row>> executionPhaseOutput(Context context);
+        List<PipelineSource> sinks(Context context);
 
         @Override
         default void createTables(Context context, TableEnvironment tableEnv) throws Exception {
@@ -369,7 +370,7 @@ public interface PersistedPlanTestCase {
         default StatementSet definePipeline(Context context, TableEnvironment tableEnv)
                 throws Exception {
             StatementSet statementSet = tableEnv.createStatementSet();
-            for (String stmt : definePipeline(context)) {
+            for (String stmt : pipeline(context)) {
                 statementSet.addInsertSql(stmt);
             }
             return statementSet;

@@ -24,7 +24,6 @@ import org.apache.flink.types.Row;
 import java.util.List;
 import java.util.Map;
 
-import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
@@ -43,7 +42,7 @@ public class InsertIntoSelectAsteriskTestCase
     }
 
     @Override
-    public Map<String, List<Row>> savepointPhaseInput(PersistedPlanTestCase.Context context) {
+    public Map<String, List<Row>> savepointPhaseSources(PersistedPlanTestCase.Context context) {
         return singletonMap(
                 "MyInputTable",
                 singletonList(
@@ -54,12 +53,12 @@ public class InsertIntoSelectAsteriskTestCase
     }
 
     @Override
-    public String definePipeline(PersistedPlanTestCase.Context context) {
+    public String pipeline(PersistedPlanTestCase.Context context) {
         return format("INSERT INTO %s SELECT * FROM MyInputTable", DEFAULT_OUTPUT_TABLE_NAME);
     }
 
     @Override
-    public List<Row> savepointPhaseOutput(PersistedPlanTestCase.Context context) {
+    public List<Row> savepointPhaseSink(PersistedPlanTestCase.Context context) {
         return singletonList(
                 Row.of(
                         String.valueOf(startingChar),
@@ -68,7 +67,7 @@ public class InsertIntoSelectAsteriskTestCase
     }
 
     @Override
-    public Map<String, List<Row>> executionPhaseInput(PersistedPlanTestCase.Context context) {
+    public Map<String, List<Row>> sources(PersistedPlanTestCase.Context context) {
         return singletonMap(
                 "MyInputTable",
                 singletonList(
@@ -79,7 +78,7 @@ public class InsertIntoSelectAsteriskTestCase
     }
 
     @Override
-    public List<Row> executionPhaseOutput(PersistedPlanTestCase.Context context) {
+    public List<Row> sink(PersistedPlanTestCase.Context context) {
         return singletonList(
                 Row.of(
                         String.valueOf(startingChar + 3),

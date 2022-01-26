@@ -33,7 +33,7 @@ import java.util.Map;
  * Simple static implementation of {@link SQLSetPipelineDefinition}. See {@link
  * PersistedPlanTestCase} for more details.
  */
-public final class SQLSetPipeline implements PersistedPlanTestCase, SQLSetPipelineDefinition {
+public final class SQLSetPipeline implements SQLSetPipelineDefinition {
 
     private final Map<String, List<Row>> savepointPhaseInput;
     private final List<String> pipeline;
@@ -61,27 +61,27 @@ public final class SQLSetPipeline implements PersistedPlanTestCase, SQLSetPipeli
     }
 
     @Override
-    public Map<String, List<Row>> savepointPhaseInput(PersistedPlanTestCase.Context context) {
+    public Map<String, List<Row>> savepointPhaseSources(PersistedPlanTestCase.Context context) {
         return savepointPhaseInput;
     }
 
     @Override
-    public List<String> definePipeline(PersistedPlanTestCase.Context context) {
+    public List<String> pipeline(PersistedPlanTestCase.Context context) {
         return pipeline;
     }
 
     @Override
-    public Map<String, List<Row>> savepointPhaseOutput(PersistedPlanTestCase.Context context) {
+    public Map<String, List<Row>> savepointPhaseSinks(PersistedPlanTestCase.Context context) {
         return savepointPhaseOutput;
     }
 
     @Override
-    public Map<String, List<Row>> executionPhaseInput(PersistedPlanTestCase.Context context) {
+    public Map<String, List<Row>> sources(PersistedPlanTestCase.Context context) {
         return executionPhaseInput;
     }
 
     @Override
-    public Map<String, List<Row>> executionPhaseOutput(PersistedPlanTestCase.Context context) {
+    public Map<String, List<Row>> sinks(PersistedPlanTestCase.Context context) {
         return executionPhaseOutput;
     }
 
@@ -158,7 +158,7 @@ public final class SQLSetPipeline implements PersistedPlanTestCase, SQLSetPipeli
             return executionPhaseOutput(table, Arrays.asList(rows));
         }
 
-        public SQLSetPipeline build() {
+        public SQLSetPipelineDefinition build() {
             Preconditions.checkArgument(
                     pipeline.size() != 0,
                     "Pipeline is empty. Define at least one insert statement");

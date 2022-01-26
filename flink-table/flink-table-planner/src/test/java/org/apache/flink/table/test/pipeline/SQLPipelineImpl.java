@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-package org.apache.flink.table.persistedplan.infra;
+package org.apache.flink.table.test.pipeline;
 
+import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase;
 import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLPipelineDefinition;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Preconditions;
@@ -35,28 +36,35 @@ import java.util.Map;
  * Simple static implementation of {@link SQLPipelineDefinition}. See {@link PersistedPlanTestCase}
  * for more details.
  */
-public final class SQLPipeline implements SQLPipelineDefinition {
+public final class SQLPipelineImpl implements Pipeline.SQL {
 
-    private final Map<String, List<Row>> savepointPhaseInput;
+    private final List<PipelineSource> sources;
     private final String pipeline;
-    private final @Nullable String outputTableName;
-    private final List<Row> savepointPhaseOutput;
-    private final Map<String, List<Row>> executionPhaseInput;
-    private final List<Row> executionPhaseOutput;
+    private final PipelineSink sinks;
+    private final @Nullable List<PipelineSource> savepointPhaseSources;
+    private final @Nullable PipelineSink savepointPhaseSink;
 
-    private SQLPipeline(
-            Map<String, List<Row>> savepointPhaseInput,
+    public SQLPipelineImpl(
+            List<PipelineSource> sources,
             String pipeline,
-            @Nullable String outputTableName,
-            List<Row> savepointPhaseOutput,
-            Map<String, List<Row>> executionPhaseInput,
-            List<Row> executionPhaseOutput) {
-        this.savepointPhaseInput = savepointPhaseInput;
+            PipelineSink sinks,
+            @Nullable List<PipelineSource> savepointPhaseSources,
+            @Nullable PipelineSink savepointPhaseSink) {
+        this.sources = sources;
         this.pipeline = pipeline;
-        this.outputTableName = outputTableName;
-        this.savepointPhaseOutput = savepointPhaseOutput;
-        this.executionPhaseInput = executionPhaseInput;
-        this.executionPhaseOutput = executionPhaseOutput;
+        this.sinks = sinks;
+        this.savepointPhaseSources = savepointPhaseSources;
+        this.savepointPhaseSink = savepointPhaseSink;
+    }
+
+    @Override
+    public List<PipelineSource> savepointPhaseSources() {
+        if (sa) return null;
+    }
+
+    @Override
+    public PipelineSink savepointPhaseSink() {
+        return null;
     }
 
     @Override
@@ -66,40 +74,18 @@ public final class SQLPipeline implements SQLPipelineDefinition {
     }
 
     @Override
-    public Map<String, List<Row>> savepointPhaseSources(PersistedPlanTestCase.Context context) {
-        return savepointPhaseInput;
+    public List<PipelineSource> sources() {
+        return null;
     }
 
     @Override
-    public String pipeline(PersistedPlanTestCase.Context context) {
-        return pipeline;
+    public String sqlStatement() {
+        return null;
     }
 
     @Override
-    public String outputTableName(PersistedPlanTestCase.Context context) {
-        if (outputTableName != null) {
-            return outputTableName;
-        }
-        return SQLPipelineDefinition.super.outputTableName(context);
-    }
-
-    @Override
-    public List<Row> savepointPhaseSink(PersistedPlanTestCase.Context context) {
-        return savepointPhaseOutput;
-    }
-
-    @Override
-    public Map<String, List<Row>> sources(PersistedPlanTestCase.Context context) {
-        return executionPhaseInput;
-    }
-
-    @Override
-    public List<Row> sink(PersistedPlanTestCase.Context context) {
-        return executionPhaseOutput;
-    }
-
-    public static Builder builder() {
-        return new Builder();
+    public PipelineSink sink() {
+        return null;
     }
 
     public static class Builder {
@@ -167,9 +153,9 @@ public final class SQLPipeline implements SQLPipelineDefinition {
             return executionPhaseOutput(Arrays.asList(rows));
         }
 
-        public SQLPipelineDefinition build() {
+        public SQLPipelineImpl build() {
             Preconditions.checkNotNull(pipeline, "Pipeline is not defined.");
-            return new SQLPipeline(
+            return new SQLPipelineImpl(
                     savepointPhaseInput,
                     pipeline,
                     outputTableName,
