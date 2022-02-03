@@ -33,7 +33,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLPipelineDefinition.DEFAULT_OUTPUT_TABLE_NAME;
+import static org.apache.flink.table.test.pipeline.Pipelines.sink;
+import static org.apache.flink.table.test.pipeline.Pipelines.source;
 
 class ProjectionAndCalcPersistedPlanTest {
 
@@ -42,16 +43,14 @@ class ProjectionAndCalcPersistedPlanTest {
             new SharedMiniClusterWithClientExtension(
                     new MiniClusterResourceConfiguration.Builder().build());
 
-    private static List<PersistedPlanTestCase> testCases =
+    private static final List<PersistedPlanTestCase> testCases =
             Stream.of(
-                            SQLPipeline.builder()
-                                    .savepointPhaseInput("MyInputTable", Row.of("a", "b", "c"))
-                                    .setInsertSql(
-                                            "INSERT INTO %s SELECT * FROM MyInputTable",
-                                            DEFAULT_OUTPUT_TABLE_NAME)
-                                    .savepointPhaseOutput(Row.of("a", "b", "c"))
-                                    .executionPhaseInput("MyInputTable", Row.of("d", "e", "f"))
-                                    .executionPhaseOutput(Row.of("d", "e", "f"))
+                            SQLPipeline.named("one to one insert into with strings")
+                                    .savepointPhaseInput(source("A").rows(Row.of("a", "b", "c")))
+                                    .sql("INSERT INTO B SELECT * FROM A")
+                                    .savepointPhaseOutput(sink("B").rows(Row.of("a", "b", "c")))
+                                    .executionPhaseInput(source("A").rows(Row.of("d", "e", "f")))
+                                    .executionPhaseOutput(sink("B").rows(Row.of("d", "e", "f")))
                                     .build(),
                             new InsertIntoSelectAsteriskTestCase('f'),
                             new InsertIntoSelectAsteriskTestCase('h'))
@@ -63,16 +62,6 @@ class ProjectionAndCalcPersistedPlanTest {
                 .flatMap(
                         p ->
                                 RestoreTestExecutor.forAllVersions(p)
-                                        .withClusterClient(MINI_CLUSTER.getClusterClient())
-                                        .build());
-    }
-
-    @TestFactory
-    Stream<DynamicTest> anotherTest() {
-        return testCases.stream()
-                .flatMap(
-                        p ->
-                                AnotherTestExecutor.forAllVersions(p)
                                         .withClusterClient(MINI_CLUSTER.getClusterClient())
                                         .build());
     }

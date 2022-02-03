@@ -19,13 +19,15 @@
 package org.apache.flink.table.persistedplan;
 
 import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase;
+import org.apache.flink.table.test.pipeline.PipelineSink;
+import org.apache.flink.table.test.pipeline.PipelineSource;
+import org.apache.flink.table.test.pipeline.Pipelines;
 import org.apache.flink.types.Row;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
+import static org.apache.flink.table.test.pipeline.Pipelines.source;
 
 public class InsertIntoSelectAsteriskTestCase
         implements PersistedPlanTestCase, PersistedPlanTestCase.SQLPipelineDefinition {
@@ -42,47 +44,49 @@ public class InsertIntoSelectAsteriskTestCase
     }
 
     @Override
-    public Map<String, List<Row>> savepointPhaseSources(PersistedPlanTestCase.Context context) {
-        return singletonMap(
-                "MyInputTable",
-                singletonList(
-                        Row.of(
-                                String.valueOf(startingChar),
-                                String.valueOf(startingChar + 1),
-                                String.valueOf(startingChar + 2))));
+    public List<PipelineSource> savepointPhaseSources(PersistedPlanTestCase.Context context) {
+        return singletonList(
+                source("A")
+                        .rows(
+                                Row.of(
+                                        String.valueOf(startingChar),
+                                        String.valueOf(startingChar + 1),
+                                        String.valueOf(startingChar + 2))));
     }
 
     @Override
     public String pipeline(PersistedPlanTestCase.Context context) {
-        return format("INSERT INTO %s SELECT * FROM MyInputTable", DEFAULT_OUTPUT_TABLE_NAME);
+        return "INSERT INTO B SELECT * FROM A";
     }
 
     @Override
-    public List<Row> savepointPhaseSink(PersistedPlanTestCase.Context context) {
+    public PipelineSink savepointPhaseSink(PersistedPlanTestCase.Context context) {
+        return Pipelines.sink("B")
+                .rows(
+                        Row.of(
+                                String.valueOf(startingChar),
+                                String.valueOf(startingChar + 1),
+                                String.valueOf(startingChar + 2)));
+    }
+
+    @Override
+    public List<PipelineSource> sources(Context context) {
         return singletonList(
-                Row.of(
-                        String.valueOf(startingChar),
-                        String.valueOf(startingChar + 1),
-                        String.valueOf(startingChar + 2)));
+                source("A")
+                        .rows(
+                                Row.of(
+                                        String.valueOf(startingChar + 3),
+                                        String.valueOf(startingChar + 4),
+                                        String.valueOf(startingChar + 5))));
     }
 
     @Override
-    public Map<String, List<Row>> sources(PersistedPlanTestCase.Context context) {
-        return singletonMap(
-                "MyInputTable",
-                singletonList(
+    public PipelineSink sink(Context context) {
+        return Pipelines.sink("B")
+                .rows(
                         Row.of(
                                 String.valueOf(startingChar + 3),
                                 String.valueOf(startingChar + 4),
-                                String.valueOf(startingChar + 5))));
-    }
-
-    @Override
-    public List<Row> sink(PersistedPlanTestCase.Context context) {
-        return singletonList(
-                Row.of(
-                        String.valueOf(startingChar + 3),
-                        String.valueOf(startingChar + 4),
-                        String.valueOf(startingChar + 5)));
+                                String.valueOf(startingChar + 5)));
     }
 }

@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * paragraphs, or you implement either {@link SQLPipelineDefinition} or {@link
  * SQLSetPipelineDefinition}, which will take care of defining the catalog tables, the pipeline, the
  * terminating conditions and the results assertions. You can also statically define a pipeline
- * using {@link SQLPipeline#builder()} or {@link SQLSetPipeline#builder()}.
+ * using {@link SQLPipeline#named(String)} or {@link SQLSetPipeline#named(String)}.
  *
  * <h2>Creation of the savepoint lifecycle</h2>
  *
@@ -355,11 +355,11 @@ public interface PersistedPlanTestCase {
 
         List<String> pipeline(Context context);
 
-        List<PipelineSource> savepointPhaseSinks(Context context);
+        List<PipelineSink> savepointPhaseSinks(Context context);
 
         List<PipelineSource> sources(Context context);
 
-        List<PipelineSource> sinks(Context context);
+        List<PipelineSink> sinks(Context context);
 
         @Override
         default void createTables(Context context, TableEnvironment tableEnv) throws Exception {

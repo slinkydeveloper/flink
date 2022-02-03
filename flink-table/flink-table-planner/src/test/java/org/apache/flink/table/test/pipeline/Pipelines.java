@@ -18,43 +18,13 @@
 
 package org.apache.flink.table.test.pipeline;
 
-import java.util.List;
+public class Pipelines {
 
-// TODO REMOVE
-
-public interface Pipeline {
-
-    String getName();
-
-    interface SQL extends Pipeline {
-
-        List<PipelineSource> sources();
-
-        String sqlStatement();
-
-        PipelineSink sink();
+    public static PipelineSource source(String name) {
+        return PipelineSource.named(name);
     }
 
-    interface SQLSet extends Pipeline {
-
-        List<PipelineSource> sources();
-
-        List<String> sqlStatements();
-
-        List<PipelineSink> sinks();
-    }
-
-    interface SupportsSavepointPhase {
-
-        List<PipelineSource> savepointPhaseSources();
-
-        PipelineSink savepointPhaseSink();
-    }
-
-    interface SupportsSetSavepointPhase {
-
-        List<PipelineSource> savepointPhaseSources();
-
-        List<PipelineSink> savepointPhaseSinks();
+    public static PipelineSink sink(String name) {
+        return PipelineSink.named(name);
     }
 }

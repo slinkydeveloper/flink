@@ -19,17 +19,15 @@
 package org.apache.flink.table.persistedplan.infra;
 
 import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLPipelineDefinition;
-import org.apache.flink.types.Row;
-import org.apache.flink.util.Preconditions;
-
-import javax.annotation.Nullable;
+import org.apache.flink.table.test.pipeline.PipelineSink;
+import org.apache.flink.table.test.pipeline.PipelineSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
+import static java.util.Collections.unmodifiableList;
+import static org.apache.flink.util.Preconditions.checkNotNull;
 
 /**
  * Simple static implementation of {@link SQLPipelineDefinition}. See {@link PersistedPlanTestCase}
@@ -37,145 +35,119 @@ import java.util.Map;
  */
 public final class SQLPipeline implements SQLPipelineDefinition {
 
-    private final Map<String, List<Row>> savepointPhaseInput;
+    private final String name;
+    private final List<PipelineSource> savepointPhaseInput;
     private final String pipeline;
-    private final @Nullable String outputTableName;
-    private final List<Row> savepointPhaseOutput;
-    private final Map<String, List<Row>> executionPhaseInput;
-    private final List<Row> executionPhaseOutput;
+    private final PipelineSink savepointPhaseOutput;
+    private final List<PipelineSource> executionPhaseInput;
+    private final PipelineSink executionPhaseOutput;
 
     private SQLPipeline(
-            Map<String, List<Row>> savepointPhaseInput,
+            String name,
+            List<PipelineSource> savepointPhaseInput,
             String pipeline,
-            @Nullable String outputTableName,
-            List<Row> savepointPhaseOutput,
-            Map<String, List<Row>> executionPhaseInput,
-            List<Row> executionPhaseOutput) {
-        this.savepointPhaseInput = savepointPhaseInput;
+            PipelineSink savepointPhaseOutput,
+            List<PipelineSource> executionPhaseInput,
+            PipelineSink executionPhaseOutput) {
+        this.name = name;
+        this.savepointPhaseInput = unmodifiableList(savepointPhaseInput);
         this.pipeline = pipeline;
-        this.outputTableName = outputTableName;
         this.savepointPhaseOutput = savepointPhaseOutput;
-        this.executionPhaseInput = executionPhaseInput;
+        this.executionPhaseInput = unmodifiableList(executionPhaseInput);
         this.executionPhaseOutput = executionPhaseOutput;
     }
 
     @Override
     public String getName() {
-        // TODO generate a good name
-        return pipeline;
+        return name;
     }
 
     @Override
-    public Map<String, List<Row>> savepointPhaseSources(PersistedPlanTestCase.Context context) {
+    public List<PipelineSource> savepointPhaseSources(Context context) {
         return savepointPhaseInput;
     }
 
     @Override
-    public String pipeline(PersistedPlanTestCase.Context context) {
+    public String pipeline(Context context) {
         return pipeline;
     }
 
     @Override
-    public String outputTableName(PersistedPlanTestCase.Context context) {
-        if (outputTableName != null) {
-            return outputTableName;
-        }
-        return SQLPipelineDefinition.super.outputTableName(context);
-    }
-
-    @Override
-    public List<Row> savepointPhaseSink(PersistedPlanTestCase.Context context) {
+    public PipelineSink savepointPhaseSink(Context context) {
         return savepointPhaseOutput;
     }
 
     @Override
-    public Map<String, List<Row>> sources(PersistedPlanTestCase.Context context) {
+    public List<PipelineSource> sources(Context context) {
         return executionPhaseInput;
     }
 
     @Override
-    public List<Row> sink(PersistedPlanTestCase.Context context) {
+    public PipelineSink sink(Context context) {
         return executionPhaseOutput;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder named(String name) {
+        return new Builder(name);
     }
 
     public static class Builder {
 
-        private final Map<String, List<Row>> savepointPhaseInput = new HashMap<>();
+        private final String name;
+
+        private final List<PipelineSource> savepointPhaseInput = new ArrayList<>();
         private String pipeline;
-        private @Nullable String outputTableName;
-        private final List<Row> savepointPhaseOutput = new ArrayList<>();
-        private final Map<String, List<Row>> executionPhaseInput = new HashMap<>();
-        private final List<Row> executionPhaseOutput = new ArrayList<>();
+        private PipelineSink savepointPhaseOutput;
+        private final List<PipelineSource> executionPhaseInput = new ArrayList<>();
+        private PipelineSink executionPhaseOutput;
 
-        public Builder savepointPhaseInput(Map<String, List<Row>> input) {
-            savepointPhaseInput.putAll(input);
+        public Builder(String name) {
+            this.name = name;
+        }
+
+        public Builder savepointPhaseInput(List<PipelineSource> input) {
+            savepointPhaseInput.addAll(input);
             return this;
         }
 
-        public Builder savepointPhaseInput(String table, Collection<Row> rows) {
-            savepointPhaseInput.computeIfAbsent(table, k -> new ArrayList<>()).addAll(rows);
+        public Builder savepointPhaseInput(PipelineSource... input) {
+            savepointPhaseInput.addAll(Arrays.asList(input));
             return this;
         }
 
-        public Builder savepointPhaseInput(String table, Row... rows) {
-            return savepointPhaseInput(table, Arrays.asList(rows));
-        }
-
-        public Builder setInsertSql(String stmt, String... args) {
+        public Builder sql(String stmt, String... args) {
             this.pipeline = String.format(stmt, (Object[]) args);
             return this;
         }
 
-        public Builder outputTableName(String outputTableName) {
-            this.outputTableName = outputTableName;
+        public Builder savepointPhaseOutput(PipelineSink output) {
+            this.savepointPhaseOutput = output;
             return this;
         }
 
-        public Builder savepointPhaseOutput(Collection<Row> rows) {
-            this.savepointPhaseOutput.addAll(rows);
+        public Builder executionPhaseInput(List<PipelineSource> input) {
+            executionPhaseInput.addAll(input);
             return this;
         }
 
-        public Builder savepointPhaseOutput(Row... rows) {
-            return savepointPhaseOutput(Arrays.asList(rows));
-        }
-
-        public Builder executionPhaseInput(Map<String, List<Row>> input) {
-            executionPhaseInput.putAll(input);
+        public Builder executionPhaseInput(PipelineSource... input) {
+            executionPhaseInput.addAll(Arrays.asList(input));
             return this;
         }
 
-        public Builder executionPhaseInput(String table, Collection<Row> rows) {
-            executionPhaseInput.computeIfAbsent(table, k -> new ArrayList<>()).addAll(rows);
+        public Builder executionPhaseOutput(PipelineSink output) {
+            this.executionPhaseOutput = output;
             return this;
-        }
-
-        public Builder executionPhaseInput(String table, Row... rows) {
-            return executionPhaseInput(table, Arrays.asList(rows));
-        }
-
-        public Builder executionPhaseOutput(Collection<Row> rows) {
-            this.executionPhaseOutput.addAll(rows);
-            return this;
-        }
-
-        public Builder executionPhaseOutput(Row... rows) {
-            return executionPhaseOutput(Arrays.asList(rows));
         }
 
         public SQLPipelineDefinition build() {
-            Preconditions.checkNotNull(pipeline, "Pipeline is not defined.");
             return new SQLPipeline(
+                    name,
                     savepointPhaseInput,
-                    pipeline,
-                    outputTableName,
-                    savepointPhaseOutput,
+                    checkNotNull(pipeline, "Pipeline is not defined."),
+                    checkNotNull(savepointPhaseOutput, "Savepoint phase output not defined"),
                     executionPhaseInput,
-                    executionPhaseOutput);
+                    checkNotNull(executionPhaseOutput, "Execution phase output not defined"));
         }
     }
 }

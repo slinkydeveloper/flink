@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// TODO REMOVE
+
 /**
  * Simple static implementation of {@link SQLPipelineDefinition}. See {@link PersistedPlanTestCase}
  * for more details.

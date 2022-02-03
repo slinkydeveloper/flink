@@ -24,6 +24,7 @@ import org.apache.flink.types.Row;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,13 +32,32 @@ import java.util.stream.Stream;
 public class PipelineSource {
 
     private final String name;
-    private final DataType dataType;
+    private DataType dataType;
     private final List<Row> rows;
 
-    private PipelineSource(String name, DataType dataType, List<Row> rows) {
+    private PipelineSource(String name) {
         this.name = name;
+        this.rows = new ArrayList<>();
+    }
+
+    public PipelineSource typed(DataType dataType) {
         this.dataType = dataType;
-        this.rows = rows;
+        return this;
+    }
+
+    public PipelineSource rows(Row... rows) {
+        this.rows.addAll(Arrays.asList(rows));
+        return this;
+    }
+
+    public PipelineSource rows(Collection<Row> rows) {
+        this.rows.addAll(rows);
+        return this;
+    }
+
+    public PipelineSource rows(Stream<Row> rows) {
+        this.rows.addAll(rows.collect(Collectors.toList()));
+        return this;
     }
 
     public String getName() {
@@ -45,56 +65,22 @@ public class PipelineSource {
     }
 
     public DataType getDataType() {
+        if (dataType == null) {
+            if (this.rows.size() == 0) {
+                throw new IllegalArgumentException(
+                        "You need to provide at least one row to derive the type automatically. "
+                                + "Please either add a row or define the type manually.");
+            }
+            dataType = PipelineUtils.inferDataType(this.rows.get(0));
+        }
         return dataType;
     }
 
     public List<Row> getRows() {
-        return rows;
+        return Collections.unmodifiableList(rows);
     }
 
-    public static Builder named(String name) {
-        return new Builder(name);
-    }
-
-    public static class Builder {
-
-        private final String name;
-        private DataType dataType;
-        private final List<Row> rows = new ArrayList<>();
-
-        public Builder(String name) {
-            this.name = name;
-        }
-
-        public Builder type(DataType dataType) {
-            this.dataType = dataType;
-            return this;
-        }
-
-        public Builder rows(Row... rows) {
-            this.rows.addAll(Arrays.asList(rows));
-            return this;
-        }
-
-        public Builder rows(Collection<Row> rows) {
-            this.rows.addAll(rows);
-            return this;
-        }
-
-        public Builder rows(Stream<Row> rows) {
-            this.rows.addAll(rows.collect(Collectors.toList()));
-            return this;
-        }
-
-        public PipelineSource build() {
-            if (dataType == null) {
-                if (this.rows.size() == 0) {
-                    throw new IllegalArgumentException(
-                            "You need to have at least one row to derive the type automatically. Please either add a row or define the type manually.");
-                }
-                dataType = PipelineUtils.inferDataType(this.rows.get(0));
-            }
-            return new PipelineSource(name, dataType, rows);
-        }
+    public static PipelineSource named(String name) {
+        return new PipelineSource(name);
     }
 }
