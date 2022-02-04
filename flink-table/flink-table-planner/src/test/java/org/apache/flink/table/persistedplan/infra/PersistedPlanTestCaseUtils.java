@@ -18,9 +18,23 @@
 
 package org.apache.flink.table.persistedplan.infra;
 
-/**
- * Collection of utilities to deal with types
- */
-public class PersistedPlanTestCaseUtils {
+import java.util.UUID;
 
+/** Collection of utilities to deal with types */
+class PersistedPlanTestCaseUtils {
+
+    static String normalizeTestCaseName(String name) {
+        return name.replaceAll("\\s*", "_");
+    }
+
+    static String classpathRoot(Class<?> testClazz) {
+        return testClazz
+                .getResource("/")
+                .getPath()
+                .replace("/target/test-classes/", "/src/test/resources");
+    }
+
+    static String generateTestExecutionId(PersistedPlanTestCase testCase, String version) {
+        return normalizeTestCaseName(testCase.getName()) + "_" + version + "_" + UUID.randomUUID();
+    }
 }

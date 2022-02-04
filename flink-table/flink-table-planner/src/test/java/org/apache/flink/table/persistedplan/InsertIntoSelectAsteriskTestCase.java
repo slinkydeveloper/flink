@@ -19,6 +19,7 @@
 package org.apache.flink.table.persistedplan;
 
 import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase;
+import org.apache.flink.table.persistedplan.infra.SQLPipelineDefinition;
 import org.apache.flink.table.test.pipeline.PipelineSink;
 import org.apache.flink.table.test.pipeline.PipelineSource;
 import org.apache.flink.table.test.pipeline.Pipelines;
@@ -29,8 +30,7 @@ import java.util.List;
 import static java.util.Collections.singletonList;
 import static org.apache.flink.table.test.pipeline.Pipelines.source;
 
-public class InsertIntoSelectAsteriskTestCase
-        implements PersistedPlanTestCase, PersistedPlanTestCase.SQLPipelineDefinition {
+class InsertIntoSelectAsteriskTestCase implements PersistedPlanTestCase, SQLPipelineDefinition {
 
     private final char startingChar;
 

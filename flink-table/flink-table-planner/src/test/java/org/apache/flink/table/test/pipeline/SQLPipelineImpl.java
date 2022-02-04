@@ -19,7 +19,7 @@
 package org.apache.flink.table.test.pipeline;
 
 import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase;
-import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLPipelineDefinition;
+import org.apache.flink.table.persistedplan.infra.SQLPipelineDefinition;
 import org.apache.flink.types.Row;
 import org.apache.flink.util.Preconditions;
 

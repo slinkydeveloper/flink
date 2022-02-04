@@ -21,7 +21,7 @@ package org.apache.flink.table.persistedplan;
 import org.apache.flink.runtime.testutils.MiniClusterResourceConfiguration;
 import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase;
 import org.apache.flink.table.persistedplan.infra.RestoreTestExecutor;
-import org.apache.flink.table.persistedplan.infra.SQLPipeline;
+import org.apache.flink.table.persistedplan.infra.SQLPipelineDefinition;
 import org.apache.flink.test.util.SharedMiniClusterWithClientExtension;
 import org.apache.flink.types.Row;
 
@@ -45,7 +45,7 @@ class ProjectionAndCalcPersistedPlanTest {
 
     private static final List<PersistedPlanTestCase> testCases =
             Stream.of(
-                            SQLPipeline.named("one to one insert into with strings")
+                            SQLPipelineDefinition.named("one to one insert into with strings")
                                     .savepointPhaseInput(source("A").rows(Row.of("a", "b", "c")))
                                     .sql("INSERT INTO B SELECT * FROM A")
                                     .savepointPhaseOutput(sink("B").rows(Row.of("a", "b", "c")))

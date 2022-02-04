@@ -36,7 +36,14 @@ import org.junit.jupiter.api.DynamicTest;
 
 import javax.annotation.Nullable;
 
+import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /** This POJO encapsulates parameters and logic of an upgrade test. */
@@ -45,7 +52,8 @@ public class RestoreTestExecutor {
     private final String name;
     private final String testExecutionId;
     private final Path testDir;
-    private final Integer version;
+    private final int version;
+    private final boolean isLatestVersion;
     private final SavepointPhaseConfiguration savepointPhaseConfiguration;
     private final CreateTables createTables;
     private final TablePipelineDefinition tablePipelineDefinition;
@@ -62,7 +70,8 @@ public class RestoreTestExecutor {
             String name,
             String testExecutionId,
             Path testDir,
-            Integer version,
+            int version,
+            boolean isLatestVersion,
             PersistedPlanTestCase testCase) {
         Preconditions.checkState(
                 Boolean.logicalXor(
@@ -74,6 +83,7 @@ public class RestoreTestExecutor {
         this.testExecutionId = testExecutionId;
         this.testDir = testDir;
         this.version = version;
+        this.isLatestVersion = isLatestVersion;
 
         this.savepointPhaseConfiguration = castOrNull(testCase, SavepointPhaseConfiguration.class);
         this.createTables = castOrNull(testCase, CreateTables.class);
@@ -132,6 +142,8 @@ public class RestoreTestExecutor {
 
     public static class Builder {
 
+        private static final String LATEST_DIR = "latest";
+
         private final PersistedPlanTestCase persistedPlanTestCase;
         private final boolean loadAllVersions;
         private ClusterClient<?> jobClient;
@@ -147,12 +159,68 @@ public class RestoreTestExecutor {
         }
 
         public Stream<DynamicTest> build() {
-            // TODO load all versions here
             Preconditions.checkNotNull(jobClient);
-            RestoreTestExecutor executor =
-                    new RestoreTestExecutor(persistedPlanTestCase.getName(), persistedPlanTestCase);
-            return Stream.of(
-                    DynamicTest.dynamicTest(executor.name, () -> executor.execute(jobClient)));
+
+            List<RestoreTestExecutor> executors = new ArrayList<>();
+
+            String testPath =
+                    PersistedPlanTestCaseUtils.classpathRoot(RestoreTestExecutor.class)
+                            + persistedPlanTestCase.getPath();
+            List<Integer> versions = readAvailableVersions(testPath);
+            int lastVersion = lastVersion(versions);
+
+            if (loadAllVersions) {
+                for (int version : versions) {
+                    executors.add(
+                            new RestoreTestExecutor(
+                                    persistedPlanTestCase.getName(),
+                                    PersistedPlanTestCaseUtils.generateTestExecutionId(
+                                            persistedPlanTestCase, String.valueOf(version)),
+                                    Paths.get(testPath, String.valueOf(version)),
+                                    version,
+                                    false,
+                                    persistedPlanTestCase));
+                }
+            }
+
+            executors.add(
+                    new RestoreTestExecutor(
+                            persistedPlanTestCase.getName(),
+                            PersistedPlanTestCaseUtils.generateTestExecutionId(
+                                    persistedPlanTestCase, LATEST_DIR),
+                            Paths.get(testPath, LATEST_DIR),
+                            lastVersion,
+                            false,
+                            persistedPlanTestCase));
+
+            return executors.stream()
+                    .map(
+                            executor ->
+                                    DynamicTest.dynamicTest(
+                                            executor.name, () -> executor.execute(jobClient)));
+        }
+
+        private static List<Integer> readAvailableVersions(String testPath) {
+            File testPathFile = new File(testPath);
+            if (!testPathFile.exists()) {
+                return Collections.emptyList();
+            }
+
+            assert testPathFile.isDirectory();
+
+            return Arrays.stream(testPathFile.listFiles())
+                    .map(File::getName)
+                    .filter(dir -> !dir.equals(LATEST_DIR))
+                    .map(Integer::valueOf)
+                    .sorted()
+                    .collect(Collectors.toList());
+        }
+
+        private static int lastVersion(List<Integer> versions) {
+            if (versions.isEmpty()) {
+                return 0;
+            }
+            return versions.get(versions.size() - 1) + 1;
         }
     }
 }

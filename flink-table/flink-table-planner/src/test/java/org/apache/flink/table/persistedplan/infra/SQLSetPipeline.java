@@ -18,14 +18,15 @@
 
 package org.apache.flink.table.persistedplan.infra;
 
-import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLSetPipelineDefinition;
 import org.apache.flink.table.test.pipeline.PipelineSink;
 import org.apache.flink.table.test.pipeline.PipelineSource;
 import org.apache.flink.util.Preconditions;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static java.util.Collections.unmodifiableList;
 
@@ -33,9 +34,10 @@ import static java.util.Collections.unmodifiableList;
  * Simple static implementation of {@link SQLSetPipelineDefinition}. See {@link
  * PersistedPlanTestCase} for more details.
  */
-public final class SQLSetPipeline implements SQLSetPipelineDefinition {
+final class SQLSetPipeline implements SQLSetPipelineDefinition {
 
     private final String name;
+    private final String path;
     private final List<PipelineSource> savepointPhaseInput;
     private final List<String> pipeline;
     private final List<PipelineSink> savepointPhaseOutput;
@@ -44,12 +46,14 @@ public final class SQLSetPipeline implements SQLSetPipelineDefinition {
 
     private SQLSetPipeline(
             String name,
+            String path,
             List<PipelineSource> savepointPhaseInput,
             List<String> pipeline,
             List<PipelineSink> savepointPhaseOutput,
             List<PipelineSource> executionPhaseInput,
             List<PipelineSink> executionPhaseOutput) {
         this.name = name;
+        this.path = path;
         this.savepointPhaseInput = unmodifiableList(savepointPhaseInput);
         this.pipeline = unmodifiableList(pipeline);
         this.savepointPhaseOutput = unmodifiableList(savepointPhaseOutput);
@@ -60,6 +64,11 @@ public final class SQLSetPipeline implements SQLSetPipelineDefinition {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getPath() {
+        return path;
     }
 
     @Override
@@ -88,12 +97,20 @@ public final class SQLSetPipeline implements SQLSetPipelineDefinition {
     }
 
     public static Builder named(String name) {
-        return new Builder(name);
+        String callerClassName = new Exception().getStackTrace()[1].getClassName();
+        String packageName = callerClassName.substring(0, callerClassName.lastIndexOf("."));
+        String path =
+                File.pathSeparator
+                        + packageName.replaceAll(Pattern.quote("."), File.pathSeparator)
+                        + File.pathSeparator
+                        + PersistedPlanTestCaseUtils.normalizeTestCaseName(name);
+        return new Builder(name, path);
     }
 
     public static class Builder {
 
         private final String name;
+        private final String path;
 
         private final List<PipelineSource> savepointPhaseInput = new ArrayList<>();
         private final List<String> pipeline = new ArrayList<>();
@@ -101,8 +118,9 @@ public final class SQLSetPipeline implements SQLSetPipelineDefinition {
         private final List<PipelineSource> executionPhaseInput = new ArrayList<>();
         private final List<PipelineSink> executionPhaseOutput = new ArrayList<>();
 
-        public Builder(String name) {
+        public Builder(String name, String path) {
             this.name = name;
+            this.path = path;
         }
 
         public Builder savepointPhaseInput(List<PipelineSource> input) {
@@ -156,6 +174,7 @@ public final class SQLSetPipeline implements SQLSetPipelineDefinition {
                     "Pipeline is empty. Define at least one insert statement");
             return new SQLSetPipeline(
                     name,
+                    path,
                     savepointPhaseInput,
                     pipeline,
                     savepointPhaseOutput,

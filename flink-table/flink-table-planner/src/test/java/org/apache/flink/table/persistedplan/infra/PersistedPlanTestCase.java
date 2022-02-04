@@ -23,19 +23,16 @@ import org.apache.flink.table.api.StatementSet;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.internal.TableEnvironmentInternal;
 import org.apache.flink.table.catalog.ObjectIdentifier;
-import org.apache.flink.table.catalog.UnresolvedIdentifier;
 import org.apache.flink.table.planner.plan.nodes.exec.ExecNodeGraph;
-import org.apache.flink.table.test.pipeline.PipelineSink;
-import org.apache.flink.table.test.pipeline.PipelineSource;
 import org.apache.flink.types.Row;
 
 import org.junit.jupiter.api.DynamicTest;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.regex.Pattern;
 
 /**
  * Interface to define and implement a persisted plan test case.
@@ -86,7 +83,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * always identified as {@code latest}.
  *
  * <p>Each test has an associated directory in the resources, named after the result of {@link
- * #getName()}, and this directory contains an associated subdirectory for each version. For
+ * #getPath()}, and this directory contains an associated subdirectory for each version. For
  * example, a test named {@code sink test} will have a directory structure like:
  *
  * <p><code>
@@ -121,6 +118,20 @@ public interface PersistedPlanTestCase {
 
     String getName();
 
+    /**
+     * Get path of the test. The path needs to be an absolute classpath path, that is it should
+     * start with {@code /} and should be related to classpath root.
+     */
+    default String getPath() {
+        return File.pathSeparator
+                + getClass()
+                        .getPackage()
+                        .getName()
+                        .replaceAll(Pattern.quote("."), File.pathSeparator)
+                + File.pathSeparator
+                + PersistedPlanTestCaseUtils.normalizeTestCaseName(getName());
+    }
+
     interface Context {
         /** Unique id per {@link DynamicTest}, that is unique across test cases and versions. */
         String testExecutionId();
@@ -128,8 +139,9 @@ public interface PersistedPlanTestCase {
         /** Test directory of the test case version. * */
         Path testDir();
 
-        /** Null for latest. */
-        Integer version();
+        int version();
+
+        boolean isLatestVersion();
     }
 
     // --- Test phases
@@ -230,180 +242,5 @@ public interface PersistedPlanTestCase {
                 TableEnvironmentInternal tableEnv,
                 Map<ObjectIdentifier, List<Row>> sinkTablesState)
                 throws Exception;
-    }
-
-    // --- Helpers to define pipelines
-
-    /**
-     * This interface provides a helper to simplify the development of a test with a static set of
-     * sources and sink for a single {@code INSERT INTO} query.
-     *
-     * <p>Both savepoint and execution will stop when the record count is reached and the assertions
-     * will check the equality, minus order, of the output list of rows.
-     *
-     * <p>You can perform more complex assertions by overriding {@link
-     * #afterSavepointCreationPhase(Context, TableEnvironmentInternal, Map)} and {@link
-     * #afterExecutionPhase(Context, TableEnvironmentInternal, Map)}.
-     */
-    interface SQLPipelineDefinition
-            extends PersistedPlanTestCase,
-                    CreateTables,
-                    RestoreTables,
-                    TriggerSavepointCondition,
-                    TablePipelineDefinition,
-                    StopExecutionCondition,
-                    AfterSavepointCreationPhase,
-                    AfterExecutionPhase {
-
-        List<PipelineSource> savepointPhaseSources(Context context);
-
-        String pipeline(Context context);
-
-        PipelineSink savepointPhaseSink(Context context);
-
-        List<PipelineSource> sources(Context context);
-
-        PipelineSink sink(Context context);
-
-        @Override
-        default void createTables(Context context, TableEnvironment tableEnv) throws Exception {
-            // TODO create input tables and output table
-        }
-
-        @Override
-        default String definePipeline(Context context, TableEnvironment tableEnv) throws Exception {
-            return pipeline(context);
-        }
-
-        @Override
-        default boolean triggerSavepointIf(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState) {
-            ObjectIdentifier identifier =
-                    tableEnv.getCatalogManager()
-                            .qualifyIdentifier(
-                                    UnresolvedIdentifier.of(savepointPhaseSink(context).getName()));
-            return sinkTablesState.get(identifier).size()
-                    >= savepointPhaseSink(context).getRows().size();
-        }
-
-        @Override
-        default void afterSavepointCreationPhase(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState)
-                throws Exception {
-            ObjectIdentifier identifier =
-                    tableEnv.getCatalogManager()
-                            .qualifyIdentifier(
-                                    UnresolvedIdentifier.of(savepointPhaseSink(context).getName()));
-            assertThat(sinkTablesState).containsOnlyKeys(identifier);
-            assertThat(sinkTablesState.get(identifier))
-                    .containsExactlyInAnyOrderElementsOf(savepointPhaseSink(context).getRows());
-        }
-
-        @Override
-        default boolean stopExecutionIf(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState) {
-            ObjectIdentifier identifier =
-                    tableEnv.getCatalogManager()
-                            .qualifyIdentifier(UnresolvedIdentifier.of(sink(context).getName()));
-            return sinkTablesState.get(identifier).size() >= sink(context).getRows().size();
-        }
-
-        @Override
-        default void afterExecutionPhase(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState)
-                throws Exception {
-            ObjectIdentifier identifier =
-                    tableEnv.getCatalogManager()
-                            .qualifyIdentifier(UnresolvedIdentifier.of(sink(context).getName()));
-            assertThat(sinkTablesState).containsOnlyKeys(identifier);
-            assertThat(sinkTablesState.get(identifier))
-                    .containsExactlyInAnyOrderElementsOf(sink(context).getRows());
-        }
-    }
-
-    /**
-     * This interface provides a helper to simplify the development of a test with a static input
-     * and output for a {@link StatementSet}.
-     *
-     * <p>Both savepoint and execution will stop when the record count is reached for every output
-     * table and the assertions will check the equality, minus order, of the output list of rows for
-     * every output table.
-     *
-     * <p>You can perform more complex assertions by overriding {@link
-     * #afterSavepointCreationPhase(Context, TableEnvironmentInternal, Map)} and {@link
-     * #afterExecutionPhase(Context, TableEnvironmentInternal, Map)}.
-     */
-    interface SQLSetPipelineDefinition
-            extends PersistedPlanTestCase,
-                    CreateTables,
-                    RestoreTables,
-                    TriggerSavepointCondition,
-                    StatementSetPipelineDefinition,
-                    StopExecutionCondition,
-                    AfterSavepointCreationPhase,
-                    AfterExecutionPhase {
-
-        List<PipelineSource> savepointPhaseSources(Context context);
-
-        List<String> pipeline(Context context);
-
-        List<PipelineSink> savepointPhaseSinks(Context context);
-
-        List<PipelineSource> sources(Context context);
-
-        List<PipelineSink> sinks(Context context);
-
-        @Override
-        default void createTables(Context context, TableEnvironment tableEnv) throws Exception {
-            // TODO create input and output tables
-        }
-
-        @Override
-        default StatementSet definePipeline(Context context, TableEnvironment tableEnv)
-                throws Exception {
-            StatementSet statementSet = tableEnv.createStatementSet();
-            for (String stmt : pipeline(context)) {
-                statementSet.addInsertSql(stmt);
-            }
-            return statementSet;
-        }
-
-        @Override
-        default boolean triggerSavepointIf(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState) {
-            return false;
-        }
-
-        @Override
-        default void afterSavepointCreationPhase(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState)
-                throws Exception {}
-
-        @Override
-        default boolean stopExecutionIf(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState) {
-            return false;
-        }
-
-        @Override
-        default void afterExecutionPhase(
-                Context context,
-                TableEnvironmentInternal tableEnv,
-                Map<ObjectIdentifier, List<Row>> sinkTablesState)
-                throws Exception {}
     }
 }

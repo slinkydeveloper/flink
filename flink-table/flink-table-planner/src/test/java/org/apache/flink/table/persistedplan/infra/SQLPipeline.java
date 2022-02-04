@@ -18,7 +18,6 @@
 
 package org.apache.flink.table.persistedplan.infra;
 
-import org.apache.flink.table.persistedplan.infra.PersistedPlanTestCase.SQLPipelineDefinition;
 import org.apache.flink.table.test.pipeline.PipelineSink;
 import org.apache.flink.table.test.pipeline.PipelineSource;
 
@@ -33,9 +32,10 @@ import static org.apache.flink.util.Preconditions.checkNotNull;
  * Simple static implementation of {@link SQLPipelineDefinition}. See {@link PersistedPlanTestCase}
  * for more details.
  */
-public final class SQLPipeline implements SQLPipelineDefinition {
+final class SQLPipeline implements SQLPipelineDefinition {
 
     private final String name;
+    private final String path;
     private final List<PipelineSource> savepointPhaseInput;
     private final String pipeline;
     private final PipelineSink savepointPhaseOutput;
@@ -44,12 +44,14 @@ public final class SQLPipeline implements SQLPipelineDefinition {
 
     private SQLPipeline(
             String name,
+            String path,
             List<PipelineSource> savepointPhaseInput,
             String pipeline,
             PipelineSink savepointPhaseOutput,
             List<PipelineSource> executionPhaseInput,
             PipelineSink executionPhaseOutput) {
         this.name = name;
+        this.path = path;
         this.savepointPhaseInput = unmodifiableList(savepointPhaseInput);
         this.pipeline = pipeline;
         this.savepointPhaseOutput = savepointPhaseOutput;
@@ -60,6 +62,11 @@ public final class SQLPipeline implements SQLPipelineDefinition {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public String getPath() {
+        return path;
     }
 
     @Override
@@ -87,13 +94,10 @@ public final class SQLPipeline implements SQLPipelineDefinition {
         return executionPhaseOutput;
     }
 
-    public static Builder named(String name) {
-        return new Builder(name);
-    }
-
     public static class Builder {
 
         private final String name;
+        private final String path;
 
         private final List<PipelineSource> savepointPhaseInput = new ArrayList<>();
         private String pipeline;
@@ -101,8 +105,9 @@ public final class SQLPipeline implements SQLPipelineDefinition {
         private final List<PipelineSource> executionPhaseInput = new ArrayList<>();
         private PipelineSink executionPhaseOutput;
 
-        public Builder(String name) {
+        public Builder(String name, String path) {
             this.name = name;
+            this.path = path;
         }
 
         public Builder savepointPhaseInput(List<PipelineSource> input) {
@@ -143,6 +148,7 @@ public final class SQLPipeline implements SQLPipelineDefinition {
         public SQLPipelineDefinition build() {
             return new SQLPipeline(
                     name,
+                    path,
                     savepointPhaseInput,
                     checkNotNull(pipeline, "Pipeline is not defined."),
                     checkNotNull(savepointPhaseOutput, "Savepoint phase output not defined"),
