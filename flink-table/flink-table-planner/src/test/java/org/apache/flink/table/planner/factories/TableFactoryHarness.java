@@ -237,6 +237,54 @@ public class TableFactoryHarness {
                         });
             }
 
+            public Builder unboundedScanSource(SourceFunction<RowData> sourceFunction) {
+                return source(
+                        new ScanSourceBase(false) {
+                            @Override
+                            public ScanRuntimeProvider getScanRuntimeProvider(
+                                    ScanContext runtimeProviderContext) {
+                                return new SourceFunctionProvider() {
+                                    @Override
+                                    public SourceFunction<RowData> createSourceFunction() {
+                                        return sourceFunction;
+                                    }
+
+                                    @Override
+                                    public boolean isBounded() {
+                                        return false;
+                                    }
+                                };
+                            }
+                        });
+            }
+
+            public Builder unboundedScanSource(
+                    ChangelogMode changelogMode, SourceFunction<RowData> sourceFunction) {
+                return source(
+                        new ScanSourceBase(false) {
+                            @Override
+                            public ChangelogMode getChangelogMode() {
+                                return changelogMode;
+                            }
+
+                            @Override
+                            public ScanRuntimeProvider getScanRuntimeProvider(
+                                    ScanContext runtimeProviderContext) {
+                                return new SourceFunctionProvider() {
+                                    @Override
+                                    public SourceFunction<RowData> createSourceFunction() {
+                                        return sourceFunction;
+                                    }
+
+                                    @Override
+                                    public boolean isBounded() {
+                                        return false;
+                                    }
+                                };
+                            }
+                        });
+            }
+
             /** Use a {@link LookupTableSource} which produces no data. */
             public Builder lookupSource() {
                 return source(new LookupSourceBase() {});

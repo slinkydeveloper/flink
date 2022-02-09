@@ -18,6 +18,11 @@
 
 package org.apache.flink.table.test.pipeline;
 
+import org.apache.flink.streaming.api.functions.source.SourceFunction;
+import org.apache.flink.table.connector.ChangelogMode;
+import org.apache.flink.table.data.RowData;
+import org.apache.flink.table.data.conversion.DataStructureConverter;
+import org.apache.flink.table.data.conversion.DataStructureConverters;
 import org.apache.flink.table.types.DataType;
 import org.apache.flink.types.Row;
 
@@ -34,10 +39,12 @@ public class PipelineSource {
     private final String name;
     private DataType dataType;
     private final List<Row> rows;
+    private ChangelogMode changelogMode;
 
     private PipelineSource(String name) {
         this.name = name;
         this.rows = new ArrayList<>();
+        this.changelogMode = ChangelogMode.insertOnly();
     }
 
     public PipelineSource typed(DataType dataType) {
@@ -60,6 +67,11 @@ public class PipelineSource {
         return this;
     }
 
+    public PipelineSource changelogMode(ChangelogMode changelogMode) {
+        this.changelogMode = changelogMode;
+        return this;
+    }
+
     public String getName() {
         return name;
     }
@@ -78,6 +90,27 @@ public class PipelineSource {
 
     public List<Row> getRows() {
         return Collections.unmodifiableList(rows);
+    }
+
+    public ChangelogMode getChangelogMode() {
+        return changelogMode;
+    }
+
+    public SourceFunction<RowData> toSourceFunction() {
+        DataStructureConverter<Object, Object> dataStructureConverter =
+                DataStructureConverters.getConverter(getDataType());
+        return new SourceFunction<RowData>() {
+            @Override
+            public void run(SourceContext<RowData> ctx) {
+                for (Row row : getRows()) {
+                    ctx.collect((RowData) dataStructureConverter.toInternal(row));
+                }
+                ctx.close();
+            }
+
+            @Override
+            public void cancel() {}
+        };
     }
 
     public static PipelineSource named(String name) {
