@@ -182,14 +182,23 @@ which will require different dependencies.
 
 Here is a table of artifact/dependency names:
 
-| APIs you want to use              | Dependency you need to add    |
-|-----------------------------------|-------------------------------|
-| DataStream                        | flink-streaming-java          |  
-| DataStream with Scala             | flink-streaming-scala{{< scala_version >}}         |   
-| Table API                         | flink-table-api-java          |   
-| Table API with Scala              | flink-table-api-scala{{< scala_version >}}         |
-| Table API + DataStream            | flink-table-api-java-bridge   |
-| Table API + DataStream with Scala | flink-table-api-scala-bridge{{< scala_version >}}  |
+| APIs you want to use                                                              | Dependency you need to add                          |
+|-----------------------------------------------------------------------------------|-----------------------------------------------------|
+| [DataStream]({{< ref "docs/dev/datastream/overview" >}})                          | `flink-streaming-java`                              |  
+| [DataStream with Scala]({{< ref "docs/dev/datastream/scala_api_extensions" >}})   | `flink-streaming-scala{{< scala_version >}}`        |   
+| [Table API]({{< ref "docs/dev/table/common" >}})                                  | `flink-table-api-java`                              |   
+| [Table API with Scala]({{< ref "docs/dev/table/common" >}})                       | `flink-table-api-scala{{< scala_version >}}`        |
+| [Table API + DataStream]({{< ref "docs/dev/table/data_stream_api" >}})            | `flink-table-api-java-bridge`                       |
+| [Table API + DataStream with Scala]({{< ref "docs/dev/table/data_stream_api" >}}) | `flink-table-api-scala-bridge{{< scala_version >}}` |
 
-Check out the sections on [Datastream API]({{< ref "docs/dev/datastream/overview" >}}) and 
-[Table API & SQL]({{< ref "docs/dev/table/overview" >}}) to learn more.
+Just include them in your build tool script/descriptor and you can start developing your job.
+
+## What's next?
+
+* To start developing your job, check out [Datastream API]({{< ref "docs/dev/datastream/overview" >}}) and [Table API & SQL]({{< ref "docs/dev/table/overview" >}}).
+* For more details about how to package your job for Flink, check the specific guides:
+  * [Maven]({{< ref "docs/dev/configuration/maven" >}})
+  * [Gradle]({{< ref "docs/dev/configuration/gradle" >}})
+* In order to configure testing dependencies for your job, check out [testing dependencies]({{< ref "docs/dev/configuration/testing" >}})).
+* For the best practices about connector and format dependencies, check out [connectors and formats dependencies]({{< ref "docs/dev/configuration/connector" >}}).
+* For more advanced topics about project configuration, check out [advanced topic]({{< ref "docs/dev/configuration/advanced" >}}).

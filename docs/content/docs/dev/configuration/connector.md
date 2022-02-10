@@ -1,5 +1,5 @@
 ---
-title: "Dependencies: Connectors and Formats"
+title: "Connectors and Formats"
 weight: 5
 type: docs
 ---
@@ -24,39 +24,47 @@ under the License.
 
 # Connectors and Formats
 
-Flink can read from and write to various external systems via connectors and define the format in 
-which to store the data.
+Flink can read from and write to various external systems via connectors and use the format of your choice 
+in order to read/write data from/into records. 
 
-The way that information is serialized is represented in the external system and that system needs
-to know how to read this data in a format that can be read by Flink.  This is done through format 
-dependencies.
+An overview of available connectors and formats is available for both 
+[DataStream]({{< ref "docs/connectors/datastream/overview.md" >}}) and 
+[Table API/SQL]({{< ref "docs/connectors/table/overview.md" >}}).
 
-Most applications need specific connectors to run. Flink provides a set of formats that can be used 
-with connectors (with the dependencies for both being fairly unified). These are not part of Flink's 
-core dependencies and must be added as dependencies to the application.
+In order to use connectors and formats, you need to make sure Flink is able to access the classes implementing them in the classpath.
 
-## Adding Dependencies 
+## Managing connectors and format dependencies
 
 For more information on how to add dependencies, refer to the build tools sections on [Maven]({{< ref "docs/dev/configuration/maven" >}})
-and [Gradle]({{< ref "docs/dev/configuration/gradle" >}}). 
+and [Gradle]({{< ref "docs/dev/configuration/gradle" >}}).
 
-## Packaging Dependencies
+For each connector supported by the Flink community, we publish on [Maven Central](https://search.maven.org) two artifacts:
 
-We recommend packaging the application code and all its required dependencies into one fat/uber JAR. 
+* `flink-connector-<NAME>` which is a thin JAR including only the connector code, but excluding eventual 3rd party dependencies
+* `flink-sql-connector-<NAME>` which is an uber JAR ready to use with all the connector 3rd party dependencies.
+
+The same applies for formats as well. Also note that some connectors, because they don't require 3rd party dependencies, 
+may not have a corresponding `flink-sql-connector-<NAME>` artifact.
+
+The uber JARs are supported mostly for being used in conjunction with [SQL client]({{< ref "docs/dev/table/sqlClient" >}}),
+but you can also use them in any DataStream/Table job.
+
+As a rule of thumb, we **recommend** packaging the application code and all its required dependencies, 
+except the Flink APIs packages, into one fat/uber JAR. 
+This includes packaging connectors and every 3rd party dependencies of your job.
 This job JAR can be submitted to an already running Flink cluster, or added to a Flink application 
-container image.
+container image easily without modifying the distribution.
 
-On [Maven Central](https://search.maven.org), we publish connectors named "flink-connector-<NAME>" and
-"flink-sql-connector-<NAME>". The former are thin JARs while the latter are uber JARs.
+When shading a dependency, you can either shade the connector thin JAR and its transitive dependencies or the connector uber JAR.
+In case of shading the thin JAR, you will have even more control over the transitive dependencies,
+since you can change the versions without changing the connector version (binary compatibility permitting).
 
-In order to use the uber JARs, you can shade them (including and renaming dependencies to create a 
-private copy) in the uber JAR of your Flink job, or you can add them to the `/lib` folder of the 
-distribution.
+In order to use the uber JARs, you can shade them in the uber JAR of your Flink job, 
+or you can add them to the `/lib` folder of the distribution.
 
 If you shade a dependency, you will have more control over the dependency version in the job JAR. 
 In case of shading the thin JAR, you will have even more control over the transitive dependencies, 
 since you can change the versions without changing the connector version (binary compatibility permitting).
 
-If you include uber JARs directly in the distribution, this can simplify the management of dependencies 
-in a shared multi-job Flink cluster, but it also means that you will lock in a specific version of the 
-dependency.
+If you're managing a multi-job Flink cluster, and you want to control in one place connector versions for all jobs, you
+can include the uber JARs directly in the `/lib` folder of the distribution.
