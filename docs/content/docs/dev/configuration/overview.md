@@ -38,15 +38,15 @@ under the License.
 
 # Project Configuration
 
-Every Flink application depends on a set of Flink libraries. At a minimum, the application depends
-on the Flink APIs and, in addition, on certain connector libraries (i.e. Kafka, Cassandra).
-When running Flink applications in the IDE, add a provided dependency to the [Flink runtime library](https://mvnrepository.com/artifact/org.apache.flink/flink-runtime).
-
 The guides in this section will show you how to configure your projects via popular build tools
 ([Maven]({{< ref "docs/dev/configuration/maven" >}}), [Gradle]({{< ref "docs/dev/configuration/gradle" >}})),
-add the necessary dependencies (i.e. [connectors and formats]({{< ref "docs/dev/configuration/connector" >}}), 
-[testing]({{< ref "docs/dev/configuration/testing" >}})), and cover some 
-[advanced]({{< ref "docs/dev/configuration/advanced" >}}) configuration topics. 
+add the necessary dependencies (i.e. [connectors and formats]({{< ref "docs/dev/configuration/connector" >}}),
+[testing]({{< ref "docs/dev/configuration/testing" >}})), and cover some
+[advanced]({{< ref "docs/dev/configuration/advanced" >}}) configuration topics.
+
+Every Flink application depends on a set of Flink libraries. At a minimum, the application depends
+on the Flink APIs and, in addition, on certain connector libraries (i.e. Kafka, Cassandra) and 
+3rd party dependencies required to the user to develop custom functions to process the data.
 
 ## Getting started
 
@@ -130,7 +130,7 @@ configurations {
 dependencies {
     // --------------------------------------------------------------
     // Compile-time dependencies that should NOT be part of the
-    // shadow jar and are provided in the lib folder of Flink
+    // shadow (uber) jar and are provided in the lib folder of Flink
     // --------------------------------------------------------------
     implementation "org.apache.flink:flink-streaming-java:${flinkVersion}"
     implementation "org.apache.flink:flink-clients:${flinkVersion}"
@@ -177,10 +177,18 @@ bash -c "$(curl https://flink.apache.org/q/gradle-quickstart.sh)" -- {{< version
 
 ## Which dependencies do you need?
 
-Depending on what you want to achieve, you are going to choose a combination of our available APIs, 
-which will require different dependencies. 
+In general, you're going to need dependencies for:
 
-Here is a table of artifact/dependency names:
+* Flink APIs, in order to develop your job
+* Connectors and formats, in order to integrate your job with external systems
+* Testing, in order to test your job
+
+And in addition to these, you might want to add 3rd party dependencies that you need to develop custom functions.
+
+### Flink APIs
+
+Flink offers two major APIs: [Datastream API]({{< ref "docs/dev/datastream/overview" >}}) and [Table API & SQL]({{< ref "docs/dev/table/overview" >}}). 
+They can be used separately, or they can be mixed, depending on your use cases:
 
 | APIs you want to use                                                              | Dependency you need to add                          |
 |-----------------------------------------------------------------------------------|-----------------------------------------------------|
@@ -191,14 +199,133 @@ Here is a table of artifact/dependency names:
 | [Table API + DataStream]({{< ref "docs/dev/table/data_stream_api" >}})            | `flink-table-api-java-bridge`                       |
 | [Table API + DataStream with Scala]({{< ref "docs/dev/table/data_stream_api" >}}) | `flink-table-api-scala-bridge{{< scala_version >}}` |
 
-Just include them in your build tool script/descriptor and you can start developing your job.
+Just include them in your build tool script/descriptor, and you can start developing your job!
+
+### Connectors and Formats
+
+Flink can read from and write to various external systems via connectors and use the format of your choice
+in order to read/write data from/into records.
+
+An overview of available connectors and formats is available for both
+[DataStream]({{< ref "docs/connectors/datastream/overview.md" >}}) and
+[Table API/SQL]({{< ref "docs/connectors/table/overview.md" >}}).
+
+In order to use connectors and formats, you need to make sure Flink is able to access the classes implementing them in the classpath.
+
+For each connector supported by the Flink community, we publish on [Maven Central](https://search.maven.org) two artifacts:
+
+* `flink-connector-<NAME>` which is a thin JAR including only the connector code, but excluding eventual 3rd party dependencies
+* `flink-sql-connector-<NAME>` which is an uber JAR ready to use with all the connector 3rd party dependencies.
+
+The same applies for formats as well. Also note that some connectors, because they don't require 3rd party dependencies,
+may not have a corresponding `flink-sql-connector-<NAME>` artifact.
+
+The uber JARs are supported mostly for being used in conjunction with [SQL client]({{< ref "docs/dev/table/sqlClient" >}}),
+but you can also use them in any DataStream/Table job.
+
+When shading a dependency, you can either shade the connector thin JAR and its transitive dependencies or the connector uber JAR.
+In case of shading the thin JAR, you will have even more control over the transitive dependencies,
+since you can change the versions without changing the connector version (binary compatibility permitting).
+
+In order to use the uber JARs, you can shade them in the uber JAR of your Flink job,
+or you can add them to the `/lib` folder of the distribution.
+
+{{< hint info >}}
+Deciding whether to shade the uber JAR, the thin JAR or just include the dependency in the distribution is up to you and your use case.
+If you shade a dependency, you will have more control over the dependency version in the job JAR.
+In case of shading the thin JAR, you will have even more control over the transitive dependencies,
+since you can change the versions without changing the connector version (binary compatibility permitting). 
+In case of embedding the connector uber JAR directly in the Flink distribution `/lib` folder, 
+you will be able to control in one place connector versions for all jobs.
+{{< /hint >}}
+
+### Testing
+
+Flink provides utilities for testing your job that you can add as dependencies.
+
+#### DataStream API Testing
+
+You need to add the following dependencies if you want to develop tests for a job built with the
+DataStream API:
+
+{{< tabs "datastream test" >}}
+
+{{< tab "Maven" >}}
+Open the `pom.xml` file in your project directory and add these dependencies in between the dependencies tab.
+{{< artifact flink-test-utils withTestScope >}}
+{{< artifact flink-runtime withTestScope >}}
+{{< /tab >}}
+
+{{< tab "Gradle" >}}
+Open the `build.gradle` file in your project directory and add the following in the dependencies block.
+```gradle
+...
+dependencies {
+    ...  
+    testImplementation "org.apache.flink:flink-test-utils:${flinkVersion}"
+    testImplementation "org.apache.flink:flink-runtime:${flinkVersion}"
+    ...
+}
+...
+```
+**Note:** This assumes that you have created your project using our Gradle build script or quickstart script.
+{{< /tab >}}
+
+{{< /tabs >}}
+
+For more information on how to use these utilities, check out the section on [DataStream API testing]({{< ref "docs/dev/datastream/testing" >}})
+
+#### Table API Testing
+
+If you want to test the Table API & SQL programs locally within your IDE, you can add the following
+dependency:
+
+{{< tabs "table test" >}}
+
+{{< tab "Maven" >}}
+Open the `pom.xml` file in your project directory and add this dependency in between the dependencies tab.
+{{< artifact flink-table-test-utils withTestScope >}}
+{{< /tab >}}
+
+{{< tab "Gradle" >}}
+Open the `build.gradle` file in your project directory and add the following in the dependencies block.
+```gradle
+...
+dependencies {
+    ...  
+    testImplementation "org.apache.flink:flink-table-test-utils:${flinkVersion}"
+    ...
+}
+...
+```
+**Note:** This assumes that you have created your project using our Gradle build script or quickstart script.
+{{< /tab >}}
+
+{{< /tabs >}}
+
+This will automatically bring in the query planner and the runtime, required respectively to plan
+and execute the queries.
+
+{{< hint info >}}
+The module `flink-table-test-utils` is experimental and has been introduced in Flink 1.15.
+{{< /hint >}}
+
+## Running and packaging
+
+If you want to run your job by simply executing the main class, you will need `flink-runtime` in your classpath.
+In case of Table API programs, you will also need `flink-table-runtime` and `flink-table-planner-loader`.
+
+As a rule of thumb, we **suggest** packaging the application code and all its required dependencies into one fat/uber JAR.
+This includes packaging connectors, formats and every 3rd party dependencies of your job.
+This rule **does not apply** to Java APIs, DataStream Scala APIs and eventual aforementioned runtime modules, 
+which are already provided by Flink itself and **must not** be included in a job uber JAR.
+This job JAR can be submitted to an already running Flink cluster, or added to a Flink application
+container image easily without modifying the distribution.
 
 ## What's next?
 
 * To start developing your job, check out [Datastream API]({{< ref "docs/dev/datastream/overview" >}}) and [Table API & SQL]({{< ref "docs/dev/table/overview" >}}).
-* For more details about how to package your job for Flink, check the specific guides:
+* For more details about how to package your job depending on the build tools, check the specific guides:
   * [Maven]({{< ref "docs/dev/configuration/maven" >}})
   * [Gradle]({{< ref "docs/dev/configuration/gradle" >}})
-* In order to configure testing dependencies for your job, check out [testing dependencies]({{< ref "docs/dev/configuration/testing" >}})).
-* For the best practices about connector and format dependencies, check out [connectors and formats dependencies]({{< ref "docs/dev/configuration/connector" >}}).
 * For more advanced topics about project configuration, check out [advanced topic]({{< ref "docs/dev/configuration/advanced" >}}).
