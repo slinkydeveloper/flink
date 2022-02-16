@@ -32,7 +32,12 @@ class IdentityCastRule extends AbstractCodeGeneratorCastRule<Object, Object>
     static final IdentityCastRule INSTANCE = new IdentityCastRule();
 
     private IdentityCastRule() {
-        super(CastRulePredicate.builder().predicate(IdentityCastRule::isIdentityCast).build());
+        super(
+                CastRulePredicate.builder()
+                        .predicate(
+                                (input, target) ->
+                                        CastRuleMatch.from(isIdentityCast(input, target)))
+                        .build());
     }
 
     private static boolean isIdentityCast(

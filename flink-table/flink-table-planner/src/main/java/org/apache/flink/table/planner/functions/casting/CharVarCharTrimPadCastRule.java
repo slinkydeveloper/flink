@@ -53,8 +53,9 @@ class CharVarCharTrimPadCastRule
                 CastRulePredicate.builder()
                         .predicate(
                                 (inputType, targetType) ->
-                                        targetType.is(LogicalTypeFamily.CHARACTER_STRING)
-                                                && !targetType.equals(STRING_TYPE))
+                                        CastRuleMatch.from(
+                                                targetType.is(LogicalTypeFamily.CHARACTER_STRING)
+                                                        && !targetType.equals(STRING_TYPE)))
                         .build());
     }
 
@@ -94,7 +95,7 @@ class CharVarCharTrimPadCastRule
             inputLength = LogicalTypeChecks.getLength(inputLogicalType);
         }
         CastRule<?, ?> castRule =
-                CastRuleProvider.resolve(inputLogicalType, VarCharType.STRING_TYPE);
+                CastRuleProvider.resolveRule(inputLogicalType, VarCharType.STRING_TYPE);
 
         // Only used for non-Constructed types - for constructed type and RAW, the trimming/padding
         // is applied on each individual rule, i.e.: ArrayToStringCastRule, RawToStringCastRule

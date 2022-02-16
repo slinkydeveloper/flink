@@ -36,6 +36,7 @@ class StringToDateCastRule extends AbstractExpressionCodeGeneratorCastRule<Strin
                 CastRulePredicate.builder()
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeRoot.DATE)
+                        .fallible(true)
                         .build());
     }
 
@@ -46,10 +47,5 @@ class StringToDateCastRule extends AbstractExpressionCodeGeneratorCastRule<Strin
             LogicalType inputLogicalType,
             LogicalType targetLogicalType) {
         return staticCall(STRING_DATA_TO_DATE(), inputTerm);
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        return true;
     }
 }

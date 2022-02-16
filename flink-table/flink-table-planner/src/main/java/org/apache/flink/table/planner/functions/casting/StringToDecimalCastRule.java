@@ -39,6 +39,7 @@ class StringToDecimalCastRule
                 CastRulePredicate.builder()
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeRoot.DECIMAL)
+                        .fallible(true)
                         .build());
     }
 
@@ -54,10 +55,5 @@ class StringToDecimalCastRule
                 inputTerm,
                 targetDecimalType.getPrecision(),
                 targetDecimalType.getScale());
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        return true;
     }
 }

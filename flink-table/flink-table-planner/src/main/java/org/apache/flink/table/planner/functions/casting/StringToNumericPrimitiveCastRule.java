@@ -45,6 +45,7 @@ class StringToNumericPrimitiveCastRule
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeFamily.INTEGER_NUMERIC)
                         .target(LogicalTypeFamily.APPROXIMATE_NUMERIC)
+                        .fallible(true)
                         .build());
     }
 
@@ -69,10 +70,5 @@ class StringToNumericPrimitiveCastRule
                 return staticCall(STRING_DATA_TO_DOUBLE(), inputTerm);
         }
         throw new IllegalArgumentException("This is a bug. Please file an issue.");
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        return true;
     }
 }

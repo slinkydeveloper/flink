@@ -39,6 +39,7 @@ class StringToTimeCastRule extends AbstractExpressionCodeGeneratorCastRule<Strin
                 CastRulePredicate.builder()
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeRoot.TIME_WITHOUT_TIME_ZONE)
+                        .fallible(true)
                         .build());
     }
 
@@ -49,10 +50,5 @@ class StringToTimeCastRule extends AbstractExpressionCodeGeneratorCastRule<Strin
             LogicalType inputLogicalType,
             LogicalType targetLogicalType) {
         return staticCall(STRING_DATA_TO_TIME(), inputTerm);
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        return true;
     }
 }

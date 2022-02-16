@@ -33,6 +33,9 @@ import static org.apache.flink.table.planner.codegen.CodeGenUtils.className;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.newName;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.rowFieldReadAccess;
 import static org.apache.flink.table.planner.codegen.calls.BuiltInMethods.BINARY_STRING_DATA_FROM_STRING;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.and;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.ifTypeThen;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.xor;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.nullLiteral;
@@ -57,15 +60,25 @@ class MapAndMultisetToStringCastRule
                         .build());
     }
 
-    private static boolean isMapOrMultiset(LogicalType input, LogicalType target) {
-        return target.is(LogicalTypeFamily.CHARACTER_STRING)
-                && ((input.is(LogicalTypeRoot.MAP)
-                                && CastRuleProvider.exists(((MapType) input).getKeyType(), target)
-                                && CastRuleProvider.exists(
-                                        ((MapType) input).getValueType(), target))
-                        || (input.is(LogicalTypeRoot.MULTISET)
-                                && CastRuleProvider.exists(
-                                        ((MultisetType) input).getElementType(), target)));
+    private static CastRuleMatch isMapOrMultiset(LogicalType input, LogicalType target) {
+        return and(
+                target.is(LogicalTypeFamily.CHARACTER_STRING),
+                xor(
+                        ifTypeThen(
+                                input,
+                                MapType.class,
+                                mapType ->
+                                        and(
+                                                CastRuleProvider.matches(
+                                                        mapType.getKeyType(), target),
+                                                CastRuleProvider.matches(
+                                                        mapType.getValueType(), target))),
+                        ifTypeThen(
+                                input,
+                                MultisetType.class,
+                                multisetType ->
+                                        CastRuleProvider.matches(
+                                                multisetType.getElementType(), target))));
     }
 
     /* Example generated code for MAP<STRING, INTERVAL MONTH> -> CHAR(12):

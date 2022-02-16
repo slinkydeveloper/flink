@@ -43,6 +43,7 @@ class StringToBinaryCastRule extends AbstractNullAwareCodeGeneratorCastRule<Stri
                 CastRulePredicate.builder()
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeFamily.BINARY_STRING)
+                        .fallible(true)
                         .build());
     }
 

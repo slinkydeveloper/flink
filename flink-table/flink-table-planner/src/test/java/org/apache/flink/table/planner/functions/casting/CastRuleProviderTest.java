@@ -49,50 +49,59 @@ class CastRuleProviderTest {
 
     @Test
     void testResolveDistinctTypeToIdentityCastRule() {
-        assertThat(CastRuleProvider.resolve(DISTINCT_INT, INT)).isSameAs(IdentityCastRule.INSTANCE);
-        assertThat(CastRuleProvider.resolve(INT, DISTINCT_INT)).isSameAs(IdentityCastRule.INSTANCE);
-        assertThat(CastRuleProvider.resolve(DISTINCT_INT, DISTINCT_INT))
+        assertThat(CastRuleProvider.resolveRule(DISTINCT_INT, INT))
+                .isSameAs(IdentityCastRule.INSTANCE);
+        assertThat(CastRuleProvider.resolveRule(INT, DISTINCT_INT))
+                .isSameAs(IdentityCastRule.INSTANCE);
+        assertThat(CastRuleProvider.resolveRule(DISTINCT_INT, DISTINCT_INT))
                 .isSameAs(IdentityCastRule.INSTANCE);
     }
 
     @Test
     void testResolveIntToBigIntWithDistinct() {
-        assertThat(CastRuleProvider.resolve(INT, DISTINCT_BIG_INT))
+        assertThat(CastRuleProvider.resolveRule(INT, DISTINCT_BIG_INT))
                 .isSameAs(NumericPrimitiveCastRule.INSTANCE);
     }
 
     @Test
     void testResolveArrayIntToBigIntWithDistinct() {
-        assertThat(CastRuleProvider.resolve(new ArrayType(INT), new ArrayType(DISTINCT_BIG_INT)))
+        assertThat(
+                        CastRuleProvider.resolveRule(
+                                new ArrayType(INT), new ArrayType(DISTINCT_BIG_INT)))
                 .isSameAs(ArrayToArrayCastRule.INSTANCE);
     }
 
     @Test
     void testResolvePredefinedToString() {
-        assertThat(CastRuleProvider.resolve(INT, new VarCharType(10)))
+        assertThat(CastRuleProvider.resolveRule(INT, new VarCharType(10)))
                 .isSameAs(CharVarCharTrimPadCastRule.INSTANCE);
-        assertThat(CastRuleProvider.resolve(INT, new CharType(10)))
+        assertThat(CastRuleProvider.resolveRule(INT, new CharType(10)))
                 .isSameAs(CharVarCharTrimPadCastRule.INSTANCE);
-        assertThat(CastRuleProvider.resolve(INT, STRING_TYPE))
+        assertThat(CastRuleProvider.resolveRule(INT, STRING_TYPE))
                 .isSameAs(NumericToStringCastRule.INSTANCE);
     }
 
     @Test
     void testResolveConstructedToString() {
-        assertThat(CastRuleProvider.resolve(new ArrayType(INT), new VarCharType(10)))
+        assertThat(CastRuleProvider.resolveRule(new ArrayType(INT), new VarCharType(10)))
                 .isSameAs(ArrayToStringCastRule.INSTANCE);
     }
 
     @Test
-    void testCanFail() {
-        assertThat(CastRuleProvider.canFail(TINYINT, INT)).isFalse();
-        assertThat(CastRuleProvider.canFail(STRING_TYPE, TIME().getLogicalType())).isTrue();
-        assertThat(CastRuleProvider.canFail(STRING_TYPE, STRING_TYPE)).isFalse();
+    void testFallibility() {
+        assertThat(CastRuleProvider.resolve(TINYINT, INT).isFallible()).isFalse();
+        assertThat(CastRuleProvider.resolve(STRING_TYPE, TIME().getLogicalType()).isFallible())
+                .isTrue();
+        assertThat(CastRuleProvider.resolve(STRING_TYPE, STRING_TYPE).isFallible()).isFalse();
 
         LogicalType inputType = ROW(TINYINT(), STRING()).getLogicalType();
-        assertThat(CastRuleProvider.canFail(inputType, ROW(INT(), TIME()).getLogicalType()))
+        assertThat(
+                        CastRuleProvider.resolve(inputType, ROW(INT(), TIME()).getLogicalType())
+                                .isFallible())
                 .isTrue();
-        assertThat(CastRuleProvider.canFail(inputType, ROW(INT(), STRING()).getLogicalType()))
+        assertThat(
+                        CastRuleProvider.resolve(inputType, ROW(INT(), STRING()).getLogicalType())
+                                .isFallible())
                 .isFalse();
     }
 }

@@ -30,6 +30,7 @@ import org.apache.flink.table.types.logical.utils.LogicalTypeChecks;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.className;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.newName;
 import static org.apache.flink.table.planner.codegen.calls.BuiltInMethods.BINARY_STRING_DATA_FROM_STRING;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.and;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.nullLiteral;
@@ -46,11 +47,13 @@ class StructuredToStringCastRule extends AbstractNullAwareCodeGeneratorCastRule<
         super(CastRulePredicate.builder().predicate(StructuredToStringCastRule::matches).build());
     }
 
-    private static boolean matches(LogicalType input, LogicalType target) {
-        return target.is(LogicalTypeFamily.CHARACTER_STRING)
-                && input.is(LogicalTypeRoot.STRUCTURED_TYPE)
-                && LogicalTypeChecks.getFieldTypes(input).stream()
-                        .allMatch(fieldType -> CastRuleProvider.exists(fieldType, target));
+    private static CastRuleMatch matches(LogicalType input, LogicalType target) {
+        return and(
+                target.is(LogicalTypeFamily.CHARACTER_STRING)
+                        && input.is(LogicalTypeRoot.STRUCTURED_TYPE),
+                LogicalTypeChecks.getFieldTypes(input).stream()
+                        .map(fieldType -> CastRuleProvider.matches(fieldType, target))
+                        .reduce(CastRuleMatch.INFALLIBLE, CastRuleMatch::and));
     }
 
     /* Example generated code for MyStructuredType in CastRulesTest:

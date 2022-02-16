@@ -27,13 +27,13 @@ import org.apache.flink.table.types.logical.LogicalTypeRoot;
 
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.newName;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.rowFieldReadAccess;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.and;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.newArray;
 
 /** {@link LogicalTypeRoot#ARRAY} to {@link LogicalTypeRoot#ARRAY} cast rule. */
-class ArrayToArrayCastRule extends AbstractNullAwareCodeGeneratorCastRule<ArrayData, ArrayData>
-        implements ConstructedToConstructedCastRule<ArrayData, ArrayData> {
+class ArrayToArrayCastRule extends AbstractNullAwareCodeGeneratorCastRule<ArrayData, ArrayData> {
 
     static final ArrayToArrayCastRule INSTANCE = new ArrayToArrayCastRule();
 
@@ -42,17 +42,21 @@ class ArrayToArrayCastRule extends AbstractNullAwareCodeGeneratorCastRule<ArrayD
                 CastRulePredicate.builder()
                         .predicate(
                                 (input, target) ->
-                                        input.is(LogicalTypeRoot.ARRAY)
-                                                && target.is(LogicalTypeRoot.ARRAY)
-                                                && isValidArrayCasting(
-                                                        ((ArrayType) input).getElementType(),
-                                                        ((ArrayType) target).getElementType()))
+                                        and(
+                                                input.is(LogicalTypeRoot.ARRAY)
+                                                        && target.is(LogicalTypeRoot.ARRAY),
+                                                () ->
+                                                        isValidArrayCasting(
+                                                                ((ArrayType) input)
+                                                                        .getElementType(),
+                                                                ((ArrayType) target)
+                                                                        .getElementType())))
                         .build());
     }
 
-    private static boolean isValidArrayCasting(
+    private static CastRuleMatch isValidArrayCasting(
             LogicalType innerInputType, LogicalType innerTargetType) {
-        return CastRuleProvider.resolve(innerInputType, innerTargetType) != null;
+        return CastRuleProvider.matches(innerInputType, innerTargetType);
     }
 
     @SuppressWarnings("rawtypes")

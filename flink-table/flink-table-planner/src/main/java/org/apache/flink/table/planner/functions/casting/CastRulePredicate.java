@@ -27,7 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiPredicate;
+import java.util.function.BiFunction;
 
 /**
  * In order to apply a {@link CastRule}, the runtime checks if a particular rule matches the tuple
@@ -55,6 +55,10 @@ import java.util.function.BiPredicate;
  * <p>The {@code customPredicate} should be used in cases where {@link LogicalTypeRoot} and {@link
  * LogicalTypeFamily} are not enough to identify whether a rule is applicable or not, for example
  * when the matching depends on a field of the provided input {@link LogicalType} instance.
+ *
+ * <p>When matching using type roots and families, fallibility is computed by the {@link
+ * #isFallible()} flag, while in case of using the custom predicate, the return value of the
+ * predicate itself defines whether the cast runtime implementation can fail or not.
  */
 @Internal
 public class CastRulePredicate {
@@ -67,7 +71,9 @@ public class CastRulePredicate {
     private final Set<LogicalTypeFamily> inputTypeFamilies;
     private final Set<LogicalTypeFamily> targetTypeFamilies;
 
-    private final BiPredicate<LogicalType, LogicalType> customPredicate;
+    private final boolean isFallible;
+
+    private final BiFunction<LogicalType, LogicalType, CastRuleMatch> customPredicate;
 
     private CastRulePredicate(
             Set<LogicalType> targetTypes,
@@ -75,12 +81,14 @@ public class CastRulePredicate {
             Set<LogicalTypeRoot> targetTypeRoots,
             Set<LogicalTypeFamily> inputTypeFamilies,
             Set<LogicalTypeFamily> targetTypeFamilies,
-            BiPredicate<LogicalType, LogicalType> customPredicate) {
+            boolean isFallible,
+            BiFunction<LogicalType, LogicalType, CastRuleMatch> customPredicate) {
         this.targetTypes = targetTypes;
         this.inputTypeRoots = inputTypeRoots;
         this.targetTypeRoots = targetTypeRoots;
         this.inputTypeFamilies = inputTypeFamilies;
         this.targetTypeFamilies = targetTypeFamilies;
+        this.isFallible = isFallible;
         this.customPredicate = customPredicate;
     }
 
@@ -104,7 +112,11 @@ public class CastRulePredicate {
         return targetTypeFamilies;
     }
 
-    public Optional<BiPredicate<LogicalType, LogicalType>> getCustomPredicate() {
+    public boolean isFallible() {
+        return isFallible;
+    }
+
+    public Optional<BiFunction<LogicalType, LogicalType, CastRuleMatch>> getCustomPredicate() {
         return Optional.ofNullable(customPredicate);
     }
 
@@ -121,7 +133,9 @@ public class CastRulePredicate {
         private final Set<LogicalTypeFamily> inputTypeFamilies = new HashSet<>();
         private final Set<LogicalTypeFamily> targetTypeFamilies = new HashSet<>();
 
-        private BiPredicate<LogicalType, LogicalType> customPredicate;
+        private boolean isFallible = false;
+
+        private BiFunction<LogicalType, LogicalType, CastRuleMatch> customPredicate;
 
         public Builder input(LogicalTypeRoot inputTypeRoot) {
             inputTypeRoots.add(inputTypeRoot);
@@ -148,7 +162,13 @@ public class CastRulePredicate {
             return this;
         }
 
-        public Builder predicate(BiPredicate<LogicalType, LogicalType> customPredicate) {
+        public Builder fallible(boolean fallible) {
+            this.isFallible = fallible;
+            return this;
+        }
+
+        public Builder predicate(
+                BiFunction<LogicalType, LogicalType, CastRuleMatch> customPredicate) {
             this.customPredicate = customPredicate;
             return this;
         }
@@ -160,6 +180,7 @@ public class CastRulePredicate {
                     Collections.unmodifiableSet(targetTypeRoots),
                     Collections.unmodifiableSet(inputTypeFamilies),
                     Collections.unmodifiableSet(targetTypeFamilies),
+                    isFallible,
                     customPredicate);
         }
     }

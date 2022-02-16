@@ -39,6 +39,7 @@ class StringToTimestampCastRule
                 CastRulePredicate.builder()
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeFamily.TIMESTAMP)
+                        .fallible(true)
                         .build());
     }
 
@@ -54,10 +55,5 @@ class StringToTimestampCastRule
 
         return staticCall(
                 STRING_DATA_TO_TIMESTAMP_WITH_ZONE(), inputTerm, context.getSessionTimeZoneTerm());
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        return true;
     }
 }

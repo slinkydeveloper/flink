@@ -25,7 +25,6 @@ import org.apache.flink.table.types.logical.LogicalType;
 import org.apache.flink.table.types.logical.LogicalTypeFamily;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.types.logical.NullType;
-import org.apache.flink.util.Preconditions;
 
 import javax.annotation.Nullable;
 
@@ -37,6 +36,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.FALLIBLE;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.INFALLIBLE;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.UNSUPPORTED;
 
 /** This class resolves {@link CastRule} using the input and the target type. */
 @Internal
@@ -101,29 +104,34 @@ public class CastRuleProvider {
     /* ------- Entrypoint ------- */
 
     /**
-     * Resolve a {@link CastRule} for the provided input type and target type. Returns {@code null}
-     * if no rule can be resolved.
+     * Resolve a {@link CastRule} and its fallibility for the provided input type and target type.
+     * Returns {@code null} if no rule can be resolved.
      */
-    public static @Nullable CastRule<?, ?> resolve(LogicalType inputType, LogicalType targetType) {
+    public static @Nullable ResolutionResult resolve(
+            LogicalType inputType, LogicalType targetType) {
         return INSTANCE.internalResolve(inputType, targetType);
     }
 
     /**
-     * Returns {@code true} if and only if a {@link CastRule} can be resolved for the provided input
-     * type and target type.
+     * Resolve a {@link CastRule} for the provided input type and target type. Returns {@code null}
+     * if no rule can be resolved.
      */
-    public static boolean exists(LogicalType inputType, LogicalType targetType) {
-        return resolve(inputType, targetType) != null;
+    public static @Nullable CastRule<?, ?> resolveRule(
+            LogicalType inputType, LogicalType targetType) {
+        return Optional.ofNullable(resolve(inputType, targetType))
+                .map(ResolutionResult::getRule)
+                .orElse(null);
     }
 
     /**
-     * Resolves the rule and returns the result of {@link CastRule#canFail(LogicalType,
-     * LogicalType)}. Fails with {@link NullPointerException} if the rule cannot be resolved.
+     * Returns {@link CastRuleMatch} for the specified types tuple. If the result {@link
+     * CastRuleMatch#matches()}, then {@link #resolve(LogicalType, LogicalType)} always returns a
+     * not null result.
      */
-    public static boolean canFail(LogicalType inputType, LogicalType targetType) {
-        return Preconditions.checkNotNull(
-                        resolve(inputType, targetType), "Cast rule cannot be resolved")
-                .canFail(inputType, targetType);
+    public static CastRuleMatch matches(LogicalType inputType, LogicalType targetType) {
+        return Optional.ofNullable(resolve(inputType, targetType))
+                .map(res -> res.isFallible() ? FALLIBLE : INFALLIBLE)
+                .orElse(UNSUPPORTED);
     }
 
     /**
@@ -134,11 +142,11 @@ public class CastRuleProvider {
      */
     public static @Nullable CastExecutor<?, ?> create(
             CastRule.Context context, LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        CastRule<?, ?> rule = INSTANCE.internalResolve(inputLogicalType, targetLogicalType);
-        if (rule == null) {
+        ResolutionResult result = INSTANCE.internalResolve(inputLogicalType, targetLogicalType);
+        if (result == null) {
             return null;
         }
-        return rule.create(context, inputLogicalType, targetLogicalType);
+        return result.getRule().create(context, inputLogicalType, targetLogicalType);
     }
 
     /**
@@ -156,11 +164,11 @@ public class CastRuleProvider {
             String inputIsNullTerm,
             LogicalType inputLogicalType,
             LogicalType targetLogicalType) {
-        CastRule<?, ?> rule = INSTANCE.internalResolve(inputLogicalType, targetLogicalType);
-        if (!(rule instanceof CodeGeneratorCastRule)) {
+        ResolutionResult result = INSTANCE.internalResolve(inputLogicalType, targetLogicalType);
+        if (result == null || !(result.getRule() instanceof CodeGeneratorCastRule)) {
             return null;
         }
-        return ((CodeGeneratorCastRule) rule)
+        return ((CodeGeneratorCastRule) result.getRule())
                 .generateCodeBlock(
                         context, inputTerm, inputIsNullTerm, inputLogicalType, targetLogicalType);
     }
@@ -231,7 +239,7 @@ public class CastRuleProvider {
         return this;
     }
 
-    private CastRule<?, ?> internalResolve(LogicalType input, LogicalType target) {
+    private ResolutionResult internalResolve(LogicalType input, LogicalType target) {
         LogicalType inputType = unwrapDistinct(input);
         LogicalType targetType = unwrapDistinct(target);
 
@@ -262,20 +270,24 @@ public class CastRuleProvider {
                             .findFirst();
 
             if (rule.isPresent()) {
-                return rule.get();
+                CastRule<?, ?> resultRule = rule.get();
+                return new ResolutionResult(
+                        rule.get(), resultRule.getPredicateDefinition().isFallible());
             }
         }
 
         // Try with the custom predicate rules
-        return rulesWithCustomPredicate.stream()
-                .filter(
-                        r ->
-                                r.getPredicateDefinition()
-                                        .getCustomPredicate()
-                                        .map(p -> p.test(inputType, targetType))
-                                        .orElse(false))
-                .findFirst()
-                .orElse(null);
+        for (CastRule<?, ?> rule : rulesWithCustomPredicate) {
+            CastRuleMatch match =
+                    rule.getPredicateDefinition()
+                            .getCustomPredicate()
+                            .get()
+                            .apply(inputType, targetType);
+            if (match.matches()) {
+                return new ResolutionResult(rule, match == FALLIBLE);
+            }
+        }
+        return null;
     }
 
     private LogicalType unwrapDistinct(LogicalType logicalType) {
@@ -283,5 +295,25 @@ public class CastRuleProvider {
             return unwrapDistinct(((DistinctType) logicalType).getSourceType());
         }
         return logicalType;
+    }
+
+    /** Holder for a {@link #resolve(LogicalType, LogicalType)} result. */
+    @Internal
+    public static class ResolutionResult {
+        private final CastRule<?, ?> rule;
+        private final boolean fallible;
+
+        public ResolutionResult(CastRule<?, ?> rule, boolean fallible) {
+            this.rule = rule;
+            this.fallible = fallible;
+        }
+
+        public CastRule<?, ?> getRule() {
+            return rule;
+        }
+
+        public boolean isFallible() {
+            return fallible;
+        }
     }
 }

@@ -36,6 +36,7 @@ class StringToBooleanCastRule extends AbstractExpressionCodeGeneratorCastRule<St
                 CastRulePredicate.builder()
                         .input(LogicalTypeFamily.CHARACTER_STRING)
                         .target(LogicalTypeRoot.BOOLEAN)
+                        .fallible(true)
                         .build());
     }
 
@@ -46,10 +47,5 @@ class StringToBooleanCastRule extends AbstractExpressionCodeGeneratorCastRule<St
             LogicalType inputLogicalType,
             LogicalType targetLogicalType) {
         return staticCall(STRING_DATA_TO_BOOLEAN(), inputTerm);
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        return true;
     }
 }

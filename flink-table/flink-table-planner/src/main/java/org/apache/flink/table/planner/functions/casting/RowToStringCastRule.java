@@ -31,6 +31,7 @@ import static org.apache.flink.table.planner.codegen.CodeGenUtils.className;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.newName;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.rowFieldReadAccess;
 import static org.apache.flink.table.planner.codegen.calls.BuiltInMethods.BINARY_STRING_DATA_FROM_STRING;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.and;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.nullLiteral;
@@ -45,11 +46,13 @@ class RowToStringCastRule extends AbstractNullAwareCodeGeneratorCastRule<ArrayDa
         super(CastRulePredicate.builder().predicate(RowToStringCastRule::matches).build());
     }
 
-    private static boolean matches(LogicalType input, LogicalType target) {
-        return (input.is(LogicalTypeRoot.ROW) || input.is(LogicalTypeRoot.STRUCTURED_TYPE))
-                && target.is(LogicalTypeFamily.CHARACTER_STRING)
-                && LogicalTypeChecks.getFieldTypes(input).stream()
-                        .allMatch(fieldType -> CastRuleProvider.exists(fieldType, target));
+    private static CastRuleMatch matches(LogicalType input, LogicalType target) {
+        return and(
+                (input.is(LogicalTypeRoot.ROW) || input.is(LogicalTypeRoot.STRUCTURED_TYPE))
+                        && target.is(LogicalTypeFamily.CHARACTER_STRING),
+                LogicalTypeChecks.getFieldTypes(input).stream()
+                        .map(fieldType -> CastRuleProvider.matches(fieldType, target))
+                        .reduce(CastRuleMatch.INFALLIBLE, CastRuleMatch::and));
     }
 
     /* Example generated code for ROW<`f0` INT, `f1` STRING> -> CHAR(12):

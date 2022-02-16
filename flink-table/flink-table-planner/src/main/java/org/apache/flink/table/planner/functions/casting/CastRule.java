@@ -45,9 +45,6 @@ public interface CastRule<IN, OUT> {
     CastExecutor<IN, OUT> create(
             Context context, LogicalType inputLogicalType, LogicalType targetLogicalType);
 
-    /** Returns true if the {@link CastExecutor} can fail at runtime. */
-    boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType);
-
     /** Casting context. */
     interface Context {
         @Deprecated

@@ -48,22 +48,23 @@ class RowToRowCastRule extends AbstractNullAwareCodeGeneratorCastRule<RowData, R
         super(CastRulePredicate.builder().predicate(RowToRowCastRule::matches).build());
     }
 
-    private static boolean matches(LogicalType input, LogicalType target) {
+    private static CastRuleMatch matches(LogicalType input, LogicalType target) {
         if (!((input.is(LogicalTypeRoot.ROW) || input.is(LogicalTypeRoot.STRUCTURED_TYPE))
                 && (target.is(LogicalTypeRoot.ROW)
                         || target.is(LogicalTypeRoot.STRUCTURED_TYPE)))) {
-            return false;
+            return CastRuleMatch.UNSUPPORTED;
         }
 
         final List<LogicalType> inputFields = LogicalTypeChecks.getFieldTypes(input);
         final List<LogicalType> targetFields = LogicalTypeChecks.getFieldTypes(target);
 
         if (inputFields.size() < targetFields.size()) {
-            return false;
+            return CastRuleMatch.UNSUPPORTED;
         }
 
         return IntStream.range(0, targetFields.size())
-                .allMatch(i -> CastRuleProvider.exists(inputFields.get(i), targetFields.get(i)));
+                .mapToObj(i -> CastRuleProvider.matches(inputFields.get(i), targetFields.get(i)))
+                .reduce(CastRuleMatch.INFALLIBLE, CastRuleMatch::and);
     }
 
     /* Example generated code for ROW<`f0` BIGINT, `f1` BIGINT, `f2` STRING, `f3` ARRAY<STRING>>:
@@ -223,14 +224,5 @@ class RowToRowCastRule extends AbstractNullAwareCodeGeneratorCastRule<RowData, R
 
         writer.stmt(methodCall(writerTerm, "complete")).assignStmt(returnVariable, rowTerm);
         return writer.toString();
-    }
-
-    @Override
-    public boolean canFail(LogicalType inputLogicalType, LogicalType targetLogicalType) {
-        final List<LogicalType> inputFields = LogicalTypeChecks.getFieldTypes(inputLogicalType);
-        final List<LogicalType> targetFields = LogicalTypeChecks.getFieldTypes(targetLogicalType);
-
-        return IntStream.range(0, Math.min(inputFields.size(), targetFields.size()))
-                .anyMatch(i -> CastRuleProvider.canFail(inputFields.get(i), targetFields.get(i)));
     }
 }

@@ -86,7 +86,7 @@ class IfCallGen() extends CallGenerator {
       expr: GeneratedExpression,
       targetType: LogicalType): CastCodeBlock = {
 
-      val rule = CastRuleProvider.resolve(expr.resultType, targetType)
+      val rule = CastRuleProvider.resolveRule(expr.resultType, targetType)
       rule match {
         case codeGeneratorCastRule: ExpressionCodeGeneratorCastRule[_, _] =>
           CastCodeBlock.withoutCode(codeGeneratorCastRule.generateExpression(

@@ -33,6 +33,8 @@ import static org.apache.flink.table.planner.codegen.CodeGenUtils.boxedTypeTermF
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.className;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.newName;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.rowFieldReadAccess;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.and;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.xor;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 
@@ -41,8 +43,7 @@ import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.met
  * to {@link LogicalTypeRoot#MULTISET} cast rule.
  */
 class MapToMapAndMultisetToMultisetCastRule
-        extends AbstractNullAwareCodeGeneratorCastRule<MapData, MapData>
-        implements ConstructedToConstructedCastRule<MapData, MapData> {
+        extends AbstractNullAwareCodeGeneratorCastRule<MapData, MapData> {
 
     static final MapToMapAndMultisetToMultisetCastRule INSTANCE =
             new MapToMapAndMultisetToMultisetCastRule();
@@ -56,24 +57,25 @@ class MapToMapAndMultisetToMultisetCastRule
                         .build());
     }
 
-    private static boolean isValidMapToMapOrMultisetToMultisetCasting(
+    private static CastRuleMatch isValidMapToMapOrMultisetToMultisetCasting(
             LogicalType input, LogicalType target) {
-        return input.is(LogicalTypeRoot.MAP)
-                        && target.is(LogicalTypeRoot.MAP)
-                        && CastRuleProvider.resolve(
+        return xor(
+                and(
+                        input.is(LogicalTypeRoot.MAP) && target.is(LogicalTypeRoot.MAP),
+                        () ->
+                                CastRuleProvider.matches(
                                         ((MapType) input).getKeyType(),
-                                        ((MapType) target).getKeyType())
-                                != null
-                        && CastRuleProvider.resolve(
+                                        ((MapType) target).getKeyType()),
+                        () ->
+                                CastRuleProvider.matches(
                                         ((MapType) input).getValueType(),
-                                        ((MapType) target).getValueType())
-                                != null
-                || input.is(LogicalTypeRoot.MULTISET)
-                        && target.is(LogicalTypeRoot.MULTISET)
-                        && CastRuleProvider.resolve(
+                                        ((MapType) target).getValueType())),
+                and(
+                        input.is(LogicalTypeRoot.MULTISET) && target.is(LogicalTypeRoot.MULTISET),
+                        () ->
+                                CastRuleProvider.matches(
                                         ((MultisetType) input).getElementType(),
-                                        ((MultisetType) target).getElementType())
-                                != null;
+                                        ((MultisetType) target).getElementType())));
     }
 
     /* Example generated code for MULTISET<INT> -> MULTISET<FLOAT>:

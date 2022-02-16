@@ -29,6 +29,8 @@ import static org.apache.flink.table.planner.codegen.CodeGenUtils.className;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.newName;
 import static org.apache.flink.table.planner.codegen.CodeGenUtils.rowFieldReadAccess;
 import static org.apache.flink.table.planner.codegen.calls.BuiltInMethods.BINARY_STRING_DATA_FROM_STRING;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.and;
+import static org.apache.flink.table.planner.functions.casting.CastRuleMatch.ifTypeThen;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.constructorCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.methodCall;
 import static org.apache.flink.table.planner.functions.casting.CastRuleUtils.nullLiteral;
@@ -47,11 +49,15 @@ class ArrayToStringCastRule extends AbstractNullAwareCodeGeneratorCastRule<Array
                 CastRulePredicate.builder()
                         .predicate(
                                 (input, target) ->
-                                        input.is(LogicalTypeRoot.ARRAY)
-                                                && target.is(LogicalTypeFamily.CHARACTER_STRING)
-                                                && CastRuleProvider.exists(
-                                                        ((ArrayType) input).getElementType(),
-                                                        target))
+                                        and(
+                                                target.is(LogicalTypeFamily.CHARACTER_STRING),
+                                                ifTypeThen(
+                                                        input,
+                                                        ArrayType.class,
+                                                        arrayType ->
+                                                                CastRuleProvider.matches(
+                                                                        arrayType.getElementType(),
+                                                                        target))))
                         .build());
     }
 

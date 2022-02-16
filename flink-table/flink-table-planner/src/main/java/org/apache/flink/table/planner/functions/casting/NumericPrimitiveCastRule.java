@@ -37,7 +37,10 @@ class NumericPrimitiveCastRule extends AbstractExpressionCodeGeneratorCastRule<N
     static final NumericPrimitiveCastRule INSTANCE = new NumericPrimitiveCastRule();
 
     private NumericPrimitiveCastRule() {
-        super(CastRulePredicate.builder().predicate(NumericPrimitiveCastRule::matches).build());
+        super(
+                CastRulePredicate.builder()
+                        .predicate((input, target) -> CastRuleMatch.from(matches(input, target)))
+                        .build());
     }
 
     private static boolean matches(LogicalType input, LogicalType target) {
