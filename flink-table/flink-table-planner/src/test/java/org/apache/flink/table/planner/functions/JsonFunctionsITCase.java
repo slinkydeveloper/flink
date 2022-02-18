@@ -28,8 +28,8 @@ import org.apache.flink.table.functions.ScalarFunction;
 import org.apache.flink.types.Row;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.runners.Parameterized;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.apache.flink.table.api.DataTypes.ARRAY;
 import static org.apache.flink.table.api.DataTypes.BINARY;
@@ -71,11 +72,11 @@ import static org.apache.flink.table.api.JsonQueryWrapper.UNCONDITIONAL_ARRAY;
 import static org.apache.flink.table.api.JsonQueryWrapper.WITHOUT_ARRAY;
 
 /** Tests for built-in JSON functions. */
-public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
+class JsonFunctionsITCase extends BuiltInFunctionTestBase {
 
-    @Parameterized.Parameters(name = "{index}: {0}")
-    public static List<TestSpec> testData() throws Exception {
-        final List<TestSpec> testCases = new ArrayList<>();
+    @Override
+    public Stream<TestSetSpec> getTestCaseSpecs() {
+        final List<TestSetSpec> testCases = new ArrayList<>();
         testCases.add(jsonExistsSpec());
         testCases.add(jsonValueSpec());
         testCases.addAll(isJsonSpec());
@@ -84,12 +85,12 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
         testCases.addAll(jsonObjectSpec());
         testCases.addAll(jsonArraySpec());
 
-        return testCases;
+        return testCases.stream();
     }
 
-    private static TestSpec jsonExistsSpec() throws Exception {
+    private static TestSetSpec jsonExistsSpec() {
         final String jsonValue = getJsonFromResource("/json/json-exists.json");
-        return TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_EXISTS)
+        return TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_EXISTS)
                 .onFieldsWithData(jsonValue)
                 .andDataTypes(STRING())
                 .testResult(
@@ -168,9 +169,9 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                         "No results for path: $['invalid']");
     }
 
-    private static TestSpec jsonValueSpec() throws Exception {
+    private static TestSetSpec jsonValueSpec() {
         final String jsonValue = getJsonFromResource("/json/json-value.json");
-        return TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_VALUE)
+        return TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_VALUE)
                 .onFieldsWithData(jsonValue)
                 .andDataTypes(STRING())
                 .testResult(
@@ -254,9 +255,9 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                 INT()));
     }
 
-    private static List<TestSpec> isJsonSpec() {
+    private static List<TestSetSpec> isJsonSpec() {
         return Arrays.asList(
-                TestSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
                         .onFieldsWithData(1)
                         .andDataTypes(INT())
                         .testSqlValidationError(
@@ -266,15 +267,15 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                         .testTableApiValidationError(
                                 $("f0").isJson(),
                                 String.format("Invalid function call:%nIS_JSON(INT)")),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
                         .onFieldsWithData((String) null)
                         .andDataTypes(STRING())
                         .testResult($("f0").isJson(), "f0 IS JSON", false, BOOLEAN().notNull()),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
                         .onFieldsWithData("a")
                         .andDataTypes(STRING())
                         .testResult($("f0").isJson(), "f0 IS JSON", false, BOOLEAN().notNull()),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
                         .onFieldsWithData("\"a\"")
                         .andDataTypes(STRING())
                         .testResult(
@@ -300,7 +301,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                         "f0 IS JSON OBJECT",
                                         false,
                                         BOOLEAN().notNull())),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.IS_JSON)
                         .onFieldsWithData("{}")
                         .andDataTypes(STRING())
                         .testResult(
@@ -328,14 +329,14 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                         BOOLEAN().notNull())));
     }
 
-    private static List<TestSpec> jsonQuerySpec() throws Exception {
+    private static List<TestSetSpec> jsonQuerySpec() {
         final String jsonValue = getJsonFromResource("/json/json-query.json");
         return Arrays.asList(
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_QUERY)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_QUERY)
                         .onFieldsWithData((String) null)
                         .andDataTypes(STRING())
                         .testResult($("f0").jsonQuery("$"), "JSON_QUERY(f0, '$')", null, STRING()),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_QUERY)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_QUERY)
                         .onFieldsWithData(jsonValue)
                         .andDataTypes(STRING())
 
@@ -423,7 +424,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                 "No results for path"));
     }
 
-    private static List<TestSpec> jsonStringSpec() {
+    private static List<TestSetSpec> jsonStringSpec() {
         final Map<String, String> mapData = new HashMap<>();
         mapData.put("M1", "V1");
         mapData.put("M2", "V2");
@@ -433,14 +434,14 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
         multisetData.put("M2", 2);
 
         return Arrays.asList(
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_STRING)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_STRING)
                         .onFieldsWithData(0)
                         .testResult(
                                 jsonString(nullOf(STRING())),
                                 "JSON_STRING(CAST(NULL AS STRING))",
                                 null,
                                 STRING().nullable()),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_STRING)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_STRING)
                         .onFieldsWithData(
                                 "V",
                                 true,
@@ -544,7 +545,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                         STRING().notNull())));
     }
 
-    private static List<TestSpec> jsonObjectSpec() {
+    private static List<TestSetSpec> jsonObjectSpec() {
         final Map<String, String> mapData = new HashMap<>();
         mapData.put("M1", "V1");
         mapData.put("M2", "V2");
@@ -554,7 +555,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
         multisetData.put("M2", 2);
 
         return Arrays.asList(
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_OBJECT)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_OBJECT)
                         .onFieldsWithData(0)
                         .testResult(
                                 resultSpec(
@@ -575,7 +576,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                         "{}",
                                         STRING().notNull(),
                                         STRING().notNull())),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_OBJECT)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_OBJECT)
                         .onFieldsWithData(
                                 "V",
                                 true,
@@ -690,7 +691,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                 STRING().notNull()));
     }
 
-    private static List<TestSpec> jsonArraySpec() {
+    private static List<TestSetSpec> jsonArraySpec() {
         final Map<String, String> mapData = new HashMap<>();
         mapData.put("M1", "V1");
         mapData.put("M2", "V2");
@@ -700,7 +701,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
         multisetData.put("M2", 2);
 
         return Arrays.asList(
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_ARRAY)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_ARRAY)
                         .onFieldsWithData(0)
                         .testResult(
                                 jsonArray(JsonOnNull.NULL),
@@ -720,7 +721,7 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
                                 "[]",
                                 STRING().notNull(),
                                 STRING().notNull()),
-                TestSpec.forFunction(BuiltInFunctionDefinitions.JSON_ARRAY)
+                TestSetSpec.forFunction(BuiltInFunctionDefinitions.JSON_ARRAY)
                         .onFieldsWithData(
                                 "V",
                                 true,
@@ -853,13 +854,17 @@ public class JsonFunctionsITCase extends BuiltInFunctionTestBase {
         }
     }
 
-    private static String getJsonFromResource(String fileName) throws Exception {
+    private static String getJsonFromResource(String fileName) {
         final InputStream jsonResource = JsonFunctionsITCase.class.getResourceAsStream(fileName);
         if (jsonResource == null) {
             throw new IllegalStateException(
                     String.format("%s: Missing test data.", JsonFunctionsITCase.class.getName()));
         }
 
-        return IOUtils.toString(jsonResource, Charset.defaultCharset());
+        try {
+            return IOUtils.toString(jsonResource, Charset.defaultCharset());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
