@@ -30,6 +30,7 @@ import org.codehaus.janino.SimpleCompiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,13 +49,19 @@ public final class CompileUtils {
      * Meta zone GC (class unloading), resulting in performance bottlenecks. So we add a cache to
      * avoid this problem.
      */
-    protected static final Cache<String, Cache<ClassLoader, Class>> COMPILED_CACHE =
+    protected static final Cache<ClassLoader, Cache<String, Class<?>>> COMPILED_CACHE =
             CacheBuilder.newBuilder()
-                    .maximumSize(100) // estimated cache size
+                    // We assume it takes at most 30 seconds to do a query planning
+                    .expireAfterAccess(Duration.ofSeconds(30))
+                    // Allows the GC to unload classloaders
+                    .weakKeys()
+                    .maximumSize(10)
                     .build();
 
     protected static final Cache<ExpressionEntry, ExpressionEvaluator> COMPILED_EXPRESSION_CACHE =
             CacheBuilder.newBuilder()
+                    // We assume it takes at most 30 seconds to do a query planning
+                    .expireAfterAccess(Duration.ofSeconds(30))
                     .maximumSize(100) // estimated cache size
                     .build();
 
@@ -70,18 +77,19 @@ public final class CompileUtils {
     @SuppressWarnings("unchecked")
     public static <T> Class<T> compile(ClassLoader cl, String name, String code) {
         try {
-            Cache<ClassLoader, Class> compiledClasses =
+            Cache<String, Class<?>> compiledClasses =
                     COMPILED_CACHE.get(
-                            // "code" as a key should be sufficient as the class name
-                            // is part of the Java code
-                            code,
+                            cl,
                             () ->
                                     CacheBuilder.newBuilder()
-                                            .maximumSize(5)
-                                            .weakKeys()
-                                            .softValues()
+                                            // Big queries can easily compile a lot of generated
+                                            // code
+                                            .maximumSize(100)
+                                            .weakValues()
                                             .build());
-            return compiledClasses.get(cl, () -> doCompile(cl, name, code));
+            // "code" as a key should be sufficient as the class name
+            // is part of the Java code
+            return (Class<T>) compiledClasses.get(code, () -> doCompile(cl, name, code));
         } catch (Exception e) {
             throw new FlinkRuntimeException(e.getMessage(), e);
         }
