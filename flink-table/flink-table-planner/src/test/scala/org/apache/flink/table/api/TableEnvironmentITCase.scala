@@ -34,8 +34,9 @@ import org.apache.flink.table.planner.factories.utils.TestCollectionTableFactory
 import org.apache.flink.table.planner.runtime.utils.TestingAppendSink
 import org.apache.flink.table.planner.utils.TableTestUtil.{readFromResource, replaceStageId}
 import org.apache.flink.table.planner.utils.{TableTestUtil, TestTableSourceSinks, TestTableSourceWithTime}
+import org.apache.flink.test.util.AbstractTestBase
 import org.apache.flink.types.{Row, RowKind}
-import org.apache.flink.util.{CollectionUtil, FileUtils, TestLogger}
+import org.apache.flink.util.{CollectionUtil, FileUtils}
 
 import org.junit.Assert.{assertEquals, assertFalse, assertTrue, fail}
 import org.junit.rules.{ExpectedException, TemporaryFolder}
@@ -50,7 +51,7 @@ import java.util
 import scala.collection.mutable
 
 @RunWith(classOf[Parameterized])
-class TableEnvironmentITCase(tableEnvName: String, isStreaming: Boolean) extends TestLogger {
+class TableEnvironmentITCase(tableEnvName: String, isStreaming: Boolean) extends AbstractTestBase {
 
   // used for accurate exception information checking.
   val expectedException: ExpectedException = ExpectedException.none()
