@@ -19,7 +19,11 @@
 package org.apache.flink.table.types.inference;
 
 import org.apache.flink.annotation.PublicEvolving;
+import org.apache.flink.table.expressions.TableSymbol;
 import org.apache.flink.table.functions.FunctionDefinition;
+import org.apache.flink.table.types.logical.LogicalType;
+import org.apache.flink.table.types.logical.LogicalTypeFamily;
+import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.util.Preconditions;
 
 import javax.annotation.Nullable;
@@ -81,9 +85,50 @@ public final class Signature {
             return new Argument(Preconditions.checkNotNull(name, "Name must not be null."), type);
         }
 
+        public static Argument of(String name, LogicalType type) {
+            return new Argument(
+                    Preconditions.checkNotNull(name, "Name must not be null."),
+                    "<" + type.asSummaryString() + ">");
+        }
+
+        public static Argument of(String name, LogicalTypeRoot typeRoot) {
+            return new Argument(
+                    Preconditions.checkNotNull(name, "Name must not be null."),
+                    "<" + typeRoot + ">");
+        }
+
+        public static Argument of(String name, LogicalTypeFamily typeFamily) {
+            return new Argument(
+                    Preconditions.checkNotNull(name, "Name must not be null."),
+                    "<" + typeFamily + ">");
+        }
+
+        public static Argument of(
+                String name, Class<? extends Enum<? extends TableSymbol>> symbol) {
+            return new Argument(
+                    Preconditions.checkNotNull(name, "Name must not be null."),
+                    "<" + symbol.getSimpleName() + ">");
+        }
+
         /** Returns an instance of {@link Argument}. */
         public static Argument of(String type) {
             return new Argument(null, type);
+        }
+
+        public static Argument of(LogicalType type) {
+            return new Argument(null, "<" + type.asSummaryString() + ">");
+        }
+
+        public static Argument of(LogicalTypeRoot typeRoot) {
+            return new Argument(null, "<" + typeRoot + ">");
+        }
+
+        public static Argument of(LogicalTypeFamily typeFamily) {
+            return new Argument(null, "<" + typeFamily + ">");
+        }
+
+        public static Argument of(Class<? extends Enum<?>> symbol) {
+            return new Argument(null, "<" + symbol.getSimpleName() + ">");
         }
 
         public Optional<String> getName() {

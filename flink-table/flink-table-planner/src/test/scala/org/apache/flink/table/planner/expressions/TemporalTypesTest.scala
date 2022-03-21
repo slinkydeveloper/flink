@@ -1553,8 +1553,7 @@ class TemporalTypesTest extends ExpressionTestBase {
       classOf[ValidationException])
     testExpectedTableApiException(
       toTimestampLtz("test_string_type", 0),
-      "toTimestampLtz(test_string_type, 0) requires numeric type for the first input," +
-        " but the actual type 'String'.")
+      "Expected type of family 'NUMERIC'")
 
     // invalid type for the second input
     testExpectedSqlException(
