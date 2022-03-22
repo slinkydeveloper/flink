@@ -724,11 +724,8 @@ class CodeGeneratorContext(val tableConfig: ReadableConfig) {
       fieldTypeTerm: String): Unit = {
     val idx = references.length
     // make a deep copy of the object
-    val byteArray = InstantiationUtil.serializeObject(obj)
-    val objCopy: AnyRef = InstantiationUtil.deserializeObject(
-      byteArray,
-      obj.getClass.getClassLoader)
-    references += objCopy
+    val objCopy = InstantiationUtil.clone(obj.asInstanceOf[java.io.Serializable])
+    references += objCopy.asInstanceOf[AnyRef]
 
     reusableMemberStatements.add(s"private transient $fieldTypeTerm $fieldTerm;")
     reusableInitStatements.add(s"$fieldTerm = ((($fieldTypeTerm) references[$idx]));")
