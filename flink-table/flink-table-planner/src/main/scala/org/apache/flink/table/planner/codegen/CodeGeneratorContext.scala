@@ -727,7 +727,7 @@ class CodeGeneratorContext(val tableConfig: ReadableConfig) {
     val byteArray = InstantiationUtil.serializeObject(obj)
     val objCopy: AnyRef = InstantiationUtil.deserializeObject(
       byteArray,
-      Thread.currentThread().getContextClassLoader)
+      obj.getClass.getClassLoader)
     references += objCopy
 
     reusableMemberStatements.add(s"private transient $fieldTypeTerm $fieldTerm;")
