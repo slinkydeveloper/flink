@@ -27,7 +27,6 @@ import org.apache.flink.table.api.internal.TableEnvironmentInternal
 import org.apache.flink.table.planner.runtime.utils.TestData.{smallTupleData3, tupleData3, tupleData5}
 import org.apache.flink.table.planner.runtime.utils.{TestingAppendTableSink, TestingRetractTableSink, TestingUpsertTableSink}
 import org.apache.flink.table.planner.utils.{MemoryTableSourceSinkUtil, TableTestUtil}
-import org.apache.flink.table.sinks._
 import org.apache.flink.table.utils.LegacyRowResource
 import org.apache.flink.test.util.{AbstractTestBase, TestBaseUtils}
 import org.apache.flink.types.Row
@@ -35,7 +34,6 @@ import org.apache.flink.types.Row
 import org.junit.Assert._
 import org.junit.{Rule, Test}
 
-import java.io.File
 import java.util.TimeZone
 
 import scala.collection.JavaConverters._
@@ -44,48 +42,6 @@ class LegacyTableSinkITCase extends AbstractTestBase {
 
   @Rule
   def usesLegacyRows: LegacyRowResource = LegacyRowResource.INSTANCE
-
-  @Test
-  def testStreamTableSink(): Unit = {
-
-    val tmpFile = File.createTempFile("flink-table-sink-test", ".tmp")
-    tmpFile.delete()
-    tmpFile.deleteOnExit()
-    val path = tmpFile.toURI.toString
-
-    val env = StreamExecutionEnvironment.getExecutionEnvironment
-    env.getConfig.enableObjectReuse()
-
-    val tEnv = StreamTableEnvironment.create(env, TableTestUtil.STREAM_SETTING)
-    env.setParallelism(4)
-
-    tEnv.asInstanceOf[TableEnvironmentInternal].registerTableSinkInternal(
-      "csvSink",
-      new CsvTableSink(path).configure(
-        Array[String]("nullableCol", "c", "b"),
-        Array[TypeInformation[_]](Types.INT, Types.STRING, Types.SQL_TIMESTAMP)))
-
-    val input = env.fromCollection(tupleData3)
-      .assignAscendingTimestamps(_._2)
-      .map(x => x).setParallelism(4) // increase DOP to 4
-
-    val table = input.toTable(tEnv, 'a, 'b.rowtime, 'c)
-      .where('a < 5 || 'a > 17)
-      .select(ifThenElse('a < 4, nullOf(Types.INT()), 'a), 'c, 'b)
-    table.executeInsert("csvSink").await()
-
-    val expected = Seq(
-      ",Hello world,1970-01-01 00:00:00.002",
-      ",Hello,1970-01-01 00:00:00.002",
-      ",Hi,1970-01-01 00:00:00.001",
-      "18,Comment#12,1970-01-01 00:00:00.006",
-      "19,Comment#13,1970-01-01 00:00:00.006",
-      "20,Comment#14,1970-01-01 00:00:00.006",
-      "21,Comment#15,1970-01-01 00:00:00.006",
-      "4,Hello world, how are you?,1970-01-01 00:00:00.003").mkString("\n")
-
-    TestBaseUtils.compareResultsByLinesInMemory(expected, path)
-  }
 
   @Test
   def testAppendSinkOnAppendTable(): Unit = {

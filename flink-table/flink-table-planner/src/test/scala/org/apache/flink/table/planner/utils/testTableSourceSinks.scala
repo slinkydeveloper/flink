@@ -730,44 +730,6 @@ class TestInputFormatTableSource[T](
   override def getTableSchema: TableSchema = tableSchema
 }
 
-object TestInputFormatTableSource {
-  def createTemporaryTable(
-      tEnv: TableEnvironment,
-      schema: TableSchema,
-      data: Seq[_],
-      tableName: String): Unit = {
-    val source = new TestInputFormatTableSource(schema, data)
-    tEnv.asInstanceOf[TableEnvironmentInternal].registerTableSourceInternal(tableName, source)
-  }
-}
-
-class TestInputFormatTableSourceFactory[T] extends StreamTableSourceFactory[T] {
-  override def createStreamTableSource(properties: JMap[String, String]): StreamTableSource[T] = {
-    val descriptorProps = new DescriptorProperties()
-    descriptorProps.putProperties(properties)
-    val schema = descriptorProps.getTableSchema(Schema.SCHEMA)
-    val serializedRows = descriptorProps.getOptionalString("data").orElse(null)
-    val values = if (serializedRows != null) {
-      EncodingUtils.decodeStringToObject(serializedRows, classOf[List[T]])
-    } else {
-      Seq.empty[T]
-    }
-    new TestInputFormatTableSource[T](schema, values)
-  }
-
-  override def requiredContext(): JMap[String, String] = {
-    val context = new util.HashMap[String, String]()
-    context.put(CONNECTOR_TYPE, "TestInputFormatTableSource")
-    context
-  }
-
-  override def supportedProperties(): JList[String] = {
-    val supported = new JArrayList[String]()
-    supported.add("*")
-    supported
-  }
-}
-
 class TestDataTypeTableSource(
     tableSchema: TableSchema,
     values: Seq[Row]) extends InputFormatTableSource[Row] {
