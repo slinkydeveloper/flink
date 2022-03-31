@@ -18,134 +18,154 @@
 
 package org.apache.flink.table.api
 
-import org.apache.flink.api.common.JobStatus
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.internal.TableEnvironmentImpl
+import org.apache.flink.api.common.{JobStatus, RuntimeExecutionMode}
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.{Column, ResolvedSchema}
 import org.apache.flink.table.planner.utils.TestTableSourceSinks
-import org.apache.flink.test.util.AbstractTestBase
+import org.apache.flink.table.test.WithTableEnvironment
+import org.apache.flink.test.junit5.MiniClusterExtension
 import org.apache.flink.types.{Row, RowKind}
-import org.apache.flink.util.{CollectionUtil, TestLogger}
+import org.apache.flink.util.CollectionUtil
 
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.containsInAnyOrder
-import org.junit.Assert.{assertEquals, assertNotEquals, assertTrue}
-import org.junit.rules.{ExpectedException, TemporaryFolder}
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
-import org.junit.{Before, Rule, Test}
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.{BeforeEach, DisplayName, Nested, Test}
+import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.api.parallel.{Execution, ExecutionMode}
 
-import _root_.java.lang.{Long => JLong}
-import _root_.java.util
+import java.lang.{Long => JLong}
+import java.nio.file.Path
 import java.time.Instant
 
-@RunWith(classOf[Parameterized])
-class TableITCase(tableEnvName: String, isStreaming: Boolean) extends AbstractTestBase {
+@ExtendWith(Array(classOf[MiniClusterExtension]))
+@Execution(ExecutionMode.CONCURRENT)
+class TableITCase {
 
-  // used for accurate exception information checking.
-  val expectedException: ExpectedException = ExpectedException.none()
+  abstract class ParameterizedTableTests(tEnv: TableEnvironment) {
 
-  @Rule
-  def thrown: ExpectedException = expectedException
-
-  private val _tempFolder = new TemporaryFolder()
-
-  @Rule
-  def tempFolder: TemporaryFolder = _tempFolder
-
-  var tEnv: TableEnvironment = _
-
-  private val settings = if (isStreaming) {
-    EnvironmentSettings.newInstance().inStreamingMode().build()
-  } else {
-    EnvironmentSettings.newInstance().inBatchMode().build()
-  }
-
-  @Before
-  def setup(): Unit = {
-    tableEnvName match {
-      case "TableEnvironment" =>
-        tEnv = TableEnvironmentImpl.create(settings)
-      case "StreamTableEnvironment" =>
-        tEnv = StreamTableEnvironment.create(
-          StreamExecutionEnvironment.getExecutionEnvironment, settings)
-      case _ => throw new UnsupportedOperationException("unsupported tableEnvName: " + tableEnvName)
+    @BeforeEach
+    def setup(@TempDir tempDir: Path): Unit = {
+      TestTableSourceSinks.createPersonCsvTemporaryTable(tEnv, tempDir, "MyTable")
     }
-    TestTableSourceSinks.createPersonCsvTemporaryTable(tEnv, "MyTable")
-  }
 
-  @Test
-  def testExecute(): Unit = {
-    val query =
-      """
-        |select id, concat(concat(`first`, ' '), `last`) as `full name`
-        |from MyTable where mod(id, 2) = 0
-      """.stripMargin
-    val table = tEnv.sqlQuery(query)
-    val tableResult = table.execute()
-    assertTrue(tableResult.getJobClient.isPresent)
-    assertEquals(ResultKind.SUCCESS_WITH_CONTENT, tableResult.getResultKind)
-    assertEquals(
-      ResolvedSchema.of(
-        Column.physical("id", DataTypes.INT()),
-        Column.physical("full name", DataTypes.STRING())),
-      tableResult.getResolvedSchema)
-    val expected = util.Arrays.asList(
-      Row.of(Integer.valueOf(2), "Bob Taylor"),
-      Row.of(Integer.valueOf(4), "Peter Smith"),
-      Row.of(Integer.valueOf(6), "Sally Miller"),
-      Row.of(Integer.valueOf(8), "Kelly Williams"))
-    // wait for data ready
-    // this is just for testing, because iterator will also wait for data ready
-    tableResult.await()
-    val it = tableResult.collect()
-    val actual = CollectionUtil.iteratorToList(it)
-    // actively close the job even it is finished
-    it.close()
-    actual.sort(new util.Comparator[Row]() {
-      override def compare(o1: Row, o2: Row): Int = {
-        o1.getField(0).asInstanceOf[Int].compareTo(o2.getField(0).asInstanceOf[Int])
+    @Test
+    def testExecute(): Unit = {
+      val query =
+        """
+          |select id, concat(concat(`first`, ' '), `last`) as `full name`
+          |from MyTable where mod(id, 2) = 0
+          """.stripMargin
+      val table = tEnv.sqlQuery(query)
+      val tableResult = table.execute()
+      assertThat(tableResult.getJobClient).isPresent
+      assertThat(tableResult.getResultKind).isEqualTo(ResultKind.SUCCESS_WITH_CONTENT)
+      assertThat(
+        tableResult.getResolvedSchema).isEqualTo(
+        ResolvedSchema.of(
+          Column.physical("id", DataTypes.INT()),
+          Column.physical("full name", DataTypes.STRING()))
+      )
+      val it = tableResult.collect()
+      assertThat[Row](CollectionUtil.iteratorToList(it))
+        .containsExactlyInAnyOrder(
+          Row.of(Integer.valueOf(2), "Bob Taylor"),
+          Row.of(Integer.valueOf(4), "Peter Smith"),
+          Row.of(Integer.valueOf(6), "Sally Miller"),
+          Row.of(Integer.valueOf(8), "Kelly Williams")
+        )
+      it.close()
+    }
+
+    @Test
+    def testCollectWithClose(): Unit = {
+      val query =
+        """
+          |select id, concat(concat(`first`, ' '), `last`) as `full name`
+          |from MyTable where mod(id, 2) = 0
+          """.stripMargin
+      val table = tEnv.sqlQuery(query)
+      val tableResult = table.execute()
+      assertThat(tableResult.getJobClient).isPresent
+      assertThat(tableResult.getResultKind).isEqualTo(ResultKind.SUCCESS_WITH_CONTENT)
+      val it = tableResult.collect()
+      it.close()
+      val jobStatus = try {
+        Some(tableResult.getJobClient.get().getJobStatus.get())
+      } catch {
+        // ignore the exception,
+        // because the MiniCluster maybe already been shut down when getting job status
+        case _: Throwable => None
       }
-    })
-    assertEquals(expected, actual)
+      if (jobStatus.isDefined) {
+        assertThat(jobStatus.get)
+          .isIn(JobStatus.RUNNING, JobStatus.CANCELLING, JobStatus.CANCELED, JobStatus.FINISHED)
+      }
+    }
+
+    @Test
+    def testCollectWithMultiRowtime(): Unit = {
+      tEnv.executeSql(
+        """
+          |CREATE TABLE MyTableWithRowtime1 (
+          |  ts AS TO_TIMESTAMP_LTZ(id, 3),
+          |  WATERMARK FOR ts AS ts - INTERVAL '1' MINUTE)
+          |LIKE MyTable""".stripMargin)
+      tEnv.executeSql(
+        """
+          |CREATE TABLE MyTableWithRowtime2 (
+          |  ts AS TO_TIMESTAMP_LTZ(id, 3),
+          |  WATERMARK FOR ts AS ts - INTERVAL '1' MINUTE)
+          |LIKE MyTable""".stripMargin)
+
+      val tableResult = tEnv.executeSql(
+        """
+          |SELECT MyTableWithRowtime1.ts, MyTableWithRowtime2.ts
+          |FROM MyTableWithRowtime1, MyTableWithRowtime2
+          |WHERE
+          |  MyTableWithRowtime1.first = MyTableWithRowtime2.first AND
+          |  MyTableWithRowtime1.ts = MyTableWithRowtime2.ts""".stripMargin)
+
+      val expected = for (i <- 1 to 8) yield
+        Row.ofKind(RowKind.INSERT, Instant.ofEpochMilli(i), Instant.ofEpochMilli(i))
+
+      val actual = CollectionUtil.iteratorToList(tableResult.collect())
+      assertThat[Row](actual).containsExactlyInAnyOrder(expected: _*)
+    }
   }
 
-  @Test
-  def testCollectWithClose(): Unit = {
-    val query =
-      """
-        |select id, concat(concat(`first`, ' '), `last`) as `full name`
-        |from MyTable where mod(id, 2) = 0
-      """.stripMargin
-    val table = tEnv.sqlQuery(query)
-    val tableResult = table.execute()
-    assertTrue(tableResult.getJobClient.isPresent)
-    assertEquals(ResultKind.SUCCESS_WITH_CONTENT, tableResult.getResultKind)
-    val it = tableResult.collect()
-    it.close()
-    val jobStatus = try {
-      Some(tableResult.getJobClient.get().getJobStatus.get())
-    } catch {
-      // ignore the exception,
-      // because the MiniCluster maybe already been shut down when getting job status
-      case _: Throwable => None
-    }
-    if (jobStatus.isDefined) {
-      assertNotEquals(JobStatus.RUNNING, jobStatus.get)
-    }
-  }
+  @Nested
+  @DisplayName("With TableEnvironment In Streaming Mode")
+  class WithTableEnvironmentInStreamingMode extends
+    ParameterizedTableTests(
+      TableEnvironment.create(EnvironmentSettings.newInstance().inStreamingMode().build()))
+
+  @Nested
+  @DisplayName("With TableEnvironment In Batch Mode")
+  class WithTableEnvironmentInBatchMode extends
+    ParameterizedTableTests(
+      TableEnvironment.create(EnvironmentSettings.newInstance().inBatchMode().build()))
+
+  @Nested
+  @DisplayName("With StreamTableEnvironment")
+  class WithStreamTableEnvironment extends
+    ParameterizedTableTests(
+      StreamTableEnvironment.create(
+        StreamExecutionEnvironment.getExecutionEnvironment,
+        EnvironmentSettings.newInstance().inStreamingMode().build()))
 
   @Test
-  def testExecuteWithUpdateChanges(): Unit = {
+  @WithTableEnvironment(value = RuntimeExecutionMode.STREAMING)
+  def testExecuteWithUpdateChangesStreamingMode(
+    tEnv: TableEnvironment, @TempDir tempDir: Path): Unit = {
+    TestTableSourceSinks.createPersonCsvTemporaryTable(tEnv, tempDir, "MyTable")
     val tableResult = tEnv.sqlQuery("select count(*) as c from MyTable").execute()
-    assertTrue(tableResult.getJobClient.isPresent)
-    assertEquals(ResultKind.SUCCESS_WITH_CONTENT, tableResult.getResultKind)
-    assertEquals(
-      ResolvedSchema.of(Column.physical("c", DataTypes.BIGINT().notNull())),
-      tableResult.getResolvedSchema)
-    val expected = if (isStreaming) {
-      util.Arrays.asList(
+    assertThat(tableResult.getJobClient).isPresent
+    assertThat(tableResult.getResultKind).isEqualTo(ResultKind.SUCCESS_WITH_CONTENT)
+    assertThat(tableResult.getResolvedSchema).isEqualTo(
+      ResolvedSchema.of(Column.physical("c", DataTypes.BIGINT().notNull())))
+    assertThat[Row](CollectionUtil.iteratorToList(tableResult.collect()))
+      .containsExactlyInAnyOrder(
         Row.ofKind(RowKind.INSERT, JLong.valueOf(1)),
         Row.ofKind(RowKind.UPDATE_BEFORE, JLong.valueOf(1)),
         Row.ofKind(RowKind.UPDATE_AFTER, JLong.valueOf(2)),
@@ -162,51 +182,19 @@ class TableITCase(tableEnvName: String, isStreaming: Boolean) extends AbstractTe
         Row.ofKind(RowKind.UPDATE_BEFORE, JLong.valueOf(7)),
         Row.ofKind(RowKind.UPDATE_AFTER, JLong.valueOf(8))
       )
-    } else {
-      util.Arrays.asList(Row.of(JLong.valueOf(8)))
-    }
-    val actual = CollectionUtil.iteratorToList(tableResult.collect())
-    assertEquals(expected, actual)
   }
 
   @Test
-  def testCollectWithMultiRowtime(): Unit = {
-    tEnv.executeSql(
-      """
-        |CREATE TABLE MyTableWithRowtime1 (
-        |  ts AS TO_TIMESTAMP_LTZ(id, 3),
-        |  WATERMARK FOR ts AS ts - INTERVAL '1' MINUTE)
-        |LIKE MyTable""".stripMargin)
-    tEnv.executeSql(
-      """
-        |CREATE TABLE MyTableWithRowtime2 (
-        |  ts AS TO_TIMESTAMP_LTZ(id, 3),
-        |  WATERMARK FOR ts AS ts - INTERVAL '1' MINUTE)
-        |LIKE MyTable""".stripMargin)
-
-    val tableResult = tEnv.executeSql(
-      """
-        |SELECT MyTableWithRowtime1.ts, MyTableWithRowtime2.ts
-        |FROM MyTableWithRowtime1, MyTableWithRowtime2
-        |WHERE
-        |  MyTableWithRowtime1.first = MyTableWithRowtime2.first AND
-        |  MyTableWithRowtime1.ts = MyTableWithRowtime2.ts""".stripMargin)
-
-    val expected = for (i <- 1 to 8) yield
-      Row.ofKind(RowKind.INSERT, Instant.ofEpochMilli(i), Instant.ofEpochMilli(i))
-
-    val actual = CollectionUtil.iteratorToList(tableResult.collect())
-    assertThat(actual, containsInAnyOrder(expected: _*))
-  }
-}
-
-object TableITCase {
-  @Parameterized.Parameters(name = "{0}:isStream={1}")
-  def parameters(): util.Collection[Array[_]] = {
-    util.Arrays.asList(
-      Array("TableEnvironment", true),
-      Array("TableEnvironment", false),
-      Array("StreamTableEnvironment", true)
-    )
+  @WithTableEnvironment(value = RuntimeExecutionMode.BATCH)
+  def testExecuteWithUpdateChangesBatchMode(
+    tEnv: TableEnvironment, @TempDir tempDir: Path): Unit = {
+    TestTableSourceSinks.createPersonCsvTemporaryTable(tEnv, tempDir, "MyTable")
+    val tableResult = tEnv.sqlQuery("select count(*) as c from MyTable").execute()
+    assertThat(tableResult.getJobClient).isPresent
+    assertThat(tableResult.getResultKind).isEqualTo(ResultKind.SUCCESS_WITH_CONTENT)
+    assertThat(tableResult.getResolvedSchema).isEqualTo(
+      ResolvedSchema.of(Column.physical("c", DataTypes.BIGINT().notNull())))
+    assertThat[Row](CollectionUtil.iteratorToList(tableResult.collect()))
+      .containsOnly(Row.of(JLong.valueOf(8)))
   }
 }

@@ -22,13 +22,13 @@ Union(all=[true], union=[a, b, c])
     "type" : "Source: Custom Source",
     "pact" : "Data Source",
     "contents" : "Source: Custom Source",
-    "parallelism" : 1
+    "parallelism" : 8
   }, {
     "id" : ,
     "type" : "SourceConversion[]",
     "pact" : "Operator",
     "contents" : "[]:SourceConversion(table=[default_catalog.default_database.MyTable, source: [CollectionTableSource(a, b, c)]], fields=[a, b, c])",
-    "parallelism" : 1,
+    "parallelism" : 8,
     "predecessors" : [ {
       "id" : ,
       "ship_strategy" : "FORWARD",
@@ -39,13 +39,13 @@ Union(all=[true], union=[a, b, c])
     "type" : "Source: Custom Source",
     "pact" : "Data Source",
     "contents" : "Source: Custom Source",
-    "parallelism" : 1
+    "parallelism" : 8
   }, {
     "id" : ,
     "type" : "SourceConversion[]",
     "pact" : "Operator",
     "contents" : "[]:SourceConversion(table=[default_catalog.default_database.MyTable2, source: [CollectionTableSource(a, b, c)]], fields=[a, b, c])",
-    "parallelism" : 1,
+    "parallelism" : 8,
     "predecessors" : [ {
       "id" : ,
       "ship_strategy" : "FORWARD",
