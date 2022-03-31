@@ -19,23 +19,21 @@
 package org.apache.flink.table.tpcds;
 
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.core.fs.FileSystem;
+import org.apache.flink.connector.file.table.FileSystemConnectorOptions;
+import org.apache.flink.formats.csv.CsvFormatOptions;
 import org.apache.flink.streaming.api.graph.GlobalStreamExchangeMode;
 import org.apache.flink.table.api.EnvironmentSettings;
+import org.apache.flink.table.api.FormatDescriptor;
+import org.apache.flink.table.api.Schema;
 import org.apache.flink.table.api.Table;
+import org.apache.flink.table.api.TableDescriptor;
 import org.apache.flink.table.api.TableEnvironment;
 import org.apache.flink.table.api.TableResult;
 import org.apache.flink.table.api.config.ExecutionConfigOptions;
 import org.apache.flink.table.api.config.OptimizerConfigOptions;
-import org.apache.flink.table.api.internal.TableEnvironmentInternal;
-import org.apache.flink.table.catalog.ConnectorCatalogTable;
-import org.apache.flink.table.catalog.ObjectPath;
-import org.apache.flink.table.sinks.CsvTableSink;
-import org.apache.flink.table.sources.CsvTableSource;
 import org.apache.flink.table.tpcds.schema.TpcdsSchema;
 import org.apache.flink.table.tpcds.schema.TpcdsSchemaProvider;
 import org.apache.flink.table.tpcds.stats.TpcdsStatsProvider;
-import org.apache.flink.table.types.utils.TypeConversions;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -87,7 +85,6 @@ public class TpcdsTestProgram {
     private static final String QUERY_PREFIX = "query";
     private static final String QUERY_SUFFIX = ".sql";
     private static final String DATA_SUFFIX = ".dat";
-    private static final String RESULT_SUFFIX = ".ans";
     private static final String COL_DELIMITER = "|";
     private static final String FILE_SEPARATOR = "/";
 
@@ -109,16 +106,22 @@ public class TpcdsTestProgram {
 
             // register sink table
             String sinkTableName = QUERY_PREFIX + queryId + "_sinkTable";
-            ((TableEnvironmentInternal) tableEnvironment)
-                    .registerTableSinkInternal(
-                            sinkTableName,
-                            new CsvTableSink(
-                                    sinkTablePath + FILE_SEPARATOR + queryId + RESULT_SUFFIX,
-                                    COL_DELIMITER,
-                                    1,
-                                    FileSystem.WriteMode.OVERWRITE,
-                                    resultTable.getSchema().getFieldNames(),
-                                    resultTable.getSchema().getFieldDataTypes()));
+            tableEnvironment.createTemporaryTable(
+                    sinkTableName,
+                    TableDescriptor.forConnector("filesystem")
+                            .schema(
+                                    Schema.newBuilder()
+                                            .fromResolvedSchema(resultTable.getResolvedSchema())
+                                            .build())
+                            .option(
+                                    FileSystemConnectorOptions.PATH,
+                                    Paths.get(sinkTablePath, queryId).toString())
+                            .format(
+                                    FormatDescriptor.forFormat("csv")
+                                            .option(CsvFormatOptions.FIELD_DELIMITER, COL_DELIMITER)
+                                            .option(CsvFormatOptions.DISABLE_QUOTE_CHARACTER, true)
+                                            .build())
+                            .build());
             TableResult tableResult = resultTable.executeInsert(sinkTableName);
             // wait job finish
             tableResult.getJobClient().get().getJobExecutionResult().get();
@@ -152,34 +155,34 @@ public class TpcdsTestProgram {
         // register TPC-DS tables
         TPCDS_TABLES.forEach(
                 table -> {
-                    TpcdsSchema schema = TpcdsSchemaProvider.getTableSchema(table);
-                    CsvTableSource.Builder builder = CsvTableSource.builder();
-                    builder.path(sourceTablePath + FILE_SEPARATOR + table + DATA_SUFFIX);
-                    for (int i = 0; i < schema.getFieldNames().size(); i++) {
-                        builder.field(
-                                schema.getFieldNames().get(i),
-                                TypeConversions.fromDataTypeToLegacyInfo(
-                                        schema.getFieldTypes().get(i)));
-                    }
-                    builder.fieldDelimiter(COL_DELIMITER);
-                    builder.emptyColumnAsNull();
-                    builder.lineDelimiter("\n");
-                    CsvTableSource tableSource = builder.build();
-                    ConnectorCatalogTable catalogTable =
-                            ConnectorCatalogTable.source(tableSource, true);
-                    tEnv.getCatalog(tEnv.getCurrentCatalog())
-                            .ifPresent(
-                                    catalog -> {
-                                        try {
-                                            catalog.createTable(
-                                                    new ObjectPath(
-                                                            tEnv.getCurrentDatabase(), table),
-                                                    catalogTable,
-                                                    false);
-                                        } catch (Exception e) {
-                                            throw new RuntimeException(e);
-                                        }
-                                    });
+                    System.out.println(
+                            "Table "
+                                    + table
+                                    + " path "
+                                    + Paths.get(sourceTablePath, table + DATA_SUFFIX));
+                    TpcdsSchema tpcdsSchema = TpcdsSchemaProvider.getTableSchema(table);
+                    TableDescriptor tableDescriptor =
+                            TableDescriptor.forConnector("filesystem")
+                                    .schema(tpcdsSchema.toSchema())
+                                    .option(
+                                            FileSystemConnectorOptions.PATH,
+                                            Paths.get(sourceTablePath, table + DATA_SUFFIX)
+                                                    .toString())
+                                    .format(
+                                            FormatDescriptor.forFormat("csv")
+                                                    .option(
+                                                            CsvFormatOptions.FIELD_DELIMITER,
+                                                            COL_DELIMITER)
+                                                    .option(
+                                                            CsvFormatOptions
+                                                                    .DISABLE_QUOTE_CHARACTER,
+                                                            true)
+                                                    .option(
+                                                            CsvFormatOptions.IGNORE_PARSE_ERRORS,
+                                                            true)
+                                                    .build())
+                                    .build();
+                    tEnv.createTable(table, tableDescriptor);
                 });
         // register statistics info
         if (useTableStats) {

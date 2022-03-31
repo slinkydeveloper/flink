@@ -19,8 +19,10 @@
 package org.apache.flink.table.tpcds.utils;
 
 import org.apache.flink.api.java.utils.ParameterTool;
+import org.apache.flink.util.FileUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -61,7 +63,7 @@ public class TpcdsResultComparator {
 
         for (String queryId : VALIDATE_QUERIES) {
             File expectedFile = new File(expectedDir, queryId + RESULT_SUFFIX);
-            File actualFile = new File(actualDir, queryId + RESULT_SUFFIX);
+            File actualFile = new File(actualDir, queryId);
 
             if (compareResult(queryId, expectedFile, actualFile)) {
                 passCnt++;
@@ -81,14 +83,26 @@ public class TpcdsResultComparator {
         System.exit(1);
     }
 
-    private static boolean compareResult(String queryId, File expectedFile, File actualFile)
+    private static boolean compareResult(String queryId, File expectedFile, File actualDir)
             throws Exception {
         final String[] expectedLines =
                 Files.readAllLines(expectedFile.toPath(), StandardCharsets.UTF_8)
                         .toArray(new String[0]);
+
+        // Because the csv source cannot write to a single file, the actual is a directory with
+        // different csv files
         final String[] actualLines =
-                Files.readAllLines(actualFile.toPath(), StandardCharsets.UTF_8)
-                        .toArray(new String[0]);
+                FileUtils.listFilesInDirectory(actualDir.toPath(), p -> true).stream()
+                        .flatMap(
+                                p -> {
+                                    try {
+                                        return Files.readAllLines(p, StandardCharsets.UTF_8)
+                                                .stream();
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
+                                    }
+                                })
+                        .toArray(String[]::new);
 
         if (expectedLines.length != actualLines.length) {
             System.out.println(
